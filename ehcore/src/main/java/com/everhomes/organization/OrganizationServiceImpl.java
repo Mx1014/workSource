@@ -13876,7 +13876,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         
         //查找记录（groupType=DIRECT_UNDER_ENTERPRISE/targetId/organizationId），null则插入
-        OrganizationMember selectMember = organizationProvider.listOrganizationMembersByGroupTypeAndContactToken("DIRECT_UNDER_ENTERPRISE",member.getContactToken(),organization.getPath());
+        List<String> groupTypeList = new ArrayList<>();
+        groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypeList.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        OrganizationMember selectMember = organizationProvider.listOrganizationMembersByGroupTypeAndContactToken(groupTypeList,member.getContactToken(),organization.getPath());
         
         if(selectMember == null){
         	// organizationId要从organizations表找到主属部门记录，然后添加；

@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2;
 
+import com.everhomes.rest.archives.ArchivesContactDTO;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
@@ -64,6 +65,7 @@ public interface Rentalv2Service {
 	void addRule(AddDefaultRuleAdminCommand cmd);
 	QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd);
 	GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd);
+	GetResourceListAdminResponse listResourceAbstract(GetResourceListAdminCommand cmd);
 	void addResource(AddResourceAdminCommand cmd);
 	void updateResource(UpdateResourceAdminCommand cmd);
 	void updateResourceStatus(UpdateResourceAdminCommand cmd);
@@ -126,7 +128,7 @@ public interface Rentalv2Service {
 	void onOrderSuccess(RentalOrder bill);
 
 
-	void onOrderCancel(RentalOrder order);
+	void onOrderCancel(RentalOrder order,String content);
 
 
 	void updateRentalDate(UpdateRentalDateCommand cmd);
@@ -142,9 +144,6 @@ public interface Rentalv2Service {
 
 
 	void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag);
-
-
-	void sendMessageCode(Long uid, String locale, Map<String, String> map, int code);
 
 	RentalSiteDTO findRentalSiteById(FindRentalSiteByIdCommand cmd);
 
@@ -232,6 +231,10 @@ public interface Rentalv2Service {
 	GetUserClosestBillResponse getUserClosestBill(GetUserClosestBillCommand cmd);
 
 	String parseSceneToken(String sceneToken);
+
+	GetSceneTypeResponse getSceneType(GetSceneTypeCommand cmd);
+
+	ArchivesContactDTO registerUser(RegisterUserCommand cmd);
 
 	void test();
 
