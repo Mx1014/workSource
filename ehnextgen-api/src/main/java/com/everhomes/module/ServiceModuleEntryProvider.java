@@ -23,4 +23,17 @@ public interface ServiceModuleEntryProvider {
     ServiceModuleEntry findById(Long id);
 
     void udpate(ServiceModuleEntry serviceModuleEntry);
+
+
+    List<ServiceModuleAppEntry> listServiceModuleAppEntries(Long appId, Long appCategoryId, Byte terminalType, Byte locationType, Byte sceneType);
+
+    List<ServiceModuleAppEntry> listServiceModuleAppEntries(List<Long> appIds, Byte locationType, Byte sceneType);
+
+    void deleteAppEntry(Long id);
+
+    void createAppEntry(ServiceModuleAppEntry serviceModuleAppEntry);
+
+    ServiceModuleAppEntry findAppEntryById(Long id);
+
+    void udpateAppEntry(ServiceModuleAppEntry serviceModuleAppEntry);
 }

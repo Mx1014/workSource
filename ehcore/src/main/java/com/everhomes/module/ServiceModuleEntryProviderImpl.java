@@ -151,4 +151,102 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleEntries.class, id);
     }
 
+    @Override
+    public List<ServiceModuleAppEntry> listServiceModuleAppEntries(Long appId, Long appCategoryId, Byte terminalType, Byte locationType, Byte sceneType) {
+        List<ServiceModuleAppEntry> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhServiceModuleAppEntriesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_APP_ENTRIES);
+        if(appId != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.APP_ID.eq(appId));
+        }
+
+        if(appCategoryId != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.APP_CATEGORY_ID.eq(appCategoryId));
+        }
+
+        if(terminalType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.TERMINAL_TYPE.eq(terminalType));
+        }
+        if(locationType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.LOCATION_TYPE.eq(locationType));
+        }
+        if(sceneType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.SCENE_TYPE.eq(sceneType));
+        }
+
+        //查询某个分类的话，就不按照模块排序了。查询所有的
+        if(appCategoryId != null){
+            query.addOrderBy(Tables.EH_SERVICE_MODULE_APP_ENTRIES.DEFAULT_ORDER);
+        }else {
+            query.addOrderBy(Tables.EH_SERVICE_MODULE_APP_ENTRIES.APP_ID);
+        }
+
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleAppEntry.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<ServiceModuleAppEntry> listServiceModuleAppEntries(List<Long> appIds, Byte locationType, Byte sceneType) {
+        List<ServiceModuleAppEntry> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhServiceModuleAppEntriesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_APP_ENTRIES);
+        if(appIds != null && appIds.size() > 0){
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.APP_ID.in(appIds));
+        }
+
+        if(locationType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.LOCATION_TYPE.eq(locationType));
+        }
+        if(sceneType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.SCENE_TYPE.eq(sceneType));
+        }
+
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleAppEntry.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public void deleteAppEntry(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntries.class, id));
+        EhServiceModuleAppEntriesDao dao = new EhServiceModuleAppEntriesDao(context.configuration());
+        dao.deleteById(id);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModuleAppEntries.class, id);
+    }
+
+    @Override
+    public void createAppEntry(ServiceModuleAppEntry serviceModuleAppEntry) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppEntries.class));
+        serviceModuleAppEntry.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntries.class, id));
+        EhServiceModuleAppEntriesDao dao = new EhServiceModuleAppEntriesDao(context.configuration());
+        dao.insert(serviceModuleAppEntry);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleAppEntries.class, id);
+    }
+
+    @Override
+    public ServiceModuleAppEntry findAppEntryById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhServiceModuleAppEntriesDao dao = new EhServiceModuleAppEntriesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ServiceModuleAppEntry.class);
+    }
+
+    @Override
+    public void udpateAppEntry(ServiceModuleAppEntry serviceModuleAppEntry) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppEntries.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntries.class, id));
+        EhServiceModuleAppEntriesDao dao = new EhServiceModuleAppEntriesDao(context.configuration());
+        dao.update(serviceModuleAppEntry);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleAppEntries.class, id);
+    }
+
 }
