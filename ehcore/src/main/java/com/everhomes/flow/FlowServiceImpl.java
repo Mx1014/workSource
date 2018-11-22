@@ -6528,7 +6528,7 @@ public class FlowServiceImpl implements FlowService {
     private List<FlowServiceTypeDTO> getOldFlowServiceTypeDTOS(SearchFlowCaseCommand cmd, Integer namespaceId) {
         List<FlowServiceTypeDTO> serviceTypes;
         cmd.setOrganizationId(null);
-        List<FlowCase> flowCases = flowCaseProvider.listFlowCaseGroupByServiceTypes(namespaceId);
+        List<FlowCase> flowCases = flowCaseProvider.listFlowCaseGroupByServiceTypes(namespaceId, cmd);
         serviceTypes = flowCases.stream()
                 .filter(r -> r.getServiceType() != null && r.getServiceType().trim().length() > 0)
                 .map(r -> {

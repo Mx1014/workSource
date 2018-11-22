@@ -121,12 +121,15 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     }
 
     @Override
-    public List<FlowCase> listFlowCaseGroupByServiceTypes(Integer namespaceId) {
+    public List<FlowCase> listFlowCaseGroupByServiceTypes(Integer namespaceId, SearchFlowCaseCommand cmd) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+
+        Condition condition = buildSearchFlowCaseCmdCondition(new ListingLocator(), cmd);
         return context.selectFrom(t)
                 .where(t.NAMESPACE_ID.eq(namespaceId))
-                .groupBy(t.MODULE_ID, t.ORGANIZATION_ID, t.SERVICE_TYPE)
+                .and(condition)
+                .groupBy(t.MODULE_ID, t.SERVICE_TYPE)
                 .fetchInto(FlowCase.class);
     }
 
