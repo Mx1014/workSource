@@ -426,7 +426,41 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
-    
+
+    @Override
+    public void sendMessageToAuthCreator(Long creatorId, Long visitorId, Long doorId){
+        User creator = userProvider.findUserById(creatorId);
+        User visitor = userProvider.findUserById(visitorId);
+        DoorAccess door = doorAccessProvider.getDoorAccessById(doorId);
+
+        if(creator == null || visitor == null || door == null){
+            return;
+        }
+        sendMessageToAuthCreator(creator, visitor, door);
+    }
+
+    private void sendMessageToAuthCreator(User creator, User visitor,DoorAccess door){
+        String locale = creator.getLocale();
+//        Map<String, Object> map = new HashMap<String, Object>();
+//        String userName = user.getNickName();
+//        if(userName == null || userName.isEmpty()) {
+//            userName = user.getAccountName();
+//        }
+//        map.put("userName", userName);
+//
+//        //displayName不为空就拿displayName by liuyilin 20180625
+//        map.put("doorName", doorAcc.getDisplayNameNotEmpty());
+//
+//        String scope = AclinkNotificationTemplateCode.SCOPE;
+//        int code = AclinkNotificationTemplateCode.ACLINK_NEW_AUTH;
+//        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//
+//        Map<String, String> meta = new HashMap<String, String>();
+//        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.ACLINK_AUTH_CHANGED.getCode());
+//        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(new AclinkMessageMeta(user.getId(), doorAcc.getId(), doorType)));
+//        sendMessageToUser(user.getId(), notifyTextForApplicant, meta);
+    }
+
     @Override
     public void sendMessageToUser(Long uid, Long doorId, Byte doorType) {
         User user = userProvider.findUserById(uid);

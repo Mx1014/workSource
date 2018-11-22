@@ -84,6 +84,8 @@ public interface DoorAccessService {
     ListDoorAuthResponse searchVisitorDoorAuth(SearchDoorAuthCommand cmd);
 
     void sendMessageToUser(Long uid, Long doorId, Byte doorType);
+    //临时授权访客来访消息提示 add by liqingyan
+    void sendMessageToAuthCreator(Long creatorId, Long visitorId, Long doorId);
 
     void remoteOpenDoor(Long doorId);
 
