@@ -9125,6 +9125,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}
 			}
 		}
+		response.setAllowRent(TrueOrFalseFlag.TRUE.getCode());
+		if (!SceneType.PM_ADMIN.getCode().equals(sceneType)
+				&& !SceneType.ENTERPRISE.getCode().equals(sceneType)
+				&& TrueOrFalseFlag.fromCode(resourceType.getUnauthVisible()) != TrueOrFalseFlag.TRUE){
+			response.setAllowRent(TrueOrFalseFlag.FALSE.getCode());
+		}
+
 		//会员等级
 		User user = userProvider.findUserById(userId);
 		if (user.getVipLevelText() != null){
