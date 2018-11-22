@@ -4212,9 +4212,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				rentalv2Provider.updateRentalBill(bill);
 
 				if (bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
-					//发短信
-					RentalMessageHandler handler2 = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
-					handler2.sendRentalSuccessSms(bill);
 					onOrderSuccess(bill);
 				}
 			}else{
@@ -4443,27 +4440,26 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 		}
 
+        //预约成功 授权门禁
+        RentalResource rentalResource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
+
+        if (!StringUtils.isEmpty(rentalResource.getAclinkId())) {
+            String[] ids = rentalResource.getAclinkId().split(",");
+            if (ids.length > 0) {
+                String doorAuthId = "";
+                for (String id : ids)
+                    doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
+                            Long.parseLong(id), rentalResource.getCreatorUid()) + ",";
+                order.setDoorAuthId(doorAuthId.substring(0, doorAuthId.length() - 1));
+                rentalv2Provider.updateRentalBill(order);
+            }
+        }
+
 		//发消息给管理员
 		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
 		handler.addOrderSendMessage(order);
 		//发短信 推送给用户
 		handler.sendRentalSuccessSms(order);
-
-		//预约成功 授权门禁
-		RentalResource rentalResource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
-
-//			RentalResource rentalResource = rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-		if (!StringUtils.isEmpty(rentalResource.getAclinkId())) {
-			String[] ids = rentalResource.getAclinkId().split(",");
-			if (ids.length > 0) {
-				String doorAuthId = "";
-				for (String id : ids)
-					doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
-							Long.parseLong(id), rentalResource.getCreatorUid()) + ",";
-				order.setDoorAuthId(doorAuthId.substring(0, doorAuthId.length() - 1));
-				rentalv2Provider.updateRentalBill(order);
-			}
-		}
 
 		//用户积分
 		LocalEventBus.publish(event -> {
