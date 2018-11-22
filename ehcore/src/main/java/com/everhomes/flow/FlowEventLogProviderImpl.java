@@ -853,27 +853,4 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                     return dto;
                 });
     }
-
-    @Override
-    public List<FlowServiceTypeDTO> listAdminServiceTypes(Integer namespaceId, SearchFlowCaseCommand cmd) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
-        com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
-
-        cmd.setUserId(null);
-        Condition condition = buildSearchFlowCaseCondition(new ListingLocator(), cmd);
-        return context.select(t.fields())
-                .from(Tables.EH_FLOW_EVENT_LOGS)
-                .join(t)
-                .on(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(t.ID))
-                .join(Tables.EH_FLOWS)
-                .on(t.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
-                        .and(t.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
-                .where(condition)
-                .groupBy(t.MODULE_ID, t.SERVICE_TYPE)
-                .fetch(record -> {
-                    FlowServiceTypeDTO dto = RecordHelper.convert(record, FlowServiceTypeDTO.class);
-                    dto.setServiceName(record.getValue(t.SERVICE_TYPE));
-                    return dto;
-                });
-    }
 }

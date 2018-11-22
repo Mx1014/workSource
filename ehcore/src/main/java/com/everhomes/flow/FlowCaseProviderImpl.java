@@ -503,4 +503,27 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	
     	return null;
     }
+
+    @Override
+    public List<FlowServiceTypeDTO> listAdminServiceTypes(Integer namespaceId, SearchFlowCaseCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
+        com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+
+        cmd.setUserId(null);
+        Condition condition = buildSearchFlowCaseCmdCondition(new ListingLocator(), cmd);
+        return context.select(t.fields())
+                .from(t)
+                .join(Tables.EH_FLOWS)
+                .on(t.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
+                        .and(t.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+                .where(condition)
+                .groupBy(t.MODULE_ID, t.SERVICE_TYPE)
+                .fetch(record -> {
+                    FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+                    dto.setModuleId(record.getValue(t.MODULE_ID));
+                    dto.setServiceName(record.getValue(t.SERVICE_TYPE));
+                    dto.setNamespaceId(record.getValue(t.NAMESPACE_ID));
+                    return dto;
+                });
+    }
 }

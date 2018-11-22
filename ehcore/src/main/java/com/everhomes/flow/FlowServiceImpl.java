@@ -5552,26 +5552,26 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public ListFlowModuleAppsResponse listFlowModuleApps(SearchFlowCaseCommand cmd) {
         ValidatorUtil.validate(cmd);
+        if (cmd.getFlowCaseSearchType() == null) {
+            cmd.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
+        }
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         List<FlowModuleAppDTO> apps;
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
-        if (searchType == null) {
-            apps = flowCaseProvider.listAdminApps(namespaceId, cmd);
-        } else {
-            switch (searchType) {
-                case APPLIER:
-                    apps = flowCaseProvider.listApplierApps(namespaceId, UserContext.currentUserId(), cmd);
-                    break;
-                case TODO_LIST:
-                case DONE_LIST:
-                case SUPERVISOR:
-                    apps = flowEventLogProvider.listProcessorApps(namespaceId, UserContext.currentUserId(), cmd);
-                    break;
-                default:
-                    apps = flowCaseProvider.listAdminApps(namespaceId, cmd);
-            }
+
+        switch (searchType) {
+            case APPLIER:
+                apps = flowCaseProvider.listApplierApps(namespaceId, UserContext.currentUserId(), cmd);
+                break;
+            case TODO_LIST:
+            case DONE_LIST:
+            case SUPERVISOR:
+                apps = flowEventLogProvider.listProcessorApps(namespaceId, UserContext.currentUserId(), cmd);
+                break;
+            default:
+                apps = flowCaseProvider.listAdminApps(namespaceId, cmd);
         }
 
         apps = apps.stream().filter(r -> {
@@ -5580,6 +5580,7 @@ public class FlowServiceImpl implements FlowService {
             ServiceModuleApp moduleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(r.getOriginId());
             if (moduleApp != null) {
                 r.setName(moduleApp.getName());
+                r.setModuleId(moduleApp.getModuleId());
             }
         }).collect(Collectors.toList());
 
@@ -5596,6 +5597,7 @@ public class FlowServiceImpl implements FlowService {
 
         final List<FlowModuleAppDTO> finalApps = apps;
         moduleIdToApp.forEach((k, v) -> {
+            //
             if (v.size() == 1 && moduleIdSet.contains(k) && !flowCaseModuleIds.contains(k)) {
                 FlowModuleAppDTO appDTO = new FlowModuleAppDTO();
                 appDTO.setOriginId(0L);
@@ -5615,6 +5617,9 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public ListFlowModuleAppServiceTypesResponse listFlowModuleAppServiceTypes(SearchFlowCaseCommand cmd) {
         ValidatorUtil.validate(cmd);
+        if (cmd.getFlowCaseSearchType() == null) {
+            cmd.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
+        }
 
         ListFlowServiceTypeResponse typeResponse = this.listFlowServiceTypes(cmd);
         ListFlowModuleAppServiceTypesResponse response = new ListFlowModuleAppServiceTypesResponse();
@@ -6511,7 +6516,7 @@ public class FlowServiceImpl implements FlowService {
                     serviceTypes = flowEventLogProvider.listProcessorServiceTypes(namespaceId, UserContext.currentUserId(), cmd);
                     break;
                 case ADMIN:
-                    serviceTypes = flowEventLogProvider.listAdminServiceTypes(namespaceId, cmd);
+                    serviceTypes = flowCaseProvider.listAdminServiceTypes(namespaceId, cmd);
                     break;
                 default:
                     serviceTypes = getOldFlowServiceTypeDTOS(cmd, namespaceId);

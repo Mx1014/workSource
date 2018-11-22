@@ -99,6 +99,4 @@ public interface FlowEventLogProvider {
     List<FlowServiceTypeDTO> listProcessorServiceTypes(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd);
 
     List<FlowModuleAppDTO> listProcessorApps(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd);
-
-    List<FlowServiceTypeDTO> listAdminServiceTypes(Integer namespaceId, SearchFlowCaseCommand cmd);
 }
