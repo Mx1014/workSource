@@ -154,5 +154,10 @@ public interface ContractProvider {
 	List<ContractChargingItemReportformDTO> getContractChargingItemInfoList(ContractDTO contract);
 	List<ContractStaticsListDTO> listCommunityContractStaticsList(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr,String endTimeStr,  Byte dateType, Integer pageOffSet, Integer pageSize);
 	TotalContractStaticsDTO getTotalContractStatics(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr,String endTimeStr,  Byte dateType);
+	List<TotalContractStaticsDTO> listcontractStaticsListTimeDimension(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr,String endTimeStr,  Byte dateType, Integer pageOffSet, Integer pageSize);
+
+	List<TotalContractStaticsDTO> listcontractStaticsListCommunityTotal(Integer namespaceId, List<Long> communityIds,
+			String formatDateStr, String startTimeStr, String endTimeStr, Byte dateType, Integer pageOffSet,
+			Integer pageSize);
 
 }

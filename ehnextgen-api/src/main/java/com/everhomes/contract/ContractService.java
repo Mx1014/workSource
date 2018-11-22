@@ -78,8 +78,16 @@ public interface ContractService {
    
 	//合同报表
 	default void generateReportFormStatics(GetTotalContractStaticsCommand dateStr){};
-	default ListCommunityContractReportFormResponse searchContractStaticsList(SearchContractStaticsListCommand cmd){return null;}
-	default TotalContractStaticsDTO getTotalContractStatics(GetTotalContractStaticsCommand cmd){return null;}
+	default ListCommunityContractReportFormResponse searchContractStaticsList(SearchContractStaticsListCommand cmd){return null;};
+	default TotalContractStaticsDTO getTotalContractStatics(GetTotalContractStaticsCommand cmd){return null;};
 	default void exportContractStaticsInfo(GetTotalContractStaticsCommand cmd){};
 	default OutputStream exportOutputStreamForContractStatics(GetTotalContractStaticsCommand cmd, Long taskId){return null;};
+	default ListContractStaticsTimeDimensionResponse contractStaticsListTimeDimension(SearchContractStaticsListCommand cmd){return null;};
+	default void exportContractStaticsTimeDimension(SearchContractStaticsListCommand cmd){};
+	default OutputStream exportOutputStreamForContractStaticsTime(SearchContractStaticsListCommand cmd, Long taskId){return null;};
+	default void exportContractStaticsTotal(GetTotalContractStaticsCommand cmd){};
+	default OutputStream exportOutputStreamContractStaticsTotal(GetTotalContractStaticsCommand cmd, Long taskId){return null;};
+	default void exportContractStaticsCommunityTotal(SearchContractStaticsListCommand cmd){};
+	default OutputStream exportOutputStreamContractStaticsCommunityTotal(SearchContractStaticsListCommand cmd, Long taskId){return null;};
+	default ListContractStaticsTimeDimensionResponse contractStaticsListCommunityTotal(SearchContractStaticsListCommand cmd){return null;};
 }

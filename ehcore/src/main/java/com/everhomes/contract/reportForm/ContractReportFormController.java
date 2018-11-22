@@ -13,6 +13,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.contract.GetTotalContractStaticsCommand;
 import com.everhomes.rest.contract.ListCommunityContractReportFormResponse;
+import com.everhomes.rest.contract.ListContractStaticsTimeDimensionResponse;
 import com.everhomes.rest.contract.SearchContractStaticsListCommand;
 import com.everhomes.rest.contract.TotalContractStaticsDTO;
 import com.everhomes.user.UserContext;
@@ -64,6 +65,22 @@ public class ContractReportFormController extends ControllerBase{
 		return response;
 	}
     
+	/**
+     * <p>合同报表：获取项目在时间维度上的信息汇总表</p>
+     * <b>URL: /contract/reportForm/contractStaticsListTimeDimension</b>
+     */
+    @RequestMapping("contractStaticsListTimeDimension")
+    @RestReturn(value = ListContractStaticsTimeDimensionResponse.class)
+	public RestResponse contractStaticsListTimeDimension(SearchContractStaticsListCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		ListContractStaticsTimeDimensionResponse contractStaticsList = contractService.contractStaticsListTimeDimension(cmd);
+		RestResponse response = new RestResponse(contractStaticsList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
     /**
      * <p>合同报表：导出项目信息汇总表</p>
      * <b>URL: /contract/reportForm/exportContractStaticsInfo</b>
@@ -74,6 +91,53 @@ public class ContractReportFormController extends ControllerBase{
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
 		contractService.exportContractStaticsInfo(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    
+    /**
+     * <p>合同报表：导出项目时间维度上的信息汇总表</p>
+     * <b>URL: /contract/reportForm/exportContractStaticsTimeDimension</b>
+     */
+    @RequestMapping("exportContractStaticsTimeDimension")
+    @RestReturn(value=String.class)
+	public RestResponse exportContractStaticsTimeDimension(SearchContractStaticsListCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		contractService.exportContractStaticsTimeDimension(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    
+    /**
+     * <p>合同报表：导出项目汇总表总的数据信息</p>
+     * <b>URL: /contract/reportForm/exportContractStaticsTotal</b>
+     */
+    @RequestMapping("exportContractStaticsTotal")
+    @RestReturn(value=String.class)
+	public RestResponse exportContractStaticsTotal(GetTotalContractStaticsCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		contractService.exportContractStaticsTotal(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+     * <p>合同报表：导出项目时间维度上的信息汇总表加上园区维度</p>
+     * <b>URL: /contract/reportForm/exportContractStaticsCommunityTotal</b>
+     */
+    @RequestMapping("exportContractStaticsCommunityTotal")
+    @RestReturn(value=String.class)
+	public RestResponse exportContractStaticsCommunityTotal(SearchContractStaticsListCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		contractService.exportContractStaticsCommunityTotal(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

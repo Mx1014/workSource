@@ -71,6 +71,9 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.reportForm.ContractReportFormExportHandler;
+import com.everhomes.contract.reportForm.ContractStaticsCommunityTotalExportHandler;
+import com.everhomes.contract.reportForm.ContractStaticsTimeExportHandler;
+import com.everhomes.contract.reportForm.ContractStaticsTotalExportHandler;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.*;
@@ -154,6 +157,7 @@ import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.awt.geom.Area;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -4309,10 +4313,52 @@ long assetCategoryId = 0l;
         	startTimeStr = cmd.getStartTimeStr();
         	endTimeStr = cmd.getEndTimeStr();
 		}else {
-	        formatDateStr = formatDateStr(dateStr);
+	        formatDateStr = cmd.getDateStr();
 		}
         
         List<ContractStaticsListDTO> resultList = contractProvider.listCommunityContractStaticsList(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
+        
+        
+        if(resultList.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            resultList.remove(resultList.size()-1);
+        }
+        response.setResultList(resultList);
+		return response;
+	}
+	
+	@Override
+	public ListContractStaticsTimeDimensionResponse contractStaticsListTimeDimension(SearchContractStaticsListCommand cmd) {
+		ListContractStaticsTimeDimensionResponse response = new ListContractStaticsTimeDimensionResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor();
+		if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        
+		Integer pageSize = cmd.getPageSize();
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        
+        if(cmd.getDateType() == null){
+        	cmd.setDateType(ContractStatisticDateType.YEARMMSTR.getCode());
+        }
+        String startTimeStr = "";
+        String endTimeStr = "";
+        String formatDateStr = "";
+        
+        if (!"".equals(cmd.getStartTimeStr()) && !"".equals(cmd.getEndTimeStr()) && cmd.getStartTimeStr() != null && cmd.getEndTimeStr() !=null) {
+        	startTimeStr = cmd.getStartTimeStr();
+        	endTimeStr = cmd.getEndTimeStr();
+		}else {
+	        formatDateStr = cmd.getDateStr();
+		}
+        
+        List<TotalContractStaticsDTO> resultList = contractProvider.listcontractStaticsListTimeDimension(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
         
         
         if(resultList.size() <= pageSize){
@@ -4614,5 +4660,406 @@ long assetCategoryId = 0l;
 		Cell cell11 = tempRow.createCell(10);
 		cell11.setCellStyle(style);
 		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
+	}
+    
+    @Override
+	public void exportContractStaticsTimeDimension(SearchContractStaticsListCommand cmd) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("GetTotalContractStaticsCommand", cmd);
+		String fileName = String.format("项目合同信息汇总明细表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractStaticsTimeExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+    
+    //导出报表的总明细在时间维度
+	@Override
+	public OutputStream exportOutputStreamForContractStaticsTime(SearchContractStaticsListCommand cmd, Long taskId) {
+		OutputStream outputStream = new ByteArrayOutputStream();
+    	//每一条数据
+		SearchContractStaticsListCommand cmd2 = new SearchContractStaticsListCommand();
+		cmd2.setNamespaceId(cmd.getNamespaceId());
+		cmd2.setCommunityIds(cmd.getCommunityIds());
+		cmd2.setDateStr(cmd.getDateStr());
+		cmd2.setStartTimeStr(cmd.getStartTimeStr());
+		cmd2.setEndTimeStr(cmd.getEndTimeStr());
+		cmd2.setDateType(cmd.getDateType());
+		cmd2.setPageAnchor(0L);
+		cmd2.setPageSize(10000);
+		
+		ListContractStaticsTimeDimensionResponse contractStaticsList = contractStaticsListTimeDimension(cmd);
+		
+		//ListCommunityContractReportFormResponse response = searchContractStaticsList(cmd2); 
+        List<TotalContractStaticsDTO> dtos = contractStaticsList.getResultList();
+    
+        taskService.updateTaskProcess(taskId, 20);
+		Workbook wb = null;
+		InputStream in;
+		in = this.getClass().getResourceAsStream("/excels/contract/communityContractStatistic.xlsx");
+		
+		try {
+			wb = new XSSFWorkbook(copyInputStream(in));
+		} catch (IOException e) {
+			LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
+		}
+		Sheet sheet = wb.getSheetAt(0);
+		if (null != sheet) {
+			Row defaultRow = sheet.getRow(2);
+			Cell cell = defaultRow.getCell(0);
+			CellStyle style = cell.getCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
+			int size = 0;
+			if(null != dtos){
+				size = dtos.size();
+				taskService.updateTaskProcess(taskId, 30);
+				for(int i = 0;i < size;i++){
+					Row tempRow = sheet.createRow(i + 2);
+					TotalContractStaticsDTO dto = dtos.get(i);
+					int orderNum = i + 1;//序号
+					boolean isLastRow = false;
+					fillRowCellCommunityContractStaticsTime(tempRow, style, isLastRow, orderNum, dto);
+				}
+				taskService.updateTaskProcess(taskId, 70);
+				//最后的一行总计
+				/*CellStyle totalStyle = getTotalStyle(wb, style);
+				Row tempRow = sheet.createRow(dtos.size() + 2);
+				int orderNum = dtos.size() + 1;//序号
+				boolean isLastRow = true;
+				TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
+				fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);*/
+				taskService.updateTaskProcess(taskId, 80);
+				try {
+					wb.write(outputStream);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return outputStream;
+			}else {
+				throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+			}
+		}
+		return outputStream;
+	}
+	/**
+     * @param tempRow ： Excel的行
+     * @param style 
+     * @param isLastRow ： 是否是最后一行
+     * @param orderNum ： 序号
+     * @param dto
+     */
+    private void fillRowCellCommunityContractStaticsTime(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, TotalContractStaticsDTO dto) {
+    	//序号
+		Cell cell0 = tempRow.createCell(0);
+		cell0.setCellStyle(style);
+		cell0.setCellValue(orderNum);
+			
+		//日期
+		Cell cell2 = tempRow.createCell(1);
+		cell2.setCellStyle(style);
+		cell2.setCellValue(dto.getDateStr());
+		
+		//项目名称
+		Cell cell3 = tempRow.createCell(2);
+		cell3.setCellStyle(style);
+		cell3.setCellValue(dto.getCommunityCount());
+		
+		//新签合同总额
+		Cell cell4 = tempRow.createCell(3);
+		cell4.setCellStyle(style);
+		cell4.setCellValue(dto.getNewContractAmount() != null ? dto.getNewContractAmount().toString() : "0");
+		
+		//新签客户总数
+		Cell cell5 = tempRow.createCell(4);
+		cell5.setCellStyle(style);
+		cell5.setCellValue(dto.getCustomerCount() != null ? dto.getCustomerCount().toString() : "0");
+		
+		//新签租赁总面积
+		Cell cell6 = tempRow.createCell(5);
+		cell6.setCellStyle(style);
+		cell6.setCellValue(dto.getNewContractArea() != null ? dto.getNewContractArea().toString() : "0");	
+		
+		//变更合同总数
+		Cell cell7 = tempRow.createCell(6);
+		cell7.setCellStyle(style);
+		cell7.setCellValue(dto.getChangeContractCount() != null ? dto.getChangeContractCount().toString() : "0");
+		
+		//退约合同总数
+		Cell cell8 = tempRow.createCell(7);
+		cell8.setCellStyle(style);
+		cell8.setCellValue(dto.getDenunciationContractCount() != null ? dto.getDenunciationContractCount().toString() : "0");
+		
+		//新增押金总额
+		Cell cell9 = tempRow.createCell(8);
+		cell9.setCellStyle(style);
+		cell9.setCellValue(dto.getDepositAmount() != null ? dto.getDepositAmount().toString() : "0");
+		
+		//企业客户总数
+		Cell cell10 = tempRow.createCell(9);
+		cell10.setCellStyle(style);
+		cell10.setCellValue(dto.getOrgContractCount() != null ? dto.getOrgContractCount().toString() : "0");
+		
+		//个人客户总数
+		Cell cell11 = tempRow.createCell(10);
+		cell11.setCellStyle(style);
+		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
+		
+	}
+	
+	@Override
+	public void exportContractStaticsTotal(GetTotalContractStaticsCommand cmd) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("GetTotalContractStaticsCommand", cmd);
+		String fileName = String.format("项目合同信息总计表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractStaticsTotalExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+	//导出报表的总明细在时间维度
+	@Override
+	public OutputStream exportOutputStreamContractStaticsTotal(GetTotalContractStaticsCommand cmd, Long taskId) {
+			OutputStream outputStream = new ByteArrayOutputStream();
+	    	//每一条数据
+			SearchContractStaticsListCommand cmd2 = new SearchContractStaticsListCommand();
+			cmd2.setNamespaceId(cmd.getNamespaceId());
+			cmd2.setCommunityIds(cmd.getCommunityIds());
+			cmd2.setDateStr(cmd.getDateStr());
+			cmd2.setStartTimeStr(cmd.getStartTimeStr());
+			cmd2.setEndTimeStr(cmd.getEndTimeStr());
+			cmd2.setDateType(cmd.getDateType());
+			cmd2.setPageAnchor(0L);
+			cmd2.setPageSize(10000);
+			
+			//ListCommunityContractReportFormResponse response = searchContractStaticsList(cmd2); 
+	        List<ContractStaticsListDTO> dtos = new ArrayList<ContractStaticsListDTO>();
+	        
+	        //TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
+			//fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
+	    
+	        taskService.updateTaskProcess(taskId, 20);
+			Workbook wb = null;
+			InputStream in;
+			in = this.getClass().getResourceAsStream("/excels/contract/communityContractStatistic.xlsx");
+			
+			try {
+				wb = new XSSFWorkbook(copyInputStream(in));
+			} catch (IOException e) {
+				LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
+			}
+			Sheet sheet = wb.getSheetAt(0);
+			if (null != sheet) {
+				Row defaultRow = sheet.getRow(2);
+				Cell cell = defaultRow.getCell(0);
+				CellStyle style = cell.getCellStyle();
+				style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
+				int size = 0;
+				if(null != dtos){
+					size = dtos.size();
+					taskService.updateTaskProcess(taskId, 30);
+					for(int i = 0;i < size;i++){
+						Row tempRow = sheet.createRow(i + 2);
+						ContractStaticsListDTO dto = dtos.get(i);
+						int orderNum = i + 1;//序号
+						boolean isLastRow = false;
+						fillRowCellCommunityContractStatistic(tempRow, style, isLastRow, orderNum, dto);
+					}
+					taskService.updateTaskProcess(taskId, 70);
+					//最后的一行总计
+					CellStyle totalStyle = getTotalStyle(wb, style);
+					Row tempRow = sheet.createRow(dtos.size() + 2);
+					int orderNum = dtos.size() + 1;//序号
+					boolean isLastRow = true;
+					TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
+					fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
+					taskService.updateTaskProcess(taskId, 80);
+					try {
+						wb.write(outputStream);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					return outputStream;
+				}else {
+					throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+				}
+			}
+			return outputStream;
+		}
+	
+	@Override
+	public void exportContractStaticsCommunityTotal(SearchContractStaticsListCommand cmd) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("GetTotalContractStaticsCommand", cmd);
+		String fileName = String.format("项目合同信息总计表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractStaticsCommunityTotalExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+	//导出报表的总明细在时间维度
+	@Override
+	public OutputStream exportOutputStreamContractStaticsCommunityTotal(SearchContractStaticsListCommand cmd, Long taskId) {
+			OutputStream outputStream = new ByteArrayOutputStream();
+	    	//每一条数据
+			SearchContractStaticsListCommand cmd2 = new SearchContractStaticsListCommand();
+			cmd2.setNamespaceId(cmd.getNamespaceId());
+			cmd2.setCommunityIds(cmd.getCommunityIds());
+			cmd2.setDateStr(cmd.getDateStr());
+			cmd2.setStartTimeStr(cmd.getStartTimeStr());
+			cmd2.setEndTimeStr(cmd.getEndTimeStr());
+			cmd2.setDateType(cmd.getDateType());
+			cmd2.setPageAnchor(0L);
+			cmd2.setPageSize(10000);
+			
+			//ListCommunityContractReportFormResponse response = searchContractStaticsList(cmd2); 
+	        //List<ContractStaticsListDTO> dtos = new ArrayList<ContractStaticsListDTO>();
+	        
+			ListContractStaticsTimeDimensionResponse response = contractStaticsListCommunityTotal(cmd2); 
+	        List<TotalContractStaticsDTO> dtos = response.getResultList();
+	        
+	        //TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
+			//fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
+	    
+	        taskService.updateTaskProcess(taskId, 20);
+			Workbook wb = null;
+			InputStream in;
+			in = this.getClass().getResourceAsStream("/excels/contract/communityContractStatistic.xlsx");
+			
+			try {
+				wb = new XSSFWorkbook(copyInputStream(in));
+			} catch (IOException e) {
+				LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
+			}
+			Sheet sheet = wb.getSheetAt(0);
+			if (null != sheet) {
+				Row defaultRow = sheet.getRow(2);
+				Cell cell = defaultRow.getCell(0);
+				CellStyle style = cell.getCellStyle();
+				style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
+				int size = 0;
+				if(null != dtos){
+					size = dtos.size();
+					taskService.updateTaskProcess(taskId, 30);
+					for(int i = 0;i < size;i++){
+						Row tempRow = sheet.createRow(i + 2);
+						TotalContractStaticsDTO dto = dtos.get(i);
+						int orderNum = i + 1;//序号
+						boolean isLastRow = false;
+						fillRowCellCommunityContractStatisticCommunityTotal(tempRow, style, isLastRow, orderNum, dto);
+					}
+					taskService.updateTaskProcess(taskId, 70);
+					//最后的一行总计
+					/*CellStyle totalStyle = getTotalStyle(wb, style);
+					Row tempRow = sheet.createRow(dtos.size() + 2);
+					int orderNum = dtos.size() + 1;//序号
+					boolean isLastRow = true;
+					TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
+					fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);*/
+					taskService.updateTaskProcess(taskId, 80);
+					try {
+						wb.write(outputStream);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					return outputStream;
+				}else {
+					throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+				}
+			}
+			return outputStream;
+		}
+	
+    private void fillRowCellCommunityContractStatisticCommunityTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, TotalContractStaticsDTO dto) {
+    	//序号
+		Cell cell0 = tempRow.createCell(0);
+		cell0.setCellStyle(style);
+		cell0.setCellValue(orderNum);
+			
+		//日期
+		Cell cell2 = tempRow.createCell(1);
+		cell2.setCellStyle(style);
+		cell2.setCellValue(dto.getDateStr());
+		
+		//项目名称
+		Cell cell3 = tempRow.createCell(2);
+		cell3.setCellStyle(style);
+		cell3.setCellValue(dto.getCommunityName());
+		
+		//新签合同总额
+		Cell cell4 = tempRow.createCell(3);
+		cell4.setCellStyle(style);
+		cell4.setCellValue(dto.getNewContractAmount() != null ? dto.getNewContractAmount().toString() : "0");
+		
+		//新签客户总数
+		Cell cell5 = tempRow.createCell(4);
+		cell5.setCellStyle(style);
+		cell5.setCellValue(dto.getCustomerCount() != null ? dto.getCustomerCount().toString() : "0");
+		
+		//新签租赁总面积
+		Cell cell6 = tempRow.createCell(5);
+		cell6.setCellStyle(style);
+		cell6.setCellValue(dto.getNewContractArea() != null ? dto.getNewContractArea().toString() : "0");	
+		
+		//变更合同总数
+		Cell cell7 = tempRow.createCell(6);
+		cell7.setCellStyle(style);
+		cell7.setCellValue(dto.getChangeContractCount() != null ? dto.getChangeContractCount().toString() : "0");
+		
+		//退约合同总数
+		Cell cell8 = tempRow.createCell(7);
+		cell8.setCellStyle(style);
+		cell8.setCellValue(dto.getDenunciationContractCount() != null ? dto.getDenunciationContractCount().toString() : "0");
+		
+		//新增押金总额
+		Cell cell9 = tempRow.createCell(8);
+		cell9.setCellStyle(style);
+		cell9.setCellValue(dto.getDepositAmount() != null ? dto.getDepositAmount().toString() : "0");
+		
+		//企业客户总数
+		Cell cell10 = tempRow.createCell(9);
+		cell10.setCellStyle(style);
+		cell10.setCellValue(dto.getOrgContractCount() != null ? dto.getOrgContractCount().toString() : "0");
+		
+		//个人客户总数
+		Cell cell11 = tempRow.createCell(10);
+		cell11.setCellStyle(style);
+		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
+		
+	}
+    
+	@Override
+	public ListContractStaticsTimeDimensionResponse contractStaticsListCommunityTotal(SearchContractStaticsListCommand cmd) {
+		ListContractStaticsTimeDimensionResponse response = new ListContractStaticsTimeDimensionResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor();
+		if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        
+		Integer pageSize = cmd.getPageSize();
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        
+        if(cmd.getDateType() == null){
+        	cmd.setDateType(ContractStatisticDateType.YEARMMSTR.getCode());
+        }
+        String startTimeStr = "";
+        String endTimeStr = "";
+        String formatDateStr = "";
+        
+        if (!"".equals(cmd.getStartTimeStr()) && !"".equals(cmd.getEndTimeStr()) && cmd.getStartTimeStr() != null && cmd.getEndTimeStr() !=null) {
+        	startTimeStr = cmd.getStartTimeStr();
+        	endTimeStr = cmd.getEndTimeStr();
+		}else {
+	        formatDateStr = cmd.getDateStr();
+		}
+        
+        List<TotalContractStaticsDTO> resultList = contractProvider.listcontractStaticsListCommunityTotal(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
+        
+        
+        if(resultList.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            resultList.remove(resultList.size()-1);
+        }
+        response.setResultList(resultList);
+		return response;
 	}
 }

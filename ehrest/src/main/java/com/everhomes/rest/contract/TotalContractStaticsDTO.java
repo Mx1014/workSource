@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import com.everhomes.util.StringHelper;
 
 public class TotalContractStaticsDTO {
+	private String dateStr;
 	private Integer communityCount;
 	private BigDecimal rentAmount;
 	private BigDecimal rentalArea;
@@ -27,6 +28,23 @@ public class TotalContractStaticsDTO {
 	private BigDecimal renewContractAmount;
 	private BigDecimal renewContractArea;
 	private BigDecimal depositAmount;
+	private String communityName;
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+
+	public String getDateStr() {
+		return dateStr;
+	}
+
+	public void setDateStr(String dateStr) {
+		this.dateStr = dateStr;
+	}
 
 	public Integer getCommunityCount() {
 		return communityCount;
