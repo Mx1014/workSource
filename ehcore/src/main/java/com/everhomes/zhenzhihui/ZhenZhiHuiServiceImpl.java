@@ -246,7 +246,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                                 }
                             }
                             String url = urlStr.toString().substring(0,urlStr.toString().length()-1);
-                            LOGGER.info("zhenzhihui redirect to zuolin, uri={}" , url);
+                            LOGGER.info("zhenzhihui redirect to zuolin, uri={},builderUrl = {}" , url,builder.build().toUriString());
                             return builder.build().toUriString();
                         }
                     }
