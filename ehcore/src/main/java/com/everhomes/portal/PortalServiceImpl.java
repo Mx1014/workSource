@@ -39,6 +39,7 @@ import com.everhomes.rest.launchpadbase.indexconfigjson.Application;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
 import com.everhomes.rest.module.AccessControlType;
 import com.everhomes.rest.module.RouterInfo;
+import com.everhomes.rest.module.TerminalType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
@@ -192,6 +193,8 @@ public class PortalServiceImpl implements PortalService {
 	@Autowired
 	private LaunchPadService launchPadService;
 
+	@Autowired
+    private ServiceModuleEntryProvider serviceModuleEntryProvider;
 	@Autowired
     private ServiceModuleAppProfileProvider serviceModuleAppProfileProvider;
 	@Override
@@ -1834,6 +1837,63 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
+	private void publishAppEntries(ServiceModuleApp app) {
+	    List<ServiceModuleAppEntry> appEntries = this.serviceModuleEntryProvider.listServiceModuleAppEntries(app.getOriginId(),null,
+                TerminalType.MOBILE.getCode(),null,null);
+
+        List<ServiceModuleEntry> moduleEntries = this.serviceModuleEntryProvider.listServiceModuleEntries(app.getModuleId(),null,
+                TerminalType.MOBILE.getCode(),null,null);
+        if (appEntries.size() > moduleEntries.size()) {
+            if (CollectionUtils.isEmpty(moduleEntries)) {
+                for (ServiceModuleAppEntry appEntry : appEntries) {
+                    this.serviceModuleEntryProvider.deleteAppEntry(appEntry.getId());
+                }
+            }else {
+                ServiceModuleEntry moduleEntry = moduleEntries.get(0);
+                for (ServiceModuleAppEntry appEntry : appEntries) {
+                    if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
+                        appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
+                        appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
+                        appEntry.setEntryName(moduleEntry.getEntryName());
+                        appEntry.setIconUri(moduleEntry.getIconUri());
+                        this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
+                    }else {
+                        this.serviceModuleEntryProvider.deleteAppEntry(appEntry.getId());
+                    }
+                }
+
+            }
+
+        }else if (appEntries.size() < moduleEntries.size()) {
+            if (CollectionUtils.isEmpty(appEntries)) {
+                for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                    ServiceModuleAppEntry appEntry = ConvertHelper.convert(moduleEntry, ServiceModuleAppEntry.class);
+                    appEntry.setAppId(app.getOriginId());
+                    appEntry.setAppName(app.getName());
+                    appEntry.setId(null);
+                    this.serviceModuleEntryProvider.createAppEntry(appEntry);
+                }
+            }else {
+                ServiceModuleAppEntry appEntry = appEntries.get(0);
+                for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                    if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
+                        appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
+                        appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
+                        appEntry.setEntryName(moduleEntry.getEntryName());
+                        appEntry.setIconUri(moduleEntry.getIconUri());
+                        this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
+                    }else {
+                        ServiceModuleAppEntry newAppEntry = ConvertHelper.convert(moduleEntry, ServiceModuleAppEntry.class);
+                        newAppEntry.setAppId(app.getOriginId());
+                        newAppEntry.setAppName(app.getName());
+                        newAppEntry.setId(null);
+                        this.serviceModuleEntryProvider.createAppEntry(newAppEntry);
+                    }
+                }
+            }
+        }
+    }
+
 	/**
 	 * 正式版本保护机制，不能对正式版本做编辑和发布。
 	 * @param versionId
@@ -1924,6 +1984,8 @@ public class PortalServiceImpl implements PortalService {
 				app.setCustomTag(customTag);
 				serviceModuleAppProvider.updateServiceModuleApp(app);
 			}
+			//发布应用入口信息 add by yanlong.liang 20181122
+            publishAppEntries(app);
 		}
 
 		/**
