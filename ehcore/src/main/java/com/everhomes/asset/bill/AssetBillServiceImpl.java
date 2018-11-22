@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.asset.PaymentBills;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
@@ -45,6 +46,7 @@ public class AssetBillServiceImpl implements AssetBillService {
 	 * 第三方或对接其他模块不管是已缴还是未缴都不允许删除
 	 */
 	public BatchDeleteBillResponse batchDeleteBill(BatchDeleteBillCommand cmd) {
+		assetService.checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_BATCH_DELETE_BILL,cmd.getOrganizationId());
 		BatchDeleteBillResponse response = new BatchDeleteBillResponse();
 		List<Long> billIdList = cmd.getBillIdList();
 		Integer selectCount, deleteFail, deleteSuccess;
