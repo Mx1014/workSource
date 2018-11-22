@@ -1601,8 +1601,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	private void setShowPrice(RentalSiteDTO rSiteDTO) {
-		if (!StringUtils.isBlank(currentSceneType.get())) {
-			String scene = currentSceneType.get();
+		String scene = getClassification(RentalUserPriceType.USER_TYPE.getCode());
+		if (!StringUtils.isBlank(scene)) {
 			if (!SceneType.PM_ADMIN.getCode().equals(scene)
 					&& !SceneType.ENTERPRISE.getCode().equals(scene)
 					&& TrueOrFalseFlag.fromCode(rSiteDTO.getUnauthVisible()) != TrueOrFalseFlag.TRUE) {
