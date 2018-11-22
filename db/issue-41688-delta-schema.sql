@@ -23,3 +23,18 @@ CREATE TABLE `eh_service_module_app_entry_profiles` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='应用自定义配置应用入口信息';
+
+CREATE TABLE `eh_service_module_app_entries` (
+  `id` BIGINT NOT NULL,
+  `app_id` BIGINT NOT NULL,
+  `app_name` VARCHAR(256),
+  `entry_name` VARCHAR(256),
+  `terminal_type` TINYINT NOT NULL COMMENT '终端列表，1-mobile,2-pc',
+  `location_type` TINYINT NOT NULL COMMENT '位置，参考枚举ServiceModuleLocationType',
+  `scene_type` TINYINT NOT NULL COMMENT '形态，1-管理端，2-客户端，参考枚举ServiceModuleSceneType',
+  `app_category_id` BIGINT NOT NULL DEFAULT 0,
+  `default_order` INTEGER NOT NULL DEFAULT 0,
+  `icon_uri` VARCHAR(255),
+  PRIMARY KEY (`id`)
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '应用的入口数据';
