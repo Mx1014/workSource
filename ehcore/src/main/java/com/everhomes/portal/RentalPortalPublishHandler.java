@@ -70,6 +70,8 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
             rentalInstanceConfig.setIdentify(RentalV2ResourceType.DEFAULT.getCode());
         if (null == rentalInstanceConfig.getUnauthVisible())
             rentalInstanceConfig.setUnauthVisible((byte)0);
+        if (null == rentalInstanceConfig.getCrossCommuFlag())
+            rentalInstanceConfig.setCrossCommuFlag((byte)1);
 
         rentalResourceType.setPageType(rentalInstanceConfig.getPageType());
         rentalResourceType.setPayMode(rentalInstanceConfig.getPayMode());
