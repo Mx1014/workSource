@@ -66,6 +66,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.CommunityType;
@@ -5968,6 +5969,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
+        List<NamespaceDTO> namespaces = new ArrayList<NamespaceDTO>();
+        namespaces = doorAccessProvider.listDoorAccessNamespaces();
+        resp.setNamespaces(namespaces);
         List<DoorAccessNewDTO> dtos = doorAccessProvider.listDoorAccessEh(locator, count, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,

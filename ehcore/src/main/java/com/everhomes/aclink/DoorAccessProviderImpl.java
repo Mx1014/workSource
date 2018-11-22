@@ -12,6 +12,7 @@ import java.util.Comparator;
 
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Tab;
 import com.everhomes.sequence.SequenceProvider;
@@ -526,6 +527,28 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         }
         return objs;
     }
+
+    @Override
+    public List<NamespaceDTO> listDoorAccessNamespaces(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.schema.tables.EhNamespaces t = com.everhomes.schema.Tables.EH_NAMESPACES;
+        com.everhomes.server.schema.tables.EhDoorAccess t1 = Tables.EH_DOOR_ACCESS;
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(t);
+        query.addConditions(t.ID.in(context.select(t1.NAMESPACE_ID).from(t1).where(t1.STATUS.eq((byte)1))));
+        List<NamespaceDTO> dtos = query.fetch().map((r) -> {
+            NamespaceDTO dto = new NamespaceDTO();
+            dto.setId(r.getValue(t.ID));
+            dto.setName(r.getValue(t.NAME));
+            return dto;
+        });
+//        SelectConditionStep<Record2<Integer,String>> result = context.select(t.ID,
+//                t.NAME)
+//                .from(t)
+//                .where(t.ID.in(context.select(t1.NAMESPACE_ID).from(t1).where(t1.STATUS.eq((byte)1))));
+        return dtos;
+    }
+
     @Override
     public DoorAccess findDoorAccessById(Long id){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
