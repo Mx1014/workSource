@@ -16,7 +16,7 @@ INSERT INTO eh_locale_templates (`id`, `scope`, `code`, `locale`, `description`,
 INSERT INTO eh_locale_templates (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'contract.tracking', '21', 'zh_CN', '合同初始化事件', '该合同进行了初始化', '0');
 INSERT INTO eh_locale_templates (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'contract.tracking', '22', 'zh_CN', '合同免批事件', '该合同已免批', '0');
 
--- AUTHOR: 杨崇鑫
+-- AUTHOR: 杨崇鑫 20181122
 -- REMARK: 物业缴费V7.3(账单组规则定义) 新增以下权限：“批量减免”权限；
 SET @p_id = 204001011;
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '批量删除', '账单管理 批量删除', NULL);
