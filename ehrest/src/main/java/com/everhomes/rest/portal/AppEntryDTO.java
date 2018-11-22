@@ -8,7 +8,8 @@ import com.everhomes.util.StringHelper;
  *     <li>entryId: 入口ID</li>
  *     <li>entryCategory: 入口分类</li>
  *     <li>entryName: 入口名称</li>
- *     <li>entryIconUri: 入口图标</li>
+ *     <li>entryIconUri: 入口图标uri</li>
+ *     <li>entryIconUrl: 入口图标url</li>
  * </ul>
  */
 public class AppEntryDTO {
@@ -19,6 +20,16 @@ public class AppEntryDTO {
     private String entryName;
 
     private String entryIconUri;
+
+    private String entryIconUrl;
+
+    public String getEntryIconUrl() {
+        return entryIconUrl;
+    }
+
+    public void setEntryIconUrl(String entryIconUrl) {
+        this.entryIconUrl = entryIconUrl;
+    }
 
     public Long getEntryId() {
         return entryId;

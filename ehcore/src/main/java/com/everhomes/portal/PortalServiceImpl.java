@@ -507,7 +507,22 @@ public class PortalServiceImpl implements PortalService {
 			List<AppEntryInfoDTO> entryInfos = GsonUtil.fromJson(moduleApp.getAppEntryInfos(), new TypeToken<List<AppEntryInfoDTO>>(){}.getType());
 			dto.setAppEntryInfos(entryInfos);
 		}
-
+		List<ServiceModuleAppEntryProfile> appEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(moduleApp.getOriginId(),
+				null,null,null);
+		if (!CollectionUtils.isEmpty(appEntryProfiles)) {
+		    List<AppEntryDTO> appEntryDTOS = new ArrayList<>();
+		    dto.setAppEntrySettingFlag(appEntryProfiles.get(0).getAppEntrySetting());
+			for (ServiceModuleAppEntryProfile serviceModuleAppEntryProfile : appEntryProfiles) {
+                AppEntryDTO appEntryDTO = ConvertHelper.convert(serviceModuleAppEntryProfile, AppEntryDTO.class);
+                appEntryDTO.setEntryIconUri(serviceModuleAppEntryProfile.getEntryUri());
+                String url = contentServerService.parserUri(appEntryDTO.getEntryIconUri(), ServiceModuleAppEntryProfile.class.getSimpleName(), serviceModuleAppEntryProfile.getId());
+                appEntryDTO.setEntryIconUrl(url);
+                appEntryDTOS.add(appEntryDTO);
+            }
+            dto.setServiceModuleSelfEntryDtos(appEntryDTOS);
+		}else {
+			dto.setAppEntrySettingFlag(TrueOrFalseFlag.FALSE.getCode());
+		}
 		return dto;
 	}
 
