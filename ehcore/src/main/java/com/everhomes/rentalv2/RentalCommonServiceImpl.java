@@ -143,6 +143,18 @@ public class RentalCommonServiceImpl {
         return rentalResourceType;
     }
 
+    public void rentalOrderSuccess(Long rentalBillId){
+        RentalOrder rentalBill = rentalv2Provider.findRentalBillById(rentalBillId);
+        rentalBill.setStatus(SiteBillStatus.SUCCESS.getCode());
+        rentalv2Provider.updateRentalBill(rentalBill);
+    }
+
+    public void rentalOrderCancel(Long rentalBillId){
+        RentalOrder rentalBill = rentalv2Provider.findRentalBillById(rentalBillId);
+        rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
+        rentalv2Provider.updateRentalBill(rentalBill);
+    }
+
     public void sendMessageToUser(Long userId, String content) {
         if(null == userId)
             return;
