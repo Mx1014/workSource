@@ -20,14 +20,19 @@ public enum ZhenZhiHuiServer {
     BANNER(1022,"广告banner",10400L,""),
     NOTICE_MANAGE(1023,"公告管理",10300L,""),
     ACTIVITY(1024,"官方活动",10600L,"/activity/build/index.html#/listPage"),
-    NEWS(1025,"园区快讯",10800L,"/park-news-web/build/index.html?#/newsList"),
+    NEWS(1025,"园区快讯",10800L,"/park-news-web/build/index.html#/newsList"),
     MAIL_LIST(1026,"通讯录",50100L,""),
     CARD_ATTENDANCE(1027,"打卡考勤",50600L,""),
     TASKS(1028,"任务管理",13000L,"/workflow/build/index.html#/list/management"),
     PARTY(1029,"园区党建",10110L,"/forum/build/index.html#/"),
     DYNAMIC(1030,"党建动态",40500L,"/service-alliance-web/build/index.html#/home/grid"),
     NOTICE(1031,"党建公告",40500L,"/service-alliance-web/build/index.html#/home/grid"),
-    DONE(1032,"两学一做",40500L,"/service-alliance-web/build/index.html#/home/grid");
+    DONE(1032,"两学一做",40500L,"/service-alliance-web/build/index.html#/home/grid"),
+    MERCHANT(1050,"商家名录",40500L,"/service-alliance-web/build/index.html#/home/list"),
+    RESIDENCE(1052,"迁入办理",40500L,"/service-alliance-web/build/index.html#/home/list"),
+    DECORATION(1053,"装修办理",40500L,"/service-alliance-web/build/index.html#/home/list"),
+    BROADBAND(1054,"宽带申请",40500L,"/service-alliance-web/build/index.html#/home/list"),
+    ENTREPRENEURIAL(1070,"创业入驻",40500L,"/service-alliance-web/build/index.html#/home/grid");
 
     private Integer code;
     private String name;
