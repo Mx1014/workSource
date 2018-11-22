@@ -761,17 +761,9 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                     case 1:
                     case 7:
                     case 9:
-                    case 21:
-                        order.setVendorType(VendorType.WEI_XIN.getCode());
-                        order.setPayChannel(PayChannel.NORMAL_PAY.getCode());
-                        break;
-                    case 29:
-                        order.setPayChannel(PayChannel.ENTERPRISE_PAY_CHARGE.getCode());
-                        break;
-                    default:
-                        order.setVendorType(VendorType.ZHI_FU_BAO.getCode());
-                        order.setPayChannel(PayChannel.NORMAL_PAY.getCode());
-                        break;
+                    case 21: order.setVendorType(VendorType.WEI_XIN.getCode());order.setPayChannel(PayChannel.NORMAL_PAY.getCode());break;
+                    case 29: order.setVendorType(VendorType.ENTERPRISE_WALLET.getCode());order.setPayChannel(PayChannel.ENTERPRISE_PAY_CHARGE.getCode());break;
+                    default: order.setVendorType(VendorType.ZHI_FU_BAO.getCode());order.setPayChannel(PayChannel.NORMAL_PAY.getCode());break;
                 }
 
             order.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

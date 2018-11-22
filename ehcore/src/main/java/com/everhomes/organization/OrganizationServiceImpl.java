@@ -201,16 +201,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.userOrganization.UserOrganizations;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.PinYinHelper;
-import com.everhomes.util.RouterBuilder;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -14873,7 +14864,53 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return resp.getDtos() == null ? null : resp.getDtos().stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
 
 	}
+    @Override
+    public List<Long> listMemberDetailIds(Long ownerId, Long deptId, Integer pageSize, Integer pageOffSet, String keyWord){
+        List<Long> result = new ArrayList<>();
+        List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
 
+            if (null != keyWord) {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%"+keyWord+"%")
+                		.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.like("%"+keyWord+"%")));
+            }
+
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.desc());
+
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc());
+            query.addLimit(pageOffSet - 1, pageSize);
+            return query;
+        });
+        if (records == null || records.size() == 0) {
+            return result;
+        }
+        for (OrganizationMemberDetails detail : records) {
+            result.add(detail.getId());
+        }
+        return result;
+    }
+    @Override
+    public List<OrganizationMemberDetails> listMembers(Long ownerId, Long deptId, Integer pageSize, Integer pageOffSet, String keyWord, Condition condition) {
+        // yyyyMM to yyyy-MM
+        List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
+            if (null != keyWord) {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%"+keyWord+"%")
+                		.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.like("%"+keyWord+"%")));
+            }
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
+            if(condition != null){
+            	query.addConditions(condition);
+            }
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.desc());
+
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc());
+            query.addLimit(pageOffSet, pageSize);
+            return query;
+        });
+        if (records == null || records.size() == 0) {
+            return null;
+        }
+        return records;
+    }
     //	物业组所需获取企业员工的唯一标识符
     @Override
     public String getAccountByTargetIdAndOrgId(Long targetId, Long orgId){
