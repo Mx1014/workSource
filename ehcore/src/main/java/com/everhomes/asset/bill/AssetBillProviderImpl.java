@@ -86,18 +86,18 @@ public class AssetBillProviderImpl implements AssetBillProvider {
 	public void deleteBillFromContract(Integer namespaceId, String ownerType, Long ownerId, Long contractId) {
 		this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-            //删除账单（置状态）
-            context.update(Tables.EH_PAYMENT_BILLS)
-            		.set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+            //删除账单：缺陷 #42544【合同管理V4.0】一键初始化合同后，查看修改初始化为“草稿合同”的数据，原来的费用清单依然存在
+            //产品已确认，合同初始化，账单进行物理删除，不可恢复。
+            context.delete(Tables.EH_PAYMENT_BILLS)
                     .where(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
                     .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType))
                     .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
                     .and(Tables.EH_PAYMENT_BILLS.STATUS.notEqual(AssetPaymentBillStatus.PAID.getCode())) //已支付的不允许删除
                     .and(Tables.EH_PAYMENT_BILLS.CONTRACT_ID.eq(contractId))
                     .execute();
-            //删除费项（置状态）
-            context.update(Tables.EH_PAYMENT_BILL_ITEMS)
-	    		.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+            //删除费项：缺陷 #42544【合同管理V4.0】一键初始化合同后，查看修改初始化为“草稿合同”的数据，原来的费用清单依然存在
+            //产品已确认，合同初始化，账单进行物理删除，不可恢复。
+            context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
 	    		.where(Tables.EH_PAYMENT_BILL_ITEMS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_PAYMENT_BILL_ITEMS.OWNER_TYPE.eq(ownerType))
                 .and(Tables.EH_PAYMENT_BILL_ITEMS.OWNER_ID.eq(ownerId))
