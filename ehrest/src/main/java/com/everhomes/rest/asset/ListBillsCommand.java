@@ -47,6 +47,7 @@ import com.everhomes.util.StringHelper;
  * <li>updateTime:更新时间，为空全量同步数据，不为空是增量同步（该时间点以后的数据信息），使用1970-01-01 00:00:00开始到现在的毫秒数（时间戳）</li>
  * <li>communityId:项目ID(左邻的项目id),如何不传，可以跨园区获取数据，否则获取的是该园区下面的数据信息</li>
  * <li>switchList:物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单）</li>
+ * <li>contractId:合同ID</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -91,6 +92,7 @@ public class ListBillsCommand {
     //账单列表处增加筛选项：欠费金额、应收、已收、待收等排序
     private List<ReSortCmd> sorts;
     private Long updateTime;
+    private Long contractId;
     
     public Long getCommunityId() {
         return communityId;
@@ -389,6 +391,14 @@ public class ListBillsCommand {
 
 	public void setSwitchList(List<Byte> switchList) {
 		this.switchList = switchList;
+	}
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
 	}
     
 }
