@@ -73,6 +73,8 @@ public interface InvitedCustomerService {
 
     void changeCustomerLevelByCustomerId(Long customerId, Long levelItemId);
 
+    void createCustomerLevelByCustomerId(Long customerId, Long newLevelItemId);
+
     List<StatisticDataDTO> startCustomerStatisticTotal(StatisticTime time);
 
     List<StatisticDataDTO> startCustomerStatistic(StatisticTime time);

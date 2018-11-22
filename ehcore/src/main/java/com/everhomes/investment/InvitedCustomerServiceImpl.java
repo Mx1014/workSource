@@ -1150,13 +1150,18 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         }else{
             customer.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
         }*/
-
-
     }
 
     @Override
     public void changeCustomerLevelByCustomerId(Long customerId, Long newLevelItemId){
         EnterpriseCustomer customer = customerProvider.findById(customerId);
+        changeCustomerLevel(customer, newLevelItemId);
+    }
+
+    @Override
+    public void createCustomerLevelByCustomerId(Long customerId, Long newLevelItemId){
+        EnterpriseCustomer customer = customerProvider.findById(customerId);
+        customer.setLevelItemId(null);
         changeCustomerLevel(customer, newLevelItemId);
     }
 
@@ -1585,11 +1590,13 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         StatisticDataDTO datas = organizationCustomerStatisticTotal(time, cmd.getOrgId(), cmd.getNamespaceId());
         StatisticDataDTO datas2 = getCustomerStatisticsTotal(cmd);
 
-        datas.setNewCustomerNum(datas.getNewCustomerNum() + datas2.getNewCustomerNum());
-        datas.setLossCustomerNum(datas.getLossCustomerNum() + datas2.getLossCustomerNum());
-        datas.setHistoryCustomerNum(datas.getHistoryCustomerNum() + datas2.getHistoryCustomerNum());
-        datas.setDeleteCustomerNum(datas.getDeleteCustomerNum() + datas2.getDeleteCustomerNum());
-        datas.setTrackingNum(datas.getTrackingNum() + datas2.getTrackingNum());
+        if(datas != null && datas2 != null) {
+            datas.setNewCustomerNum(datas.getNewCustomerNum() + datas2.getNewCustomerNum());
+            datas.setLossCustomerNum(datas.getLossCustomerNum() + datas2.getLossCustomerNum());
+            datas.setHistoryCustomerNum(datas.getHistoryCustomerNum() + datas2.getHistoryCustomerNum());
+            datas.setDeleteCustomerNum(datas.getDeleteCustomerNum() + datas2.getDeleteCustomerNum());
+            datas.setTrackingNum(datas.getTrackingNum() + datas2.getTrackingNum());
+        }
 
         return ConvertHelper.convert(datas, CustomerStatisticsDTO.class);
 

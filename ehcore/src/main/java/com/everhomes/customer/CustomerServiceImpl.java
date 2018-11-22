@@ -524,7 +524,7 @@ public class CustomerServiceImpl implements CustomerService {
             });
         }
         if(customer.getLevelItemId() != null){
-            invitedCustomerService.changeCustomerLevelByCustomerId(customer.getId(), customer.getLevelItemId());
+            invitedCustomerService.createCustomerLevelByCustomerId(customer.getId(), customer.getLevelItemId());
         }
 
         //企业客户新增成功,保存客户事件
