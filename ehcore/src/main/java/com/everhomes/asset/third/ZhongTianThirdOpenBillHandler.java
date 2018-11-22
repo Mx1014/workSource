@@ -1,7 +1,5 @@
 package com.everhomes.asset.third;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
