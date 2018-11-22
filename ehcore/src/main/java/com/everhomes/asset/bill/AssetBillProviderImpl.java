@@ -1,5 +1,6 @@
 package com.everhomes.asset.bill;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -74,6 +75,9 @@ public class AssetBillProviderImpl implements AssetBillProvider {
 				.and(r.OWNER_ID.eq(ownerId))
 				.and(r.CONTRACT_ID.eq(contractId))
 				.and(r.STATUS.eq(AssetPaymentBillStatus.PAID.getCode()))
+				//缺陷 #43009 新建的合同，在进行初始化的时候，获取不到新建的合同，该合同未缴费，查询账单，出现一条金额为0 的账单记录，显示已缴，导致不能初始化合同
+				//如果账单是已缴，但是已收金额是0，说明是系统置为已缴状态的
+				.and(r.AMOUNT_RECEIVED.ne(BigDecimal.ZERO)) 
 				.and(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))
 				.fetchInto(PaymentBills.class);
         if(list != null && list.size() > 0) {
