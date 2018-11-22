@@ -460,7 +460,7 @@ public class WelfareServiceImpl implements WelfareService {
             return null;
         }
         GetUserWelfareResponse response = ConvertHelper.convert(welfare, GetUserWelfareResponse.class);
-        if((welfare.getSenderUid() != null){
+        if(welfare.getSenderUid() != null){
 	        UserInfo senderInfo = userService.getUserInfo(welfare.getSenderUid());
 	        if (senderInfo != null) {
 	            response.setSenderAvatarUrl(senderInfo.getAvatarUrl());
