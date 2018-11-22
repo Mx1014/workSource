@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -66,7 +65,6 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -2257,9 +2255,17 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         formula += "*"+duration;
-        BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2,BigDecimal.ROUND_CEILING);
-
+//        BigDecimal response = CalculatorUtil.arithmetic(formula);
+//        response.setScale(2,BigDecimal.ROUND_CEILING);
+        BigDecimal response = BigDecimal.ZERO;
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			Object object = jse.eval(formula);
+			response = new BigDecimal(object.toString());
+			response = response.setScale(2, BigDecimal.ROUND_HALF_UP);
+		} catch (Exception e) {
+			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+		}
         return response;
     }
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula) {
@@ -2307,9 +2313,17 @@ public class AssetServiceImpl implements AssetService {
                 throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
             }
         }
-        BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2,BigDecimal.ROUND_CEILING);
-
+//        BigDecimal response = CalculatorUtil.arithmetic(formula);
+//        response.setScale(2,BigDecimal.ROUND_CEILING);
+        BigDecimal response = BigDecimal.ZERO;
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			Object object = jse.eval(formula);
+			response = new BigDecimal(object.toString());
+			response = response.setScale(2, BigDecimal.ROUND_HALF_UP);
+		} catch (Exception e) {
+			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+		}
         return response;
     }
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, Integer days
@@ -2378,7 +2392,7 @@ public class AssetServiceImpl implements AssetService {
     			result = new BigDecimal(object.toString());
     			result = result.setScale(2, BigDecimal.ROUND_HALF_UP);
     		} catch (Exception e) {
-    			LOGGER.info("calculateFee error, exception={}", e);
+    			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
     		}
         }
         else if(formulaType == 3 || formulaType == 4){
