@@ -69,7 +69,7 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 -- AUTHOR: 黄鹏宇
 -- REMARK: fixbug #42303
-delete  from eh_var_field_scopes where field_display_name in ('客户级别','资质客户') and module_name = 'enterprise_customer';
+update eh_var_field_scopes set status = 0 where field_display_name in ('客户级别','资质客户') and module_name = 'enterprise_customer';
 -- END
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
