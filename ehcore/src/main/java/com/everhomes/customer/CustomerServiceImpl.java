@@ -523,6 +523,9 @@ public class CustomerServiceImpl implements CustomerService {
                 enterpriseCustomerProvider.createCustomerAttachements(attachment);
             });
         }
+        if(customer.getLevelItemId() != null){
+            invitedCustomerService.changeCustomerLevelByCustomerId(customer.getId(), customer.getLevelItemId());
+        }
 
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
@@ -1075,7 +1078,9 @@ public class CustomerServiceImpl implements CustomerService {
         if (updateCustomer.getTrackingUid() == null) {
             updateCustomer.setTrackingName(null);
         }
-        invitedCustomerService.changeCustomerLevelByCustomerId(updateCustomer.getId(), updateCustomer.getLevelItemId());
+        if(updateCustomer.getLevelItemId() != null){
+            invitedCustomerService.changeCustomerLevelByCustomerId(updateCustomer.getId(), updateCustomer.getLevelItemId());
+        }
 
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);

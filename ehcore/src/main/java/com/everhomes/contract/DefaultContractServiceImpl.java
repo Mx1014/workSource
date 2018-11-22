@@ -1984,7 +1984,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				enterpriseCustomer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
 				enterpriseCustomer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
 				//2018年11月15日 黄鹏宇 统计客户状态变更
-				invitedCustomerService.changeCustomerLevelByCustomerId(enterpriseCustomer.getId(), enterpriseCustomer.getLevelItemId());
+				if(enterpriseCustomer.getLevelItemId() != null){
+					invitedCustomerService.changeCustomerLevelByCustomerId(enterpriseCustomer.getId(), enterpriseCustomer.getLevelItemId());
+				}
 				enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
 				enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
 			}
