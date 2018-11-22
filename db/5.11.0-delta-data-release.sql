@@ -5,6 +5,9 @@
 -- REMARK: 替换最新的 contentserver 二进制 #40547 contentserver/release/server/contentserver
 
 
+-- AUTHOR: 黄鹏宇
+-- REMARK: 请在执行release前备份eh_var_field_scopes表
+
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
@@ -64,6 +67,10 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_configurations`),1);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id:=@id+1, 'service.module.security.time.out-79880000', '5', '', '0', NULL);
 
+-- AUTHOR: 黄鹏宇
+-- REMARK: fixbug #42303
+update eh_var_field_scopes set status = 0 where field_display_name in ('客户级别','资质客户') and module_name = 'enterprise_customer';
+-- END
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
