@@ -661,11 +661,14 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(Long.parseLong("5000"));
         }
         ListPaymentBillResp result = listPaymentBill(cmd);
-        List<PaymentOrderBillDTO> dtos = result.getPaymentOrderBillDTOs();
+        List<PaymentOrderBillDTO> dtos = new ArrayList<>();
+        List<PaymentOrderBillDTO> paymentOrderBillDTOs = result.getPaymentOrderBillDTOs();
+        for(PaymentOrderBillDTO dto : paymentOrderBillDTOs) {
+        	dto = assetProvider.listPaymentBillDetail(dto.getBillId());
+        	dtos.add(dto);
+        }
         exportOrdersUtil(dtos, cmd, response);
     }
-
-
 
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
@@ -5637,6 +5640,10 @@ public class AssetServiceImpl implements AssetService {
 			existDooraccessLog.setMsg("门禁处于开启状态");
 		}
 		return existDooraccessLog;
+	}
+
+	public PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd) {
+		return assetProvider.listPaymentBillDetail(cmd.getBillId());
 	}
 	
 }

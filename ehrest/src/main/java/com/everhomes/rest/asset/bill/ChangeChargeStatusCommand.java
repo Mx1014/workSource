@@ -3,10 +3,6 @@ package com.everhomes.rest.asset.bill;
 
 
 import java.math.BigDecimal;
-/**
- * @author created by ycx
- * @date 2018年11月14日 上午10:17:18
- */
 
 /**
  *<ul>

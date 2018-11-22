@@ -14,6 +14,7 @@ import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.Version;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -308,13 +309,13 @@ public class GeneralApprovalFieldProcessorImpl implements GeneralApprovalFieldPr
             if ("0.0.0".equals(UserContext.current().getVersion())) {
                 return true;
             }
-            // 等客户端开发后打卡注释
-//            Version appVersion = Version.fromVersionString(UserContext.current().getVersion());
-//
-//            if (Version.encodeValue(appVersion.getMajor(), appVersion.getMinor(), appVersion.getRevision()) >=
-//                    Version.encodeValue(5, 11, 0)) {
-//                return true;
-//            }
+
+            Version appVersion = Version.fromVersionString(UserContext.current().getVersion());
+
+            if (Version.encodeValue(appVersion.getMajor(), appVersion.getMinor(), appVersion.getRevision()) >=
+                    Version.encodeValue(5, 11, 0)) {
+                return true;
+            }
         }
         return false;
     }
