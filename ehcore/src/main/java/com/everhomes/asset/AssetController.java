@@ -1243,11 +1243,11 @@ public class AssetController extends ControllerBase {
 	}
 
 	/**
-	 * <p>导出筛选过的所有交易明细</p>
-	 * <b>URL: /asset/listPaymentBillExport</b>
+	 * <p>导出筛选过的所有交易明细(对接下载中心)</p>
+	 * <b>URL: /asset/exportListPaymentBill</b>
 	 */
-	@RequestMapping("listPaymentBillExport")
-	public RestResponse listPaymentBillExport(ListPaymentBillCmd cmd) {
+	@RequestMapping("exportListPaymentBill")
+	public RestResponse exportListPaymentBill(ListPaymentBillCmd cmd) {
 		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);
 		assetService.exportListPaymentBillByParams(cmd);
 		RestResponse response = new RestResponse();
@@ -1443,6 +1443,7 @@ public class AssetController extends ControllerBase {
 	 * <b>URL: /asset/getPayBillsForEntResult</b>
 	 */
 	@RequestMapping("getPayBillsForEntResult")
+
 	@RestReturn(GetPayBillsForEntResultResp.class)
 	public RestResponse getPayBillsForEntResult(PaymentOrderRecord cmd) {
 		GetPayBillsForEntResultResp response = assetService.getPayBillsForEntResult(cmd);

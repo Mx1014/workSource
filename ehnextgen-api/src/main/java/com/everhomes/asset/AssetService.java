@@ -55,7 +55,7 @@ public interface AssetService {
 //
 	List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
 
-	//=============================================================================
+	//=============================================================================export
 	// wentian's controlls for payment module（从这里开始的接口都是基于新的eh_payment_*表开头的）
 	//=============================================================================
 
@@ -235,11 +235,11 @@ public interface AssetService {
 
 	default OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){return null;}
 
-	default OutputStream exportOutputStreamListPaymentBill(Object cmd, Long taskId){return null;}
-
 	default void exportAssetListByParams(Object cmd){}
 
-	default void exportListPaymentBillByParams(Object cmd){}
+	default OutputStream exportOutputStreamListPaymentBill(ListPaymentBillCmd cmd, Long taskId){return null;}
+
+	default void exportListPaymentBillByParams(ListPaymentBillCmd cmd){}
 
 	void cancelGeneralBill(CancelGeneralBillCommand cmd);
 
