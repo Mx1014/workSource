@@ -219,6 +219,9 @@ public class WelfareServiceImpl implements WelfareService {
                     throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能保存草稿");
                 }
+                welfareDTO.setCreateTime(welfare.getCreateTime() == null ? DateHelper.currentGMTTime().getTime() : welfare.getCreateTime().getTime());
+                welfareDTO.setCreatorUid(welfare.getCreatorUid());
+                welfareDTO.setCreatorName(welfare.getCreatorName());
             }
             welfareDTO.setStatus(WelfareStatus.DRAFT.getCode());
             welfareDTO.setId(saveWelfare(welfareDTO).getId());
@@ -230,6 +233,8 @@ public class WelfareServiceImpl implements WelfareService {
     private Welfare saveWelfare(WelfaresDTO welfareDTO) {
 
         Welfare welfare = ConvertHelper.convert(welfareDTO, Welfare.class);
+        if(welfareDTO.getCreateTime() != null)
+            welfare.setCreateTime(new Timestamp(welfareDTO.getCreateTime()));
         welfare.setNamespaceId(UserContext.getCurrentNamespaceId());
         this.dbProvider.execute((TransactionStatus status) -> {
             String uName = "-";
@@ -237,7 +242,8 @@ public class WelfareServiceImpl implements WelfareService {
             if (operator != null) {
                 uName = operator.getContactName();
             }
-            welfare.setCreatorName(uName);
+            if(welfare.getCreatorName() == null)
+                welfare.setCreatorName(uName);
 	        welfare.setOperatorName(uName);
 	        if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
 	            welfare.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
