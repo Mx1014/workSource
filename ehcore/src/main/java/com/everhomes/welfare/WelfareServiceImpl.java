@@ -460,10 +460,11 @@ public class WelfareServiceImpl implements WelfareService {
             return null;
         }
         GetUserWelfareResponse response = ConvertHelper.convert(welfare, GetUserWelfareResponse.class);
-
-        UserInfo senderInfo = userService.getUserInfo(welfare.getSenderUid());
-        if (senderInfo != null) {
-            response.setSenderAvatarUrl(senderInfo.getAvatarUrl());
+        if((welfare.getSenderUid() != null){
+	        UserInfo senderInfo = userService.getUserInfo(welfare.getSenderUid());
+	        if (senderInfo != null) {
+	            response.setSenderAvatarUrl(senderInfo.getAvatarUrl());
+	        }
         }
         if (null != welfare.getSendTime()) {
             response.setSendTime(welfare.getSendTime().getTime());
