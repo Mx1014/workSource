@@ -948,7 +948,7 @@ public class ParkingServiceImpl implements ParkingService {
 		GoodDTO good = new GoodDTO();
 		good.setNamespace("NS");
 		good.setTag1(order.getOwnerId() + "");
-		good.setTag2(parkingLot.getName());
+		good.setTag2(String.valueOf(parkingLot.getId()));
 		Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
 		if (null != community) {
 			good.setServeApplyName(community.getName()); //

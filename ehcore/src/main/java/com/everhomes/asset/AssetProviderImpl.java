@@ -684,6 +684,9 @@ public class AssetProviderImpl implements AssetProvider {
 	                    "This updateTime is error, updateTime={" + cmd.getUpdateTime() + "}");
 			}
         }
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getContractId())) {
+        	query.addConditions(t.CONTRACT_ID.eq(cmd.getContractId()));
+        }
         
         if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
@@ -2822,6 +2825,36 @@ public class AssetProviderImpl implements AssetProvider {
                         .from(t)
                         .where(t.CONTRACT_ID.eq(contractId))
                         .and(t.SWITCH.eq((byte) 3))
+                        .fetch(t.ID);
+                context.delete(t)
+                        .where(t.ID.in(billIds))
+                        .execute();
+                context.delete(t2)
+                        .where(t2.BILL_ID.in(billIds))
+                        .execute();
+                context.delete(t1)
+                        .where(t1.CONTRACT_ID.eq(contractId))
+                        .execute();
+                return null;
+            });
+            return null;
+        });
+    }
+    
+    /**
+     * 合同更新/根据合同id,自动刷新合同账单
+     * @param contractId
+     */
+    public void deleteContractPaymentByContractId(Long contractId) {
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
+        EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
+        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+                List<Long> billIds = context.select(t.ID)
+                        .from(t)
+                        .where(t.CONTRACT_ID.eq(contractId))
                         .fetch(t.ID);
                 context.delete(t)
                         .where(t.ID.in(billIds))

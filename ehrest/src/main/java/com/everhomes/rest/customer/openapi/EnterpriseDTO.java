@@ -15,7 +15,7 @@ public class EnterpriseDTO {
 
     private String name;
 
-    private String contactName;
+    private String trackingName;
 
     private String corpNatureItemName;
 
@@ -53,12 +53,12 @@ public class EnterpriseDTO {
         this.name = name;
     }
 
-    public String getContactName() {
-        return contactName;
+    public String getTrackingName() {
+        return trackingName;
     }
 
-    public void setContactName(String contactName) {
-        this.contactName = contactName;
+    public void setTrackingName(String trackingName) {
+        this.trackingName = trackingName;
     }
 
     public String getCorpNatureItemName() {

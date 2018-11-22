@@ -1,0 +1,92 @@
+// @formatter:off
+package com.everhomes.enterprisepaymentauth;
+
+import com.everhomes.rest.enterprisepaymentauth.BatchCreateOrUpdateEmployeePaymentLimitCommand;
+import com.everhomes.rest.enterprisepaymentauth.CreateOrUpdateEnterprisePaymentSceneLimitCommand;
+import com.everhomes.rest.enterprisepaymentauth.ExportEnterprisePaymentPayLogsCommand;
+import com.everhomes.rest.enterprisepaymentauth.GetEmployeePaymentAuthDetailCommand;
+import com.everhomes.rest.enterprisepaymentauth.GetEmployeePaymentAuthDetailResponse;
+import com.everhomes.rest.enterprisepaymentauth.GetEmployeePaymentAuthStatusCommand;
+import com.everhomes.rest.enterprisepaymentauth.GetEmployeePaymentAuthStatusResponse;
+import com.everhomes.rest.enterprisepaymentauth.GetEnterpriseEmployeePaymentLimitDetailCommand;
+import com.everhomes.rest.enterprisepaymentauth.GetEnterpriseEmployeePaymentLimitDetailResponse;
+import com.everhomes.rest.enterprisepaymentauth.GetEnterprisePaymentAuthInfoCommand;
+import com.everhomes.rest.enterprisepaymentauth.GetEnterprisePaymentAuthInfoResponse;
+import com.everhomes.rest.enterprisepaymentauth.GetEnterprisePaymentSceneLimitInfoCommand;
+import com.everhomes.rest.enterprisepaymentauth.GetEnterprisePaymentSceneLimitInfoResponse;
+import com.everhomes.rest.enterprisepaymentauth.ListEmployeePaymentLimitChangeLogsCommand;
+import com.everhomes.rest.enterprisepaymentauth.ListEmployeePaymentLimitChangeLogsResponse;
+import com.everhomes.rest.enterprisepaymentauth.ListEmployeePaymentLogsCommand;
+import com.everhomes.rest.enterprisepaymentauth.ListEmployeePaymentLogsResponse;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterpriseEmployeePaymentLimitChangeLogsCommand;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterpriseEmployeePaymentLimitChangeLogsResponse;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterprisePaymentAuthOfEmployeesCommand;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterprisePaymentAuthOfEmployeesResponse;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterprisePaymentAuthOperateLogsCommand;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterprisePaymentAuthOperateLogsResponse;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterprisePaymentPayLogsCommand;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterprisePaymentPayLogsResponse;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterprisePaymentSceneEmployeeLimitCommand;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterprisePaymentSceneEmployeeLimitResponse;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterprisePaymentScenesCommand;
+import com.everhomes.rest.enterprisepaymentauth.ListEnterprisePaymentScenesResponse;
+import com.everhomes.rest.enterprisepaymentauth.ListPaymentScenesResponse;
+import com.everhomes.rest.enterprisepaymentauth.PaymentAuthCheckAndFrozenCommand;
+import com.everhomes.rest.enterprisepaymentauth.PaymentAuthCheckAndFrozenResponse;
+import com.everhomes.rest.enterprisepaymentauth.PaymentAuthFrozenConfirmCommand;
+import com.everhomes.rest.enterprisepaymentauth.PaymentAuthUnFrozenCommand;
+import com.everhomes.rest.enterprisepaymentauth.TestPaymentCallbackCommand;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.OutputStream;
+
+public interface EnterprisePaymentAuthService {
+
+    GetEnterprisePaymentAuthInfoResponse getEnterprisePaymentAuthInfo(GetEnterprisePaymentAuthInfoCommand cmd);
+
+    ListEnterprisePaymentAuthOfEmployeesResponse listEnterprisePaymentAuthOfEmployees(ListEnterprisePaymentAuthOfEmployeesCommand cmd);
+
+    ListEnterprisePaymentScenesResponse listEnterprisePaymentScenes(ListEnterprisePaymentScenesCommand cmd);
+
+    GetEnterprisePaymentSceneLimitInfoResponse getEnterprisePaymentSceneLimitInfo(GetEnterprisePaymentSceneLimitInfoCommand cmd);
+
+    ListEnterprisePaymentSceneEmployeeLimitResponse listPaymentSceneEmployeeLimit(ListEnterprisePaymentSceneEmployeeLimitCommand cmd);
+
+    void createOrUpdatePaymentSceneLimit(CreateOrUpdateEnterprisePaymentSceneLimitCommand cmd);
+
+    void batchCreateOrUpdateEmployeePaymentLimit(BatchCreateOrUpdateEmployeePaymentLimitCommand cmd, HttpServletRequest request);
+
+    GetEnterpriseEmployeePaymentLimitDetailResponse getEmployeePaymentLimitDetail(GetEnterpriseEmployeePaymentLimitDetailCommand cmd);
+
+    ListEnterpriseEmployeePaymentLimitChangeLogsResponse listEmployeePaymentLimitChangeLogs(ListEnterpriseEmployeePaymentLimitChangeLogsCommand cmd);
+
+    ListEnterprisePaymentAuthOperateLogsResponse listPaymentAuthOperateLogs(ListEnterprisePaymentAuthOperateLogsCommand cmd);
+
+    ListEnterprisePaymentPayLogsResponse listEnterprisePayLogs(ListEnterprisePaymentPayLogsCommand cmd);
+
+    void exportEnterprisePayLogs(ExportEnterprisePaymentPayLogsCommand cmd);
+
+    GetEmployeePaymentAuthDetailResponse getEmployeePaymentAuthDetail(GetEmployeePaymentAuthDetailCommand cmd);
+
+    ListEmployeePaymentLogsResponse listEmployeePaymentLogs(ListEmployeePaymentLogsCommand cmd);
+
+    ListEmployeePaymentLimitChangeLogsResponse listEmployeePaymentLimitChangeLogs(ListEmployeePaymentLimitChangeLogsCommand cmd);
+
+    void autoDeleteEmployeePaymentLimit();
+
+    void checkPaymentStatusScheduled();
+
+    GetEmployeePaymentAuthStatusResponse getPaymentAuthStatus(GetEmployeePaymentAuthStatusCommand cmd);
+
+    PaymentAuthCheckAndFrozenResponse checkAndPaymentFrozen(PaymentAuthCheckAndFrozenCommand cmd);
+
+    ListPaymentScenesResponse listPaymentScenes();
+
+    void paymentAuthUnFrozen(PaymentAuthUnFrozenCommand cmd, boolean verifySignature);
+
+    void paymentAuthFrozenConfirm(PaymentAuthFrozenConfirmCommand cmd, boolean verifySignature, HttpServletRequest request);
+
+    OutputStream getEnterprisePayLogsOutputStream(Integer namespaceId, Long organizationId, Long paymentSceneAppId, Long paymentStartDate, Long paymentEndDate, String keyWords, String orderNo, Long taskId);
+
+    void testPaymentCallback(TestPaymentCallbackCommand cmd, HttpServletRequest request);
+}

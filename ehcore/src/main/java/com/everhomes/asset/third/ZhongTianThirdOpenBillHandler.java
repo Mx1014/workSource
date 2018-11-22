@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.asset.AssetProvider;
@@ -207,6 +208,9 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 	 * 总体原则：不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
 	 */
 	public ListBillsDTO changeChargeStatus(ChangeChargeStatusCommand cmd) {
+		Assert.notNull(cmd.getBillId(), "billId can not be null");
+		Assert.notNull(cmd.getAmountReceived(), "amountReceived can not be null");
+		Assert.notNull(cmd.getPaymentType(), "paymentType can not be null");
 		ListBillsDTO dto = new ListBillsDTO();
 		if(cmd.getBillId() != null) {
 			//如果账单已经在左邻支付，那么EAS调用左邻的收款回传接口是无效调用，已支付的数据以左邻为准
