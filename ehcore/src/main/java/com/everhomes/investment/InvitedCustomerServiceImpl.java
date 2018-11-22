@@ -1751,6 +1751,11 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                 dtos = response6.getDtos();
                 break;
             case 7:
+                GetCustomerStatisticsCommand cmd8 = ConvertHelper.convert(cmd, GetCustomerStatisticsCommand.class);
+                cmd8.setPageSize(pageSize);
+                CustomerStatisticsDTO dto = queryCustomerStatisticTotal(cmd8);
+                in = this.getClass().getResourceAsStream("/excels/customer/total.xlsx");
+                dtos.add(dto);
                 break;
             default:
                 //in = this.getClass().getResourceAsStream("/excels/customer/daily.xlsx");
@@ -1812,6 +1817,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                         fillRowCellCustomerStatisticTotal(tempRow, style, isLastRow, orderNum, dto);
                     }else if(exportType == 3 || exportType == 6){
                         fillRowCellCustomerStatisticNowWithTotal(tempRow, style, isLastRow, orderNum, dto);
+                    }else if(exportType == 7){
+                        fillRowCellCustomerStatisticNowTotal(tempRow, style, isLastRow, orderNum, dto);
                     }
                 }
                 taskService.updateTaskProcess(taskId, 70);
@@ -1993,6 +2000,40 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         cell7.setCellValue(dto.getDeleteCustomerNum() != null ? dto.getDeleteCustomerNum() : 0);
         //已收金额(元)
         Cell cell8 = tempRow.createCell(7);
+        cell8.setCellStyle(style);
+        cell8.setCellValue(dto.getTrackingNum() != null ? dto.getTrackingNum() : 0);
+
+    }
+
+    private void fillRowCellCustomerStatisticNowTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, CustomerStatisticsDTO dto) {
+        SimpleDateFormat format  = new SimpleDateFormat("yyyy-MM-dd");
+
+        Cell cell2 = tempRow.createCell(0);
+        cell2.setCellStyle(style);
+        cell2.setCellValue(dto.getCommunityNum()!= null ? dto.getCommunityNum() : 0);
+
+        //项目名称
+        Cell cell3 = tempRow.createCell(1);
+        cell3.setCellStyle(style);
+        cell3.setCellValue(dto.getNewCustomerNum()!= null ? dto.getNewCustomerNum() : 0);
+        //项目分类
+        Cell cell4 = tempRow.createCell(2);
+        cell4.setCellStyle(style);
+        cell4.setCellValue(dto.getLossCustomerNum() != null ? dto.getLossCustomerNum() : 0);
+        //楼宇总数
+        Cell cell5 = tempRow.createCell(3);
+        cell5.setCellStyle(style);
+        cell5.setCellValue(dto.getRegisteredCustomerNum() != null ? dto.getRegisteredCustomerNum() : 0);
+        //建筑面积
+        Cell cell6 = tempRow.createCell(4);
+        cell6.setCellStyle(style);
+        cell6.setCellValue(dto.getHistoryCustomerNum() != null ? dto.getHistoryCustomerNum() : 0);
+        //应收含税金额(元)
+        Cell cell7 = tempRow.createCell(5);
+        cell7.setCellStyle(style);
+        cell7.setCellValue(dto.getDeleteCustomerNum() != null ? dto.getDeleteCustomerNum() : 0);
+        //已收金额(元)
+        Cell cell8 = tempRow.createCell(6);
         cell8.setCellStyle(style);
         cell8.setCellValue(dto.getTrackingNum() != null ? dto.getTrackingNum() : 0);
 
