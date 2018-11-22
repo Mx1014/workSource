@@ -170,7 +170,7 @@ public class CommunityProviderImpl implements CommunityProvider {
             self.deleteCommunity(community);
     }
 
-    //@Cacheable(value="Community", key="#id" , unless="#result == null")
+    @Cacheable(value="Community", key="#id" , unless="#result == null")
     @Override
     public Community findCommunityById(Long id) {
         final Community[] result = new Community[1];
