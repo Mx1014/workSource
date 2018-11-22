@@ -1872,21 +1872,22 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				//发起审批要把门牌状态置为被占用
 				List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 				
-				//校验房源是否可以发起审批
-				
-				FindContractCommand command = new FindContractCommand();
-				command.setId(contract.getId());
-				command.setPartyAId(contract.getPartyAId());
-				command.setCommunityId(contract.getCommunityId());
-				command.setNamespaceId(contract.getNamespaceId());
-				command.setCategoryId(contract.getCategoryId());
-				ContractDetailDTO contractDetailDTO = findContract(command);
-				Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
-				
-				if (!possibleEnterContractStatus) {
-					LOGGER.error("possibleEnterContractStatus is false, Apartments is not free");
-					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
-							"apartments status is not free for contract!");
+				//校验房源是否可以发起审批 变更，续约，退约的不校验房源状态
+				if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+					FindContractCommand command = new FindContractCommand();
+					command.setId(contract.getId());
+					command.setPartyAId(contract.getPartyAId());
+					command.setCommunityId(contract.getCommunityId());
+					command.setNamespaceId(contract.getNamespaceId());
+					command.setCategoryId(contract.getCategoryId());
+					ContractDetailDTO contractDetailDTO = findContract(command);
+					Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
+					
+					if (!possibleEnterContractStatus) {
+						LOGGER.error("possibleEnterContractStatus is false, Apartments is not free");
+						throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
+								"apartments status is not free for contract!");
+					}
 				}
 				
 				if(contractApartments != null && contractApartments.size() > 0) {
@@ -2033,7 +2034,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				//add by tangcen 变更合同入场后，要对父合同的未出账单进行处理
 				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
 					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
-long assetCategoryId = 0l;
+					long assetCategoryId = 0l;
     				if(contract.getCategoryId() != null){
     					assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
     		        }
@@ -2082,7 +2083,6 @@ long assetCategoryId = 0l;
 				contractSearcher.feedDoc(parentContract);
 			}
 		}
-
 
 		//入场报错合同变为正常合同
 		contractProvider.updateContract(contract);
@@ -4134,21 +4134,23 @@ long assetCategoryId = 0l;
 				noApartmentsContract.append(contractDetailDTO.getContractNumber() + ",");
 				break;
 			} else {
-
 				if (contractDetailDTO.getChargingItems() == null) {
 					// 合同没有绑定计价条款
 					noChargingItemsContract.append(contractDetailDTO.getContractNumber() + ",");
 					break;
 				}
 
-				// 校验房源是否可以入场
-				Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
+				// 物业合同不用检查房源状态 不改变房源状态
+				ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+				if ((contractCategory == null && contract.getPaymentFlag() == 1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+					// 校验房源是否可以入场
+					Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
 
-				if (!possibleEnterContractStatus) {
-					// 房源状态在这个时间点是不允许签合同的，直接返回该合同，审批不通过，操作下一个合同
-					//return;
-					apartmentsNoRent.append(contractDetailDTO.getContractNumber() + ",");
-					break;
+					if (!possibleEnterContractStatus) {
+						// 房源状态在这个时间点是不允许签合同的，直接返回该合同，审批不通过，操作下一个合同
+						apartmentsNoRent.append(contractDetailDTO.getContractNumber() + ",");
+						break;
+					}
 				}
 				
 				//生成正常合同清单
@@ -4225,22 +4227,25 @@ long assetCategoryId = 0l;
 			// 根据房源id查询该房源的状态信息
 			// 1、查询该房源是否签过合同，获取合同的签署有效期，如果不再本合同的范围内可以签署合同
 			// 查房源签署过的合同
-			List<ContractBuildingMapping> contractBuildingMappingList = addressProvider
-					.findContractBuildingMappingByAddressId(apartment.getAddressId());
+			List<ContractBuildingMapping> contractBuildingMappingList = addressProvider.findContractBuildingMappingByAddressId(apartment.getAddressId());
 			for (ContractBuildingMapping contractBuildingMapping : contractBuildingMappingList) {
-				// 根据合同id,查询合同的有效时间
-				Boolean possibleEnterContractFuture = contractProvider.possibleEnterContractFuture(contractDetailDTO,
-						contractBuildingMapping);
-				// 存在了，不能审批通过，
-				if (possibleEnterContractFuture) {
-					return false;
-				} else {
-					possibleEnterContractStatus = true;
+				//如果房源关联的是物业合同，则不用查询
+				Contract contract = contractProvider.findContractById(contractBuildingMapping.getContractId());
+				ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+				if ((contractCategory == null && contract.getPaymentFlag() == 1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+					// 根据合同id,查询合同的有效时间
+					Boolean possibleEnterContractFuture = contractProvider.possibleEnterContractFuture(contractDetailDTO, contractBuildingMapping);
+					// 存在了，不能审批通过，
+					if (possibleEnterContractFuture) {
+						return false;
+					} else {
+						possibleEnterContractStatus = true;
+					}
+					
 				}
 			}
 			// 房源预定,房源已经被预定，预定时间在签署合同时间范围内
-			Boolean resoucreReservationsFuture = contractProvider.resoucreReservationsFuture(contractDetailDTO,
-					apartment);
+			Boolean resoucreReservationsFuture = contractProvider.resoucreReservationsFuture(contractDetailDTO, apartment);
 			if (resoucreReservationsFuture) {
 				return false;
 			} else {
