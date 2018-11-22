@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  */
 public enum ZhenZhiHuiServer {
     MEETING(1011,"会议室预定",40400L,"/resource-rental/build/index.html#/home?aliasName=%E5%B9%BF%E5%B7%9E%E6%80%A1%E5%9F%8E%E7%89%A9%E4%B8%9A%E7%AE%A1%E7%90%86%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8&status=3&itemLocation=/home/yuding&title=%E7%8B%AC%E7%AB%8B%E5%8A%9E%E5%85%AC%E5%AE%A4%E9%A2%84%E8%AE%A2&layoutName=HomeYudingLayout"),
-    PARKING(1012,"停车缴费",40800L,"/pp/b/a.html#home"),
+    PARKING(1042,"停车缴费",40800L,"/pp/b/a.html#home"),
     HOTLINE(1013,"服务热线",40300L,""),
     SERVICE_ALLIANCE(1014,"服务联盟",40500L,"/service-alliance-web/build/index.html#/home/grid"),
     PARK_INTRODUCTION(1015,"园区介绍",40500L,"/service-alliance-web/build/index.html#/home/grid"),
