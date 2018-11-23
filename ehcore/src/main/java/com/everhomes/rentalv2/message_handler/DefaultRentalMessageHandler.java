@@ -142,7 +142,7 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         //发短信
         String templateScope = SmsTemplateCode.SCOPE;
         String templateLocale = RentalNotificationTemplateCode.locale;
-        int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
+        int templateId = SmsTemplateCode.RENTAL_CANCEL_NOT_PAY;
 
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", rentalBill.getUseDetail());
         smsProvider.addToTupleList(variables, "resourceName", rentalBill.getResourceName());
