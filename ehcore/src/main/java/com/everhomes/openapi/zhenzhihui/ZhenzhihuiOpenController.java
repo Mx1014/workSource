@@ -23,8 +23,6 @@ import java.util.Map;
 
 /**
  * 对接圳智慧
- * 根据ticket获取信息
- * @author chenhe
  */
 @RestController
 @RequestMapping("/openapi/zhenzhihui")
@@ -43,7 +41,7 @@ public class ZhenzhihuiOpenController extends ControllerBase {
     /**
      *
      * <b>URL: /openapi/zhenzhihui/getUserInfo</b>
-     * <p>获取用户信息 </p>
+     * <p>根据ticket获取用户信息 </p>
      * @return
      */
     @RequireAuthentication(false)
@@ -63,6 +61,7 @@ public class ZhenzhihuiOpenController extends ControllerBase {
             String openid = user.getUuid();
             String nickname = user.getNickName();
             Byte sex = user.getGender();
+            String code = tickets.getRedirectCode();
 
             String imgUrl = contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId());
 
@@ -72,7 +71,7 @@ public class ZhenzhihuiOpenController extends ControllerBase {
             userInfo.put("nickname", nickname);
             userInfo.put("sex", Byte.toString(sex));
             userInfo.put("headimgurl", imgUrl);
-            userInfo.put("code", "1301");
+            userInfo.put("code", code);
 
             String userInfoJsonStr = JSON.toJSONString(userInfo);
             LOGGER.info("*************************************************************** userInfoStr: " + userInfoJsonStr);

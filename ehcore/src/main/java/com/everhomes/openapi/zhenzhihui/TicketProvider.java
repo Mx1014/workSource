@@ -42,7 +42,7 @@ public class TicketProvider {
         ticket.setId(id);
         ticket.setUserId(userId);
         ticket.setTicket(token);
-//        ticket.setRedirectCode(redirectCode);
+        ticket.setRedirectCode(redirectCode);
         ticket.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         EhTicketsDao dao = new EhTicketsDao(context.configuration());

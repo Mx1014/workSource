@@ -13,31 +13,32 @@ import java.util.Map;
 
 /**
  * 对接圳智慧
- * 生成ticket并redirect
- * @author chenhe
  */
 @Component(OpenApiRedirectHandler.PREFIX + "zhenzhihui")
 public class ZhenzhihuiOpenApiRedirectHandler implements OpenApiRedirectHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZhenzhihuiOpenApiRedirectHandler.class);
-    private static final Integer NAMESPACEALLOWED = 2; //仅999931域空间允许跳第三方
+    private static final Integer NAMESPACEALLOWED = 999931; //仅999931域空间允许跳第三方
 
     @Autowired
     private TicketProvider ticketProvider;
 
+    /**
+     * 生成ticket并redirect
+     */
     @Override
     public String build(String redirectUrl, Map<String, String[]> parameterMap) {
         try {
             String redirectCode = parameterMap.get("redirectCode")[0];
 
             Long userId = UserContext.currentUserId();
-            Integer namespaceId = UserContext.getCurrentNamespaceId();
+//            Integer namespaceId = UserContext.getCurrentNamespaceId();
 
             //仅XXX域空间被允许跳第三方
-            if ( namespaceId == null || NAMESPACEALLOWED.compareTo(namespaceId) != 0 ) {
-                LOGGER.error("user in namespace[" + namespaceId + "] is not allowed to redirect to zhenzhihui");
-                return null;
-            }
+//            if ( namespaceId == null || NAMESPACEALLOWED.compareTo(namespaceId) != 0 ) {
+//                LOGGER.error("user in namespace[" + namespaceId + "] is not allowed to redirect to zhenzhihui");
+//                return null;
+//            }
 
             //生成ticket并保存
             String ticket = ticketProvider.createTicket4User(userId, redirectCode);
