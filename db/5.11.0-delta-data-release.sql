@@ -19,6 +19,7 @@
 -- REMARK: 报错提示模板
 INSERT INTO eh_locale_strings (scope, code, locale, text) VALUES ('flow', '10013', 'zh_CN', '任务状态已经改变，请刷新重试');
 
+
 -- AUTHOR: 张智伟 20181115
 -- REMARK: issue-37602 审批单支持编辑
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
@@ -105,6 +106,32 @@ VALUES (@mp_id:=@mp_id+1, '204011', '0', @p_id, '批量删除', '0', NOW());
 UPDATE eh_personal_center_settings SET editable = 1 WHERE name = '订单';
 UPDATE eh_personal_center_settings SET editable = 1 WHERE name = '卡券';
 
+-- AUTHOR: 黄明波  20181121
+-- REMARK: 添加服务联盟短信模板
+SET @module_id = 40500;  -- 模块id
+SET @sms_code = 87;      -- sms code, 对应于`com.everhomes.rest.sms.SmsTemplateCode`中的 code
+SET @description = '模板1';
+SET @display_name = '【app名称】$发起人姓名$（$发起人手机号$）提交了$服务名称$申请，请及时处理';
+SET @namespace_id = 0; -- 域空间id, 如果为0, 则相当于配置给所有域空间, 不为0, 则只给特定的域空间配置
+SET @locale_templates_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @module_id), @sms_code, 'zh_CN', @description, @display_name, @namespace_id);
+
+
+SET @module_id = 40500;  -- 模块id
+SET @sms_code = 88;      -- sms code, 对应于`com.everhomes.rest.sms.SmsTemplateCode`中的 code
+SET @description = '模板2';
+SET @display_name = '【app名称】你提交的$服务名称$申请正在处理，可在app“我”-“我的申请”中查看处理进度';
+SET @namespace_id = 0; -- 域空间id, 如果为0, 则相当于配置给所有域空间, 不为0, 则只给特定的域空间配置
+SET @locale_templates_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @module_id), @sms_code, 'zh_CN', @description, @display_name, @namespace_id);
+
+
+INSERT INTO eh_locale_templates (scope, code, locale, description, text, namespace_id) VALUES ( 'sms.default', '87', 'zh_CN', '服务申请推送', '${applierName}（${applierPhone}）提交了${serviceName}申请，请及时处理', '0');    
+INSERT INTO eh_locale_templates (scope, code, locale, description, text, namespace_id) VALUES ( 'sms.default', '88', 'zh_CN', '服务申请提醒', '你提交的${serviceName}申请正在处理，可在app“我”-“我的申请”中查看处理进度', '0');
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
@@ -183,3 +210,26 @@ VALUES ('zhenzhihui.redirect.url', 'http://120.132.117.22:8016/ZHYQ/restservices
 
 
 -- --------------------- SECTION END wanzhihui ------------------------------------------
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: shanghaijinmao
+-- DESCRIPTION: 此SECTION只在上海金茂-999925执行的脚本
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.host', 'http://10.1.10.37:80', '接口地址', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.appkey', '880076901009202', 'appkey', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.secretKey', '880076901009202', 'secretKey', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.parkUuid', '06dfa3ed3a5a4309bd087fd2625ea00e', '停车场标识', 999925, NULL, 1);
+
+
+
+
+set @max_lots_id := (select ifnull(max(id),0)  from eh_parking_lots);
+set @namespace_id := 11;
+set @community_id := 240111044332061474;
+set @parking_name := '上海金茂停车场';
+set @parking_vendor := 'HKWS_SHJINMAO';
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) 
+
+VALUES ((@max_lots_id := @max_lots_id + 1), 'community', @community_id,  @parking_name,  @parking_vendor, '', 2, 1, now(), @namespace_id, '{"expiredRechargeFlag":0,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee"]');
+
+
+
+-- --------------------- SECTION END shanghaijinmao ------------------------------------------
