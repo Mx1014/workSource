@@ -2,7 +2,7 @@ package com.everhomes.parking.handler.jieshun;
 
 import org.springframework.stereotype.Component;
 import com.everhomes.parking.ParkingVendorHandler;
-import com.everhomes.rest.parking.jieshun.VendorNameEnum;
+import com.everhomes.rest.parking.VendorNameEnum;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + JieShunGQY1VendorHandler.VENDOR_NAME)
 public class JieShunGQY1VendorHandler extends JieShunGQY2VendorHandler{

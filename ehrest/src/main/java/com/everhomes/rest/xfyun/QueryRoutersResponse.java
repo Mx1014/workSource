@@ -2,28 +2,30 @@ package com.everhomes.rest.xfyun;
 
 import java.util.List;
 
+import com.everhomes.rest.launchpadbase.AppDTO;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>routers: 跳转路径，{@link com.everhomes.rest.xfyun.XfRouterDTO}</li>
+ * <li>routerDtos: 跳转路径，{@link com.everhomes.rest.launchpadbase.AppDTO}</li>
  * </ul>
  */
 public class QueryRoutersResponse {
 	
-	private List<XfRouterDTO> routers;
+	private List<AppDTO> routerDtos;
 	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
 
-	public List<XfRouterDTO> getRouters() {
-		return routers;
+	public List<AppDTO> getRouterDtos() {
+		return routerDtos;
 	}
 
-	public void setRouters(List<XfRouterDTO> routers) {
-		this.routers = routers;
+	public void setRouterDtos(List<AppDTO> routerDtos) {
+		this.routerDtos = routerDtos;
 	}
+
 
 }

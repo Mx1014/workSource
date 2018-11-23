@@ -1,16 +1,18 @@
 package com.everhomes.rest.xfyun;
 
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>context: 需要的广场等参数 {@link com.everhomes.rest.launchpadbase.AppContext}</li>
  * <li>routeTextInfo: 客户端识别出的名称</li>
  * <li>routeTag: 标识</li>
- * <li>routeType: 跳转类型 null/0-业务模块 1-其他，公共模块</li>
+ * <li>routeType: 跳转类型  null/0-应用  1-其他 如我的申请，悦邻优选等</li>
  * </ul>
  */
 public class QueryRoutersCommand {
-
+	private AppContext context; 
 	private String routeTextInfo;
 	private String routeTag;
 	private Byte routeType;
@@ -42,6 +44,14 @@ public class QueryRoutersCommand {
 
 	public void setRouteType(Byte routeType) {
 		this.routeType = routeType;
+	}
+
+	public AppContext getContext() {
+		return context;
+	}
+
+	public void setContext(AppContext context) {
+		this.context = context;
 	}
 
 }
