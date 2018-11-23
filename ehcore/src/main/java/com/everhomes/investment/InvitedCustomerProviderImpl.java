@@ -8,6 +8,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.CustomerErrorCode;
+import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.investment.CustomerLevelType;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
 import com.everhomes.rest.investment.InvitedCustomerStatus;
@@ -688,6 +689,8 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         }
 
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_SOURCE.eq(InvitedCustomerType.INVITED_CUSTOMER.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.INACTIVE.getCode()));
+
 
         return query.fetchCount();
     }
