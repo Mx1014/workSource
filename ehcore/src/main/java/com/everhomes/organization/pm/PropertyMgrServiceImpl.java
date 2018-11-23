@@ -2998,7 +2998,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     @Override
     public void deleteApartment(DeleteApartmentCommand cmd) {
-    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_UPDATE_APARTMENT, cmd.getOrganizationId(), cmd.getCommunityId());
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_DELETE_APARTMENT, cmd.getOrganizationId(), cmd.getCommunityId());
     	
         Address address = addressProvider.findAddressById(cmd.getId());
         if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
