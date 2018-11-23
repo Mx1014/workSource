@@ -201,7 +201,7 @@ public interface Rentalv2Provider {
 
 	List<RentalResourceOrder> findAllRentalSiteBillByTime(RentalResource rentalResource,Long beginTime,Long endTime);
 
-	MaxMinPrice findMaxMinPrice(String resourceType,Long ownerId, Byte rentalType,Byte userPriceType);
+	MaxMinPrice findMaxMinPrice(String resourceType,Long ownerId, Byte rentalType);
 
 	MaxMinPrice findMaxMinPriceByClassifycation(String resourceType,String ownerType,List<Long> ownerIds,
 												String sourceType,Long sourceId,Byte userPriceType,String classification);
@@ -222,7 +222,7 @@ public interface Rentalv2Provider {
 
 	List<Long> listCellPackageId (String resourceType, Long ownerId, Byte rentalType);
 
-	List<Long> listCellId (String resourceType, Long ownerId, Byte rentalType,Byte userPriceType);
+	List<Long> listCellId (String resourceType, Long ownerId, Byte rentalType);
 
 	void createRentalOrderRule(RentalOrderRule rule);
 

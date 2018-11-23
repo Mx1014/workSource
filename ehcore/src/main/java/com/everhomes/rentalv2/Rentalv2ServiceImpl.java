@@ -1806,9 +1806,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 		BigDecimal maxPrice = null;
 		BigDecimal minPrice = null;
+        MaxMinPrice maxMinPrice = null;
 		if (RentalUserPriceType.UNIFICATION.getCode() == priceRule.getUserPriceType()){ //统一价格
 			maxPrice = priceRule.getWorkdayPrice();
 			minPrice = priceRule.getWorkdayPrice();
+            //单元格统一价格
+            maxMinPrice = rentalv2Provider.findMaxMinPrice(rentalSite.getResourceType(),priceRule.getOwnerId(), priceRule.getRentalType());
+            maxPrice = max(maxMinPrice.getMaxPrice(),maxPrice);
+            minPrice = min(maxMinPrice.getMinPrice(),minPrice);
 		}else{
 			List<RentalPriceClassification> classifications = rentalv2Provider.listClassification(rentalSite.getResourceType(), EhRentalv2PriceRules.class.getSimpleName(),
 					priceRule.getId(), null, null, priceRule.getUserPriceType(), scene);
@@ -1816,20 +1821,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				maxPrice = classifications.get(0).getWorkdayPrice();
 				minPrice = classifications.get(0).getWorkdayPrice();
 			}
+            //单元格按类型区分价格
+            List<Long> cellId = rentalv2Provider.listCellId(rentalSite.getResourceType(), rentalSite.getId(), priceRule.getRentalType());
+            if (cellId != null && cellId.size() > 0){
+                maxMinPrice = rentalv2Provider.findMaxMinPriceByClassifycation(rentalSite.getResourceType(),EhRentalv2Cells.class.getSimpleName(),cellId,
+                        null,null,priceRule.getUserPriceType(),scene);
+                maxPrice = max(maxMinPrice.getMaxPrice(),maxPrice);
+                minPrice = min(maxMinPrice.getMinPrice(),minPrice);
+            }
 		}
-		//计算单元格价格
-		//单元格统一价格
-		MaxMinPrice maxMinPrice = rentalv2Provider.findMaxMinPrice(rentalSite.getResourceType(),priceRule.getOwnerId(), priceRule.getRentalType(),RentalUserPriceType.UNIFICATION.getCode());
-		maxPrice = max(maxMinPrice.getMaxPrice(),maxPrice);
-		minPrice = min(maxMinPrice.getMinPrice(),minPrice);
-		//单元格按类型区分价格
-		List<Long> cellId = rentalv2Provider.listCellId(rentalSite.getResourceType(), rentalSite.getId(), priceRule.getRentalType(),RentalUserPriceType.UNIFICATION.getCode());
-		if (cellId != null && cellId.size() > 0){
-			maxMinPrice = rentalv2Provider.findMaxMinPriceByClassifycation(rentalSite.getResourceType(),EhRentalv2Cells.class.getSimpleName(),cellId,
-					null,null,priceRule.getUserPriceType(),scene);
-			maxPrice = max(maxMinPrice.getMaxPrice(),maxPrice);
-			minPrice = min(maxMinPrice.getMinPrice(),minPrice);
-		}
+
 		sitePriceRuleDTO.setMaxPrice(maxPrice);
 		sitePriceRuleDTO.setMinPrice(minPrice);
 		sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(),priceRule.getPriceType(), PRICE_TIME_STEP));

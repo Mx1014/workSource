@@ -2498,7 +2498,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public MaxMinPrice findMaxMinPrice(String resourceType,Long resourceId, Byte rentalType,Byte userPriceType) {
+	public MaxMinPrice findMaxMinPrice(String resourceType,Long resourceId, Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Record record = context.select(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.PRICE),
 				DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE),
@@ -2509,7 +2509,6 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 			.and(Tables.EH_RENTALV2_CELLS.STATUS.eq(RentalSiteStatus.NORMAL.getCode()))
-				.and(Tables.EH_RENTALV2_CELLS.USER_PRICE_TYPE.eq(userPriceType))
 			.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(new Date(new java.util.Date().getTime())))
 			.fetchOne();
 		if (record != null) {
@@ -2609,14 +2608,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<Long> listCellId(String resourceType, Long resourceId, Byte rentalType,Byte userPriceType) {
+	public List<Long> listCellId(String resourceType, Long resourceId, Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.select(Tables.EH_RENTALV2_CELLS.ID).from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
 				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq(RentalSiteStatus.NORMAL.getCode()))
-				.and(Tables.EH_RENTALV2_CELLS.USER_PRICE_TYPE.notEqual(userPriceType))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(new Date(new java.util.Date().getTime())))
 				.fetch().map(r->r.value1());
 	}
