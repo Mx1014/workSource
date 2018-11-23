@@ -949,7 +949,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         Byte routerLocationType = null;
         Byte routerSceneType = null;
         if(app.getEntryId() != null){
-            ServiceModuleEntry entry = serviceModuleEntryProvider.findById(app.getEntryId());
+            ServiceModuleAppEntry entry = serviceModuleEntryProvider.findAppEntryById(app.getEntryId());
             if(entry != null){
                 routerLocationType = entry.getLocationType();
                 routerSceneType = entry.getSceneType();
@@ -958,7 +958,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
             }
 
             //优先使用entryIcon
-            if(!StringUtils.isEmpty(entry.getIconUri())){
+            if(entry != null && !StringUtils.isEmpty(entry.getIconUri())){
                 String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
                 appDTO.setIconUrl(url);
             }else {
