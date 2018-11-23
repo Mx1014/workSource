@@ -512,8 +512,8 @@ public class PortalServiceImpl implements PortalService {
 		}
 		List<ServiceModuleAppEntryProfile> appEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(moduleApp.getOriginId(),
 				null,null,null);
+		List<AppEntryDTO> appEntryDTOS = new ArrayList<>();
 		if (!CollectionUtils.isEmpty(appEntryProfiles)) {
-		    List<AppEntryDTO> appEntryDTOS = new ArrayList<>();
 		    dto.setAppEntrySettingFlag(appEntryProfiles.get(0).getAppEntrySetting());
 			for (ServiceModuleAppEntryProfile serviceModuleAppEntryProfile : appEntryProfiles) {
                 AppEntryDTO appEntryDTO = ConvertHelper.convert(serviceModuleAppEntryProfile, AppEntryDTO.class);
@@ -522,10 +522,10 @@ public class PortalServiceImpl implements PortalService {
                 appEntryDTO.setEntryIconUrl(url);
                 appEntryDTOS.add(appEntryDTO);
             }
-            dto.setServiceModuleSelfEntryDtos(appEntryDTOS);
 		}else {
 			dto.setAppEntrySettingFlag(TrueOrFalseFlag.FALSE.getCode());
 		}
+		dto.setServiceModuleSelfEntryDtos(appEntryDTOS);
 		return dto;
 	}
 
