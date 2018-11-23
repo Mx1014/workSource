@@ -72,6 +72,10 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `price` DECIMAL(10,2) COMMENT '价格',
   `rent_count` BIGINT COMMENT '预定数量',
   `remark` TEXT COMMENT '备注',
+  `reserverName` VARCHAR(32) COMMENT '预定人姓名',
+  `reserverEnterpriseName` VARCHAR(64) COMMENT '预定人公司名称',
+  `reserverEnterpriseId` BIGINT COMMENT '预定人公司ID',
+  `reserverContactToken` BIGINT COMMENT '预定人联系方式',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -96,3 +100,8 @@ CREATE TABLE `eh_office_cubicle_payee_accounts` (
   `payee_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='工位预定收款账户表';
+
+ALTER TABLE eh_office_cubicle_spaces ADD COLUMN space_cover_uri VARCHAR(1024) COMMENT '封面URI';
+ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_uri VARCHAR(1024) COMMENT '短租封面URI';
+ALTER TABLE eh_office_cubicle_spaces ADD COLUMN station_uri VARCHAR(1024) COMMENT '开放式工位URI';
+ALTER TABLE eh_office_cubicle_spaces ADD COLUMN open_flag TINYINT COMMENT '是否开启空间，1是，0否';
