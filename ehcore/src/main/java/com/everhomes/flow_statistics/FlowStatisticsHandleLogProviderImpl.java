@@ -1,6 +1,5 @@
 package com.everhomes.flow_statistics;
 
-import com.everhomes.buttscript.ButtScriptPublishInfo;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -8,11 +7,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.flow_statistics.FlowVersionCycleDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFlowStatisticsHandleLogDao;
-import com.everhomes.server.schema.tables.pojos.EhFlowEventLogs;
 import com.everhomes.server.schema.tables.pojos.EhFlowStatisticsHandleLog;
 import com.everhomes.server.schema.tables.records.EhFlowStatisticsHandleLogRecord;
 import org.apache.commons.collections.CollectionUtils;
@@ -23,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -84,8 +80,6 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
 
     /**
      * 通过原（处理前的）记录ＩＤ查询
-     * @param eventLogId
-     * @return
      */
     @Override
     public List<FlowStatisticsHandleLog> getStatisticsHandleLogByEventLogId(Long eventLogId){
@@ -106,11 +100,6 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
 
     /**
      * 节点处理次数
-     * @param flowMainId
-     * @param version
-     * @param startTime
-     * @param endTime
-     * @return
      */
     @Override
     public Integer countNodesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long nodeId) {
@@ -143,11 +132,6 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
 
     /**
      * 节点处理时长
-     * @param flowMainId
-     * @param version
-     * @param startTime
-     * @param endTime
-     * @return
      */
     @Override
     public Long countNodesCycle(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime, Long nodeId){
@@ -178,55 +162,13 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
     }
 
     /**
-     * 泳道处理次数
-     * @param flowMainId
-     * @param version
-     * @param startTime
-     * @param endTime
-     * @return
-     */
-    @Override
-    public Integer countLanesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long laneId , Long nodeId) {
-        Integer intCount = 0 ;
-        try {
-
-            SelectConditionStep step = context().selectCount()
-                    .from(Tables.EH_FLOW_STATISTICS_HANDLE_LOG)
-                    .where(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.FLOW_MAIN_ID.eq(flowMainId))
-                    .and(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.FLOW_VERSION.eq(version));
-
-            if(laneId != null){
-                step.and(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.FLOW_LANES_ID.eq(laneId));
-            }
-            if(startTime != null){
-                step.and(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.START_TIME.ge(startTime));
-            }
-            if(endTime != null){
-                step.and(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.END_TIME.le(endTime));
-            }
-            Object count = step.fetchOneInto(Integer.class);
-            intCount = count==null?0:(Integer)count;
-
-            return intCount;
-        } catch (Exception ex) {
-            //fetchAny() maybe return null
-            return intCount;
-        }
-    }
-
-    /**
      * 泳道处理时长
-     * @param flowMainId
-     * @param version
-     * @param startTime
-     * @param endTime
-     * @return
      */
     @Override
     public Long countLanesCycle(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime, Long laneId){
         Long longCount = 0L ;
         try {
-            SelectConditionStep step = context().select(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.CYCLE.sum())
+            SelectConditionStep step = context().select(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.FLOW_LANES_CYCLE.sum())
                     .from(Tables.EH_FLOW_STATISTICS_HANDLE_LOG)
                     .where(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.FLOW_MAIN_ID.eq(flowMainId))
                     .and(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.FLOW_VERSION.eq(version));
@@ -252,11 +194,7 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
 
     /**
      * 统计泳道个数
-     * @param flowMainId
-     * @param version
-     * @param startTime
-     * @param endTime
-     * @return
+     * ps by huqi：该方法计算的是工作流图表中包含的泳道个数，不是累计经过的泳道个数，与业务不符合，目前废弃
      */
     @Override
     public Integer countLanes(Long flowMainId, Integer version, Timestamp startTime, Timestamp endTime) {
@@ -329,11 +267,6 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
 
     /**
      * 查询底层方法
-     * @param locator
-     * @param count
-     * @param callback 条件
-     * @param orderCallback　排序
-     * @return
      */
     @Override
     public List<FlowStatisticsHandleLog> query(ListingLocator locator, int count,
@@ -382,5 +315,52 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+
+    /**
+     * 泳道处理次数
+     * @author huqi
+     */
+    @Override
+    public Integer countLanesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long laneId , Long nodeId) {
+        Integer intCount = 0 ;
+        com.everhomes.server.schema.tables.EhFlowStatisticsHandleLog t = Tables.EH_FLOW_STATISTICS_HANDLE_LOG;
+
+        try {
+            final Integer[] counter = new Integer[1];
+            Condition condition = t.FLOW_MAIN_ID.eq(flowMainId)
+                    .and(t.FLOW_VERSION.eq(version));
+            if(laneId != null){
+                condition = condition.and(t.FLOW_LANES_ID.eq(laneId));
+            }
+            if(startTime != null){
+                condition = condition.and(t.START_TIME.ge(startTime));
+            }
+            if(endTime != null){
+                condition = condition.and(t.END_TIME.le(endTime));
+            }
+            counter[0] = context().selectCount()
+                    .from(context().select().from(t)
+                            .where(condition)
+                            .groupBy(t.FLOW_LANES_ID, t.FLOW_CASE_ID))
+                    .fetchOneInto(Integer.class);
+
+            intCount = counter[0]==null?0:counter[0];
+            return intCount;
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return intCount;
+        }
+    }
+
+    /**
+     * 查询工作流效率统计表的最大创建时间，作为上一次的执行时间
+     * @author huqi
+     */
+    @Override
+    public Timestamp getMaxStatisticsTime(){
+        return context().select(DSL.max(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.CREATE_TIME))
+                .from(Tables.EH_FLOW_STATISTICS_HANDLE_LOG)
+                .fetchAnyInto(Timestamp.class);
     }
 }
