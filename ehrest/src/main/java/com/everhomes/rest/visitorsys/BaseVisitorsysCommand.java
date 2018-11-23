@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>appId: (必填)应用Id</li>
  * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * <li>pmId: (选填)管理公司id</li>
+ * <li>communityType: (必填)园区类型 {@link com.everhomes.rest.community.CommunityType}</li>
  * </ul>
  */
 public class BaseVisitorsysCommand {
@@ -20,6 +21,8 @@ public class BaseVisitorsysCommand {
     private Long appId;
     private String ownerToken;
     private Long pmId;
+
+    private Byte communityType;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -67,6 +70,14 @@ public class BaseVisitorsysCommand {
 
     public void setPmId(Long pmId) {
         this.pmId = pmId;
+    }
+
+    public Byte getCommunityType() {
+        return communityType;
+    }
+
+    public void setCommunityType(Byte communityType) {
+        this.communityType = communityType;
     }
 
     @Override
