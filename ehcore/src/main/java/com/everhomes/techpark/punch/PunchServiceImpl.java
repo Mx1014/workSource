@@ -48,6 +48,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.RestResponse;
@@ -2209,12 +2210,16 @@ public class PunchServiceImpl implements PunchService {
 
     private PunchClockResponse createPunchLog(String punchTime,
 			byte punchCode, PunchLog punchLog) {
+        Long userId = UserContext.current().getUser().getId();
+    	return createPunchLog(userId, punchTime, punchCode, punchLog);
+    }
 
+    private PunchClockResponse createPunchLog(Long userId, String punchTime,
+			byte punchCode, PunchLog punchLog) {
         PunchClockResponse response = new PunchClockResponse();
         if(punchLog.getCreateType() == null){
 			punchLog.setCreateType(CreateType.NORMAL_PUNCH.getCode());
 		}
-        Long userId = UserContext.current().getUser().getId();
         // new Date()为获取当前系统时间为打卡时间
         punchLog.setUserId(userId);
         punchLog.setPunchTime(Timestamp.valueOf(punchTime));
@@ -11588,16 +11593,46 @@ public class PunchServiceImpl implements PunchService {
 	public PunchClockResponse thirdPartPunchClock(ThirdPartPunchClockCommand cmd) { 
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
         cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
-		String punchTime = datetimeSF.get().format(new Date());
+        Date punchTimeDate = DateHelper.currentGMTTime();
+        checkNamespace(cmd.getNamespaceId(),cmd.getEnterpriseId());
+		String punchTime = datetimeSF.get().format(punchTimeDate);
 		PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
 		if(punchLog.getCreateType() == null){
 			punchLog.setCreateType(CreateType.OTHER_THRID_PUNCH.getCode());
 		}
 		punchLog.setPunchType(PunchType.ON_DUTY.getCode());
-		return createPunchLog(punchTime, ClockCode.SUCESS.getCode(), punchLog);
+		if(cmd.getUsers() != null){
+			for(ThirdPartPunchClockUerDTO userDTO : cmd.getUsers()){
+				if(userDTO.getPunchTime() != null){
+					//打卡时间不能超过当前时间,也不能在当前时间前10分钟之前
+					Long endPunchTimeLong = punchTimeDate.getTime();
+					Long beginPunchTimeLong = endPunchTimeLong - 10*60*1000L;
+					Long punchTimeLong = Math.max(beginPunchTimeLong, userDTO.getPunchTime());
+					punchTimeLong = Math.min(punchTimeLong, endPunchTimeLong);
+					final String punchTime1 = datetimeSF.get().format(new Date(punchTimeLong));
+					ExecutorUtil.submit(() ->{createPunchLog(userDTO.getUserId(), punchTime1, ClockCode.SUCESS.getCode(), punchLog);});
+				}else {		
+					//如果没有传时间就用请求接受到的时间做打卡时间
+					ExecutorUtil.submit(() ->{createPunchLog(userDTO.getUserId(), punchTime, ClockCode.SUCESS.getCode(), punchLog);});
+				}
+			}
+			return null;
+		}else{
+			return createPunchLog(punchTime, ClockCode.SUCESS.getCode(), punchLog);
+		}
 	}
 
-    @Override
+    private void checkNamespace(Integer namespaceId, Long enterpriseId) {
+
+        Organization organization = organizationProvider.findOrganizationById(enterpriseId);
+        if(!organization.getNamespaceId().equals(namespaceId)){
+        	throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+        			PunchServiceErrorCode.ERROR_NAMESPACE_WRONG,
+                    "namespace is wrong!"); 
+        }
+	}
+
+	@Override
     public GoOutPunchLogDTO goOutPunchClock(GoOutPunchClockCommand cmd) {
         checkCompanyIdIsNull(cmd.getOrganizationId());
         cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
