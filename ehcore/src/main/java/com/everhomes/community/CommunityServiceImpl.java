@@ -5991,6 +5991,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public ListApartmentsInCommunityResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd) {
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_GET_APARTMENT_DETAIL, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		ListApartmentsInCommunityResponse result = new ListApartmentsInCommunityResponse();
 		List<ApartmentInfoDTO> apartments = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
