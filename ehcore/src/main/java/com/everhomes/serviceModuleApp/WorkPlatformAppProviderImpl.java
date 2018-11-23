@@ -33,13 +33,13 @@ public class WorkPlatformAppProviderImpl implements WorkPlatformAppProvider{
     private SequenceProvider sequenceProvider;
 
     @Override
-    public WorkPlatformApp getWorkPlatformApp(Long appOriginId, Long scopeId, Byte sceneType) {
+    public WorkPlatformApp getWorkPlatformApp(Long appOriginId, Long scopeId, Long entryId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWorkPlatformApps.class));
         SelectJoinStep<Record> step = context.select().from(Tables.EH_WORK_PLATFORM_APPS);
         Condition condition = Tables.EH_WORK_PLATFORM_APPS.APP_ID.eq(appOriginId)
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId))
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()))
-                .and(Tables.EH_WORK_PLATFORM_APPS.SCENE_TYPE.eq(sceneType));
+                .and(Tables.EH_WORK_PLATFORM_APPS.ENTRY_ID.eq(entryId));
 
         return ConvertHelper.convert(step.where(condition).fetchAny(), WorkPlatformApp.class);
     }
@@ -97,6 +97,20 @@ public class WorkPlatformAppProviderImpl implements WorkPlatformAppProvider{
         SelectJoinStep<Record> step = context.select().from(Tables.EH_WORK_PLATFORM_APPS);
         Condition condition = Tables.EH_WORK_PLATFORM_APPS.APP_ID.eq(appOriginId)
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId))
+                .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()));
+        step.where(condition).orderBy(Tables.EH_WORK_PLATFORM_APPS.ORDER.asc()).fetch().map((r) ->{
+            list.add(ConvertHelper.convert(r, WorkPlatformApp.class));
+            return null;
+        });
+        return list;
+    }
+
+    @Override
+    public List<WorkPlatformApp> listWorkPlatformAppByScopeId(Long scopeId) {
+        List<WorkPlatformApp> list = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWorkPlatformApps.class));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_WORK_PLATFORM_APPS);
+        Condition condition = Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId)
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()));
         step.where(condition).orderBy(Tables.EH_WORK_PLATFORM_APPS.ORDER.asc()).fetch().map((r) ->{
             list.add(ConvertHelper.convert(r, WorkPlatformApp.class));

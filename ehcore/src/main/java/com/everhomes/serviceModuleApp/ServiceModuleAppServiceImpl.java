@@ -676,19 +676,19 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         List<ServiceModuleApp> tempApps = new ArrayList<>();
 
         //OA应用 管理端
-        List<ServiceModuleApp> oaApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), ServiceModuleAppType.OA.getCode(),
+        List<ServiceModuleApp> oaApps = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), ServiceModuleAppType.OA.getCode(),
                 ServiceModuleSceneType.MANAGEMENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
         if (!CollectionUtils.isEmpty(oaApps)) {
             tempApps.addAll(oaApps);
         }
         //OA应用  用户端
-        oaApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), ServiceModuleAppType.OA.getCode(),
+        oaApps = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), ServiceModuleAppType.OA.getCode(),
                 ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
         if (!CollectionUtils.isEmpty(oaApps)) {
             tempApps.addAll(oaApps);
         }
         // 园区应用 管理端
-        List<ServiceModuleApp> communityApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),
+        List<ServiceModuleApp> communityApps = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),
                 ServiceModuleAppType.COMMUNITY.getCode(), ServiceModuleSceneType.MANAGEMENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
         if (!CollectionUtils.isEmpty(communityApps)) {
             tempApps.addAll(communityApps);
@@ -704,14 +704,29 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 if (userApps != null && userApps.size() != 0) {
                     for (UserApp userApp : userApps) {
                         for (ServiceModuleApp app : tempApps) {
-                            if (userApp.getAppId().equals(app.getOriginId())) {
+                            if (userApp.getAppId().equals(app.getEntryId())) {
                                 apps.add(app);
                             }
                         }
                     }
                 }
             } else {
-                apps.addAll(tempApps);
+                List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(organizationId);
+                if (!CollectionUtils.isEmpty(workPlatformApps)) {
+                    for (WorkPlatformApp workPlatformApp : workPlatformApps) {
+                        if (TrueOrFalseFlag.FALSE.getCode().equals(workPlatformApp.getVisibleFlag())) {
+                            continue;
+                        }
+                        for (ServiceModuleApp app : tempApps) {
+                            if (app.getOriginId().equals(workPlatformApp.getAppId())) {
+                                apps.add(app);
+                            }
+                        }
+                    }
+                }else {
+                    apps.addAll(tempApps);
+                }
+
             }
         }
 
@@ -910,11 +925,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         AppDTO appDTO = ConvertHelper.convert(app, AppDTO.class);
 
         ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(app.getModuleId());
-
-        WorkPlatformApp workPlatformApp = this.workPlatformAppProvider.getWorkPlatformApp(app.getOriginId(), orgId,sceneType);
-        if (workPlatformApp != null && TrueOrFalseFlag.FALSE.getCode().equals(workPlatformApp.getVisibleFlag())) {
-            return null;
-        }
 
         appDTO.setAppId(app.getOriginId());
 
@@ -1607,27 +1617,26 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
             LaunchPadCategoryDTO dto = ConvertHelper.convert(appCategory, LaunchPadCategoryDTO.class);
 
-            List<ServiceModuleApp> apps = new ArrayList<>();
+			List<AppDTO> appDtos = new ArrayList<>();
             //OA应用 管理端
-            List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+            List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
                     ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
             if(!CollectionUtils.isEmpty(oaApp)) {
-                apps.addAll(oaApp);
+                appDtos.addAll(toAppDtosForWorkPlatform(orgId, sceneType, oaApp));
             }
             // OA应用 用户端
-            oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+            oaApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
                     ServiceModuleAppType.OA.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
             if(!CollectionUtils.isEmpty(oaApp)) {
-                apps.addAll(oaApp);
+                appDtos.addAll(toAppDtosForWorkPlatform(orgId, ServiceModuleSceneType.CLIENT.getCode(), oaApp));
             }
 
             //园区应用  管理端
-			List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+			List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
 					ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
             if (!CollectionUtils.isEmpty(communityApp)) {
-				apps.addAll(communityApp);
+                appDtos.addAll(toAppDtosForWorkPlatform(orgId, sceneType, communityApp));
 			}
-            List<AppDTO> appDtos = toAppDtosForWorkPlatform(orgId, sceneType, apps);
 
             dto.setAppDtos(appDtos);
 
@@ -1638,20 +1647,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
         List<AppDTO> appDtos = toAppDtosForWorkPlatform(orgId, sceneType, userOrganizationApps);
 
-        //加上"全部"或者“更多”Icon
-//        Integer showMoreOrAllNum = this.configurationProvider.getIntValue("moreOrAll.show.number",
-//                23);
-//        String moreOrAllStr = AllOrMoreType.MORE.getCode();
-//        Integer allAppNum = 0;
-//        for (int i =0;i<categoryDtos.size();i++) {
-//            LaunchPadCategoryDTO launchPadCategoryDTO = categoryDtos.get(i);
-//            if (!CollectionUtils.isEmpty(launchPadCategoryDTO.getAppDtos())) {
-//                allAppNum += launchPadCategoryDTO.getAppDtos().size();
-//            }
-//        }
-//        if (allAppNum > showMoreOrAllNum) {
-//            moreOrAllStr = AllOrMoreType.ALL.getCode();
-//        }
         AppDTO allIcon = getAllIconForWorkPlatform(orgId, AllOrMoreType.ALL.getCode());
         appDtos.add(allIcon);
         ListAllAppsResponse response = new ListAllAppsResponse();
@@ -1709,6 +1704,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		if(cmd.getCommunityId() == null){
             UpdateUserAppsForWorkPlatformCommand command = new UpdateUserAppsForWorkPlatformCommand();
             command.setAppIds(cmd.getAppIds());
+            command.setEntryIds(cmd.getEntryIds());
             command.setOrganizationId(cmd.getContext().getOrganizationId());
             updateBaseUserAppsForWorkPlatform(command);
             return;
@@ -1770,16 +1766,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 
 			//没有自己的就返回吧
-			if(cmd.getAppIds() == null){
+			if(cmd.getEntryIds() == null){
 				return null;
 			}
 
 			Integer order = 1;
-
-			for (Long appId: cmd.getAppIds()){
+            //工作台对应的是入口ID
+			for (Long entryId: cmd.getEntryIds()){
 
 				UserApp userApp = new UserApp();
-				userApp.setAppId(appId);
+				userApp.setAppId(entryId);
 				userApp.setUserId(userId);
 				userApp.setLocationType(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode());
 				userApp.setLocationTargetId(cmd.getOrganizationId());
@@ -1886,7 +1882,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         List<WorkPlatformAppDTO> list = new ArrayList<>();
 		for (AppCategory appCategory: appCategories) {
 
-			List<ServiceModuleApp> apps = new ArrayList<>();
             //OA应用  管理端
             List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
                     ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
@@ -1923,12 +1918,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 dto.setAppName(app.getName());
             }
             dto.setAppOriginId(app.getOriginId());
-            dto.setSceneType(sceneType);
+            dto.setEntryId(app.getEntryId());
             List<ServiceModuleEntry> entries = this.serviceModuleEntryProvider.listServiceModuleEntries(Arrays.asList(app.getModuleId()), locationType, sceneType);
             if (!CollectionUtils.isEmpty(entries)) {
                 dto.setAppEntry(entries.get(0).getEntryName());
             }
-            WorkPlatformApp workPlatformApp = this.workPlatformAppProvider.getWorkPlatformApp(app.getOriginId(), orgId,sceneType);
+            WorkPlatformApp workPlatformApp = this.workPlatformAppProvider.getWorkPlatformApp(app.getOriginId(), orgId,app.getEntryId());
             if (workPlatformApp != null) {
                 dto.setId(workPlatformApp.getId());
                 dto.setVisibleFlag(workPlatformApp.getVisibleFlag());
@@ -1944,7 +1939,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
     public void saveWorkPlatformApp(SaveWorkPlatformAppCommand cmd) {
         for (int i = 0;i<cmd.getApps().size();i++) {
             WorkPlatformAppDTO dto = cmd.getApps().get(i);
-            WorkPlatformApp app = this.workPlatformAppProvider.getWorkPlatformApp(dto.getAppOriginId(),cmd.getOrganizationId(),dto.getSceneType());
+            WorkPlatformApp app = this.workPlatformAppProvider.getWorkPlatformApp(dto.getAppOriginId(),cmd.getOrganizationId(),dto.getEntryId());
             if (app == null) {
                 WorkPlatformApp newApp = new WorkPlatformApp();
                 newApp.setOrder(i+1);
@@ -1952,7 +1947,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 newApp.setAppId(dto.getAppOriginId());
                 newApp.setScopeId(cmd.getOrganizationId());
                 newApp.setScopeType(ScopeType.ORGANIZATION.getCode());
-                newApp.setSceneType(dto.getSceneType());
+                newApp.setEntryId(dto.getEntryId());
                 this.workPlatformAppProvider.createWorkPlatformApp(newApp);
             }
         }

@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface WorkPlatformAppProvider {
 
-    WorkPlatformApp getWorkPlatformApp(Long appOriginId, Long scopeId, Byte sceneType);
+    WorkPlatformApp getWorkPlatformApp(Long appOriginId, Long scopeId, Long  entryId);
 
     void deleteWorkPlatformApp(WorkPlatformApp workPlatformApp);
 
@@ -16,6 +16,8 @@ public interface WorkPlatformAppProvider {
     List<WorkPlatformApp> listWorkPlatformApp(Long appOriginId, Long scopeId, Integer sortNum);
 
     List<WorkPlatformApp> listWorkPlatformApp(Long appOriginId, Long scopeId);
+
+    List<WorkPlatformApp> listWorkPlatformAppByScopeId(Long scopeId);
     Integer getMaxSort(Long appOriginId, Long scopeId);
 
     WorkPlatformApp findWorkPlatformById(Long id);

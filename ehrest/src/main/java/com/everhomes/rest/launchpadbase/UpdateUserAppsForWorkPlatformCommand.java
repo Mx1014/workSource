@@ -16,6 +16,16 @@ public class UpdateUserAppsForWorkPlatformCommand {
 
     private List<Long> appIds;
 
+    private List<Long> entryIds;
+
+    public List<Long> getEntryIds() {
+        return entryIds;
+    }
+
+    public void setEntryIds(List<Long> entryIds) {
+        this.entryIds = entryIds;
+    }
+
     public Long getOrganizationId() {
         return organizationId;
     }
