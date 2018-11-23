@@ -1,11 +1,21 @@
-package com.everhomes.rest.contract;
+package com.everhomes.rest.contract.statistic;
 
 import java.util.List;
 
 import com.everhomes.util.StringHelper;
+/**
+ *<ul>
+ * 	<li>namespaceId</li>
+ *	<li>communityIds : communityId的数组</li>
+ *	<li>dateStr : 时间（传年份例子：2018，传月份例子：2018-07）</li>
+ *	<li>dateType : 日期查询类型 参考{@link com.everhomes.rest.contract.statistic.ContractStatisticDateType}</li>
+ *	<li>startTimeStr : 开始时间</li>
+ *	<li>endTimeStr : 结束时间</li>
+ *	<li>searchType : 查询类型 参考{@link com.everhomes.rest.contract.statistic.ContractStatisticSearchType}</li>
+ *</ul>
+ */
 
 public class SearchContractStaticsListCommand {
-
 	private Integer namespaceId;
 	private Long orgId;
 	private List<Long> communityIds;
@@ -16,6 +26,15 @@ public class SearchContractStaticsListCommand {
 	private String startTimeStr;
 	private String endTimeStr;
 	private String dateStr;
+	private Byte searchType;
+
+	public Byte getSearchType() {
+		return searchType;
+	}
+
+	public void setSearchType(Byte searchType) {
+		this.searchType = searchType;
+	}
 
 	public String getDateStr() {
 		return dateStr;

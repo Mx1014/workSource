@@ -1,10 +1,10 @@
 package com.everhomes.search;
 
 import com.everhomes.openapi.Contract;
-import com.everhomes.rest.contract.ContractReportFormListContractsCommand;
 import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.contract.OpenapiListContractsCommand;
 import com.everhomes.rest.contract.SearchContractCommand;
+import com.everhomes.rest.contract.statistic.ContractReportFormListContractsCommand;
 
 import java.util.List;
 

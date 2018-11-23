@@ -13,7 +13,7 @@ import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
-import com.everhomes.rest.contract.GetTotalContractStaticsCommand;
+import com.everhomes.rest.contract.statistic.GetTotalContractStaticsCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
@@ -33,7 +33,6 @@ public class ContractStaticsTotalExportHandler implements FileDownloadTaskHandle
 	@Override
 	public void beforeExecute(Map<String, Object> params) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -45,15 +44,13 @@ public class ContractStaticsTotalExportHandler implements FileDownloadTaskHandle
 		User user = (User) StringHelper.fromJsonString(userStr, User.class);
 
 		String getTotalContractStaticsCommandStr = String.valueOf(params.get("GetTotalContractStaticsCommand"));
-		GetTotalContractStaticsCommand cmd = (GetTotalContractStaticsCommand) StringHelper
-				.fromJsonString(getTotalContractStaticsCommandStr, GetTotalContractStaticsCommand.class);
+		GetTotalContractStaticsCommand cmd = (GetTotalContractStaticsCommand) StringHelper.fromJsonString(getTotalContractStaticsCommandStr, GetTotalContractStaticsCommand.class);
 		user.setNamespaceId(cmd.getNamespaceId());
 		UserContext.setCurrentUser(user);
 
 		ContractService contractService = getContractService(cmd.getNamespaceId());
 		OutputStream outputStream = contractService.exportOutputStreamContractStaticsTotal(cmd, taskId);
-		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream,
-				taskId);
+		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
 		taskService.processUpdateTask(taskId, fileLocationDTO);
 	}
 

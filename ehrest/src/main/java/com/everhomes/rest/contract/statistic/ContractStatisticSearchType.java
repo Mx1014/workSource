@@ -1,21 +1,21 @@
-package com.everhomes.rest.contract;
+package com.everhomes.rest.contract.statistic;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>统计时间类型： 1-统计月份取（格式为xxxx-xx）, 2-统计年份取（格式为xxxx）</li>
+ *     <li>用于区分数据查询类型： 1-汇总记录, 2-明细记录</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
-public enum ContractStatisticDateType {
-	YEARMMSTR((byte)1,"按月份统计"), YEARSTR((byte)2,"按年份统计");
+public enum ContractStatisticSearchType {
+	SUMMARYRECORD((byte)1,"汇总记录"), DETAILRECORD((byte)2,"明细记录");
 
     private byte code;
 
     private String description;
 
-    ContractStatisticDateType(byte code, String description) {
+    ContractStatisticSearchType(byte code, String description) {
         this.code = code;
         this.description = description;
     }
@@ -28,9 +28,9 @@ public enum ContractStatisticDateType {
         return description;
     }
 
-    public static ContractStatisticDateType fromStatus(Byte code) {
+    public static ContractStatisticSearchType fromStatus(Byte code) {
         if(code != null) {
-            for(ContractStatisticDateType v : ContractStatisticDateType.values()) {
+            for(ContractStatisticSearchType v : ContractStatisticSearchType.values()) {
                 if(v.getCode() == code)
                     return v;
             }

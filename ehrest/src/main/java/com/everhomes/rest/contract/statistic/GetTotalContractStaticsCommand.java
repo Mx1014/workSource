@@ -1,4 +1,4 @@
-package com.everhomes.rest.contract;
+package com.everhomes.rest.contract.statistic;
 
 import java.util.List;
 
@@ -9,6 +9,10 @@ import com.everhomes.util.StringHelper;
  * 	<li>namespaceId</li>
  *	<li>communityIds : communityId的数组</li>
  *	<li>dateStr : 时间（传年份例子：2018，传月份例子：2018-07）</li>
+ *	<li>dateType : 日期查询类型 参考{@link com.everhomes.rest.contract.statistic.ContractStatisticDateType}</li>
+ *	<li>startTimeStr : 开始时间</li>
+ *	<li>endTimeStr : 结束时间</li>
+ *	<li>searchType : 查询类型 参考{@link com.everhomes.rest.contract.statistic.ContractStatisticSearchType}</li>
  *</ul>
  */
 public class GetTotalContractStaticsCommand {
@@ -21,7 +25,14 @@ public class GetTotalContractStaticsCommand {
 	private String endTimeStr;
 	private Long pageAnchor;
     private Integer pageSize;
+    private String searchType;
 	
+	public String getSearchType() {
+		return searchType;
+	}
+	public void setSearchType(String searchType) {
+		this.searchType = searchType;
+	}
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}

@@ -13,14 +13,13 @@ import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
-import com.everhomes.rest.contract.GetTotalContractStaticsCommand;
-import com.everhomes.rest.contract.SearchContractStaticsListCommand;
+import com.everhomes.rest.contract.statistic.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
 
 @Component
-public class ContractStaticsTimeExportHandler implements FileDownloadTaskHandler {
+public class ContractStaticsCommunityHistoryExportHandler implements FileDownloadTaskHandler {
 
 	@Autowired
 	private TaskService taskService;
@@ -34,7 +33,6 @@ public class ContractStaticsTimeExportHandler implements FileDownloadTaskHandler
 	@Override
 	public void beforeExecute(Map<String, Object> params) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -46,15 +44,22 @@ public class ContractStaticsTimeExportHandler implements FileDownloadTaskHandler
 		User user = (User) StringHelper.fromJsonString(userStr, User.class);
 
 		String getTotalContractStaticsCommandStr = String.valueOf(params.get("GetTotalContractStaticsCommand"));
-		SearchContractStaticsListCommand cmd = (SearchContractStaticsListCommand) StringHelper
-				.fromJsonString(getTotalContractStaticsCommandStr, SearchContractStaticsListCommand.class);
+		SearchContractStaticsListCommand cmd = (SearchContractStaticsListCommand) StringHelper.fromJsonString(getTotalContractStaticsCommandStr, SearchContractStaticsListCommand.class);
 		user.setNamespaceId(cmd.getNamespaceId());
 		UserContext.setCurrentUser(user);
 
 		ContractService contractService = getContractService(cmd.getNamespaceId());
-		OutputStream outputStream = contractService.exportOutputStreamForContractStaticsTime(cmd, taskId);
-		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream,
-				taskId);
+		OutputStream outputStream = null;
+		// 所有项目的汇总历史记录 汇总
+		if (cmd.getSearchType() == ContractStatisticSearchType.SUMMARYRECORD.getCode()) {
+			outputStream = contractService.exportOutputStreamForContractStaticsTime(cmd, taskId);
+		}
+		// 各项目的历史合计 明细
+		if (cmd.getSearchType() == ContractStatisticSearchType.DETAILRECORD.getCode()) {
+			outputStream = contractService.exportOutputStreamContractStaticsCommunityTotal(cmd, taskId);
+		}
+		
+		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
 		taskService.processUpdateTask(taskId, fileLocationDTO);
 	}
 

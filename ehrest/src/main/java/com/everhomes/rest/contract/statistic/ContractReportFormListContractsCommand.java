@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.rest.contract;
+package com.everhomes.rest.contract.statistic;
 
 import com.everhomes.util.StringHelper;
 
@@ -14,8 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>contractType: 合同属性 参考{@link com.everhomes.rest.contract.ContractType}</li>
  * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * <li>customerType: 客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
- * <li>updateTime: 更新时间，为空全量同步数据，不为空是增量同步（该时间点以后的数据信息），使用2018-11-01
- * 00:00:00格式</li>
+ * <li>updateTime: 更新时间，为空全量同步数据，不为空是增量同步（该时间点以后的数据信息）,时间戳</li>
  * <li>buildingId: 楼栋</li>
  * <li>addressId: 门牌</li>
  * <li>pageNumber: 页码</li>

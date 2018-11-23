@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contract.ContractService;
-import com.everhomes.rest.contract.GetTotalContractStaticsCommand;
+import com.everhomes.rest.contract.statistic.GetTotalContractStaticsCommand;
 
 /**
  * Created by djm  2018/11/17

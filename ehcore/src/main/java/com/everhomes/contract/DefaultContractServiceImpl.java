@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -28,8 +27,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.validation.constraints.Null;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -71,8 +68,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.reportForm.ContractReportFormExportHandler;
-import com.everhomes.contract.reportForm.ContractStaticsCommunityTotalExportHandler;
-import com.everhomes.contract.reportForm.ContractStaticsTimeExportHandler;
+import com.everhomes.contract.reportForm.ContractStaticsCommunityHistoryExportHandler;
 import com.everhomes.contract.reportForm.ContractStaticsTotalExportHandler;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -110,6 +106,7 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.*;
+import com.everhomes.rest.contract.statistic.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncDataTaskType;
@@ -157,7 +154,6 @@ import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.awt.geom.Area;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -4304,7 +4300,6 @@ long assetCategoryId = 0l;
         if(cmd.getDateType() == null){
         	cmd.setDateType(ContractStatisticDateType.YEARMMSTR.getCode());
         }
-        String dateStr = cmd.getDateStr();
         String startTimeStr = "";
         String endTimeStr = "";
         String formatDateStr = "";
@@ -4459,7 +4454,7 @@ long assetCategoryId = 0l;
         taskService.updateTaskProcess(taskId, 20);
 		Workbook wb = null;
 		InputStream in;
-		in = this.getClass().getResourceAsStream("/excels/contract/communityContractStatistic.xlsx");
+		in = this.getClass().getResourceAsStream("/excels/contract/communityContractDetailStatistic.xlsx");
 		
 		try {
 			wb = new XSSFWorkbook(copyInputStream(in));
@@ -4614,7 +4609,7 @@ long assetCategoryId = 0l;
 		//日期
 		Cell cell2 = tempRow.createCell(1);
 		cell2.setCellStyle(style);
-		cell2.setCellValue("--");
+		cell2.setCellValue("项目总数");
 		
 		//项目总数
 		Cell cell3 = tempRow.createCell(2);
@@ -4663,39 +4658,35 @@ long assetCategoryId = 0l;
 	}
     
     @Override
-	public void exportContractStaticsTimeDimension(SearchContractStaticsListCommand cmd) {
+	public void exportContractStaticsCommunityHistory(SearchContractStaticsListCommand cmd) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("UserContext", UserContext.current().getUser());
 		params.put("GetTotalContractStaticsCommand", cmd);
-		String fileName = String.format("项目合同信息汇总明细表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
-		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractStaticsTimeExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+		// 所有项目的汇总历史记录 汇总
+		String name = "";
+		if (cmd.getSearchType() == ContractStatisticSearchType.SUMMARYRECORD.getCode()) {
+			name = "所有项目的历史汇总表";
+		}
+		if (cmd.getSearchType() == ContractStatisticSearchType.DETAILRECORD.getCode()) {
+			name = "各项目的历史汇总表";
+		}
+		String fileName = String.format(name, com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractStaticsCommunityHistoryExportHandler.class,
+				params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
 	}
     
-    //导出报表的总明细在时间维度
+    //导出所有项目的历史汇总表
 	@Override
 	public OutputStream exportOutputStreamForContractStaticsTime(SearchContractStaticsListCommand cmd, Long taskId) {
 		OutputStream outputStream = new ByteArrayOutputStream();
     	//每一条数据
-		SearchContractStaticsListCommand cmd2 = new SearchContractStaticsListCommand();
-		cmd2.setNamespaceId(cmd.getNamespaceId());
-		cmd2.setCommunityIds(cmd.getCommunityIds());
-		cmd2.setDateStr(cmd.getDateStr());
-		cmd2.setStartTimeStr(cmd.getStartTimeStr());
-		cmd2.setEndTimeStr(cmd.getEndTimeStr());
-		cmd2.setDateType(cmd.getDateType());
-		cmd2.setPageAnchor(0L);
-		cmd2.setPageSize(10000);
-		
 		ListContractStaticsTimeDimensionResponse contractStaticsList = contractStaticsListTimeDimension(cmd);
-		
-		//ListCommunityContractReportFormResponse response = searchContractStaticsList(cmd2); 
         List<TotalContractStaticsDTO> dtos = contractStaticsList.getResultList();
     
         taskService.updateTaskProcess(taskId, 20);
 		Workbook wb = null;
 		InputStream in;
-		in = this.getClass().getResourceAsStream("/excels/contract/communityContractStatistic.xlsx");
-		
+		in = this.getClass().getResourceAsStream("/excels/contract/communityContractSummaryStatistic.xlsx");
 		try {
 			wb = new XSSFWorkbook(copyInputStream(in));
 		} catch (IOException e) {
@@ -4718,14 +4709,6 @@ long assetCategoryId = 0l;
 					boolean isLastRow = false;
 					fillRowCellCommunityContractStaticsTime(tempRow, style, isLastRow, orderNum, dto);
 				}
-				taskService.updateTaskProcess(taskId, 70);
-				//最后的一行总计
-				/*CellStyle totalStyle = getTotalStyle(wb, style);
-				Row tempRow = sheet.createRow(dtos.size() + 2);
-				int orderNum = dtos.size() + 1;//序号
-				boolean isLastRow = true;
-				TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
-				fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);*/
 				taskService.updateTaskProcess(taskId, 80);
 				try {
 					wb.write(outputStream);
@@ -4803,165 +4786,55 @@ long assetCategoryId = 0l;
 		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
 		
 	}
-	
-	@Override
-	public void exportContractStaticsTotal(GetTotalContractStaticsCommand cmd) {
-		Map<String, Object> params = new HashMap<>();
-		params.put("UserContext", UserContext.current().getUser());
-		params.put("GetTotalContractStaticsCommand", cmd);
-		String fileName = String.format("项目合同信息总计表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
-		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractStaticsTotalExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
-	}
-	//导出报表的总明细在时间维度
-	@Override
-	public OutputStream exportOutputStreamContractStaticsTotal(GetTotalContractStaticsCommand cmd, Long taskId) {
-			OutputStream outputStream = new ByteArrayOutputStream();
-	    	//每一条数据
-			SearchContractStaticsListCommand cmd2 = new SearchContractStaticsListCommand();
-			cmd2.setNamespaceId(cmd.getNamespaceId());
-			cmd2.setCommunityIds(cmd.getCommunityIds());
-			cmd2.setDateStr(cmd.getDateStr());
-			cmd2.setStartTimeStr(cmd.getStartTimeStr());
-			cmd2.setEndTimeStr(cmd.getEndTimeStr());
-			cmd2.setDateType(cmd.getDateType());
-			cmd2.setPageAnchor(0L);
-			cmd2.setPageSize(10000);
-			
-			//ListCommunityContractReportFormResponse response = searchContractStaticsList(cmd2); 
-	        List<ContractStaticsListDTO> dtos = new ArrayList<ContractStaticsListDTO>();
-	        
-	        //TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
-			//fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
-	    
-	        taskService.updateTaskProcess(taskId, 20);
-			Workbook wb = null;
-			InputStream in;
-			in = this.getClass().getResourceAsStream("/excels/contract/communityContractStatistic.xlsx");
-			
-			try {
-				wb = new XSSFWorkbook(copyInputStream(in));
-			} catch (IOException e) {
-				LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
-			}
-			Sheet sheet = wb.getSheetAt(0);
-			if (null != sheet) {
-				Row defaultRow = sheet.getRow(2);
-				Cell cell = defaultRow.getCell(0);
-				CellStyle style = cell.getCellStyle();
-				style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
-				int size = 0;
-				if(null != dtos){
-					size = dtos.size();
-					taskService.updateTaskProcess(taskId, 30);
-					for(int i = 0;i < size;i++){
-						Row tempRow = sheet.createRow(i + 2);
-						ContractStaticsListDTO dto = dtos.get(i);
-						int orderNum = i + 1;//序号
-						boolean isLastRow = false;
-						fillRowCellCommunityContractStatistic(tempRow, style, isLastRow, orderNum, dto);
-					}
-					taskService.updateTaskProcess(taskId, 70);
-					//最后的一行总计
-					CellStyle totalStyle = getTotalStyle(wb, style);
-					Row tempRow = sheet.createRow(dtos.size() + 2);
-					int orderNum = dtos.size() + 1;//序号
-					boolean isLastRow = true;
-					TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
-					fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
-					taskService.updateTaskProcess(taskId, 80);
-					try {
-						wb.write(outputStream);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					return outputStream;
-				}else {
-					throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
-				}
-			}
-			return outputStream;
-		}
-	
-	@Override
-	public void exportContractStaticsCommunityTotal(SearchContractStaticsListCommand cmd) {
-		Map<String, Object> params = new HashMap<>();
-		params.put("UserContext", UserContext.current().getUser());
-		params.put("GetTotalContractStaticsCommand", cmd);
-		String fileName = String.format("项目合同信息总计表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
-		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractStaticsCommunityTotalExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
-	}
-	//导出报表的总明细在时间维度
+    
+    // 各项目的历史合计 明细
 	@Override
 	public OutputStream exportOutputStreamContractStaticsCommunityTotal(SearchContractStaticsListCommand cmd, Long taskId) {
-			OutputStream outputStream = new ByteArrayOutputStream();
-	    	//每一条数据
-			SearchContractStaticsListCommand cmd2 = new SearchContractStaticsListCommand();
-			cmd2.setNamespaceId(cmd.getNamespaceId());
-			cmd2.setCommunityIds(cmd.getCommunityIds());
-			cmd2.setDateStr(cmd.getDateStr());
-			cmd2.setStartTimeStr(cmd.getStartTimeStr());
-			cmd2.setEndTimeStr(cmd.getEndTimeStr());
-			cmd2.setDateType(cmd.getDateType());
-			cmd2.setPageAnchor(0L);
-			cmd2.setPageSize(10000);
-			
-			//ListCommunityContractReportFormResponse response = searchContractStaticsList(cmd2); 
-	        //List<ContractStaticsListDTO> dtos = new ArrayList<ContractStaticsListDTO>();
-	        
-			ListContractStaticsTimeDimensionResponse response = contractStaticsListCommunityTotal(cmd2); 
-	        List<TotalContractStaticsDTO> dtos = response.getResultList();
-	        
-	        //TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
-			//fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
-	    
-	        taskService.updateTaskProcess(taskId, 20);
-			Workbook wb = null;
-			InputStream in;
-			in = this.getClass().getResourceAsStream("/excels/contract/communityContractStatistic.xlsx");
-			
-			try {
-				wb = new XSSFWorkbook(copyInputStream(in));
-			} catch (IOException e) {
-				LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
-			}
-			Sheet sheet = wb.getSheetAt(0);
-			if (null != sheet) {
-				Row defaultRow = sheet.getRow(2);
-				Cell cell = defaultRow.getCell(0);
-				CellStyle style = cell.getCellStyle();
-				style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
-				int size = 0;
-				if(null != dtos){
-					size = dtos.size();
-					taskService.updateTaskProcess(taskId, 30);
-					for(int i = 0;i < size;i++){
-						Row tempRow = sheet.createRow(i + 2);
-						TotalContractStaticsDTO dto = dtos.get(i);
-						int orderNum = i + 1;//序号
-						boolean isLastRow = false;
-						fillRowCellCommunityContractStatisticCommunityTotal(tempRow, style, isLastRow, orderNum, dto);
-					}
-					taskService.updateTaskProcess(taskId, 70);
-					//最后的一行总计
-					/*CellStyle totalStyle = getTotalStyle(wb, style);
-					Row tempRow = sheet.createRow(dtos.size() + 2);
-					int orderNum = dtos.size() + 1;//序号
-					boolean isLastRow = true;
-					TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
-					fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);*/
-					taskService.updateTaskProcess(taskId, 80);
-					try {
-						wb.write(outputStream);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					return outputStream;
-				}else {
-					throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
-				}
-			}
-			return outputStream;
+		OutputStream outputStream = new ByteArrayOutputStream();
+        // 各项目的历史合计 列表
+		ListContractStaticsTimeDimensionResponse response = contractStaticsListCommunityTotal(cmd); 
+        List<TotalContractStaticsDTO> dtos = response.getResultList();
+    
+        taskService.updateTaskProcess(taskId, 20);
+		Workbook wb = null;
+		InputStream in;
+		in = this.getClass().getResourceAsStream("/excels/contract/communityContractDetailStatistic.xlsx");
+		
+		try {
+			wb = new XSSFWorkbook(copyInputStream(in));
+		} catch (IOException e) {
+			LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
 		}
+		Sheet sheet = wb.getSheetAt(0);
+		if (null != sheet) {
+			Row defaultRow = sheet.getRow(2);
+			Cell cell = defaultRow.getCell(0);
+			CellStyle style = cell.getCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
+			int size = 0;
+			if(null != dtos){
+				size = dtos.size();
+				taskService.updateTaskProcess(taskId, 30);
+				for(int i = 0;i < size;i++){
+					Row tempRow = sheet.createRow(i + 2);
+					TotalContractStaticsDTO dto = dtos.get(i);
+					int orderNum = i + 1;//序号
+					boolean isLastRow = false;
+					fillRowCellCommunityContractStatisticCommunityTotal(tempRow, style, isLastRow, orderNum, dto);
+				}
+				taskService.updateTaskProcess(taskId, 80);
+				try {
+					wb.write(outputStream);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return outputStream;
+			}else {
+				throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+			}
+		}
+		return outputStream;
+	}
 	
     private void fillRowCellCommunityContractStatisticCommunityTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, TotalContractStaticsDTO dto) {
     	//序号
@@ -5018,8 +4891,72 @@ long assetCategoryId = 0l;
 		Cell cell11 = tempRow.createCell(10);
 		cell11.setCellStyle(style);
 		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
-		
 	}
+	
+	@Override
+	public void exportContractStaticsTotal(GetTotalContractStaticsCommand cmd) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("GetTotalContractStaticsCommand", cmd);
+		String fileName = String.format("项目合同信息总计表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractStaticsTotalExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+	//导出报表的总明细在时间维度
+	@Override
+	public OutputStream exportOutputStreamContractStaticsTotal(GetTotalContractStaticsCommand cmd, Long taskId) {
+		OutputStream outputStream = new ByteArrayOutputStream();
+        List<ContractStaticsListDTO> dtos = new ArrayList<ContractStaticsListDTO>();
+        
+        taskService.updateTaskProcess(taskId, 20);
+		Workbook wb = null;
+		InputStream in;
+		in = this.getClass().getResourceAsStream("/excels/contract/communityContractSummaryStatistic.xlsx");
+		
+		try {
+			wb = new XSSFWorkbook(copyInputStream(in));
+		} catch (IOException e) {
+			LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
+		}
+		Sheet sheet = wb.getSheetAt(0);
+		if (null != sheet) {
+			Row defaultRow = sheet.getRow(2);
+			Cell cell = defaultRow.getCell(0);
+			CellStyle style = cell.getCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
+			int size = 0;
+			if(null != dtos){
+				size = dtos.size();
+				taskService.updateTaskProcess(taskId, 30);
+				for(int i = 0;i < size;i++){
+					Row tempRow = sheet.createRow(i + 2);
+					ContractStaticsListDTO dto = dtos.get(i);
+					int orderNum = i + 1;//序号
+					boolean isLastRow = false;
+					fillRowCellCommunityContractStatistic(tempRow, style, isLastRow, orderNum, dto);
+				}
+				taskService.updateTaskProcess(taskId, 70);
+				//最后的一行总计
+				CellStyle totalStyle = getTotalStyle(wb, style);
+				Row tempRow = sheet.createRow(dtos.size() + 2);
+				int orderNum = dtos.size() + 1;//序号
+				boolean isLastRow = true;
+				TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
+				fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
+				taskService.updateTaskProcess(taskId, 80);
+				try {
+					wb.write(outputStream);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return outputStream;
+			}else {
+				throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+			}
+		}
+		return outputStream;
+	}
+	
+
     
 	@Override
 	public ListContractStaticsTimeDimensionResponse contractStaticsListCommunityTotal(SearchContractStaticsListCommand cmd) {

@@ -11,11 +11,12 @@ import com.everhomes.contract.ContractService;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.contract.GetTotalContractStaticsCommand;
-import com.everhomes.rest.contract.ListCommunityContractReportFormResponse;
-import com.everhomes.rest.contract.ListContractStaticsTimeDimensionResponse;
-import com.everhomes.rest.contract.SearchContractStaticsListCommand;
-import com.everhomes.rest.contract.TotalContractStaticsDTO;
+import com.everhomes.rest.contract.statistic.ContractStatisticSearchType;
+import com.everhomes.rest.contract.statistic.GetTotalContractStaticsCommand;
+import com.everhomes.rest.contract.statistic.ListCommunityContractReportFormResponse;
+import com.everhomes.rest.contract.statistic.ListContractStaticsTimeDimensionResponse;
+import com.everhomes.rest.contract.statistic.SearchContractStaticsListCommand;
+import com.everhomes.rest.contract.statistic.TotalContractStaticsDTO;
 import com.everhomes.user.UserContext;
 
 /**
@@ -33,24 +34,9 @@ public class ContractReportFormController extends ControllerBase{
 		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
 		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
 	}
-	/**
-     * <p>合同报表：获取项目信息汇总表</p>
-     * <b>URL: /contract/reportForm/searchContractStaticsList</b>
-     */
-    @RequestMapping("searchContractStaticsList")
-    @RestReturn(value = ListCommunityContractReportFormResponse.class)
-	public RestResponse searchContractStaticsList(SearchContractStaticsListCommand cmd) {
-		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
-		ContractService contractService = getContractService(namespaceId);
-		ListCommunityContractReportFormResponse contractStaticsList = contractService.searchContractStaticsList(cmd);
-		RestResponse response = new RestResponse(contractStaticsList);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-    
+	
     /**
-     * <p>合同报表：获取项目信息汇总表</p>
+     * <p>合同报表：合同信息汇总表（根据域空间查询所有园区的数据记录总和）</p>
      * <b>URL: /contract/reportForm/getTotalContractStatics</b>
      */
     @RequestMapping("getTotalContractStatics")
@@ -64,9 +50,41 @@ public class ContractReportFormController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
-    
+	
+    /**
+     * <p>合同报表：导出合同信息汇总表（根据域空间查询所有园区的数据记录总和）</p>
+     * <b>URL: /contract/reportForm/exportContractStaticsTotal</b>
+     */
+    @RequestMapping("exportContractStaticsTotal")
+    @RestReturn(value=String.class)
+	public RestResponse exportContractStaticsTotal(GetTotalContractStaticsCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		contractService.exportContractStaticsTotal(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+	
+    /**
+     * <p>合同报表：本月度各项目合同信息汇总表</p>
+     * <b>URL: /contract/reportForm/searchContractStaticsList</b>
+     */
+    @RequestMapping("searchContractStaticsList")
+    @RestReturn(value = ListCommunityContractReportFormResponse.class)
+	public RestResponse searchContractStaticsList(SearchContractStaticsListCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		ListCommunityContractReportFormResponse contractStaticsList = contractService.searchContractStaticsList(cmd);
+		RestResponse response = new RestResponse(contractStaticsList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
-     * <p>合同报表：获取项目在时间维度上的信息汇总表</p>
+     * <p>合同报表：获取项目在时间维度上的信息汇总表（历史合计列表）</p>
      * <b>URL: /contract/reportForm/contractStaticsListTimeDimension</b>
      */
     @RequestMapping("contractStaticsListTimeDimension")
@@ -82,7 +100,7 @@ public class ContractReportFormController extends ControllerBase{
 	}
     
     /**
-     * <p>合同报表：导出项目信息汇总表</p>
+     * <p>合同报表：导出月度所有项目合同信息汇总表（月度年度导出计算总计）</p>
      * <b>URL: /contract/reportForm/exportContractStaticsInfo</b>
      */
     @RequestMapping("exportContractStaticsInfo")
@@ -98,7 +116,7 @@ public class ContractReportFormController extends ControllerBase{
 	}
     
     /**
-     * <p>合同报表：导出项目时间维度上的信息汇总表</p>
+     * <p>合同报表：导出项目时间维度上的信息汇总表（所有项目的历史合计）</p>
      * <b>URL: /contract/reportForm/exportContractStaticsTimeDimension</b>
      */
     @RequestMapping("exportContractStaticsTimeDimension")
@@ -106,30 +124,17 @@ public class ContractReportFormController extends ControllerBase{
 	public RestResponse exportContractStaticsTimeDimension(SearchContractStaticsListCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		contractService.exportContractStaticsTimeDimension(cmd);
+		//所有项目的汇总历史记录 汇总
+		cmd.setSearchType(ContractStatisticSearchType.SUMMARYRECORD.getCode());
+		contractService.exportContractStaticsCommunityHistory(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
 	}
-    
+
     /**
-     * <p>合同报表：导出项目汇总表总的数据信息</p>
-     * <b>URL: /contract/reportForm/exportContractStaticsTotal</b>
-     */
-    @RequestMapping("exportContractStaticsTotal")
-    @RestReturn(value=String.class)
-	public RestResponse exportContractStaticsTotal(GetTotalContractStaticsCommand cmd) {
-		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
-		ContractService contractService = getContractService(namespaceId);
-		contractService.exportContractStaticsTotal(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-	}
-    /**
-     * <p>合同报表：导出项目时间维度上的信息汇总表加上园区维度</p>
+     * <p>合同报表：导出项目时间维度上的信息汇总表加上园区维度（各项目的历史合计）</p>
      * <b>URL: /contract/reportForm/exportContractStaticsCommunityTotal</b>
      */
     @RequestMapping("exportContractStaticsCommunityTotal")
@@ -137,7 +142,9 @@ public class ContractReportFormController extends ControllerBase{
 	public RestResponse exportContractStaticsCommunityTotal(SearchContractStaticsListCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		contractService.exportContractStaticsCommunityTotal(cmd);
+		//各项目的历史合计 明细
+		cmd.setSearchType(ContractStatisticSearchType.DETAILRECORD.getCode());
+		contractService.exportContractStaticsCommunityHistory(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -158,5 +165,4 @@ public class ContractReportFormController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
     }
-    
 }

@@ -18,8 +18,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.contract.ContractChargingItemReportformDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractLogDTO;
-import com.everhomes.rest.contract.ContractStaticsListDTO;
-import com.everhomes.rest.contract.TotalContractStaticsDTO;
+import com.everhomes.rest.contract.statistic.ContractStaticsListDTO;
+import com.everhomes.rest.contract.statistic.TotalContractStaticsDTO;
 
 public interface ContractProvider {
 

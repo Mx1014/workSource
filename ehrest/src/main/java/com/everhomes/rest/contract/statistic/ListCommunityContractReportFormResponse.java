@@ -1,4 +1,4 @@
-package com.everhomes.rest.contract;
+package com.everhomes.rest.contract.statistic;
 
 import java.util.List;
 

@@ -2,11 +2,12 @@
 package com.everhomes.contract;
 
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.contract.*;
+import com.everhomes.rest.contract.statistic.*;
+import com.everhomes.rest.contract.statistic.TotalContractStaticsDTO;
 import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.rest.varField.FieldDTO;
 
@@ -75,7 +76,7 @@ public interface ContractService {
 	default OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId){return null;};
 	default ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes){return null;};
 	default void autoGeneratingBill(AutoGeneratingBillCommand cmd){};
-   
+
 	//合同报表
 	default void generateReportFormStatics(GetTotalContractStaticsCommand dateStr){};
 	default ListCommunityContractReportFormResponse searchContractStaticsList(SearchContractStaticsListCommand cmd){return null;};
@@ -83,7 +84,7 @@ public interface ContractService {
 	default void exportContractStaticsInfo(GetTotalContractStaticsCommand cmd){};
 	default OutputStream exportOutputStreamForContractStatics(GetTotalContractStaticsCommand cmd, Long taskId){return null;};
 	default ListContractStaticsTimeDimensionResponse contractStaticsListTimeDimension(SearchContractStaticsListCommand cmd){return null;};
-	default void exportContractStaticsTimeDimension(SearchContractStaticsListCommand cmd){};
+	default void exportContractStaticsCommunityHistory(SearchContractStaticsListCommand cmd){};
 	default OutputStream exportOutputStreamForContractStaticsTime(SearchContractStaticsListCommand cmd, Long taskId){return null;};
 	default void exportContractStaticsTotal(GetTotalContractStaticsCommand cmd){};
 	default OutputStream exportOutputStreamContractStaticsTotal(GetTotalContractStaticsCommand cmd, Long taskId){return null;};
