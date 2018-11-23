@@ -371,21 +371,20 @@ public class PortalServiceImpl implements PortalService {
         }else if (!CollectionUtils.isEmpty(cmd.getAppEntryDtos())) {
             for (AppEntryDTO appEntryDTO : cmd.getAppEntryDtos()) {
                 List<ServiceModuleAppEntryProfile> appEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(moduleApp.getOriginId(),
-                        null,appEntryDTO.getEntryCategory(),null);
+                        appEntryDTO.getEntryId(),null,null);
                 if(!CollectionUtils.isEmpty(appEntryProfiles)) {
                     ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = appEntryProfiles.get(0);
                     serviceModuleAppEntryProfile.setAppEntrySetting(cmd.getAppEntrySettingFlag());
                     serviceModuleAppEntryProfile.setEntryName(appEntryDTO.getEntryName());
-                    serviceModuleAppEntryProfile.setEntryUri(appEntryDTO.getEntryIconUri());
+                    serviceModuleAppEntryProfile.setEntryUri(appEntryDTO.getIconUri());
                     this.serviceModuleAppProvider.updateServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
                 }else {
                     ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = new ServiceModuleAppEntryProfile();
                     serviceModuleAppEntryProfile.setOriginId(moduleApp.getOriginId());
-                    serviceModuleAppEntryProfile.setEntryCategory(appEntryDTO.getEntryCategory());
                     serviceModuleAppEntryProfile.setEntryId(appEntryDTO.getEntryId());
                     serviceModuleAppEntryProfile.setAppEntrySetting(cmd.getAppEntrySettingFlag());
                     serviceModuleAppEntryProfile.setEntryName(appEntryDTO.getEntryName());
-                    serviceModuleAppEntryProfile.setEntryUri(appEntryDTO.getEntryIconUri());
+                    serviceModuleAppEntryProfile.setEntryUri(appEntryDTO.getIconUri());
                     this.serviceModuleAppProvider.createServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
                 }
             }
@@ -517,9 +516,15 @@ public class PortalServiceImpl implements PortalService {
 		    dto.setAppEntrySettingFlag(appEntryProfiles.get(0).getAppEntrySetting());
 			for (ServiceModuleAppEntryProfile serviceModuleAppEntryProfile : appEntryProfiles) {
                 AppEntryDTO appEntryDTO = ConvertHelper.convert(serviceModuleAppEntryProfile, AppEntryDTO.class);
-                appEntryDTO.setEntryIconUri(serviceModuleAppEntryProfile.getEntryUri());
-                String url = contentServerService.parserUri(appEntryDTO.getEntryIconUri(), ServiceModuleAppEntryProfile.class.getSimpleName(), serviceModuleAppEntryProfile.getId());
-                appEntryDTO.setEntryIconUrl(url);
+                appEntryDTO.setIconUri(serviceModuleAppEntryProfile.getEntryUri());
+                String url = contentServerService.parserUri(appEntryDTO.getIconUri(), ServiceModuleAppEntryProfile.class.getSimpleName(), serviceModuleAppEntryProfile.getId());
+                appEntryDTO.setIconUrl(url);
+                ServiceModuleEntry entry = this.serviceModuleEntryProvider.findById(serviceModuleAppEntryProfile.getEntryId());
+                if (entry != null) {
+                    appEntryDTO.setTerminalType(entry.getTerminalType());
+                    appEntryDTO.setSceneType(entry.getSceneType());
+                    appEntryDTO.setLocationType(entry.getLocationType());
+                }
                 appEntryDTOS.add(appEntryDTO);
             }
 		}else {

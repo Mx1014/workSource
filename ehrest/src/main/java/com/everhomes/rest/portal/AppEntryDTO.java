@@ -6,29 +6,67 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>entryId: 入口ID</li>
- *     <li>entryCategory: 入口分类</li>
+ *     <li>locationType: 入口分类,请参考{@link com.everhomes.rest.module.ServiceModuleLocationType}</li>
  *     <li>entryName: 入口名称</li>
- *     <li>entryIconUri: 入口图标uri</li>
- *     <li>entryIconUrl: 入口图标url</li>
+ *     <li>iconUri: 入口图标uri</li>
+ *     <li>iconUrl: 入口图标url</li>
+ *     <li>sceneType: 1:管理端，2：用户端, 请参考{@link com.everhomes.rest.module.ServiceModuleSceneType}</li>
+ *     <li>terminalType: 1：手机端，2：PC端  请参考{@link com.everhomes.rest.module.TerminalType}</li>
  * </ul>
  */
 public class AppEntryDTO {
     private Long entryId;
 
-    private Byte entryCategory;
+    private Byte locationType;
 
     private String entryName;
 
-    private String entryIconUri;
+    private String iconUri;
 
-    private String entryIconUrl;
+    private String iconUrl;
 
-    public String getEntryIconUrl() {
-        return entryIconUrl;
+    private Byte sceneType;
+
+    private Byte terminalType;
+
+    public Byte getTerminalType() {
+        return terminalType;
     }
 
-    public void setEntryIconUrl(String entryIconUrl) {
-        this.entryIconUrl = entryIconUrl;
+    public void setTerminalType(Byte terminalType) {
+        this.terminalType = terminalType;
+    }
+
+    public Byte getLocationType() {
+        return locationType;
+    }
+
+    public void setLocationType(Byte locationType) {
+        this.locationType = locationType;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
+
+    public Byte getSceneType() {
+        return sceneType;
+    }
+
+    public void setSceneType(Byte sceneType) {
+        this.sceneType = sceneType;
     }
 
     public Long getEntryId() {
@@ -39,13 +77,6 @@ public class AppEntryDTO {
         this.entryId = entryId;
     }
 
-    public Byte getEntryCategory() {
-        return entryCategory;
-    }
-
-    public void setEntryCategory(Byte entryCategory) {
-        this.entryCategory = entryCategory;
-    }
 
     public String getEntryName() {
         return entryName;
@@ -53,14 +84,6 @@ public class AppEntryDTO {
 
     public void setEntryName(String entryName) {
         this.entryName = entryName;
-    }
-
-    public String getEntryIconUri() {
-        return entryIconUri;
-    }
-
-    public void setEntryIconUri(String entryIconUri) {
-        this.entryIconUri = entryIconUri;
     }
 
     @Override
