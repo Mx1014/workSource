@@ -6,11 +6,11 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 	VALUES (@id:=@id+1 , 38000, 0, 38101, '新增房源', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
 	VALUES (38101, 0, '楼宇资产管理 新增房源', '楼宇资产管理 业务模块权限', NULL);
--- 修改房源权限
+-- 编辑房源权限
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-	VALUES (@id:=@id+1 , 38000, 0, 38102, '修改房源', 0, SYSDATE());
+	VALUES (@id:=@id+1 , 38000, 0, 38102, '编辑房源', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
-	VALUES (38102, 0, '楼宇资产管理 修改房源', '楼宇资产管理 业务模块权限', NULL);
+	VALUES (38102, 0, '楼宇资产管理 编辑房源', '楼宇资产管理 业务模块权限', NULL);
 -- 删除房源权限
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
 	VALUES (@id:=@id+1 , 38000, 0, 38103, '删除房源', 0, SYSDATE());
@@ -21,16 +21,16 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 	VALUES (@id:=@id+1 , 38000, 0, 38104, '查看所有的预定记录', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
 	VALUES (38104, 0, '楼宇资产管理 查看所有的预定记录', '楼宇资产管理 业务模块权限', NULL);
--- 创建预定记录
+-- 新增预定记录
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-	VALUES (@id:=@id+1 , 38000, 0, 38105, '创建预定记录', 0, SYSDATE());
+	VALUES (@id:=@id+1 , 38000, 0, 38105, '新增预定记录', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
-	VALUES (38105, 0, '楼宇资产管理 创建预定记录', '楼宇资产管理 业务模块权限', NULL);
--- 更新预定记录
+	VALUES (38105, 0, '楼宇资产管理 新增预定记录', '楼宇资产管理 业务模块权限', NULL);
+-- 编辑预定记录
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-	VALUES (@id:=@id+1 , 38000, 0, 38106, '更新预定记录', 0, SYSDATE());
+	VALUES (@id:=@id+1 , 38000, 0, 38106, '编辑预定记录', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
-	VALUES (38106, 0, '楼宇资产管理 更新预定记录', '楼宇资产管理 业务模块权限', NULL);
+	VALUES (38106, 0, '楼宇资产管理 编辑预定记录', '楼宇资产管理 业务模块权限', NULL);
 -- 删除预定记录
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
 	VALUES (@id:=@id+1 , 38000, 0, 38107, '删除预定记录', 0, SYSDATE());
@@ -51,11 +51,11 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 	VALUES (@id:=@id+1 , 38000, 0, 38110, '新增楼宇', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
 	VALUES (38110, 0, '楼宇资产管理 新增楼宇', '楼宇资产管理 业务模块权限', NULL);
--- 更新楼宇
+-- 编辑楼宇
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-	VALUES (@id:=@id+1 , 38000, 0, 38111, '更新楼宇', 0, SYSDATE());
+	VALUES (@id:=@id+1 , 38000, 0, 38111, '编辑楼宇', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
-	VALUES (38111, 0, '楼宇资产管理 更新楼宇', '楼宇资产管理 业务模块权限', NULL);
+	VALUES (38111, 0, '楼宇资产管理 编辑楼宇', '楼宇资产管理 业务模块权限', NULL);
 -- 导入楼宇
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
 	VALUES (@id:=@id+1 , 38000, 0, 38112, '导入楼宇', 0, SYSDATE());
@@ -66,11 +66,11 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 	VALUES (@id:=@id+1 , 38000, 0, 38113, '导出楼宇', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
 	VALUES (38113, 0, '楼宇资产管理 导出楼宇', '楼宇资产管理 业务模块权限', NULL);
--- 更新园区信息
+-- 编辑园区信息
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-	VALUES (@id:=@id+1 , 38000, 0, 38114, '更新园区信息', 0, SYSDATE());
+	VALUES (@id:=@id+1 , 38000, 0, 38114, '编辑园区信息', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
-	VALUES (38114, 0, '楼宇资产管理 更新园区信息', '楼宇资产管理 业务模块权限', NULL);
+	VALUES (38114, 0, '楼宇资产管理 编辑园区信息', '楼宇资产管理 业务模块权限', NULL);
 -- 楼宇排序
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
 	VALUES (@id:=@id+1 , 38000, 0, 38115, '楼宇排序', 0, SYSDATE());
@@ -96,11 +96,11 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 	VALUES (@id:=@id+1 , 38000, 0, 38119, '新增授权价', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
 	VALUES (38119, 0, '楼宇资产管理 新增授权价', '楼宇资产管理 业务模块权限', NULL);
--- 修改授权价
+-- 编辑授权价
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-	VALUES (@id:=@id+1 , 38000, 0, 38120, '修改授权价', 0, SYSDATE());
+	VALUES (@id:=@id+1 , 38000, 0, 38120, '编辑授权价', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
-	VALUES (38120, 0, '楼宇资产管理 修改授权价', '楼宇资产管理 业务模块权限', NULL);
+	VALUES (38120, 0, '楼宇资产管理 编辑授权价', '楼宇资产管理 业务模块权限', NULL);
 -- 删除授权价
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
 	VALUES (@id:=@id+1 , 38000, 0, 38121, '删除授权价', 0, SYSDATE());
