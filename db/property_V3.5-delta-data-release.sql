@@ -131,7 +131,16 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 	VALUES (@id:=@id+1 , 38000, 0, 38126, '按房源导出', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
 	VALUES (38126, 0, '楼宇资产管理 按房源导出', '楼宇资产管理 业务模块权限', NULL);
-	
+-- 按楼宇导入房源
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+	VALUES (@id:=@id+1 , 38000, 0, 38127, '按楼宇导入房源', 0, SYSDATE());
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
+	VALUES (38127, 0, '楼宇资产管理 按楼宇导入房源', '楼宇资产管理 业务模块权限', NULL);
+-- 按楼宇导出房源
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+	VALUES (@id:=@id+1 , 38000, 0, 38128, '按楼宇导出房源', 0, SYSDATE());
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
+	VALUES (38128, 0, '楼宇资产管理 按楼宇导出房源', '楼宇资产管理 业务模块权限', NULL);
 	
 -- AUTHOR: tangcen 2018年11月15日
 -- REMARK: 添加房源日志模板

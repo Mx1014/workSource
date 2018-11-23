@@ -2051,6 +2051,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
     @Override
 	public Object importParkAddressData(ImportAddressCommand cmd, MultipartFile file) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_IMPORT_ADDRESS, cmd.getOrganizationId(), cmd.getCommunityId());
+
     	Long userId = UserContext.current().getUser().getId();
     	ImportFileTask task = new ImportFileTask();
 		try {
@@ -3730,6 +3732,8 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 
 	@Override
 	public void exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse response) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_EXPORT_ADDRESS, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		List<ApartmentDTO> aptList = this.listApartmentsByKeyword(cmd).second();
 		if (aptList != null && aptList.size()>0) {
 			String fileName = null;
