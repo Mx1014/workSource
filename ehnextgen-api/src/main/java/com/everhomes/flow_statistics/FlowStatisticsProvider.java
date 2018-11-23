@@ -26,4 +26,19 @@ public interface FlowStatisticsProvider {
     FlowNode getFlowNodeByFlowLevel(Long flowMainId , Integer version , Integer flowNodeLevel);
 
     List<FlowNode> getFlowNodeByLaneId(Long flowMainId , Integer version ,Long laneId);
+
+    /**
+     * 获取上一次效率统计之后，新增的FlowEventLog
+     */
+    List<FlowEventLog> getRecentFlowEventLog(Integer namespaceId, Timestamp maxTime);
+
+    /**
+     * 获取泳道开始时间，即该泳道所有节点的最小开始时间
+     */
+    Timestamp getFlowLaneStartTime(Long flowCaseId, Long flowLaneId);
+
+    /**
+     * 查询所有正常结束状态的FlowEventLog
+     */
+    List<FlowEventLog> queryAllNormalFlowEventLogs(Integer namespaceId);
 }

@@ -1,22 +1,20 @@
 package com.everhomes.flow_statistics;
 
-import com.everhomes.buttscript.ButtScriptConfig;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.FlowEventLog;
 import com.everhomes.flow.FlowNode;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow_statistics.FlowVersionCycleDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFlowEventLogsDao;
-import com.everhomes.server.schema.tables.daos.EhFlowStatisticsHandleLogDao;
 import com.everhomes.server.schema.tables.pojos.EhFlowEventLogs;
 import com.everhomes.server.schema.tables.pojos.EhFlowNodes;
 import com.everhomes.server.schema.tables.records.EhFlowEventLogsRecord;
 import com.everhomes.server.schema.tables.records.EhFlowNodesRecord;
-import com.everhomes.server.schema.tables.records.EhFlowStatisticsHandleLogRecord;
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -24,7 +22,6 @@ import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -39,9 +36,6 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
 
     /**
      * 该版本的时间跨度为该版本的创建时间到下一版本的创建时间.(该方法目前废弃)
-     * @param flowMainId
-     * @param version
-     * @return
      */
     @Override
     public FlowVersionCycleDTO getFlowVersionCycle(Long flowMainId ,Integer version) {
@@ -76,9 +70,6 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
 
     /**
      * 通过flowMainId　，version　查询所有节点
-     * @param flowMainId
-     * @param version
-     * @return
      */
     @Override
     public List<FlowNode> getFlowNodes(Long flowMainId , Integer version){
@@ -98,10 +89,6 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
 
     /**
      * 通过节点ｌｅｖｅｌ获取节点信息
-     * @param flowMainId
-     * @param version
-     * @param flowNodeLevel
-     * @return
      */
     @Override
     public FlowNode getFlowNodeByFlowLevel(Long flowMainId, Integer version, Integer flowNodeLevel) {
@@ -124,7 +111,6 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
 
     /**
      * 获取所有指定类型为step_tracker的记录
-     * @return
      */
     @Override
     public List<FlowEventLog> getAllFlowEventLogs(Integer namespaceId){
@@ -152,12 +138,6 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
 
     /**
      * 查询记录信息
-     * @param flowMainId
-     * @param version
-     * @param flowCases
-     * @param startDate
-     * @param flowNodeIds
-     * @return
      */
     @Override
     public List<FlowEventLog> getFlowEventLogs(Long flowMainId ,Integer version ,List<Long>flowCases , Timestamp startDate ,List<Long> flowNodeIds){
@@ -192,11 +172,6 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
 
     /**
      *
-     * @param locator
-     * @param count
-     * @param callback 条件
-     * @param orderCallback 排序
-     * @return
      */
     @Override
     public List<FlowEventLog> queryFlowEventLog(ListingLocator locator, int count,
@@ -261,5 +236,76 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+
+    /**
+     * 获取上一次效率统计之后，新增的FlowEventLog
+     * @author huqi
+     */
+    @Override
+    public List<FlowEventLog> getRecentFlowEventLog(Integer namespaceId, Timestamp maxTime){
+
+        com.everhomes.server.schema.tables.EhFlowEventLogs t = Tables.EH_FLOW_EVENT_LOGS;
+
+        SelectQuery<Record> query = context().select(t.fields())
+                .from(t).join(Tables.EH_FLOW_CASES)
+                .on(t.FLOW_CASE_ID.eq(Tables.EH_FLOW_CASES.ID))
+                .where(Tables.EH_FLOW_CASES.STATUS.eq(FlowCaseStatus.FINISHED.getCode()))
+                .and(t.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()))
+                .orderBy(t.NAMESPACE_ID.asc(),
+                        t.FLOW_MAIN_ID.asc(),
+                        t.FLOW_VERSION.asc(),
+                        t.ID.asc()).getQuery();
+        if(namespaceId != null){
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(maxTime != null){
+            query.addConditions(Tables.EH_FLOW_CASES.LAST_STEP_TIME.gt(maxTime));
+        }
+        List<FlowEventLog> logs = query.fetchInto(FlowEventLog.class);
+        return logs;
+    }
+
+    /**
+     * 获取泳道的开始时间，即该泳道上所有节点的最小开始时间
+     * @author huqi
+     */
+    @Override
+    public Timestamp getFlowLaneStartTime(Long flowCaseId, Long flowLaneId){
+
+        com.everhomes.server.schema.tables.EhFlowEventLogs t = Tables.EH_FLOW_EVENT_LOGS;
+
+        return context().select(DSL.min(t.CREATE_TIME))
+                .from(t).join(Tables.EH_FLOW_NODES)
+                .on(t.FLOW_NODE_ID.eq(Tables.EH_FLOW_NODES.ID))
+                .where(t.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()))
+                .and(t.FLOW_CASE_ID.eq(flowCaseId))
+                .and(Tables.EH_FLOW_NODES.FLOW_LANE_ID.eq(flowLaneId))
+                .fetchAnyInto(Timestamp.class);
+    }
+
+    /**
+     * 查询所有正常结束的FlowEventLog，用于重新全部统计
+     * @author huqi
+     */
+    @Override
+    public List<FlowEventLog> queryAllNormalFlowEventLogs(Integer namespaceId){
+
+        com.everhomes.server.schema.tables.EhFlowEventLogs t = Tables.EH_FLOW_EVENT_LOGS;
+
+        SelectQuery<Record> query = context().select(t.fields())
+                .from(t).join(Tables.EH_FLOW_CASES)
+                .on(t.FLOW_CASE_ID.eq(Tables.EH_FLOW_CASES.ID))
+                .where(Tables.EH_FLOW_CASES.STATUS.eq(FlowCaseStatus.FINISHED.getCode()))
+                .and(t.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()))
+                .orderBy(t.NAMESPACE_ID.asc(),
+                        t.FLOW_MAIN_ID.asc(),
+                        t.FLOW_VERSION.asc(),
+                        t.ID.asc()).getQuery();
+        if(namespaceId != null){
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        }
+        List<FlowEventLog> logs = query.fetchInto(FlowEventLog.class);
+        return logs;
     }
 }

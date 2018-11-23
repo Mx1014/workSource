@@ -14,13 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 
 /**
  * 工作流效率统计  Controller
  * @author huanglm
- *
  */
 @RestDoc(value="FlowStatistics  controller", site="core")
 @RestController
@@ -125,8 +123,9 @@ public class FlowStatisticsController extends ControllerBase {
      * @param response
      */
     private void setResponseSuccess(RestResponse response){
-        if(response == null ) return ;
-
+        if(response == null ) {
+            return ;
+        }
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
     }

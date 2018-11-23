@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @author liangming.huang
  * @className FlowStatisticsTaskHandler
  * @description 定时处理工作流效率统计数据
- * @date 2018/10/111
+ * @date 2018/10/11
  **/
 @Component
 public class FlowStatisticsTaskHandler {
@@ -29,14 +29,18 @@ public class FlowStatisticsTaskHandler {
     private static final String TRUE_KEY = "1";
 
 
-    //每天的晚上23点59分50秒的时候执行
+    /**
+     * 每天的晚上23点59分50秒的时候执行
+     */
     @Scheduled(cron = "50 59 23 * * ?")
     public void statisticsTask() {
 
         LOG.info("flowStatisticsTaskHandler start . today：{}", System.currentTimeMillis());
-        String statisticsTaskKey = configProvider.getValue(STATISTICS_TASK_KEY, "");//查询是否有配置项
+        //查询是否有配置项
+        String statisticsTaskKey = configProvider.getValue(STATISTICS_TASK_KEY, "");
 
-        if(TRUE_KEY.equals(statisticsTaskKey)){//使用合部重新统计的处理方式
+        //使用合部重新统计的处理方式
+        if(TRUE_KEY.equals(statisticsTaskKey)){
             flowStatisticsTaskService.allStatistics(null);
         }else{ //默认是使用追加方式处理数据
             flowStatisticsTaskService.appendStatistics(null);

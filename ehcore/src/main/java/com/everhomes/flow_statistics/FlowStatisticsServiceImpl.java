@@ -11,7 +11,6 @@ import com.everhomes.rest.flow_statistics.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.collections.CollectionUtils;
@@ -26,7 +25,6 @@ import java.math.RoundingMode;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,14 +54,12 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
 
     /**
      * 工作流版本查询
-     * @param cmd
-     * @return
      */
     @Override
     public FindFlowVersionDTO findFlowVersion(FindFlowVersionCommand cmd ){
         FindFlowVersionDTO dto = new FindFlowVersionDTO();
         if(dto.getFlowVersions() == null){
-            dto.setFlowVersions(new ArrayList<StatisticFlowVersion>());
+            dto.setFlowVersions(new ArrayList<>());
         }
         if(cmd.getFlowMainId() == null ){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -92,8 +88,6 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
     /**
      * 工作流版本时间跨度查询
      * 该版本的时间跨度为该版本的创建时间到下一版本的创建时间.
-     * @param cmd
-     * @return
      */
     @Override
     public FlowVersionCycleDTO getFlowVersionCycle(FlowVersionCycleCommand cmd ){
@@ -108,12 +102,11 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "flowVersion is null  .");
         }
-       // dto = flowStatisticsProvider.getFlowVersionCycle(cmd.getFlowMainId() ,cmd.getFlowVersion());
         Flow currentFlow =  this.findFlowVersionByVersion(cmd.getFlowMainId() , cmd.getNamespaceId() ,cmd.getFlowVersion());
         if(currentFlow == null ){
             return dto ;
         }
-        Timestamp minTime = currentFlow.getCreateTime() ;
+        Timestamp minTime = currentFlow.getCreateTime();
         if(minTime != null){
             dto.setStartDate(new Date(minTime.getTime()));
         }
@@ -121,7 +114,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         if(nextFlow == null ){
             return dto ;
         }
-        Timestamp maxTime = nextFlow.getCreateTime() ;
+        Timestamp maxTime = nextFlow.getCreateTime();
         if(minTime != null){
             dto.setEndDate(new Date(maxTime.getTime()));
         }
@@ -130,10 +123,6 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
 
     /**
      * 查询某版本的工作流信息
-     * @param flowMainId
-     * @param namespaceId
-     * @param flowVersion
-     * @return
      */
     private Flow findFlowVersionByVersion(Long flowMainId , Integer namespaceId , Integer flowVersion){
         ListingLocator locator = new ListingLocator();
@@ -146,7 +135,6 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
                 query.addConditions(Tables.EH_FLOWS.FLOW_VERSION.eq(flowVersion));
                 return query;
             }
-
         });
         if (flows != null && flows.size() > 0) {
             return flows.get(0);
@@ -156,10 +144,6 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
 
     /**
      * 查询某版本的下一个版本的工作流信息
-     * @param flowMainId
-     * @param namespaceId
-     * @param currentId
-     * @return
      */
     private Flow findNextFlowVersionByVersion(Long flowMainId , Integer namespaceId , Long currentId){
         ListingLocator locator = new ListingLocator();
@@ -172,7 +156,6 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
                 query.addConditions(Tables.EH_FLOWS.ID.gt(currentId));
                 return query;
             }
-
         });
         if (flows != null && flows.size() > 0) {
             return flows.get(0);
@@ -181,34 +164,24 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
     }
     /**
      * 按泳道统计处理效率
-     * @param cmd
-     * @return
      */
     @Override
     public StatisticsByLanesResponse statisticsByLanes(StatisticsByLanesCommand cmd){
-
         StatisticsByLanesResponse result = handleLanes(cmd);
-
         return result ;
     }
 
     /**
      * 按节点统计处理效率
-     * @param cmd
-     * @return
      */
     @Override
     public StatisticsByNodesResponse statisticsByNodes( StatisticsByNodesCommand cmd ){
-
         StatisticsByNodesResponse result = handleNodes(cmd);
-
         return result ;
     }
 
     /**
      * 处理节点返回结果
-     * @param cmd
-     * @return
      */
     private StatisticsByNodesResponse handleNodes(StatisticsByNodesCommand cmd){
         StatisticsByNodesResponse response = new StatisticsByNodesResponse();
@@ -254,9 +227,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             Double average = 0D;
             //直接返回秒
             if(averageCycle!=0){
-               // average = averageCycle.doubleValue()/60/60 ;
-                average = averageCycle.doubleValue() ;
-                //average = handleDecimal(average);
+                average = averageCycle.doubleValue();
             }
             dto.setHandleTimes(times);
             dto.setAverageHandleCycle(average);
@@ -277,23 +248,19 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         Double average = 0D;
         //直接返回秒
         if(averageCycle != 0){
-            //average = averageCycle.doubleValue()/60/60 ;
             average = averageCycle.doubleValue() ;
-            //average = handleDecimal(average);
         }
         response.setCurrentCycleNodesAverage(average);
         return response;
     }
 
     /**
-     * 处理节点返回结果
-     * @param cmd
-     * @return
+     * 处理泳道返回结果
      */
     private StatisticsByLanesResponse handleLanes(StatisticsByLanesCommand cmd){
 
         StatisticsByLanesResponse response = new StatisticsByLanesResponse();
-        List<StatisticsByLanesDTO> list = new ArrayList<StatisticsByLanesDTO>();
+        List<StatisticsByLanesDTO> list = new ArrayList<>();
         response.setDtos(list);
         response.setCurrentCycleLanesAverage(0D);
         if(cmd.getStartDate() == null ||cmd.getEndDate()==null){
@@ -307,6 +274,9 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         if(CollectionUtils.isEmpty(lanesList)){
             return response;
         }
+        //泳道个数，与产品确认是累计经过的泳道总数，通过叠加每个泳道的经过次数来获得
+        Integer lanesCount = 0;
+
         for(FlowLane lane :lanesList){
             if(isStartOrEndLanes(flowMainId,flowVersion,lane.getId())){
                 continue ;
@@ -323,7 +293,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             java.util.Date lastEndDate = DateUtils.dateAfterOrBeforeDays(new Date(cmd.getEndDate()),-cl);
 
             Timestamp lastStartTime = new Timestamp(lastStartDate.getTime());
-            Timestamp lastEndTime =     new Timestamp(lastEndDate.getTime());
+            Timestamp lastEndTime = new Timestamp(lastEndDate.getTime());
 
             Integer lastTimes = this.countLanesTimes(flowMainId,flowVersion,lastStartTime,lastEndTime,lane.getId());
             if(lastTimes==null|| lastTimes==0){
@@ -332,14 +302,12 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             Long lastCycles = flowStatisticsHandleLogProvider.countLanesCycle(flowMainId,flowVersion,lastStartTime,lastEndTime,lane.getId());
             Long lastAverageCycle = 0L ;
             if(lastCycles!=null && lastTimes!=null&& lastTimes!=0){
-                lastAverageCycle = lastCycles/lastTimes ;
+                lastAverageCycle = lastCycles/lastTimes;
             }
             Double lastAverage = 0D;
             //直接返回秒
             if(lastAverageCycle!=0){
-                //lastAverage = lastAverageCycle.doubleValue()/60/60 ;
-                lastAverage = lastAverageCycle.doubleValue() ;
-                //lastAverage = handleDecimal(lastAverage);
+                lastAverage = lastAverageCycle.doubleValue();
             }
 
             dto.setLastCycleAverage(lastAverage);
@@ -351,23 +319,23 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             Long cycles = flowStatisticsHandleLogProvider.countLanesCycle(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),lane.getId());
             Long averageCycle = 0L ;
             if(cycles!=null && times!=null&& times!=0){
-                averageCycle = cycles/times ;
+                averageCycle = cycles/times;
+                //叠加该泳道的经过次数
+                lanesCount += times;
             }
             Double average = 0D;
             //直接返回秒
             if(averageCycle!=0){
-                //average = averageCycle.doubleValue()/60/60 ;
-                average = averageCycle.doubleValue() ;
-                //average = handleDecimal(average);
+                average = averageCycle.doubleValue();
             }
             dto.setCurrentCycleAverage(average);
             //环比效率值(上周期平均处理时间-当前周期平均处理时间)/当前周期平均处理时间 * 100%)
             Double earlyComaredVal = null ;
-            if(lastAverage == 0 ||lastAverage == null){
+            if(lastAverage == 0 ){
                //无法比较的时候就返回null
                 dto.setEarlyComparedVal(null);
             }
-            else if(average == 0 ||average == null){
+            else if(average == 0 ){
                 //无法比较的时候就返回null
                 dto.setEarlyComparedVal(null);
             }
@@ -379,7 +347,6 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             response.getDtos().add(dto);
         }
         //当前周期泳道平均处理时长(所有泳道的处理时长总和/泳道个数)
-        Integer lanesCount = flowStatisticsHandleLogProvider.countLanes(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()));
         if(lanesCount==null|| lanesCount==0){
             LOGGER.debug("countLanes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate());
         }
@@ -391,9 +358,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         Double average = 0D;
         //直接返回秒
         if(averageCycle!=0){
-            //average = averageCycle.doubleValue()/60/60 ;
-            average = averageCycle.doubleValue() ;
-            //average = handleDecimal(average);
+            average = averageCycle.doubleValue();
         }
         response.setCurrentCycleLanesAverage(average);
         return response ;
@@ -401,12 +366,6 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
 
     /**
      * 统计泳道次数
-     * @param flowMainId
-     * @param version
-     * @param startTime
-     * @param endTime
-     * @param laneId
-     * @return
      */
     private Integer countLanesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long laneId){
 
@@ -422,15 +381,11 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         }
         //3.统计首个节点的记录数即为经过该泳道的次数（以进入的次数为准）
         Integer times = flowStatisticsHandleLogProvider.countLanesTimes(flowMainId,version,startTime,endTime,laneId,node.getId());
-        return times ;
+         return times ;
     }
 
     /**
      * 判断一个泳道是不是开始或结束的泳道
-     * @param flowMainId
-     * @param version
-     * @param laneId
-     * @return
      */
     private boolean isStartOrEndLanes(Long flowMainId , Integer version ,Long laneId){
 
@@ -451,7 +406,9 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         return false ;
     }
 
-    //处理小数位数
+    /**
+     * 处理小数位数
+     */
     private Double handleDecimal(Double d ){
 
         if(d == null){

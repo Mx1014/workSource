@@ -3,11 +3,9 @@ package com.everhomes.flow_statistics;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import org.jooq.Field;
-import org.jooq.TableField;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 
 public interface FlowStatisticsHandleLogProvider {
 
@@ -36,4 +34,6 @@ public interface FlowStatisticsHandleLogProvider {
     List<FlowStatisticsHandleLog> getStatisticsHandleLogByEventLogId(Long eventLogId) ;
 
     Integer countLanes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime);
+
+    Timestamp getMaxStatisticsTime();
 }
