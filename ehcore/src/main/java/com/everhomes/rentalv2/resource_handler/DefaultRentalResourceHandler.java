@@ -66,7 +66,7 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
         Integer pageSize = Integer.MAX_VALUE;
         List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
                 cmd.getRentalSiteId(), new CrossShardListingLocator(), cmd.getBillStatus(), cmd.getVendorType(), pageSize, cmd.getStartTime(), cmd.getEndTime(),
-                null, null,cmd.getPayChannel());
+                null, null,cmd.getPayChannel(),cmd.getSource());
         if(null == bills){
             bills = new ArrayList<>();
         }

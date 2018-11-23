@@ -64,7 +64,7 @@ public interface Rentalv2Provider {
 
 	List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
-			Byte invoiceFlag,Long userId,String payChannel);
+			Byte invoiceFlag,Long userId,String payChannel,Byte source);
 	List<RentalOrder> listRentalBillsByUserOrgId(Long organizationId ,ListingLocator locator, Integer pageSize );
 	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime);
 
@@ -201,7 +201,17 @@ public interface Rentalv2Provider {
 
 	List<RentalResourceOrder> findAllRentalSiteBillByTime(RentalResource rentalResource,Long beginTime,Long endTime);
 
-	MaxMinPrice findMaxMinPrice(String resourceType,Long ownerId, Byte rentalType);
+	MaxMinPrice findMaxMinPrice(String resourceType,Long ownerId, Byte rentalType,Byte userPriceType);
+
+	MaxMinPrice findMaxMinPriceByClassifycation(String resourceType,String ownerType,List<Long> ownerIds,
+												String sourceType,Long sourceId,Byte userPriceType,String classification);
+
+	List<RentalPriceClassification> listClassification(String resourceType,String ownerType,Long ownerId,
+													   String sourceType,Long sourceId,Byte userPriceType,String classification);
+
+	void deleteClassificationBySourceId(String resourceType,String sourceType,Long sourceId);
+
+	void deleteClassificationByOwnerId(String resourceType,String ownerType,Long ownerId);
 
 	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
 			List<Rentalv2PriceRule> priceRules);
@@ -211,6 +221,8 @@ public interface Rentalv2Provider {
 	RentalResourceType findRentalResourceTypeById(Long resourceTypeId);
 
 	List<Long> listCellPackageId (String resourceType, Long ownerId, Byte rentalType);
+
+	List<Long> listCellId (String resourceType, Long ownerId, Byte rentalType,Byte userPriceType);
 
 	void createRentalOrderRule(RentalOrderRule rule);
 

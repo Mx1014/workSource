@@ -105,6 +105,8 @@ public class RentalBillDTO {
 	private String offlinePayName;
 	private String offlinePayPhone;
 	private String payChannel;
+	private String vipLevel;
+	private Byte source;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 
@@ -129,9 +131,8 @@ public class RentalBillDTO {
 	private List<Long> specialCloseDate;
 	private String refundTip;
 	private String openTime;
-	private Byte remarkFlag;
-	private String remark;
 	private Long appId;
+	private Byte fileFlag;
 
 	@Override
 	public String toString() {
@@ -455,6 +456,13 @@ public class RentalBillDTO {
 		this.refundFlag = refundFlag;
 	}
 
+	public Byte getSource() {
+		return source;
+	}
+
+	public void setSource(Byte source) {
+		this.source = source;
+	}
 
 	public BigDecimal getRefundAmount() {
 		return refundAmount;
@@ -597,22 +605,6 @@ public class RentalBillDTO {
 		this.fileUris = fileUris;
 	}
 
-	public Byte getRemarkFlag() {
-		return remarkFlag;
-	}
-
-	public void setRemarkFlag(Byte remarkFlag) {
-		this.remarkFlag = remarkFlag;
-	}
-
-	public String getRemark() {
-		return remark;
-	}
-
-	public void setRemark(String remark) {
-		this.remark = remark;
-	}
-
 	public String getAccountName() {
 		return accountName;
 	}
@@ -627,5 +619,21 @@ public class RentalBillDTO {
 
 	public void setPayChannel(String payChannel) {
 		this.payChannel = payChannel;
+	}
+
+	public String getVipLevel() {
+		return vipLevel;
+	}
+
+	public void setVipLevel(String vipLevel) {
+		this.vipLevel = vipLevel;
+	}
+
+	public Byte getFileFlag() {
+		return fileFlag;
+	}
+
+	public void setFileFlag(Byte fileFlag) {
+		this.fileFlag = fileFlag;
 	}
 }

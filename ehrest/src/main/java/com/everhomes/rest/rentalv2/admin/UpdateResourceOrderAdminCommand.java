@@ -2,6 +2,8 @@ package com.everhomes.rest.rentalv2.admin;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
  * <li>id: 资源id</li>
@@ -11,8 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateResourceOrderAdminCommand {
     private String resourceType;
-    private Long id;
-    private Long defaultOrderId;
+    private List<DefaultOrderDTO> defaultOrder;
 
     public String getResourceType() {
         return resourceType;
@@ -22,20 +23,12 @@ public class UpdateResourceOrderAdminCommand {
         this.resourceType = resourceType;
     }
 
-    public Long getId() {
-        return id;
+    public List<DefaultOrderDTO> getDefaultOrder() {
+        return defaultOrder;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getDefaultOrderId() {
-        return defaultOrderId;
-    }
-
-    public void setDefaultOrderId(Long defaultOrderId) {
-        this.defaultOrderId = defaultOrderId;
+    public void setDefaultOrder(List<DefaultOrderDTO> defaultOrder) {
+        this.defaultOrder = defaultOrder;
     }
 
     @Override

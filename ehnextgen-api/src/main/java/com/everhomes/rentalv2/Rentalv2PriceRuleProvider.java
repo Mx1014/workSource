@@ -9,6 +9,8 @@ public interface Rentalv2PriceRuleProvider {
 
 	void createRentalv2PriceRule(Rentalv2PriceRule rentalv2PriceRule);
 
+	void createRentalv2PriceClassification(RentalPriceClassification classification);
+
 	void updateRentalv2PriceRule(Rentalv2PriceRule rentalv2PriceRule);
 
 	Rentalv2PriceRule findRentalv2PriceRuleById(Long id);

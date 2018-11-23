@@ -181,11 +181,17 @@ public interface SmsTemplateCode {
     //云打印
     int PRINT_UNPAID_MESSAGE = 83; //未支付的短信
 
-    int RENTAL_CANCEL_ORDER_REFUND = 84;//尊敬的用户，您预约的${useDetail}已退款成功，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。
+    int RENTAL_CANCEL_ORDER_REFUND = 84;//尊敬的用户，您预约的${resourceName}(${useDetail})已退款成功，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。
 
-    int RENTAL_CANCEL_ORDER_NO_REFUND = 85;//尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。
+    int RENTAL_CANCEL_ORDER_NO_REFUND = 85;//尊敬的用户，您预约的${resourceName}(${useDetail})已成功取消，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。
 
-    int RENTAL_CANCEL_ORDER = 86;//尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。
+    int RENTAL_CANCEL_ORDER = 86;//尊敬的用户，您预约的${resourceName}(${useDetail})已成功取消，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。
 
+    int RENTAL_ADMIN_NOTIFY = 87;//$预订人$（$联系方式$）预约了$资源名称$，使用时间：$预订时间$，需要物资：$物资名称$、$物资名称$，购买商品：$商品名称$*$数量$、$商品名称$*$数量$
 
+    int RENTAL_BEGIN_NOTIFY = 88;//您预约的${resourceName}已临近使用时间，预订时间为$预订时间$
+
+    int RENTAL_END_NOTIFY_HOUR_USER = 89;//您预约的${resourceName}已临近结束时间，预订时间为$预订时间$
+
+    int RENTAL_CREATE_FLOW = 90;//${requestorName}(${requestorPhone})发起了${resourceName}的预约申请，请及时核查订单并处理
 }
