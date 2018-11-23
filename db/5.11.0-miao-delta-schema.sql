@@ -52,7 +52,7 @@ CREATE TABLE `eh_office_cubicle_station_rent` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
-CREATE TABLE `eh_office_cubicle_rent_order` (
+CREATE TABLE `eh_office_cubicle_rent_orders` (
   `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
   `namespace_id` INTEGER NOT NULL,
   `owner_type`  VARCHAR(255) COMMENT 'owner type: community',
@@ -65,7 +65,11 @@ CREATE TABLE `eh_office_cubicle_rent_order` (
   `station_id` BIGINT COMMENT '工位/办公室Id',
   `rental_order_no` BIGINT COMMENT '资源预约订单号',
   `order_status` TINYINT COMMENT '订单状态',
+  `requestType` TINYINT COMMENT '订单来源',
+  `paidType` TINYINT COMMENT '支付方式',
+  `paidMode` TINYINT COMMENT '支付类型',
   `price` DECIMAL(10,2) COMMENT '价格',
+  `rent_count` BIGINT COMMENT '预定数量',
   `remark` TEXT COMMENT '备注',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
