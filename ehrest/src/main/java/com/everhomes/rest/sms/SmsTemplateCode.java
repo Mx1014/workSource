@@ -194,4 +194,6 @@ public interface SmsTemplateCode {
     int RENTAL_END_NOTIFY_HOUR_USER = 89;//您预约的${resourceName}已临近结束时间，预订时间为$预订时间$
 
     int RENTAL_CREATE_FLOW = 90;//${requestorName}(${requestorPhone})发起了${resourceName}的预约申请，请及时核查订单并处理
+
+    int RENTAL_CANCEL_NOT_PAY = 91;//抱歉，由于您未在规定时间内完成支付，您预约的${resourceName}（${useDetail}）已自动取消，订单编号：${orderNum}，期待下次为您服务
 }

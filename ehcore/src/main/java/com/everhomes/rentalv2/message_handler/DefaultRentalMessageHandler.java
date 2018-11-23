@@ -139,11 +139,23 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
     @Override
     public void sendOrderOverTimeMessage(RentalOrder rentalBill) {
-        String useDetail = rentalBill.getUseDetail();
-        Map<String, String> map = new HashMap<>();
-        map.put("useDetail", useDetail);
-        //给预约人推送消息
-        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map, RentalNotificationTemplateCode.UNPAID_ORDER_OVER_TIME);
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        String templateLocale = RentalNotificationTemplateCode.locale;
+        int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
+
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", rentalBill.getUseDetail());
+        smsProvider.addToTupleList(variables, "resourceName", rentalBill.getResourceName());
+        smsProvider.addToTupleList(variables, "orderNum", rentalBill.getOrderNo());
+
+        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(rentalBill.getCreatorUid(),
+                IdentifierType.MOBILE.getCode());
+        if (null == userIdentifier) {
+            LOGGER.error("userIdentifier is null...userId = " + rentalBill.getCreatorUid());
+        } else {
+            smsProvider.sendSms(rentalBill.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
+                    templateId, templateLocale, variables);
+        }
     }
 
     @Override
