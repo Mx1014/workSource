@@ -7597,14 +7597,47 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
         return res;
     }
+
+
+    /**
+     * 获取商户跳转URL
+     * @param cmd
+     * @return
+     */
+    @Override
+    public GetPrintMerchantUrlResponse getPrintMerchantUrl(GetPrintMerchantUrlCommand cmd) {
+        GetPrintMerchantUrlResponse response = new GetPrintMerchantUrlResponse();
+        String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"prmt.merchant.home.url","http://promo-alpha.zuolin.com/prmt");
+        String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
+        String infoUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.info.url", "${mercharntHomeUrl}/merchantLogin/logon/login?sourceUrl=${sourceUrl}&systemId=${systemId}");
+        String sourceUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.url", "${mercharntHomeUrl}/merchant/getMerchantDetail?enterpriseId=${enterpriseId}&ns=${namespaceId}");
+
+        Map<String, String> sourceUrlParam= new HashMap<String, String>();
+        sourceUrlParam.put("merchantHomeUrl", homeUrl);
+        sourceUrlParam.put("enterpriseId", String.valueOf(cmd.getEnterpriseId()));
+        sourceUrlParam.put("namespaceId", String.valueOf(UserContext.getCurrentNamespaceId()));
+        sourceUrl = StringHelper.interpolate(sourceUrl,sourceUrlParam);
+        Map<String, String> infoUrlParam = new HashMap<String, String>();
+        infoUrlParam.put("merchantHomeUrl", homeUrl);
+        infoUrlParam.put("systemId", systemId);
+        try {
+            infoUrlParam.put("sourceUrl", URLEncoder.encode(sourceUrl, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        response.setInfoUrl(StringHelper.interpolate(infoUrl,infoUrlParam));
+        return response;
+    }
+
     /*******************统一用户同步数据**********************/
     @KafkaListener(topics = "user-create-event")
     public void syncCreateUser(ConsumerRecord<?, String> record) {
         LOGGER.debug("received message [ user-create-event ] {}", record.value());
-        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(user.getNamespaceId())) {
+        User user = (User) StringHelper.fromJsonString(record.value(), User.class);
+
+        coordinationProvider.getNamedLock(CoordinationLocks.SYNC_USER_MODIFY.getCode()+user.getId()).enter(() -> {
+            Namespace namespace = this.namespaceProvider.findNamespaceById(user.getNamespaceId());
+            if (namespace != null) {
                 //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
                 //所以这里加个判断，是新增还是更新.
                 User existsUser = this.userProvider.findUserById(user.getId());
@@ -7614,16 +7647,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     this.userProvider.createUserFromUnite(user);
                 }
             }
-        }else {
-            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
-                User existsUser = this.userProvider.findUserById(user.getId());
-                if (existsUser != null) {
-                    this.userProvider.updateUserFromUnite(user);
-                }else {
-                    this.userProvider.createUserFromUnite(user);
-                }
-            }
-        }
+            return null;
+        });
     }
 
     @KafkaListener(topics = "user-update-event")
@@ -7704,36 +7729,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-
-    /**
-	 * 获取商户跳转URL
-     * @param cmd
-     * @return
-     */
-    @Override
-    public GetPrintMerchantUrlResponse getPrintMerchantUrl(GetPrintMerchantUrlCommand cmd) {
-    	GetPrintMerchantUrlResponse response = new GetPrintMerchantUrlResponse();
-        String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"prmt.merchant.home.url","http://promo-alpha.zuolin.com/prmt");
-		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
-		String infoUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.info.url", "${mercharntHomeUrl}/merchantLogin/logon/login?sourceUrl=${sourceUrl}&systemId=${systemId}");
-		String sourceUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.url", "${mercharntHomeUrl}/merchant/getMerchantDetail?enterpriseId=${enterpriseId}&ns=${namespaceId}");
-
-        Map<String, String> sourceUrlParam= new HashMap<String, String>();
-        sourceUrlParam.put("merchantHomeUrl", homeUrl);
-        sourceUrlParam.put("enterpriseId", String.valueOf(cmd.getEnterpriseId()));
-        sourceUrlParam.put("namespaceId", String.valueOf(UserContext.getCurrentNamespaceId()));
-        sourceUrl = StringHelper.interpolate(sourceUrl,sourceUrlParam);
-        Map<String, String> infoUrlParam = new HashMap<String, String>();
-        infoUrlParam.put("merchantHomeUrl", homeUrl);
-        infoUrlParam.put("systemId", systemId);
-        try {
-        	infoUrlParam.put("sourceUrl", URLEncoder.encode(sourceUrl, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-        response.setInfoUrl(StringHelper.interpolate(infoUrl,infoUrlParam));
-        return response;
-    }
     @KafkaListener(topics = "user-kickoff")
     public void userKickoffMessage(ConsumerRecord<?, String> record) {
         LOGGER.debug("received message [ user-kickoff ] {}", record.value());

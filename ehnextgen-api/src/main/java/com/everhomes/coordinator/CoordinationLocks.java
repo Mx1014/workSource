@@ -176,7 +176,10 @@ public enum CoordinationLocks {
     ENTERPRISE_PAYMENT_AUTH_PAY_AMOUNT_LOCK("enterprise_payment_auth_pay_amount_lock"),
     ENTERPRISE_PAYMENT_AUTH_FROZEN("enterprise_payment_auth_frozen"),
     INIT_ENTERPRISE_PAYMENT_AUTH_SCENE_LIMIT("init_enterprise_payment_auth_scene_limit"),
-    CHECK_ENTERPRISE_PAYMENT_STATUS("check_enterprise_payment_status");
+    CHECK_ENTERPRISE_PAYMENT_STATUS("check_enterprise_payment_status"),
+
+    SYNC_USER_MODIFY("sync_user_modify"),
+    SYNC_USER_IDEN_MODIFY("sync_user_iden_modify");
 
     private String code;
 

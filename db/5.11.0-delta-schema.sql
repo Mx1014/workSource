@@ -304,3 +304,7 @@ CREATE TABLE `eh_contract_task_operate_logs` (
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '合同初始化,审批,复制进度记录表';
 
+-- AUTHOR: xq.tian 20181123
+-- REMARK: 用户两张表加一个版本号，用于在同步数据的时候避免旧数据覆盖新数据
+ALTER TABLE eh_users ADD COLUMN update_version BIGINT NOT NULL DEFAULT 0 COMMENT '版本号, 数据同步时候的版本号';
+ALTER TABLE eh_user_identifiers ADD COLUMN update_version BIGINT NOT NULL DEFAULT 0 COMMENT '版本号, 数据同步时候的版本号';
