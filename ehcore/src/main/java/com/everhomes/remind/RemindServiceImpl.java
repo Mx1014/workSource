@@ -810,7 +810,7 @@ public class RemindServiceImpl implements RemindService  {
         List<Remind> unSubscribeReminds = new ArrayList<>();
 
     	List<RemindCategoryDefaultShare> categoryShares = remindProvider.findShareMemberDetailsByCategoryId(existRemind.getRemindCategoryId());
-    	
+    	List<Remind> newShareRminds = new ArrayList<>();
         dbProvider.execute(transactionStatus -> {
             remindProvider.updateRemind(existRemind);
             setRemindRedis(existRemind);
@@ -840,7 +840,8 @@ public class RemindServiceImpl implements RemindService  {
     			            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cs.getSharedSourceId());
     			            if(null != detail && !detail.getTargetId().equals(0L)){
     				            Remind trackRemind = processSendMsgTrackRemind(existRemind, detail);
-    				            trackReminds.add(trackRemind);
+    				          
+    				            newShareRminds.add(trackRemind);
     			            }
     	            	}
             		}
@@ -849,6 +850,7 @@ public class RemindServiceImpl implements RemindService  {
             return null;
         });
 
+        sendTrackMessageOnBackGround(originPlanDescription, newShareRminds, RemindModifyType.CREATE_SUBSCRIBE);
         sendTrackMessageOnBackGround(originPlanDescription, trackReminds, RemindModifyType.SETTING_UPDATE);
 
         return existRemind.getId();
