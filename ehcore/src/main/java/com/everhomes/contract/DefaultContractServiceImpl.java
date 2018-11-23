@@ -3918,39 +3918,38 @@ long assetCategoryId = 0l;
         List<Long> contractIdlist = Arrays.asList(cmd.getContractIds().split(",")).stream().map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
 
         for (Long contractId : contractIdlist) {
-        	try {
-				Contract contract = contractProvider.findContractById(contractId);
-				if (contract == null) {
-					continue ;
-				}
-				FindContractCommand command = new FindContractCommand();
-				command.setId(contractId);
-				command.setPartyAId(contract.getPartyAId());
-				command.setCommunityId(contract.getCommunityId());
-				command.setNamespaceId(contract.getNamespaceId());
-				command.setCategoryId(contract.getCategoryId());
-				ContractDetailDTO contractDetailDTO = findContract(command);
-				
-				//生成正常合同清单
-				ExecutorUtil.submit(new Runnable() {
-					@Override
-					public void run() {
-						generatePaymentExpectancies(contract, contractDetailDTO.getChargingItems(), contractDetailDTO.getAdjusts(), contractDetailDTO.getFrees());
-						//判断是否为正常合同，为正常合同进行入场
-						if (contract.getStatus() == ContractStatus.ACTIVE.getCode()) {
-							// 合同入场
-							EntryContractCommand entryContractCommand = new EntryContractCommand();
-							entryContractCommand.setCategoryId(contract.getCategoryId());
-							entryContractCommand.setCommunityId(contract.getCommunityId());
-							entryContractCommand.setId(contract.getId());
-							entryContractCommand.setNamespaceId(contract.getNamespaceId());
-							entryContractCommand.setOrgId(contract.getPartyAId());
-							entryContractCommand.setPartyAId(contract.getPartyAId());
-							entryContract(entryContractCommand);
-						}
+        	try {Contract contract = contractProvider.findContractById(contractId);
+        	if (contract == null) {
+				continue ;
+			}
+        	FindContractCommand command = new FindContractCommand();
+			command.setId(contractId);
+			command.setPartyAId(contract.getPartyAId());
+			command.setCommunityId(contract.getCommunityId());
+			command.setNamespaceId(contract.getNamespaceId());
+			command.setCategoryId(contract.getCategoryId());
+			ContractDetailDTO contractDetailDTO = findContract(command);
+
+			//生成正常合同清单
+			ExecutorUtil.submit(new Runnable() {
+				@Override
+				public void run() {
+					generatePaymentExpectancies(contract, contractDetailDTO.getChargingItems(), contractDetailDTO.getAdjusts(), contractDetailDTO.getFrees());
+					//判断是否为正常合同，为正常合同进行入场
+					if (contract.getStatus() == ContractStatus.ACTIVE.getCode()) {//由于合同入场的接口有Bug，导致无法更新账单，所以如果是正常合同，那么直接调用代码
+							assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_SAVE);
+						//// 合同入场
+//						EntryContractCommand entryContractCommand = new EntryContractCommand();
+//						entryContractCommand.setCategoryId(contract.getCategoryId());
+//						entryContractCommand.setCommunityId(contract.getCommunityId());
+//						entryContractCommand.setId(contract.getId());
+//						entryContractCommand.setNamespaceId(contract.getNamespaceId());
+//						entryContractCommand.setOrgId(contract.getPartyAId());
+//						entryContractCommand.setPartyAId(contract.getPartyAId());
+//						entryContract(entryContractCommand);
 					}
-				});
-			} catch (Exception e) {
+				}
+			});} catch (Exception e) {
 				LOGGER.info("autoGeneratingBill is error , contract id " + contractId);
 				continue ;
 			}

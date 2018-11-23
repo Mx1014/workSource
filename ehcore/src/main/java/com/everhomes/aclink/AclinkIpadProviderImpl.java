@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.aclink.AclinkIPadDTO;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -69,6 +70,19 @@ public class AclinkIpadProviderImpl implements AclinkIpadProvider{
         }
 
         return objs;
+	}
+
+	@Override
+	public List<AclinkIPadDTO> findIpadByDoorId(Long doorId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkIpads.class));
+		SelectQuery<EhAclinkIpadsRecord> query = context.selectQuery(Tables.EH_ACLINK_IPADS);
+		query.addConditions(Tables.EH_ACLINK_IPADS.STATUS.ne((byte) 2));
+		query.addConditions(Tables.EH_ACLINK_IPADS.DOOR_ACCESS_ID.eq(doorId));
+		query.addOrderBy(Tables.EH_ACLINK_IPADS.ID.desc());
+		List<AclinkIPadDTO> objs = query.fetch().map((r) -> {
+			return ConvertHelper.convert(r, AclinkIPadDTO.class);
+		});
+		return objs;
 	}
 
 	@Override
