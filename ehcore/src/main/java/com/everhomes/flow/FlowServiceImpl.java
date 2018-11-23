@@ -6500,6 +6500,9 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public ListFlowServiceTypeResponse listFlowServiceTypes(SearchFlowCaseCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (cmd.getNamespaceId() == null) {
+            cmd.setNamespaceId(namespaceId);
+        }
 
         List<FlowServiceTypeDTO> serviceTypes = null;
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());

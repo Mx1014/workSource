@@ -808,7 +808,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 .fetchAnyInto(Integer.class);
     }
 
-    @Cacheable(value = "ProcessorServiceTypes", key = "{#userId}", unless = "#result == null")
+    // @Cacheable(value = "ProcessorServiceTypes", key = "{#userId}", unless = "#result == null")
     @Override
     public List<FlowServiceTypeDTO> listProcessorServiceTypes(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
