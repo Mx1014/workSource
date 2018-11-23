@@ -5,6 +5,9 @@
 -- REMARK: 替换最新的 contentserver 二进制 #40547 contentserver/release/server/contentserver
 
 
+-- AUTHOR: 黄鹏宇
+-- REMARK: 请在执行release前备份eh_var_field_scopes表
+
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
@@ -15,6 +18,118 @@
 -- AUTHOR: xq.tian  20181116
 -- REMARK: 报错提示模板
 INSERT INTO eh_locale_strings (scope, code, locale, text) VALUES ('flow', '10013', 'zh_CN', '任务状态已经改变，请刷新重试');
+
+
+-- AUTHOR: 张智伟 20181115
+-- REMARK: issue-37602 审批单支持编辑
+SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '30003', 'zh_CN', '该节点任务已被处理');
+
+
+-- AUTHOR: 吴寒
+-- REMARK: 企业支付授权
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES('enterprise_payment_auth_operate_log','1','zh_CN','授权日志主要','设置 ${employeeCount} 名员工（${employeeName}）\n每人额度： ${limitAmount} 元/月\n支付场景：${sceneString}','0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES('enterprise_payment_auth_operate_log','2','zh_CN','授权日志场景','${sceneName}（${limitAmount} 元/月）','0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES('enterprise_payment_auth_operate_log','3','zh_CN','授权记录场景','${sceneName}：${changeAmount} 元，当前额度为 ${limitAmount} 元','0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES('enterprise_payment_auth_msg','1','zh_CN','设置授权推送消息','${operator}调整了你的企业支付额度，点击查看。','0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES('enterprise_payment_auth_msg','2','zh_CN','支付后，可用余额扣除推送消息','你在 ${payTime} 使用企业账号支付了一笔 ${payAmount?string(",##0.00")} 的 ${sceneName} 订单，点击查看。','0');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth_operate_source','1','zh_CN','每月额度');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','1','zh_CN','无');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','2','zh_CN','增加');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','3','zh_CN','减少');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','4','zh_CN','订单编号;使用人;使用人手机;支付场景;支付时间;支付金额');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','5','zh_CN','企业支付记录');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','6','zh_CN','支付时间:');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','7','zh_CN','企业支付额度');
+
+-- AUTHOR: 吴寒
+-- REMARK: 企业支付授权   支付授权的菜单
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES('79870000','支付管理','100','/100/79870000','1','2','2','50','2018-09-26 16:51:46',NULL,NULL,'2018-09-26 16:51:46','0','0','0',NULL,'org_control','1','1','classify','0','0',NULL,NULL,NULL,NULL);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES('79880000','支付授权','79870000','/100/79870000/79880000','1','3','2','10','2018-09-26 16:51:46',NULL,NULL,'2018-09-26 16:51:46','0','0','0',NULL,'org_control','1','1','module','0','0',NULL,NULL,NULL,NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('271000','企业支付授权','70000010',NULL,'enterprise-payment-auth','1','2','/70000010/271000','park','8','79880000','3','system','module','2','1');
+
+-- AUTHOR: 张智伟
+-- REMARK: 企业支付授权
+SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 1);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '1', 'zh_CN', '已经设置了安全密码，不能重复设置');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '2', 'zh_CN', '未设置安全密码');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '3', 'zh_CN', '安全密码错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '4', 'zh_CN', '验证码错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '5', 'zh_CN', '验证码失效');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '6', 'zh_CN', '需要安全验证才能访问');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'enterprise_payment_auth_error', '506', 'zh_CN', '接口参数异常');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'enterprise_payment_auth_error', '100', 'zh_CN', '员工不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'enterprise_payment_auth_error', '101', 'zh_CN', '员工已离职');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'enterprise_payment_auth_error', '102', 'zh_CN', 'token错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'enterprise_payment_auth_error', '103', 'zh_CN', '鉴权失败');
+
+-- AUTHOR: 张智伟
+-- REMARK: 企业支付授权
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_configurations`),1);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id:=@id+1, 'service.module.security.time.out-79880000', '5', '', '0', NULL);
+
+-- AUTHOR: 黄鹏宇
+-- REMARK: fixbug #42303
+update eh_var_field_scopes set status = 0 where field_display_name in ('客户级别','资质客户') and module_name = 'enterprise_customer';
+-- END
+
+-- AUTHOR: 丁建民
+-- REMARK: 合同4.0
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'contract', '10015', 'zh_CN', '该房源不是待租状态');
+
+-- AUTHOR: 丁建民
+-- REMARK: 合同复制权限
+SET @id = (SELECT MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 21210, 0, 21224, '复制', 0, SYSDATE());
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (21224, 0, '合同管理 合同复制', '合同管理 合同复制权限', NULL);
+
+INSERT INTO `ehcore`.`eh_service_module_functions` (`id`, `module_id`, `privilege_id`, `explain`) VALUES (21224, '21200', '21224', '复制');
+
+-- AUTHOR: 丁建民
+-- 合同记录日志
+SET @id = (SELECT MAX(id) from eh_locale_templates);
+INSERT INTO eh_locale_templates (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'contract.tracking', '20', 'zh_CN', '合同复制事件', '合同复制，该合同复制于${contractName}', '0');
+INSERT INTO eh_locale_templates (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'contract.tracking', '21', 'zh_CN', '合同初始化事件', '该合同进行了初始化', '0');
+INSERT INTO eh_locale_templates (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'contract.tracking', '22', 'zh_CN', '合同免批事件', '该合同已免批', '0');
+
+-- AUTHOR: 杨崇鑫 20181122
+-- REMARK: 物业缴费V7.3(账单组规则定义) 新增以下权限：“批量减免”权限；
+SET @p_id = 204001011;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '批量删除', '账单管理 批量删除', NULL);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES (@mp_id:=@mp_id+1, '204011', '0', @p_id, '批量删除', '0', NOW());
+
+-- AUTHOR: 梁燕龙 20181123
+-- REMARK: 个人中心修改可编辑性
+UPDATE eh_personal_center_settings SET editable = 1 WHERE name = '订单';
+UPDATE eh_personal_center_settings SET editable = 1 WHERE name = '卡券';
+
+-- AUTHOR: 黄明波  20181121
+-- REMARK: 添加服务联盟短信模板
+SET @module_id = 40500;  -- 模块id
+SET @sms_code = 87;      -- sms code, 对应于`com.everhomes.rest.sms.SmsTemplateCode`中的 code
+SET @description = '模板1';
+SET @display_name = '【app名称】$发起人姓名$（$发起人手机号$）提交了$服务名称$申请，请及时处理';
+SET @namespace_id = 0; -- 域空间id, 如果为0, 则相当于配置给所有域空间, 不为0, 则只给特定的域空间配置
+SET @locale_templates_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @module_id), @sms_code, 'zh_CN', @description, @display_name, @namespace_id);
+
+
+SET @module_id = 40500;  -- 模块id
+SET @sms_code = 88;      -- sms code, 对应于`com.everhomes.rest.sms.SmsTemplateCode`中的 code
+SET @description = '模板2';
+SET @display_name = '【app名称】你提交的$服务名称$申请正在处理，可在app“我”-“我的申请”中查看处理进度';
+SET @namespace_id = 0; -- 域空间id, 如果为0, 则相当于配置给所有域空间, 不为0, 则只给特定的域空间配置
+SET @locale_templates_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @module_id), @sms_code, 'zh_CN', @description, @display_name, @namespace_id);
+
+
+INSERT INTO eh_locale_templates (scope, code, locale, description, text, namespace_id) VALUES ( 'sms.default', '87', 'zh_CN', '服务申请推送', '${applierName}（${applierPhone}）提交了${serviceName}申请，请及时处理', '0');    
+INSERT INTO eh_locale_templates (scope, code, locale, description, text, namespace_id) VALUES ( 'sms.default', '88', 'zh_CN', '服务申请提醒', '你提交的${serviceName}申请正在处理，可在app“我”-“我的申请”中查看处理进度', '0');
 
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
@@ -70,6 +185,14 @@ INSERT INTO eh_locale_strings (scope, code, locale, text) VALUES ('flow', '10013
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: nanshanquzhengfu
 -- DESCRIPTION: 此SECTION只在南山区政府-999931执行的脚本
+-- 圳智慧beta
+-- addy yanlong.liang 20180814
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('zhenzhihui.url', 'http://120.132.117.22:8016/ZHYQ/restservices/LEAPAuthorize/attributes/query?TICKET=', '圳智慧认证url', '999931', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('zhenzhihui.appkey', 'c00f02aac30d0822', '圳智慧APPKEY', '999931', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('zhenzhihui.redirect.url', 'http://120.132.117.22:8016/ZHYQ/restservices/common/zhyq_zlgetUserinfo/query?code=', '圳智慧对接跳转url', '999931', NULL, '1');
 -- --------------------- SECTION END nanshanquzhengfu ----------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guanzhouyuekongjian
@@ -87,3 +210,26 @@ INSERT INTO eh_locale_strings (scope, code, locale, text) VALUES ('flow', '10013
 
 
 -- --------------------- SECTION END wanzhihui ------------------------------------------
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: shanghaijinmao
+-- DESCRIPTION: 此SECTION只在上海金茂-999925执行的脚本
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.host', 'http://10.1.10.37:80', '接口地址', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.appkey', '880076901009202', 'appkey', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.secretKey', '880076901009202', 'secretKey', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.parkUuid', '06dfa3ed3a5a4309bd087fd2625ea00e', '停车场标识', 999925, NULL, 1);
+
+
+
+
+set @max_lots_id := (select ifnull(max(id),0)  from eh_parking_lots);
+set @namespace_id := 11;
+set @community_id := 240111044332061474;
+set @parking_name := '上海金茂停车场';
+set @parking_vendor := 'HKWS_SHJINMAO';
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) 
+
+VALUES ((@max_lots_id := @max_lots_id + 1), 'community', @community_id,  @parking_name,  @parking_vendor, '', 2, 1, now(), @namespace_id, '{"expiredRechargeFlag":0,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee"]');
+
+
+
+-- --------------------- SECTION END shanghaijinmao ------------------------------------------

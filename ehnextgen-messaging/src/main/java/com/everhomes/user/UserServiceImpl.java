@@ -1763,7 +1763,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 User user = validateUser(userInfo);
                 if (user != null) {
                     LOGGER.info("User service check success, loginToken={}", loginToken);
-                    createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
+                    String deviceIdentifier = null;
+                    String pusherIdentify = null;
+
+                    com.everhomes.rest.user.user.UserLoginDTO loginDTO = sdkUserService.getUserLogin(user.getId(), loginToken.getLoginId());
+                    if (loginDTO != null) {
+                        deviceIdentifier = loginDTO.getDeviceIdentifier();
+                        pusherIdentify = loginDTO.getPusherIdentify();
+                    } else {
+                        LOGGER.warn("Get user login return null, uid={}, loginId={}", user.getId(), loginToken.getLoginId());
+                    }
+
+                    createLogin(userInfo.getNamespaceId(), user, deviceIdentifier, pusherIdentify, loginToken);
                     return true;
                 }
             } else {

@@ -14,7 +14,6 @@ import com.everhomes.server.schema.tables.daos.EhTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhTasks;
 import com.everhomes.server.schema.tables.records.EhTasksRecord;
 import com.everhomes.util.ConvertHelper;
-import javafx.scene.control.Tab;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;

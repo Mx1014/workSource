@@ -13,7 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>directlyEnterpriseId：如果本身是机构，则此值无效；如果本身是部门、群组（可能多层），则其层次结构上最近的一个直属机构</li>
  * 物业或业委 需要附加字段 :
  * <li>communityId : 小区id</li>
- * <li>communityName : 小区name</li> 
+ * <li>communityName : 小区name</li>
+ * <li>userIsManage : 是否为管理员</li>
  *	</ul>
  */
 public class OrganizationSimpleDTO {
@@ -38,7 +39,17 @@ public class OrganizationSimpleDTO {
 
 	private String displayName;
 
-	public Long getId() {
+	private Byte userIsManage;
+
+    public Byte getUserIsManage() {
+        return userIsManage;
+    }
+
+    public void setUserIsManage(Byte userIsManage) {
+        this.userIsManage = userIsManage;
+    }
+
+    public Long getId() {
 		return id;
 	}
 

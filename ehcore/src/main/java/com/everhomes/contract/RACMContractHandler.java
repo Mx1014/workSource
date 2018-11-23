@@ -36,6 +36,7 @@ public class RACMContractHandler extends DefaultContractServiceImpl {
         if(community == null) {
             return "0";
         }
+        //这是一个简易的同步锁，在同步数据的时候我们会将获取到的数据存入数据库中，这时我们会将这些正在同步的数据的状态置为InActive,此时如果再次创建的话，上一次没有执行完同步之前数据库的正在执行的状态的数量不为1则返回状态‘有同步任务正在进行’
         int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.CONTRACT.getCode());
         if(syncCount > 0) {
             return "1";

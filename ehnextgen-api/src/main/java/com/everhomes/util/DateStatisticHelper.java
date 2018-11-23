@@ -257,4 +257,56 @@ public class DateStatisticHelper {
 		SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 		return df.format(d1).equals(df.format(d2));
 	}
+
+	public static java.sql.Date getTheFirstDate(String m) {
+		Calendar c = Calendar.getInstance();
+		SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+		try {
+			Date date = df.parse(m);
+			c.setTime(date);
+			c.add(Calendar.MONTH, 0);
+			c.set(Calendar.DAY_OF_MONTH, 1); //  设置为1号,当前日期既为本月第一天
+			date = c.getTime();
+			java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+			return sqlDate;
+		} catch (ParseException e) {
+			LOGGER.error("transfer format error");
+			return null;
+		}
+	}
+
+	public static java.sql.Date getTheLastDate(String m) {
+		Calendar c = Calendar.getInstance();
+		SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+		try {
+			Date date = df.parse(m);
+			c.setTime(date);
+			c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH)); //  获取当前月最后一天
+			date = c.getTime();
+			java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+			return sqlDate;
+		} catch (ParseException e) {
+			LOGGER.error("transfer format error");
+			return null;
+		}
+	}
+
+	/**
+	 * <p>取这天开始的时间</p>
+	 *
+	 *
+	 * @param calendar  要取时间的日期
+	 * @return calendar:这天0点0分0秒0毫秒 <code>null</code> if Exception
+	 */
+	public static Calendar getDateBeginCalendar(Calendar calendar){
+		if (null == calendar) {
+			return null;
+		}
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		return calendar;
+	}
+
 }

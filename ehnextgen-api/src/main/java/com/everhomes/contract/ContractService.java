@@ -2,7 +2,6 @@
 package com.everhomes.contract;
 
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -74,6 +73,10 @@ public interface ContractService {
 	void exportContractListByCommunityCategoryId(SearchContractCommand cmd);
 	default OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId){return null;}
 	default ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes){return null;}
+	//合同4.0
+	default ContractTaskOperateLog initializationContract(InitializationCommand cmd){return null;};
+	default ContractTaskOperateLog exemptionContract(InitializationCommand cmd){return null;};
+	default void copyContract(InitializationCommand cmd){};
+	default SearchProgressDTO findContractOperateTaskById(SearchProgressCommand cmd){return null;};
 	default void autoGeneratingBill(AutoGeneratingBillCommand cmd){};
-   
 }

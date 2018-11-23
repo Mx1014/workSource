@@ -1,0 +1,31 @@
+// @formatter:off
+package com.everhomes.rest.aclink;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
+/**
+ * <ul>获取门禁列表
+ * </ul>
+ *
+ */
+public class DeleteTempAuthPriorityResponse {
+
+	@ItemType(AclinkFormValuesDTO.class)
+	private List<AclinkFormValuesDTO> doors;
+
+	public List<AclinkFormValuesDTO> getDoors() {
+		return doors;
+	}
+
+	public void setDoors(List<AclinkFormValuesDTO> doors) {
+		this.doors = doors;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

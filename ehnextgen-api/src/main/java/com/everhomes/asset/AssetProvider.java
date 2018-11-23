@@ -161,6 +161,12 @@ public interface AssetProvider {
     void changeBillStatusOnContractSaved(Long contractId);
 
     void deleteContractPayment(Long contractId);
+    
+    /**
+     * 合同更新/根据合同id,自动刷新合同账单
+     * @param contractId
+     */
+    void deleteContractPaymentByContractId(Long contractId);
 
     List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId, Long categoryId, Integer namespaceId);
 

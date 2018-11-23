@@ -1,6 +1,49 @@
 
 package com.everhomes.asset;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.DSLContext;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
@@ -1332,14 +1375,23 @@ public class AssetServiceImpl implements AssetService {
             Integer days = null;
             // calculate r if cycle is not one-off deal
             if(billingCycle.byteValue() != (byte) 5){
-
                 boolean b = checkCycle(d, a, cycle.getMonthOffset()+1);
                 int divided = daysBetween(dWithoutLimit,aWithoutLimit);
                 days = divided;
                 if(!b){
                     // period of this cycle
-                    int divider = daysBetween(d, a);
-                    r = String.valueOf(divider+"/" + divided);
+                	/**
+                	 * issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                	 * 比如签了一个合同，计价条款为：自然季、2018-08-30至2018-12-31，固定金额9000
+                	 * 2018-08-30至2018-09-30 ： 计算系数r = (1 + 2/31) / 3
+                	 * 2018-10-01至2018-12-31 ：计算系数r = 1
+                	 */
+                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                    	r = assetCalculateUtil.getReductionFactor(d, a);
+                    }else {
+                    	int divider = daysBetween(d, a);
+                        r = String.valueOf(divider+"/" + divided);
+                    }
                 }
             }
             BigDecimal amount = calculateFee(var2, days, formula, r,standard, formulaCondition);
@@ -2196,9 +2248,17 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         formula += "*"+duration;
-        BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2,BigDecimal.ROUND_CEILING);
-
+//        BigDecimal response = CalculatorUtil.arithmetic(formula);
+//        response.setScale(2,BigDecimal.ROUND_CEILING);
+        BigDecimal response = BigDecimal.ZERO;
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			Object object = jse.eval(formula);
+			response = new BigDecimal(object.toString());
+			response = response.setScale(2, BigDecimal.ROUND_HALF_UP);
+		} catch (Exception e) {
+			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+		}
         return response;
     }
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula) {
@@ -2246,9 +2306,17 @@ public class AssetServiceImpl implements AssetService {
                 throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
             }
         }
-        BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2,BigDecimal.ROUND_CEILING);
-
+//        BigDecimal response = CalculatorUtil.arithmetic(formula);
+//        response.setScale(2,BigDecimal.ROUND_CEILING);
+        BigDecimal response = BigDecimal.ZERO;
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			Object object = jse.eval(formula);
+			response = new BigDecimal(object.toString());
+			response = response.setScale(2, BigDecimal.ROUND_HALF_UP);
+		} catch (Exception e) {
+			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+		}
         return response;
     }
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, Integer days
@@ -2308,8 +2376,17 @@ public class AssetServiceImpl implements AssetService {
                 }
             }
             formula += "*"+duration;
-            result = CalculatorUtil.arithmetic(formula);
-            result.setScale(2,BigDecimal.ROUND_FLOOR);
+            //result = CalculatorUtil.arithmetic(formula);
+            //result.setScale(2,BigDecimal.ROUND_FLOOR);
+            //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+            ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+    		try {
+    			Object object = jse.eval(formula);
+    			result = new BigDecimal(object.toString());
+    			result = result.setScale(2, BigDecimal.ROUND_HALF_UP);
+    		} catch (Exception e) {
+    			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+    		}
         }
         else if(formulaType == 3 || formulaType == 4){
             //阶梯或者区间
@@ -5406,7 +5483,8 @@ public class AssetServiceImpl implements AssetService {
 		List<String> phoneNumbers = new ArrayList<String>(); 
 		try {
 			if (targetType.equals(AssetTargetType.USER.getCode())) {
-				UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), namespaceId);
+				//修复缺陷 #42722 【鼎峰汇】【现网】客户账单中的客户手机号显示的是管理员手机号
+				UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(targetId, namespaceId);
 				if(userIdentifier != null) {
 					phoneNumbers.add(userIdentifier.getIdentifierToken());
 				}
@@ -5428,7 +5506,7 @@ public class AssetServiceImpl implements AssetService {
 	            }
 		    }
 		} catch (Exception e) {
-			LOGGER.error("ZhuZongAssetVendor getPhoneNumber() {}", targetType, targetId, namespaceId, e);
+			LOGGER.error("/asset/listNotSettledBillDetail getPhoneNumber() {}", targetType, targetId, namespaceId, e);
 		}
 		return phoneNumbers;
 	}

@@ -205,7 +205,7 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),
-            @CacheEvict(value="User-Account", key="#user.accountName"),
+            @CacheEvict(value="User-Acount", key="#user.accountName"),
             @CacheEvict(value="UserIdentifier-List", key="#user.id")})
     @Override
     public void deleteUser(User user) {

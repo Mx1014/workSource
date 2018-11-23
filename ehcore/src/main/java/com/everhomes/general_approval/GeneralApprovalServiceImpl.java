@@ -1070,7 +1070,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     private void checkFlowCaseValid(Long flowCaseId, Long flowNodeId) {
         List<Long> currentNodeIds = getProcessingFlowNodeIds(flowCaseId);
         if (!currentNodeIds.contains(flowNodeId)) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR, "step busy");
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE, EnterpriseApprovalErrorCode.ERROR_FLOW_STEP_ERROR, "step busy");
         }
     }
 }
