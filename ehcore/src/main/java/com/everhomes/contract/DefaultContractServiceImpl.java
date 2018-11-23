@@ -1710,6 +1710,22 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 		//by --djm issue-35586
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+				FindContractCommand command = new FindContractCommand();
+				command.setId(contract.getId());
+				command.setPartyAId(contract.getPartyAId());
+				command.setCommunityId(contract.getCommunityId());
+				command.setNamespaceId(contract.getNamespaceId());
+				command.setCategoryId(contract.getCategoryId());
+				ContractDetailDTO contractDetailDTO = findContract(command);
+				Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
+				
+				if (!possibleEnterContractStatus) {
+					LOGGER.error("possibleEnterContractStatus is false, Apartments is not free");
+					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
+							"apartments status is not free for contract!");
+				}
+			}
 			addToFlowCase(contract, flowcaseContractOwnerType);
 			//添加发起人字段
 			contract.setSponsorUid(UserContext.currentUserId().toString());
