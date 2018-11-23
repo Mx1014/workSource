@@ -49,7 +49,7 @@ public class XunfeiYunServiceImpl implements XunfeiYunService{
 		LOGGER.info("queryRouters cmd:" + StringHelper.toJsonString(cmd));
 
 		// 先处理公共跳转
-		if (cmd.getRouteType() == 1) {
+		if (null != cmd.getRouteType() && cmd.getRouteType() == 1) {
 			return queryCommonRouters(cmd);
 		}
 
@@ -61,10 +61,7 @@ public class XunfeiYunServiceImpl implements XunfeiYunService{
 		}
 		
 		List<AppDTO> appDtos = getTargetApps(UserContext.getCurrentNamespaceId(), cmd.getContext().getCommunityId(), moduleId);
-		if (CollectionUtils.isEmpty(appDtos)) {
-			return resp;
-		}
-
+		resp.setRouterDtos(appDtos);
 		return resp;
 	}
 	
@@ -136,19 +133,15 @@ public class XunfeiYunServiceImpl implements XunfeiYunService{
 	}
 	
 	private List<AppDTO> getTargetApps(Integer namespaceId, Long communityId, Long moduleId) {
-		Byte locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
 		OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(communityId);
 		if (null == organizationProperty) {
 			return new ArrayList<>(1);
 		}
-		
+
 		Long orgId = organizationProperty.getOrganizationId();
-		Byte appType = ServiceModuleAppType.COMMUNITY.getCode();
 		Byte sceneType = ServiceModuleSceneType.CLIENT.getCode();
-		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
-		List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleApps(
-				UserContext.getCurrentNamespaceId(), releaseVersion.getId(), locationType, appType, sceneType, null,
-				null, moduleId);
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(namespaceId, moduleId, null,
+				null, null);
 		return serviceModuleAppService.toAppDtos(communityId, orgId, sceneType, apps);
 	}
 	

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -16,7 +17,7 @@ import com.everhomes.rest.xfyun.QueryRoutersResponse;
 @RestDoc(value = "Xufei Yun Controller", site = "core")
 @RestController
 @RequestMapping("/xfyun")
-public class XunfeiYunController {
+public class XunfeiYunController  extends ControllerBase {
 	
 	@Autowired
 	XunfeiYunService xunfeiYunService;
