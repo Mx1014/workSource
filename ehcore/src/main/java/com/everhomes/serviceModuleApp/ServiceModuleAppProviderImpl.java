@@ -528,6 +528,11 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 	@Override
 	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId) {
+		return listInstallServiceModuleApps(namespaceId, versionId, locationType, appType, sceneType, organizationAppStatus, appCategoryId, null);
+	}
+	
+	@Override
+	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId, Long moduleId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Field<?> fieldArr[] = Tables.EH_SERVICE_MODULE_APPS.fields();
 		List<Field<?>> fields = new ArrayList<Field<?>>();
@@ -541,12 +546,14 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		SelectQuery<Record> query = context.select(fields).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
-
+   
 		if(appType != null){
 			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
 		}
-
-
+		
+		if (null != moduleId) {
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
+		}
 
 		//入口类型
 		if(locationType != null || sceneType != null || appCategoryId != null){

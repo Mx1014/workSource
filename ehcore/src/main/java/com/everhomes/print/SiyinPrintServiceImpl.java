@@ -979,6 +979,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getOwnerId()));
         preOrderCommand.setOrderRemark4(null);
         preOrderCommand.setOrderRemark5(null);
+  
         String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 
@@ -2041,11 +2042,25 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	private GetPrintQrcodeCommand getParamsFromReq(HttpServletRequest req) {
 		GetPrintQrcodeCommand cmd = new GetPrintQrcodeCommand();
-		Object object = req.getParameter("data");
+		String object = req.getParameter("data");
+//		req.getParameterMap();
 		if(object==null){
 			throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 		}
-		cmd.setData(object.toString());
+		
+		String  finalData = object.toString();
+		JSONObject json = JSONObject.parseObject(finalData);
+		
+		for (String key : json.keySet()) {
+//			if ("sessionId".equals(key)) {
+				String sValue = json.getString(key);
+				sValue = sValue.substring(1, sValue.length() - 1);
+				json.put(key, sValue);
+//			}
+	
+		}
+		
+		cmd.setData(json.toString());
 		Object width = req.getParameter("width");
 		Object height = req.getParameter("height");
 		if(width!=null && height!=null){
@@ -2094,7 +2109,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			return dto;
 		}).collect(Collectors.toList());
 		
-		
+		 
 	}
 
 	@Override

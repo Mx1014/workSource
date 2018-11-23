@@ -36,6 +36,8 @@ import java.util.List;
  * <li>summary: 用户须知</li>
  * <li>noticeFlag: 是否开启用户须知 0：关闭，1：开启</li>
  * <li>noticeContact: 用户须知的联系电话</li>
+ * <li>monthCardFlag: 是否开启月卡  0：不开启，1：开启 {@link ParkingConfigFlag}</li>
+ * <li>monthCardMaxRequestFlag: 是否超过最大月卡请求次数  0：否，1：是</li>
  * </ul>
  */
 public class ParkingLotDTO {
@@ -92,9 +94,19 @@ public class ParkingLotDTO {
     private String province;
     private String city;
     private Byte invoiceTypeFlag;
-
+    private Byte monthCardFlag;
+    private Byte monthCardMaxRequestFlag;
     
-    public Byte getIdentityCardFlag() {
+
+    public Byte getMonthCardFlag() {
+		return monthCardFlag;
+	}
+
+	public void setMonthCardFlag(Byte monthCardFlag) {
+		this.monthCardFlag = monthCardFlag;
+	}
+
+	public Byte getIdentityCardFlag() {
         return identityCardFlag;
     }
 
@@ -376,6 +388,14 @@ public class ParkingLotDTO {
 
 	public void setInvoiceTypeFlag(Byte invoiceTypeFlag) {
 		this.invoiceTypeFlag = invoiceTypeFlag;
+	}
+
+	public Byte getMonthCardMaxRequestFlag() {
+		return monthCardMaxRequestFlag;
+	}
+
+	public void setMonthCardMaxRequestFlag(Byte monthCardMaxRequestFlag) {
+		this.monthCardMaxRequestFlag = monthCardMaxRequestFlag;
 	}
 
 	@Override

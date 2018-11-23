@@ -8447,7 +8447,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
         LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
         if (identifier == null) {
-            identifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifierByIdentifierToken(namespaceId,identifierToken), UserIdentifier.class);
+         //   identifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifierByIdentifierToken(namespaceId,identifierToken), UserIdentifier.class);
             LOGGER.info("get userIdentifier from unite user namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
             if (identifier != null) {
                 this.userProvider.createIdentifierFromUnite(identifier);
