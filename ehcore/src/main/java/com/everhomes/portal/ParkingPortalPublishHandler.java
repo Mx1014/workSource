@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
+import com.everhomes.rentalv2.RentalCommonServiceImpl;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -33,6 +34,8 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
     private ParkingProvider parkingProvider;
     @Autowired
     private Rentalv2Provider rentalv2Provider;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
 
@@ -43,8 +46,7 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
         }
         
         if(null == parkingInstanceConfig.getResourceTypeId()){
-            RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, appName, (byte)0,
-                    (byte)0,RentalV2ResourceType.VIP_PARKING.getCode());
+            RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, appName);
             parkingInstanceConfig.setResourceTypeId(rentalResourceType.getId());
         }
 
@@ -140,27 +142,12 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
         return actionData;
     }
 
-    private RentalResourceType createRentalResourceType(Integer namespaceId, String name, Byte pageType,Byte payMode,String identify){
-        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(namespaceId, identify);
+    private RentalResourceType createRentalResourceType(Integer namespaceId, String name){
+        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(namespaceId, RentalV2ResourceType.VIP_PARKING.getCode());
         if (type != null){ //原来就有了 直接拿过来用 不重新生成
             return type;
         }
-        RentalResourceType rentalResourceType = new RentalResourceType();
-        rentalResourceType.setNamespaceId(namespaceId);
-        rentalResourceType.setName(name);
-        if(null == pageType){
-            pageType = 0;
-        }
-        if (null == payMode)
-            payMode = 0;
-        if (null == identify)
-            identify = RentalV2ResourceType.DEFAULT.getCode();
-        rentalResourceType.setPageType(pageType);
-        rentalResourceType.setPayMode(payMode);
-        rentalResourceType.setIdentify(identify);
-        rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
-        rentalResourceType.setUnauthVisible((byte)1);
-        rentalv2Provider.createRentalResourceType(rentalResourceType);
-        return rentalResourceType;
+        return rentalCommonService.createRentalResourceType(namespaceId,name,(byte)0,
+                (byte)0,RentalV2ResourceType.VIP_PARKING.getCode(),(byte)1);
     }
 }

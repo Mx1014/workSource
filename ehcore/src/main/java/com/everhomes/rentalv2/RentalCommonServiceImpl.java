@@ -121,6 +121,40 @@ public class RentalCommonServiceImpl {
         return rs;
     }
 
+    public RentalResourceType createRentalResourceType(Integer namespaceId, String name, Byte pageType,Byte payMode,
+                                                       String identify,Byte unauthVisible){
+        RentalResourceType rentalResourceType = new RentalResourceType();
+        rentalResourceType.setNamespaceId(namespaceId);
+        rentalResourceType.setName(name);
+        if(null == pageType)
+            pageType = 0;
+        if (null == payMode)
+            payMode = 0;
+        if (null == identify)
+            identify = RentalV2ResourceType.DEFAULT.getCode();
+        if (null == unauthVisible)
+            unauthVisible = (byte)0;
+        rentalResourceType.setPageType(pageType);
+        rentalResourceType.setPayMode(payMode);
+        rentalResourceType.setIdentify(identify);
+        rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
+        rentalResourceType.setUnauthVisible(unauthVisible);
+        rentalv2Provider.createRentalResourceType(rentalResourceType);
+        return rentalResourceType;
+    }
+
+    public void rentalOrderSuccess(Long rentalBillId){
+        RentalOrder rentalBill = rentalv2Provider.findRentalBillById(rentalBillId);
+        rentalBill.setStatus(SiteBillStatus.SUCCESS.getCode());
+        rentalv2Provider.updateRentalBill(rentalBill);
+    }
+
+    public void rentalOrderCancel(Long rentalBillId){
+        RentalOrder rentalBill = rentalv2Provider.findRentalBillById(rentalBillId);
+        rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
+        rentalv2Provider.updateRentalBill(rentalBill);
+    }
+
     public void sendMessageToUser(Long userId, String content) {
         if(null == userId)
             return;

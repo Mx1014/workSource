@@ -7303,43 +7303,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return ConvertHelper.convert(this.rentalv2Provider.findRentalResourceTypeById(cmd.getId()), ResourceTypeDTO.class);
 	}
 
-	//	@Override
-//	public void createResourceType(CreateResourceTypeCommand cmd) {
-//		cmd.setStatus(ResourceTypeStatus.DISABLE.getCode());
-//		RentalResourceType rsType = ConvertHelper.convert(cmd, RentalResourceType.class);
-//		this.rentalv2Provider.createRentalResourceType(rsType);
-//
-//	}
-//
-//	@Override
-//	public void deleteResourceType(DeleteResourceTypeCommand cmd) {
-//		// TODO 图标也要删除
-//		this.rentalv2Provider.deleteRentalResourceType(cmd.getId());
-//
-//	}
-//
-//	@Override
-//	public void updateResourceType(UpdateResourceTypeCommand cmd) {
-//		//  更新type不更新status
-//		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(cmd.getId());
-//		rsType.setIconUri(cmd.getIconUri());
-//		rsType.setName(cmd.getName());
-//		rsType.setPageType(cmd.getPageType());
-//		this.rentalv2Provider.updateRentalResourceType(rsType);
-//	}
-
-//	@Override
-//	public void closeResourceType(CloseResourceTypeCommand cmd) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void openResourceType(OpenResourceTypeCommand cmd) {
-//		// TODO Auto-generated method stub
-//
-//	}
-
 	@Override
 	public void deleteResource(DeleteResourceCommand cmd) {
 
@@ -7661,7 +7624,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		QueryDefaultRuleAdminCommand queryRuleCmd = ConvertHelper.convert(cmd, QueryDefaultRuleAdminCommand.class);
 
 		QueryDefaultRuleAdminResponse queryRule = queryDefaultRule(queryRuleCmd);
-		return convertResourceTimeRuleDTO(queryRule, cmd.getSourceType());
+		return convertResourceTimeRuleDTO(queryRule);
 
 	}
 
@@ -7687,7 +7650,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return queryRule;
 	}
 
-	private ResourceTimeRuleDTO convertResourceTimeRuleDTO(QueryDefaultRuleAdminResponse rule, String sourceType) {
+	private ResourceTimeRuleDTO convertResourceTimeRuleDTO(QueryDefaultRuleAdminResponse rule) {
 		ResourceTimeRuleDTO dto = ConvertHelper.convert(rule, ResourceTimeRuleDTO.class);
 
 		return dto;
