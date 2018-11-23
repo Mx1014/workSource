@@ -93,6 +93,6 @@ CREATE TABLE `eh_office_cubicle_payee_accounts` (
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
   `merchant_id` BIGINT COMMENT '商户ID',
-  `peyee_id` BIGINT,
+  `payee_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='工位预定收款账户表';
