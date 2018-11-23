@@ -597,6 +597,9 @@ public class CustomerServiceImpl implements CustomerService {
         if (cmd.getSourceId() != null) {
             saveCustomerTransferEvent(UserContext.currentUserId(), customer, cmd.getSourceId(), cmd.getDeviceType());
         }
+        if(customer.getLevelItemId() != null){
+            invitedCustomerService.createCustomerLevelByCustomerId(customer.getId(), customer.getLevelItemId());
+        }
         syncPotentialTalentToCustomer(customer.getId(),cmd.getSourceId());
         enterpriseCustomerSearcher.feedDoc(customer);
         return convertToDTO(customer);

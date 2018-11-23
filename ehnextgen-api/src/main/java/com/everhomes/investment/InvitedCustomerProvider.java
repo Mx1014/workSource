@@ -88,7 +88,7 @@ public interface InvitedCustomerProvider {
 
     Integer countCustomerNumByCreateDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
 
-    Integer countTrackingNumByCreateDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
+    Integer countTrackingNumByTrackingDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
 
     void createCustomerStatisticsDaily(CustomerStatisticDaily daily);
 

@@ -25,8 +25,6 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.ListCommunitiesCommand;
 import com.everhomes.rest.community.ListCommunitiesResponse;
@@ -37,7 +35,6 @@ import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.module.CheckModuleManageCommand;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.FieldItemDTO;
@@ -60,14 +57,9 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1098,7 +1090,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             nextPageAnchor = cmd.getPageAnchor() + 1;
             monthlyTotals.remove(monthlyTotals.size() - 1);
         }
-        response.setDtos(monthlyTotals.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
+        response.setDtos(monthlyTotals.stream().map(r->{
+            ConvertHelper.convert(r, CustomerStatisticsDTO.class);
+        }).collect(Collectors.toList()));
         response.setNextPageAnchor(nextPageAnchor);
         return response;
     }
@@ -1684,7 +1678,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         data.setNamespaceId(namespaceId);
         data.setCommunityId(communityId);
         data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime));
-        data.setTrackingNum(invitedCustomerProvider.countTrackingNumByCreateDate(communityId, statisticStartTime, statisticEndTime));
+        data.setTrackingNum(invitedCustomerProvider.countTrackingNumByTrackingDate(communityId, statisticStartTime, statisticEndTime));
         data.setLossCustomerNum(lossNum);
         data.setHistoryCustomerNum(historyNum);
         data.setRegisteredCustomerNum(registeredNum);

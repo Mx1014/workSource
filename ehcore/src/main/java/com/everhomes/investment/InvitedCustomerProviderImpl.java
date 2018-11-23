@@ -670,7 +670,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public Integer countTrackingNumByCreateDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate){
+    public Integer countTrackingNumByTrackingDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerTrackingsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKINGS);
         query.addSelect(Tables.EH_CUSTOMER_TRACKINGS.ID);
