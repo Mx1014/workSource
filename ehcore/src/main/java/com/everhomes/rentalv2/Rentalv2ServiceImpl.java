@@ -9098,7 +9098,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				if (response1 != null && response1.getDtos() != null){
 					for (OrganizationDTO dto : response1.getDtos()) {
 						if (dto.getId().equals(cmd.getOrganizationId())){
-							if (TrueOrFalseFlag.TRUE.getCode().equals(dto.getManagerFlag()))
+							if (TrueOrFalseFlag.TRUE.getCode().equals(dto.getProjectManageFlag()))
 								sceneType = SceneType.PM_ADMIN.getCode();
 							else if (sceneType.equals(SceneType.PARK_TOURIST.getCode()))
 										sceneType = SceneType.ENTERPRISE.getCode();
@@ -9116,7 +9116,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			if (response1 != null && response1.getDtos() != null){
 				for (OrganizationDTO dto : response1.getDtos()) {
 					if (dto.getId().equals(cmd.getOrganizationId())){
-						if (TrueOrFalseFlag.TRUE.getCode().equals(dto.getManagerFlag()))
+						if (TrueOrFalseFlag.TRUE.getCode().equals(dto.getProjectManageFlag()))
 							sceneType = SceneType.PM_ADMIN.getCode();
 						else
 							sceneType = SceneType.ENTERPRISE.getCode();
