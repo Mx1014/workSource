@@ -1090,9 +1090,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             nextPageAnchor = cmd.getPageAnchor() + 1;
             monthlyTotals.remove(monthlyTotals.size() - 1);
         }
-        response.setDtos(monthlyTotals.stream().map(r->{
-            ConvertHelper.convert(r, CustomerStatisticsDTO.class);
-        }).collect(Collectors.toList()));
+        response.setDtos(monthlyTotals.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
         response.setNextPageAnchor(nextPageAnchor);
         return response;
     }
@@ -1742,7 +1740,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                 cmd6.setPageSize(pageSize);
                 cmd6.setPageAnchor(pageOffSet);
                 GetCustomerStatisticResponse response5 = getCustomerStatisticsMonthlyTotal(cmd6);
-                in = this.getClass().getResourceAsStream("/excels/customer/monthly.xlsx");
+                in = this.getClass().getResourceAsStream("/excels/customer/monthlyTotal.xlsx");
                 dtos = response5.getDtos();
                 break;
             case 6:
