@@ -144,7 +144,7 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         String templateLocale = RentalNotificationTemplateCode.locale;
         int templateId = SmsTemplateCode.RENTAL_CANCEL_NOT_PAY;
 
-        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", rentalBill.getUseDetail());
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", rentalBill.getUseDetail());
         smsProvider.addToTupleList(variables, "resourceName", rentalBill.getResourceName());
         smsProvider.addToTupleList(variables, "orderNum", rentalBill.getOrderNo());
 
