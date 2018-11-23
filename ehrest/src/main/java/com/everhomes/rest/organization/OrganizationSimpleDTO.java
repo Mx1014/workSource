@@ -39,7 +39,6 @@ public class OrganizationSimpleDTO {
 
 	private String displayName;
 
-	public Long getId() {
 	private Byte userIsManage;
 
     public Byte getUserIsManage() {
