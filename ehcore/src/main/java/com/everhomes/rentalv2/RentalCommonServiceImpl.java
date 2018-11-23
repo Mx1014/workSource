@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class RentalCommonServiceImpl {
     }
 
     public RentalResourceType createRentalResourceType(Integer namespaceId, String name, Byte pageType,Byte payMode,
-                                                       String identify,Byte unauthVisible){
+                                                       String identify,Byte unauthVisible,Byte crossCommuFlag){
         RentalResourceType rentalResourceType = new RentalResourceType();
         rentalResourceType.setNamespaceId(namespaceId);
         rentalResourceType.setName(name);
@@ -134,11 +135,14 @@ public class RentalCommonServiceImpl {
             identify = RentalV2ResourceType.DEFAULT.getCode();
         if (null == unauthVisible)
             unauthVisible = (byte)0;
+        if (null == crossCommuFlag)
+            crossCommuFlag = (byte)1;
         rentalResourceType.setPageType(pageType);
         rentalResourceType.setPayMode(payMode);
         rentalResourceType.setIdentify(identify);
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
         rentalResourceType.setUnauthVisible(unauthVisible);
+        rentalResourceType.setCrossCommuFlag(crossCommuFlag);
         rentalv2Provider.createRentalResourceType(rentalResourceType);
         return rentalResourceType;
     }
@@ -153,6 +157,40 @@ public class RentalCommonServiceImpl {
         RentalOrder rentalBill = rentalv2Provider.findRentalBillById(rentalBillId);
         rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
         rentalv2Provider.updateRentalBill(rentalBill);
+    }
+
+    public List<PriceRuleDTO> buildDefaultPriceRule(List<Byte> rentalTypes) {
+        List<PriceRuleDTO> priceRules = new ArrayList<>();
+        rentalTypes.forEach(r -> {
+            priceRules.add(createInitPriceRuleDTO(r));
+        });
+
+        return priceRules;
+    }
+
+    public PriceRuleDTO createInitPriceRuleDTO(Byte rentalType) {
+        PriceRuleDTO rule = new PriceRuleDTO();
+        rule.setRentalType(rentalType);
+        rule.setPriceType(RentalPriceType.LINEARITY.getCode());
+        rule.setUserPriceType(RentalUserPriceType.UNIFICATION.getCode());
+        rule.setInitiatePrice(new BigDecimal(0));
+        rule.setWorkdayPrice(new BigDecimal(0));
+
+        //设置类型价格
+        rule.setClassifications(new ArrayList<>());
+        RentalPriceClassificationDTO classification = new RentalPriceClassificationDTO();
+        classification.setWorkdayPrice(new BigDecimal(0));
+        classification.setInitiatePrice(new BigDecimal(0));
+        classification.setUserPriceType(RentalUserPriceType.USER_TYPE.getCode());
+        classification.setClassification(SceneType.ENTERPRISE.getCode());
+        rule.getClassifications().add(classification);
+        classification = ConvertHelper.convert(classification,RentalPriceClassificationDTO.class);
+        classification.setClassification(SceneType.PM_ADMIN.getCode());
+        rule.getClassifications().add(classification);
+        classification = ConvertHelper.convert(classification,RentalPriceClassificationDTO.class);
+        classification.setClassification(SceneType.PARK_TOURIST.getCode());
+        rule.getClassifications().add(classification);
+        return rule;
     }
 
     public void sendMessageToUser(Long userId, String content) {

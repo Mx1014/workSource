@@ -62,7 +62,7 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     private RentalResourceType createRentalResourceType(Integer namespaceId, String name,RentalInstanceConfig rentalInstanceConfig){
         RentalResourceType rentalResourceType = rentalCommonService.createRentalResourceType(namespaceId,name,
                 rentalInstanceConfig.getPageType(),rentalInstanceConfig.getPayMode(),rentalInstanceConfig.getIdentify(),
-                rentalInstanceConfig.getUnauthVisible());
+                rentalInstanceConfig.getUnauthVisible(),rentalInstanceConfig.getCrossCommuFlag());
 
         rentalInstanceConfig.setPageType(rentalResourceType.getPageType());
         rentalInstanceConfig.setPayMode(rentalResourceType.getPayMode());
