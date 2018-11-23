@@ -8,8 +8,7 @@ import com.everhomes.parking.ParkingSpace;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.rentalv2.*;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.SearchRentalOrdersCommand;
+import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DownloadUtils;
@@ -29,6 +28,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,6 +45,8 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
     private Rentalv2Provider rentalv2Provider;
     @Autowired
     private Rentalv2Service rentalv2Service;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
 
     private ThreadLocal<SimpleDateFormat> datetimeSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
@@ -78,6 +81,38 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
     @Override
     public void updateRentalResource(String resourceJson) {
 
+    }
+
+    @Override
+    public void buildDefaultRule(AddDefaultRuleAdminCommand addCmd) {
+        List<Byte> rentalTypes = Arrays.asList(RentalType.HALFDAY.getCode(), RentalType.DAY.getCode());
+        addCmd.setPriceRules(rentalCommonService.buildDefaultPriceRule(rentalTypes));
+        addCmd.setRentalTypes(rentalTypes);
+        //设置按半天模式 开放时间
+        List<TimeIntervalDTO> timeIntervals = new ArrayList<>();
+        TimeIntervalDTO timeIntervalDTO = new TimeIntervalDTO();
+        timeIntervalDTO.setBeginTime(8D);
+        timeIntervalDTO.setEndTime(12D);
+        timeIntervalDTO.setAmorpm((byte)0);
+        timeIntervalDTO.setName("上午");
+        timeIntervals.add(timeIntervalDTO);
+        timeIntervalDTO = new TimeIntervalDTO();
+        timeIntervalDTO.setBeginTime(12D);
+        timeIntervalDTO.setEndTime(18D);
+        timeIntervalDTO.setAmorpm((byte)1);
+        timeIntervalDTO.setName("下午");
+        timeIntervals.add(timeIntervalDTO);
+        addCmd.setHalfDayTimeIntervals(timeIntervals);
+
+        addCmd.setTimeIntervals(Collections.singletonList(timeIntervalDTO));
+        //设置按天模式 开放时间
+        List<RentalOpenTimeDTO> openTimes = new ArrayList<>();
+        RentalOpenTimeDTO openTimeDTO = new RentalOpenTimeDTO();
+        openTimeDTO.setRentalType(RentalType.DAY.getCode());
+        openTimeDTO.setDayOpenTime(8D);
+        openTimeDTO.setDayCloseTime(22D);
+        openTimes.add(openTimeDTO);
+        addCmd.setOpenTimes(openTimes);
     }
 
     @Override

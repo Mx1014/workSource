@@ -148,6 +148,6 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
             return type;
         }
         return rentalCommonService.createRentalResourceType(namespaceId,name,(byte)0,
-                (byte)0,RentalV2ResourceType.VIP_PARKING.getCode(),(byte)1);
+                (byte)0,RentalV2ResourceType.VIP_PARKING.getCode(),(byte)1,(byte)0);
     }
 }
