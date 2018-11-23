@@ -29,6 +29,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
+import com.everhomes.rest.asset.bill.BatchDeleteBillResponse;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
@@ -1751,15 +1752,11 @@ public class AssetController extends ControllerBase {
 	 * <b>URL: /asset/batchDeleteBill</b>
 	 */
 	@RequestMapping("batchDeleteBill")
-	@RestReturn(value = String.class)
+	@RestReturn(value = BatchDeleteBillResponse.class)
 	public RestResponse batchDeleteBill(BatchDeleteBillCommand cmd) {
-		String result = assetBillService.batchDeleteBill(cmd);
-		RestResponse response = new RestResponse();
-		if (result.equals("OK")) {
-			response.setErrorDescription("OK");
-		} else {
-			response.setErrorDescription(result);
-		}
+		BatchDeleteBillResponse res = assetBillService.batchDeleteBill(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}

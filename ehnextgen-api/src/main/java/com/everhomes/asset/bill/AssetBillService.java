@@ -5,6 +5,7 @@ import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
+import com.everhomes.rest.asset.bill.BatchDeleteBillResponse;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
@@ -17,7 +18,7 @@ import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
  */
 public interface AssetBillService {
 
-	String batchDeleteBill(BatchDeleteBillCommand cmd);
+	BatchDeleteBillResponse batchDeleteBill(BatchDeleteBillCommand cmd);
 
 	ListCheckContractIsProduceBillResponse checkContractIsProduceBill(CheckContractIsProduceBillCmd cmd);
 
