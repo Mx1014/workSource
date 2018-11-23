@@ -1681,6 +1681,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         Integer deleteNum = invitedCustomerProvider.countCustomerLevelLossChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime, CustomerLevelType.DELETE_CUSTOMER.getCode());
 
         StatisticDataDTO data = new StatisticDataDTO();
+        data.setNamespaceId(namespaceId);
         data.setCommunityId(communityId);
         data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime));
         data.setTrackingNum(invitedCustomerProvider.countTrackingNumByCreateDate(communityId, statisticStartTime, statisticEndTime));
