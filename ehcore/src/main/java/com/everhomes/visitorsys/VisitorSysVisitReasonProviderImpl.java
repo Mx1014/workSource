@@ -64,6 +64,7 @@ public class VisitorSysVisitReasonProviderImpl implements VisitorSysVisitReasonP
 		List<VisitorSysVisitReason> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISIT_REASON)
 				.where(Tables.EH_VISITOR_SYS_VISIT_REASON.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_VISITOR_SYS_VISIT_REASON.STATUS.eq((byte)2))
+                .and(Tables.EH_VISITOR_SYS_VISIT_REASON.REASON_TYPE.eq(communityType))
 				.orderBy(Tables.EH_VISITOR_SYS_VISIT_REASON.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitReason.class));
 		if(list==null || list.size()==0){

@@ -411,7 +411,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public ListVisitReasonsResponse listVisitReasons(BaseVisitorsysCommand cmd) {
         beforePostForWeb(cmd);
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-        List<VisitorSysVisitReason> visitorSysVisitReasons = visitorSysVisitReasonProvider.listVisitorSysVisitReason(cmd.getNamespaceId());
+        List<VisitorSysVisitReason> visitorSysVisitReasons = visitorSysVisitReasonProvider.listVisitorSysVisitReason(cmd.getNamespaceId(),cmd.getCommunityType());
         ListVisitReasonsResponse response = new ListVisitReasonsResponse();
         response.setVisitorReasonList(visitorSysVisitReasons.stream().map(r->{
             BaseVisitorReasonDTO convert = new BaseVisitorReasonDTO();
