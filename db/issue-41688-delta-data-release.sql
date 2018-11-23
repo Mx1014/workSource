@@ -38,6 +38,10 @@ VALUES (@id := @id+1,50100,'组织架构','通讯录',1,1,1,@categoryId,1);
 INSERT INTO eh_service_module_entries (id,module_id, module_name, entry_name, terminal_type, location_type, scene_type, app_category_id, default_order)
 VALUES (@id := @id+1,13000,'任务管理','我的任务',1,1,1,@categoryId,2);
 
+-- AUTHOR: 梁燕龙 20181123
+-- REMARK: 删除原来的用户编辑数据
+DELETE from eh_user_apps WHERE location_type = 1 OR location_type = 2;
+DELETE from eh_user_app_flags WHERE location_type = 1 OR location_type = 2;
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev
