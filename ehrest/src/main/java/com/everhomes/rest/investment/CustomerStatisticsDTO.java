@@ -18,6 +18,15 @@ public class CustomerStatisticsDTO {
     private Integer deleteCustomerNum;
     private Integer trackingNum;
     private Integer customerCount;
+    private String dateString;
+
+    public String getDateString() {
+        return dateString;
+    }
+
+    public void setDateString(String dateString) {
+        this.dateString = dateString;
+    }
 
     public String getCommunityName() {
         return communityName;

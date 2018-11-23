@@ -1000,6 +1000,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
         List<CustomerStatisticsDTO> dtos = dailies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList());
         for(CustomerStatisticsDTO dto: dtos){
+            if(dto.getDateStr() != null){
+                SimpleDateFormat haveDay = new SimpleDateFormat("yyyy-MM-dd");
+                dto.setDateString(haveDay.format(dto.getDateStr()));
+            }
             dto.setCommunityName(communityProvider.findCommunityById(dto.getCommunityId()).getName());
         }
         response.setDtos(dtos);
@@ -1030,7 +1034,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             nextPageAnchor = cmd.getPageAnchor() + 1;
             dailies.remove(dailies.size() - 1);
         }
-        response.setDtos(dailies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
+        List<CustomerStatisticsDTO> dtos = dailies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList());
+        for(CustomerStatisticsDTO dto: dtos){
+            if(dto.getDateStr() != null){
+                SimpleDateFormat haveDay = new SimpleDateFormat("yyyy-MM-dd");
+                dto.setDateString(haveDay.format(dto.getDateStr()));
+            }
+        }
+        response.setDtos(dtos);
         response.setNextPageAnchor(nextPageAnchor);
         return response;
     }
@@ -1060,6 +1071,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
         List<CustomerStatisticsDTO> dtos = monthlies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList());
         for(CustomerStatisticsDTO dto: dtos){
+            if(dto.getDateStr() != null){
+                SimpleDateFormat haveDay = new SimpleDateFormat("yyyy-MM");
+                dto.setDateString(haveDay.format(dto.getDateStr()));
+            }
             dto.setCommunityName(communityProvider.findCommunityById(dto.getCommunityId()).getName());
         }
         response.setDtos(dtos);
@@ -1090,7 +1105,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             nextPageAnchor = cmd.getPageAnchor() + 1;
             monthlyTotals.remove(monthlyTotals.size() - 1);
         }
-        response.setDtos(monthlyTotals.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
+        List<CustomerStatisticsDTO> dtos = monthlyTotals.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList());
+        for(CustomerStatisticsDTO dto: dtos){
+            if(dto.getDateStr() != null){
+                SimpleDateFormat haveDay = new SimpleDateFormat("yyyy-MM");
+                dto.setDateString(haveDay.format(dto.getDateStr()));
+            }
+        }
+        response.setDtos(dtos);
         response.setNextPageAnchor(nextPageAnchor);
         return response;
     }
@@ -1885,9 +1907,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         Cell cell1 = tempRow.createCell(0);
         cell1.setCellStyle(style);
         if(isLastRow) {
-            cell1.setCellValue(dto.getDateStr() != null ? format.format(dto.getDateStr()) : "");
+            cell1.setCellValue(dto.getDateString() != null ? dto.getDateString() : "");
         }else {
-            cell1.setCellValue(dto.getDateStr() != null ? format.format(dto.getDateStr()) : "");
+            cell1.setCellValue(dto.getDateString() != null ? dto.getDateString() : "");
         }
         Cell cell2 = tempRow.createCell(1);
         cell2.setCellStyle(style);
@@ -1921,14 +1943,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
 
     private void fillRowCellCustomerStatisticTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, CustomerStatisticsDTO dto) {
-        SimpleDateFormat format  = new SimpleDateFormat("yyyy-MM-dd");
+        //SimpleDateFormat format  = new SimpleDateFormat("yyyy-MM-dd");
         //序号
         Cell cell1 = tempRow.createCell(0);
         cell1.setCellStyle(style);
         if(isLastRow) {
-            cell1.setCellValue(dto.getDateStr() != null ? format.format(dto.getDateStr()) : "");
+            cell1.setCellValue(dto.getDateString() != null ? dto.getDateString() : "");
         }else {
-            cell1.setCellValue(dto.getDateStr() != null ? format.format(dto.getDateStr()) : "");
+            cell1.setCellValue(dto.getDateString() != null ? dto.getDateString() : "");
         }
         Cell cell2 = tempRow.createCell(1);
         cell2.setCellStyle(style);
