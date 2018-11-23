@@ -1850,14 +1850,15 @@ public class AclinkAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/aclink/visitorComingNotice</b>
-     * <p>开关访客来访提示</p>
+     * <b>URL: /admin/aclink/sendMessageTest</b>
+     * <p>访客来访消息提示</p>
      * @return
      */
-    @RequestMapping("visitorComingNotice")
-    @RestReturn(value = VisitorComingNoticeResponse.class)
-    public RestResponse visitorComingNotice(@Valid VisitorComingNoticeCommand cmd) {
-        RestResponse response = new RestResponse(doorAccessService.visitorComingNotice(cmd));
+    @RequestMapping("sendMessageTest")
+    @RestReturn(value = String.class)
+    public RestResponse sendMessageTest(@Valid SendMessageTestCommand cmd) {
+        doorAccessService.sendMessageToAuthCreator(cmd.getAuthId());
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

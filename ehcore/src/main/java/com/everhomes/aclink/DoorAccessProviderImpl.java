@@ -569,6 +569,8 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_ACLINK_FORM_VALUES);
         query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_ID.eq(id));
+        //临时授权自定义字段
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.TYPE.eq(AclinkFormValuesType.CUSTOM_FIELD.getCode()));
         query.addConditions(Tables.EH_ACLINK_FORM_VALUES.STATUS.eq((byte)1));
         query.addOrderBy(Tables.EH_ACLINK_FORM_VALUES.ID.desc());
         List<AclinkFormValuesDTO> values = query.fetch().map((r) -> {

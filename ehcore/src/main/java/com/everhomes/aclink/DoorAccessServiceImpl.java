@@ -428,37 +428,53 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
     @Override
-    public void sendMessageToAuthCreator(Long creatorId, Long visitorId, Long doorId){
-        User creator = userProvider.findUserById(creatorId);
-        User visitor = userProvider.findUserById(visitorId);
-        DoorAccess door = doorAccessProvider.getDoorAccessById(doorId);
+    public void sendMessageToAuthCreator(Long authId){
+        DoorAuth auth = doorAuthProvider.getDoorAuthById(authId);
+        User creator = userProvider.findUserById(auth.getApproveUserId());
+        String visitorName = auth.getNickname();
+        DoorAccess door = doorAccessProvider.getDoorAccessById(auth.getDoorId());
 
-        if(creator == null || visitor == null || door == null){
+        if(creator == null || visitorName == null || door == null){
             return;
         }
-        sendMessageToAuthCreator(creator, visitor, door);
+        sendMessageToAuthCreator(creator, visitorName, door);
     }
 
-    private void sendMessageToAuthCreator(User creator, User visitor,DoorAccess door){
+    private void sendMessageToAuthCreator(User creator, String visitorName,DoorAccess door){
         String locale = creator.getLocale();
-//        Map<String, Object> map = new HashMap<String, Object>();
-//        String userName = user.getNickName();
-//        if(userName == null || userName.isEmpty()) {
-//            userName = user.getAccountName();
+        Map<String, Object> map = new HashMap<String, Object>();
+//        String visitorName = visitor.getNickName();
+//        if(visitorName == null || visitorName.isEmpty()) {
+//            visitorName = visitor.getAccountName();
 //        }
-//        map.put("userName", userName);
-//
-//        //displayName不为空就拿displayName by liuyilin 20180625
-//        map.put("doorName", doorAcc.getDisplayNameNotEmpty());
-//
-//        String scope = AclinkNotificationTemplateCode.SCOPE;
-//        int code = AclinkNotificationTemplateCode.ACLINK_NEW_AUTH;
-//        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-//
-//        Map<String, String> meta = new HashMap<String, String>();
-//        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.ACLINK_AUTH_CHANGED.getCode());
-//        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(new AclinkMessageMeta(user.getId(), doorAcc.getId(), doorType)));
-//        sendMessageToUser(user.getId(), notifyTextForApplicant, meta);
+        map.put("visitorName", visitorName);
+
+        map.put("doorName", door.getDisplayNameNotEmpty());
+
+        String scope = AclinkNotificationTemplateCode.SCOPE;
+        int code = AclinkNotificationTemplateCode.ACLINK_VISITOR_COMING;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//          String notifyTextForApplicant = "ceshi";
+        Map<String, String> meta =  new HashMap<String, String>();
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "门禁进入提醒");
+        sendMessageToAuthCreator(creator.getId(),notifyTextForApplicant,meta);
+    }
+
+    private void sendMessageToAuthCreator(Long creatorId, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), creatorId.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_ACLINK);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+        }
+        LOGGER.debug("messageDTO : {}", messageDto);
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                creatorId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
     @Override
@@ -1264,7 +1280,24 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         doorAuth.setPhone(custom.getPhones().get(0));    
                         }
                     
-                    doorAuthProvider.createDoorAuth(doorAuth);
+                    Long authId = doorAuthProvider.createDoorAuth(doorAuth);
+                    //访客来访消息提醒
+                    User user = UserContext.current().getUser();
+                    Integer namespaceId = UserContext.getCurrentNamespaceId();
+                    if(null!= cmd.getNotice() && cmd.getNotice() == (byte)1){
+                        AclinkFormValues notice = new AclinkFormValues();
+                        notice.setNamespaceId(namespaceId);
+                        notice.setTitleId(0L);
+                        notice.setValue("notice");
+                        notice.setType(AclinkFormValuesType.VISITOR_NOTICE.getCode());
+                        notice.setStatus((byte)1);
+                        //表单记录ownerId对应授权Id
+                        notice.setOwnerId(authId);
+                        notice.setOwnerType((byte)5);
+                        notice.setCreatorUid(user.getId());
+                        notice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        doorAccessProvider.createAclinkFormValues(notice);
+                    }
                     //by liuyilin 20180502 同步信息到内网服务器
                     if(doorAcc.getLocalServerId() != null){
                     	SyncLocalPhotoByUserIdCommand syncCmd = new SyncLocalPhotoByUserIdCommand();
@@ -3631,7 +3664,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setDescription(cmd.getDescription());
         auth.setDoorId(cmd.getDoorId());
         auth.setGroupType(cmd.getGroupType());
-        auth.setDriver(this.getQrDriverZuolinInner(cmd.getNamespaceId()).getCode());
+        //二维码类型(0 静态 zuolin；1 动态 zuolin_v2
+        if(null != cmd.getQrType() && cmd.getQrType() == (byte)0) {
+            auth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
+            }
+        else if(null != cmd.getQrType() && cmd.getQrType() == (byte)1){
+            auth.setDriver(DoorAccessDriverType.ZUOLIN_V2.getCode());
+        }else{
+            auth.setDriver(this.getQrDriverZuolinInner(cmd.getNamespaceId()).getCode());
+        }
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
@@ -5882,6 +5923,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAccessProvider.createAclinkFormValues(value);
             }
         }
+        //访客来访消息提醒
+        if(null!= cmd.getNotice() && cmd.getNotice() == (byte)1){
+            AclinkFormValues notice = new AclinkFormValues();
+            notice.setNamespaceId(namespaceId);
+            notice.setTitleId(0L);
+            notice.setValue("notice");
+            notice.setType(AclinkFormValuesType.VISITOR_NOTICE.getCode());
+            notice.setStatus((byte)1);
+            //表单记录ownerId对应授权Id
+            notice.setOwnerId(auth.getId());
+            notice.setOwnerType((byte)5);
+            notice.setCreatorUid(user.getId());
+            notice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            doorAccessProvider.createAclinkFormValues(notice);
+        }
 //TODO: 还需要吗
 //        DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
 //        dto.setQrString(auth.getQrKey());
@@ -7240,6 +7296,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 DoorsAndGroupsDTO dto = new DoorsAndGroupsDTO();
                 dto.setId(door.getId());
                 dto.setType((byte)1); //门禁
+                dto.setDoortype(door.getDoorType());
                 dto.setName(door.getDisplayName());
                 dto.setStatus(door.getStatus());
                 dtos.add(dto);

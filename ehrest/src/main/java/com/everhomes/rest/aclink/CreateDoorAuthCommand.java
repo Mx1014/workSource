@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>operatorOrgId: 操作人所在的公司</li>
  * <li>organization: 用户来自于，访客授权使用</li>
  * <li>description: 授权描述，访客授权使用</li>
+ * <li>notice: 访客来访提示 1 需提示 null 不提示（只在app端）</li>
  * </ul>
  * @author janson
  *
@@ -45,8 +46,16 @@ public class CreateDoorAuthCommand {
     private String authMethod;
 
     private String keyU;
-    
-    
+    private Byte notice;
+
+    public Byte getNotice() {
+        return notice;
+    }
+
+    public void setNotice(Byte notice) {
+        this.notice = notice;
+    }
+
     public Long getUserId() {
         return userId;
     }

@@ -85,7 +85,7 @@ public interface DoorAccessService {
 
     void sendMessageToUser(Long uid, Long doorId, Byte doorType);
     //临时授权访客来访消息提示 add by liqingyan
-    void sendMessageToAuthCreator(Long creatorId, Long visitorId, Long doorId);
+    void sendMessageToAuthCreator(Long authId);
 
     void remoteOpenDoor(Long doorId);
 

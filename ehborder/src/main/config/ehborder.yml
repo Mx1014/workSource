@@ -16,7 +16,7 @@ border.id: 1
 border.app.key: b86ddb3b-ac77-4a65-ae03-7e8482a3db70
 border.app.secret: 2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ
 
-core.service.uri: http://10.1.10.94:8080/evh
+core.service.uri: http://10.1.140.53:8080/evh
 
 upload.max.size: 10000000
 heartbeat.interval: 10000
