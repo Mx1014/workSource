@@ -234,4 +234,11 @@ public interface ConfigConstants {
 
     // 模块安全防护会话静默时长
     public static final String SERVICE_MODULE_SECURITY_TIME_OUT = "service.module.security.time.out";
+    
+	//合同报表定时任务
+	public static final String SCHEDULE_CONTRACT_TASK_TIME = "schedule.contractstatics.cronexpression";
+	
+	//缴费对接门禁定时任务
+	public static final String SCHEDULE_ASSET_DOORACCESS_TASK_TIME = "asset.dooraccess.cronexpression";
+	
 }

@@ -100,6 +100,12 @@ SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES (@mp_id:=@mp_id+1, '204011', '0', @p_id, '批量删除', '0', NOW());
 
+-- AUTHOR: 丁建民
+-- 合同报表定时任务
+SET @eh_configurations = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ((@eh_configurations := @eh_configurations + 1), 'schedule.contractstatics.cronexpression', '0 30 2 * * ?', '合同报表定时任务', '0', NULL, '1');
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
