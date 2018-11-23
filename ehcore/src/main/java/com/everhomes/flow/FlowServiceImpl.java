@@ -6503,6 +6503,9 @@ public class FlowServiceImpl implements FlowService {
         if (cmd.getNamespaceId() == null) {
             cmd.setNamespaceId(namespaceId);
         }
+        if (cmd.getUserId() == null) {
+            cmd.setUserId(UserContext.currentUserId());
+        }
 
         List<FlowServiceTypeDTO> serviceTypes = null;
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
