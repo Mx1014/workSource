@@ -1,10 +1,12 @@
 package com.everhomes.visitorsys;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.everhomes.parking.handler.Utils;
 import com.everhomes.parking.handler.haikangweishi.HaiKangWeiShiJinMaoVendorHandler;
 import com.everhomes.rest.parking.handler.haikangweishi.ErrorCodeEnum;
 import com.everhomes.rest.parking.handler.haikangweishi.HkwsThirdResponse;
+import com.everhomes.visitorsys.hkws.HKWSDataSet;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Component
 public class VisitorSysHKWSUtil {
@@ -25,6 +28,9 @@ public class VisitorSysHKWSUtil {
 
     @Autowired
     HaiKangWeiShiJinMaoVendorHandler HKWSHandler;
+
+    @Autowired
+    HKWSUserProvider HKWSUserProvider;
 
     public String addAppointment(VisitorSysVisitor visitor){
         JSONObject params = new JSONObject();
@@ -57,21 +63,35 @@ public class VisitorSysHKWSUtil {
         return "";
     }
 
-    public void initHKWSUsers(){
+    public void initHKWSUsers(Long startTime){
+
+        Integer pageSize = 400;
+        Integer pageNo = 1;
 
         JSONObject params = new JSONObject();
 
-        params.put("pageNo",0);
-        params.put("pageSize",400);
+        params.put("pageNo",pageNo);
+        params.put("pageSize",pageSize);
         params.put("opUserUuid",HKWSHandler.getOpUserUuid(false));
-        params.put("startTime",Long.MIN_VALUE);
-        params.put("endTime",Long.MIN_VALUE);
+        params.put("startTime",startTime == null ? Long.MIN_VALUE : startTime);
+        params.put("endTime",System.currentTimeMillis());
         HkwsThirdResponse resp = HKWSHandler.post(GET_PERSON_INFO,params);
         if(!HKWSHandler.isSuccess(resp)){
 
         }
+        HKWSDataSet<HKWSUser> datas = JSONObject.parseObject(resp.getData(),new TypeReference<HKWSDataSet<HKWSUser>>(){});
 
-//        while () {}
+        while (datas.getTotal() >= pageSize) {
+            HKWSUserProvider.deleteUsers(datas.getList().stream().map(r-> r.getPersonId()).collect(Collectors.toList()));
+            HKWSUserProvider.createUsers(datas.getList());
+            params.put("pageNo",pageNo++);
+            resp = HKWSHandler.post(GET_PERSON_INFO,params);
+            if(!HKWSHandler.isSuccess(resp)){
+
+            }
+            datas = JSONObject.parseObject(resp.getData(),new TypeReference<HKWSDataSet<HKWSUser>>(){});
+
+        }
 
 
 
