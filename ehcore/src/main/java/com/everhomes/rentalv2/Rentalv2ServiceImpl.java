@@ -2947,7 +2947,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						messageMap.put("resourceType",order.getResourceType());
 						scheduleProvider.scheduleSimpleJob(
 								queueName,
-								queueName,
+								"RentalNearStartMessageJob" + order.getId(),
 								new java.util.Date(orderReminderTimeLong),
 								RentalNearStartMessageJob.class,
 								messageMap
@@ -2961,7 +2961,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						messageMap.put("resourceType",order.getResourceType());
 						scheduleProvider.scheduleSimpleJob(
 								queueName,
-								queueName,
+								"RentalNearEndMessageJob" + order.getId(),
 								new java.util.Date(orderReminderEndTimeLong),
 								RentalNearEndMessageJob.class,
 								messageMap
@@ -2992,7 +2992,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						messageMap.put("methodName", "endReminderSendMessage");
 						scheduleProvider.scheduleSimpleJob(
 								queueName,
-								queueName,
+								"RentalMessageQuartzJob" + order.getId(),
 								new java.util.Date(orderReminderEndTimeLong),
 								RentalMessageQuartzJob.class,
 								messageMap
@@ -3017,7 +3017,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		Map<String, Object> messageMap = new HashMap<>();
 		messageMap.put("orderId", cmd.getOrderId());
 		scheduleProvider.scheduleSimpleJob(
-				queueName + cmd.getOrderId(),
+				queueName,
 				"cancelBill" + cmd.getOrderId(),
 				new java.util.Date(new java.util.Date().getTime() + 30 * 1000),
 				RentalCancelOrderJob.class,
@@ -4279,7 +4279,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		Map<String, Object> messageMap = new HashMap<>();
 		messageMap.put("orderId", bill.getId());
 		scheduleProvider.scheduleSimpleJob(
-				queueName + bill.getId(),
+				queueName,
 				"cancelBill" + bill.getId(),
 				new java.util.Date(bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME),
 				RentalCancelOrderJob.class,
