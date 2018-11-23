@@ -802,8 +802,8 @@ public class Rentalv2Controller extends ControllerBase {
 	 * <p>test</p>
 	 */
 	@RequestMapping("test")
-	public void test() {
-		rentalService.test();
+	public void test(GetRentalOrderDetailCommand cmd) {
+		rentalService.test(cmd);
 
 	}
 }

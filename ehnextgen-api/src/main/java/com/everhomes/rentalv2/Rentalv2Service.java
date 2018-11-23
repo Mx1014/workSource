@@ -236,6 +236,6 @@ public interface Rentalv2Service {
 
 	ArchivesContactDTO registerUser(RegisterUserCommand cmd);
 
-	void test();
+	void test(GetRentalOrderDetailCommand cmd);
 
 }

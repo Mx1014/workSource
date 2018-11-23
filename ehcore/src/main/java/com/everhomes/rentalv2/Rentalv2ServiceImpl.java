@@ -2972,18 +2972,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						order.setStatus(SiteBillStatus.IN_USING.getCode());
 						rentalv2Provider.updateRentalBill(order);
 					}
-					//订单过期,置状态 3.5以前的逻辑
+
 					if(orderEndTimeLong <= currTime){
 						order.setStatus(SiteBillStatus.COMPLETE.getCode());
 						rentalv2Provider.updateRentalBill(order);
-					}else if(currTime + 30*60*1000L >= orderReminderTimeLong){
-						//超期未确认的置为超时
-						final Job job1 = new Job(
-								IncompleteUnsuccessRentalBillAction.class.getName(),
-								String.valueOf(order.getId()));
-
-						jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-								orderEndTimeLong);
 					}
 				}else if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
 					//订单开始 置为使用中的状态
@@ -3021,15 +3013,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
-	public void test() {
+	public void test(GetRentalOrderDetailCommand cmd) {
 		Map<String, Object> messageMap = new HashMap<>();
-		messageMap.put("orderId", 6236L);
-		messageMap.put("methodName", "endReminderSendMessage");
+		messageMap.put("orderId", cmd.getOrderId());
 		scheduleProvider.scheduleSimpleJob(
-				queueName,
-				queueName,
-				new java.util.Date(),
-				RentalMessageQuartzJob.class,
+				queueName + cmd.getOrderId(),
+				"cancelBill" + cmd.getOrderId(),
+				new java.util.Date(new java.util.Date().getTime() + 30 * 1000),
+				RentalCancelOrderJob.class,
 				messageMap
 		);
 	}
@@ -4148,10 +4139,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			record.setPaymentOrderType(OrderRecordType.NORMAL.getCode());//支付订单
 			this.rentalv2AccountProvider.updateOrderRecord(record);
 		}
-		//当订单创建成功之后，在来创建定时任务
-		if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode()) && bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
-			createOrderOverTimeTask(bill);
-		}
 		return obj;
 	}
 
@@ -4246,8 +4233,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 				rentalv2Provider.updateRentalBill(bill);
 			}
-
-
 			//save Attachments
 			createOrderAttachments(bill, cmd.getRentalAttachments());
 			//save files
@@ -4264,11 +4249,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		// 客户端生成订单
 		if (ActivityRosterPayVersionFlag.V1 == version) {
 			this.setSignatureParam(response);
-
-			//当订单创建成功之后，在来创建定时任务
-			if (orderCancelFlag[0]) {
-				createOrderOverTimeTask(bill);
-			}
+		}
+		//创建定时任务
+		if (orderCancelFlag[0]) {
+			createOrderOverTimeTask(bill);
 		}
 		return response;
 	}
