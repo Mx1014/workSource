@@ -729,7 +729,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}else if (SmsTemplateCode.RENTAL_CREATE_FLOW == templateId){
 			smsProvider.addToTupleList(variables, "resourceName", resourceTypeName);
 			smsProvider.addToTupleList(variables, "requestorName", order.getUserName());
-			smsProvider.addToTupleList(variables, "requestorPhonr", order.getUserPhone());
+			smsProvider.addToTupleList(variables, "requestorPhone", order.getUserPhone());
 		}
 	}
 
