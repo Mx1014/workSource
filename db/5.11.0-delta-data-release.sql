@@ -100,6 +100,11 @@ SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES (@mp_id:=@mp_id+1, '204011', '0', @p_id, '批量删除', '0', NOW());
 
+-- AUTHOR: 梁燕龙 20181123
+-- REMARK: 个人中心修改可编辑性
+UPDATE eh_personal_center_settings SET editable = 1 WHERE name = '订单';
+UPDATE eh_personal_center_settings SET editable = 1 WHERE name = '卡券';
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
