@@ -607,7 +607,7 @@ public class AssetServiceImpl implements AssetService {
         handler.modifyBillStatus(cmd);
     }
 
-    public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
+   /* public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(Long.parseLong("5000"));
         }
@@ -619,7 +619,7 @@ public class AssetServiceImpl implements AssetService {
         	dtos.add(dto);
         }
         exportOrdersUtil(dtos, cmd, response);
-    }
+    }*/
 
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
@@ -5237,8 +5237,13 @@ public class AssetServiceImpl implements AssetService {
         //交易明细下载
 
         communityId = cmd.getCommunityId();
-        cmd.setPageSize(100000l);
-        dtos = listPaymentBill(cmd).getPaymentOrderBillDTOs();
+        cmd.setPageSize(10000l);
+        ListPaymentBillResp result = listPaymentBill(cmd);
+        List<PaymentOrderBillDTO> paymentOrderBillDTOs = result.getPaymentOrderBillDTOs();
+        for(PaymentOrderBillDTO dto : paymentOrderBillDTOs) {
+            dto = assetProvider.listPaymentBillDetail(dto.getBillId());
+            dtos.add(dto);
+        }
         command = ConvertHelper.convert(cmd,ListFieldCommand.class);
         command.setModuleName("asset");
         command.setGroupPath(null);

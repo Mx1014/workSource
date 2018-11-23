@@ -153,7 +153,7 @@ public interface AssetService {
 
     JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd);
     
-    void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
+//    void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
 //    void noticeTrigger(Integer namespaceId);
     
