@@ -61,6 +61,9 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 	private final String GET_DEFAULT_USER_UUID = "/openapi/service/base/user/getDefaultUserUuid";
 
 	@Autowired
+	BigCollectionProvider bigCollectionProvider;
+
+	@Autowired
 	ConfigurationProvider configurationProvider;
 
 	@Autowired
@@ -235,9 +238,13 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 	}
 
 	public String getOpUserUuid(boolean forcedUpdate) {
+
+		String key = getOpUserUuidRedisKey();
 		if (!forcedUpdate) {
-			return configurationProvider.getValue(UserContext.getCurrentNamespaceId(),
-					getSpecificConfigPrefix() + "opUserUuid", "5b2eb534696b11e89c2e438f92627767");
+			String uuid =  getRedisValue(key);
+			if (null!= uuid) {
+				return uuid;
+			}
 		}
 
 		String newUuid = getOpUserUuidPost();
@@ -245,9 +252,12 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 			throwError(ParkingErrorCode.ERROR_HKWS_FETCH_OP_USER_UUID, "opUserUuid fetch error");
 		}
 
-		configurationProvider.setValue(UserContext.getCurrentNamespaceId(), getSpecificConfigPrefix() + "opUserUuid",
-				newUuid);
+		setRedisValue(key, newUuid, 365, TimeUnit.DAYS);
 		return newUuid;
+	}
+
+	private String getOpUserUuidRedisKey() {
+		return getSpecificConfigPrefix() + "opUserUuid";
 	}
 
 	public String getAppyKey() {
@@ -262,6 +272,20 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 
 	private void throwError(int errorCode, String errorMsg) {
 		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE_HKWS, errorCode, errorMsg);
+	}
+
+	private String getRedisValue(String key) {
+		return  getRedisTemplate(key).opsForValue().get(key);
+	}
+
+	private void setRedisValue(String key, String value, long time, TimeUnit timeUnit) {
+		getRedisTemplate(key).opsForValue().set(key, value, time, timeUnit);
+	}
+
+	@SuppressWarnings("unchecked")
+	private RedisTemplate<String, String> getRedisTemplate(String key) {
+		Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
+		return acc.getTemplate(new StringRedisSerializer());
 	}
 
 }
