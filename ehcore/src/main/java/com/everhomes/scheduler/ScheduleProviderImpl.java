@@ -46,7 +46,7 @@ import com.everhomes.util.RuntimeErrorException;
 @Component
 //public class ScheduleProviderImpl extends SchedulerFactoryBean implements ScheduleProvider {
 public class ScheduleProviderImpl implements ScheduleProvider {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleProviderImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger("schedulelog");
 
 	@Autowired
 	private DbProvider dbProvider;
