@@ -1843,8 +1843,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
                 taskService.updateTaskProcess(taskId, 80);
                 //设置自适应列宽
-				for(int i = 0; i < 50;i++) {
-					sheet.autoSizeColumn(i);
+				for(int i = 0; i < 10;i++) {
+                    sheet.setColumnWidth(i, "汉字".getBytes().length*2*256);
 				}
                 try {
                     wb.write(outputStream);
