@@ -224,15 +224,16 @@ public class VisitorSysDingFengHuiUtil {
     }
 
     public static void main(String[] args) {
-        VisitorSysDingFengHuiUtil bean = new VisitorSysDingFengHuiUtil();
+//        VisitorSysDingFengHuiUtil bean = new VisitorSysDingFengHuiUtil();
 //
 //        String params = "{\"attributes\":{\"carNo\":\"粤-BMP525\",\"parkCode\":\"0010028888\"},\"requestType\":\"DATA\",\"serviceId\":\"3c.park.bookparkspace\"}";
 //      人员编码查询
-        String params = "{\"attributes\":{\"areaCode\":\"0010028888\",\"telephone\":\"13823665629\"},\"requestType\":\"DATA\",\"serviceId\":\"3c.base.querypersonsbytel\"}";
+//        String params = "{\"attributes\":{\"areaCode\":\"0010028888\",\"telephone\":\"13823665629\"},\"requestType\":\"DATA\",\"serviceId\":\"3c.base.querypersonsbytel\"}";
 //      3.17 发起邀访
 //        String params = "{\"attributes\":{\"areaCode\":\"0010028888\",\"businesserCode\":\"880075500000001\",\"parkCode\":\"0010028888\",\"personCode\":\"SZ000098\",\"timeDesc\":\"{\\\"sd\\\":\\\"2018-11-30 00:00:00\\\",\\\"ed\\\":\\\"2018-11-30 23:59:59\\\",\\\"st\\\":\\\"15:00\\\",\\\"et\\\":\\\"17:30\\\",\\\"w\\\":\\\"0\\\"}\",\"visitorContent\":\"6666\",\"visitorType\":0},\"dataItems\":[{\"attributes\":{\"carNo\":\"粤-12345\",\"cardNo\":\"4343434\",\"visitorName\":\"张三\",\"visitorTel\":\"13800138000\"},\"objectId\":\"\",\"operateType\":\"READ\",\"subItems\":[]}],\"requestType\":\"DATA\",\"serviceId\":\"3c.visitor.invite\"}";
-        bean.post(params);
+//        bean.post(params);
 //        bean.login();
+        System.out.println("" + 1 + 3L);
     }
 
 }
