@@ -1976,7 +1976,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		Long userId = cmd.getUid() == null ? UserContext.currentUserId() : cmd.getUid();
-		currentSceneType.set(cmd.getSceneType());
 
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getRentalSiteId());
 
@@ -2136,7 +2135,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	private BigDecimal calculateOrderAmount(RentalResource rs, List<RentalBillRuleDTO> rules, RentalOrder rentalBill,
 											Map<Long, BigDecimal> cellAmountMap) {
-
+		currentSceneType.set(rentalBill.getScene());
 		BigDecimal[] siteTotalMoneys = {new BigDecimal(0)};
 
 		List<Rentalv2PricePackage> resourcePackages = rentalv2PricePackageProvider.listPricePackageByOwner(rs.getResourceType(),
@@ -3170,6 +3169,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			if (flowCase != null)
 				dto.setFlowCaseId(flowCase.getId());
 		}
+
+		//设置scene
+		if (StringHelper.hasContent(dto.getScene()))
+			dto.setScene(dto.getScene().split(",")[0]);
 		return dto;
 	}
 
