@@ -686,6 +686,9 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         if(communityId != null){
             query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
         }
+
+        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_SOURCE.eq(InvitedCustomerType.INVITED_CUSTOMER.getCode()));
+
         return query.fetchCount();
     }
 

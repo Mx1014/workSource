@@ -42,11 +42,13 @@ public class CustomerStatisticsScheduleJob extends QuartzJobBean {
         LOGGER.info("the scheduleJob of customer statistics is start!");
 
         invitedCustomerService.statisticCustomerDaily(new Date());
+        invitedCustomerService.statisticCustomerDailyTotal(new Date());
         invitedCustomerService.statisticCustomerAll(new Date());
         Calendar calendar = Calendar. getInstance();
         calendar.setTime(new Date());
-        if(calendar.get(Calendar.DAY_OF_MONTH) == Calendar.SUNDAY){
+        if(calendar.get(Calendar.DAY_OF_MONTH) == 1){
             invitedCustomerService.statisticCustomerMonthly(new Date());
+            invitedCustomerService.statisticCustomerMonthlyTotal(new Date());
         }
 
     }
