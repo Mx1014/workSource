@@ -29,6 +29,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -63,7 +65,6 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -1381,14 +1382,23 @@ public class AssetServiceImpl implements AssetService {
             Integer days = null;
             // calculate r if cycle is not one-off deal
             if(billingCycle.byteValue() != (byte) 5){
-
                 boolean b = checkCycle(d, a, cycle.getMonthOffset()+1);
                 int divided = daysBetween(dWithoutLimit,aWithoutLimit);
                 days = divided;
                 if(!b){
                     // period of this cycle
-                    int divider = daysBetween(d, a);
-                    r = String.valueOf(divider+"/" + divided);
+                	/**
+                	 * issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                	 * 比如签了一个合同，计价条款为：自然季、2018-08-30至2018-12-31，固定金额9000
+                	 * 2018-08-30至2018-09-30 ： 计算系数r = (1 + 2/31) / 3
+                	 * 2018-10-01至2018-12-31 ：计算系数r = 1
+                	 */
+                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                    	r = assetCalculateUtil.getReductionFactor(d, a);
+                    }else {
+                    	int divider = daysBetween(d, a);
+                        r = String.valueOf(divider+"/" + divided);
+                    }
                 }
             }
             BigDecimal amount = calculateFee(var2, days, formula, r,standard, formulaCondition);
@@ -2245,9 +2255,17 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         formula += "*"+duration;
-        BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2,BigDecimal.ROUND_CEILING);
-
+//        BigDecimal response = CalculatorUtil.arithmetic(formula);
+//        response.setScale(2,BigDecimal.ROUND_CEILING);
+        BigDecimal response = BigDecimal.ZERO;
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			Object object = jse.eval(formula);
+			response = new BigDecimal(object.toString());
+			response = response.setScale(2, BigDecimal.ROUND_HALF_UP);
+		} catch (Exception e) {
+			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+		}
         return response;
     }
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula) {
@@ -2295,9 +2313,17 @@ public class AssetServiceImpl implements AssetService {
                 throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
             }
         }
-        BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2,BigDecimal.ROUND_CEILING);
-
+//        BigDecimal response = CalculatorUtil.arithmetic(formula);
+//        response.setScale(2,BigDecimal.ROUND_CEILING);
+        BigDecimal response = BigDecimal.ZERO;
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			Object object = jse.eval(formula);
+			response = new BigDecimal(object.toString());
+			response = response.setScale(2, BigDecimal.ROUND_HALF_UP);
+		} catch (Exception e) {
+			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+		}
         return response;
     }
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, Integer days
@@ -2357,8 +2383,17 @@ public class AssetServiceImpl implements AssetService {
                 }
             }
             formula += "*"+duration;
-            result = CalculatorUtil.arithmetic(formula);
-            result.setScale(2,BigDecimal.ROUND_FLOOR);
+            //result = CalculatorUtil.arithmetic(formula);
+            //result.setScale(2,BigDecimal.ROUND_FLOOR);
+            //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+            ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+    		try {
+    			Object object = jse.eval(formula);
+    			result = new BigDecimal(object.toString());
+    			result = result.setScale(2, BigDecimal.ROUND_HALF_UP);
+    		} catch (Exception e) {
+    			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+    		}
         }
         else if(formulaType == 3 || formulaType == 4){
             //阶梯或者区间

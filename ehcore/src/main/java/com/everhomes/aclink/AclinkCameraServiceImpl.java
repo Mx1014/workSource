@@ -101,14 +101,18 @@ public class AclinkCameraServiceImpl implements AclinkCameraService {
 	@Override
 	public void deleteLocalCameras(Long id) {
 		User user = UserContext.current().getUser();
-		AclinkCamera camera = aclinkCameraProvider.findCameraById(id);
-		camera.setStatus((byte) 2);
-		camera.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		camera.setOperatorUid(user.getId());
-		aclinkCameraProvider.updateLocalCamera(camera);
+		AclinkCamera camera = new AclinkCamera();
+		AclinkServer server = new AclinkServer();
+		camera = aclinkCameraProvider.findCameraById(id);
+		if(null != camera && camera.getId() != null){
+			camera.setStatus((byte) 2);
+			camera.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			camera.setOperatorUid(user.getId());
+			aclinkCameraProvider.updateLocalCamera(camera);
+			server = aclinkServerProvider.findServerById(camera.getServerId());
+		}
 		//内网服务器下属设备有变动,更新服务器的上次操作时间
-		AclinkServer server = aclinkServerProvider.findServerById(camera.getServerId());
-		if(server != null){
+		if(server != null && server.getId() != null){
 			server.setOperateTime(camera.getOperateTime());
 			server.setOperatorUid(camera.getOperatorUid());
 			aclinkServerProvider.updateLocalServer(server);

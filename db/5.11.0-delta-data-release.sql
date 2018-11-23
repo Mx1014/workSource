@@ -5,6 +5,9 @@
 -- REMARK: 替换最新的 contentserver 二进制 #40547 contentserver/release/server/contentserver
 
 
+-- AUTHOR: 黄鹏宇
+-- REMARK: 请在执行release前备份eh_var_field_scopes表
+
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
@@ -64,6 +67,10 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_configurations`),1);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id:=@id+1, 'service.module.security.time.out-79880000', '5', '', '0', NULL);
 
+-- AUTHOR: 黄鹏宇
+-- REMARK: fixbug #42303
+update eh_var_field_scopes set status = 0 where field_display_name in ('客户级别','资质客户') and module_name = 'enterprise_customer';
+-- END
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -118,6 +125,14 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: nanshanquzhengfu
 -- DESCRIPTION: 此SECTION只在南山区政府-999931执行的脚本
+-- 圳智慧beta
+-- addy yanlong.liang 20180814
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('zhenzhihui.url', 'http://120.132.117.22:8016/ZHYQ/restservices/LEAPAuthorize/attributes/query?TICKET=', '圳智慧认证url', '999931', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('zhenzhihui.appkey', 'c00f02aac30d0822', '圳智慧APPKEY', '999931', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('zhenzhihui.redirect.url', 'http://120.132.117.22:8016/ZHYQ/restservices/common/zhyq_zlgetUserinfo/query?code=', '圳智慧对接跳转url', '999931', NULL, '1');
 -- --------------------- SECTION END nanshanquzhengfu ----------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guanzhouyuekongjian

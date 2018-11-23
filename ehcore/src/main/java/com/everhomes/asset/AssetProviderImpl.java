@@ -2840,6 +2840,36 @@ public class AssetProviderImpl implements AssetProvider {
             return null;
         });
     }
+    
+    /**
+     * 合同更新/根据合同id,自动刷新合同账单
+     * @param contractId
+     */
+    public void deleteContractPaymentByContractId(Long contractId) {
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
+        EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
+        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+                List<Long> billIds = context.select(t.ID)
+                        .from(t)
+                        .where(t.CONTRACT_ID.eq(contractId))
+                        .fetch(t.ID);
+                context.delete(t)
+                        .where(t.ID.in(billIds))
+                        .execute();
+                context.delete(t2)
+                        .where(t2.BILL_ID.in(billIds))
+                        .execute();
+                context.delete(t1)
+                        .where(t1.CONTRACT_ID.eq(contractId))
+                        .execute();
+                return null;
+            });
+            return null;
+        });
+    }
 
     @Override
     public List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId, Long categoryId, Integer namespaceId) {
@@ -4801,7 +4831,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(paymentOrderNum)){
         	query.addConditions(t2.PAYMENT_ORDER_ID.like("%" + paymentOrderNum + "%"));
         }
-        query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//EhAssetPaymentOrderBills中的status1代表支付成功
+        query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//eh_payment_bill_orders中的PAYMENT_STATUS=2代表支付成功
         query.addOrderBy(t2.PAYMENT_TIME.desc());
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
@@ -4964,6 +4994,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addSelect(t2.BILL_ID, t2.ORDER_NUMBER, t2.PAYMENT_ORDER_ID, t2.GENERAL_ORDER_ID, t2.PAYMENT_TIME, t2.PAYMENT_TYPE, t2.PAYMENT_CHANNEL, t2.UID);
         query.addFrom(t2);
         query.addConditions(t2.BILL_ID.eq(String.valueOf(billId)));
+        query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//eh_payment_bill_orders中的PAYMENT_STATUS=2代表支付成功
         query.addOrderBy(t2.PAYMENT_TIME.desc());
         query.fetch().map(r -> {
         	dto.setPaymentOrderNum(r.getValue(t2.PAYMENT_ORDER_ID).toString());//支付订单ID

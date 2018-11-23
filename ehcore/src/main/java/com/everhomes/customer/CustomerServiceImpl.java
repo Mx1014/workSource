@@ -4301,13 +4301,24 @@ public class CustomerServiceImpl implements CustomerService {
             cmd.setOrganizationId(customer.getOrganizationId() == null ? 0 : customer.getOrganizationId());
 //            result = rolePrivilegeService.listOrganizationAdministrators(cmd);
             // 标准版修改成此种概念
-            ListOrganizationContectDTOResponse organizationAdmins = rolePrivilegeService.listOrganizationSystemAdministrators(cmd);
-            result = organizationAdmins == null ? null : organizationAdmins.getDtos();
-            //复制organization管理员到企业客户管理中来
-            if (result != null && result.size() > 0) {
-                result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(),customer.getNamespaceId()));
-                customer.setAdminFlag(AdminFlag.YES.getCode());
-                enterpriseCustomerSearcher.feedDoc(customer);
+            if(cmd.getOrganizationId() != null && cmd.getOrganizationId() != 0) {
+                OrganizationContactDTO organizationAdmin = rolePrivilegeService.listOrganizationTopAdministrator(cmd);
+                if(organizationAdmin != null){
+                    result = new ArrayList<>();
+                    result.add(organizationAdmin);
+                    result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(),customer.getNamespaceId()));
+                    customer.setAdminFlag(AdminFlag.YES.getCode());
+                    enterpriseCustomerSearcher.feedDoc(customer);
+                }
+            } else if(result == null || result.size() < 1){
+                ListOrganizationContectDTOResponse organizationAdmins = rolePrivilegeService.listOrganizationSystemAdministrators(cmd);
+                result = organizationAdmins == null ? null : organizationAdmins.getDtos();
+                //复制organization管理员到企业客户管理中来
+                if (result != null && result.size() > 0) {
+                    result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(), customer.getNamespaceId()));
+                    customer.setAdminFlag(AdminFlag.YES.getCode());
+                    enterpriseCustomerSearcher.feedDoc(customer);
+                }
             }
         } else {
             result = customerAdminContacts;
