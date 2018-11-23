@@ -207,7 +207,8 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
-
+        //TODO：若是门禁组则查门禁组表
+        //query.addConditions();
         query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_DOOR_ACCESS.ID).from(Tables.EH_DOOR_ACCESS).where(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))));
         //根据userId查询userName add by liqingyan
 //        query.addJoin(Tables.EH_USERS,JoinType.LEFT_OUTER_JOIN,Tables.EH_DOOR_AUTH.APPROVE_USER_ID.eq(Tables.EH_USERS.ID));
@@ -242,8 +243,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         query.addFrom(t);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
-
-        query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_DOOR_ACCESS.ID).from(Tables.EH_DOOR_ACCESS).where(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))));
+        Condition c1 = Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_DOOR_ACCESS.ID).from(Tables.EH_DOOR_ACCESS).where(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode())));
+        Condition c2 = Tables.EH_DOOR_AUTH.GROUP_TYPE.eq((byte)2).and(Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_ACLINK_GROUP.ID).from(Tables.EH_ACLINK_GROUP).where(Tables.EH_ACLINK_GROUP.STATUS.eq((byte)1))));
+        query.addConditions(c1.or(c2));
         //根据userId查询userName add by liqingyan
         query.addJoin(Tables.EH_USERS,JoinType.LEFT_OUTER_JOIN,Tables.EH_DOOR_AUTH.APPROVE_USER_ID.eq(Tables.EH_USERS.ID));
         query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc(),Tables.EH_DOOR_AUTH.ID.desc());
@@ -586,6 +588,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
                 if(cmd.getDoorId() != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(cmd.getDoorId()));
+                }
+                if(cmd.getGroupType() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.GROUP_TYPE.eq(cmd.getGroupType()));
                 }
 
                 if(cmd.getKeyword() != null) {
@@ -1200,7 +1205,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
 
 	@Override
-	public List<DoorAuth> listValidDoorAuthByVisitorPhone(Long doorId, String phone) {
+	public List<DoorAuth> listValidDoorAuthByVisitorPhone(Long doorId, String phone, Byte groupType) {
 		ListingLocator locator = new ListingLocator();
         long now = DateHelper.currentGMTTime().getTime();
 
@@ -1214,6 +1219,12 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                         and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
                 query.addConditions(Tables.EH_DOOR_AUTH.PHONE.eq(phone));
                 query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+                if(null!=groupType){
+                    query.addConditions(Tables.EH_DOOR_AUTH.GROUP_TYPE.eq(groupType));
+                }
+                if(null==groupType){
+                    query.addConditions(Tables.EH_DOOR_AUTH.GROUP_TYPE.eq((byte)1).or(Tables.EH_DOOR_AUTH.GROUP_TYPE.isNull()));
+                }
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
                 query.addConditions(c1);
                 return query;

@@ -28,6 +28,7 @@ public class CreateDoorVisitorCommand {
     
     @NotNull
     private Long     doorId;
+    private Byte groupType;
     
     @NotNull
     private Integer namespaceId;
@@ -42,7 +43,15 @@ public class CreateDoorVisitorCommand {
 	private Long validEndMs;
 	private Byte authRuleType;
 	private Integer totalAuthAmount;
-    
+
+    public Byte getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(Byte groupType) {
+        this.groupType = groupType;
+    }
+
     public String getPhone() {
         return phone;
     }
