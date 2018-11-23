@@ -252,9 +252,7 @@ public class SiyinJobValidateServiceImpl {
 				SiyinPrintNotifyJob.class,
 				notifyMap
 		);
-		String appName = getAppName(order.getNamespaceId());
 		Map<String, Object> messageMap = new HashMap<>();
-		messageMap.put("appName",appName);
 		messageMap.put("orderNo", order.getOrderNo());
 		scheduleProvider.scheduleSimpleJob(
 				"siyinprintmessage" +order.getId(),
