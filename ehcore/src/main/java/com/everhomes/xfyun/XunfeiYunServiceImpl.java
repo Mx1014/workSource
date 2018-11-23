@@ -46,36 +46,19 @@ public class XunfeiYunServiceImpl implements XunfeiYunService{
 	@Override
 	public QueryRoutersResponse queryRouters(QueryRoutersCommand cmd) {
 
-		LOGGER.info("queryRouters cmd:" + StringHelper.toJsonString(cmd));
-
-		// 先处理公共跳转
-		if (null != cmd.getRouteType() && cmd.getRouteType() == 1) {
-			return queryCommonRouters(cmd);
-		}
-
 		// 业务跳转
-		QueryRoutersResponse resp = new QueryRoutersResponse();
 		Long moduleId = getHandlerPrefixByQuery(cmd);
-		if (null == moduleId) {
+		if (null != moduleId) {
+			QueryRoutersResponse resp = new QueryRoutersResponse();
+			List<AppDTO> appDtos = getTargetApps(UserContext.getCurrentNamespaceId(), cmd.getContext().getCommunityId(),
+					moduleId);
+			resp.setRouterDtos(appDtos);
 			return resp;
 		}
-		
-		List<AppDTO> appDtos = getTargetApps(UserContext.getCurrentNamespaceId(), cmd.getContext().getCommunityId(), moduleId);
-		resp.setRouterDtos(appDtos);
-		return resp;
+
+		return queryCommonRouters(cmd);
 	}
 	
-//	private void fillRespRouterInfo(QueryRoutersResponse resp, QueryRoutersCommand cmd) {
-//		List<XfRouterDTO> routers = resp.getRouters();
-//		if (CollectionUtils.isEmpty(routers)) {
-//			return;
-//		}
-//
-//		for (XfRouterDTO route : routers) {
-//			BeanUtils.copyProperties(cmd, route);
-//		}
-//	}
-
 	private QueryRoutersResponse queryCommonRouters(QueryRoutersCommand cmd) {
 
 		List<AppDTO> routerDtos = new ArrayList<>();
@@ -93,24 +76,6 @@ public class XunfeiYunServiceImpl implements XunfeiYunService{
 		return resp;
 	}
 
-	private XunfeiYunRouterHandler getHandler(QueryRoutersCommand cmd) {
-		
-		Long moduleId = getHandlerPrefixByQuery(cmd);
-		if (null != moduleId && moduleId > 0) {
-			XunfeiYunRouterHandler handler = null;
-			String handlerPrefix = XunfeiYunRouterHandler.ROUTER_HANDLER_PREFIX;
-			try {
-				handler = PlatformContextNoWarnning.getComponent(handlerPrefix + moduleId);
-			} catch (Exception ex) {
-				LOGGER.info("XunfeiYunRouterHandler not exist moduleId = {}", moduleId);
-			}
-
-			return handler;
-		}
-
-		return null;
-	}
-	
 	private Long getHandlerPrefixByQuery(QueryRoutersCommand cmd) {
 
 		if ("物业报修".equals(cmd.getRouteTextInfo())) {
