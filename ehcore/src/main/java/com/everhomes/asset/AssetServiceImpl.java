@@ -5292,7 +5292,8 @@ public class AssetServiceImpl implements AssetService {
 		List<String> phoneNumbers = new ArrayList<String>(); 
 		try {
 			if (targetType.equals(AssetTargetType.USER.getCode())) {
-				UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), namespaceId);
+				//修复缺陷 #42722 【鼎峰汇】【现网】客户账单中的客户手机号显示的是管理员手机号
+				UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(targetId, namespaceId);
 				if(userIdentifier != null) {
 					phoneNumbers.add(userIdentifier.getIdentifierToken());
 				}
@@ -5314,7 +5315,7 @@ public class AssetServiceImpl implements AssetService {
 	            }
 		    }
 		} catch (Exception e) {
-			LOGGER.error("ZhuZongAssetVendor getPhoneNumber() {}", targetType, targetId, namespaceId, e);
+			LOGGER.error("/asset/listNotSettledBillDetail getPhoneNumber() {}", targetType, targetId, namespaceId, e);
 		}
 		return phoneNumbers;
 	}
