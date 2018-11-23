@@ -44,6 +44,7 @@ CREATE TABLE `eh_office_cubicle_station_rent` (
   `rent_type` TINYINT COMMENT '1-长租，0-短租',
   `station_type` TINYINT COMMENT '1-普通工位，0-办公室',
   `station_id` BIGINT COMMENT '工位/办公室Id',
+  `status` TINYINT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -65,9 +66,9 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `station_id` BIGINT COMMENT '工位/办公室Id',
   `rental_order_no` BIGINT COMMENT '资源预约订单号',
   `order_status` TINYINT COMMENT '订单状态',
-  `requestType` TINYINT COMMENT '订单来源',
-  `paidType` TINYINT COMMENT '支付方式',
-  `paidMode` TINYINT COMMENT '支付类型',
+  `request_type` TINYINT COMMENT '订单来源',
+  `paid_type` TINYINT COMMENT '支付方式',
+  `paid_mode` TINYINT COMMENT '支付类型',
   `price` DECIMAL(10,2) COMMENT '价格',
   `rent_count` BIGINT COMMENT '预定数量',
   `remark` TEXT COMMENT '备注',
@@ -92,5 +93,6 @@ CREATE TABLE `eh_office_cubicle_payee_accounts` (
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
   `merchant_id` BIGINT COMMENT '商户ID',
+  `peyee_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='工位预定收款账户表';
