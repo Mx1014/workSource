@@ -91,4 +91,6 @@ public interface UserActivityService {
     GetUserTreasureNewResponse getUserTreasureNew();
 
     GetUserTreasureForRuiAnResponse getUserTreasureForRuiAn();
+
+    List<VipPriority> listVipPriorityByNamespaceId(Integer namespaceId);
 }
