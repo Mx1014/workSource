@@ -2902,15 +2902,19 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setChargingItemId(r.getValue(t1.ID));
-                    dto.setAmountReceivableWithoutTax(r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
-                    dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));//税额
                     dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
                     //物业缴费V6.0 账单、费项表增加是否删除状态字段
                     dto.setDeleteFlag(r.getValue(t.DELETE_FLAG));
+                    //缺陷 #42852 【中天】【缴费管理】联科园区6栋5-6F合同录入信息无误，但是展示账单数据金额却有小数
+                    BigDecimal taxAmount = r.getValue(t.TAX_AMOUNT);//税额
+                    BigDecimal amountReceivable = r.getValue(t.AMOUNT_RECEIVABLE);//应收金额含税
+                    BigDecimal amountReceivableWithoutTax = r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX);//应收不含税
+                    dto.setTaxAmount(taxAmount != null ? taxAmount.stripTrailingZeros() : taxAmount);
+                    dto.setAmountReceivable(amountReceivable != null ? amountReceivable.stripTrailingZeros() : amountReceivable);
+                    dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax.stripTrailingZeros() : amountReceivableWithoutTax);
                     set.add(dto);
                     return null;
                 });
@@ -2937,13 +2941,17 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setChargingItemId(r.getValue(t1.ID));
-                    dto.setAmountReceivableWithoutTax(r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
-                    dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));//税额
                     dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
+                    //缺陷 #42852 【中天】【缴费管理】联科园区6栋5-6F合同录入信息无误，但是展示账单数据金额却有小数
+                    BigDecimal taxAmount = r.getValue(t.TAX_AMOUNT);//税额
+                    BigDecimal amountReceivable = r.getValue(t.AMOUNT_RECEIVABLE);//应收金额含税
+                    BigDecimal amountReceivableWithoutTax = r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX);//应收不含税
+                    dto.setTaxAmount(taxAmount != null ? taxAmount.stripTrailingZeros() : taxAmount);
+                    dto.setAmountReceivable(amountReceivable != null ? amountReceivable.stripTrailingZeros() : amountReceivable);
+                    dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax.stripTrailingZeros() : amountReceivableWithoutTax);
                     set.add(dto);
                     return null;
                 });
