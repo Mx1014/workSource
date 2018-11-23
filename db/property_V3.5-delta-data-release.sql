@@ -66,11 +66,11 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 	VALUES (@id:=@id+1 , 38000, 0, 38113, '导出楼宇', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
 	VALUES (38113, 0, '楼宇资产管理 导出楼宇', '楼宇资产管理 业务模块权限', NULL);
--- 编辑园区信息
+-- 编辑项目
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-	VALUES (@id:=@id+1 , 38000, 0, 38114, '编辑园区信息', 0, SYSDATE());
+	VALUES (@id:=@id+1 , 38000, 0, 38114, '编辑项目', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
-	VALUES (38114, 0, '楼宇资产管理 编辑园区信息', '楼宇资产管理 业务模块权限', NULL);
+	VALUES (38114, 0, '楼宇资产管理 编辑项目', '楼宇资产管理 业务模块权限', NULL);
 -- 楼宇排序
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
 	VALUES (@id:=@id+1 , 38000, 0, 38115, '楼宇排序', 0, SYSDATE());
