@@ -27,10 +27,10 @@ import java.util.Map;
  * @author chenhe
  */
 @RestController
-@RequestMapping("/openapi/zhenzhihuig")
-public class ZHYQOpenController extends ControllerBase {
+@RequestMapping("/openapi/zhenzhihui")
+public class ZhenzhihuiOpenController extends ControllerBase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZHYQOpenController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZhenzhihuiOpenController.class);
     static final String KEY = "A6465651FDDC5E4B";
 
     @Autowired
@@ -42,7 +42,7 @@ public class ZHYQOpenController extends ControllerBase {
 
     /**
      *
-     * <b>URL: /openapi/zhenzhihuig/getUserInfo</b>
+     * <b>URL: /openapi/zhenzhihui/getUserInfo</b>
      * <p>获取用户信息 </p>
      * @return
      */

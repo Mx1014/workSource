@@ -31,7 +31,7 @@ public class TicketProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
 
-    public String createTicket4User(Long userId) throws Exception {
+    public String createTicket4User(Long userId, String redirectCode) throws Exception {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
         long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTickets.class));
@@ -42,6 +42,7 @@ public class TicketProvider {
         ticket.setId(id);
         ticket.setUserId(userId);
         ticket.setTicket(token);
+//        ticket.setRedirectCode(redirectCode);
         ticket.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         EhTicketsDao dao = new EhTicketsDao(context.configuration());
