@@ -384,12 +384,13 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
                     new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
         }
         if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
+            String keyword = "%" + cmd.getKeyword().trim() + "%";
             cond = cond.and(
-                    Tables.EH_FLOW_CASES.TITLE.like("%" + cmd.getKeyword() + "%")
-                    .or(Tables.EH_FLOW_CASES.SERVICE_TYPE.like("%" + cmd.getKeyword() + "%"))
-                    .or(Tables.EH_FLOW_CASES.CONTENT.like("%" + cmd.getKeyword() + "%"))
-                    .or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
-                    .or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
+                    Tables.EH_FLOW_CASES.TITLE.like(keyword)
+                    .or(Tables.EH_FLOW_CASES.SERVICE_TYPE.like(keyword))
+                    .or(Tables.EH_FLOW_CASES.CONTENT.like(keyword))
+                    .or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(keyword))
+                    .or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(keyword))
             );
         }
         return cond;

@@ -181,7 +181,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         List<Field> fields = new ArrayList<>(Arrays.asList(Tables.EH_FLOW_CASES.fields()));
         fields.add(Tables.EH_FLOW_EVENT_LOGS.ID);
 
-        SelectQuery<Record> query = context.select(fields.toArray(new Field[fields.size()]))
+        SelectQuery<Record> query = context.select(fields.toArray(new Field[0]))
                 .from(Tables.EH_FLOW_EVENT_LOGS).join(Tables.EH_FLOW_CASES)
                 .on(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(Tables.EH_FLOW_CASES.ID))
                 .join(Tables.EH_FLOWS)
@@ -286,14 +286,14 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                     new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
         }
         if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
+            String keyword = "%" + cmd.getKeyword().trim() + "%";
             cond = cond.and(
-                    Tables.EH_FLOW_CASES.TITLE.like("%" + cmd.getKeyword() + "%")
-                        .or(Tables.EH_FLOW_CASES.SERVICE_TYPE.like("%" + cmd.getKeyword() + "%"))
-                        .or(Tables.EH_FLOW_CASES.CONTENT.like("%" + cmd.getKeyword() + "%"))
-                            .or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
-                                .or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
+                    Tables.EH_FLOW_CASES.TITLE.like(keyword)
+                            .or(Tables.EH_FLOW_CASES.SERVICE_TYPE.like(keyword))
+                            .or(Tables.EH_FLOW_CASES.CONTENT.like(keyword))
+                            .or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(keyword))
+                            .or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(keyword))
             );
-
         }
 
         if(locator.getAnchor() != null) {
