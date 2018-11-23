@@ -1,5 +1,22 @@
 package com.everhomes.oauth2api;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.everhomes.organization.OrganizationServiceImpl;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.user.ZhenZhiHuiUserDetailInfo;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiUserType;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.zhenzhihui.ZhenzhihuiEnterpriseInfo;
+import com.everhomes.zhenzhihui.ZhenzhihuiEnterpriseInfoProvider;
+import com.everhomes.zhenzhihui.ZhenzhihuiUserInfo;
+import com.everhomes.zhenzhihui.ZhenzhihuiUserInfoProvider;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.everhomes.oauthapi.OAuth2ApiService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
@@ -24,6 +41,8 @@ import java.util.stream.Collectors;
 @Service
 public class OAuth2ApiServiceImpl implements OAuth2ApiService {
 
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(OAuth2ApiServiceImpl.class);
+
     @Autowired
     private UserService userService;
 
@@ -32,6 +51,15 @@ public class OAuth2ApiServiceImpl implements OAuth2ApiService {
 
     @Autowired
     private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private OrganizationServiceImpl organizationServiceImpl;
+
+    @Autowired
+    private ZhenzhihuiUserInfoProvider zhenzhihuiUserInfoProvider;
+
+    @Autowired
+    private ZhenzhihuiEnterpriseInfoProvider zhenzhihuiEnterpriseInfoProvider;
 
     @Override
     public UserInfo getUserInfoForInternal(Long grantorUid) {
@@ -42,6 +70,41 @@ public class OAuth2ApiServiceImpl implements OAuth2ApiService {
     public UserInfoDTO getUserInfoForThird(Long grantorUid) {
         UserInfo info = userService.getUserSnapshotInfoWithPhone(grantorUid);
         return sensitiveClean(info);
+    }
+
+    @Override
+    public ZhenZhiHuiUserDetailInfo getUserInfoForZhenZhiHui(Long grantorUid) {
+        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(grantorUid);
+        List<OrganizationSimpleDTO> organizationSimpleDTOS = this.organizationServiceImpl.listUserRelateOrganizations(grantorUid);
+        if (!CollectionUtils.isEmpty(organizationSimpleDTOS)) {
+            userInfo.setOrganizationList(organizationSimpleDTOS);
+        }
+        ZhenZhiHuiUserDetailInfo zhenZhiHuiUserDetailInfo = ConvertHelper.convert(userInfo, ZhenZhiHuiUserDetailInfo.class);
+        LOGGER.info("userId = {}", userInfo.getId());
+        List<ZhenzhihuiUserInfo> zhenzhihuiUserInfos = this.zhenzhihuiUserInfoProvider.listZhenzhihuiUserInfosByUserId(userInfo.getId());
+        LOGGER.info("userInfo size = {}",zhenzhihuiUserInfos.size());
+        if (!CollectionUtils.isEmpty(zhenzhihuiUserInfos)) {
+            ZhenzhihuiUserInfo zhenzhihuiUserInfo = zhenzhihuiUserInfos.get(0);
+            zhenZhiHuiUserDetailInfo.setIdentifyType(zhenzhihuiUserInfo.getIdentifyType());
+            zhenZhiHuiUserDetailInfo.setIdentifyToken(zhenzhihuiUserInfo.getIdentifyToken());
+            zhenZhiHuiUserDetailInfo.setName(zhenzhihuiUserInfo.getName());
+            zhenZhiHuiUserDetailInfo.setEmail(zhenzhihuiUserInfo.getEmail());
+        }
+        List<ZhenzhihuiEnterpriseInfo> zhenzhihuiEnterpriseInfos = this.zhenzhihuiEnterpriseInfoProvider.listZhenzhihuiEnterpriseInfoByUserId(userInfo.getId());
+        LOGGER.info("enterprise size = {}",zhenzhihuiEnterpriseInfos.size());
+        if (!CollectionUtils.isEmpty(zhenzhihuiEnterpriseInfos)) {
+            ZhenzhihuiEnterpriseInfo zhenzhihuiEnterpriseInfo = zhenzhihuiEnterpriseInfos.get(0);
+            zhenZhiHuiUserDetailInfo.setEnterpriseName(zhenzhihuiEnterpriseInfo.getEnterpriseName());
+            zhenZhiHuiUserDetailInfo.setEnterpriseToken(zhenzhihuiEnterpriseInfo.getEnterpriseToken());
+            zhenZhiHuiUserDetailInfo.setEnterpriseType(zhenzhihuiEnterpriseInfo.getEnterpriseType());
+            zhenZhiHuiUserDetailInfo.setCorporationName(zhenzhihuiEnterpriseInfo.getCorporationName());
+            zhenZhiHuiUserDetailInfo.setCorporationToken(zhenzhihuiEnterpriseInfo.getIdentifyToken());
+            zhenZhiHuiUserDetailInfo.setCorporationType(zhenzhihuiEnterpriseInfo.getIdentifyType());
+            zhenZhiHuiUserDetailInfo.setUserType(ZhenZhiHuiUserType.BOTH.getCode());
+        }else {
+            zhenZhiHuiUserDetailInfo.setUserType(ZhenZhiHuiUserType.PERSON.getCode());
+        }
+        return zhenZhiHuiUserDetailInfo;
     }
 
     @Override

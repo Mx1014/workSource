@@ -41,12 +41,21 @@ import java.util.List;
  *  <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
  *  <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
  *  <li>registerDays: 用户注册天数</li>
- *  <li>showCompanyFlag: 是否展示公司</li>
- *  <li>companyId: 公司ID</li>
  *  <li>organizationList: 用户所加入的公司</li>
+ *     <li>name: 姓名</li>
+ *     <li>identifyType: 证件类型,请参考{@link com.everhomes.rest.zhenzhihui.ZhenZhiHuiCertificateType}</li>
+ *     <li>identifyToken: 证件号码</li>
+ *     <li>email: 邮件</li>
+ *     <li>corporationToken: 法人证件号码</li>
+ *     <li>corporationType: 法人证件类型,请参考{@link com.everhomes.rest.zhenzhihui.ZhenZhiHuiCertificateType}</li>
+ *     <li>corporationName: 法人名称</li>
+ *     <li>enterpriseToken: 单位证件号码</li>
+ *     <li>enterpriseName: 单位名称</li>
+ *     <li>enterpriseType:单位证件类型</li>
+ *     <li>userType: 用户类型</li>
  *  </ul>
  **/
-public class UserInfo {
+public class ZhenZhiHuiUserDetailInfo {
 
     private Long id;
     private String accountName;
@@ -71,9 +80,9 @@ public class UserInfo {
     private Integer namespaceId;
     private String namespaceUserToken;
     private String namespaceUserType;
-    private Byte showCompanyFlag;
+
     private String uuid;
-    private Long companyId;
+
     @ItemType(String.class)
     private List<String> phones;
     @ItemType(Integer.class)
@@ -81,33 +90,29 @@ public class UserInfo {
 
     @ItemType(String.class)
     private List<String> emails;
-    
+
     private Byte communityType;
     @ItemType(UserCurrentEntity.class)
     private List<UserCurrentEntity> entityList;
-    
+
     private String sceneToken;
     private String registerDaysDesc;
 
+    private String      name;
+    private Integer     identifyType;
+    private String     identifyToken;
+    private String     email;
+    private String     corporationToken;
+    private Integer     corporationType;
+    private String     corporationName;
+    private String     enterpriseToken;
+    private String     enterpriseName;
+    private Integer    enterpriseType;
+    private Byte       userType;
+
     @ItemType(OrganizationSimpleDTO.class)
     private List<OrganizationSimpleDTO> organizationList;
-    public UserInfo() {
-    }
-
-    public Long getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
-    }
-
-    public Byte getShowCompanyFlag() {
-        return showCompanyFlag;
-    }
-
-    public void setShowCompanyFlag(Byte showCompanyFlag) {
-        this.showCompanyFlag = showCompanyFlag;
+    public ZhenZhiHuiUserDetailInfo() {
     }
 
     public List<OrganizationSimpleDTO> getOrganizationList() {
@@ -116,6 +121,94 @@ public class UserInfo {
 
     public void setOrganizationList(List<OrganizationSimpleDTO> organizationList) {
         this.organizationList = organizationList;
+    }
+
+    public Byte getUserType() {
+        return userType;
+    }
+
+    public void setUserType(Byte userType) {
+        this.userType = userType;
+    }
+
+    public Integer getEnterpriseType() {
+        return enterpriseType;
+    }
+
+    public void setEnterpriseType(Integer enterpriseType) {
+        this.enterpriseType = enterpriseType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getIdentifyType() {
+        return identifyType;
+    }
+
+    public void setIdentifyType(Integer identifyType) {
+        this.identifyType = identifyType;
+    }
+
+    public String getIdentifyToken() {
+        return identifyToken;
+    }
+
+    public void setIdentifyToken(String identifyToken) {
+        this.identifyToken = identifyToken;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getCorporationToken() {
+        return corporationToken;
+    }
+
+    public void setCorporationToken(String corporationToken) {
+        this.corporationToken = corporationToken;
+    }
+
+    public Integer getCorporationType() {
+        return corporationType;
+    }
+
+    public void setCorporationType(Integer corporationType) {
+        this.corporationType = corporationType;
+    }
+
+    public String getCorporationName() {
+        return corporationName;
+    }
+
+    public void setCorporationName(String corporationName) {
+        this.corporationName = corporationName;
+    }
+
+    public String getEnterpriseToken() {
+        return enterpriseToken;
+    }
+
+    public void setEnterpriseToken(String enterpriseToken) {
+        this.enterpriseToken = enterpriseToken;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
     }
 
     public Long getId() {
