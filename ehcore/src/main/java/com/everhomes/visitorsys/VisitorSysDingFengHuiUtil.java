@@ -18,6 +18,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.apache.xmlbeans.impl.jam.JSourcePosition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -32,6 +33,7 @@ import java.util.List;
 
 import static com.everhomes.util.StringHelper.toHexString;
 
+@Component
 public class VisitorSysDingFengHuiUtil {
 
     @Autowired

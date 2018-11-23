@@ -169,7 +169,7 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 		return post(GET_TEMP_FEE_ORDER_URL, json);
 	}
 
-	private String getOpUserUuidPost() {
+	public String getOpUserUuidPost() {
 		JSONObject json = new JSONObject();
 		json.put("appkey", getAppyKey());
 		json.put("time", System.currentTimeMillis());// 设置时间参数
@@ -186,7 +186,7 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 		return resp.getData();
 	}
 
-	private HkwsThirdResponse post(String urlSuffix, JSONObject json) {
+	public HkwsThirdResponse post(String urlSuffix, JSONObject json) {
 		json.put("appkey", getAppyKey());
 		json.put("time", System.currentTimeMillis());// 设置时间参数
 		json.put("opUserUuid", getOpUserUuid(false));// 设置操作用户UUID
@@ -205,36 +205,36 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 		return resp;
 	}
 
-	private boolean isSuccess(HkwsThirdResponse resp) {
+	public boolean isSuccess(HkwsThirdResponse resp) {
 		if (null != resp && ErrorCodeEnum.SUCCESS.getCode().equals(resp.getErrorCode())) {
 			return true;
 		}
 		return false;
 	}
 
-	private String convetUrl(String urlSuffix, JSONObject json) {
+	public String convetUrl(String urlSuffix, JSONObject json) {
 		return getHost() + urlSuffix + "?token=" + MD5Utils.getMD5(urlSuffix + json.toString() + getSecretKey());
 	}
 
-	private String getSpecificConfigPrefix() {
+	public String getSpecificConfigPrefix() {
 		return getBaseConfigPrefix() + getParkingVendorName() + ".";
 	}
 
-	private String getBaseConfigPrefix() {
+	public String getBaseConfigPrefix() {
 		return "parking.hkws.";
 	}
 
-	private String getHost() {
+	public String getHost() {
 		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(),
 				getSpecificConfigPrefix() + "host", "http://10.1.10.37:80");
 	}
 
-	private String getSecretKey() {
+	public String getSecretKey() {
 		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(),
 				getSpecificConfigPrefix() + "secretKey", "71aaeaf9687b48f5bc95ae3f8cf91d08");
 	}
 
-	private String getOpUserUuid(boolean forcedUpdate) {
+	public String getOpUserUuid(boolean forcedUpdate) {
 		if (!forcedUpdate) {
 			return configurationProvider.getValue(UserContext.getCurrentNamespaceId(),
 					getSpecificConfigPrefix() + "opUserUuid", "5b2eb534696b11e89c2e438f92627767");
@@ -250,12 +250,12 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 		return newUuid;
 	}
 
-	private String getAppyKey() {
+	public String getAppyKey() {
 		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(), getSpecificConfigPrefix() + "appKey",
 				"028c85ec");
 	}
-	
-	private String getParkUuid() {
+
+	public String getParkUuid() {
 		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(), getSpecificConfigPrefix() + "parkUuid",
 				"06dfa3ed3a5a4309bd087fd2625ea00e");
 	}
