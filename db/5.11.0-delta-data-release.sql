@@ -190,6 +190,15 @@ SET @namespace_id = 0; -- 域空间id, 如果为0, 则相当于配置给所有�
 SET @locale_templates_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @module_id), @sms_code, 'zh_CN', @description, @display_name, @namespace_id);
+
+-- AUTHOR:tangcen 2018年11月12日14:31:01
+-- REMARK:修改楼宇资产管理模块配置
+UPDATE eh_service_modules SET instance_config='{\"url\":\"${home.url}/assets-web/build/index.html?hideNavigationBar=1&ehnavigatorstyle=2#/home/#sign_suffix\"}' WHERE id=38000;
+
+UPDATE eh_service_modules SET action_type=14 WHERE id=38000;
+
+UPDATE eh_service_modules SET client_handler_type=2 WHERE id=38000;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
