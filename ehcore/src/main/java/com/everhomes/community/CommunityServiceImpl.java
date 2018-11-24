@@ -234,6 +234,12 @@ import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.openapi.ListAddressesForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListAddressesForThirdPartyResponse;
+import com.everhomes.rest.openapi.ListBuildingsForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListBuildingsForThirdPartyResponse;
+import com.everhomes.rest.openapi.ListCommunitiesForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListCommunitiesForThirdPartyResponse;
 import com.everhomes.rest.organization.AuditAuth;
 import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.ExecutiveFlag;
@@ -4232,6 +4238,7 @@ public class CommunityServiceImpl implements CommunityService {
             }).collect(Collectors.toList());
 
         response.setMembers(dtoList);
+        //已认证或已拒绝的排序
 		Collections.sort(response.getMembers(), new Comparator<ComOrganizationMemberDTO>() {
 			@Override
 			public int compare(ComOrganizationMemberDTO o1, ComOrganizationMemberDTO o2) {
@@ -4241,6 +4248,18 @@ public class CommunityServiceImpl implements CommunityService {
 				return o2.getApproveTime().compareTo(o1.getApproveTime());
 			}
 		});
+		//未认证的排序
+		if(OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.WAITING_FOR_APPROVAL){
+			Collections.sort(response.getMembers(), new Comparator<ComOrganizationMemberDTO>() {
+				@Override
+				public int compare(ComOrganizationMemberDTO o1, ComOrganizationMemberDTO o2) {
+					if (o1.getCreateTime() == null || o2.getCreateTime() == null) {
+						return -1;
+					}
+					return o2.getCreateTime().compareTo(o1.getCreateTime());
+				}
+			});
+		}
 		return response;
 	}
 
@@ -5341,8 +5360,9 @@ public class CommunityServiceImpl implements CommunityService {
 		List<CommunityGeoPoint> pointList;
 
 
-
-		for(int i = 12; i > 3; i--){
+//TODO 5的范围太小，但是改成3的话，会把大量的数据查询出来。因为0域空间有大量的Community和CommunityGeoPoint数据。
+		//TODO findCommunityGeoPointByGeoHash接口应该带上namespaceId，内部和eh_communities连表查询。并且规定不能查询0域空间。
+		for(int i = 12; i > 5; i--){
 			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
 			if(pointList != null && pointList.size() > 0){
 				for(CommunityGeoPoint point: pointList){
@@ -6572,6 +6592,113 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		return response;
 	} 
+
+
+	@Override
+	public ListCommunitiesForThirdPartyResponse listCommunitiesForThirdParty(ListCommunitiesForThirdPartyCommand cmd) {
+		ListCommunitiesForThirdPartyResponse response = new ListCommunitiesForThirdPartyResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
+		Integer pageSize = cmd.getPageSize();
+		if (pageSize == null) {
+			pageSize = 10;
+		}else if (pageSize > 1000) {
+			pageSize = 1000;
+		}
+		
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.CommunityDTO> results = communityProvider.listCommunitiesForThirdParty(currentNamespaceId,cmd.getCommunityId(),pageAnchor,pageSize+1,timestamp);
+		
+		if (results!=null && results.size() > pageSize) {
+			results.remove(results.size()-1);
+			Long nextPageAnchor = pageAnchor + pageSize.longValue();
+			response.setNextPageAnchor(nextPageAnchor);
+		}
+		
+		response.setResults(results);
+		
+		return response;
+	}
+
+
+	@Override
+	public ListBuildingsForThirdPartyResponse listBuildingsForThirdParty(ListBuildingsForThirdPartyCommand cmd) {
+		ListBuildingsForThirdPartyResponse response = new ListBuildingsForThirdPartyResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
+		Integer pageSize = cmd.getPageSize();
+		if (pageSize == null) {
+			pageSize = 10;
+		}else if (pageSize > 1000) {
+			pageSize = 1000;
+		}
+		
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.BuildingDTO> results = communityProvider.listBuildingsForThirdParty(currentNamespaceId,cmd.getCommunityId(),pageAnchor,pageSize+1,timestamp);
+		
+		if (results!=null && results.size() > pageSize) {
+			results.remove(results.size()-1);
+			Long nextPageAnchor = pageAnchor + pageSize.longValue();
+			response.setNextPageAnchor(nextPageAnchor);
+		}
+		
+		for (com.everhomes.rest.openapi.BuildingDTO buildingDTO : results) {
+			if (buildingDTO.getCommunityId() != null) {
+				Community community = communityProvider.findCommunityById(buildingDTO.getCommunityId());
+				if (community != null) {
+					buildingDTO.setCommunityName(community.getName());
+				}
+			}
+		}
+		
+		response.setResults(results);
+		
+		return response;
+	}
+
+	@Override
+	public ListAddressesForThirdPartyResponse listAddressesForThirdParty(ListAddressesForThirdPartyCommand cmd) {
+		ListAddressesForThirdPartyResponse response = new ListAddressesForThirdPartyResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
+		Integer pageSize = cmd.getPageSize();
+		if (pageSize == null) {
+			pageSize = 10;
+		}else if (pageSize > 1000) {
+			pageSize = 1000;
+		}
+		
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.ApartmentDTO> results = communityProvider.listAddressesForThirdParty(currentNamespaceId,cmd.getCommunityId(),cmd.getBuildingId(),pageAnchor,pageSize+1,timestamp);
+		
+		if (results!=null && results.size() > pageSize) {
+			results.remove(results.size()-1);
+			Long nextPageAnchor = pageAnchor + pageSize.longValue();
+			response.setNextPageAnchor(nextPageAnchor);
+		}
+		
+		response.setResults(results);
+		
+		return response;
+	}
 
 }
 

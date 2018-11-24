@@ -188,6 +188,9 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	OrganizationService organizationService;
 
+	@Autowired
+	private FamilyProvider familyProvider;
+
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
 		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null
@@ -921,7 +924,7 @@ public class NewsServiceImpl implements NewsService {
 			}
 		}
 
-		if (CollectionUtils.isEmpty(authProjectIds)) {
+		if (!CollectionUtils.isEmpty(authProjectIds)) {
 			String authIdList = Joiner.on(",").join(authProjectIds);
 			must.add(JSONObject.parse("{\"terms\":{\"ownerId\":[" + authIdList + "]}}"));
 		}
@@ -2633,13 +2636,25 @@ public class NewsServiceImpl implements NewsService {
 		if (null != appContext.getCommunityId()) {
 			return appContext.getCommunityId();
 		}
-		
-		List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(appContext.getOrganizationId());
-		if (!CollectionUtils.isEmpty(requests)) {
-			return requests.get(0).getCommunityId();
+
+
+		//旧版本的公司场景没有communityId跪了
+		if(appContext != null && appContext.getCommunityId() == null && appContext.getOrganizationId() != null){
+			List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(appContext.getOrganizationId());
+			if(requests != null && requests.size() > 0){
+				appContext.setCommunityId(requests.get(0).getCommunityId());
+			}
+		}
+
+		//旧版本的家庭场景没有communityId，又跪了
+		if(appContext != null && appContext.getCommunityId() == null && appContext.getFamilyId() != null){
+			FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+			if(family != null){
+				appContext.setCommunityId(family.getCommunityId());
+			}
 		}
 		 
-		 return null;
+		return appContext.getCommunityId();
 	}
 
 

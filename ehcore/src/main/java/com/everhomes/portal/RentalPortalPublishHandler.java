@@ -70,12 +70,15 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
             rentalInstanceConfig.setIdentify(RentalV2ResourceType.DEFAULT.getCode());
         if (null == rentalInstanceConfig.getUnauthVisible())
             rentalInstanceConfig.setUnauthVisible((byte)0);
+        if (null == rentalInstanceConfig.getCrossCommuFlag())
+            rentalInstanceConfig.setCrossCommuFlag((byte)1);
 
         rentalResourceType.setPageType(rentalInstanceConfig.getPageType());
         rentalResourceType.setPayMode(rentalInstanceConfig.getPayMode());
         rentalResourceType.setIdentify(rentalInstanceConfig.getIdentify());
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
         rentalResourceType.setUnauthVisible(rentalInstanceConfig.getUnauthVisible());
+        rentalResourceType.setCrossCommuFlag(rentalInstanceConfig.getCrossCommuFlag());
         rentalv2Provider.createRentalResourceType(rentalResourceType);
         rentalInstanceConfig.setResourceTypeId(rentalResourceType.getId());
         return rentalResourceType;
@@ -94,6 +97,7 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
             if (null != rentalInstanceConfig.getUnauthVisible())
                 rentalResourceType.setUnauthVisible(rentalInstanceConfig.getUnauthVisible());
             rentalResourceType.setName(name);
+            rentalResourceType.setCrossCommuFlag(rentalInstanceConfig.getCrossCommuFlag());
             rentalv2Provider.updateRentalResourceType(rentalResourceType);
         }else{
             LOGGER.error("rental resource type is null. resourceTypeId = {}", rentalInstanceConfig.getResourceTypeId());

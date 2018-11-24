@@ -90,7 +90,7 @@ public interface SmsTemplateCode {
     int APPLY_ENTRY_PROCESSING_BUTTON_REMINDER_CODE = 38;
     int APPLY_ENTRY_COMPLETED_CODE = 39;
 
-    //资源预约短信
+    //资源预约短信(工作流模板)
     int RENTAL_PROCESSING_NODE_CODE = 40;
     int RENTAL_PROCESSING_NODE_SUPERVISE_CODE = 41;
 
@@ -177,7 +177,27 @@ public interface SmsTemplateCode {
     int DECORATION_MOTIFY_FEE = 81;//管理员修改装修费用的时候，短信提醒租户和装修公司 尊敬的“申请人姓名”/“装修公司负责人姓名”，关于“租户公司名称”的装修费用清单有更新，请前往APP查看详情。
 
     int DECORATION_MOTIFY_REFUND = 82;//修改退费信息后，短信提醒租户和装修公司负责人 尊敬的“申请人姓名”/“装修公司负责人姓名”，关于“租户公司名称”的装修押金退费信息有更新，请前往APP查看详情。
-    
+
     //云打印
     int PRINT_UNPAID_MESSAGE = 83; //未支付的短信
+
+    int RENTAL_CANCEL_ORDER_REFUND = 84;//尊敬的用户，您预约的${resourceName}(${useDetail})已退款成功，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。
+
+    int RENTAL_CANCEL_ORDER_NO_REFUND = 85;//尊敬的用户，您预约的${resourceName}(${useDetail})已成功取消，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。
+
+    int RENTAL_CANCEL_ORDER = 86;//尊敬的用户，您预约的${resourceName}(${useDetail})已成功取消，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。
+    
+    //服务联盟
+    int SERVICE_ALLIANCE_NEW_APPLY_TO_MANAGE = 87; //服务联盟V3.7.1 - 【app名称】$发起人姓名$（$发起人手机号$）提交了$服务名称$申请，请及时处理
+    int SERVICE_ALLIANCE_NEW_APPLY_TO_USER = 88; //服务联盟V3.7.1 - 【app名称】你提交的$服务名称$申请正在处理，可在app“我”-“我的申请”中查看处理进度
+
+    int RENTAL_END_NOTIFY_HOUR_USER = 89;//您预约的${resourceName}已临近结束时间，预订时间为$预订时间$
+
+    int RENTAL_CREATE_FLOW = 90;//${requestorName}(${requestorPhone})发起了${resourceName}的预约申请，请及时核查订单并处理
+
+    int RENTAL_CANCEL_NOT_PAY = 91;//抱歉，由于您未在规定时间内完成支付，您预约的${resourceName}（${useDetail}）已自动取消，订单编号：${orderNum}，期待下次为您服务
+
+    int RENTAL_ADMIN_NOTIFY = 92;//$预订人$（$联系方式$）预约了$资源名称$，使用时间：$预订时间$，需要物资：$物资名称$、$物资名称$，购买商品：$商品名称$*$数量$、$商品名称$*$数量$
+
+    int RENTAL_BEGIN_NOTIFY = 93;//您预约的${resourceName}已临近使用时间，预订时间为$预订时间$
 }

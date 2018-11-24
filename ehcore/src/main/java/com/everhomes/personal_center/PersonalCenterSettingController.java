@@ -22,6 +22,7 @@ import com.everhomes.rest.personal_center.ShowPrivateSettingResponse;
 import com.everhomes.rest.personal_center.UpdateShowCompanyCommand;
 import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -113,6 +114,7 @@ public class PersonalCenterSettingController extends ControllerBase{
      */
     @RequestMapping("listActivePersonalCenterSettings")
     @RestReturn(value=ListActivePersonalCenterSettingsResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listActivePersonalCenterSettings(ListActivePersonalCenterSettingsCommand cmd) {
         ListActivePersonalCenterSettingsResponse res = this.personalCenterService.listActivePersonalCenterSettings(cmd);
         RestResponse response = new RestResponse(res);

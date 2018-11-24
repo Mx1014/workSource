@@ -37,6 +37,7 @@ public class CreateOrderBaseInfo {
 	private String orderTitle;
 	private Integer paySourceType;
 	private String returnUrl;
+	private String extendInfo;
 	
 	@Override
 	public String toString() {
@@ -139,4 +140,13 @@ public class CreateOrderBaseInfo {
 	public void setGoodsDetail(List<OrderDescriptionEntity> goodsDetail) {
 		this.goodsDetail = goodsDetail;
 	}
+
+	public String getExtendInfo() {
+		return extendInfo;
+	}
+
+	public void setExtendInfo(String extendInfo) {
+		this.extendInfo = extendInfo;
+	}
+	
 }

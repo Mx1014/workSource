@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: 资源id</li>
  * <li>siteName: 名称</li>
  * <li>spec: 规格</li>
+ * <li>peopleSpec: 容纳人数(会议室)</li>
  * <li>address: 地址</li>
  * <li>longitude: 地址经度</li>
  * <li>latitude: 地址纬度</li>
@@ -40,6 +41,7 @@ public class UpdateResourceAdminCommand {
 	private String siteName;
 	@NotNull
 	private String spec;
+	private Integer peopleSpec;
 	@NotNull
 	private String address;
 	@NotNull
@@ -49,7 +51,7 @@ public class UpdateResourceAdminCommand {
 	private Long communityId;
 	private String contactPhonenum;
 	@NotNull
-	private Long chargeUid;
+	private String chargeUid;
 	@NotNull
 	private String introduction;
 	private String notice;
@@ -137,11 +139,11 @@ public class UpdateResourceAdminCommand {
 		this.contactPhonenum = contactPhonenum;
 	}
 
-	public Long getChargeUid() {
+	public String getChargeUid() {
 		return chargeUid;
 	}
 
-	public void setChargeUid(Long chargeUid) {
+	public void setChargeUid(String chargeUid) {
 		this.chargeUid = chargeUid;
 	}
 
@@ -249,5 +251,13 @@ public class UpdateResourceAdminCommand {
 
 	public void setFileUris(List<RentalSiteFileDTO> fileUris) {
 		this.fileUris = fileUris;
+	}
+
+	public Integer getPeopleSpec() {
+		return peopleSpec;
+	}
+
+	public void setPeopleSpec(Integer peopleSpec) {
+		this.peopleSpec = peopleSpec;
 	}
 }

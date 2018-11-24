@@ -8,7 +8,7 @@ import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
-import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
+import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -193,6 +193,23 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 
 	/**
+	 *
+	 * <b>URL: /rental/admin/listResourceAbstract</b>
+	 * <p>
+	 * 获取资源摘要
+	 * </p>
+	 */
+	@RequestMapping("listResourceAbstract")
+	@RestReturn(GetResourceListAdminResponse.class)
+	public RestResponse listResourceAbstract(@Valid GetResourceListAdminCommand cmd){
+		GetResourceListAdminResponse list = this.rentalService.getResourceList(cmd);
+		RestResponse response = new RestResponse(list);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * 
 	 * <b>URL: /rental/admin/addResource</b>
 	 * <p>
@@ -292,8 +309,6 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-	
 
 	
 	/**
@@ -343,7 +358,55 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /rental/admin/getStructureList</b>
+	 * <p>
+	 * 查询资源的基础设施
+	 * </p>
+	 */
+	@RequestMapping("getStructureList")
+	@RestReturn(value = GetStructureListResponse.class)
+	public RestResponse getStructureList(@Valid GetStructureListAdminCommand cmd) {
+		GetStructureListResponse getStructureListResponse =  rentalService.getStructureList(cmd);
+		RestResponse response = new RestResponse(getStructureListResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/updateStructure</b>
+	 * <p>
+	 * 更新资源的基础设施
+	 * </p>
+	 */
+	@RequestMapping("updateStructure")
+	@RestReturn(value = String.class)
+	public RestResponse updateStructure(@Valid UpdateStructureAdminCommand cmd) {
+		rentalService.updateStructure(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/updateStructures</b>
+	 * <p>
+	 *	批量更新structures
+	 * </p>
+	 */
+	@RequestMapping("updateStructures")
+	@RestReturn(value = String.class)
+	public RestResponse updateStructures(@Valid UpdateStructuresAdminCommand cmd) {
+		rentalService.updateStructures(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 	/**
 	 * <b>URL: /rental/admin/addRentalSiteRules</b>
@@ -713,6 +776,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourceAttachment")
 	@RestReturn(value = ResourceAttachmentDTO.class)
 	public RestResponse getResourceAttachment(@Valid GetResourceAttachmentCommand cmd) {
+		if (RuleSourceType.DEFAULT.getCode().equals(cmd.getSourceType())) {
+			GetResourceTimeRuleCommand cmd2 = ConvertHelper.convert(cmd, GetResourceTimeRuleCommand.class);
+			this.getResourceTimeRule(cmd2);//防止没有规则
+		}
 		RestResponse response = new RestResponse(rentalService.getResourceAttachment(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

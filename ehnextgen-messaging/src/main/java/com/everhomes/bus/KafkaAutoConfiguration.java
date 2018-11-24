@@ -1,5 +1,6 @@
 package com.everhomes.bus;
 
+import org.apache.commons.collections.ExtendedProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -41,13 +42,23 @@ public class KafkaAutoConfiguration {
 
     @Bean
     public ConsumerFactory<?, ?> kafkaConsumerFactory() {
-        return new DefaultKafkaConsumerFactory<Object, Object>(
-                this.properties.buildConsumerProperties());
+        if (properties.isEnabled()) {
+            return new DefaultKafkaConsumerFactory<Object, Object>(
+                    properties.buildConsumerProperties());
+        } else {
+            return new DefaultKafkaConsumerFactory<Object, Object>(
+                    new ExtendKafkaProperties().buildConsumerProperties());
+        }
     }
 
     @Bean
     public ProducerFactory<?, ?> kafkaProducerFactory() {
-        return new DefaultKafkaProducerFactory<Object, Object>(
-                this.properties.buildProducerProperties());
+        if (properties.isEnabled()) {
+            return new DefaultKafkaProducerFactory<Object, Object>(
+                    properties.buildProducerProperties());
+        } else {
+            return new DefaultKafkaProducerFactory<Object, Object>(
+                    new ExtendKafkaProperties().buildProducerProperties());
+        }
     }
 }

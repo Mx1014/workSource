@@ -16,7 +16,10 @@ import java.util.List;
  * <li>enableProvider: 是否开启服务商的功能 0-不开启 1-开启</li>
  * <li>enableCustomerService: 是否开启客服会话查看和导出功能 0-不开启 1-开启</li>
  * <li>appType: web-跳转web链接  native-原生 这个参数用于生成web化的actionData还是原生的actionData</li>
+ * <li>realm: 用于离线应用识别</li>
  * <li>enableOnly: 0-可以在多项目显示 1-仅当前项目下显示</li>
+ * <li>entryUrl: 离线包，使用该url</li> 
+ * <li>url: 用于广场显示</li>
  * </ul>
  */
 public class ServiceAllianceInstanceConfig {
@@ -36,8 +39,22 @@ public class ServiceAllianceInstanceConfig {
 	private Byte enableCustomerService;
 	
 	private String appType;
-	
+
+	private String realm;
+
 	private Byte enableOnly;
+	
+	private String entryUrl;
+	
+	private String url;
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
 	@ItemType(ServiceAllianceJump.class)
 	private List<ServiceAllianceJump> jumps;
@@ -147,12 +164,28 @@ public class ServiceAllianceInstanceConfig {
 		this.appType = appType;
 	}
 
+	public String getRealm() {
+		return realm;
+	}
+
+	public void setRealm(String realm) {
+		this.realm = realm;
+	}
+
 	public Byte getEnableOnly() {
 		return enableOnly;
 	}
 
 	public void setEnableOnly(Byte enableOnly) {
 		this.enableOnly = enableOnly;
+	}
+
+	public String getEntryUrl() {
+		return entryUrl;
+	}
+
+	public void setEntryUrl(String entryUrl) {
+		this.entryUrl = entryUrl;
 	}
 
 }

@@ -24,6 +24,8 @@ public class SearchDoorAuthCommand {
     
     @NotNull
     private Long doorId;
+
+    private Byte groupType;
     
     private Integer pageSize;
 
@@ -39,6 +41,14 @@ public class SearchDoorAuthCommand {
     private String keyword;
     
     private Byte status;
+
+    public Byte getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(Byte groupType) {
+        this.groupType = groupType;
+    }
 
     public Long getCreateTimeStart() {
         return createTimeStart;

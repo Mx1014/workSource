@@ -27,4 +27,7 @@ public interface ContractTrackingTemplateCode {
 	int CONTRACT_CHANGE = 18;//合同变更
 	int APARTMENT_UPDATE = 19;//资产更改事件 
 
+	int CONTRACT_COPY = 20;        //合同复制
+	int CONTRACT_INITIALIZE = 21;  //合同初始化
+	int CONTRACT_EXEMPTION = 22;   //合同免批
 }

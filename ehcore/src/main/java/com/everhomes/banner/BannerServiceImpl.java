@@ -486,6 +486,14 @@ public class BannerServiceImpl implements BannerService {
             }
         }
 
+        //旧版本的家庭场景没有communityId，又跪了
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getFamilyId() != null){
+            FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+            if(family != null){
+                appContext.setCommunityId(family.getCommunityId());
+            }
+        }
+
 
         if (appContext != null && appContext.getCommunityId() != null) {
             List<Banner> bannerList = bannerProvider.listBannersByCommunityId(UserContext.getCurrentNamespaceId(), appContext.getCommunityId(),cmd.getCategoryId());

@@ -1,1 +1,0 @@
-ALTER TABLE eh_general_form_val_requests MODIFY created_time DATETIME;

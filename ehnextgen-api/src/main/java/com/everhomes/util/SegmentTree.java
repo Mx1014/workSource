@@ -1,5 +1,8 @@
 package com.everhomes.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SegmentTree {
 
     private SegmentNode root;
@@ -56,6 +59,24 @@ public class SegmentTree {
         return getMaxCover(this.root,lborder,rborder);
     }
 
+    public List<SegmentNode> getZeroConverNodes(long lborder, long rborder){
+        List<SegmentNode> covers = new ArrayList<>();
+        if (lborder == rborder)
+            return covers;
+        modifyTree(rborder);
+
+        covers.addAll(getZeroConverNodes(this.root,lborder,rborder ));
+
+        //合并时间段
+        for (int i = covers.size() - 1;i > 0;i--){
+            if (covers.get(i).getLborder() == covers.get(i - 1).getRborder()){
+                covers.get(i - 1).setRborder(covers.get(i).getRborder());
+                covers.remove(i);
+            }
+        }
+        return covers;
+    }
+
     private int getMaxCover(SegmentNode p, long lborder, long rborder){
         if ((lborder == p.getLborder() && rborder == p.getRborder()) || p.getLeftNode() == null)
             return p.getMaxCover();
@@ -75,6 +96,36 @@ public class SegmentTree {
                 maxCover = Math.max(getMaxCover(p.getRightNode(), mid, rborder),maxCover);
         }
         return maxCover;
+    }
+
+    private List<SegmentNode> getZeroConverNodes(SegmentNode p,long lborder, long rborder){
+        List<SegmentNode> covers = new ArrayList<>();
+        if ( p.getLeftNode() == null)
+            if (p.getMaxCover() != 0) {
+                return covers;
+            }else{
+                SegmentNode node = new SegmentNode();
+                node.setLborder(lborder);
+                node.setRborder(rborder);
+                covers.add(node);
+                return covers;
+            }
+
+        long mid = (p.getLborder() + p.getRborder()) / 2;
+        modifyNode(p);
+        if (lborder < mid){
+            if (rborder <= mid)
+                covers.addAll(getZeroConverNodes(p.getLeftNode(),lborder,rborder));
+            else
+                covers.addAll(getZeroConverNodes(p.getLeftNode(),lborder,mid));
+        }
+        if (rborder > mid) {
+            if (lborder >= mid)
+                covers.addAll(getZeroConverNodes(p.getRightNode(), lborder, rborder));
+            else
+                covers.addAll(getZeroConverNodes(p.getRightNode(), mid, rborder));
+        }
+        return covers;
     }
 
     private void modifyNode(SegmentNode p){

@@ -5,6 +5,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.*;
+import com.everhomes.server.schema.Tables;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,18 +18,6 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.aclink.AclinkIPadDTO;
-import com.everhomes.rest.aclink.AclinkServerDTO;
-import com.everhomes.rest.aclink.AclinkServiceErrorCode;
-import com.everhomes.rest.aclink.CreateLocalIpadCommand;
-import com.everhomes.rest.aclink.CreateLocalIpadResponse;
-import com.everhomes.rest.aclink.CreateMarchUUIDCommand;
-import com.everhomes.rest.aclink.DoorAccessDTO;
-import com.everhomes.rest.aclink.DoorAccessLinkStatus;
-import com.everhomes.rest.aclink.DoorAccessOwnerType;
-import com.everhomes.rest.aclink.ListLocalIpadCommand;
-import com.everhomes.rest.aclink.ListLocalIpadResponse;
-import com.everhomes.rest.aclink.UpdateLocalIpadCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -116,6 +110,48 @@ public class AclinkIpadServiceImpl implements AclinkIpadService {
 			server.setOperateTime(ipad.getOperateTime());
 			server.setOperatorUid(ipad.getOperatorUid());
 			aclinkServerProvider.updateLocalServer(server);
+		}
+	}
+
+	@Override
+	public void updateIpadLogo(UpdateIpadLogoCommand cmd){
+		List<AclinkIpad> ipads = new ArrayList<AclinkIpad>();
+		User user = UserContext.current().getUser();
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		ipads = aclinkIpadProvider.queryLocalIpads(locator, 9999,new ListingQueryBuilderCallback(){
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+																SelectQuery<? extends Record> query) {
+
+				if(cmd.getOwnerId() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.OWNER_ID.eq(cmd.getOwnerId()));
+				}
+
+				if(cmd.getOwnerType() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.OWNER_TYPE.eq(cmd.getOwnerType()));
+				}
+				return query;
+			}
+
+		});
+		if(null != ipads && !ipads.isEmpty()){
+			for(AclinkIpad ipad: ipads){
+				if(null != ipad.getId()){
+					ipad.setLogoUrl(cmd.getLogoUrl());
+					ipad.setLogoUri(cmd.getLogoUri());
+					ipad.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					ipad.setOperatorUid(user.getId());
+					aclinkIpadProvider.updateLocalIpad(ipad);
+					//内网服务器下属设备有变动,更新服务器的上次操作时间
+					AclinkServer server = aclinkServerProvider.findServerById(ipad.getServerId());
+					if(server != null){
+						server.setOperateTime(ipad.getOperateTime());
+						server.setOperatorUid(ipad.getOperatorUid());
+						aclinkServerProvider.updateLocalServer(server);
+					}
+				}
+			}
 		}
 	}
 

@@ -17,6 +17,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.customer.SyncDataTaskService;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.CheckAdminCommand;
@@ -74,6 +75,9 @@ public class ContractController extends ControllerBase {
 	@Autowired
 	private SyncDataTaskService syncDataTaskService;
 	
+	@Autowired
+	protected ContractProvider contractProvider;
+	
 	/**
 	 * <p>1.合同列表</p>
 	 * <b>URL: /contract/listContracts</b>
@@ -113,6 +117,23 @@ public class ContractController extends ControllerBase {
 		}
 		cmd.setPaymentFlag((byte)0);
 		return new RestResponse(contractSearcher.queryContracts(cmd));
+	}
+	
+	/**
+	 * <p>搜索合同没有OrgId</p>
+	 * <b>URL: /contract/searchNoOrgIdContracts</b>
+	 */
+	@RequestMapping("searchNoOrgIdContracts")
+	@RestReturn(ListContractsResponse.class)
+	public RestResponse searchNoOrgIdContracts(SearchContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		if (namespaceId == 999971) {
+			ContractService contractService = getContractService(namespaceId);
+			ListContractsCommand command = ConvertHelper.convert(cmd, ListContractsCommand.class);
+			return new RestResponse(contractService.listContracts(command));
+		}
+		cmd.setPaymentFlag((byte)0);
+		return new RestResponse(contractSearcher.searchNoOrgIdContracts(cmd));
 	}
 
 	/**
@@ -625,4 +646,85 @@ public class ContractController extends ControllerBase {
 		return response;
 	}
 
+	/**	
+	 * <p>合同更新/根据合同id,自动刷新合同账单</p>
+	 * <b>URL: /contract/autoGeneratingBill</b>
+	 */
+	@RequestMapping("autoGeneratingBill")
+	@RestReturn(String.class)
+	public RestResponse autoGeneratingBill(AutoGeneratingBillCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.autoGeneratingBill(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>合同初始化/选择合同列表合同进行初始化</p>
+	 * <b>URL: /contract/initializationContract</b>
+	 */
+	@RequestMapping("initializationContract")
+	@RestReturn(String.class)
+	public RestResponse initializationContract(InitializationCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		ContractTaskOperateLog contractTaskOperateLog = contractService.initializationContract(cmd);
+		RestResponse response = new RestResponse(contractTaskOperateLog);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>合同免批/选择合同列表合同进行合同免批</p>
+	 * <b>URL: /contract/exemptionContract</b>
+	 */
+	@RequestMapping("exemptionContract")
+	@RestReturn(String.class)
+	public RestResponse exemptionContract(InitializationCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		ContractTaskOperateLog contractTaskOperateLog = contractService.exemptionContract(cmd);
+		RestResponse response = new RestResponse(contractTaskOperateLog);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>合同复制/支持批量复制合同</p>
+	 * <b>URL: /contract/copyContract</b>
+	 */
+	@RequestMapping("copyContract")
+	@RestReturn(String.class)
+	public RestResponse copyContract(InitializationCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.copyContract(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>合同初始化进度条/进度条查询</p>
+	 * <b>URL: /contract/searchProgressContract</b>
+	 */
+	@RequestMapping("searchProgressContract")
+	@RestReturn(SearchProgressDTO.class)
+	public RestResponse searcIinitializationContract(SearchProgressCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		SearchProgressDTO result = contractService.findContractOperateTaskById(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>合同更新/根据合同id,自动刷新合同账单</p>
+	 * <b>URL: /contract/autoGeneratingBill</b>
+	 */
+	/*@RequestMapping("autoGeneratingBill")
+	@RestReturn(String.class)
+	public RestResponse autoGeneratingBill(AutoGeneratingBillCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.autoGeneratingBill(cmd);
+		return new RestResponse();
+	}*/
 }

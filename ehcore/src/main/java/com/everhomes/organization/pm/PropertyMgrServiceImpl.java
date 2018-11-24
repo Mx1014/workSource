@@ -3060,10 +3060,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		//addressProvider.deleteAddressById(cmd.getId());
     }
 
+    //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+    //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
-        if (organizationId != null && community != null && address != null) {
-        	//针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
-            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+//        if (organizationId != null && community != null && address != null) {
+    	if (community != null && address != null) {
             //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
             CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
         	if (communityAddressMapping == null) {
@@ -8057,8 +8058,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public ListAuthorizePricesResponse listAuthorizePrices(AuthorizePriceCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<AddressProperties> list = propertyMgrProvider.listAuthorizePrices(cmd.getNamespaceId(), cmd.getBuildingId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+		List<AddressProperties> list = propertyMgrProvider.listAuthorizePrices(cmd.getNamespaceId(), cmd.getBuildingId(), cmd.getCommunityId(), locator, pageSize);
 		ListAuthorizePricesResponse response = new ListAuthorizePricesResponse();
+		Long nextPageAnchor = null;
+		if(list.size() > pageSize) {
+			list.remove(list.size() - 1);
+            response.setNextPageAnchor(list.get(list.size() - 1).getId());
+        }
 
 		if (list.size() > 0) {
 			List<AuthorizePriceDTO> resultList = list.stream().map((c) -> {
@@ -8082,11 +8090,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				return dto;
 			}).collect(Collectors.toList());
 			response.setAuthorizePricesList(resultList);
-			if (list.size() != pageSize) {
-				response.setNextPageAnchor(null);
-			} else {
-				response.setNextPageAnchor(list.get(list.size() - 1).getId());
-			}
 		}
 		return response;
 	}
@@ -8176,7 +8179,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			excelUtils = excelUtils.setNeedSequenceColumn(false);
 			List<ExportApartmentsAuthorizePriceDTO> data = aptList.stream().map(r -> {
 				ExportApartmentsAuthorizePriceDTO dto = ConvertHelper.convert(r, ExportApartmentsAuthorizePriceDTO.class);
-				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
+				// issue-41379 【资产管理-楼宇详情-房源授权价记录：点击批量导入授权价，选择下载模板，下载失败】
+				Byte livingStatus = null;
+				Address address = addressProvider.findAddressById(r.getAddressId());
+				CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(r.getAddressId());
+				if (communityAddressMapping != null) {
+					livingStatus = communityAddressMapping.getLivingStatus();
+		        } else {
+		        	livingStatus = AddressMappingStatus.LIVING.getCode();
+		        }
+				//此方法会返回多个房源状态，由于历史遗留数据的问题，导致此方法会返回多个房源状态，一个房源对应对各状态，导致报错
+				//Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
 				dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
 				AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, cmd.getBuildingId(), r.getAddressId());
 				if (addressProperties != null && addressProperties.getApartmentAuthorizeType() != null && addressProperties.getAuthorizePrice() != null && addressProperties.getChargingItemsId() != null) {
@@ -8200,7 +8213,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			for (int i = 0; i < lists.size(); i++) {
 				chargingItemName.append(lists.get(i).getChargingItemName() + ",");
 			}
-			if (chargingItemName != null && !"".equals(chargingItemName)) {
+			if (chargingItemName.length()>1) {
 				chargingItemNames = (chargingItemName.toString()).substring(0, (chargingItemName.toString()).length() - 1);
 			} else {
 				chargingItemNames = "暂无可选费项，请设置后再试";

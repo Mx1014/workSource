@@ -47,9 +47,6 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
 
     @Override
     public void cancelOrderSendMessage(RentalOrder rentalBill) {
-
-
-
         Map<String, String> map = new HashMap<>();
         map.put("resourceTypeName", "VIP车位预约");
         String content = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
@@ -62,19 +59,6 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
 
         String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
-        //当有退款时 才发退款的消息
-        if (rentalBill.getStatus() == SiteBillStatus.REFUNDED.getCode()) {
-            map = new HashMap<>();
-            map.put("useDetail", useDetail);
-            map.put("totalAmount", String.valueOf(rentalBill.getPayTotalMoney()));
-            map.put("refundAmount", String.valueOf(rentalBill.getRefundAmount()));
-            String refundContent = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
-                    RentalNotificationTemplateCode.RENTAL_USER_CANCEL_ORDER_REFUND, RentalNotificationTemplateCode.locale, map, "");
-            //给预约人推送订单退款成功消息
-            rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), refundContent,
-                    rentalBill.getId(), rentalBill.getResourceType());
-
-        }
         //给车主发短信
         String templateScope = SmsTemplateCode.SCOPE;
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("plateOwnerName", useInfoDTO.getPlateOwnerName());
@@ -385,5 +369,21 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         } catch (RuntimeException e) {
             LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:" + useInfoDTO.getPlateOwnerPhone());
         }
+    }
+
+    @Override
+    public void refundOrderSuccessSendMessage(RentalOrder rentalBill) {
+        Map<String, String> map = new HashMap<>();
+        String customJson = rentalBill.getCustomObject();
+        VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
+        String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
+        map.put("useDetail", useDetail);
+        map.put("totalAmount", String.valueOf(rentalBill.getPayTotalMoney()));
+        map.put("refundAmount", String.valueOf(rentalBill.getRefundAmount()));
+        String refundContent = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+                RentalNotificationTemplateCode.RENTAL_USER_CANCEL_ORDER_REFUND, RentalNotificationTemplateCode.locale, map, "");
+        //给预约人推送订单退款成功消息
+        rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), refundContent,
+                rentalBill.getId(), rentalBill.getResourceType());
     }
 }

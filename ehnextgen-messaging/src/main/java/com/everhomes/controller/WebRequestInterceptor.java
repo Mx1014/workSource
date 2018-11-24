@@ -13,6 +13,8 @@ import com.everhomes.domain.Domain;
 import com.everhomes.domain.DomainService;
 import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.portal.PortalVersionUser;
 import com.everhomes.portal.PortalVersionUserProvider;
 import com.everhomes.rest.app.AppConstants;
@@ -20,9 +22,8 @@ import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
-import com.everhomes.tool.BlutoAccessor;
+import com.everhomes.tachikoma.commons.sdk.SdkSettings;
 import com.everhomes.user.*;
-import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -43,6 +44,8 @@ import java.net.InetAddress;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Interceptor that checks REST API signatures
@@ -60,6 +63,14 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     private static final int VERSION_UPPERBOUND = 4195330; // 区分4.1.2之前的版本,小于这个数字代表4.1.2以前的版本
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
+
+    private static final String DEFAULT_CLIENT_APP_KEY_API_STR =
+            "/stat/event/postDevice," +
+                    "/pusher/registDevice," +
+                    "/user/syncActivity,/user/signupByAppKey," +
+                    "/user/signup,/user/logoff,/community/findDefaultCommunity," +
+                    "/user/systemInfo,/user/resendVerificationCodeByAppKey," +
+                    "/user/resendVerificationCodeByIdentifierAndAppKey";
 
     @Autowired
     private UserService userService;
@@ -87,14 +98,14 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 	
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
-
+    
     @Autowired
-    private SdkUserService sdkUserService;
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
 
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
-
-    public WebRequestInterceptor() {
+    public WebRequestInterceptor() throws ClassNotFoundException {
+        Class.forName("com.everhomes.tool.BlutoAccessor");
     }
 
     @Override
@@ -218,7 +229,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
                     //Update by Janson, when the request is using apiKey, we generate a 403 response to app.
                     String appKey = request.getParameter(APP_KEY_NAME);
-                    if (null != appKey && (!appKey.isEmpty())) {
+                    if (null != appKey && (!appKey.isEmpty()) && !requireLogonToken(request)) {
                         LOGGER.info("appKey=" + appKey + " is Forbidden");
                         throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
                                 UserServiceErrorCode.ERROR_FORBIDDEN, "Forbidden");
@@ -458,6 +469,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if (paramMap.get("signature") == null)
             return false;
 
+        if (requireLogonToken(request)) {
+            return false;
+        }
+
         String appKey = getParamValue(paramMap, APP_KEY_NAME);
         App app = getAppByKey(appKey);
         if (app == null) {
@@ -465,7 +480,12 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             return false;
         }
 
+        // add by 杨崇鑫  物业缴费V7.5（中天-资管与财务EAS系统对接）
+        AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(app.getAppKey());
         UserContext.current().setCallerApp(app);
+        if(mapping != null) {
+        	UserContext.setCurrentNamespaceId(mapping.getNamespaceId());
+        }
 
         Map<String, String> mapForSignature = new HashMap<String, String>();
         for (Map.Entry<String, String[]> entry : paramMap.entrySet()) {
@@ -481,10 +501,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     private App getAppByKey(String appKey) {
         // 给 SDK 调用提供的便捷方式
-        if (AppConstants.APPKEY_SDK.equalsIgnoreCase(appKey)) {
+        if (SdkSettings.APP_KEY_SDK.equalsIgnoreCase(appKey)) {
             App app = new App();
             app.setAppKey(appKey);
-            app.setSecretKey(Base64.getEncoder().encodeToString((new BlutoAccessor()).get(new TokenServiceSecretKey())));
+            app.setSecretKey(SdkSettings.SECRET_KEY_SDK);
             app.setName("SDK");
             app.setId(0L);
             return app;
@@ -618,7 +638,46 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         Map<String, String[]> paramMap = request.getParameterMap();
         String signAppKey = getParamValue(paramMap, "appKey");
         String osignAppKey = configurationProvider.getValue(SIGN_APP_KEY, "44952417-b120-4f41-885f-0c1110c6aece");
-        return signAppKey == null ? false : signAppKey.equals(osignAppKey);
+        return signAppKey != null && signAppKey.equals(osignAppKey) && !requireLogonToken(request);
+    }
+
+    private boolean requireLogonToken(HttpServletRequest request) {
+        String appKey = getParamValue(request.getParameterMap(), "appKey");
+        if (appKey != null) {
+            String contextPath = request.getContextPath();
+            String requestURI = request.getRequestURI();
+            String uri = requestURI.replaceFirst(contextPath, "");
+
+            String clientAppKeyApi = configurationProvider.getValue("client.appKeyApi", DEFAULT_CLIENT_APP_KEY_API_STR);
+            Set<String> apiSet = Stream
+                    .of(clientAppKeyApi.split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
+
+            // appKey 不为空的时候，如果是客户端来的请求，除了特殊的几个，都是需要 logon token 的
+            boolean needLogonToken = AppConstants.APPKEY_APP.equals(appKey) && !apiSet.contains(uri);
+
+            // log start
+            try {
+                if (needLogonToken) {
+                    String token = getParamValue(request.getParameterMap(), "token");
+                    if (token == null) {
+                        Cookie cookie = findCookieInRequest("token", request);
+                        if (cookie != null) {
+                            token = cookie.getValue();
+                        }
+                    }
+                    LOGGER.debug("Need logon token, but they are invalid, requestURI={}, token={}", uri, token);
+                }
+            } catch (Exception e) {
+                //
+            }
+            // log end
+
+            return needLogonToken;
+        }
+        // 受保护的 API 里，没有 appKey 的请求都是需要 logon token 的
+        return true;
     }
 
     private LoginToken innerSignLogon(HttpServletRequest request, HttpServletResponse response) {

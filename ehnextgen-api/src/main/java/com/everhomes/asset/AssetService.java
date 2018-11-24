@@ -60,13 +60,12 @@ import com.everhomes.rest.asset.ListAvailableVariablesCommand;
 import com.everhomes.rest.asset.ListAvailableVariablesDTO;
 import com.everhomes.rest.asset.ListBillDetailCommandStr;
 import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.ListBillDetailVO;
 import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
 import com.everhomes.rest.asset.ListBillItemsCommand;
 import com.everhomes.rest.asset.ListBillItemsResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.ListBillsCommandForEnt;
-import com.everhomes.rest.asset.ListBillsDTO;
-import com.everhomes.rest.asset.ListBillsResponse;
 import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.ListChargingItemsForBillGroupResponse;
@@ -78,6 +77,7 @@ import com.everhomes.rest.asset.ListLateFineStandardsCommand;
 import com.everhomes.rest.asset.ListLateFineStandardsDTO;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.asset.ListPaymentBillCmd;
+import com.everhomes.rest.asset.ListPaymentBillDetailCmd;
 import com.everhomes.rest.asset.ListPaymentBillResp;
 import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
 import com.everhomes.rest.asset.ListSimpleAssetBillsCommand;
@@ -89,6 +89,7 @@ import com.everhomes.rest.asset.OneKeyNoticeCommand;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
 import com.everhomes.rest.asset.PaymentExpectanciesResponse;
+import com.everhomes.rest.asset.PaymentOrderBillDTO;
 import com.everhomes.rest.asset.PublicTransferBillCmdForEnt;
 import com.everhomes.rest.asset.PublicTransferBillRespForEnt;
 import com.everhomes.rest.asset.ReCalBillCommand;
@@ -101,6 +102,8 @@ import com.everhomes.rest.asset.UploadCertificateCommand;
 import com.everhomes.rest.asset.UploadCertificateInfoDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -343,4 +346,8 @@ public interface AssetService {
 	void meterAutoReading(Boolean createPlanFlag);
 	AssetDooraccessLog getDoorAccessInfo(GetDoorAccessInfoCommand cmd);
 	List<AssetDooraccessParam> getDoorAccessParamList(byte status);
+	
+	void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId);
+	
+	PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd);
 }

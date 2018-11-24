@@ -207,9 +207,14 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             FilterBuilder meterNumberTerm = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());
             filterBuilders.add(meterNumberTerm);
         }
+        //issue-41935:在不同的community都可以看到所有园区的抄表数据，没有通过communityId来区分数据
         if (cmd.getCommunityIds() != null && cmd.getCommunityIds().size()>0) {
             TermsFilterBuilder communityIdTerms = FilterBuilders.termsFilter("communityId", cmd.getCommunityIds());
             filterBuilders.add(communityIdTerms);
+        }
+        if (cmd.getCommunityId() != null) {
+            TermFilterBuilder communityIdTerm = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+            filterBuilders.add(communityIdTerm);
         }
         if (cmd.getMeterType() != null) {
             TermFilterBuilder meterTypeTerm = FilterBuilders.termFilter("meterType", cmd.getMeterType());

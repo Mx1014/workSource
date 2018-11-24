@@ -45,28 +45,7 @@ import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.FieldItemDTO;
-import com.everhomes.rest.varField.ImportFieldExcelCommand;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.rest.varField.ListFieldItemCommand;
-import com.everhomes.rest.varField.ListScopeFieldItemCommand;
-import com.everhomes.rest.varField.ListSystemFieldCommand;
-import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
-import com.everhomes.rest.varField.ListSystemFieldItemCommand;
-import com.everhomes.rest.varField.ModuleName;
-import com.everhomes.rest.varField.ScopeFieldGroupInfo;
-import com.everhomes.rest.varField.ScopeFieldInfo;
-import com.everhomes.rest.varField.ScopeFieldItemInfo;
-import com.everhomes.rest.varField.SystemFieldDTO;
-import com.everhomes.rest.varField.SystemFieldGroupDTO;
-import com.everhomes.rest.varField.SystemFieldItemDTO;
-import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
-import com.everhomes.rest.varField.UpdateFieldItemsCommand;
-import com.everhomes.rest.varField.UpdateFieldsCommand;
-import com.everhomes.rest.varField.VarFieldStatus;
+import com.everhomes.rest.varField.*;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
@@ -109,14 +88,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -553,6 +525,9 @@ public class FieldServiceImpl implements FieldService {
         }
         if (namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getOwnerId(), null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            if(scopeFields == null || scopeFields.size() == 0){
+                scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            }
             if (scopeFields != null && scopeFields.size() > 0) {
                 globalFlag = false;
             }
@@ -560,10 +535,17 @@ public class FieldServiceImpl implements FieldService {
         // add general scope fields version 3.5
         if (globalFlag) {
             scopeFields = fieldProvider.listScopeFields(0, cmd.getOwnerId(), null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            if(scopeFields == null || scopeFields.size() == 0){
+                scopeFields = fieldProvider.listScopeFields(0, null, null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            }
         }
         //查询表单初始化的数据
         if (scopeFields != null && scopeFields.size() < 1) {
             scopeFields = fieldProvider.listScopeFields(0, cmd.getOwnerId(), null, cmd.getModuleName(), cmd.getGroupPath(), null);
+        }
+
+        if (scopeFields != null && scopeFields.size() < 1) {
+            scopeFields = fieldProvider.listScopeFields(0, null, null, cmd.getModuleName(), cmd.getGroupPath(), null);
         }
 
         if (scopeFields != null && scopeFields.size() > 0) {
@@ -2467,4 +2449,53 @@ public class FieldServiceImpl implements FieldService {
         return dto;
     }
 
+
+    @Override
+    public void saveFieldScopeFilter(SaveFieldScopeFilterCommand cmd){
+        List<Long> fields = cmd.getFieldId();
+        fieldProvider.changeFilterStatus(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), UserContext.currentUserId(), cmd.getGroupPath());
+        if(fields != null && fields.size() > 0){
+            fields.forEach(r ->{
+                VarFieldScopeFilter filter = new VarFieldScopeFilter();
+                filter.setCommunityId(cmd.getCommunityId());
+                filter.setFieldId(r);
+                filter.setNamespaceId(cmd.getNamespaceId());
+                filter.setStatus(VarFieldStatus.ACTIVE.getCode());
+                filter.setUserId(UserContext.currentUserId());
+                filter.setGroupPath(cmd.getGroupPath());
+                filter.setModuleName(cmd.getModuleName());
+                fieldProvider.createFieldScopeFilter(filter);
+            });
+        }
+    }
+
+    @Override
+    public List<FieldDTO> listFieldScopeFilter(ListFieldScopeFilterCommand cmd) {
+        ListFieldCommand cmd2 = ConvertHelper.convert(cmd, ListFieldCommand.class);
+        List<FieldDTO> fields = listFields(cmd2);
+        List<FieldDTO> result = new ArrayList<>();
+
+        if(fields != null && fields.size() > 0) {
+            List<VarFieldScopeFilter> filters = fieldProvider.listFieldScopeFilter(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), UserContext.currentUserId(), cmd.getGroupPath());
+            for (VarFieldScopeFilter filter : filters) {
+                fields.forEach(r -> {
+                    if (r.getFieldId().equals(filter.getFieldId())) {
+                        result.add(r);
+                    }
+                });
+            }
+            if (result.size() == 0) {
+                List<String> defaultField = new ArrayList<>(Arrays.asList("name", "entryStatusItemId", "corpIndustryItemId", "contactName", "contactPhone", "trackingUid"));
+                for (String str : defaultField) {
+                    fields.forEach(r -> {
+                        if (r.getFieldName().equals(str)) {
+                            result.add(r);
+                        }
+                    });
+                }
+            }
+        }
+
+        return result;
+    }
 }

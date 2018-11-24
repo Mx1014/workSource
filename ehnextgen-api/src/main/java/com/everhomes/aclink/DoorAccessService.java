@@ -124,6 +124,8 @@ public interface DoorAccessService {
 
     void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
 
+    void exportTempAuthXls(SearchDoorAuthCommand cmd, HttpServletResponse httpResponse);
+
     //add by liqingyan
     void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse);
 
@@ -180,7 +182,7 @@ public interface DoorAccessService {
 
     public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd);
 
-    public int invalidVistorAuth(Long DoorId, String phone);
+    public int invalidVistorAuth(Long DoorId, String phone, Byte groupType);
 
     public ListDoorAccessQRKeyResponse listBusAccessQRKey();
 
@@ -267,11 +269,20 @@ public interface DoorAccessService {
     OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd);
     //门禁v3.0.2 临时授权优先门禁 add by liqingyan
     void createTempAuthPriority (CreateTempAuthPriorityCommand cmd);
+
+    ListTempAuthPriorityResponse listTempAuthPriority (ListTempAuthPriorityCommand cmd);
+
+    DeleteTempAuthPriorityResponse deleteTempAuthPriority(DeleteTempAuthPriorityCommand cmd);
+
+    void createTempAuthDefaultRule(CreateTempAuthDefaultRuleCommand cmd);
+
+    ListTempAuthDefaultRuleResponse listTempAuthDefaultRule (ListTempAuthDefaultRuleCommand cmd);
     /**
 	 * 常规授权,授权/取消权限,园区下的所有门禁,单个用户/企业下的所有用户,1成功,0失败 
 	 */
 	public UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunity(UpdateFormalAuthByCommunityCommand cmd);
 
+	public String getVisitorUrlById(GetVisitorCommand cmd);
     //门禁v3.0.2 添加管理授权企业 add by liqingyan
     void addDoorManagement(AddDoorManagementCommand cmd);
 
@@ -286,8 +297,13 @@ public interface DoorAccessService {
 
     ListDoorGroupResponse listDoorGroupNew(ListDoorGroupCommand cmd);
 
+    ListGroupDoorsResponse listGroupDoors(ListGroupDoorsCommand cmd);
+
     void deleteDoorGroupRel (DeleteDoorGroupRelCommand cmd);
-
+    //列出可加入门禁组门禁
     ListSelectDoorsResponse listSelectDoors(ListSelectDoorsCommand cmd);
-
+    //列出所有管理门禁(组)
+    ListSelectDoorsAndGroupsResponse listSelectDoorsAndGroups (ListSelectDoorsAndGroupsCommand cmd);
+    //查询门禁关联服务器、摄像头
+    SearchDoorServerResponse searchDoorServer (SearchDoorServerCommand cmd);
 }

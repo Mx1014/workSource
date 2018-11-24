@@ -31,7 +31,8 @@ public class CreateLocalVistorCommand {
     
     @NotNull
     private Long     doorId;
-    
+    private Byte groupType;
+
     @NotNull
     private Integer namespaceId;
 
@@ -56,6 +57,14 @@ public class CreateLocalVistorCommand {
 
 	public void setList(List<CreateCustomFieldCommand> list) {
 		this.list = list;
+	}
+
+	public Byte getGroupType() {
+		return groupType;
+	}
+
+	public void setGroupType(Byte groupType) {
+		this.groupType = groupType;
 	}
 
 	public String getPhone() {

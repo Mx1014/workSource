@@ -566,5 +566,20 @@ public class AddressController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /address/fixInvalidCityInAddresses</b>
+     * <p>修复地址中的城市ID</p>
+     */
+    @RequestMapping("fixInvalidCityInAddresses")
+    @RestReturn(value=String.class)
+    public RestResponse fixInvalidCityInAddresses(FixInvalidCityInAddressCommand cmd) {
+        addressService.fixInvalidCityInAddresses(cmd.getNamespaceId());
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
 }

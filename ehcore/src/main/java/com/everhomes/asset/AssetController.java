@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.asset.app.AssetAppService;
+import com.everhomes.asset.bill.AssetBillService;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.asset.group.AssetGroupService;
 import com.everhomes.asset.standard.AssetStandardService;
@@ -26,6 +27,14 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
+import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
+import com.everhomes.rest.asset.bill.BatchDeleteBillResponse;
+import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
+import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
@@ -68,6 +77,9 @@ public class AssetController extends ControllerBase {
 	
 	@Autowired
 	private AssetStatisticService assetStatisticService;
+	
+	@Autowired
+	private AssetBillService assetBillService;
 
 //	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
 //	/**
@@ -1077,15 +1089,9 @@ public class AssetController extends ControllerBase {
 	 */
 	@RequestMapping(value = "listPaymentBillDetail")
 	@RestReturn(PaymentOrderBillDTO.class)
-	public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-		ListPaymentBillResp listPaymentBillResp = assetService.listPaymentBill(cmd);
-		PaymentOrderBillDTO result = new PaymentOrderBillDTO();
-		if (listPaymentBillResp != null && listPaymentBillResp.getPaymentOrderBillDTOs() != null
-				&& listPaymentBillResp.getPaymentOrderBillDTOs().size() != 0
-				&& listPaymentBillResp.getPaymentOrderBillDTOs().get(0) != null) {
-			result = listPaymentBillResp.getPaymentOrderBillDTOs().get(0);
-		}
-		RestResponse response = new RestResponse(result);
+	public RestResponse listPaymentBillDetail(ListPaymentBillDetailCmd cmd, HttpServletRequest request) throws Exception {
+		PaymentOrderBillDTO dto = assetService.listPaymentBillDetail(cmd);
+		RestResponse response = new RestResponse(dto);
 		return response;
 	}
 
@@ -1740,4 +1746,48 @@ public class AssetController extends ControllerBase {
     public RestResponse getDoorAccessInfo(@Valid GetDoorAccessInfoCommand cmd) {
     	return new RestResponse(assetService.getDoorAccessInfo(cmd));
     }
+    
+    /**
+	 * <p>缴费V7.3(账单组规则定义)：批量删除“非已缴”账单接口</p>
+	 * <b>URL: /asset/batchDeleteBill</b>
+	 */
+	@RequestMapping("batchDeleteBill")
+	@RestReturn(value = BatchDeleteBillResponse.class)
+	public RestResponse batchDeleteBill(BatchDeleteBillCommand cmd) {
+		BatchDeleteBillResponse res = assetBillService.batchDeleteBill(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>缴费V7.3(账单组规则定义)：校验合同是否产生已缴账单接口（合同模块调用）</p>
+	 * <b>URL: /asset/checkContractIsProduceBill</b>
+	 */
+	@RequestMapping("checkContractIsProduceBill")
+	@RestReturn(value = ListCheckContractIsProduceBillResponse.class)
+	public RestResponse checkContractIsProduceBill(CheckContractIsProduceBillCmd cmd) {
+		ListCheckContractIsProduceBillResponse res = assetBillService.checkContractIsProduceBill(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>缴费V7.3(账单组规则定义)：批量删除合同产生的相关账单、费项明细数据（合同模块调用）</p>
+	 * <b>URL: /asset/batchDeleteBillFromContract</b>
+	 */
+	@RequestMapping("batchDeleteBillFromContract")
+	@RestReturn(value = ListCheckContractIsProduceBillResponse.class)
+	public RestResponse batchDeleteBillFromContract(BatchDeleteBillFromContractCmd cmd) {
+		ListBatchDeleteBillFromContractResponse res = assetBillService.batchDeleteBillFromContract(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+
+    
 }

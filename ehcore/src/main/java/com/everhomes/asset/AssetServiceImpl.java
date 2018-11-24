@@ -29,6 +29,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -49,6 +51,7 @@ import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.calculate.AssetCalculateUtil;
 import com.everhomes.asset.chargingitem.AssetChargingItemProvider;
 import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.asset.standard.AssetStandardProvider;
@@ -62,7 +65,6 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -99,6 +101,9 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.calculate.NatualQuarterMonthDTO;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
@@ -282,6 +287,9 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
     private DoorAccessService doorAccessService;
+    
+    @Autowired
+    private AssetCalculateUtil assetCalculateUtil;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -345,7 +353,7 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
 
-    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId) {
+    public void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId) {
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrgId, priviledgeId, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, communityId);
     }
 
@@ -654,11 +662,14 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(Long.parseLong("5000"));
         }
         ListPaymentBillResp result = listPaymentBill(cmd);
-        List<PaymentOrderBillDTO> dtos = result.getPaymentOrderBillDTOs();
+        List<PaymentOrderBillDTO> dtos = new ArrayList<>();
+        List<PaymentOrderBillDTO> paymentOrderBillDTOs = result.getPaymentOrderBillDTOs();
+        for(PaymentOrderBillDTO dto : paymentOrderBillDTOs) {
+        	dto = assetProvider.listPaymentBillDetail(dto.getBillId());
+        	dtos.add(dto);
+        }
         exportOrdersUtil(dtos, cmd, response);
     }
-
-
 
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
@@ -1309,7 +1320,21 @@ public class AssetServiceImpl implements AssetService {
                 aWithoutLimit.setTime(a.getTime());
                 if(!cycle.isContract()){
                     aWithoutLimit.set(Calendar.DAY_OF_MONTH, aWithoutLimit.getActualMinimum(Calendar.DAY_OF_MONTH));
-                    d.add(Calendar.MONTH,cycle.getMonthOffset());
+                    //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                    int monthOffset;
+                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                    	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                    	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                    	//设置自然季的开始时间
+                    	try {
+							aWithoutLimit.setTime(yyyyMMdd.parse(natualQuarterMonthDTO.getDateStrBegin()));
+						} catch (ParseException e) {
+							LOGGER.info("assetFeeHandler set aWithoutLimit error, e = {}", e);
+						}
+                    }else {
+                    	monthOffset = cycle.getMonthOffset();
+                    }
+                    d.add(Calendar.MONTH, monthOffset);
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                     dWithoutLimit.setTime(d.getTime());
                  }else{
@@ -1357,14 +1382,23 @@ public class AssetServiceImpl implements AssetService {
             Integer days = null;
             // calculate r if cycle is not one-off deal
             if(billingCycle.byteValue() != (byte) 5){
-
                 boolean b = checkCycle(d, a, cycle.getMonthOffset()+1);
                 int divided = daysBetween(dWithoutLimit,aWithoutLimit);
                 days = divided;
                 if(!b){
                     // period of this cycle
-                    int divider = daysBetween(d, a);
-                    r = String.valueOf(divider+"/" + divided);
+                	/**
+                	 * issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                	 * 比如签了一个合同，计价条款为：自然季、2018-08-30至2018-12-31，固定金额9000
+                	 * 2018-08-30至2018-09-30 ： 计算系数r = (1 + 2/31) / 3
+                	 * 2018-10-01至2018-12-31 ：计算系数r = 1
+                	 */
+                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                    	r = assetCalculateUtil.getReductionFactor(d, a);
+                    }else {
+                    	int divider = daysBetween(d, a);
+                        r = String.valueOf(divider+"/" + divided);
+                    }
                 }
             }
             BigDecimal amount = calculateFee(var2, days, formula, r,standard, formulaCondition);
@@ -1651,7 +1685,21 @@ public class AssetServiceImpl implements AssetService {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 d.setTime(a.getTime());
                 if(!cycle.isContract()){
-                    d.add(Calendar.MONTH,cycle.getMonthOffset());
+                	//issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                    int monthOffset;
+                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                    	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                    	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                    	//设置自然季的开始时间
+//                    	try {
+//							aWithoutLimit.setTime(yyyyMMdd.parse(natualQuarterMonthDTO.getDateStrBegin()));
+//						} catch (ParseException e) {
+//							LOGGER.info("assetFeeHandler set aWithoutLimit error, e = {}", e);
+//						}
+                    }else {
+                    	monthOffset = cycle.getMonthOffset();
+                    }
+                    d.add(Calendar.MONTH, monthOffset);
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                 }else{
                     // #32243  check if the next day is beyond the maximum day of the next month
@@ -2207,9 +2255,17 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         formula += "*"+duration;
-        BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2,BigDecimal.ROUND_CEILING);
-
+//        BigDecimal response = CalculatorUtil.arithmetic(formula);
+//        response.setScale(2,BigDecimal.ROUND_CEILING);
+        BigDecimal response = BigDecimal.ZERO;
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			Object object = jse.eval(formula);
+			response = new BigDecimal(object.toString());
+			response = response.setScale(2, BigDecimal.ROUND_HALF_UP);
+		} catch (Exception e) {
+			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+		}
         return response;
     }
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula) {
@@ -2257,9 +2313,17 @@ public class AssetServiceImpl implements AssetService {
                 throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
             }
         }
-        BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2,BigDecimal.ROUND_CEILING);
-
+//        BigDecimal response = CalculatorUtil.arithmetic(formula);
+//        response.setScale(2,BigDecimal.ROUND_CEILING);
+        BigDecimal response = BigDecimal.ZERO;
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			Object object = jse.eval(formula);
+			response = new BigDecimal(object.toString());
+			response = response.setScale(2, BigDecimal.ROUND_HALF_UP);
+		} catch (Exception e) {
+			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+		}
         return response;
     }
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, Integer days
@@ -2319,8 +2383,17 @@ public class AssetServiceImpl implements AssetService {
                 }
             }
             formula += "*"+duration;
-            result = CalculatorUtil.arithmetic(formula);
-            result.setScale(2,BigDecimal.ROUND_FLOOR);
+            //result = CalculatorUtil.arithmetic(formula);
+            //result.setScale(2,BigDecimal.ROUND_FLOOR);
+            //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+            ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+    		try {
+    			Object object = jse.eval(formula);
+    			result = new BigDecimal(object.toString());
+    			result = result.setScale(2, BigDecimal.ROUND_HALF_UP);
+    		} catch (Exception e) {
+    			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+    		}
         }
         else if(formulaType == 3 || formulaType == 4){
             //阶梯或者区间
@@ -5219,7 +5292,8 @@ public class AssetServiceImpl implements AssetService {
 		List<String> phoneNumbers = new ArrayList<String>(); 
 		try {
 			if (targetType.equals(AssetTargetType.USER.getCode())) {
-				UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), namespaceId);
+				//修复缺陷 #42722 【鼎峰汇】【现网】客户账单中的客户手机号显示的是管理员手机号
+				UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(targetId, namespaceId);
 				if(userIdentifier != null) {
 					phoneNumbers.add(userIdentifier.getIdentifierToken());
 				}
@@ -5241,7 +5315,7 @@ public class AssetServiceImpl implements AssetService {
 	            }
 		    }
 		} catch (Exception e) {
-			LOGGER.error("ZhuZongAssetVendor getPhoneNumber() {}", targetType, targetId, namespaceId, e);
+			LOGGER.error("/asset/listNotSettledBillDetail getPhoneNumber() {}", targetType, targetId, namespaceId, e);
 		}
 		return phoneNumbers;
 	}
@@ -5602,6 +5676,10 @@ public class AssetServiceImpl implements AssetService {
 			existDooraccessLog.setMsg("门禁处于开启状态");
 		}
 		return existDooraccessLog;
+	}
+
+	public PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd) {
+		return assetProvider.listPaymentBillDetail(cmd.getBillId());
 	}
 	
 }
