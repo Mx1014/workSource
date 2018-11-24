@@ -22,7 +22,7 @@ import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.promotion.order.PayerInfoDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
-import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2PriceRules;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserContext;
@@ -115,17 +115,14 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
         parkingInfo.setSpaceAddress(parkingSpace.getSpaceAddress());
         parkingInfo.setLockId(parkingSpace.getLockId());
         parkingInfo.setPriceStr(priceRule.getWorkdayPrice().toString() + "/半小时");
-
-        if (null != order.getScene()) {
-            if (SceneType.PM_ADMIN.getCode().equals(order.getScene())) {
-                parkingInfo.setPriceStr(priceRule.getOrgMemberWorkdayPrice().toString() + "/半小时");
-
-            } else if (!SceneType.ENTERPRISE.getCode().equals(order.getScene())) {
-                parkingInfo.setPriceStr(priceRule.getApprovingUserWorkdayPrice().toString() + "/半小时");
-
-            }else {
-                parkingInfo.setPriceStr(priceRule.getWorkdayPrice().toString() + "/半小时");
-            }
+        String classification = order.getScene();
+        if (order.getVipLevel() != null)
+            classification = order.getVipLevel();
+        if (classification != null && !priceRule.getUserPriceType().equals(RentalUserPriceType.UNIFICATION.getCode())){
+            List<RentalPriceClassification> classifications = rentalv2Provider.listClassification(priceRule.getResourceType(), EhRentalv2PriceRules.class.getSimpleName(),
+                    priceRule.getId(), null, null, priceRule.getUserPriceType(), classification);
+            if (classifications != null && classifications.size() > 0)
+                parkingInfo.setPriceStr(classifications.get(0).getWorkdayPrice().toString() + "/半小时");
         }
 
         order.setOldCustomObject(order.getCustomObject());

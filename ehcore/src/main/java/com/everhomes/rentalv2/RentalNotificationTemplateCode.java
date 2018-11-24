@@ -15,11 +15,12 @@ public interface RentalNotificationTemplateCode {
 	int RENTAL_END_NOTIFY_HOUR = 10;//预定快结束的推送(小时/半天):温馨提醒：{资源名称}资源的使用将在15分钟后结束，使用客户{客户姓名}（{客户联系方式}），请进行确认
 	int RENTAL_END_NOTIFY_DAY = 11;//(废弃)预定快结束的推送(天/月):温馨提醒：{资源名称}资源的使用将在今日结束，使用客户{客户姓名}（{客户联系方式}），请进行确认
     int RENTAL_CHANGE_AMOUNT = 12;//修改金额的推送  您申请预订的$资源名称$，使用时间：$使用时间$，订单金额调整为$调整后的金额$
-    int RENTAL_CANCEL_NOT_PAY = 24;//取消未支付的订单 您预约的${useDetail}已成功取消，期待下次为您服务。
+    int RENTAL_CANCEL_NOT_PAY = 24;//取消未支付的订单 您预约的$资源名称$（$预订时间$）已成功取消，期待下次为您服务
     int RENTAL_CANCEL_ORDER_REFUND = 25;//尊敬的用户，您预约的${useDetail}已退款成功，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。
     int RENTAL_CANCEL_ORDER_NO_REFUND = 26;//尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。
     int RENTAL_CANCEL_ORDER = 27;//尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。
-
+    int RENTAL_END_NOTIFY_HOUR_USER = 28;//预定快结束的推送 用户接收 您预约的${resourceName}已临近结束时间，预订时间为$预订时间$
+    int RENTAL_BEGIN_CHARGE_NOTIFY = 29;//预订开始 负责人的推送 ${requestorName}(${requestorPhone})预约的${resourceName}已临近使用时间，预订时间为${useDetail}，请做好会前准备
     // vip 车位预约 消息模版
     int RENTAL_USER_CANCEL_ORDER = 13;  //vip车位预约用户取消订单推送消息    订单取消通知：您的${VIP车位预约}订单已成功取消。
     int UNPAID_ORDER_OVER_TIME = 14; //订单超时取消通知：由于您未在15分钟内完成支付，您预约的${VIP车位（科兴科学园停车场AE003车位：2017-11-15 10:00 - 2017-11-15 12:00）}已自动取消，期待下次为您服务。

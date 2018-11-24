@@ -19,6 +19,7 @@
 -- REMARK: 报错提示模板
 INSERT INTO eh_locale_strings (scope, code, locale, text) VALUES ('flow', '10013', 'zh_CN', '任务状态已经改变，请刷新重试');
 
+
 -- AUTHOR: 张智伟 20181115
 -- REMARK: issue-37602 审批单支持编辑
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
@@ -100,6 +101,104 @@ SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES (@mp_id:=@mp_id+1, '204011', '0', @p_id, '批量删除', '0', NOW());
 
+-- AUTHOR: 梁燕龙 20181123
+-- REMARK: 个人中心修改可编辑性
+UPDATE eh_personal_center_settings SET editable = 1 WHERE name = '订单';
+UPDATE eh_personal_center_settings SET editable = 1 WHERE name = '卡券';
+
+-- AUTHOR: 黄明波  20181121
+-- REMARK: 添加服务联盟短信模板
+SET @module_id = 40500;  -- 模块id
+SET @sms_code = 87;      -- sms code, 对应于`com.everhomes.rest.sms.SmsTemplateCode`中的 code
+SET @description = '模板1';
+SET @display_name = '【app名称】$发起人姓名$（$发起人手机号$）提交了$服务名称$申请，请及时处理';
+SET @namespace_id = 0; -- 域空间id, 如果为0, 则相当于配置给所有域空间, 不为0, 则只给特定的域空间配置
+SET @locale_templates_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @module_id), @sms_code, 'zh_CN', @description, @display_name, @namespace_id);
+
+
+SET @module_id = 40500;  -- 模块id
+SET @sms_code = 88;      -- sms code, 对应于`com.everhomes.rest.sms.SmsTemplateCode`中的 code
+SET @description = '模板2';
+SET @display_name = '【app名称】你提交的$服务名称$申请正在处理，可在app“我”-“我的申请”中查看处理进度';
+SET @namespace_id = 0; -- 域空间id, 如果为0, 则相当于配置给所有域空间, 不为0, 则只给特定的域空间配置
+SET @locale_templates_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @module_id), @sms_code, 'zh_CN', @description, @display_name, @namespace_id);
+
+
+INSERT INTO eh_locale_templates (scope, code, locale, description, text, namespace_id) VALUES ( 'sms.default', '87', 'zh_CN', '服务申请推送', '${applierName}（${applierPhone}）提交了${serviceName}申请，请及时处理', '0');    
+INSERT INTO eh_locale_templates (scope, code, locale, description, text, namespace_id) VALUES ( 'sms.default', '88', 'zh_CN', '服务申请提醒', '你提交的${serviceName}申请正在处理，可在app“我”-“我的申请”中查看处理进度', '0');
+
+SET @id = (SELECT IFNULL(MIN(id),0) from `eh_vip_priority`);
+INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
+VALUES (@id := @id + 1,999929,1,'银卡',10 );
+INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
+VALUES (@id := @id + 1,999929,2,'金卡',20 );
+INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
+VALUES (@id := @id + 1,999929,3,'白金卡',30 );
+
+set @classification_id = 0;
+-- 普通公司用户价格迁移
+INSERT INTO eh_rentalv2_price_classification (id,source_id,source_type,owner_id,owner_type,user_price_type,classification,workday_price,original_price,initiate_price,discount_type,full_price,cut_price,discount_ratio,resource_type)
+SELECT @classification_id := @classification_id + 1,owner_id,owner_type,id,'EhRentalv2PriceRules',2,'enterprise',workday_price,original_price,initiate_price,discount_type,full_price,cut_price,discount_ratio,resource_type from eh_rentalv2_price_rules;
+-- 管理公司员工价格迁移
+INSERT INTO eh_rentalv2_price_classification (id,source_id,source_type,owner_id,owner_type,user_price_type,classification,workday_price,original_price,initiate_price,discount_type,full_price,cut_price,discount_ratio,resource_type)
+SELECT @classification_id := @classification_id + 1,owner_id,owner_type,id,'EhRentalv2PriceRules',2,'pm_admin',org_member_workday_price,org_member_original_price,org_member_initiate_price,org_member_discount_type,org_member_full_price,org_member_cut_price,org_member_discount_ratio,resource_type from eh_rentalv2_price_rules;
+-- 非认证用户价格迁移
+INSERT INTO eh_rentalv2_price_classification (id,source_id,source_type,owner_id,owner_type,user_price_type,classification,workday_price,original_price,initiate_price,discount_type,full_price,cut_price,discount_ratio,resource_type)
+ SELECT @classification_id := @classification_id + 1,owner_id,owner_type,id,'EhRentalv2PriceRules',2,'park_tourist',approving_user_workday_price,approving_user_original_price,approving_user_initiate_price,approving_user_discount_type,approving_user_full_price,approving_user_cut_price,approving_user_discount_ratio,resource_type from eh_rentalv2_price_rules ;
+-- 单元格价格迁移
+INSERT INTO eh_rentalv2_price_classification (id,source_id,source_type,owner_id,owner_type,user_price_type,classification,workday_price,original_price,initiate_price,resource_type)
+SELECT @classification_id := @classification_id + 1,rental_resource_id,'resource',id,'EhRentalv2Cells',2,'enterprise',price,original_price,initiate_price,resource_type from eh_rentalv2_cells ;
+INSERT INTO eh_rentalv2_price_classification (id,source_id,source_type,owner_id,owner_type,user_price_type,classification,workday_price,original_price,initiate_price,resource_type)
+SELECT @classification_id := @classification_id + 1,rental_resource_id,'resource',id,'EhRentalv2Cells',2,'pm_admin',org_member_price,org_member_original_price,org_member_initiate_price,resource_type from eh_rentalv2_cells ;
+INSERT INTO eh_rentalv2_price_classification (id,source_id,source_type,owner_id,owner_type,user_price_type,classification,workday_price,original_price,initiate_price,resource_type)
+SELECT @classification_id := @classification_id + 1,rental_resource_id,'resource',id,'EhRentalv2Cells',2,'park_tourist',approving_user_price,approving_user_original_price,approving_user_initiate_price,resource_type from eh_rentalv2_cells ;
+
+-- 套餐价格迁移
+INSERT INTO eh_rentalv2_price_classification (id,source_id,source_type,owner_id,owner_type,user_price_type,classification,workday_price,original_price,initiate_price,discount_type,full_price,cut_price,discount_ratio,resource_type)
+SELECT @classification_id := @classification_id + 1,owner_id,owner_type,id,'EhRentalv2PricePackages',2,'enterprise',price,original_price,initiate_price,discount_type,full_price,cut_price,discount_ratio,resource_type  from eh_rentalv2_price_packages where owner_type != 'cell' ;
+INSERT INTO eh_rentalv2_price_classification (id,source_id,source_type,owner_id,owner_type,user_price_type,classification,workday_price,original_price,initiate_price,discount_type,full_price,cut_price,discount_ratio,resource_type)
+SELECT @classification_id := @classification_id + 1,owner_id,owner_type,id,'EhRentalv2PricePackages',2,'pm_admin',org_member_price,org_member_original_price,org_member_initiate_price,org_member_discount_type,org_member_full_price,org_member_cut_price,org_member_discount_ratio,resource_type from eh_rentalv2_price_packages where owner_type != 'cell' ;
+INSERT INTO eh_rentalv2_price_classification (id,source_id,source_type,owner_id,owner_type,user_price_type,classification,workday_price,original_price,initiate_price,discount_type,full_price,cut_price,discount_ratio,resource_type)
+SELECT @classification_id := @classification_id + 1,owner_id,owner_type,id,'EhRentalv2PricePackages',2,'park_tourist',approving_user_price,approving_user_original_price,approving_user_initiate_price,approving_user_discount_type,approving_user_full_price,approving_user_cut_price,approving_user_discount_ratio,resource_type from eh_rentalv2_price_packages where owner_type != 'cell' ;
+
+update eh_rentalv2_holiday set close_date = '[1543593600000,1543680000000,1544198400000,1544284800000,1544803200000,1544889600000,1545408000000,1545494400000,1546012800000,1546099200000,1546617600000,1546704000000,1547222400000,1547308800000,1547827200000,1547913600000,1548432000000,1548518400000,1549036800000,1549123200000,1549641600000,1549728000000,1550246400000,1550332800000,1550851200000,1550937600000,1551456000000,1551542400000,1552060800000,1552147200000,1552665600000,1552752000000,1553270400000,1553356800000,1553875200000,1553961600000,1554480000000,1554566400000,1555084800000,1555171200000,1555689600000,1555776000000,1556294400000,1556380800000,1556899200000,1556985600000,1557504000000,1557590400000,1558108800000,1558195200000,1558713600000,1558800000000,1559318400000,1559404800000,1559923200000,1560009600000,1560528000000,1560614400000,1561132800000,1561219200000,1561737600000,1561824000000,1562342400000,1562428800000,1562947200000,1563033600000,1563552000000,1563638400000,1564156800000,1564243200000,1564761600000,1564848000000,1565366400000,1565452800000,1565971200000,1566057600000,1566576000000,1566662400000,1567180800000,1567267200000,1567785600000,1567872000000,1568390400000,1568476800000,1568995200000,1569081600000,1569600000000,1569686400000,1570204800000,1570291200000,1570809600000,1570896000000,1571414400000,1571500800000,1572019200000,1572105600000,1572624000000,1572710400000,1573228800000,1573315200000,1573833600000,1573920000000,1574438400000,1574524800000,1575043200000,1575129600000,1575648000000,1575734400000,1576252800000,1576339200000,1576857600000,1576944000000,1577462400000,1577548800000]' where holiday_type = 1;
+update eh_rentalv2_holiday set close_date = '[1543593600000,1543680000000,1544198400000,1544284800000,1544803200000,1544889600000,1545408000000,1545494400000,1546012800000,1546099200000,1546617600000,1546704000000,1547222400000,1547308800000,1547827200000,1547913600000,1548432000000,1548518400000,1549209600000,1549296000000,1549382400000,1549468800000,1549555200000,1549641600000,1549728000000,1550246400000,1550332800000,1550851200000,1550937600000,1551456000000,1551542400000,1552060800000,1552147200000,1552665600000,1552752000000,1553270400000,1553356800000,1553875200000,1553961600000,1554393600000,1554480000000,1554566400000,1555084800000,1555171200000,1555689600000,1555776000000,1556467200000,1556553600000,1556640000000,1556899200000,1556985600000,1557504000000,1557590400000,1558108800000,1558195200000,1558713600000,1558800000000,1559318400000,1559404800000,1559836800000,1559923200000,1560009600000,1560528000000,1560614400000,1561132800000,1561219200000,1561737600000,1561824000000,1562342400000,1562428800000,1562947200000,1563033600000,1563552000000,1563638400000,1564156800000,1564243200000,1564761600000,1564848000000,1565366400000,1565452800000,1565971200000,1566057600000,1566576000000,1566662400000,1567180800000,1567267200000,1567785600000,1567872000000,1568304000000,1568390400000,1568476800000,1568995200000,1569081600000,1569600000000,1569859200000,1569945600000,1570032000000,1570118400000,1570204800000,1570291200000,1570377600000,1570896000000,1571414400000,1571500800000,1572019200000,1572105600000,1572624000000,1572710400000,1573228800000,1573315200000,1573833600000,1573920000000,1574438400000,1574524800000,1575043200000,1575129600000,1575648000000,1575734400000,1576252800000,1576339200000,1576857600000,1576944000000,1577462400000,1577548800000]' where holiday_type = 1;
+update eh_locale_templates set text = '您已成功预约了${resourceName}，预订时间：${useTime}，订单编号：${orderNum}。如日程有变，请在预订开始时间前取消订单，感谢您的使用。${aclink}' where `scope` = 'sms.default' and `code` = 30;
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '92', 'zh_CN','工作流 发起申请', '${userName}（${phone}）预约了${resourceName}，使用时间：${useDetail}${freeGoods}${paidGoods}', '0');
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '91', 'zh_CN', '临近使用','抱歉，由于您未在规定时间内完成支付，您预约的${resourceName}（${useDetail}）已自动取消，订单编号：${orderNum}，期待下次为您服务', '0');
+update eh_locale_templates set text = '您预约的${resourceName}(${useDetail})已成功取消，期待下次为您服务。' where `scope` = 'rental.notification' and `code` = 24;
+update eh_locale_templates set text = '尊敬的用户，您预约的${resourceName}(${useDetail})已成功取消，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。' where `scope` = 'rental.notification' and `code` = 26;
+update eh_locale_templates set text = '尊敬的用户，您预约的${resourceName}(${useDetail})已成功取消，订单编号：${orderNum}，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。' where `scope` = 'sms.default' and `code` = 85;
+update eh_locale_templates set text = '尊敬的用户，您预约的${resourceName}(${useDetail})已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。' where `scope` = 'rental.notification' and `code` = 27;
+update eh_locale_templates set text = '尊敬的用户，您预约的${resourceName}(${useDetail})已成功取消，订单编号：${orderNum}，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。' where `scope` = 'sms.default' and `code` = 86;
+update eh_locale_templates set text = '尊敬的用户，您预约的${resourceName}(${useDetail})已退款成功，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。' where `scope` = 'rental.notification' and `code` = 25;
+update eh_locale_templates set text = '尊敬的用户，您预约的${resourceName}(${useDetail})已退款成功，订单编号：${orderNum}，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。' where `scope` = 'sms.default' and `code` = 84;
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '93', 'zh_CN', '临近使用','您预约的${resourceName}已临近使用时间，预订时间为${useDetail}', '0');
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental.notification', '28', 'zh_CN', '临近结束', '您预约的${resourceName}已临近结束时间，预订时间为${useDetail}', '0');
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '89', 'zh_CN', '临近结束','您预约的${resourceName}已临近结束时间，预订时间为${useDetail}', '0');
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental.notification', '29', 'zh_CN', '临近使用', '${requestorName}(${requestorPhone})预约的${resourceName}已临近使用时间，预订时间为${useDetail}，请做好会前准备', '0');
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '90', 'zh_CN', '资源预约发起工作流','${requestorName}(${requestorPhone})发起了${resourceName}的预约申请，请及时核查订单并处理', '0');
+SET @module_id = 40400;  -- 模块id
+SET @sms_code = 90;      -- sms code, 对应于`com.everhomes.rest.sms.SmsTemplateCode`中的 code
+SET @description = '用户发起申请';
+SET @display_name = '用户发起申请';
+SET @namespace_id = 0; -- 域空间id, 如果为0, 则相当于配置给所有域空间, 不为0, 则只给特定的域空间配置
+SET @locale_templates_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @module_id), @sms_code, 'zh_CN', @description, @display_name, @namespace_id);
+
+-- AUTHOR:tangcen 2018年11月12日14:31:01
+-- REMARK:修改楼宇资产管理模块配置
+UPDATE eh_service_modules SET instance_config='{\"url\":\"${home.url}/assets-web/build/index.html?hideNavigationBar=1&ehnavigatorstyle=2#/home/#sign_suffix\"}' WHERE id=38000;
+
+UPDATE eh_service_modules SET action_type=14 WHERE id=38000;
+
+UPDATE eh_service_modules SET client_handler_type=2 WHERE id=38000;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
@@ -178,3 +277,26 @@ VALUES ('zhenzhihui.redirect.url', 'http://120.132.117.22:8016/ZHYQ/restservices
 
 
 -- --------------------- SECTION END wanzhihui ------------------------------------------
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: shanghaijinmao
+-- DESCRIPTION: 此SECTION只在上海金茂-999925执行的脚本
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.host', 'http://10.1.10.37:80', '接口地址', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.appkey', '880076901009202', 'appkey', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.secretKey', '880076901009202', 'secretKey', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.parkUuid', '06dfa3ed3a5a4309bd087fd2625ea00e', '停车场标识', 999925, NULL, 1);
+
+
+
+
+set @max_lots_id := (select ifnull(max(id),0)  from eh_parking_lots);
+set @namespace_id := 11;
+set @community_id := 240111044332061474;
+set @parking_name := '上海金茂停车场';
+set @parking_vendor := 'HKWS_SHJINMAO';
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) 
+
+VALUES ((@max_lots_id := @max_lots_id + 1), 'community', @community_id,  @parking_name,  @parking_vendor, '', 2, 1, now(), @namespace_id, '{"expiredRechargeFlag":0,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee"]');
+
+
+
+-- --------------------- SECTION END shanghaijinmao ------------------------------------------

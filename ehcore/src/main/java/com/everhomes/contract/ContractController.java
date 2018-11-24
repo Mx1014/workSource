@@ -632,6 +632,21 @@ public class ContractController extends ControllerBase {
 	}
 	
 	/**
+	 * <b>URL: /contract/getApartmentRentalContract</b>
+	 * <p>获取房源相关联的租赁合同，会占资源的那一种合同</p>
+	 */
+	@RequestMapping("getApartmentRentalContract")
+	@RestReturn(value = ContractDTO.class, collection = true)
+	public RestResponse getApartmentRentalContract(ListApartmentContractsCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		List<ContractDTO> results = contractService.getApartmentRentalContract(cmd);
+		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**	
 	 * <p>合同更新/根据合同id,自动刷新合同账单</p>
 	 * <b>URL: /contract/autoGeneratingBill</b>
 	 */

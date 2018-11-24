@@ -13,6 +13,8 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
 import com.everhomes.util.RequireAuthentication;
+import com.hp.hpl.sparta.xpath.TrueExpr;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -756,4 +758,33 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /community/getBuildingStatisticsForApp</b>
+     * <p>获取楼宇的统计信息，For app端</p>
+     */
+    @RequestMapping("getBuildingStatisticsForApp")
+    @RestReturn(value=BuildingStatisticsForAppDTO.class)
+    public RestResponse getBuildingStatisticsForApp(GetBuildingStatisticsCommand cmd) {
+        BuildingStatisticsForAppDTO result = this.communityService.getBuildingStatisticsForApp(cmd);
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/listBuildingsForApp</b>
+     * <p>获取园区下的楼宇，For App端</p>
+     */
+    @RequestMapping("listBuildingsForApp")
+    @RestReturn(value=ListBuildingsForAppResponse.class)
+    public RestResponse listBuildingsForApp(ListBuildingsForAppCommand cmd) {
+        ListBuildingsForAppResponse result = this.communityService.listBuildingsForApp(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 }

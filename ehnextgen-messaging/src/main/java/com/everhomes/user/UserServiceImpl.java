@@ -1808,26 +1808,35 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
         //如果core server和统一用户都没有用户，说明真的没有该用户
         // add by yanlong.liang 20180928
-        User user = userProvider.findUserById(userId);
-        if (user == null) {
-            user = ConvertHelper.convert(this.sdkUserService.getUser(userId), User.class);
-            if (user != null) {
-                this.userProvider.createUserFromUnite(user);
-            } else {
-                LOGGER.warn("Sdk user service getUser return null, userId={}", userId);
-            }
-        }
 
-        UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(userId, namespaceId);
-        if (userIdentifier == null) {
-            userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userId), UserIdentifier.class);
-            if (userIdentifier != null) {
-                this.userProvider.createIdentifierFromUnite(userIdentifier);
-            } else {
-                LOGGER.warn("Sdk user service getUserIdentifier return null, userId={}", userId);
+        Tuple<User, Boolean> userTuple = coordinationProvider.getNamedLock(
+                CoordinationLocks.SYNC_USER_MODIFY.getCode() + userId).enter(() -> {
+            User user = userProvider.findUserById(userId);
+            if (user == null) {
+                user = ConvertHelper.convert(this.sdkUserService.getUser(userId), User.class);
+                if (user != null) {
+                    this.userProvider.createUserFromUnite(user);
+                } else {
+                    LOGGER.warn("Sdk user service getUser return null, userId={}", userId);
+                }
             }
-        }
-        return user != null && userIdentifier != null;
+            return user;
+        });
+
+        Tuple<UserIdentifier, Boolean> userIdenTuple = coordinationProvider.getNamedLock(
+                CoordinationLocks.SYNC_USER_IDEN_MODIFY.getCode() + userId).enter(() -> {
+            UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(userId, namespaceId);
+            if (userIdentifier == null) {
+                userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userId), UserIdentifier.class);
+                if (userIdentifier != null) {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                } else {
+                    LOGGER.warn("Sdk user service getUserIdentifier return null, userId={}", userId);
+                }
+            }
+            return userIdentifier;
+        });
+        return userTuple.first() != null && userIdenTuple.first() != null;
     }
 
     private static boolean isVerificationExpired(Timestamp ts) {
@@ -7597,126 +7606,20 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
         return res;
     }
-    /*******************统一用户同步数据**********************/
-    @KafkaListener(topics = "user-create-event")
-    public void syncCreateUser(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ user-create-event ] {}", record.value());
-        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(user.getNamespaceId())) {
-                //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
-                //所以这里加个判断，是新增还是更新.
-                User existsUser = this.userProvider.findUserById(user.getId());
-                if (existsUser != null) {
-                    this.userProvider.updateUserFromUnite(user);
-                }else {
-                    this.userProvider.createUserFromUnite(user);
-                }
-            }
-        }else {
-            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
-                User existsUser = this.userProvider.findUserById(user.getId());
-                if (existsUser != null) {
-                    this.userProvider.updateUserFromUnite(user);
-                }else {
-                    this.userProvider.createUserFromUnite(user);
-                }
-            }
-        }
-    }
-
-    @KafkaListener(topics = "user-update-event")
-    // @KafkaListener(topics = "user-update-event")
-    public void syncUpdateUser(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ user-update-event ] {}", record.value());
-        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(user.getNamespaceId())) {
-                this.userProvider.updateUserFromUnite(user);
-            }
-        }else {
-            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
-                this.userProvider.updateUserFromUnite(user);
-            }
-        }
-    }
-
-    @KafkaListener(topics = "user-delete-event")
-    public void syncDeleteUser(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ user-delete-event ] {}", record.value());
-        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(user.getNamespaceId())) {
-                this.userProvider.deleteUser(user);
-            }
-        }else {
-            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
-                this.userProvider.deleteUser(user);
-            }
-        }
-
-    }
-
-    @KafkaListener(topics = "userIdentifier-create-event")
-    public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ userIdentifier-create-event ] {}", record.value());
-        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
-                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
-                if (existsIdentifier != null) {
-                    this.userProvider.updateIdentifierFromUnite(userIdentifier);
-                }else {
-                    this.userProvider.createIdentifierFromUnite(userIdentifier);
-                }
-            }
-        }else {
-            if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
-                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
-                if (existsIdentifier != null) {
-                    this.userProvider.updateIdentifierFromUnite(userIdentifier);
-                }else {
-                    this.userProvider.createIdentifierFromUnite(userIdentifier);
-                }
-            }
-        }
-
-    }
-
-    @KafkaListener(topics = "userIdentifier-update-event")
-    // @KafkaListener(topics = "userIdentifier-update-event")
-    public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ userIdentifier-update-event ] {}", record.value());
-        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
-                this.userProvider.updateIdentifierFromUnite(userIdentifier);
-            }
-        }else {
-            if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
-                this.userProvider.updateIdentifierFromUnite(userIdentifier);
-            }
-        }
-    }
 
 
     /**
-	 * 获取商户跳转URL
+     * 获取商户跳转URL
      * @param cmd
      * @return
      */
     @Override
     public GetPrintMerchantUrlResponse getPrintMerchantUrl(GetPrintMerchantUrlCommand cmd) {
-    	GetPrintMerchantUrlResponse response = new GetPrintMerchantUrlResponse();
+        GetPrintMerchantUrlResponse response = new GetPrintMerchantUrlResponse();
         String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"prmt.merchant.home.url","http://promo-alpha.zuolin.com/prmt");
-		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
-		String infoUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.info.url", "${mercharntHomeUrl}/merchantLogin/logon/login?sourceUrl=${sourceUrl}&systemId=${systemId}");
-		String sourceUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.url", "${mercharntHomeUrl}/merchant/getMerchantDetail?enterpriseId=${enterpriseId}&ns=${namespaceId}");
+        String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
+        String infoUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.info.url", "${mercharntHomeUrl}/merchantLogin/logon/login?sourceUrl=${sourceUrl}&systemId=${systemId}");
+        String sourceUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.url", "${mercharntHomeUrl}/merchant/getMerchantDetail?enterpriseId=${enterpriseId}&ns=${namespaceId}");
 
         Map<String, String> sourceUrlParam= new HashMap<String, String>();
         sourceUrlParam.put("merchantHomeUrl", homeUrl);
@@ -7727,13 +7630,106 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         infoUrlParam.put("merchantHomeUrl", homeUrl);
         infoUrlParam.put("systemId", systemId);
         try {
-        	infoUrlParam.put("sourceUrl", URLEncoder.encode(sourceUrl, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+            infoUrlParam.put("sourceUrl", URLEncoder.encode(sourceUrl, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         response.setInfoUrl(StringHelper.interpolate(infoUrl,infoUrlParam));
         return response;
     }
+
+    /*******************统一用户同步数据**********************/
+    @KafkaListener(topics = "user-create-event")
+    public void syncCreateUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-create-event ] {}", record.value());
+        User user = (User) StringHelper.fromJsonString(record.value(), User.class);
+        modifyUserHandler(user);
+    }
+
+    @KafkaListener(topics = "user-update-event")
+    public void syncUpdateUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-update-event ] {}", record.value());
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        modifyUserHandler(user);
+    }
+
+    private void modifyUserHandler(User user) {
+        coordinationProvider.getNamedLock(CoordinationLocks.SYNC_USER_MODIFY.getCode()+user.getId()).enter(() -> {
+            Namespace namespace = this.namespaceProvider.findNamespaceById(user.getNamespaceId());
+            if (namespace != null) {
+                //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
+                //所以这里加个判断，是新增还是更新.
+                User existsUser = this.userProvider.findUserById(user.getId());
+                if (existsUser != null) {
+                    if (existsUser.getUpdateVersion() < user.getUpdateVersion()) {
+                        this.userProvider.updateUserFromUnite(user);
+                    } else {
+                        LOGGER.warn("Sync modify user updateVersion compare failed, dbVersion={}, eventVersion={}",
+                                existsUser.getUpdateVersion(), user.getUpdateVersion());
+                    }
+                }else {
+                    this.userProvider.createUserFromUnite(user);
+                }
+            }
+            return null;
+        });
+    }
+
+    @KafkaListener(topics = "user-delete-event")
+    public void syncDeleteUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-delete-event ] {}", record.value());
+        User user = (User) StringHelper.fromJsonString(record.value(), User.class);
+        coordinationProvider.getNamedLock(CoordinationLocks.SYNC_USER_MODIFY.getCode()+user.getId()).enter(() -> {
+            Namespace namespace = this.namespaceProvider.findNamespaceById(user.getNamespaceId());
+            if (namespace != null) {
+                User existsUser = this.userProvider.findUserById(user.getId());
+                if (existsUser != null) {
+                    this.userProvider.deleteUser(user);
+                }
+            }
+            return null;
+        });
+    }
+
+    @KafkaListener(topics = "userIdentifier-create-event")
+    public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ userIdentifier-create-event ] {}", record.value());
+        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
+
+        modifyUserIdenHandler(userIdentifier);
+    }
+
+    @KafkaListener(topics = "userIdentifier-update-event")
+    public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ userIdentifier-update-event ] {}", record.value());
+        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
+
+        modifyUserIdenHandler(userIdentifier);
+    }
+
+    private void modifyUserIdenHandler(UserIdentifier userIdentifier) {
+        coordinationProvider.getNamedLock(CoordinationLocks.SYNC_USER_IDEN_MODIFY.getCode() + userIdentifier.getOwnerUid()).enter(() -> {
+            Namespace namespace = this.namespaceProvider.findNamespaceById(userIdentifier.getNamespaceId());
+            if (namespace != null) {
+                //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
+                //所以这里加个判断，是新增还是更新.
+                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(
+                        userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                if (existsIdentifier != null) {
+                    if (existsIdentifier.getUpdateVersion() < userIdentifier.getUpdateVersion()) {
+                        this.userProvider.updateIdentifierFromUnite(userIdentifier);
+                    } else {
+                        LOGGER.warn("Sync modify user identifier updateVersion compare failed, dbVersion={}, eventVersion={}",
+                                existsIdentifier.getUpdateVersion(), userIdentifier.getUpdateVersion());
+                    }
+                }else {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                }
+            }
+            return null;
+        });
+    }
+
     @KafkaListener(topics = "user-kickoff")
     public void userKickoffMessage(ConsumerRecord<?, String> record) {
         LOGGER.debug("received message [ user-kickoff ] {}", record.value());

@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
-import com.everhomes.rest.parking.jieshun.VendorNameEnum;
-
 /**
  * <p>停车场厂商</p>
  * <ul>
@@ -22,6 +20,7 @@ import com.everhomes.rest.parking.jieshun.VendorNameEnum;
  * <li>JIESHUN_GQY1("JIESHUN_GQY1"): 光大we谷A区停车场</li>
  * <li>JIESHUN_GQY2("JIESHUN_GQY2"): 光大we谷B区停车场</li>
  * <li>JIESHUN_DSHCXMall("JIESHUN_DSHCXMall"): 大沙河创新大厦/li>
+ * <li>HKWS_SHJINMAO("HKWS_SHJINMAO"): 上海金茂停车场/li>
  * </ul>
  */
 public enum ParkingLotVendor {
@@ -51,6 +50,7 @@ public enum ParkingLotVendor {
 	JIESHUN_GQY1(VendorNameEnum.JIESHUN_GQY1),
 	JIESHUN_GQY2(VendorNameEnum.JIESHUN_GQY2),
 	JIESHUN_DSHCXMall(VendorNameEnum.JIESHUN_DSHCXMall),
+	HKWS_SHJINMAO(VendorNameEnum.HKWS_SHJINMAO),
 	KETUO_TEST("KETUO_TEST"),
 	NONE(""); //用于结束
 

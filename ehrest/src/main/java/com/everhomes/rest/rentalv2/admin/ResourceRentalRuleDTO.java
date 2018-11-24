@@ -43,6 +43,7 @@ public class ResourceRentalRuleDTO {
 
     private Byte remarkFlag;
     private String remark;
+    private Byte fileFlag;
 
     @Override
     public String toString() {
@@ -151,5 +152,13 @@ public class ResourceRentalRuleDTO {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public Byte getFileFlag() {
+        return fileFlag;
+    }
+
+    public void setFileFlag(Byte fileFlag) {
+        this.fileFlag = fileFlag;
     }
 }
