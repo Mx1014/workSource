@@ -8695,6 +8695,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
 
     }
+	
+	@Override
+	public ApartmentManagementPrivilegeDTO hasApartmentManagementPrivilege(ApartmentManagementPrivilegeCommand cmd) {
+		ApartmentManagementPrivilegeDTO dto = new ApartmentManagementPrivilegeDTO();
+		try {
+			assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_APARTMENT_MANAGEMENT, cmd.getOrganizationId(), cmd.getCommunityId());
+			dto.setApartmentManagementPrivilegeFlag((byte)1);
+		} catch (Exception e) {
+			LOGGER.info("Exception thrown : " + e.getMessage());
+			dto.setApartmentManagementPrivilegeFlag((byte)0);
+		}
+		return dto;
+	}
 
 	private void assetManagementPrivilegeCheck(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ASSET_MANAGEMENT, null, null, null, communityId);
@@ -9172,5 +9185,5 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}
 	}
 
-
+	
 }

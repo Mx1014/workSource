@@ -563,6 +563,8 @@ public interface PropertyMgrService {
 	String getAddressArrangementEventContent(int opearteType, AddressArrangement arrangement, Address newAddress,
 			Address oldAddress);
 
-	ListApartmentEventsResponse listApartmentEventsV2(ListApartmentEventsCommand cmd); 	
+	ListApartmentEventsResponse listApartmentEventsV2(ListApartmentEventsCommand cmd);
+
+	ApartmentManagementPrivilegeDTO hasApartmentManagementPrivilege(ApartmentManagementPrivilegeCommand cmd); 	
 
 }

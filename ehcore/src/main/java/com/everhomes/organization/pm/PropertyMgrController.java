@@ -2487,5 +2487,21 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /pm/hasApartmentManagementPrivilege</b>
+	 * <p>判断用户是否具有房源管理的权限</p>
+	 * @param cmd
+	 * @return
+	 */
+	@RequestMapping("hasApartmentManagementPrivilege")
+	@RestReturn(value = ApartmentManagementPrivilegeDTO.class)
+	public RestResponse hasApartmentManagementPrivilege(ApartmentManagementPrivilegeCommand cmd) {
+		ApartmentManagementPrivilegeDTO dto = propertyMgrService.hasApartmentManagementPrivilege(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }
