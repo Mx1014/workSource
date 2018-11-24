@@ -1806,18 +1806,18 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
 		contract.setCostGenerationMethod(cmd.getCostGenerationMethod());
 		contract.setContractType(ContractType.DENUNCIATION.getCode());
-		contractProvider.updateContract(contract);
-		//记录合同事件日志，by tangcen
-		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
-		
-		contractSearcher.feedDoc(contract);
-//		// todo 将此合同关联的关联的未出账单删除，但账单记录着不用
-//		assetService.deleteUnsettledBillsOnContractId(contract.getId());
+
+		//退约进工作流，没有工作流不允许退约
 		if(cmd.getPaymentFlag() == 1) {
 			addToFlowCase(contract, flowcasePaymentContractOwnerType);
 		}else {
 			addToFlowCase(contract, flowcaseContractOwnerType);
 		}
+		
+		contractProvider.updateContract(contract);
+		// 添加退约日志
+		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
+		contractSearcher.feedDoc(contract);
 
 	}
 
