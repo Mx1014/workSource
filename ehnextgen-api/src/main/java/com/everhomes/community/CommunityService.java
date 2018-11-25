@@ -208,6 +208,8 @@ public interface CommunityService {
 
 	OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd);
 
+	ApartmentCountInBuildingDTO countApartmentInBuilding(Long buildingId);
+
 	BuildingStatisticsForAppDTO getBuildingStatisticsForApp(GetBuildingStatisticsCommand cmd);
 
 	ListBuildingsForAppResponse listBuildingsForApp(ListBuildingsForAppCommand cmd);
@@ -219,5 +221,6 @@ public interface CommunityService {
 	ListBuildingsForThirdPartyResponse listBuildingsForThirdParty(ListBuildingsForThirdPartyCommand cmd);
 
 	ListAddressesForThirdPartyResponse listAddressesForThirdParty(ListAddressesForThirdPartyCommand cmd);
+
 
 }
