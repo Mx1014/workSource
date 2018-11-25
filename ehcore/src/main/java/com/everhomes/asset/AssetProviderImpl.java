@@ -4877,6 +4877,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addSelect(t2.BILL_ID, t2.ORDER_NUMBER, t2.PAYMENT_ORDER_ID, t2.GENERAL_ORDER_ID, t2.PAYMENT_TIME, t2.PAYMENT_TYPE, t2.PAYMENT_CHANNEL, t2.UID);
         query.addFrom(t2);
         query.addConditions(t2.BILL_ID.eq(String.valueOf(billId)));
+        query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//eh_payment_bill_orders中的PAYMENT_STATUS=2代表支付成功
         query.addOrderBy(t2.PAYMENT_TIME.desc());
         query.fetch().map(r -> {
         	dto.setPaymentOrderNum(r.getValue(t2.PAYMENT_ORDER_ID).toString());//支付订单ID

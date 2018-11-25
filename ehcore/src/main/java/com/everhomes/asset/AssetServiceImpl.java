@@ -5326,10 +5326,10 @@ public class AssetServiceImpl implements AssetService {
                             break;
                     }
                 }
-                detail.put("amountReceived",dto.getAmountReceived()==null?"":dto.getAmountReceived().toString());
-                detail.put("amountReceivable",dto.getAmountReceivable()==null?"":dto.getAmountReceivable().toString());
-                detail.put("amoutExemption",dto.getAmountExemption()==null?"":dto.getAmountExemption().toString());
-                detail.put("amountSupplement",dto.getAmountSupplement()==null?"":dto.getAmountSupplement().toString());
+                detail.put("amountReceived",dto.getAmountReceived().toString());
+                detail.put("amountReceivable",dto.getAmountReceivable().toString());
+                detail.put("amoutExemption",dto.getAmountExemption().toString());
+                detail.put("amountSupplement",dto.getAmountSupplement().toString());
                 detail.put("paymentOrderNum",dto.getPaymentOrderNum());
                 detail.put("payTime",dto.getPayTime());
                 detail.put("payerTel",dto.getPayerTel());
