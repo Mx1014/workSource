@@ -607,7 +607,7 @@ public class AssetServiceImpl implements AssetService {
         handler.modifyBillStatus(cmd);
     }
 
-   /* public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
+    public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(Long.parseLong("5000"));
         }
@@ -619,7 +619,7 @@ public class AssetServiceImpl implements AssetService {
         	dtos.add(dto);
         }
         exportOrdersUtil(dtos, cmd, response);
-    }*/
+    }
 
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
