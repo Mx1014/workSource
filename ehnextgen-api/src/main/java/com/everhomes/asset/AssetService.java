@@ -241,6 +241,8 @@ public interface AssetService {
 
 	default void exportListPaymentBillByParams(ListPaymentBillCmd cmd){}
 
+	default void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response){}
+
 	void cancelGeneralBill(CancelGeneralBillCommand cmd);
 
 	void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId);

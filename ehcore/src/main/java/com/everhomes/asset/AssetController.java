@@ -15,25 +15,8 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
-import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
-import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
-import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
-import com.everhomes.rest.asset.bill.ListBillsDTO;
-import com.everhomes.rest.asset.bill.ListBillsResponse;
-import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressTotalCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingTotalCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityTotalCmd;
+import com.everhomes.rest.asset.bill.*;
+import com.everhomes.rest.asset.statistic.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -1511,6 +1494,19 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+
+	/**
+	 * <p>导出筛选过的所有交易明细</p>
+	 * <b>URL: /asset/exportOrders</b>
+	 */
+	@RequestMapping("exportOrders")
+	public HttpServletResponse exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
+		assetService.exportOrders(cmd, response);
+		RestResponse restResponse = new RestResponse();
+		restResponse.setErrorDescription("OK");
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		return null;
+	}
     
 	/**
 	 * <p>导出筛选过的所有账单 (对接下载中心)</p>
