@@ -208,13 +208,10 @@ public interface CommunityService {
 
 	OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd);
 
-<<<<<<< HEAD
-	ApartmentCountInBuildingDTO countApartmentInBuilding(Long buildingId);
-
 	BuildingStatisticsForAppDTO getBuildingStatisticsForApp(GetBuildingStatisticsCommand cmd);
 
 	ListBuildingsForAppResponse listBuildingsForApp(ListBuildingsForAppCommand cmd);
-=======
+
 	ListCommunitiesForThirdPartyResponse listCommunitiesForThirdParty(ListCommunitiesForThirdPartyCommand cmd);
 
 	com.everhomes.rest.community.ListCommunitiesResponse listCommunities(com.everhomes.rest.community.ListCommunitiesCommand cmd);
@@ -222,8 +219,5 @@ public interface CommunityService {
 	ListBuildingsForThirdPartyResponse listBuildingsForThirdParty(ListBuildingsForThirdPartyCommand cmd);
 
 	ListAddressesForThirdPartyResponse listAddressesForThirdParty(ListAddressesForThirdPartyCommand cmd);
-
-	
->>>>>>> 5.11.0
 
 }
