@@ -1,4 +1,4 @@
--- AUTHOR: 孟千翔 2018-11-22
+-- AUTHOR: 孟千翔 2018-11-25
 -- REMARK: 添加交易明细导出表头及数据标签信息
 INSERT INTO eh_locale_strings (`scope`,`code`,`locale`,`text`) VALUES("export.paymentbill","14001","zh_CN","账单时间");
 INSERT INTO eh_locale_strings (`scope`,`code`,`locale`,`text`) VALUES("export.paymentbill","12002","zh_CN","账单组");
