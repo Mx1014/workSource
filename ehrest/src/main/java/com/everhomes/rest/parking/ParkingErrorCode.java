@@ -92,4 +92,9 @@ public interface ParkingErrorCode {
     int ERROR_CARD_INFO_NOT_FOUND = 10005;  //未找到月卡信息
     int ERROR_CARD_TYPES_NOT_FOUND = 10006;  //未获取到费率信息
     int ERROR_CARD_FEE_ITEM_NOT_FOUND = 10007;  //未获取到月卡对应的费率信息
+    
+    
+    // ------------------ 海康威视对接 ----------------------
+    String SCOPE_HKWS = "parking.hkws";
+    int ERROR_HKWS_FETCH_OP_USER_UUID = 10001;  //获取opUserUuid失败
 }

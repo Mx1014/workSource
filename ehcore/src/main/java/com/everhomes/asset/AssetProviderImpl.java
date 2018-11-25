@@ -559,7 +559,10 @@ public class AssetProviderImpl implements AssetProvider {
 	                    "This updateTime is error, updateTime={" + cmd.getUpdateTime() + "}");
 			}
         }
-        
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getContractId())) {
+        	query.addConditions(t.CONTRACT_ID.eq(cmd.getContractId()));
+        }
+
         if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
@@ -2713,6 +2716,36 @@ public class AssetProviderImpl implements AssetProvider {
         });
     }
 
+    /**
+     * 合同更新/根据合同id,自动刷新合同账单
+     * @param contractId
+     */
+    public void deleteContractPaymentByContractId(Long contractId) {
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
+        EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
+        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+                List<Long> billIds = context.select(t.ID)
+                        .from(t)
+                        .where(t.CONTRACT_ID.eq(contractId))
+                        .fetch(t.ID);
+                context.delete(t)
+                        .where(t.ID.in(billIds))
+                        .execute();
+                context.delete(t2)
+                        .where(t2.BILL_ID.in(billIds))
+                        .execute();
+                context.delete(t1)
+                        .where(t1.CONTRACT_ID.eq(contractId))
+                        .execute();
+                return null;
+            });
+            return null;
+        });
+    }
+
     @Override
     public List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId, Long categoryId, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2744,15 +2777,19 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setChargingItemId(r.getValue(t1.ID));
-                    dto.setAmountReceivableWithoutTax(r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
-                    dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));//税额
                     dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
                     //物业缴费V6.0 账单、费项表增加是否删除状态字段
                     dto.setDeleteFlag(r.getValue(t.DELETE_FLAG));
+                    //缺陷 #42852 【中天】【缴费管理】联科园区6栋5-6F合同录入信息无误，但是展示账单数据金额却有小数
+                    BigDecimal taxAmount = r.getValue(t.TAX_AMOUNT);//税额
+                    BigDecimal amountReceivable = r.getValue(t.AMOUNT_RECEIVABLE);//应收金额含税
+                    BigDecimal amountReceivableWithoutTax = r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX);//应收不含税
+                    dto.setTaxAmount(taxAmount != null ? taxAmount.stripTrailingZeros() : taxAmount);
+                    dto.setAmountReceivable(amountReceivable != null ? amountReceivable.stripTrailingZeros() : amountReceivable);
+                    dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax.stripTrailingZeros() : amountReceivableWithoutTax);
                     set.add(dto);
                     return null;
                 });
@@ -2779,13 +2816,17 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setChargingItemId(r.getValue(t1.ID));
-                    dto.setAmountReceivableWithoutTax(r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
-                    dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));//税额
                     dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
+                    //缺陷 #42852 【中天】【缴费管理】联科园区6栋5-6F合同录入信息无误，但是展示账单数据金额却有小数
+                    BigDecimal taxAmount = r.getValue(t.TAX_AMOUNT);//税额
+                    BigDecimal amountReceivable = r.getValue(t.AMOUNT_RECEIVABLE);//应收金额含税
+                    BigDecimal amountReceivableWithoutTax = r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX);//应收不含税
+                    dto.setTaxAmount(taxAmount != null ? taxAmount.stripTrailingZeros() : taxAmount);
+                    dto.setAmountReceivable(amountReceivable != null ? amountReceivable.stripTrailingZeros() : amountReceivable);
+                    dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax.stripTrailingZeros() : amountReceivableWithoutTax);
                     set.add(dto);
                     return null;
                 });
@@ -4673,7 +4714,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(paymentOrderNum)){
         	query.addConditions(t2.PAYMENT_ORDER_ID.like("%" + paymentOrderNum + "%"));
         }
-        query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//EhAssetPaymentOrderBills中的status1代表支付成功
+        query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//eh_payment_bill_orders中的PAYMENT_STATUS=2代表支付成功
         query.addOrderBy(t2.PAYMENT_TIME.desc());
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
@@ -4836,7 +4877,6 @@ public class AssetProviderImpl implements AssetProvider {
         query.addSelect(t2.BILL_ID, t2.ORDER_NUMBER, t2.PAYMENT_ORDER_ID, t2.GENERAL_ORDER_ID, t2.PAYMENT_TIME, t2.PAYMENT_TYPE, t2.PAYMENT_CHANNEL, t2.UID);
         query.addFrom(t2);
         query.addConditions(t2.BILL_ID.eq(String.valueOf(billId)));
-        query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//EhAssetPaymentOrderBills中的status1代表支付成功
         query.addOrderBy(t2.PAYMENT_TIME.desc());
         query.fetch().map(r -> {
         	dto.setPaymentOrderNum(r.getValue(t2.PAYMENT_ORDER_ID).toString());//支付订单ID

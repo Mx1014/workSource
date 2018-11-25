@@ -107,7 +107,7 @@ public class CustomerOpenApiController extends ControllerBase {
     public RestResponse listEnterprises(SearchEnterpriseCustomerCommand cmd) {
         Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
         cmd.setNamespaceId(namespaceId);
-        SearchEnterpriseCustomerResponse customers = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, true);
+        SearchEnterpriseCustomerResponse customers = enterpriseCustomerSearcher.queryEnterpriseCustomersForOpenAPI(cmd);
 
         List<EnterpriseDTO> dtos = new ArrayList<>();
         customers.getDtos().forEach(r ->{

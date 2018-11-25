@@ -15,8 +15,25 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.asset.bill.*;
-import com.everhomes.rest.asset.statistic.*;
+import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
+import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
+import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
+import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressTotalCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingTotalCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityTotalCmd;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -1734,15 +1751,11 @@ public class AssetController extends ControllerBase {
 	 * <b>URL: /asset/batchDeleteBill</b>
 	 */
 	@RequestMapping("batchDeleteBill")
-	@RestReturn(value = String.class)
+	@RestReturn(value = BatchDeleteBillResponse.class)
 	public RestResponse batchDeleteBill(BatchDeleteBillCommand cmd) {
-		String result = assetBillService.batchDeleteBill(cmd);
-		RestResponse response = new RestResponse();
-		if (result.equals("OK")) {
-			response.setErrorDescription("OK");
-		} else {
-			response.setErrorDescription(result);
-		}
+		BatchDeleteBillResponse res = assetBillService.batchDeleteBill(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}

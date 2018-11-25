@@ -869,13 +869,15 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(order.getRechargeType());
 		String returnUrl = null;
 		ParkingBusinessType bussinessType = null;
+		String extendInfo = null;
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			bussinessType = ParkingBusinessType.MONTH_RECHARGE;
 			returnUrl = String.format(configProvider.getValue("parking.recharge.return.url","zl://parking/monthCardRechargeStatus?orderId=%s"), String.valueOf(order.getId()));
-
+			extendInfo = parkingLot.getName()+"（月卡车：" + order.getPlateNumber() + "）";
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
-			returnUrl = String.format(configProvider.getValue("parking.tempfee.return.url","zl://parking/tempFeeStatus?orderId=%s"), String.valueOf(order.getId()));			
+			returnUrl = String.format(configProvider.getValue("parking.tempfee.return.url","zl://parking/tempFeeStatus?orderId=%s"), String.valueOf(order.getId()));	
+			extendInfo = parkingLot.getName()+"（月卡车：" + order.getPlateNumber() + "）";
 		}
 		
 		try {
@@ -918,6 +920,7 @@ public class ParkingServiceImpl implements ParkingService {
         baseInfo.setGoodsDetail(buildGoodsDetails(parkingLot, order, bussinessType));
         baseInfo.setReturnUrl(returnUrl);
         baseInfo.setOrganizationId(organizationId);
+        baseInfo.setExtendInfo(extendInfo);
         
 		CreateMerchantOrderResponse generalOrderResp = getParkingGeneralOrderHandler().createOrder(baseInfo);
         order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
@@ -945,7 +948,7 @@ public class ParkingServiceImpl implements ParkingService {
 		GoodDTO good = new GoodDTO();
 		good.setNamespace("NS");
 		good.setTag1(order.getOwnerId() + "");
-		good.setTag2(parkingLot.getName());
+		good.setTag2(String.valueOf(parkingLot.getId()));
 		Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
 		if (null != community) {
 			good.setServeApplyName(community.getName()); //

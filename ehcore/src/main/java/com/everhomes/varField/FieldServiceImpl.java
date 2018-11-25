@@ -525,6 +525,9 @@ public class FieldServiceImpl implements FieldService {
         }
         if (namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getOwnerId(), null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            if(scopeFields == null || scopeFields.size() == 0){
+                scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            }
             if (scopeFields != null && scopeFields.size() > 0) {
                 globalFlag = false;
             }
@@ -532,10 +535,17 @@ public class FieldServiceImpl implements FieldService {
         // add general scope fields version 3.5
         if (globalFlag) {
             scopeFields = fieldProvider.listScopeFields(0, cmd.getOwnerId(), null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            if(scopeFields == null || scopeFields.size() == 0){
+                scopeFields = fieldProvider.listScopeFields(0, null, null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            }
         }
         //查询表单初始化的数据
         if (scopeFields != null && scopeFields.size() < 1) {
             scopeFields = fieldProvider.listScopeFields(0, cmd.getOwnerId(), null, cmd.getModuleName(), cmd.getGroupPath(), null);
+        }
+
+        if (scopeFields != null && scopeFields.size() < 1) {
+            scopeFields = fieldProvider.listScopeFields(0, null, null, cmd.getModuleName(), cmd.getGroupPath(), null);
         }
 
         if (scopeFields != null && scopeFields.size() > 0) {

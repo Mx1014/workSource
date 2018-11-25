@@ -54,4 +54,8 @@ public interface RentalMessageHandler {
     default void cancelOrderWithoutRefund(RentalOrder rentalBill){}
 
     default void cancelOrderNeedRefund(RentalOrder rentalBill){}
+
+    default void orderNearStartSendMessage(RentalOrder rentalBill){}
+
+    default void orderNearEndSendMessage(RentalOrder rentalBill){}
 }

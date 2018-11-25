@@ -2486,5 +2486,21 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /pm/listApartmentsForApp</b>
+	 * <p>获取楼宇下的所有房源  for app端</p>
+	 * @param cmd
+	 * @return
+	 */
+	@RequestMapping("listApartmentsForApp")
+	@RestReturn(value = ListApartmentsForAppResponse.class)
+	public RestResponse listApartmentsForApp(ListApartmentsForAppCommand cmd) {
+		ListApartmentsForAppResponse res =  propertyMgrService.listApartmentsForApp(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }

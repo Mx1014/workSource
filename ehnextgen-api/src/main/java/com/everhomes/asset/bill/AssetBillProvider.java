@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.asset.PaymentBills;
 
 /**
  * @author created by ycx
@@ -21,5 +22,6 @@ public interface AssetBillProvider {
 
 	void changeChargeStatus(Integer currentNamespaceId, Long billId, BigDecimal amountReceived, BigDecimal amountOwed,
 			Integer paymentType);
+	List<PaymentBills> findCannotDeleteBill(List<Long> billIdList);
 	
 }

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.aclink;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -17,15 +19,25 @@ public class CreateTempAuthPriorityCommand {
 
     private Long ownerId;
     private Byte ownerType;
-    private List<Long> doorIds;
+//    private List<Long> doorIds;
+    @ItemType(DoorsAndGroupsDTO.class)
+    private List<DoorsAndGroupsDTO> doors;
 
-    public List<Long> getDoorIds() {
-        return doorIds;
+    public List<DoorsAndGroupsDTO> getDoors() {
+        return doors;
     }
 
-    public void setDoorIds(List<Long> doorIds) {
-        this.doorIds = doorIds;
+    public void setDoors(List<DoorsAndGroupsDTO> doors) {
+        this.doors = doors;
     }
+
+//    public List<Long> getDoorIds() {
+//        return doorIds;
+//    }
+//
+//    public void setDoorIds(List<Long> doorIds) {
+//        this.doorIds = doorIds;
+//    }
 
     public Long getOwnerId() {
         return ownerId;

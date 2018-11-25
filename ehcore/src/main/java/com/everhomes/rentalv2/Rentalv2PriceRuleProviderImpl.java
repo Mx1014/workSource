@@ -4,6 +4,7 @@ package com.everhomes.rentalv2;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.server.schema.tables.daos.EhRentalv2PriceClassificationDao;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,15 @@ public class Rentalv2PriceRuleProviderImpl implements Rentalv2PriceRuleProvider 
 		}
 		getReadWriteDao().insert(rentalv2PriceRule);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2PriceRules.class, null);
+	}
+
+	@Override
+	public void createRentalv2PriceClassification(RentalPriceClassification classification) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(RentalPriceClassification.class));
+		classification.setId(id);
+		EhRentalv2PriceClassificationDao dao = new EhRentalv2PriceClassificationDao(getReadWriteContext().configuration());
+		dao.insert(classification);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, RentalPriceClassification.class, null);
 	}
 
 	@Override
