@@ -55,6 +55,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
 import com.everhomes.rest.promotion.merchant.GetPayUserByMerchantIdCommand;
