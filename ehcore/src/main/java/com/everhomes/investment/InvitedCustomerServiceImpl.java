@@ -1507,11 +1507,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     @Override
     public void statisticCustomerAll(Date date){
         LOGGER.info("the scheduleJob of customer monthly statistics is start!");
-        //Timestamp nowTime = new Timestamp(System.currentTimeMillis());
-        StatisticTime statisticTime = getBeforeForStatistic(date , Calendar. DAY_OF_MONTH);
-        statisticTime.setStatisticEndTime(null);
+        StatisticTime statisticTime = getBeforeForStatistic(date , Calendar. YEAR);
         startCustomerStatistic(statisticTime);
-
     }
 
     @Override
