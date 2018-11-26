@@ -20,6 +20,7 @@ import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
+import com.everhomes.rest.address.ListApartmentsByMultiStatusResponse;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
@@ -2498,6 +2499,20 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse listApartmentsForApp(ListApartmentsForAppCommand cmd) {
 		ListApartmentsForAppResponse res =  propertyMgrService.listApartmentsForApp(cmd);
 		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/listApartmentsByMultiStatus</b>
+	 * <p>支持同时查询多个状态的房源列表</p>
+	 */
+	@RequestMapping("listApartmentsByMultiStatus")
+	@RestReturn(value=ListApartmentsByMultiStatusResponse.class)
+	public RestResponse listApartmentsByMultiStatus(ListApartmentsByMultiStatusCommand cmd) {
+		ListApartmentsByMultiStatusResponse results =  propertyMgrService.listApartmentsByMultiStatus(cmd);
+		RestResponse response = new RestResponse(results);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
