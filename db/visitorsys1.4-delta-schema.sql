@@ -3,6 +3,22 @@
 ALTER TABLE `eh_visitor_sys_visit_reason` ADD COLUMN `reason_type`  tinyint NULL DEFAULT null COMMENT '类型 0为住宅小区,1为商业小区';
 ALTER TABLE `eh_visitor_sys_visit_reason` ADD COLUMN `visit_reason_code`  tinyint NULL DEFAULT null COMMENT '到访原因类型码';
 
+-- AUTHOR: 马世亨 20181122
+-- REMARK: 访客1.4 第三方对接映射表
+CREATE TABLE `eh_visitor_sys_third_mapping` (
+    `id` BIGINT NOT NULL COMMENT '主键',
+    `namespace_id` INT (11) NOT NULL DEFAULT '0' COMMENT 'namespace id',
+    `owner_type` VARCHAR (64) NOT NULL COMMENT 'community or organization',
+    `owner_id` BIGINT (20) NOT NULL DEFAULT '0' COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
+    `visitor_id` BIGINT NOT NULL COMMENT '主键',
+    `third_type` VARCHAR (128) NULL COMMENT '关联类型',
+    `third_value` VARCHAR (128) NULL COMMENT '关联值',
+    `creator_uid` BIGINT (20) DEFAULT NULL,
+    `create_time` datetime DEFAULT NULL,
+    `operator_uid` BIGINT (20) DEFAULT NULL,
+    `operate_time` datetime DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '访客管理对接映射表';
 
 -- AUTHOR: 马世亨 20181122
 -- REMARK: 访客1.4 访客管理对接海康威视人员表

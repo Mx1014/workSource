@@ -2,12 +2,19 @@ package com.everhomes.visitorsys;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.parking.handler.Utils;
 import com.everhomes.parking.handler.haikangweishi.HaiKangWeiShiJinMaoVendorHandler;
 import com.everhomes.rest.parking.handler.haikangweishi.ErrorCodeEnum;
 import com.everhomes.rest.parking.handler.haikangweishi.HkwsThirdResponse;
+import com.everhomes.rest.visitorsys.VisitorsysConstant;
+import com.everhomes.uniongroup.UniongroupService;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.visitorsys.hkws.HKWSDataSet;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +22,13 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class VisitorSysHKWSUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VisitorSysHKWSUtil.class);
 
     private final String GET_PERSON_INFO = "/openapi/service/base/person/getPersonInfosEx";
 
@@ -32,11 +42,26 @@ public class VisitorSysHKWSUtil {
     @Autowired
     HKWSUserProvider HKWSUserProvider;
 
-    public String addAppointment(VisitorSysVisitor visitor){
+    @Autowired
+    ConfigurationProvider configProvider;
+
+    public HkwsThirdResponse addAppointment(VisitorSysVisitor visitor){
         JSONObject params = new JSONObject();
 
         params.put("visitorName",visitor.getVisitorName());
-//        params.put("personId",);
+
+        Integer personId = 0;
+        List<HKWSUser> users = HKWSUserProvider.findUserByPhone(UserContext.current().getUser().getIdentifierToken());
+        if(users == null || users.size() == 0){
+            Long startTime = configProvider.getLongValue("HKWS.user.syncTime", Long.MIN_VALUE);
+            syncHKWSUsers(startTime);
+            users = HKWSUserProvider.findUserByPhone(UserContext.current().getUser().getIdentifierToken());
+            if(users == null || users.size() == 0){
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_NOT_EXIST,"third user not exist");
+            }
+            personId = users.get(0).getPersonId();
+        }
+        params.put("personId",personId);
         params.put("gender","1");
         params.put("phoneNo",visitor.getVisitorPhone());
         params.put("personNum","" + 1 + visitor.getFollowUpNumbers());
@@ -56,14 +81,34 @@ public class VisitorSysHKWSUtil {
 
 
         HkwsThirdResponse resp = HKWSHandler.post(ADD_APPOINTMENT,params);
+        LOGGER.info("HKWS response:" + resp.toString());
+        return resp;
+    }
+
+    public String delAppointment(VisitorSysVisitor visitor){
+        JSONObject params = new JSONObject();
+
+        Integer personId = 0;
+        List<HKWSUser> users = HKWSUserProvider.findUserByPhone(UserContext.current().getUser().getIdentifierToken());
+        if(users == null || users.size() == 0){
+            Long startTime = configProvider.getLongValue("HKWS.user.syncTime", Long.MIN_VALUE);
+            syncHKWSUsers(startTime);
+            users = HKWSUserProvider.findUserByPhone(UserContext.current().getUser().getIdentifierToken());
+            if(users == null || users.size() == 0){
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_NOT_EXIST,"third user not exist");
+            }
+            personId = users.get(0).getPersonId();
+        }
+        params.put("personId",personId);
+
+//        params.put("appointmentUuid",);
+
         return "";
     }
 
-    public String delAppointment(){
-        return "";
-    }
+    public void syncHKWSUsers(Long startTime){
 
-    public void initHKWSUsers(Long startTime){
+        Long now = System.currentTimeMillis();
 
         Integer pageSize = 400;
         Integer pageNo = 1;
@@ -74,7 +119,7 @@ public class VisitorSysHKWSUtil {
         params.put("pageSize",pageSize);
         params.put("opUserUuid",HKWSHandler.getOpUserUuid(false));
         params.put("startTime",startTime == null ? Long.MIN_VALUE : startTime);
-        params.put("endTime",System.currentTimeMillis());
+        params.put("endTime",now);
         HkwsThirdResponse resp = HKWSHandler.post(GET_PERSON_INFO,params);
         if(!HKWSHandler.isSuccess(resp)){
 
@@ -93,7 +138,7 @@ public class VisitorSysHKWSUtil {
 
         }
 
-
+        configProvider.setValue("HKWS.user.syncTime",String.valueOf(now));
 
     }
 
