@@ -55,7 +55,7 @@ CREATE TABLE `eh_office_cubicle_station_rent` (
 
 CREATE TABLE `eh_office_cubicle_rent_orders` (
   `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
-  `biz_order_no` BIGINT,
+  `biz_order_no` VARCHAR(128),
   `namespace_id` INTEGER NOT NULL,
   `owner_type`  VARCHAR(255) COMMENT 'owner type: community',
   `owner_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
