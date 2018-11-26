@@ -3927,7 +3927,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                     this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                 }
                 OrganizationMember organizationMember = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
-                if (OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
+                if(organizationMember == null)
+                	LOGGER.error("找不到organizationMember: uid ={}.orgId = {}", userId, organizationId);
+                if (organizationMember != null && OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
                     tempSimpleOrgDTO.setUserIsManage(TrueOrFalseFlag.TRUE.getCode());
                 }else {
                     tempSimpleOrgDTO.setUserIsManage(TrueOrFalseFlag.FALSE.getCode());
