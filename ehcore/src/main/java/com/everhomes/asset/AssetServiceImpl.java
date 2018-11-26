@@ -730,7 +730,7 @@ public class AssetServiceImpl implements AssetService {
                     //获取单一包裹
                     FeeRules rule = feesRules.get(i);
                     //获得包裹中的地址包裹, named var1
-                    List<ContractProperty> var1 = rule.getProperties();
+                    List<ContractProperty> contractPropertyList = rule.getProperties();
                     //获得标准, inside formula can be found, together with variables in feerule, amont of bills can be calculated
                     EhPaymentChargingStandards standard = assetStandardProvider.findChargingStandardById(rule.getChargingStandardId());
                     PaymentChargingItemScope itemScope = assetProvider.findChargingItemScope(rule.getChargingItemId(),cmd.getOwnerType(),cmd.getOwnerId());
@@ -826,38 +826,53 @@ public class AssetServiceImpl implements AssetService {
                         throw new RuntimeException("bill group or grouprule is null");
                     }
                     Byte balanceDateType = group.getBalanceDateType();
-                    //开始循环地址包裹
-                    for(int j = 0; j < var1.size(); j ++){
-                        List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
-                        //从地址包裹中获得一个地址
-                        ContractProperty property = var1.get(j);
+                    //修复缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费。
+                    if(contractPropertyList != null) {
+                    	//开始循环地址包裹
+                        for(int j = 0; j < contractPropertyList.size(); j ++){
+                            List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
+                            //从地址包裹中获得一个地址
+                            ContractProperty property = contractPropertyList.get(j);
+                            //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
+                            BillingCycle standardBillingCycle = BillingCycle.fromCode(billingCycle);
+                            if(standardBillingCycle == null || standardBillingCycle == BillingCycle.DAY){
+                                assetProvider.deleteContractPayment(contractId);
+//                                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+//                                            ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
+                                		"目前计费周期只支持按月，按季，按年");
+                            }
+                            // #31113 by-dinfjianmin
+        					if (property.getAddressId() != null) {
+        						Double apartmentChargeArea = assetProvider.getApartmentInfo(property.getAddressId(), contractId);
+        						for (int k = 0; k < var2.size(); k++) {
+        							VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+        							if (variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null
+        									&& variableIdAndValue.getVaribleIdentifier().equals("mj")) {
+        								variableIdAndValue.setVariableValue(apartmentChargeArea);
+        							}
+        							var2.set(k, variableIdAndValue);
+        						}
+        					}
+                            //calculate the bill items expectancies for each of the address
+                            assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,property
+                                    ,standard,formulaCondition,billingCycle,itemScope);
+                            billItemsExpectancies.addAll(billItemsExpectancies_inner);
+                        }
+                    }else {
+                    	List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
                         //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
                         BillingCycle standardBillingCycle = BillingCycle.fromCode(billingCycle);
                         if(standardBillingCycle == null || standardBillingCycle == BillingCycle.DAY){
                             assetProvider.deleteContractPayment(contractId);
-//                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-//                                        ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
                             		"目前计费周期只支持按月，按季，按年");
                         }
-                        // #31113 by-dinfjianmin
-    					if (property.getAddressId() != null) {
-    						Double apartmentChargeArea = assetProvider.getApartmentInfo(property.getAddressId(), contractId);
-    						for (int k = 0; k < var2.size(); k++) {
-    							VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-    							if (variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null
-    									&& variableIdAndValue.getVaribleIdentifier().equals("mj")) {
-    								variableIdAndValue.setVariableValue(apartmentChargeArea);
-    							}
-    							var2.set(k, variableIdAndValue);
-    						}
-    					}
                         //calculate the bill items expectancies for each of the address
-                        assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,property
+                        assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,null
                                 ,standard,formulaCondition,billingCycle,itemScope);
                         billItemsExpectancies.addAll(billItemsExpectancies_inner);
                     }
-
                     //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
                     BillingCycle balanceBillingCycle = BillingCycle.fromCode(balanceDateType);
                     if(balanceBillingCycle == null || balanceBillingCycle == BillingCycle.DAY){
@@ -880,14 +895,15 @@ public class AssetServiceImpl implements AssetService {
                     PaymentChargingItemScope itemScope = exp.getItemScope();
                     PaymentBillGroupRule groupRule = exp.getGroupRule();
                     List<VariableIdAndValue> variableIdAndValueList = exp.getVariableIdAndValueList();//获取计价条款包裹
-                    //资产
-                    item.setAddressId(property.getAddressId());
-                    item.setBuildingName(property.getBuldingName());
-                    item.setApartmentName(property.getApartmentName());
-                    item.setPropertyIdentifer(property.getPropertyName());
+                    if(property != null) {
+                    	//资产
+                        item.setAddressId(property.getAddressId());
+                        item.setBuildingName(property.getBuldingName());
+                        item.setApartmentName(property.getApartmentName());
+                        item.setPropertyIdentifer(property.getPropertyName());
+                    }
                     //金额
                     //add #30669 增加负数校验
-
                     item.setAmountOwed(DecimalUtils.negativeValueFilte(exp.getAmountReceivable()));
                     item.setAmountReceivable(DecimalUtils.negativeValueFilte(exp.getAmountReceivable()));
                     item.setAmountReceived(new BigDecimal("0"));
