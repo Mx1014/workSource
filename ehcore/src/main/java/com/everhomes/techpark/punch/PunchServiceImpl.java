@@ -3727,6 +3727,7 @@ public class PunchServiceImpl implements PunchService {
         listPunchDetailsCommand.setOwnerId(cmd.getOwnerId());
         listPunchDetailsCommand.setOwnerType(cmd.getOwnerType());
         listPunchDetailsCommand.setUserName(cmd.getUserName());
+        listPunchDetailsCommand.setDepartmentIds(cmd.getDepartmentIds());
         // 进度条30% -- 60%
         createPunchDetailsBookSheet(resp.getUpdateTime(), listPunchDetailsCommand, taskId, wb);
         // 进度条60% -- 100%
