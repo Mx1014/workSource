@@ -49,12 +49,10 @@ public class ZhenzhihuiOpenController extends ControllerBase {
     public Map getUserInfo(TicketCommand cmd){
 
         String ticketStr = cmd.getTicket();
-        LOGGER.info("---------------------------------------------------------------- ticketStr: " + ticketStr);
         assert StringUtils.isNotEmpty(ticketStr);
 
         // 根据ticket获取用户信息
         EhTickets tickets = ticketProvider.getUserIdByTicket(ticketStr);
-        LOGGER.info("---------------------------------------------------------------- ticketsTableInfo: " + tickets);
         if (tickets != null ) {
             Long userId = tickets.getUserId();
             User user = userProvider.findUserById(userId);
@@ -74,17 +72,14 @@ public class ZhenzhihuiOpenController extends ControllerBase {
             userInfo.put("code", code);
 
             String userInfoJsonStr = JSON.toJSONString(userInfo);
-            LOGGER.info("*************************************************************** userInfoStr: " + userInfoJsonStr);
 
             String encryptedUserInfo = null;
             try {
                 // 加密信息
                 encryptedUserInfo = Base64.encodeBase64String(AESCoder.encrypt(userInfoJsonStr.getBytes("utf-8"), KEY.getBytes("utf-8")));
             } catch (Exception e) {
-                LOGGER.error("encountered an error in AESEncrypt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 e.printStackTrace();
             }
-            LOGGER.info("############################################################## encryptedUserInfo: " + encryptedUserInfo);
 
             Map<String, String> wappedUserInfo = new HashMap<>();
             wappedUserInfo.put("parameter", encryptedUserInfo);

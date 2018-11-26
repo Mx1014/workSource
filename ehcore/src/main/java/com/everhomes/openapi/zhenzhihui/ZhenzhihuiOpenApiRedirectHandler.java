@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Map;
 
 /**
@@ -45,9 +48,10 @@ public class ZhenzhihuiOpenApiRedirectHandler implements OpenApiRedirectHandler 
 
             //AES加密ticket
             String encryptedTicket = Base64.encodeBase64String(AESCoder.encrypt(ticket.getBytes("utf-8"), ZhenzhihuiOpenController.KEY.getBytes("utf-8")));
+            String urlTicket = URLEncoder.encode(encryptedTicket, "utf-8");
 
             return UriComponentsBuilder.fromHttpUrl(redirectUrl)
-                    .queryParam("TICKET", encryptedTicket)
+                    .queryParam("TICKET", urlTicket)
                     .build()
                     .toUriString();
         } catch (Exception e) {
