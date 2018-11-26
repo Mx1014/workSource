@@ -36,14 +36,13 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
 			"namespaceId": {"type":"integer"},
 			"categoryItemId": {"type":"long"},
 			"levelItemId": {"type":"long"},
-			"trackingUid": {"type":"long"},
 			"sourceItemId": {"type":"long"},
 			"propertyType": {"type":"long"},
 			"trackingUid": {"type":"long"},
             "status":{"type":"byte"},
             "propertyUnitPrice":{"type":"double"},
-            "buildingId":{"type":"string"},
-            "addressId":{"type":"string"},
+            "buildingId":{"type":"long"},
+            "addressId":{"type":"long"},
             "adminFlag":{"type":"long"},
             "sourceId":{"type":"long"},
             "sourceType":{"type":"string","index":"not_analyzed"},
@@ -52,7 +51,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
 			"createTime":{"type":"date"},
 			"requirementMinArea":{"type":"double"},
 			"requirementMaxArea":{"type":"double"},
-			"trackerName":{"type":"string", "index":"not_analyzed"},
+			"trackerUid": {"type":"long"},
 			"entryInfo":{"type":"long"}
 		}
 	}

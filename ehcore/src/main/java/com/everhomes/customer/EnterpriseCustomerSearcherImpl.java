@@ -444,12 +444,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
 
         //跟进时间、资产类型、资产面积、资产单价增加筛选
-        if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
+        /*if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
         	RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
         	Long startTime = getTomorrowLastTimestamp(cmd.getLastTrackingTime());
         	rf.gte(startTime);
         	fb = FilterBuilders.andFilter(fb, rf); 
-        }
+        }*/
 
         if(cmd.getTrackerUids() != null && cmd.getTrackerUids().size()>0){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackerUid", cmd.getTrackingUids()));
@@ -476,47 +476,51 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         	
         }
 
-        if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
-            if(null != cmd.getMinTrackingPeriod() && null != cmd.getMaxTrackingPeriod()){
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
-                Long startTime = cmd.getMinTrackingPeriod();
-                Long endTime = cmd.getMaxTrackingPeriod();
-                rf.gte(new Timestamp(startTime));
-                rf.lte(new Timestamp(endTime));
-                fb = FilterBuilders.andFilter(fb, rf);
-            }else if(null != cmd.getMinTrackingPeriod() && null == cmd.getMaxTrackingPeriod()){
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
-                Long startTime = cmd.getMinTrackingPeriod();
-                rf.gte(startTime);
-                fb = FilterBuilders.andFilter(fb, rf);
-            }else{
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
-                Long endTime = cmd.getMaxTrackingPeriod();
-                rf.lte(endTime);
-                fb = FilterBuilders.andFilter(fb, rf);
-            }
-        }
+        FilterBuilder rfbt = null;
 
         if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
+            RangeFilterBuilder rf1 = new RangeFilterBuilder("lastTrackingTime");
+            RangeFilterBuilder rf2 = new RangeFilterBuilder("createTime");
+            Long startTime = cmd.getMinTrackingPeriod();
+            Long endTime = cmd.getMaxTrackingPeriod();
+            if(null != startTime){
+                rf1.gte(new Timestamp(startTime));
+                rf2.gte(new Timestamp(startTime));
+            }
+            if(null != endTime){
+                rf1.lte(new Timestamp(endTime));
+                rf2.lte(new Timestamp(endTime));
+            }
+            rfbt = FilterBuilders.orFilter(rf1, rf2);
+            fb = FilterBuilders.andFilter(fb, rfbt);
+
+        }
+
+        /*if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
             if(null != cmd.getMinTrackingPeriod() && null != cmd.getMaxTrackingPeriod()){
                 RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
                 Long startTime = cmd.getMinTrackingPeriod();
                 Long endTime = cmd.getMaxTrackingPeriod();
                 rf.gte(new Timestamp(startTime));
                 rf.lte(new Timestamp(endTime));
-                fb = FilterBuilders.andFilter(fb, rf);
+                rfbt2 = FilterBuilders.orFilter(fb, rf);
             }else if(null != cmd.getMinTrackingPeriod() && null == cmd.getMaxTrackingPeriod()){
                 RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
                 Long startTime = cmd.getMinTrackingPeriod();
                 rf.gte(startTime);
-                fb = FilterBuilders.andFilter(fb, rf);
+                rfbt2 = FilterBuilders.andFilter(fb, rf);
             }else{
                 RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
                 Long endTime = cmd.getMaxTrackingPeriod();
                 rf.lte(endTime);
-                fb = FilterBuilders.andFilter(fb, rf);
+                rfbt2 = FilterBuilders.andFilter(fb, rf);
             }
-        }
+            rfbt1 = FilterBuilders.orFilter(rfbt1, rfbt2);
+            fb = FilterBuilders.andFilter(fb, rfbt1);
+        }*/
+
+
+
 
         if(null != cmd.getRequirementMinArea() || null != cmd.getRequirementMaxArea()){
             if(null != cmd.getRequirementMinArea() && null != cmd.getRequirementMaxArea()){
