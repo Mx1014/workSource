@@ -4,7 +4,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.rentalv2.*;
+import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.RuntimeErrorException;
@@ -25,6 +27,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +43,8 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
     private Rentalv2Provider rentalv2Provider;
     @Autowired
     private Rentalv2Service rentalv2Service;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
 
     private ThreadLocal<SimpleDateFormat> datetimeSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
@@ -55,6 +60,18 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
     @Override
     public void updateRentalResource(String resourceJson) {
 
+    }
+
+    @Override
+    public void buildDefaultRule(AddDefaultRuleAdminCommand addCmd) {
+        addCmd.setPriceRules(rentalCommonService.buildDefaultPriceRule(Collections.singletonList(RentalType.HOUR.getCode())));
+        addCmd.setRentalTypes(Collections.singletonList(RentalType.HOUR.getCode()));
+        //设置按小时模式 每天开放时间
+        TimeIntervalDTO timeIntervalDTO = new TimeIntervalDTO();
+        timeIntervalDTO.setTimeStep(0.5D);
+        timeIntervalDTO.setBeginTime(8D);
+        timeIntervalDTO.setEndTime(22D);
+        addCmd.setTimeIntervals(Collections.singletonList(timeIntervalDTO));
     }
 
     @Override

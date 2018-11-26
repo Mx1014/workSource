@@ -717,14 +717,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//设置关闭日期
 		addCmd.setCloseDates(null);
 
-		addCmd.setPriceRules(buildDefaultPriceRule(Collections.singletonList(RentalType.HOUR.getCode())));
-		addCmd.setRentalTypes(Collections.singletonList(RentalType.HOUR.getCode()));
-		//设置按小时模式 每天开放时间
-		TimeIntervalDTO timeIntervalDTO = new TimeIntervalDTO();
-		timeIntervalDTO.setTimeStep(0.5D);
-		timeIntervalDTO.setBeginTime(8D);
-		timeIntervalDTO.setEndTime(22D);
-		addCmd.setTimeIntervals(Collections.singletonList(timeIntervalDTO));
+		RentalResourceHandler handler = rentalCommonService.getRentalResourceHandler(resourceType);
+		handler.buildDefaultRule(addCmd);
 
 		addCmd.setRefundStrategy(RentalOrderStrategy.CUSTOM.getCode());
 		addCmd.setRefundStrategies(createRefundDefaultRules());
@@ -923,12 +917,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			cmd.setRentalStartTimeFlag(NormalFlag.NONEED.getCode());
 		}
 		if (NormalFlag.NONEED.getCode() == cmd.getNeedPay()) {
-			cmd.setPriceRules(buildDefaultPriceRule(cmd.getRentalTypes()));
+			cmd.setPriceRules(rentalCommonService.buildDefaultPriceRule(cmd.getRentalTypes()));
 		}
 
 		//用来记录rentalTypes
 		if (NormalFlag.NONEED.getCode() == cmd.getNeedPay()) {
-			cmd.setPriceRules(buildDefaultPriceRule(cmd.getRentalTypes()));
+			cmd.setPriceRules(rentalCommonService.buildDefaultPriceRule(cmd.getRentalTypes()));
 		}
 
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
@@ -3399,39 +3393,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		});
 	}
 
-	private List<PriceRuleDTO> buildDefaultPriceRule(List<Byte> rentalTypes) {
-		List<PriceRuleDTO> priceRules = new ArrayList<>();
-		rentalTypes.forEach(r -> {
-			priceRules.add(createInitPriceRuleDTO(r));
-		});
 
-		return priceRules;
-	}
-
-	private PriceRuleDTO createInitPriceRuleDTO(Byte rentalType) {
-		PriceRuleDTO rule = new PriceRuleDTO();
-		rule.setRentalType(rentalType);
-		rule.setPriceType(RentalPriceType.LINEARITY.getCode());
-		rule.setUserPriceType(RentalUserPriceType.UNIFICATION.getCode());
-		rule.setInitiatePrice(new BigDecimal(0));
-		rule.setWorkdayPrice(new BigDecimal(0));
-
-		//设置类型价格
-		rule.setClassifications(new ArrayList<>());
-		RentalPriceClassificationDTO classification = new RentalPriceClassificationDTO();
-		classification.setWorkdayPrice(new BigDecimal(0));
-		classification.setInitiatePrice(new BigDecimal(0));
-		classification.setUserPriceType(RentalUserPriceType.USER_TYPE.getCode());
-		classification.setClassification(SceneType.ENTERPRISE.getCode());
-		rule.getClassifications().add(classification);
-		classification = ConvertHelper.convert(classification,RentalPriceClassificationDTO.class);
-		classification.setClassification(SceneType.PM_ADMIN.getCode());
-		rule.getClassifications().add(classification);
-		classification = ConvertHelper.convert(classification,RentalPriceClassificationDTO.class);
-		classification.setClassification(SceneType.PARK_TOURIST.getCode());
-		rule.getClassifications().add(classification);
-		return rule;
-	}
 
 	/**
 	 * 取某个场所,某段时间的单元格
@@ -7291,43 +7253,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return ConvertHelper.convert(this.rentalv2Provider.findRentalResourceTypeById(cmd.getId()), ResourceTypeDTO.class);
 	}
 
-	//	@Override
-//	public void createResourceType(CreateResourceTypeCommand cmd) {
-//		cmd.setStatus(ResourceTypeStatus.DISABLE.getCode());
-//		RentalResourceType rsType = ConvertHelper.convert(cmd, RentalResourceType.class);
-//		this.rentalv2Provider.createRentalResourceType(rsType);
-//
-//	}
-//
-//	@Override
-//	public void deleteResourceType(DeleteResourceTypeCommand cmd) {
-//		// TODO 图标也要删除
-//		this.rentalv2Provider.deleteRentalResourceType(cmd.getId());
-//
-//	}
-//
-//	@Override
-//	public void updateResourceType(UpdateResourceTypeCommand cmd) {
-//		//  更新type不更新status
-//		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(cmd.getId());
-//		rsType.setIconUri(cmd.getIconUri());
-//		rsType.setName(cmd.getName());
-//		rsType.setPageType(cmd.getPageType());
-//		this.rentalv2Provider.updateRentalResourceType(rsType);
-//	}
-
-//	@Override
-//	public void closeResourceType(CloseResourceTypeCommand cmd) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void openResourceType(OpenResourceTypeCommand cmd) {
-//		// TODO Auto-generated method stub
-//
-//	}
-
 	@Override
 	public void deleteResource(DeleteResourceCommand cmd) {
 
@@ -7606,7 +7531,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			//先删除后添加
 			List<Rentalv2PriceRule> prices = rentalv2PriceRuleProvider.listPriceRuleByOwner(rule.getResourceType(), priceRuleType, id);
 			if (prices.isEmpty()) {
-				List<PriceRuleDTO> priceRules = buildDefaultPriceRule(cmd.getRentalTypes());
+				List<PriceRuleDTO> priceRules = rentalCommonService.buildDefaultPriceRule(cmd.getRentalTypes());
 				rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(rule.getResourceType(), priceRuleType, id);
 				createPriceRules(rule.getResourceType(), PriceRuleType.fromCode(priceRuleType), id, priceRules);
 			} else {
@@ -7620,7 +7545,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						Rentalv2PriceRule temp = optional.get();
 						priceRules.add(convert(temp));
 					} else {
-						priceRules.add(createInitPriceRuleDTO(r));
+						priceRules.add(rentalCommonService.createInitPriceRuleDTO(r));
 					}
 				});
 				rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(rule.getResourceType(), priceRuleType, id);
@@ -7649,7 +7574,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		QueryDefaultRuleAdminCommand queryRuleCmd = ConvertHelper.convert(cmd, QueryDefaultRuleAdminCommand.class);
 
 		QueryDefaultRuleAdminResponse queryRule = queryDefaultRule(queryRuleCmd);
-		return convertResourceTimeRuleDTO(queryRule, cmd.getSourceType());
+		return convertResourceTimeRuleDTO(queryRule);
 
 	}
 
@@ -7675,7 +7600,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return queryRule;
 	}
 
-	private ResourceTimeRuleDTO convertResourceTimeRuleDTO(QueryDefaultRuleAdminResponse rule, String sourceType) {
+	private ResourceTimeRuleDTO convertResourceTimeRuleDTO(QueryDefaultRuleAdminResponse rule) {
 		ResourceTimeRuleDTO dto = ConvertHelper.convert(rule, ResourceTimeRuleDTO.class);
 
 		return dto;

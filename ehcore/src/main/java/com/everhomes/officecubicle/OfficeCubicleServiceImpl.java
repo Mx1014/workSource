@@ -8,27 +8,47 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.URL;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
 import com.alipay.api.domain.CardBinVO;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rentalv2.RentalDefaultRule;
+import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rentalv2.RentalOrder;
+import com.everhomes.rentalv2.RentalOrderHandler;
+import com.everhomes.rentalv2.RentalResource;
+import com.everhomes.rentalv2.Rentalv2PriceRule;
+import com.everhomes.rentalv2.Rentalv2PriceRuleProvider;
+import com.everhomes.rentalv2.job.RentalMessageJob;
+import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityType;
@@ -36,11 +56,37 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.general.order.CreateOrderBaseInfo;
 import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.promotion.merchant.GetPayUserByMerchantIdCommand;
+import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
+import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
+import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
+import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUserIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.GetPayerInfoByMerchantIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
+import com.everhomes.rest.promotion.order.BusinessPayerType;
+import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
+import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
+import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
+import com.everhomes.rest.rentalv2.PriceRuleType;
+import com.everhomes.rest.rentalv2.RentalV2ResourceType;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceRentalRuleCommand;
 import com.everhomes.util.*;
+
+import net.greghaines.jesque.Job;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -50,7 +96,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tools.ant.taskdefs.Get;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
@@ -65,7 +114,18 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.parking.ParkingBusinessPayeeAccount;
+import com.everhomes.parking.ParkingBusinessPayeeAccountProvider;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.PaymentType;
+import com.everhomes.paySDK.PaySettings;
+import com.everhomes.paySDK.PayUtil;
+import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -73,8 +133,13 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.server.schema.tables.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleAttachments;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -96,6 +161,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static final String BIZ_ACCOUNT_PRE = "NS";//账号前缀
+	public static final String BIZ_ORDER_NUM_SPILT = "_";//业务订单分隔符
+	@Value("${server.contextPath:}")
+    private String contextPath;
 	final String downloadDir = "\\download\\";
 	@Autowired
 	ContentServerService contentServerService;
@@ -129,6 +198,14 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Autowired private CommunityProvider communityProvider;
 
+	@Autowired
+	public OfficeCubiclePayeeAccountProvider officeCubiclePayeeAccountProvider;
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	@Autowired
+	protected GeneralOrderService orderService;
+	@Autowired
+	public Rentalv2PriceRuleProvider rentalv2PriceRuleProvider;
 	private Integer getNamespaceId(Integer namespaceId){
 		if(namespaceId!=null){
 			return namespaceId;
@@ -255,8 +332,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setCreatorUid(UserContext.current().getUser().getId());
 			this.officeCubicleProvider.createSpace(space);
-			if (null != cmd.getAttachments())
-				cmd.getAttachments().forEach((dto) -> {
+			if (null != cmd.getSpaceAttachments())
+				cmd.getSpaceAttachments().forEach((dto) -> {
+					this.saveAttachment(dto, space.getId());
+				});
+			if (null != cmd.getShortRentAttachments())
+				cmd.getShortRentAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId());
 				});
 			cmd.getCategories().forEach((dto) -> {
@@ -308,8 +389,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			this.officeCubicleProvider.updateSpace(space);
 			// TODO:删除附件唐彤没有提供
 			this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId());
-			if (null != cmd.getAttachments()) {
-				cmd.getAttachments().forEach((dto) -> {
+			if (null != cmd.getSpaceAttachments()) {
+				cmd.getSpaceAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId());
 				});
 			}
@@ -605,7 +686,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			FlowCase flowCase = createFlowCase(order, flow, flowCaseId);
 			return flowCase;
 		});
-
 		sendMessage(space,order);
 		return new AddSpaceOrderResponse(flowCaseId);
 	}
@@ -753,6 +833,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		return dto;
 	}
 
+	
 	@Override
 	public void deleteUserSpaceOrder(DeleteUserSpaceOrderCommand cmd) {
 		OfficeCubicleOrder order = this.officeCubicleProvider.getOrderById(cmd.getOrderId());
@@ -785,6 +866,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		});
 
 		return response;
+	}
+	
+	@Override
+	public ListRentCubicleResponse listRentCubicle(ListRentCubicleCommand cmd){
+		return null;
 	}
 	
 	@Override
@@ -1126,5 +1212,424 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public Byte getCurrentProjectOnlyFlag(GetCurrentProjectOnlyFlagCommand cmd) {
 		String currentProjectOnly = configurationProvider.getValue(cmd.getNamespaceId(),"officecubicle.currentProjectOnly","0");
 		return Byte.valueOf(currentProjectOnly);
+	}
+	
+	@Override
+	public void addCubicle(AddCubicleAdminCommand cmd) {
+		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040410L, cmd.getAppId(), null, cmd.getCurrentProjectId());//资源管理权限
+		}
+
+		this.dbProvider.execute((TransactionStatus status) -> {
+			OfficeCubicleStation station = ConvertHelper.convert(cmd, OfficeCubicleStation.class);
+
+			officeCubicleProvider.createCubicleSite(station);
+
+			return null;
+		});
+	}
+	
+	@Override
+	public void addRoom(AddRoomAdminCommand cmd) {
+		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040410L, cmd.getAppId(), null, cmd.getCurrentProjectId());//资源管理权限
+		}
+
+		this.dbProvider.execute((TransactionStatus status) -> {
+			OfficeCubicleRoom room = ConvertHelper.convert(cmd, OfficeCubicleRoom.class);
+
+			officeCubicleProvider.createCubicleRoom(room);
+
+			return null;
+		});
+	}
+	
+	
+	@Override
+	public void updateRoom(AddRoomAdminCommand cmd) {
+		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040410L, cmd.getAppId(), null, cmd.getCurrentProjectId());//资源管理权限
+		}
+
+		this.dbProvider.execute((TransactionStatus status) -> {
+			OfficeCubicleRoom room = ConvertHelper.convert(cmd, OfficeCubicleRoom.class);
+
+			officeCubicleProvider.updateRoom(room);
+
+			return null;
+		});
+	}
+	
+	@Override
+	public CreateOfficeCubicleOrderResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd){
+		OfficeCubicleRentOrder order = ConvertHelper.convert(cmd, OfficeCubicleRentOrder.class);
+		this.dbProvider.execute((TransactionStatus status) -> {
+			officeCubicleProvider.createCubicleRentOrder(order);
+			return null;
+		});
+		List<OfficeCubicleStationRent> stationRent = 
+				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(), cmd.getRentType(), cmd.getStationType());
+		List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSpaceId());
+		Integer stationNums = station.size();
+		
+		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getId()).enter(()-> {
+			if (stationNums<(stationRent.size()+cmd.getRentCount())){
+				
+			} else {
+				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
+				rent.setOrderId(order.getId());
+				for(int i=0;i<= cmd.getRentCount() ;i++){
+					officeCubicleProvider.createCubicleStationRent(rent);
+				}
+			}
+			return null;
+		});
+		User user = UserContext.current().getUser();
+		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
+		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
+		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+		List<OfficeCubiclePayeeAccount> payeeAccounts = officeCubiclePayeeAccountProvider.findRepeatOfficeCubiclePayeeAccounts(null, UserContext.getCurrentNamespaceId(),
+				cmd.getOwnerType(), cmd.getOwnerId(),cmd.getSpaceId());
+		if(payeeAccounts==null || payeeAccounts.size()==0){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_NO_PAYEE_ACCOUNT,
+					"");
+		}
+		String extendInfo = "工位预定订单";
+		//根据merchantId获取payeeId
+		GetPayUserByMerchantIdCommand getPayUserByMerchantIdCommand = new GetPayUserByMerchantIdCommand();
+		getPayUserByMerchantIdCommand.setMerchantId(payeeAccounts.get(0).getPayeeId());
+		GetPayerInfoByMerchantIdRestResponse getPayerInfoByMerchantIdRestResponse = orderService.getPayerInfoByMerchantId(getPayUserByMerchantIdCommand);
+		createOrderCommand.setAccountCode(sNamespaceId);
+		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.OFFICE_CUBICLE.getPycode(),order.getId()));
+		createOrderCommand.setPayeeUserId(getPayerInfoByMerchantIdRestResponse.getResponse().getId());
+		List<Rentalv2PriceRule> priceRule = rentalv2PriceRuleProvider.listPriceRuleByOwner("station_booking", PriceRuleType.RESOURCE.getCode(), cmd.getSpaceId());
+		createOrderCommand.setAmount(priceRule.get(0).getApprovingUserWorkdayPrice().longValue());
+		createOrderCommand.setExtendInfo(extendInfo);
+		createOrderCommand.setGoodsName(extendInfo);
+        String homeurl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+		String callbackurl = homeurl + contextPath + configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"officecubicle.pay.callBackUrl", "/officecubicle/payNotify");
+		createOrderCommand.setBackUrl(callbackurl);
+		createOrderCommand.setSourceType(1);
+		if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.WECHAT_JS_PAY.getCode()) {
+			createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			Map<String, String> flattenMap = new HashMap<>();
+			flattenMap.put("acct",user.getNamespaceUserToken());
+//			String vspCusid = configProvider.getValue(UserContext.getCurrentNamespaceId(), "tempVspCusid", "550584053111NAJ");
+//			flattenMap.put("vspCusid",vspCusid);
+			flattenMap.put("payType","no_credit");
+			createOrderCommand.setPaymentParams(flattenMap);
+			createOrderCommand.setCommitFlag(1);
+			createOrderCommand.setOrderType(3);
+			createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId());
+		}
+		createOrderCommand.setOrderRemark1("工位预定订单");
+		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
+		CreatePurchaseOrderCommand createPurchaseOrderCommand = convertToGorderCommand(createOrderCommand);
+		CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createPurchaseOrderCommand);//统一订单
+		if(!checkOrderRestResponseIsSuccess(createOrderResp)){
+			LOGGER.info("purchaseOrderRestResponse "+createOrderResp);
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.PARAMTER_UNUSUAL,
+					"preorder failed "+StringHelper.toJsonString(createOrderResp));
+		}
+		PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+
+		OrderCommandResponse response = orderCommandResponse.getPayResponse();
+		order.setBizOrderNo(response.getBizOrderNum());
+		officeCubicleProvider.updateCubicleRentOrder(order);
+		return null;
+		
+	}
+	
+	@Override
+	public void payNotify (MerchantPaymentNotificationCommand cmd){
+
+		if(!PayUtil.verifyCallbackSignature(cmd)){
+			LOGGER.error("Failed to verify pay-callback signature, appKey={}, signature={}", 
+					PaySettings.getAppKey(), cmd.getSignature());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"sign verify faild");
+		}
+		// * RAW(0)：
+		// * SUCCESS(1)：支付成功
+		// * PENDING(2)：挂起
+		// * ERROR(3)：错误
+		if(cmd.getPaymentStatus()== null || 1!=cmd.getPaymentStatus()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"invaild paymentstatus,"+cmd.getPaymentStatus());
+		}//检查状态
+
+		//检查orderType
+		//RECHARGE(1), WITHDRAW(2), PURCHACE(3), REFUND(4);
+		//充值，体现，支付，退款
+		if(cmd.getOrderType()==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"invaild ordertype,"+cmd.getOrderType());
+		}
+		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderByBizOrderNum(cmd.getBizOrderNum());
+		if(cmd.getOrderType() == 3) {
+			officeCubicleProvider.updateCubicleRentOrder(order);
+		}
+		else if(cmd.getOrderType() == 4){
+			officeCubicleProvider.updateCubicleRentOrder(order);
+		}
+	}
+	private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+		if(response != null && response.getErrorCode() != null
+				&& (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+			return true;
+		return false;
+	}
+	private CreatePurchaseOrderCommand convertToGorderCommand(CreateOrderCommand cmd){
+		CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
+		//PaymentParamsDTO转为Map
+
+
+		preOrderCommand.setAmount(cmd.getAmount());
+
+		preOrderCommand.setAccountCode(cmd.getAccountCode());
+		preOrderCommand.setClientAppName(cmd.getClientAppName());
+
+		preOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+		// 移到统一订单系统完成
+		// String BizOrderNum  = getOrderNum(orderId, OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+		// preOrderCommand.setBizOrderNum(BizOrderNum);
+		BusinessPayerType payerType = BusinessPayerType.USER;
+		preOrderCommand.setBusinessPayerType(payerType.getCode());
+		preOrderCommand.setBusinessPayerId(String.valueOf(UserContext.currentUserId()));
+		String businessPayerParams = getBusinessPayerParams(UserContext.getCurrentNamespaceId());
+		preOrderCommand.setBusinessPayerParams(businessPayerParams);
+
+		// preOrderCommand.setPaymentPayeeType(billGroup.getBizPayeeType()); 不填会不会有问题?
+		preOrderCommand.setPaymentPayeeId(cmd.getPayeeUserId());
+
+		preOrderCommand.setExtendInfo(cmd.getExtendInfo());
+		preOrderCommand.setPaymentParams(cmd.getPaymentParams());
+		preOrderCommand.setPaymentType(cmd.getPaymentType());
+		preOrderCommand.setCommitFlag(cmd.getCommitFlag());
+		//preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
+		preOrderCommand.setCallbackUrl(cmd.getBackUrl());
+
+		preOrderCommand.setGoodsName(cmd.getExtendInfo());
+		preOrderCommand.setGoodsDescription(null);
+		preOrderCommand.setIndustryName(null);
+		preOrderCommand.setIndustryCode(null);
+		preOrderCommand.setSourceType(cmd.getSourceType());
+		preOrderCommand.setOrderRemark1(cmd.getOrderRemark1());
+		//preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));
+		preOrderCommand.setOrderRemark3(cmd.getOrderRemark3());
+		preOrderCommand.setOrderRemark4(null);
+		preOrderCommand.setOrderRemark5(null);
+		String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
+		preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+
+		return preOrderCommand;
+	}
+	private String getBusinessPayerParams(Integer namespaceId) {
+
+		Long businessPayerId = UserContext.currentUserId();
+
+
+		UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, namespaceId);
+		String buyerPhone = null;
+		if(buyerIdentifier != null) {
+			buyerPhone = buyerIdentifier.getIdentifierToken();
+		}
+		// 找不到手机号则默认一个
+		if(buyerPhone == null || buyerPhone.trim().length() == 0) {
+			buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
+		}
+
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("businessPayerPhone", buyerPhone);
+		return StringHelper.toJsonString(map);
+	}
+	private String generateBizOrderNum(String sNamespaceId, String pyCode, Long orderNo) {
+		return sNamespaceId+BIZ_ORDER_NUM_SPILT+pyCode+BIZ_ORDER_NUM_SPILT+orderNo;
+	}
+	
+	@Override
+	public CreateCubicleOrderBackgroundResponse createCubicleOrderBackground(CreateCubicleOrderBackgroundCommand cmd){
+		List<OfficeCubicleStationRent> stationRent = 
+				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(), cmd.getRentType(), cmd.getStationType());
+		List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSpaceId());
+		Integer stationNums = station.size();
+		OfficeCubicleRentOrder order = ConvertHelper.convert(cmd, OfficeCubicleRentOrder.class);
+		this.dbProvider.execute((TransactionStatus status) -> {
+			officeCubicleProvider.createCubicleRentOrder(order);
+			return null;
+		});
+		
+		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getId()).enter(()-> {
+			if (stationNums<(stationRent.size()+cmd.getRentCount())){
+				
+			} else {
+				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
+				rent.setOrderId(order.getId());
+				for(int i=0;i<= cmd.getRentCount() ;i++){
+					officeCubicleProvider.createCubicleStationRent(rent);
+				}
+			}
+			return null;
+		});
+
+		return null;
+		
+	}
+	
+	@Override
+	public OfficeCubicleDTO getCubicleDetail(GetCubicleDetailCommand cmd) {
+		OfficeCubicleSpace space = this.officeCubicleProvider.getSpaceById(cmd.getSpaceId());
+		OfficeCubicleDTO dto = new OfficeCubicleDTO();
+		dto.setAddress(space.getAddress());
+		dto.setSpaceName(space.getName());
+		dto.setContactPhone(space.getContactPhone());
+		return dto;
+	}
+	
+	@Override
+	public ListOfficeCubiclePayeeAccountResponse listOfficeCubiclPayeeAccount(ListOfficeCubiclePayeeAccountCommand cmd) {
+		List<OfficeCubiclePayeeAccount> accounts = officeCubiclePayeeAccountProvider
+				.listOfficeCubiclePayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getSpaceId());
+		if(accounts==null || accounts.size()==0){
+			return new ListOfficeCubiclePayeeAccountResponse();
+		}
+		
+		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+        cmd2.setIds(accounts.stream().map(r -> r.getMerchantId()).collect(Collectors.toList()));
+        ListPayUsersByMerchantIdsRestResponse restResponse = orderService.listPayUsersByMerchantIds(cmd2);
+        List<PayUserDTO> payUserDTOs = restResponse.getResponse();
+//		List<PayUserDTO> payUserDTOS = sdkPayService.listPayUsersByIds(accounts.stream().map(r -> r.getPayeeId()).collect(Collectors.toList()));
+		Map<Long,PayUserDTO> map = payUserDTOs.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
+		ListOfficeCubiclePayeeAccountResponse response = new ListOfficeCubiclePayeeAccountResponse();
+		response.setAccountList(accounts.stream().map(r->{
+			OfficeCubiclePayeeAccountDTO convert = ConvertHelper.convert(r, OfficeCubiclePayeeAccountDTO.class);
+			PayUserDTO payUserDTO = map.get(convert.getPayeeId());
+			if(payUserDTO!=null){
+				convert.setPayeeUserType(payUserDTO.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());
+				convert.setPayeeUserName(payUserDTO.getRemark());
+				convert.setPayeeUserAliasName(payUserDTO.getUserAliasName());
+				convert.setPayeeAccountCode(payUserDTO.getAccountCode());
+				convert.setPayeeRegisterStatus(payUserDTO.getRegisterStatus()+1);//由，0非认证，1认证，变为 1，非认证，2，审核通过
+				convert.setPayeeRemark(payUserDTO.getRemark());
+				convert.setMerchantId(payUserDTO.getId());
+			}
+			return convert;
+		}).collect(Collectors.toList()));
+		return response;
+	}
+	
+	@Override
+	public List<ListOfficeCubicleAccountDTO> listOfficeCubicleAccount(ListOfficeCubicleAccountCommand cmd) {
+		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getCommunityId() + ""));
+		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
+		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
+		GetPayUserListByMerchantCommand cmd2 = new GetPayUserListByMerchantCommand();
+		cmd2.setUserId(key);
+		cmd2.setTag1(arrayList);
+		GetMerchantListByPayUserIdRestResponse resp = orderService.getMerchantListByPayUserId(cmd2);
+		//List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
+		if(null == resp || null == resp.getResponse()){
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
+		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
+		return payUserList.stream().map(r->{
+			ListOfficeCubicleAccountDTO dto = new ListOfficeCubicleAccountDTO();
+			dto.setAccountId(r.getId());
+			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+			dto.setAccountName(r.getRemark());
+			dto.setAccountAliasName(r.getUserAliasName());
+	        if (r.getRegisterStatus() != null && r.getRegisterStatus().intValue() == 1) {
+	            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+	        } else {
+	            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+	        }
+			return dto;
+		}).collect(Collectors.toList());
+	}
+	
+	@Override
+	public void createOrUpdateOfficeCubiclePayeeAccount(CreateOrUpdateOfficeCubiclePayeeAccountCommand cmd) {
+		List<OfficeCubiclePayeeAccount> accounts = officeCubiclePayeeAccountProvider.findRepeatOfficeCubiclePayeeAccounts
+				(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getSpaceId());
+		if(accounts!=null && accounts.size()>0){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_REPEATE_ACCOUNT,
+					"repeat account");
+		}
+		if(cmd.getId()!=null){
+			OfficeCubiclePayeeAccount oldPayeeAccount = officeCubiclePayeeAccountProvider.findOfficeCubiclePayeeAccountById(cmd.getId());
+			if(oldPayeeAccount == null){
+				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.PARAMTER_LOSE,
+						"unknown payaccountid = "+cmd.getId());
+			}
+			OfficeCubiclePayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,OfficeCubiclePayeeAccount.class);
+			newPayeeAccount.setCreateTime(oldPayeeAccount.getCreateTime());
+			newPayeeAccount.setCreatorUid(oldPayeeAccount.getCreatorUid());
+			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
+			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
+			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
+			newPayeeAccount.setMerchantId(oldPayeeAccount.getMerchantId());
+			newPayeeAccount.setPayeeId(oldPayeeAccount.getMerchantId());
+			officeCubiclePayeeAccountProvider.updateOfficeCubiclePayeeAccount(newPayeeAccount);
+		}else{
+			OfficeCubiclePayeeAccount newPayeeAccount = new OfficeCubiclePayeeAccount();
+			newPayeeAccount.setMerchantId(cmd.getPayeeId());
+			newPayeeAccount.setNamespaceId(cmd.getNamespaceId());
+			newPayeeAccount.setOwnerId(cmd.getOwnerId());
+			newPayeeAccount.setOwnerType(cmd.getOwnerType());
+			newPayeeAccount.setSpaceId(cmd.getSpaceId());
+			newPayeeAccount.setPayeeUserType(cmd.getPayeeUserType());
+			newPayeeAccount.setStatus((byte)2);
+			newPayeeAccount.setPayeeId(cmd.getPayeeId());
+			
+			officeCubiclePayeeAccountProvider.createOfficeCubiclePayeeAccount(newPayeeAccount);
+		}
+	}
+	
+
+	@Override
+	public ListOfficeCubicleStatusResponse listOfficeCubicleStatus(ListOfficeCubicleStatusCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public SearchCubicleOrdersResponse searchCubicleOrders(SearchCubicleOrdersCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040220L, cmd.getAppId(), null,cmd.getCurrentProjectId());//预定详情权限
+		}
+
+		SearchCubicleOrdersResponse response = new SearchCubicleOrdersResponse();
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+
+		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginDate(), cmd.getEndDate(),
+				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),cmd.getPaidType(),cmd.getPaidMode(),cmd.getRequestType(),cmd.getRentType(), cmd.getOrderStatus());
+		if (null == orders)
+			return response;
+		Long nextPageAnchor = null;
+		if (orders != null && orders.size() > pageSize) {
+			orders.remove(orders.size() - 1);
+			nextPageAnchor = orders.get(orders.size() - 1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setOrders(new ArrayList<OfficeRentOrderDTO>());
+		orders.forEach((other) -> {
+			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
+			response.getOrders().add(dto);
+		});
+
+		return response;
+	}
+	
+	@Override
+	public GetOfficeCubicleRentOrderResponse getOfficeCubicleRentOrder(GetOfficeCubicleRentOrderCommand cmd){
+		GetOfficeCubicleRentOrderResponse response = new GetOfficeCubicleRentOrderResponse();
+		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderById(cmd.getOrderId());
+		OfficeRentOrderDTO dto = ConvertHelper.convert(order, OfficeRentOrderDTO.class);
+		response.setOrders(dto);
+		return response;
 	}
 }

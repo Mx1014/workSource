@@ -179,7 +179,10 @@ public enum CoordinationLocks {
     CHECK_ENTERPRISE_PAYMENT_STATUS("check_enterprise_payment_status"),
 
     SYNC_USER_MODIFY("sync_user_modify"),
-    SYNC_USER_IDEN_MODIFY("sync_user_iden_modify");
+    SYNC_USER_IDEN_MODIFY("sync_user_iden_modify"),
+	
+	OFFICE_CUBICLE_STATION_RENT("office_cubicle_station_rent");
+	
 
     private String code;
 

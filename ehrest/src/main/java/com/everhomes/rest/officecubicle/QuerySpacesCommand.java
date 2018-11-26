@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>provinceName: 省名称</li>
  * <li>cityName: 城市名</li>
  * <li>pageAnchor: 锚点</li>
+ * <li>rentType:</li>
  * <li>pageSize: 一页的大小</li> 
  * </ul>
  */
@@ -19,11 +20,21 @@ public class QuerySpacesCommand {
 	private Long ownerId;
 	private String provinceName;
 	private String cityName;
-	
+	private Byte rentType;
 	private Long pageAnchor;
     
 	private Integer pageSize;
  
+	public Byte getRentType() {
+		return rentType;
+	}
+
+
+	public void setRentType(Byte rentType) {
+		this.rentType = rentType;
+	}
+
+
 	public String getOwnerType() {
 		return ownerType;
 	}

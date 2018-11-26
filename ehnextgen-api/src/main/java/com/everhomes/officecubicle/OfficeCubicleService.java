@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
+import com.everhomes.rest.parking.ListPayeeAccountCommand;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 
 public interface OfficeCubicleService {
 
@@ -59,4 +61,33 @@ public interface OfficeCubicleService {
 	Byte getProjectCustomize(GetCustomizeCommand cmd);
 
 	Byte getCurrentProjectOnlyFlag(GetCurrentProjectOnlyFlagCommand cmd);
+
+	void addCubicle(AddCubicleAdminCommand cmd);
+
+	CreateOfficeCubicleOrderResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd);
+
+	OfficeCubicleDTO getCubicleDetail(GetCubicleDetailCommand cmd);
+
+	void createOrUpdateOfficeCubiclePayeeAccount(CreateOrUpdateOfficeCubiclePayeeAccountCommand cmd);
+
+	ListOfficeCubiclePayeeAccountResponse listOfficeCubiclPayeeAccount(ListOfficeCubiclePayeeAccountCommand cmd);
+
+	List<ListOfficeCubicleAccountDTO> listOfficeCubicleAccount(ListOfficeCubicleAccountCommand cmd);
+
+	SearchCubicleOrdersResponse searchCubicleOrders(SearchCubicleOrdersCommand cmd);
+
+	CreateCubicleOrderBackgroundResponse createCubicleOrderBackground(CreateCubicleOrderBackgroundCommand cmd);
+
+	void addRoom(AddRoomAdminCommand cmd);
+
+	void updateRoom(AddRoomAdminCommand cmd);
+
+	ListOfficeCubicleStatusResponse listOfficeCubicleStatus(ListOfficeCubicleStatusCommand cmd);
+
+	void payNotify(MerchantPaymentNotificationCommand cmd);
+
+	ListRentCubicleResponse listRentCubicle(ListRentCubicleCommand cmd);
+
+	GetOfficeCubicleRentOrderResponse getOfficeCubicleRentOrder(GetOfficeCubicleRentOrderCommand cmd);
+
 }

@@ -11,6 +11,8 @@ public interface OfficeCubicleErrorCode {
 
 	int ERROR_AlREADY_CUSTOMIZE_CONFIG = 10006;//已经为自定义配置
 	int ERROR_AlREADY_GENERAL_CONFIG = 10007;//已经为通用配置
-
-
+    int PARAMTER_UNUSUAL = 10008;
+    int ERROR_NO_PAYEE_ACCOUNT= 10009; //  未设置收款方账号
+    int ERROR_REPEATE_ACCOUNT= 10010; //  重复账号
+    int PARAMTER_LOSE = 10011;
 }
