@@ -246,6 +246,14 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '106', 'zh_CN', '下周六');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '107', 'zh_CN', '下周日');
 
+-- AUTHOR: xq.tian
+-- REMARK: 新增跟踪变量
+SET @eh_flow_variables_id = (SELECT MAX(id) FROM eh_flow_variables);
+INSERT INTO eh_flow_variables (id, namespace_id, owner_id, owner_type, module_id, module_type, name, label, var_type, script_type, script_cls, status)
+  VALUES ((@eh_flow_variables_id := @eh_flow_variables_id + 1), 0, 0, '', 0, '', 'text_button_tracker_input_content', '文本备注内容', 'text_tracker', 'bean_id', 'flow-variable-text-button-msg-user-input-content', 1);
+
+update eh_locale_strings set text='当前流程未经过预设待驳回节点。' where scope='flow' and code='100015';
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
