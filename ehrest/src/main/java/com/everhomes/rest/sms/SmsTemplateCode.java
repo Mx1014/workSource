@@ -186,7 +186,7 @@ public interface SmsTemplateCode {
     int RENTAL_CANCEL_ORDER_NO_REFUND = 85;//尊敬的用户，您预约的${resourceName}(${useDetail})已成功取消，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。
 
     int RENTAL_CANCEL_ORDER = 86;//尊敬的用户，您预约的${resourceName}(${useDetail})已成功取消，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。
-    
+
     //服务联盟
     int SERVICE_ALLIANCE_NEW_APPLY_TO_MANAGE = 87; //服务联盟V3.7.1 - 【app名称】$发起人姓名$（$发起人手机号$）提交了$服务名称$申请，请及时处理
     int SERVICE_ALLIANCE_NEW_APPLY_TO_USER = 88; //服务联盟V3.7.1 - 【app名称】你提交的$服务名称$申请正在处理，可在app“我”-“我的申请”中查看处理进度
