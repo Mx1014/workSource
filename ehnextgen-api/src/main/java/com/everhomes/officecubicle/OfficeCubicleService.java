@@ -90,4 +90,14 @@ public interface OfficeCubicleService {
 
 	GetOfficeCubicleRentOrderResponse getOfficeCubicleRentOrder(GetOfficeCubicleRentOrderCommand cmd);
 
+	void updateCubicle(AddCubicleAdminCommand cmd);
+
+	void deleteRoom(DeleteRoomAdminCommand cmd);
+
+	void deleteCubicle(DeleteCubicleAdminCommand cmd);
+
+	void updateShortRentNums(UpdateShortRentNumsCommand cmd);
+
+	void refundOrder(RefundOrderCommand cmd);
+
 }

@@ -94,6 +94,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tools.ant.taskdefs.Get;
+import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -108,6 +109,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -117,6 +121,7 @@ import com.everhomes.news.AttachmentProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.parking.ParkingBusinessPayeeAccount;
 import com.everhomes.parking.ParkingBusinessPayeeAccountProvider;
+import com.everhomes.parking.ParkingRechargeRate;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.PaymentType;
@@ -136,7 +141,9 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.EhRentalv2DefaultRules;
+import com.everhomes.server.schema.tables.daos.EhParkingRechargeRatesDao;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleAttachments;
+import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
@@ -1244,6 +1251,28 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		});
 	}
 	
+	@Override
+	public void deleteRoom(DeleteRoomAdminCommand cmd){
+		OfficeCubicleRoom room = new OfficeCubicleRoom();
+		officeCubicleProvider.deleteRoom(room);
+	}
+    
+	@Override
+	public void deleteCubicle(DeleteCubicleAdminCommand cmd){
+		OfficeCubicleStation station = new OfficeCubicleStation();
+		officeCubicleProvider.deleteStation(station);
+	}
+	
+	@Override
+	public void updateShortRentNums(UpdateShortRentNumsCommand cmd){
+
+	}
+	
+	
+	@Override
+	public void refundOrder(RefundOrderCommand cmd){
+
+	}
 	
 	@Override
 	public void updateRoom(AddRoomAdminCommand cmd) {
@@ -1255,6 +1284,21 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeCubicleRoom room = ConvertHelper.convert(cmd, OfficeCubicleRoom.class);
 
 			officeCubicleProvider.updateRoom(room);
+
+			return null;
+		});
+	}
+	
+	@Override
+	public void updateCubicle(AddCubicleAdminCommand cmd) {
+		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040410L, cmd.getAppId(), null, cmd.getCurrentProjectId());//资源管理权限
+		}
+
+		this.dbProvider.execute((TransactionStatus status) -> {
+			OfficeCubicleStation station = ConvertHelper.convert(cmd, OfficeCubicleStation.class);
+
+			officeCubicleProvider.updateCubicle(station);
 
 			return null;
 		});

@@ -30,4 +30,5 @@ public interface OfficeCubicleCityProvider {
 	List<OfficeCubicleCity> listOfficeCubicleCityByOwnerId(String ownerType,Long ownerId);
 
 	List<OfficeCubicleCity> listOfficeCubicleCityByOrgId(Long orgId);
+
 }

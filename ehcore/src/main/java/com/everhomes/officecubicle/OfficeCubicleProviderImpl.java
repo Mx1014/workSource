@@ -31,10 +31,12 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOfficeCubicleCategories;
 import com.everhomes.server.schema.tables.EhOfficeCubicleRoom;
+import com.everhomes.server.schema.tables.EhOfficeCubicleStation;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleRentOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleRoomDao;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleSpacesDao;
+import com.everhomes.server.schema.tables.daos.EhOfficeCubicleStationDao;
 import com.everhomes.server.schema.tables.daos.EhRentalv2DefaultRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalv2ResourceTypesDao;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleOrders;
@@ -142,6 +144,16 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		EhOfficeCubicleRoomDao dao = new EhOfficeCubicleRoomDao(context.configuration());
 		dao.update(room);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleRoom.class, room.getId());
+
+	}
+	
+	@Override
+	public void updateCubicle(OfficeCubicleStation station) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleStationDao dao = new EhOfficeCubicleStationDao(context.configuration());
+		dao.update(station);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleRoom.class, station.getId());
 
 	}
 	
@@ -629,4 +641,22 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+    @Override
+    public void deleteRoom(OfficeCubicleRoom room){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhOfficeCubicleRoomDao dao = new EhOfficeCubicleRoomDao(context.configuration());
+    	dao.delete(room);
+    	
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleRoom.class, room.getId());
+    }
+    
+    @Override
+    public void deleteStation(OfficeCubicleStation station){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhOfficeCubicleStationDao dao = new EhOfficeCubicleStationDao(context.configuration());
+    	dao.delete(station);
+    	
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleStation.class, station.getId());
+    }
 }

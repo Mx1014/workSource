@@ -12,7 +12,6 @@ import com.everhomes.util.StringHelper;
  * <li>endDate: 查询结束时间</li>
  * <li>spaceName: 查询空间名</li>
  * <li>reserveKeyword: 查询预订人关键字</li>
- * <li>workFlowStatus: 工作流状态， {@link com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 一页的大小</li> 
  * <li>currentPMId: 当前管理公司ID</li>

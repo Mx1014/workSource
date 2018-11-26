@@ -4,7 +4,13 @@ import java.util.List;
 
 import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.AddCubicleAdminCommand;
+import com.everhomes.rest.officecubicle.admin.AddRoomAdminCommand;
 import com.everhomes.rest.officecubicle.admin.CityDTO;
+import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersCommand;
+import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersResponse;
+import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
+import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,10 +157,212 @@ public class OfficeCubicleController extends ControllerBase {
      * <p>增加工位</p>
      */
     @RequestMapping("addCubicle")
-    @RestReturn(value=OfficeOrderDTO.class ,collection = true)
     public RestResponse addCubicle(AddCubicleAdminCommand cmd) {
     	 this.officeCubicleService.addCubicle(cmd);
     	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/addRoom</b> 
+     * <p>增加办公室</p>
+     */
+    @RequestMapping("addRoom")
+    public RestResponse addRoom(AddRoomAdminCommand cmd) {
+    	 this.officeCubicleService.addRoom(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/deleteRoom</b> 
+     * <p>删除办公室</p>
+     */
+    @RequestMapping("deleteRoom")
+    public RestResponse deleteRoom(DeleteRoomAdminCommand cmd) {
+    	 this.officeCubicleService.deleteRoom(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/deleteCubicle</b> 
+     * <p>删除工位</p>
+     */
+    @RequestMapping("deleteCubicle")
+    public RestResponse deleteCubicle(DeleteCubicleAdminCommand cmd) {
+    	 this.officeCubicleService.deleteCubicle(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/updateShortRentNums</b> 
+     * <p>删除工位</p>
+     */
+    @RequestMapping("updateShortRentNums")
+    public RestResponse updateShortRentNums(UpdateShortRentNumsCommand cmd) {
+    	 this.officeCubicleService.updateShortRentNums(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/updateRoom</b> 
+     * <p>编辑办公室</p>
+     */
+    @RequestMapping("updateRoom")
+    public RestResponse updateRoom(AddRoomAdminCommand cmd) {
+    	 this.officeCubicleService.updateRoom(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/updateCubicle</b> 
+     * <p>编辑工位</p>
+     */
+    @RequestMapping("updateCubicle")
+    public RestResponse updateCubicle(AddCubicleAdminCommand cmd) {
+    	 this.officeCubicleService.updateCubicle(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    
+    /**
+     * <b>URL: /officecubicle/createCubicleGeneralOrder</b> 
+     * <p>客户端创建订单</p>
+     */
+    @RequestMapping("createCubicleGeneralOrder")
+    public RestResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd) {
+    	 this.officeCubicleService.createCubicleGeneralOrder(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/createCubicleOrderBackground</b> 
+     * <p>后台创建订单</p>
+     */
+    @RequestMapping("createCubicleOrderBackground")
+    public RestResponse createCubicleOrderBackground(CreateCubicleOrderBackgroundCommand cmd) {
+    	 this.officeCubicleService.createCubicleOrderBackground(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    
+    /**
+     * <b>URL: /officecubicle/listOfficeCubiclPayeeAccount</b> 
+     * <p>6.获取工位预定收款账户</p>
+     */
+    @RequestMapping("listOfficeCubiclPayeeAccount")
+    public RestResponse listOfficeCubiclPayeeAccount(ListOfficeCubiclePayeeAccountCommand cmd) {
+    	ListOfficeCubiclePayeeAccountResponse resp = new ListOfficeCubiclePayeeAccountResponse();
+    	resp = this.officeCubicleService.listOfficeCubiclPayeeAccount(cmd);
+    	
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/listOfficeCubicleAccount</b> 
+     * <p>从电商处获取账户列表</p>
+     */
+    @RequestMapping("listOfficeCubicleAccount")
+    @RestReturn(value=ListOfficeCubicleAccountDTO.class,collection = true)
+    public RestResponse listOfficeCubicleAccount(ListOfficeCubicleAccountCommand cmd) {
+
+    	List<ListOfficeCubicleAccountDTO> list = this.officeCubicleService.listOfficeCubicleAccount(cmd);
+    	
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    
+    /**
+     * <b>URL: /officecubicle/createOrUpdateOfficeCubiclePayeeAccount</b> 
+     * <p>更新或创建收款账户</p>
+     */
+    @RequestMapping("createOrUpdateOfficeCubiclePayeeAccount")
+    public RestResponse createOrUpdateOfficeCubiclePayeeAccount(CreateOrUpdateOfficeCubiclePayeeAccountCommand cmd) {
+
+    	this.officeCubicleService.createOrUpdateOfficeCubiclePayeeAccount(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/searchCubicleOrders</b> 
+     * <p>搜索订单</p>
+     */
+    @RequestMapping("searchCubicleOrders")
+    @RestReturn(value=SearchCubicleOrdersResponse.class )
+    public RestResponse searchCubicleOrders(SearchCubicleOrdersCommand cmd) {
+
+    	SearchCubicleOrdersResponse resp = this.officeCubicleService.searchCubicleOrders(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/refundOrder</b> 
+     * <p>搜索订单</p>
+     */
+    @RequestMapping("refundOrder")
+    public RestResponse refundOrder(RefundOrderCommand cmd) {
+
+    	this.officeCubicleService.refundOrder(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

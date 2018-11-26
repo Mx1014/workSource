@@ -85,4 +85,10 @@ public interface OfficeCubicleProvider {
 
 	OfficeCubicleRentOrder findOfficeCubicleRentOrderById(Long orderId);
 
+	void updateCubicle(OfficeCubicleStation station);
+
+	void deleteRoom(OfficeCubicleRoom room);
+
+	void deleteStation(OfficeCubicleStation station);
+
 }
