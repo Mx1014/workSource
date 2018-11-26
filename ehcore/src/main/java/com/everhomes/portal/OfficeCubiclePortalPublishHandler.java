@@ -1,13 +1,18 @@
-package com.everhomes.officecubicle;
+package com.everhomes.portal;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.rentalv2.RentalCommonServiceImpl;
+import com.everhomes.rentalv2.RentalResourceType;
+import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.portal.HandlerGetAppInstanceConfigCommand;
 import com.everhomes.rest.portal.HandlerGetItemActionDataCommand;
 import com.everhomes.rest.portal.HandlerProcessInstanceConfigCommand;
 import com.everhomes.rest.portal.HandlerPublishCommand;
+import com.everhomes.rest.rentalv2.RentalV2ResourceType;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +26,10 @@ public class OfficeCubiclePortalPublishHandler implements PortalPublishHandler {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
-
+    @Autowired
+    private Rentalv2Provider rentalv2Provider;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
         if(StringUtils.isNotEmpty(instanceConfig)){
@@ -30,10 +38,24 @@ public class OfficeCubiclePortalPublishHandler implements PortalPublishHandler {
             if(null != currentProjectOnly){
                 configurationProvider.setValue(namespaceId,"officecubicle.currentProjectOnly",String.valueOf(currentProjectOnly));
             }
+            Byte resourceTypeId = jsonObj.getByte("resourceTypeId");
+            if (null == resourceTypeId){
+                RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, appName);
+                jsonObj.put("resourceTypeId", rentalResourceType);
+            }
         }
         return instanceConfig;
     }
-
+    
+    private RentalResourceType createRentalResourceType(Integer namespaceId, String name){
+        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(namespaceId, RentalV2ResourceType.STATION_BOOKING.getCode());
+        if (type != null){ //原来就有了 直接拿过来用 不重新生成
+            return type;
+        }
+        return rentalCommonService.createRentalResourceType(namespaceId,name,(byte)0,
+                (byte)0,RentalV2ResourceType.STATION_BOOKING.getCode(),(byte)1,(byte)0);
+    }
+    
     @Override
     public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         return instanceConfig;
