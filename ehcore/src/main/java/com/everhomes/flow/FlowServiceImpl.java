@@ -3,7 +3,6 @@ package com.everhomes.flow;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -21,21 +20,13 @@ import com.everhomes.flow.nashornfunc.NashornScriptConfigExtractor;
 import com.everhomes.flow.nashornfunc.NashornScriptConfigValidator;
 import com.everhomes.flow.nashornfunc.NashornScriptMappingCall;
 import com.everhomes.flow.nashornfunc.NashornScriptValidator;
-import com.everhomes.flow.node.FlowGraphNodeCondition;
-import com.everhomes.flow.node.FlowGraphNodeEnd;
-import com.everhomes.flow.node.FlowGraphNodeNormal;
-import com.everhomes.flow.node.FlowGraphNodeStart;
-import com.everhomes.flow.node.FlowGraphNodeSubFlow;
+import com.everhomes.flow.node.*;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
-import com.everhomes.gogs.GogsCommit;
-import com.everhomes.gogs.GogsRawFileParam;
-import com.everhomes.gogs.GogsRepo;
-import com.everhomes.gogs.GogsRepoType;
-import com.everhomes.gogs.GogsService;
+import com.everhomes.gogs.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
@@ -60,13 +51,8 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.messaging.RouterMetaObject;
+import com.everhomes.rest.launchpadbase.AppContext;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -85,31 +71,17 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.DateUtils;
-import com.everhomes.util.MD5Utils;
-import com.everhomes.util.RouterBuilder;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.ValidatorUtil;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.everhomes.util.*;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -122,23 +94,13 @@ import java.io.BufferedReader;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class FlowServiceImpl implements FlowService {
@@ -2823,6 +2785,14 @@ public class FlowServiceImpl implements FlowService {
         flowCase.setStartNodeId(snapshotFlow.getStartNode());
         flowCase.setEndNodeId(snapshotFlow.getEndNode());
 
+        // 应用 id 的设置
+        if (flowCaseCmd.getOriginAppId() == null) {
+            AppContext appContext = UserContext.current().getAppContext();
+            if (appContext != null && appContext.getAppId() != null) {
+                // flowCase.setOriginAppId(appContext.getAppId());
+            }
+        }
+
         List<FlowLink> startLink = flowLinkProvider.listFlowLinkByFromNodeId(snapshotFlow.getTopId(), snapshotFlow.getFlowVersion(), flowCase.getStartNodeId());
         if (startLink.size() > 0) {
             flowCase.setStartLinkId(startLink.get(0).getId());
@@ -4757,6 +4727,27 @@ public class FlowServiceImpl implements FlowService {
         return graphDTO;
     }
 
+    @Override
+    public FlowGraphDTO getFlowGraphByFlowVersion(FlowIdVersionCommand cmd) {
+        ValidatorUtil.validate(cmd);
+        Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+        if (flow == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
+                    "flow not exist flowId=%s", cmd.getFlowId());
+        }
+        FlowGraphDTO graphDTO = toFlowGraphDTO(flow ,cmd.getFlowVersion());
+
+        // flow-2.0之前的工作流没有link和lane，兼容一下
+        if (graphDTO.getNodes().size() > 0
+                && graphDTO.getLinks().size() == 0
+                && graphDTO.getLanes().size() == 0) {
+            FlowIdCommand cmd1 = new FlowIdCommand();
+            cmd1.setFlowId(cmd.getFlowId());
+            processStartAndEndNode(cmd1, flow, graphDTO);
+        }
+        return graphDTO;
+    }
+
     private void processStartAndEndNode(FlowIdCommand cmd, Flow flow, FlowGraphDTO graphDTO) {
         dbProvider.execute(status -> {
             List<FlowNodeDTO> nodes = graphDTO.getNodes();
@@ -5520,7 +5511,7 @@ public class FlowServiceImpl implements FlowService {
         FlowScriptType scriptType = FlowScriptType.fromCode(cmd.getScriptType());
         switch (scriptType) {
             case JAVASCRIPT: {
-                // TODO get objects from gogs repo and need commit_id from request, so todo it
+                // TODO get objects from gogs repo and need commit_id from request
                 List<FlowScript> scriptList = flowScriptProvider.listFlowScripts(
                         flow.getNamespaceId(), EntityType.ORGANIZATIONS.getCode(), flow.getOrganizationId(),
                         flow.getModuleType(), flow.getModuleId(), cmd.getScriptType(), cmd.getKeyword(), pageSize, locator);
@@ -5559,37 +5550,78 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public ListFlowModuleAppsResponse listFlowModuleApps(ListFlowModuleAppsCommand cmd) {
+    public ListFlowModuleAppsResponse listFlowModuleApps(SearchFlowCaseCommand cmd) {
         ValidatorUtil.validate(cmd);
-        List<FlowModuleInfo> modules = flowListenerManager.getModules();
+        if (cmd.getFlowCaseSearchType() == null) {
+            cmd.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
+        }
 
-        List<Long> moduleIds = modules.stream().map(FlowModuleInfo::getModuleId).collect(Collectors.toList());
-        List<ServiceModuleApp> moduleApps = serviceModuleAppService.
-                listReleaseServiceModuleAppByModuleIds(cmd.getNamespaceId(), moduleIds);
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        List<FlowModuleAppDTO> apps = moduleApps.stream().map(r -> {
-            FlowModuleAppDTO dto = new FlowModuleAppDTO();
-            dto.setOriginId(r.getOriginId());
-            dto.setName(r.getName());
-            dto.setNamespaceId(r.getNamespaceId());
-            dto.setModuleId(r.getModuleId());
-            return dto;
+        List<FlowModuleAppDTO> apps;
+        FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
+
+        switch (searchType) {
+            case APPLIER:
+                apps = flowCaseProvider.listApplierApps(namespaceId, UserContext.currentUserId(), cmd);
+                break;
+            case TODO_LIST:
+            case DONE_LIST:
+            case SUPERVISOR:
+                apps = flowEventLogProvider.listProcessorApps(namespaceId, UserContext.currentUserId(), cmd);
+                break;
+            default:
+                apps = flowCaseProvider.listAdminApps(namespaceId, cmd);
+        }
+
+        apps = apps.stream().filter(r -> {
+            return serviceModuleAppService.findReleaseServiceModuleAppByOriginId(r.getOriginId()) != null;
+        }).peek(r -> {
+            ServiceModuleApp moduleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(r.getOriginId());
+            if (moduleApp != null) {
+                r.setName(moduleApp.getName());
+                r.setModuleId(moduleApp.getModuleId());
+            }
         }).collect(Collectors.toList());
 
+        // 以下代码是为了兼容老的数据 20181120
+        Set<Long> flowCaseModuleIds = apps.stream().map(FlowModuleAppDTO::getModuleId).collect(Collectors.toSet());
+
+        ListFlowServiceTypeResponse listFlowServiceTypeResponse = this.listFlowServiceTypes(cmd);
+        List<FlowServiceTypeDTO> serviceTypes = listFlowServiceTypeResponse.getServiceTypes();
+        Set<Long> moduleIdSet = serviceTypes.stream().map(FlowServiceTypeDTO::getModuleId).collect(Collectors.toSet());
+
+        List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleApps(namespaceId);
+        Map<Long, List<ServiceModuleApp>> moduleIdToApp = serviceModuleApps.stream()
+                .collect(Collectors.groupingBy(ServiceModuleApp::getModuleId));
+
+        final List<FlowModuleAppDTO> finalApps = apps;
+        moduleIdToApp.forEach((k, v) -> {
+            //
+            if (v.size() == 1 && moduleIdSet.contains(k) && !flowCaseModuleIds.contains(k)) {
+                FlowModuleAppDTO appDTO = new FlowModuleAppDTO();
+                appDTO.setOriginId(0L);
+                appDTO.setModuleId(k);
+                appDTO.setNamespaceId(namespaceId);
+                appDTO.setName(v.iterator().next().getName());
+                finalApps.add(appDTO);
+            }
+        });
+        // END
+
         ListFlowModuleAppsResponse response = new ListFlowModuleAppsResponse();
-        response.setApps(apps);
+        response.setApps(finalApps);
         return response;
     }
 
     @Override
-    public ListFlowModuleAppServiceTypesResponse listFlowModuleAppServiceTypes(ListFlowModuleAppServiceTypesCommand cmd) {
+    public ListFlowModuleAppServiceTypesResponse listFlowModuleAppServiceTypes(SearchFlowCaseCommand cmd) {
         ValidatorUtil.validate(cmd);
+        if (cmd.getFlowCaseSearchType() == null) {
+            cmd.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
+        }
 
-        ListFlowServiceTypesCommand listCmd = new ListFlowServiceTypesCommand();
-        listCmd.setModuleId(cmd.getModuleId());
-
-        ListFlowServiceTypeResponse typeResponse = this.listFlowServiceTypes(listCmd);
-
+        ListFlowServiceTypeResponse typeResponse = this.listFlowServiceTypes(cmd);
         ListFlowModuleAppServiceTypesResponse response = new ListFlowModuleAppServiceTypesResponse();
         response.setDtos(typeResponse.getServiceTypes());
         return response;
@@ -6466,28 +6498,59 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public ListFlowServiceTypeResponse listFlowServiceTypes(ListFlowServiceTypesCommand cmd) {
+    public ListFlowServiceTypeResponse listFlowServiceTypes(SearchFlowCaseCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        cmd.setOrganizationId(null);
-
-        Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
-        RedisTemplate template = accessor.getTemplate(new StringRedisSerializer());
-
-        String dtoListStr = (String) template.opsForHash().get("flow-service-type", String.valueOf(namespaceId));
-        List<FlowServiceTypeDTO> dtoList = new Gson().fromJson(dtoListStr, new TypeToken<List<FlowServiceTypeDTO>>(){}.getType());
-
-        Stream<FlowServiceTypeDTO> stream = dtoList.stream();
-        if (cmd.getOrganizationId() != null) {
-            stream = stream.filter(r -> Objects.equals(cmd.getOrganizationId(), r.getOrganizationId()));
+        if (cmd.getNamespaceId() == null) {
+            cmd.setNamespaceId(namespaceId);
         }
-        if (cmd.getModuleId() != null) {
-            stream = stream.filter(r -> Objects.equals(cmd.getModuleId(), r.getModuleId()));
+        if (cmd.getUserId() == null) {
+            cmd.setUserId(UserContext.currentUserId());
         }
-        dtoList = stream.filter(r -> r.getServiceName() != null && r.getServiceName().trim().length() > 0).collect(Collectors.toList());
+
+        List<FlowServiceTypeDTO> serviceTypes = null;
+        FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
+        if (searchType == null) {
+            serviceTypes = getOldFlowServiceTypeDTOS(cmd, namespaceId);
+        } else {
+            switch (searchType) {
+                case APPLIER:
+                    serviceTypes = flowCaseProvider.listApplierServiceTypes(namespaceId, UserContext.currentUserId(), cmd);
+                    break;
+                case TODO_LIST:
+                case DONE_LIST:
+                case SUPERVISOR:
+                    serviceTypes = flowEventLogProvider.listProcessorServiceTypes(namespaceId, UserContext.currentUserId(), cmd);
+                    break;
+                case ADMIN:
+                    serviceTypes = flowCaseProvider.listAdminServiceTypes(namespaceId, cmd);
+                    break;
+                default:
+                    serviceTypes = getOldFlowServiceTypeDTOS(cmd, namespaceId);
+                    break;
+            }
+        }
 
         ListFlowServiceTypeResponse response = new ListFlowServiceTypeResponse();
-        response.setServiceTypes(dtoList);
+        response.setServiceTypes(serviceTypes);
         return response;
+    }
+
+    // 默认兼容旧的 App 获取数据方式
+    private List<FlowServiceTypeDTO> getOldFlowServiceTypeDTOS(SearchFlowCaseCommand cmd, Integer namespaceId) {
+        List<FlowServiceTypeDTO> serviceTypes;
+        cmd.setOrganizationId(null);
+        List<FlowCase> flowCases = flowCaseProvider.listFlowCaseGroupByServiceTypes(namespaceId, cmd);
+        serviceTypes = flowCases.stream()
+                .filter(r -> r.getServiceType() != null && r.getServiceType().trim().length() > 0)
+                .map(r -> {
+                    FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+                    dto.setNamespaceId(r.getNamespaceId());
+                    dto.setServiceName(r.getServiceType());
+                    dto.setModuleId(r.getModuleId());
+                    dto.setOrganizationId(r.getOrganizationId());
+                    return dto;
+                }).collect(Collectors.toList());
+        return serviceTypes;
     }
 
     @Override
@@ -6804,7 +6867,11 @@ public class FlowServiceImpl implements FlowService {
     /**
      * step_tracker_log 经过的节点列表
      * @param allFlowCase   所有的任务列表
+<<<<<<< HEAD
+     * @see FlowServiceImpl#getAllFlowCase(Long)
+=======
      * @see com.everhomes.flow.FlowServiceImpl#getAllFlowCase(java.lang.Long)
+>>>>>>> 5.10.1
      */
     @Override
     public List<FlowNodeLogDTO> getStepTrackerLogs(List<FlowCase> allFlowCase) {
@@ -6863,7 +6930,11 @@ public class FlowServiceImpl implements FlowService {
         for (FlowEventLog eventLog : stepLogs) {
             //获取工作流经过的节点日志
             if (currNode == null || !currNode.getId().equals(eventLog.getFlowNodeId())) { // 相邻相同去重
-                currNode = flowGraph.getGraphNode(eventLog.getFlowNodeId()).getFlowNode();
+                FlowGraphNode graphNode = flowGraph.getGraphNode(eventLog.getFlowNodeId());
+                if(graphNode == null){
+                    continue ;
+                }
+                currNode = graphNode.getFlowNode();
                 final FlowNodeLogDTO nodeLogDTO = new FlowNodeLogDTO();
                 nodeLogDTO.setNodeId(currNode.getId());
                 nodeLogDTO.setNodeLevel(currNode.getNodeLevel());
@@ -7199,6 +7270,29 @@ public class FlowServiceImpl implements FlowService {
         return flowGraph;
     }
 
+    private FlowGraphDTO toFlowGraphDTO(Flow flow , Integer flowVersionId) {
+        FlowGraphDTO flowGraph = new FlowGraphDTO();
+        flowGraph.setFlowId(flow.getId());
+
+        List<FlowNode> nodeList = flowNodeProvider.findFlowNodesByFlowId(flow.getId(), flowVersionId);
+        List<FlowNodeDTO> nodes = nodeList.stream().map(this::toFlowNodeDTO).collect(Collectors.toList());
+        flowGraph.setNodes(nodes);
+
+        List<FlowLink> linkList = flowLinkProvider.listFlowLink(flow.getId(), flowVersionId);
+        List<FlowLinkDTO> links = linkList.stream().map(this::toFlowLinkDTO).collect(Collectors.toList());
+        flowGraph.setLinks(links);
+
+        List<FlowLane> laneList = flowLaneProvider.listFlowLane(flow.getId(), flowVersionId);
+        List<FlowLaneDTO> lanes = laneList.stream().map(this::toFlowLaneDTO)
+                .sorted(Comparator.comparingInt(FlowLaneDTO::getLaneLevel)).collect(Collectors.toList());
+        flowGraph.setLanes(lanes);
+
+        List<FlowCondition> conditions = flowConditionProvider.listFlowCondition(flow.getId(), flowVersionId);
+        flowGraph.setConditions(conditions.stream().map(this::toFlowConditionDTO).collect(Collectors.toList()));
+
+        return flowGraph;
+    }
+
     @Override
     public FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd) {
         Flow flow = flowProvider.getFlowById(cmd.getFlowId());
@@ -7283,6 +7377,9 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public List<FlowCase> getAllFlowCase(Long flowCaseId) {
         FlowCase grantParentCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+        if(grantParentCase == null){
+            return null ;
+        }
         while (grantParentCase.getParentId() != 0) {
             grantParentCase = flowCaseProvider.getFlowCaseById(grantParentCase.getParentId());
         }
@@ -7307,7 +7404,7 @@ public class FlowServiceImpl implements FlowService {
         return RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
     }
 
-    @Scheduled(fixedRate = 30 * 60 * 1000L, initialDelay = 10000)
+    /*@Scheduled(fixedRate = 30 * 60 * 1000L, initialDelay = 10000)
     public void refreshFlowServiceType() {
         Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
         RedisTemplate template = accessor.getTemplate(new StringRedisSerializer());
@@ -7333,5 +7430,5 @@ public class FlowServiceImpl implements FlowService {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 }
