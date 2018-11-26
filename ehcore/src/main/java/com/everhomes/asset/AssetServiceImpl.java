@@ -1124,7 +1124,7 @@ public class AssetServiceImpl implements AssetService {
                     return;
                 }
 
-                LOGGER.error("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
+                LOGGER.info("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
                 if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
                     upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
                     return;
@@ -1139,13 +1139,13 @@ public class AssetServiceImpl implements AssetService {
                     });
                     return null;
                 });
-                LOGGER.error("插入完成");
+                LOGGER.info("插入完成");
                 assetProvider.setInworkFlagInContractReceiverWell(contractId);
                 // 重新计算
                 for(EhPaymentBills bill : billList){
                     assetProvider.reCalBillById(bill.getId());
                 }
-                LOGGER.error("工作flag完成");
+                LOGGER.info("工作flag完成");
                 //得到金额总和并更新到eh_contracts表中 by steve
                 BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId(), null, null);
                 assetProvider.setRent(cmd.getContractId(),totalAmount);
