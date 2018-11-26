@@ -106,3 +106,4 @@ ALTER TABLE eh_office_cubicle_spaces ADD COLUMN space_cover_uri VARCHAR(1024) CO
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_uri VARCHAR(1024) COMMENT '短租封面URI';
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN station_uri VARCHAR(1024) COMMENT '开放式工位URI';
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN open_flag TINYINT COMMENT '是否开启空间，1是，0否';
+ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_nums VARCHAR(32) COMMENT '短租工位数量';
