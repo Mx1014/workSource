@@ -380,6 +380,10 @@ public class ParkingServiceImpl implements ParkingService {
 			if(requestType == ParkingSourceRequestType.BACKGROUND){
 				dto.setFlowMode(r.getFlowMode());
 			}
+			
+			if (isReachMonthCardRequestMaxNum(r.getOwnerType(), r.getOwnerId(), r.getId())) {
+				dto.setMonthCardMaxRequestFlag(TrueOrFalseFlag.TRUE.getCode());
+			}
 
 			return dto;
 		}).filter(dto->!(requestType != ParkingSourceRequestType.BACKGROUND && isColseAllFunction(dto))).collect(Collectors.toList());
@@ -4108,5 +4112,28 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		response.setInvoiceUrl(invoiceUrl);
 		return response;
+	}
+	
+	boolean isReachMonthCardRequestMaxNum(String ownerType, Long ownerId, Long parkingLotId) {
+		
+		Long userId = UserContext.currentUserId();
+		if (null == userId) {
+			return false;
+		}
+
+		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(ownerType,
+				ownerId, parkingLotId, null);
+
+		List<ParkingCardRequest> requestList = parkingProvider.listParkingCardRequests(userId, ownerType,
+				ownerId, parkingLotId, null, null,
+				ParkingCardRequestStatus.INACTIVE.getCode(), null, null, null);
+
+		int requestListSize = requestList.size();
+		if(null != parkingFlow && parkingFlow.getMaxRequestNumFlag() == ParkingConfigFlag.SUPPORT.getCode()
+				&& requestListSize >= parkingFlow.getMaxRequestNum()){
+			return true;
+		}
+		
+		return false;
 	}
 }
