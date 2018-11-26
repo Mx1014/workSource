@@ -491,10 +491,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CUSTOMER_SOURCE.eq(cmd.getCustomerSource()));
                     }
                     if (cmd.getMinTrackingPeriod() != null) {
-                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod())));
+                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod())).or(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod()))));
                     }
                     if (cmd.getMaxTrackingPeriod() != null) {
-                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())));
+                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())).or(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod()))));
                     }
 
                     return query;
