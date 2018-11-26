@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -88,13 +89,13 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 		TempFeeInfo tempFeeInfo = getParkingTempFee(plateNumber);
-		if (null == tempFeeInfo) {
+		if (null == tempFeeInfo || null == tempFeeInfo.getEnterTime()) { //这里需要做特殊判断
 			return dto;
 		}
 
 		dto.setPrice(new BigDecimal(tempFeeInfo.getCost()));
 		dto.setPlateNumber(plateNumber);
-		Timestamp entryTime = DateUtil.parseTimestamp(tempFeeInfo.getEnterTime());
+		Date entryTime =  DateUtil.strToDate(tempFeeInfo.getEnterTime(), "yyyyMMddHHmmss");
 		dto.setEntryTime(entryTime.getTime());
 		long now = System.currentTimeMillis();
 		dto.setPayTime(now);

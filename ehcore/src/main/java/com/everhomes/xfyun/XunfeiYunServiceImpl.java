@@ -103,7 +103,7 @@ public class XunfeiYunServiceImpl implements XunfeiYunService{
 		} else {
 			appDto.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
 			String homeUrl = configurationProvider.getValue("home.url", "http://core.zuolin.com");
-			appDto.setRouter(homeUrl + "/mobile/static/stay_tuned/index.html"); // 敬请期待
+			appDto.setRouter("zl://browser/i?url="+homeUrl + "/mobile/static/stay_tuned/index.html"); // 敬请期待
 		}
 		
 		RouterDTO rDto = new RouterDTO();
