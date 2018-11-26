@@ -352,3 +352,7 @@ CREATE TABLE `eh_vip_priority` (
   `priority` INT COMMENT '优先级,数字越大，优先级越高',
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '会员等级优先级表';
+
+-- AUTHOR: xq.tian 20181126
+-- REMARK: target_data 字段增加长度
+ALTER TABLE `eh_banners` MODIFY COLUMN target_data TEXT;

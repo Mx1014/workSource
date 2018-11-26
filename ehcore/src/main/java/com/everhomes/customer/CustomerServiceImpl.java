@@ -8,6 +8,7 @@ import com.everhomes.activity.ActivityProivider;
 import com.everhomes.activity.ActivityService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -268,6 +269,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private RequisitionService requisitionService;
+
+    @Autowired
+    private ArchivesService archivesService;
 
     private static final String queueDelay = "trackingPlanTaskDelays";
     private static final String queueNoDelay = "trackingPlanTaskNoDelays";
@@ -4141,8 +4145,16 @@ public class CustomerServiceImpl implements CustomerService {
                 Organization organization =  organizationProvider.findOrganizationById(r.getOrganizationId());
                 if(organization!=null){
                     r.setDepartmentName(organization.getName());
+                    Long detailId = organizationProvider.findOrganizationMemberDetailsByTargetId(r.getTargetId()).getId();
+                    Map<Long, String> dptMap = archivesService.getEmployeeDepartment(detailId);
+                    if (null != dptMap) {
+                        String depName = archivesService.convertToOrgNames(dptMap);
+                        r.setDeptName(depName);
+                    }
+
                 } else {
                     r.setDepartmentName("");
+                    r.setDeptName("");
                 }
             });
         }
