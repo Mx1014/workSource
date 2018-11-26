@@ -834,11 +834,11 @@ public class AssetServiceImpl implements AssetService {
                         //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
                         BillingCycle standardBillingCycle = BillingCycle.fromCode(billingCycle);
                         if(standardBillingCycle == null || standardBillingCycle == BillingCycle.DAY){
-                                assetProvider.deleteContractPayment(contractId);
+                            assetProvider.deleteContractPayment(contractId);
 //                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
 //                                        ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
-                                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
-                                		"目前计费周期只支持按月，按季，按年");
+                            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
+                            		"目前计费周期只支持按月，按季，按年");
                         }
                         // #31113 by-dinfjianmin
     					if (property.getAddressId() != null) {
@@ -867,7 +867,6 @@ public class AssetServiceImpl implements AssetService {
                             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
                             		"目前计费周期只支持按月，按季，按年");
                     }
-
                     assetFeeHandlerForBillCycles(uniqueRecorder,groupRule,group,rule,balanceBillingCycle,standard,billingCycle,itemScope);
                 }
                 //先算出所有的item
