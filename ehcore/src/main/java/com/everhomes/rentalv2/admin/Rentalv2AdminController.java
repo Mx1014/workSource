@@ -202,7 +202,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("listResourceAbstract")
 	@RestReturn(GetResourceListAdminResponse.class)
 	public RestResponse listResourceAbstract(@Valid GetResourceListAdminCommand cmd){
-		GetResourceListAdminResponse list = this.rentalService.getResourceList(cmd);
+		GetResourceListAdminResponse list = this.rentalService.listResourceAbstract(cmd);
 		RestResponse response = new RestResponse(list);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
