@@ -3562,7 +3562,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
         String templateLocale = user.getLocale();
         smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
-
+        //访客来访消息提醒
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if(null!= cmd.getNotice() && cmd.getNotice() == (byte)1){
+            AclinkFormValues notice = new AclinkFormValues();
+            notice.setNamespaceId(namespaceId);
+            notice.setTitleId(0L);
+            notice.setValue("notice");
+            notice.setType(AclinkFormValuesType.VISITOR_NOTICE.getCode());
+            notice.setStatus((byte)1);
+            //表单记录ownerId对应授权Id
+            notice.setOwnerId(auth.getId());
+            notice.setOwnerType((byte)5);
+            notice.setCreatorUid(user.getId());
+            notice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            doorAccessProvider.createAclinkFormValues(notice);
+        }
         return ConvertHelper.convert(auth, DoorAuthDTO.class);
     }
 
@@ -5716,7 +5731,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                             //楼层名改为BuildingName
                             dto.setFloorName(r.getBuildingName());
                             return dto;
-                        }).collect(Collectors.toList()));
+                        }).distinct().collect(Collectors.toList()));//去重
                     }
                 }
             }
@@ -7085,7 +7100,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		
 		rsp.setIsSupportRemote(DoorAuthStatus.INVALID.getCode());
 		rsp.setIsSupportTempAuth(DoorAuthStatus.INVALID.getCode());
-		
+
 		if(cmd.getDoorId() == null && cmd.getAuthId() != null){
 			DoorAuth auth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
 			//校验用户
@@ -7123,6 +7138,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				}else{
 					throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, String.format("door.id {%d} not found",cmd.getDoorId()));
 				}
+                //服务热线
+                AclinkFormValues hotline = new AclinkFormValues();
+                HashMap<String, String> extraAction =  new HashMap<>();
+                hotline = doorAccessProvider.findAclinkFormValues(doorAccess.getOwnerId(),doorAccess.getOwnerType(), AclinkFormValuesType.HOTLINE.getCode());
+                if(null != hotline && hotline.getStatus() == (byte)1){
+                    extraAction.put("hotline", hotline.getValue() );
+                    rsp.setExtraActions(extraAction);
+                }
 
 				rsp.setAuthId(auth.getId());
 				rsp.setIsSupportQR(doorAccess.getHasQr());
