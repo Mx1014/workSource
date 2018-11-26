@@ -5670,11 +5670,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
 //      分别返回旺龙门禁组，梯控组
             boolean doorType = true;
-            if( cmd.getDoorType() != null){
-                doorType = access.getDoorType().equals(cmd.getDoorType());
-            }
-            else{
-                doorType = access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode()) || access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_DOOR_GROUP.getCode());
+            if(null != access){
+                if( null != cmd.getDoorType()){
+                    doorType = access.getDoorType().equals(cmd.getDoorType());
+                }
+                else{
+                    doorType = access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode()) || access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_DOOR_GROUP.getCode());
+                }
             }
             if(null != access && doorType){
                 DoorAccessGroupDTO group = new DoorAccessGroupDTO();
