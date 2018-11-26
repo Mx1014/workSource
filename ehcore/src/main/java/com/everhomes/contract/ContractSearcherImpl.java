@@ -3,6 +3,7 @@ package com.everhomes.contract;
 import com.everhomes.asset.bill.AssetBillService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Building;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.customer.EnterpriseCustomer;
@@ -20,6 +21,10 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.asset.AssetPaymentBillStatus;
+import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
+import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
+import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractApplicationScene;
@@ -27,6 +32,7 @@ import com.everhomes.rest.contract.ContractCategoryCommand;
 import com.everhomes.rest.contract.ContractCategoryListDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractOperateStatus;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.contract.OpenapiListContractsCommand;
@@ -308,6 +314,32 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
         if(cmd.getStatus() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+        
+		// 一键初始化，一键免批获取合同列表
+		if (cmd.getContractOperate() != null) {
+			List<Byte> statusList = new ArrayList<Byte>();
+			// 为初始化合同
+			if (cmd.getContractOperate() == ContractOperateStatus.INITIALIZATION.getCode()) {
+				statusList.add(ContractStatus.ACTIVE.getCode());
+				statusList.add(ContractStatus.WAITING_FOR_APPROVAL.getCode());
+				statusList.add(ContractStatus.APPROVE_QUALITIED.getCode());
+				statusList.add(ContractStatus.APPROVE_NOT_QUALITIED.getCode());
+				statusList.add(ContractStatus.EXPIRING.getCode());
+				statusList.add(ContractStatus.EXPIRED.getCode());
+				statusList.add(ContractStatus.HISTORY.getCode());
+				statusList.add(ContractStatus.INVALID.getCode());
+				statusList.add(ContractStatus.DENUNCIATION.getCode());
+			} else if (cmd.getContractOperate() == ContractOperateStatus.EXEMPTION.getCode()) {
+				// 免批合同
+				statusList.add(ContractStatus.WAITING_FOR_LAUNCH.getCode());
+				statusList.add(ContractStatus.DRAFT.getCode());
+			} else if (cmd.getContractOperate() == ContractOperateStatus.COPYCONTRACT.getCode()) {
+				// 复制合同
+			} else {
+
+			}
+			qb = QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("status", statusList));
+		}
 
         if(cmd.getCategoryItemId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryItemId", cmd.getCategoryItemId()));
@@ -383,6 +415,23 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
         }*/
+        
+        //初始化判断是否存在判断已缴的的合同，不能初始化
+        if (cmd.getContractOperate() != null && cmd.getContractOperate() == ContractOperateStatus.INITIALIZATION.getCode()) {
+        	CheckContractIsProduceBillCmd checkContractIsProduceBillCmd = new CheckContractIsProduceBillCmd();
+    		checkContractIsProduceBillCmd.setContractIdList(ids);
+    		checkContractIsProduceBillCmd.setNamespaceId(cmd.getNamespaceId());
+    		checkContractIsProduceBillCmd.setOwnerId(cmd.getCommunityId());
+    		checkContractIsProduceBillCmd.setOwnerType("community");
+    		ListCheckContractIsProduceBillResponse ListCheckContractIsProduceBillResponse = assetBillService.checkContractIsProduceBill(checkContractIsProduceBillCmd);
+    		List<CheckContractIsProduceBillDTO> lists = ListCheckContractIsProduceBillResponse.getList();
+    		for (CheckContractIsProduceBillDTO entry : lists) {
+    			// 合同存在已缴账单
+    			if (entry.getPaymentStatus() == AssetPaymentBillStatus.PAID.getCode()) {
+    				ids.remove(entry.getContractId());
+    			}
+    		}
+		}
 
         List<ContractDTO> dtos = new ArrayList<ContractDTO>();
         Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);
@@ -447,6 +496,214 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         response.setContracts(dtos);
         return response;
     }
+    
+    @Override
+    public ListContractsResponse searchNoOrgIdContracts(SearchContractCommand cmd) {
+    	if (cmd.getCommunityId() == null) {
+    		throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+                    "OrgIdorCommunityId user privilege error");
+		}
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        QueryBuilder qb = null;
+        if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
+            qb = QueryBuilders.matchAllQuery();
+        } else {
+        	String pattern = "*" + cmd.getKeywords() + "*";
+            qb = QueryBuilders.boolQuery()
+            					.should(QueryBuilders.wildcardQuery("name", pattern))
+            					.should(QueryBuilders.wildcardQuery("customerName", pattern))
+            					.should(QueryBuilders.wildcardQuery("contractNumber", pattern));
+
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("name").addHighlightedField("customerName").addHighlightedField("contractNumber");
+        }
+
+        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termFilter("status", ContractStatus.INACTIVE.getCode());
+        fb = FilterBuilders.notFilter(nfb);
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("paymentFlag", cmd.getPaymentFlag()));
+
+        if(cmd.getStatus() != null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+        
+		// 一键初始化，一键免批获取合同列表
+		if (cmd.getContractOperate() != null) {
+			List<Byte> statusList = new ArrayList<Byte>();
+			// 为初始化合同
+			if (cmd.getContractOperate() == ContractOperateStatus.INITIALIZATION.getCode()) {
+				statusList.add(ContractStatus.ACTIVE.getCode());
+				statusList.add(ContractStatus.WAITING_FOR_APPROVAL.getCode());
+				statusList.add(ContractStatus.APPROVE_QUALITIED.getCode());
+				statusList.add(ContractStatus.APPROVE_NOT_QUALITIED.getCode());
+				statusList.add(ContractStatus.EXPIRING.getCode());
+				statusList.add(ContractStatus.EXPIRED.getCode());
+				statusList.add(ContractStatus.HISTORY.getCode());
+				statusList.add(ContractStatus.INVALID.getCode());
+				statusList.add(ContractStatus.DENUNCIATION.getCode());
+			} else if (cmd.getContractOperate() == ContractOperateStatus.EXEMPTION.getCode()) {
+				// 免批合同
+				statusList.add(ContractStatus.WAITING_FOR_LAUNCH.getCode());
+				statusList.add(ContractStatus.DRAFT.getCode());
+			} else if (cmd.getContractOperate() == ContractOperateStatus.COPYCONTRACT.getCode()) {
+				// 复制合同
+			} else {
+
+			}
+			//qb = QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("status", statusList));
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("status", statusList));
+		}
+
+        if(cmd.getCategoryItemId() != null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryItemId", cmd.getCategoryItemId()));
+
+        if(cmd.getContractType() != null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("contractType", cmd.getContractType()));
+
+        if(cmd.getCustomerType() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("customerType", cmd.getCustomerType()));
+        }
+
+        if(cmd.getBuildingId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+        }
+
+        if(cmd.getAddressId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
+        }
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        Long pageNumber = 1l;
+        //cmd.setPageNumber(pageNumber);
+        
+        //传入的变为页码 pageNumber
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+        
+        if(cmd.getPageNumber() != null) {
+        	pageNumber = cmd.getPageNumber();
+        }
+        
+        if(cmd.getCategoryId() != null) {
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
+        }
+        
+        if(cmd.getDepositStatus() != null) {
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("depositStatus", cmd.getDepositStatus()));
+        }
+        
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        
+        //builder.setFrom((pageNumber.intValue()-1) * pageSize).setSize(pageSize + 1);
+        builder.setFrom((pageNumber.intValue()-1) * pageSize).setSize(pageSize);
+        
+        builder.setQuery(qb);
+        if(cmd.getSortField() != null && cmd.getSortType() != null) {
+            if(cmd.getSortType() == 0) {
+                builder.addSort(cmd.getSortField(), SortOrder.ASC);
+            } else if(cmd.getSortType() == 1) {
+                builder.addSort(cmd.getSortField(), SortOrder.DESC);
+            }
+        } else {
+            builder.addSort("updateTime", SortOrder.DESC);
+        }
+        SearchResponse rsp = builder.execute().actionGet();
+        Long totalHits = rsp.getHits().getTotalHits();
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("ContractSearcherImpl query builder: {}, rsp: {}", builder, rsp);
+
+        List<Long> ids = getIds(rsp);
+        List<Long> recodeOnePageids = getIds(rsp);
+        ListContractsResponse response = new ListContractsResponse();
+
+        response.setTotalNum(totalHits);
+        
+		// 判断该合同是否存在已缴账单，存在则过滤掉
+		if (cmd.getContractOperate() != null && cmd.getContractOperate() == ContractOperateStatus.INITIALIZATION.getCode()) {
+			CheckContractIsProduceBillCmd checkContractIsProduceBillCmd = new CheckContractIsProduceBillCmd();
+			checkContractIsProduceBillCmd.setContractIdList(ids);
+			checkContractIsProduceBillCmd.setNamespaceId(cmd.getNamespaceId());
+			checkContractIsProduceBillCmd.setOwnerId(cmd.getCommunityId());
+			checkContractIsProduceBillCmd.setOwnerType("community");
+			ListCheckContractIsProduceBillResponse ListCheckContractIsProduceBillResponse = assetBillService.checkContractIsProduceBill(checkContractIsProduceBillCmd);
+			List<CheckContractIsProduceBillDTO> lists = ListCheckContractIsProduceBillResponse.getList();
+			for (CheckContractIsProduceBillDTO entry : lists) {
+				// 合同存在已缴账单
+				if (entry.getPaymentStatus() == AssetPaymentBillStatus.PAID.getCode()) {
+					recodeOnePageids.remove(entry.getContractId());
+				}
+			}
+		}
+
+        List<ContractDTO> dtos = new ArrayList<ContractDTO>();
+        Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);
+        if(contracts != null && contracts.size() > 0) {
+            //把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
+            ids.forEach(id -> {
+                Contract contract = contracts.get(id);
+                ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+                if(contract.getCustomerType() != null && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                    EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+                    if(customer != null) {
+                        dto.setCustomerName(customer.getName());
+                    }
+                } else if(contract.getCustomerType() != null && CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                    OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
+                    if(owner != null) {
+                        dto.setCustomerName(owner.getContactName());
+                    }
+
+                }
+                if(contract.getPartyAId() != null && contract.getPartyAType() != null) {
+                    if(0 == contract.getPartyAType()) {
+                        Organization organization = organizationProvider.findOrganizationById(contract.getPartyAId());
+                        if(organization != null) {
+                            dto.setPartyAName(organization.getName());
+                        }
+                    }
+
+                }
+                if(contract.getCategoryItemId() != null) {
+                    ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(),null, contract.getCommunityId(), contract.getCategoryItemId());
+                    if(item != null) {
+                        dto.setCategoryItemName(item.getItemDisplayName());
+                    }
+                }
+                
+				if (contract.getSponsorUid() != null) {
+					// 用户可能不在组织架构中 所以用nickname,//由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字
+					if (cmd.getNamespaceId() == 999929) {
+						dto.setSponsorName(contract.getSponsorUid());
+					} else {
+						User user = userProvider.findUserById(Long.parseLong(contract.getSponsorUid()));
+						if (user != null) {
+							dto.setSponsorName(user.getNickName());
+						}
+					}
+				}
+                
+                processContractApartments(dto);
+                //查询合同适用场景，物业合同不修改资产状态。
+		        ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+		        if (contractCategory != null) {
+		        	dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
+				}
+		        //标记已缴账单
+		        if (!recodeOnePageids.contains(id)) {
+					dto.setAssetPaymentBillStatus(AssetPaymentBillStatus.PAID.getCode());
+				}
+                dtos.add(dto);
+            });
+        }
+        response.setContracts(dtos);
+        return response;
+    }
 
     private void processContractApartments(ContractDTO dto) {
         List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(dto.getId());
@@ -459,13 +716,14 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         }
     }
     
+    //中天对接，根据域空间查询数据，园区id可以不传，获取全部园区数据
 	@Override
 	public ListContractsResponse openapiListContracts(OpenapiListContractsCommand cmd) {
 		// 合同跟着园区走
-		if (cmd.getCommunityId() == null) {
+		/*if (cmd.getCommunityId() == null) {
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
 					ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY, "openapiListContracts CommunityId is null");
-		}
+		}*/
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
 		if (cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
@@ -522,6 +780,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		}
 		if (rentalCategoryList.size() > 0) {
 			qb = QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("categoryId", rentalCategoryList));
+			//qb = QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("categoryId", rentalCategoryList));
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("categoryId", rentalCategoryList));
 		}
 		
 		// 传过来的时间进行格式化时间戳转化
@@ -627,6 +887,14 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 				if (contractCategory != null) {
 					dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
 				}
+				//中天对接显示
+				if (dto.getCommunityId() != null) {
+					Community community = communityProvider.findCommunityById(dto.getCommunityId());
+					if (community != null) {
+						dto.setCommunityName(community.getName());
+					}
+				}
+				
 				dtos.add(dto);
 			});
 		}

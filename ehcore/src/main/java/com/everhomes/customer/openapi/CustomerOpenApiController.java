@@ -16,6 +16,7 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.customer.openapi.*;
 import com.everhomes.rest.organization.pm.PropFamilyDTO;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.SignatureHelper;
@@ -97,14 +98,16 @@ public class CustomerOpenApiController extends ControllerBase {
         return response;
     }
     /**
-     * <b>URL: /asset/listEnterprise</b>
+     * <b>URL: /asset/listEnterprises</b>
      * <p>查看客户列表</p>
      */
-    @RequestMapping("listEnterprise")
+    @RequestMapping("listEnterprises")
     @RestReturn(value = SearchEnterpriseCustomerResponse.class)
     @RequireAuthentication(value = true)
-    public RestResponse listEnterprise(SearchEnterpriseCustomerCommand cmd) {
-        SearchEnterpriseCustomerResponse customers = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, true);
+    public RestResponse listEnterprises(SearchEnterpriseCustomerCommand cmd) {
+        Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+        cmd.setNamespaceId(namespaceId);
+        SearchEnterpriseCustomerResponse customers = enterpriseCustomerSearcher.queryEnterpriseCustomersForOpenAPI(cmd);
 
         List<EnterpriseDTO> dtos = new ArrayList<>();
         customers.getDtos().forEach(r ->{

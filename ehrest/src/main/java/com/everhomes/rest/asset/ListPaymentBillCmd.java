@@ -2,8 +2,8 @@
 package com.everhomes.rest.asset;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -48,6 +48,8 @@ public class ListPaymentBillCmd {
     private Long communityId;
     private Long organizationId;
     private Long categoryId;
+
+    private Long moduleId;//用于下载中心
 
     private List<Long> orderIds;
 
@@ -316,4 +318,17 @@ public class ListPaymentBillCmd {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

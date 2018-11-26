@@ -23,7 +23,8 @@ import java.util.List;
  * <li>trackStatus: 是否已经添加到我的日程，参考{@link com.everhomes.rest.remind.SubscribeStatus}</li>
  * <li>trackRemindId: 我关注的日程的原始日程ID</li>
  * <li>status: 状态，参考{@link com.everhomes.rest.remind.RemindStatus}</li>
- * <li>shareToMembers: 默认共享人的档案ID列表，可选项，参考{@link com.everhomes.rest.remind.ShareMemberDTO}</li>
+ * <li>shareToMembers: 共享人的档案ID列表，可选项，参考{@link com.everhomes.rest.remind.ShareMemberDTO}</li>
+ * <li>categoryShareMembers: 默认共享人的档案ID列表 不可修改，参考{@link com.everhomes.rest.remind.ShareMemberDTO}</li>
  * <li>shareShortDisplay: 分享人显示概要，如YH等3人</li>
  * <li>defaultOrder: 排序序号</li>
  * </ul>
@@ -44,6 +45,7 @@ public class RemindDTO {
     private String displayColour;
     private Byte status;
     private List<ShareMemberDTO> shareToMembers;
+    private List<ShareMemberDTO> categoryShareMembers;
     private Integer shareCount;
     private String shareShortDisplay;
     private Byte trackStatus;
@@ -213,5 +215,13 @@ public class RemindDTO {
 
 	public void setPlanTime(Long planTime) {
 		this.planTime = planTime;
+	}
+
+	public List<ShareMemberDTO> getCategoryShareMembers() {
+		return categoryShareMembers;
+	}
+
+	public void setCategoryShareMembers(List<ShareMemberDTO> categoryShareMembers) {
+		this.categoryShareMembers = categoryShareMembers;
 	}
 }

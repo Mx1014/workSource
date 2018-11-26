@@ -2,8 +2,6 @@
 package com.everhomes.organization;
 
 import com.everhomes.acl.*;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -18,15 +16,10 @@ import com.everhomes.bus.SystemEvent;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.common.IdentifierTypeEnum;
-import com.everhomes.community.Building;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityService;
-import com.everhomes.community.ResourceCategory;
+import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerEntryInfo;
@@ -36,7 +29,6 @@ import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.discover.RestReturn;
 import com.everhomes.enterprise.EnterpriseCommunityMap;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
@@ -74,14 +66,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rest.acl.DeleteServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.ListAppAuthorizationsByOrganizatioinIdCommand;
-import com.everhomes.rest.acl.ListAppAuthorizationsByOwnerIdResponse;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.acl.RoleConstants;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
@@ -93,21 +78,15 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.address.CreateOfficeSiteCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.archives.AddArchivesContactCommand;
-import com.everhomes.rest.archives.ArchivesContactDTO;
-import com.everhomes.rest.archives.ListArchivesContactsCommand;
-import com.everhomes.rest.archives.ListArchivesContactsResponse;
-import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
+import com.everhomes.rest.archives.*;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.comment.AddCommentCommand;
 import com.everhomes.rest.common.*;
-import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.community.admin.OperateType;
 import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdCommand;
 import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdResponse;
+import com.everhomes.rest.community.admin.OperateType;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.customer.CustomerType;
@@ -126,32 +105,17 @@ import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
-import com.everhomes.rest.organization.pm.ChildrenOrganizationJobLevelDTO;
-import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
-import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
-import com.everhomes.rest.organization.pm.ListPmManagementsCommand;
-import com.everhomes.rest.organization.pm.PmBuildingDTO;
-import com.everhomes.rest.organization.pm.PmManagementsDTO;
-import com.everhomes.rest.organization.pm.PmManagementsResponse;
-import com.everhomes.rest.organization.pm.PmMemberGroup;
-import com.everhomes.rest.organization.pm.PmMemberStatus;
-import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
-import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
-import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
+import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
-import com.everhomes.rest.servicemoduleapp.ServiceModuleAppAuthorizationDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
@@ -159,24 +123,10 @@ import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.rest.user.UserGender;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
-import com.everhomes.rest.user.UserTokenCommand;
-import com.everhomes.rest.user.UserTokenCommandResponse;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.search.EnterpriseCustomerSearcher;
-import com.everhomes.search.OrganizationSearcher;
-import com.everhomes.search.PostAdminQueryFilter;
-import com.everhomes.search.PostSearcher;
-import com.everhomes.search.UserWithoutConfAccountSearcher;
+import com.everhomes.search.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
@@ -187,36 +137,15 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.uniongroup.UniongroupService;
-import com.everhomes.user.EncryptionUtils;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
+import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.userOrganization.UserOrganizations;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.PinYinHelper;
-import com.everhomes.util.RouterBuilder;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.mysql.fabric.xmlrpc.base.Array;
-
-
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -226,7 +155,6 @@ import org.elasticsearch.common.collect.Lists;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -236,40 +164,15 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-
-import javassist.bytecode.stackmap.BasicBlock.Catch;
-
 import javax.servlet.http.HttpServletResponse;
-
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
@@ -287,7 +190,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private AppNamespaceMappingProvider appNamespaceMappingProvider;
-    
+
     @Autowired
     private ContractBuildingMappingProvider contractBuildingMappingProvider;
 
@@ -1271,6 +1174,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
         command.setOrganizationId(organizationId);
         List<OrganizationContactDTO> justOneAdmin = new ArrayList<>();
+        OrganizationContactDTO dto = rolePrivilegeService.listOrganizationTopAdministrator(command);
+        if(dto != null && dto.getContactName() != null && dto.getContactToken() != null){
+            justOneAdmin.add(dto);
+            return justOneAdmin;
+        }
         List<OrganizationContactDTO> getAdmin = rolePrivilegeService.listOrganizationAdministrators(command);
         //由于之前的企业可以设置多个管理员，故有可能返回多个管理员结果，此时只显示最新新增的一个
         if(getAdmin == null || getAdmin.size() == 0){
@@ -4010,16 +3918,22 @@ public class OrganizationServiceImpl implements OrganizationService {
                 	// #39544 企业客户未认证，则企业没有 organization detail
                 	tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
                 }
-                
+
                 //物业或业委增加小区Id和小区name信息
                 if(org.getOrganizationType() != null){
                 if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
                 		||org.getOrganizationType().equals(OrganizationType.ENTERPRISE.getCode())
                 		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
-                        this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
-                    }
-                    orgs.add(tempSimpleOrgDTO);
+                    this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                 }
+                OrganizationMember organizationMember = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
+                if(organizationMember == null)
+                	LOGGER.error("找不到organizationMember: uid ={}.orgId = {}", userId, organizationId);
+                if (organizationMember != null && OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
+                    tempSimpleOrgDTO.setUserIsManage(TrueOrFalseFlag.TRUE.getCode());
+                }else {
+                    tempSimpleOrgDTO.setUserIsManage(TrueOrFalseFlag.FALSE.getCode());
+                }orgs.add(tempSimpleOrgDTO);}
             }
         }
         return orgs;
@@ -7341,7 +7255,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             deleteAuthByOwnerCommand.setUserId(userId);
             this.doorAccessService.deleteAuthByOwner(deleteAuthByOwnerCommand);
         }
-        
+
      // 离开企业事件
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
@@ -8281,7 +8195,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (sendMsgFlag) {
             joinOrganizationAfterOperation(member,notSendMsgFlag);
         }
-        
+
 		//add by moubinmo；特殊情况：创建的管理员是没有注册激活的用户，添加需要添加一条 groupType 为  DIRECT_UNDER_ENTERPRISE 的部门信息到 eh_organization_members 表，否则从管理后台查出的人事记录没有部门记录。
 		createOrganiztionMemberOfDirectUnderEnterprise(member, organizationId);
 
@@ -8444,22 +8358,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
-        UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
-        LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
-        if (identifier == null) {
-         //   identifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifierByIdentifierToken(namespaceId,identifierToken), UserIdentifier.class);
-            LOGGER.info("get userIdentifier from unite user namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
-            if (identifier != null) {
-                this.userProvider.createIdentifierFromUnite(identifier);
-            } else {
-                LOGGER.warn("Sdk user service getUserIdentifier return null, namespaceId={}, identifierToken= {}", namespaceId,identifierToken);
-                return null;
-            }
+        UserIdentifier userIdentifier = fetchUserIdentifier(namespaceId, identifierToken, ownerId);
+        if (userIdentifier == null) {
+            return null;
         }
-        this.propertyMgrService.processUserForOwner(identifier);
-        return processUserForMember(identifier, true);
+
+        this.propertyMgrService.processUserForOwner(userIdentifier);
+        return processUserForMember(userIdentifier, true);
     }
 
+    private UserIdentifier fetchUserIdentifier(Integer namespaceId, String identifierToken, Long ownerId) {
+        Tuple<UserIdentifier, Boolean> userIdenTuple = coordinationProvider.getNamedLock(CoordinationLocks.SYNC_USER_IDEN_MODIFY.getCode() + ownerId).enter(() -> {
+            UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
+            LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
+            if (identifier == null) {
+                identifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifierByIdentifierToken(namespaceId, identifierToken), UserIdentifier.class);
+                LOGGER.info("get userIdentifier from unite user namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
+                if (identifier != null) {
+                    this.userProvider.createIdentifierFromUnite(identifier);
+                } else {
+                    LOGGER.warn("Sdk user service getUserIdentifier return null, namespaceId={}, identifierToken= {}", namespaceId, identifierToken);
+                }
+            }
+            return identifier;
+        });
+
+        return userIdenTuple.first();
+    }
 
     private OrganizationMemberDTO processUserForMember(UserIdentifier identifier, boolean needSendMessage) {
         try {
@@ -10073,7 +9998,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setCommunities(treeDTOs);
         return response;
     }
-    
+
     @Override
     public OrganizationMenuResponse openListAllChildrenOrganizations(OpenListAllChildrenOrganizationsCommand cmd){
 
@@ -10081,10 +10006,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
 		if (appNamespaceMapping == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"not exist app namespace mapping");
 		}
-		
+
 		if(!org.getNamespaceId().equals(appNamespaceMapping.getNamespaceId())){
 			return null;
 		}
@@ -12434,7 +12359,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 leaveOrganizationAfterOperation(user.getId(), leaveMembers);
             }
         }
-        
+
         // 用户通过认证事件
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
@@ -12450,7 +12375,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             event.setParams(params);
             LOGGER.info("publish event :[{}]",event);
         });
-        
+
         return dto;
     }
 
@@ -12698,11 +12623,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				dto.setTargetId(r.getTargetId());
 				//增加岗位显示与 detailId added by ryan 20120713
 				dto.setDetailId(r.getDetailId());
-				
+
 	            //  2.detailId, 隐藏性信息
 	            dto.setVisibleFlag(r.getVisibleFlag());
-	
-	            
+
+
 	            //  1.添加职位
 	            dto.setJobPosition(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(r.getDetailId())));
 	            //  3.头像
@@ -12712,7 +12637,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	                    String avatarUri = user.getAvatar();
 	                    if (StringUtils.isEmpty(avatarUri))
 	                        avatarUri = userService.getUserAvatarUriByGender(user.getId(), user.getNamespaceId(), user.getGender());
-	
+
 	                    dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId()));
 	                }
 	            } else {
@@ -13242,7 +13167,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 list.remove(list.size() - 1);
                 response.setNextPageAnchor(list.get(list.size() - 1).getId());
             }
-            
+
             response.setRequests(list.stream().map(r -> {
                 ChildrenOrganizationJobPositionDTO dto = ConvertHelper.convert(r, ChildrenOrganizationJobPositionDTO.class);
                 dto.setParentName(organization.getName());
@@ -13850,7 +13775,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         return organizationMember;// add by xq.tian 2017/07/05
     }
-    
+
 	/**
      * 创建企业级的member记录，因为未激活用户没有直属部门的记录，需要在添加时加入该记录
      * @param _organizationMember
@@ -13865,22 +13790,22 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationMember member = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
         //获取当前App所在的域空间
         Integer namespaceId = UserContext.getCurrentNamespaceId(member.getNamespaceId());
-        
+
         //从organizations表查部门数据
         List<String> types = new ArrayList<>();
         types.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
         Organization organization = organizationProvider.listOrganizationsByPathAndToken(member.getOrganizationId(), types,namespaceId);
-        
+
         if(organization == null){
         	return;
         }
-        
+
         //查找记录（groupType=DIRECT_UNDER_ENTERPRISE/targetId/organizationId），null则插入
         List<String> groupTypeList = new ArrayList<>();
         groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypeList.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
         OrganizationMember selectMember = organizationProvider.listOrganizationMembersByGroupTypeAndContactToken(groupTypeList,member.getContactToken(),organization.getPath());
-        
+
         if(selectMember == null){
         	// organizationId要从organizations表找到主属部门记录，然后添加；
         	member.setGroupPath(organization.getPath());
@@ -13891,7 +13816,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         	LOGGER.debug("插入新的【OrganizationMember】数据： "+member.toString());
         }
     }
-    
+
     private OrganizationMember createOrganiztionMemberWithoutDetailAndUserOrganization(OrganizationMember _organizationMember, Long organizationId) {
         User user = UserContext.current().getUser();
         OrganizationMember organizationMember = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
@@ -14827,7 +14752,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setDtos(dtos);
         return response;
     }
-    
+
     @Override
 	public List<Long> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId, AppInstanceConfigConfigMatchCallBack matchCallback) {
 
@@ -14873,7 +14798,53 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return resp.getDtos() == null ? null : resp.getDtos().stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
 
 	}
+    @Override
+    public List<Long> listMemberDetailIds(Long ownerId, Long deptId, Integer pageSize, Integer pageOffSet, String keyWord){
+        List<Long> result = new ArrayList<>();
+        List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
 
+            if (null != keyWord) {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%"+keyWord+"%")
+                		.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.like("%"+keyWord+"%")));
+            }
+
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.desc());
+
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc());
+            query.addLimit(pageOffSet - 1, pageSize);
+            return query;
+        });
+        if (records == null || records.size() == 0) {
+            return result;
+        }
+        for (OrganizationMemberDetails detail : records) {
+            result.add(detail.getId());
+        }
+        return result;
+    }
+    @Override
+    public List<OrganizationMemberDetails> listMembers(Long ownerId, Long deptId, Integer pageSize, Integer pageOffSet, String keyWord, Condition condition) {
+        // yyyyMM to yyyy-MM
+        List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
+            if (null != keyWord) {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%"+keyWord+"%")
+                		.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.like("%"+keyWord+"%")));
+            }
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
+            if(condition != null){
+            	query.addConditions(condition);
+            }
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.desc());
+
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc());
+            query.addLimit(pageOffSet, pageSize);
+            return query;
+        });
+        if (records == null || records.size() == 0) {
+            return null;
+        }
+        return records;
+    }
     //	物业组所需获取企业员工的唯一标识符
     @Override
     public String getAccountByTargetIdAndOrgId(Long targetId, Long orgId){

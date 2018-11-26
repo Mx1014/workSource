@@ -105,7 +105,7 @@ public class UserProviderImpl implements UserProvider {
     private EnterpriseContactProvider ecProvider;
 
     @Autowired
-    private KafkaTemplate kafkaTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
     private SdkUserService sdkUserService;
@@ -116,18 +116,18 @@ public class UserProviderImpl implements UserProvider {
     @Override
     public void createUser(User user) {
         // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
-//        long id = sdkUserService.getSequence(Tables.EH_USERS.getName(), 1L);
-    	long id = this.dbProvider.allocPojoRecordId(EhUsers.class);
+        long id = sdkUserService.getSequence(Tables.EH_USERS.getName(), 1L);
+        //long id = this.shardingProvider.allocShardableContentId(EhUsers.class).second();
         user.setId(id);
         if(user.getAccountName() == null) {
-        	long accountSeq = sequenceProvider.getNextSequence("usr");
-//            long accountSeq = sdkUserService.getSequence("usr-account", 1L);
+            long accountSeq = sdkUserService.getSequence("usr-account", 1L);
             user.setAccountName(String.valueOf(accountSeq));
         }
         if(user.getUuid() == null)
             user.setUuid(UUID.randomUUID().toString());
         user.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         user.setUpdateTime(user.getCreateTime());
+        user.incrementVersion();
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, id));
         EhUsersDao dao = new EhUsersDao(context.configuration());
@@ -169,6 +169,8 @@ public class UserProviderImpl implements UserProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId().longValue()));
         EhUsersDao dao = new EhUsersDao(context.configuration());
         user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        user.incrementVersion();
+
         dao.update(user);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
@@ -206,7 +208,7 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),
-            @CacheEvict(value="User-Account", key="#user.accountName"),
+            @CacheEvict(value="User-Acount", key="#user.accountName"),
             @CacheEvict(value="UserIdentifier-List", key="#user.id")})
     @Override
     public void deleteUser(User user) {
@@ -388,6 +390,9 @@ public class UserProviderImpl implements UserProvider {
         if (!StringUtils.isEmpty(userIdentifier.getIdentifierToken())) {
             userIdentifier.setIdentifierToken(userIdentifier.getIdentifierToken().trim());
         }
+
+        userIdentifier.incrementVersion();
+
         EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
         dao.insert(userIdentifier);
         
@@ -407,6 +412,8 @@ public class UserProviderImpl implements UserProvider {
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid().longValue()));
         EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
+        userIdentifier.incrementVersion();
+
         dao.update(userIdentifier);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());

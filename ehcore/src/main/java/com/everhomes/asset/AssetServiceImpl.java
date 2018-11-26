@@ -1,49 +1,6 @@
 
 package com.everhomes.asset;
 
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.DSLContext;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
@@ -53,6 +10,7 @@ import com.everhomes.asset.calculate.AssetCalculateUtil;
 import com.everhomes.asset.chargingitem.AssetChargingItemProvider;
 import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.asset.standard.AssetStandardProvider;
+import com.everhomes.asset.util.ExportExcelnitUtil;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
@@ -63,7 +21,6 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -71,12 +28,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.locale.LocaleString;
-import com.everhomes.locale.LocaleStringProvider;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplate;
-import com.everhomes.locale.LocaleTemplateProvider;
-import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.locale.*;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
@@ -106,14 +58,7 @@ import com.everhomes.rest.asset.calculate.NatualQuarterMonthDTO;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.contract.CMBill;
-import com.everhomes.rest.contract.CMContractHeader;
-import com.everhomes.rest.contract.CMContractUnit;
-import com.everhomes.rest.contract.CMDataObject;
-import com.everhomes.rest.contract.CMSyncObject;
-import com.everhomes.rest.contract.ContractErrorCode;
-import com.everhomes.rest.contract.ContractTemplateStatus;
-import com.everhomes.rest.contract.NamespaceContractType;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -141,33 +86,41 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
-import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
-import com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.CalculatorUtil;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.DecimalUtils;
-import com.everhomes.util.IntegerUtil;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.DSLContext;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 //import com.everhomes.contract.ContractService;
 
@@ -661,11 +614,14 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(Long.parseLong("5000"));
         }
         ListPaymentBillResp result = listPaymentBill(cmd);
-        List<PaymentOrderBillDTO> dtos = result.getPaymentOrderBillDTOs();
+        List<PaymentOrderBillDTO> dtos = new ArrayList<>();
+        List<PaymentOrderBillDTO> paymentOrderBillDTOs = result.getPaymentOrderBillDTOs();
+        for(PaymentOrderBillDTO dto : paymentOrderBillDTOs) {
+        	dto = assetProvider.listPaymentBillDetail(dto.getBillId());
+        	dtos.add(dto);
+        }
         exportOrdersUtil(dtos, cmd, response);
     }
-
-
 
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
@@ -1378,14 +1334,23 @@ public class AssetServiceImpl implements AssetService {
             Integer days = null;
             // calculate r if cycle is not one-off deal
             if(billingCycle.byteValue() != (byte) 5){
-
                 boolean b = checkCycle(d, a, cycle.getMonthOffset()+1);
                 int divided = daysBetween(dWithoutLimit,aWithoutLimit);
                 days = divided;
                 if(!b){
                     // period of this cycle
-                    int divider = daysBetween(d, a);
-                    r = String.valueOf(divider+"/" + divided);
+                	/**
+                	 * issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                	 * 比如签了一个合同，计价条款为：自然季、2018-08-30至2018-12-31，固定金额9000
+                	 * 2018-08-30至2018-09-30 ： 计算系数r = (1 + 2/31) / 3
+                	 * 2018-10-01至2018-12-31 ：计算系数r = 1
+                	 */
+                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                    	r = assetCalculateUtil.getReductionFactor(d, a);
+                    }else {
+                    	int divider = daysBetween(d, a);
+                        r = String.valueOf(divider+"/" + divided);
+                    }
                 }
             }
             BigDecimal amount = calculateFee(var2, days, formula, r,standard, formulaCondition);
@@ -2242,9 +2207,17 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         formula += "*"+duration;
-        BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2,BigDecimal.ROUND_CEILING);
-
+//        BigDecimal response = CalculatorUtil.arithmetic(formula);
+//        response.setScale(2,BigDecimal.ROUND_CEILING);
+        BigDecimal response = BigDecimal.ZERO;
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			Object object = jse.eval(formula);
+			response = new BigDecimal(object.toString());
+			response = response.setScale(2, BigDecimal.ROUND_HALF_UP);
+		} catch (Exception e) {
+			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+		}
         return response;
     }
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula) {
@@ -2292,9 +2265,17 @@ public class AssetServiceImpl implements AssetService {
                 throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,"wrong formula" + formula);
             }
         }
-        BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2,BigDecimal.ROUND_CEILING);
-
+//        BigDecimal response = CalculatorUtil.arithmetic(formula);
+//        response.setScale(2,BigDecimal.ROUND_CEILING);
+        BigDecimal response = BigDecimal.ZERO;
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			Object object = jse.eval(formula);
+			response = new BigDecimal(object.toString());
+			response = response.setScale(2, BigDecimal.ROUND_HALF_UP);
+		} catch (Exception e) {
+			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+		}
         return response;
     }
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, Integer days
@@ -2354,8 +2335,17 @@ public class AssetServiceImpl implements AssetService {
                 }
             }
             formula += "*"+duration;
-            result = CalculatorUtil.arithmetic(formula);
-            result.setScale(2,BigDecimal.ROUND_FLOOR);
+            //result = CalculatorUtil.arithmetic(formula);
+            //result.setScale(2,BigDecimal.ROUND_FLOOR);
+            //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+            ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+    		try {
+    			Object object = jse.eval(formula);
+    			result = new BigDecimal(object.toString());
+    			result = result.setScale(2, BigDecimal.ROUND_HALF_UP);
+    		} catch (Exception e) {
+    			LOGGER.info("calculateFee error, formula={}, exception={}", formula, e);
+    		}
         }
         else if(formulaType == 3 || formulaType == 4){
             //阶梯或者区间
@@ -4997,7 +4987,28 @@ public class AssetServiceImpl implements AssetService {
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), AssetExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
 	}
 
-	//对接下载中心
+    //对接下载中心的导出交易明细
+	@Override
+    public void exportListPaymentBillByParams(ListPaymentBillCmd cmd) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("UserContext", UserContext.current().getUser());
+        Long communityId;
+        String moduleName = "";
+
+        params.put("ListPaymentBillsCMD", cmd);
+        communityId = cmd.getCommunityId();
+        moduleName="交易明细";
+;        Community community = communityProvider.findCommunityById(communityId);
+        if (community == null) {
+            LOGGER.error("Community is not exist.");
+            throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, "Community is not exist.");
+        }
+
+        String fileName = String.format(moduleName+"信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ListPaymentBillExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+
+    //对接下载中心
 	@Override
     public OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){
 		//公用字段
@@ -5131,7 +5142,7 @@ public class AssetServiceImpl implements AssetService {
         taskService.updateTaskProcess(taskId, 65);
         //组装datalist来确定propertyNames的值
         for(int i = 0; i < dtos.size(); i++) {
-            ListBillsDTO dto = dtos.get(i);
+            ListBillsDTO dto = (ListBillsDTO)dtos.get(i);
             Map<String, String> detail = new HashMap<String, String>();
             detail.put("dateStrBegin", dto.getDateStrBegin());
             detail.put("dateStrEnd", dto.getDateStrEnd());
@@ -5246,15 +5257,193 @@ public class AssetServiceImpl implements AssetService {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
 	}
-	
-	/**
+
+	//对接下载中心,下载交易明细。
+    @Override
+    public OutputStream exportOutputStreamListPaymentBill(ListPaymentBillCmd cmd, Long taskId) {
+
+        //表头信息初及数据标签始化
+        ExportExcelnitUtil excelInfo = exportPaymentBillExcelInit(new ExportExcelnitUtil());
+        //公用字段
+        Long communityId;
+        List<PaymentOrderBillDTO> dtos = new ArrayList<>();
+        ListFieldCommand command ;
+        String moduleName = "";
+        taskService.updateTaskProcess(taskId, 10);
+        //交易明细下载
+
+        communityId = cmd.getCommunityId();
+        cmd.setPageSize(10000l);
+        ListPaymentBillResp result = listPaymentBill(cmd);
+        List<PaymentOrderBillDTO> paymentOrderBillDTOs = result.getPaymentOrderBillDTOs();
+        for(PaymentOrderBillDTO dto : paymentOrderBillDTOs) {
+            dto = assetProvider.listPaymentBillDetail(dto.getBillId());
+            dtos.add(dto);
+        }
+        command = ConvertHelper.convert(cmd,ListFieldCommand.class);
+        command.setModuleName("asset");
+        command.setGroupPath(null);
+
+        moduleName=excelInfo.getDataTag().get(ContractExportPaymentBillCode.TABLENAME);
+
+        taskService.updateTaskProcess(taskId, 25);
+
+        List<Map<String, String>> dataList = new ArrayList<>();
+        taskService.updateTaskProcess(taskId, 65);
+        //组装datalist来确定propertyNames的值
+        for(int i = 0; i < dtos.size(); i++) {
+            PaymentOrderBillDTO dto = dtos.get(i);
+            if(dto != null) {
+                Map<String, String> detail = new HashMap<String, String>();
+                detail.put("dateStr",dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
+                detail.put("billGroupName",dto.getBillGroupName());
+                //组装所有的收费项信息
+                List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
+                String billItemListMsg = "";
+                if(billItemDTOList != null) {
+                    for(int k = 0; k < billItemDTOList.size();k++) {
+                        BillItemDTO billItemDTO = billItemDTOList.get(k);
+                        billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
+                    }
+                }
+                detail.put("billItemListMsg",billItemListMsg);
+                detail.put("targetName",dto.getTargetName());
+                detail.put("targetType",dto.getTargetType().equals("eh_user") ? excelInfo.getDataTag().get(ContractExportPaymentBillCode.PERSON) : excelInfo.getDataTag().get(ContractExportPaymentBillCode.ORGANIZATION));
+                //detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
+                detail.put("paymentStatus",excelInfo.getDataTag().get(ContractExportPaymentBillCode.COMPLETED));
+                if(dto.getPaymentType() != null) {
+                    switch (dto.getPaymentType()) {
+                        case 0:
+                            detail.put("paymentType",excelInfo.getDataTag().get(ContractExportPaymentBillCode.WECHAT));
+                            break;
+                        case 1:
+                            detail.put("paymentType",excelInfo.getDataTag().get(ContractExportPaymentBillCode.ALIPAY));
+                            break;
+                        case 2:
+                            detail.put("paymentType",excelInfo.getDataTag().get(ContractExportPaymentBillCode.PUBLICTRANSFER));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                detail.put("amountReceived",dto.getAmountReceived().toString());
+                detail.put("amountReceivable",dto.getAmountReceivable().toString());
+                detail.put("amoutExemption",dto.getAmountExemption().toString());
+                detail.put("amountSupplement",dto.getAmountSupplement().toString());
+                detail.put("paymentOrderNum",dto.getPaymentOrderNum());
+                detail.put("payTime",dto.getPayTime());
+                detail.put("payerTel",dto.getPayerTel());
+                detail.put("payerName",dto.getPayerName());
+                detail.put("addresses",dto.getAddresses());
+                dataList.add(detail);
+            }
+        }
+
+
+        Community community = communityProvider.findCommunityById(communityId);
+        taskService.updateTaskProcess(taskId, 90);
+        if (community == null) {
+            LOGGER.error("Community is not exist.");
+            throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+                    "Community is not exist.");
+        }
+        if (dtos != null && dtos.size() > 0) {
+            String fileName = String.format(moduleName+"信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
+            ExcelUtils excelUtils = new ExcelUtils(null, fileName, moduleName+"信息");
+            taskService.updateTaskProcess(taskId, 80);
+            return excelUtils.getOutputStream(excelInfo.getPropertyNames(), excelInfo.getTitleName(),excelInfo.getTitleSize(), dataList);
+        } else {
+            throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+        }
+
+    }
+
+    //交易明细表头信息初及数据标签始化
+    private ExportExcelnitUtil exportPaymentBillExcelInit(ExportExcelnitUtil excelHeader){
+	    excelHeader.getPropertyNames().add("dateStr");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.DATESTR,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("billGroupName");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.BILLGROUPNAME,"zh_CN").getText());
+        excelHeader.getTitleSize().add(20);
+
+        excelHeader.getPropertyNames().add("billItemListMsg");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.BILLITEMLISTMSG,"zh_CN").getText());
+        excelHeader.getTitleSize().add(20);
+
+        excelHeader.getPropertyNames().add("targetName");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.TARGETNAME,"zh_CN").getText());
+        excelHeader.getTitleSize().add(20);
+
+        excelHeader.getPropertyNames().add("targetType");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.TARGETTYPE,"zh_CN").getText());
+        excelHeader.getTitleSize().add(20);
+
+        excelHeader.getPropertyNames().add("paymentStatus");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.PAYMENTSTATUS,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("paymentType");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.PAYMENTTYPE,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("amountReceived");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.AMOUNTRECEIVED,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("amountReceivable");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.AMOUNTRECEIVABLE,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("amoutExemption");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.AMOUNTEXEMPTION,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("amountSupplement");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.AMOUNTSUPPLEMENT,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("paymentOrderNum");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.PAYMENTORDERNUM,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("payTime");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.PAYTIME,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("payerTel");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.PAYERTEL,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("payerName");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.PAYERNAME,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getPropertyNames().add("addresses");
+        excelHeader.getTitleName().add(localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.ADDRESSES,"zh_CN").getText());
+        excelHeader.getTitleSize().add(40);
+
+        excelHeader.getDataTag().put(ContractExportPaymentBillCode.PERSON,localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.PERSON,"zh_CN").getText());
+        excelHeader.getDataTag().put(ContractExportPaymentBillCode.ORGANIZATION,localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.ORGANIZATION,"zh_CN").getText());
+        excelHeader.getDataTag().put(ContractExportPaymentBillCode.COMPLETED,localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.COMPLETED,"zh_CN").getText());
+        excelHeader.getDataTag().put(ContractExportPaymentBillCode.WECHAT,localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.WECHAT,"zh_CN").getText());
+        excelHeader.getDataTag().put(ContractExportPaymentBillCode.ALIPAY,localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.ALIPAY,"zh_CN").getText());
+        excelHeader.getDataTag().put(ContractExportPaymentBillCode.PUBLICTRANSFER,localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.PUBLICTRANSFER,"zh_CN").getText());
+        excelHeader.getDataTag().put(ContractExportPaymentBillCode.TABLENAME,localeStringProvider.find(ContractExportPaymentBillCode.SCOPE,ContractExportPaymentBillCode.TABLENAME,"zh_CN").getText());
+
+	    return excelHeader;
+    };
+
+    /**
 	 * 个人直接获取手机号码，企业获取所有企业管理员的手机号码
 	 */
 	private List<String> getPhoneNumber(String targetType, Long targetId, Integer namespaceId){
 		List<String> phoneNumbers = new ArrayList<String>(); 
 		try {
 			if (targetType.equals(AssetTargetType.USER.getCode())) {
-				UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), namespaceId);
+				//修复缺陷 #42722 【鼎峰汇】【现网】客户账单中的客户手机号显示的是管理员手机号
+				UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(targetId, namespaceId);
 				if(userIdentifier != null) {
 					phoneNumbers.add(userIdentifier.getIdentifierToken());
 				}
@@ -5276,7 +5465,7 @@ public class AssetServiceImpl implements AssetService {
 	            }
 		    }
 		} catch (Exception e) {
-			LOGGER.error("ZhuZongAssetVendor getPhoneNumber() {}", targetType, targetId, namespaceId, e);
+			LOGGER.error("/asset/listNotSettledBillDetail getPhoneNumber() {}", targetType, targetId, namespaceId, e);
 		}
 		return phoneNumbers;
 	}
@@ -5637,6 +5826,10 @@ public class AssetServiceImpl implements AssetService {
 			existDooraccessLog.setMsg("门禁处于开启状态");
 		}
 		return existDooraccessLog;
+	}
+
+	public PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd) {
+		return assetProvider.listPaymentBillDetail(cmd.getBillId());
 	}
 	
 }

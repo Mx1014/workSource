@@ -1,18 +1,6 @@
 
 package com.everhomes.asset;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.asset.app.AssetAppService;
 import com.everhomes.asset.bill.AssetBillService;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
@@ -27,31 +15,24 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
-import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
-import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
-import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
-import com.everhomes.rest.asset.bill.ListBillsDTO;
-import com.everhomes.rest.asset.bill.ListBillsResponse;
-import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressTotalCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingTotalCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityTotalCmd;
+import com.everhomes.rest.asset.bill.*;
+import com.everhomes.rest.asset.statistic.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
@@ -1088,15 +1069,9 @@ public class AssetController extends ControllerBase {
 	 */
 	@RequestMapping(value = "listPaymentBillDetail")
 	@RestReturn(PaymentOrderBillDTO.class)
-	public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-		ListPaymentBillResp listPaymentBillResp = assetService.listPaymentBill(cmd);
-		PaymentOrderBillDTO result = new PaymentOrderBillDTO();
-		if (listPaymentBillResp != null && listPaymentBillResp.getPaymentOrderBillDTOs() != null
-				&& listPaymentBillResp.getPaymentOrderBillDTOs().size() != 0
-				&& listPaymentBillResp.getPaymentOrderBillDTOs().get(0) != null) {
-			result = listPaymentBillResp.getPaymentOrderBillDTOs().get(0);
-		}
-		RestResponse response = new RestResponse(result);
+	public RestResponse listPaymentBillDetail(ListPaymentBillDetailCmd cmd, HttpServletRequest request) throws Exception {
+		PaymentOrderBillDTO dto = assetService.listPaymentBillDetail(cmd);
+		RestResponse response = new RestResponse(dto);
 		return response;
 	}
 
@@ -1268,16 +1243,17 @@ public class AssetController extends ControllerBase {
 	}
 
 	/**
-	 * <p>导出筛选过的所有交易明细</p>
-	 * <b>URL: /asset/exportOrders</b>
+	 * <p>导出筛选过的所有交易明细(对接下载中心)</p>
+	 * <b>URL: /asset/exportListPaymentBill</b>
 	 */
-	@RequestMapping("exportOrders")
-	public HttpServletResponse exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
-		assetService.exportOrders(cmd, response);
-		RestResponse restResponse = new RestResponse();
-		restResponse.setErrorDescription("OK");
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		return null;
+	@RequestMapping("exportListPaymentBill")
+	public RestResponse exportListPaymentBill(ListPaymentBillCmd cmd) {
+		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);
+		assetService.exportListPaymentBillByParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -1467,6 +1443,7 @@ public class AssetController extends ControllerBase {
 	 * <b>URL: /asset/getPayBillsForEntResult</b>
 	 */
 	@RequestMapping("getPayBillsForEntResult")
+
 	@RestReturn(GetPayBillsForEntResultResp.class)
 	public RestResponse getPayBillsForEntResult(PaymentOrderRecord cmd) {
 		GetPayBillsForEntResultResp response = assetService.getPayBillsForEntResult(cmd);
@@ -1517,6 +1494,19 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+
+	/**
+	 * <p>导出筛选过的所有交易明细</p>
+	 * <b>URL: /asset/exportOrders</b>
+	 */
+	@RequestMapping("exportOrders")
+	public HttpServletResponse exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
+		assetService.exportOrders(cmd, response);
+		RestResponse restResponse = new RestResponse();
+		restResponse.setErrorDescription("OK");
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		return null;
+	}
     
 	/**
 	 * <p>导出筛选过的所有账单 (对接下载中心)</p>
@@ -1757,15 +1747,11 @@ public class AssetController extends ControllerBase {
 	 * <b>URL: /asset/batchDeleteBill</b>
 	 */
 	@RequestMapping("batchDeleteBill")
-	@RestReturn(value = String.class)
+	@RestReturn(value = BatchDeleteBillResponse.class)
 	public RestResponse batchDeleteBill(BatchDeleteBillCommand cmd) {
-		String result = assetBillService.batchDeleteBill(cmd);
-		RestResponse response = new RestResponse();
-		if (result.equals("OK")) {
-			response.setErrorDescription("OK");
-		} else {
-			response.setErrorDescription(result);
-		}
+		BatchDeleteBillResponse res = assetBillService.batchDeleteBill(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}

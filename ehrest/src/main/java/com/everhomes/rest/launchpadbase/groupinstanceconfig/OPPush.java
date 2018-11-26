@@ -17,6 +17,16 @@ public class OPPush {
 
     private Long appId;
 
+    private Integer newsSize;
+
+    public Integer getNewsSize() {
+        return newsSize;
+    }
+
+    public void setNewsSize(Integer newsSize) {
+        this.newsSize = newsSize;
+    }
+
     public String getItemGroup() {
         return itemGroup;
     }

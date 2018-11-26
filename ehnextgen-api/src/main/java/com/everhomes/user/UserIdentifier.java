@@ -10,6 +10,12 @@ public class UserIdentifier extends EhUserIdentifiers {
     public UserIdentifier() {
     }
 
+    public void incrementVersion() {
+        synchronized (this.getId()) {
+            this.setUpdateVersion(this.getUpdateVersion() + 1);
+        }
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

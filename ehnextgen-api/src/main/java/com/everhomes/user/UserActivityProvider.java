@@ -127,4 +127,6 @@ public interface UserActivityProvider {
     void addActivities(List<UserActivity> activityList);
 
     void deleteUserActivity(UserActivity activity);
+
+    List<VipPriority> listVipPriorityByNamespaceId(Integer namespaceId);
 }

@@ -88,16 +88,16 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
     @Autowired
     private ZjSyncdataBackupProvider zjSyncdataBackupProvider;
-    
+
     @Autowired
     private AssetService assetService;
-	
+
     @Autowired
     private CommunityProvider communityProvider;
-    
+
     @Autowired
     private ContractProvider contractProvider;
-    
+
     @Autowired
     private EnterpriseCustomerProvider customerProvider;
 
@@ -106,7 +106,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
-    
+
     @Autowired
     private ContractSearcher contractSearcher;
 
@@ -145,9 +145,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
     @Autowired
     private SyncDataTaskService syncDataTaskService;
-    
+
     @Autowired
-	protected UserProvider userProvider;
+    protected UserProvider userProvider;
 
     @Override
     public void syncContractsFromThirdPart(String pageOffset, String date, String communityIdentifier, Long taskId, Long categoryId, Byte contractApplicationScene){
@@ -191,9 +191,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
 
             if(cmSyncObject != null) {
-                
+
                 if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
-                	currentPage = Integer.valueOf(cmSyncObject.getCurrentpage());
+                    currentPage = Integer.valueOf(cmSyncObject.getCurrentpage());
                     totalPage = Integer.valueOf(cmSyncObject.getTotalpage());
                     pageOffset = String.valueOf(currentPage + 1);
                     cmSyncObjects.add(cmSyncObject);
@@ -219,22 +219,28 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }
 
         }
+        //此方法可以获取当前正在进行同步的数据
+        List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
 
         try{
             syncAllEnterprises(cmSyncObjects);
         }catch(Exception e){
-            LOGGER.error("sync data from RuiAnCM is fail cause customer " );
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_CUSTOMER_ERROR, "sync data from RuiAnCM is fail cause customer");
+            LOGGER.error("sync data from RuiAnCM is fail cause customer ",e );
+            //将同步锁置为失效，此时可以再次创建任务
+            zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_CUSTOMER_ERROR, "sync data from RuiAnCM is fail cause customer:" + e.getMessage());
         }
         //存储瑞安合同
         try {
-        	List<CMDataObject> dataObjects = new ArrayList<>();
-        	for(CMSyncObject temp : cmSyncObjects){
-        		dataObjects.addAll(temp.getData());
-        	}
+            List<CMDataObject> dataObjects = new ArrayList<>();
+            for(CMSyncObject temp : cmSyncObjects){
+                dataObjects.addAll(temp.getData());
+            }
             syncDataToDb(DataType.CONTRACT.getCode(), dataObjects, taskId, categoryId, contractApplicationScene);
         }catch(Exception e){
-            LOGGER.error("sync data from RuiAnCM is fail cause contract " );
+            LOGGER.error("sync data from RuiAnCM is fail cause contract ",e);
+            //将同步锁置为失效，此时可以再次创建任务
+            zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_CONTRACT_ERROR, "sync data from RuiAnCM is fail cause contract");
         }
 
@@ -242,13 +248,15 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         try{
             assetService.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
         }catch(Exception e){
-            LOGGER.error("sync data from RuiAnCM is fail cause Bill " );
+            LOGGER.error("sync data from RuiAnCM is fail cause Bill " ,e);
+            //将同步锁置为失效，此时可以再次创建任务
+            zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_BILL_ERROR, "sync data from RuiAnCM is fail cause Bill");
         }
         //String url = "http://183.62.222.87:5902/sf";
 
-        List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
 
+        //将同步锁置为失效，此时可以再次创建任务
         zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
         //syncDataTaskService.createSyncErrorMsg(NAMESPACE_ID, taskId);
 
@@ -288,7 +296,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         System.out.println(String.valueOf(Integer.valueOf("1") + 1));
     }
 
-    
+
     private void syncDataToDb(Byte dataType,List<CMDataObject> mergeContractList, Long taskId, Long categoryId, Byte contractApplicationScene) {
         /*List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, dataType);
         if (backupList == null || backupList.isEmpty()) {
@@ -307,7 +315,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             LOGGER.debug("dataType {} get out thread=================", dataType);
         }
     }
-    
+
 
 
     private String getNextDay(String date, SimpleDateFormat sdf){
@@ -341,7 +349,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         backup.setUpdateCommunity(communityIdentifier);
         zjSyncdataBackupProvider.createZjSyncdataBackup(backup);
     }
-    
+
     private void updateAllData(Byte dataType, Integer namespaceId, List<CMDataObject> mergeContractList, Long categoryId, Byte contractApplicationScene) {
         DataType cmDataType = DataType.fromCode(dataType);
         LOGGER.debug("CM DataType : {}", cmDataType);
@@ -358,13 +366,13 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                         "error data type");
         }
     }
-    
+
     private void syncAllContracts(Integer namespaceId,  List<CMDataObject> mergeContractList, Long categoryId, Byte contractApplicationScene) {
         //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
         //allFlag为part时，仅更新单个特定的项目数据即可
-    	
+
     	/*List<CMDataObject> mergeContractList = mergeBackupList(backupList, CMDataObject.class);
-    	
+
 		for (int i = 0; i < mergeContractList.size(); i++) {
 			Community community = communityProvider.findCommunityByNamespaceToken(
 					NamespaceCommunityType.RUIAN_CM.getCode(),
@@ -373,22 +381,22 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 				return;
 			}
 			mergeContractList.get(i).setCommunityId(community.getId());
-			
+
 		}*/
-       
-        
+
+
         //List<CMDataObject> mergeContractList = mergeBackupList(backupList, CMDataObject.class);
         //这部分已经传过来
-        
-        
+
+
         List<Contract> myContractList = contractProvider.listContractByNamespaceType(namespaceId, NamespaceCommunityType.RUIAN_CM.getCode(), null, null);
 
-        
+
 
         LOGGER.debug("syncDataToDb namespaceId: {}, myContractList size: {}, theirContractList size: {}",
                 namespaceId, myContractList.size(), mergeContractList.size());
-        
-        
+
+
         syncAllContracts(namespaceId, myContractList, mergeContractList, categoryId, contractApplicationScene);
 
         /*if (mergeContractList.size() > 0) {
@@ -397,21 +405,21 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             //getOwnerStatus(communityIdentifier, ownerIds);
         }*/
     }
-    
+
     private void syncAllContracts(Integer namespaceId, List<Contract> myContractList, List<CMDataObject> theirContractList, Long categoryId, Byte contractApplicationScene) {
         if (theirContractList != null) {
             for (CMDataObject cmContract : theirContractList) {
-            	//删除状态暂不考虑
+                //删除状态暂不考虑
                 if ("0".equals(convertContractStatus(cmContract.getContractHeader().getRecordstatus()))) {
                     if (myContractList != null) {
                         for (Contract contract : myContractList) {
                             if (NamespaceContractType.RUIAN_CM.getCode().equals(contract.getNamespaceContractType())
                                     && contract.getNamespaceContractToken().equals(cmContract.getContractHeader().getRentalID())) {
-                                    //deleteContract(contract,ebeiContract.getHouseInfoList());
+                                //deleteContract(contract,ebeiContract.getHouseInfoList());
                             }
                         }
                     }
-                //待发起 未提交
+                    //待发起 未提交
                 } else if("1".equals(convertContractStatus(cmContract.getContractHeader().getRecordstatus()))) {
                     Boolean notdeal = true;
                     if (myContractList != null) {
@@ -427,12 +435,12 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                         // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
                         Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, cmContract.getContractHeader().getContractNo(), categoryId);
                         if (contract == null) {
-                                insertContract(NAMESPACE_ID, cmContract, categoryId);
+                            insertContract(NAMESPACE_ID, cmContract, categoryId);
                         }else {
-                                updateContract(contract, cmContract, categoryId, contractApplicationScene);
+                            updateContract(contract, cmContract, categoryId, contractApplicationScene);
                         }
                     }
-                //3 审批中
+                    //3 审批中
                 } else {
                     Boolean notdeal = true;
                     if (myContractList != null) {
@@ -448,16 +456,16 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                         // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
                         Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, cmContract.getContractHeader().getContractNo(), categoryId);
                         if (contract == null) {
-                                insertContract(NAMESPACE_ID, cmContract, categoryId);
+                            insertContract(NAMESPACE_ID, cmContract, categoryId);
                         }else {
-                                updateContract(contract, cmContract, categoryId, contractApplicationScene);
+                            updateContract(contract, cmContract, categoryId, contractApplicationScene);
                         }
                     }
                 }
             }
         }
     }
-    
+
     private void insertContract(Integer namespaceId, CMDataObject cmContractData, Long categoryId) {
         Contract contract = new Contract();
         contract.setNamespaceId(namespaceId);
@@ -491,11 +499,11 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         contract.setCustomerId(cmContractData.getCustomerId());
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         if (!"".equals(cmContractData.getContractHeader().getContractAmt()) && cmContractData.getContractHeader().getContractAmt() != null) {
-        	contract.setRent(new BigDecimal(cmContractData.getContractHeader().getContractAmt()));
-		}
-      //由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字
+            contract.setRent(new BigDecimal(cmContractData.getContractHeader().getContractAmt()));
+        }
+        //由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字
         contract.setSponsorUid(cmContractData.getContractHeader().getCreateUserName());
-        
+
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceContractType.RUIAN_CM.getCode(), cmContractData.getContractHeader().getAccountID());
         if(customer != null) {
             //customer.setContactAddress(cmContractData.getBuildingRename());
@@ -503,14 +511,14 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             insertOrUpdateOrganizationAddresses(cmContractData.getContractUnit(),customer);
             contract.setCustomerId(customer.getId());
         }
-        
+
         contract.setCreateUid(UserContext.currentUserId());
         contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         contractProvider.createContract(contract);
         dealContractApartments(contract, cmContractData.getContractUnit());
         contractSearcher.feedDoc(contract);
     }
-    
+
     private void insertOrUpdateOrganizationAddresses(List<CMContractUnit> apartmentIdentifier, EnterpriseCustomer customer){
         List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
         List<CMContractUnit> apartments = apartmentIdentifier.stream().collect(Collectors.toList());
@@ -538,7 +546,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
 
     }
-    
+
     private void insertOrganizationAddress(CMContractUnit apartmentIdentifier, EnterpriseCustomer customer) {
         if (apartmentIdentifier == null) {
             return;
@@ -571,7 +579,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         // add sync to customer entry info  20180523
         organizationService.updateCustomerEntryInfo(customer, organizationAddress);
     }
-    
+
     private void deleteOrganizationAddress(OrganizationAddress organizationAddress) {
         if (OrganizationAddressStatus.fromCode(organizationAddress.getStatus()) != OrganizationAddressStatus.INACTIVE) {
             organizationAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
@@ -584,7 +592,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }
         }
     }
-    
+
     private void updateContract(Contract contract, CMDataObject cmContractData, Long categoryId, Byte contractApplicationScene) {
         contract.setCommunityId(cmContractData.getCommunityId());
         contract.setNamespaceContractType(NamespaceContractType.RUIAN_CM.getCode());
@@ -592,9 +600,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         contract.setContractNumber(cmContractData.getContractHeader().getContractNo());
         contract.setName("瑞安合同");
         //contract.setBuildingRename(cmContractData.getBuildingRename());
-        
+
         contract.setCategoryId(categoryId);
-        
+
         if(StringUtils.isNotBlank(cmContractData.getContractHeader().getStartDate())) {
             contract.setContractStartDate(dateStrToTimestamp(cmContractData.getContractHeader().getStartDate()));
         }
@@ -616,13 +624,13 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         //contract.setCustomerId(Long.parseLong(cmContractData.getContractHeader().getAccountID()));
         //处理过的客户ID
         contract.setCustomerId(cmContractData.getCustomerId());
-        
+
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        
+
         if (!"".equals(cmContractData.getContractHeader().getContractAmt()) && cmContractData.getContractHeader().getContractAmt() != null) {
-        	contract.setRent(new BigDecimal(cmContractData.getContractHeader().getContractAmt()));
-		}
+            contract.setRent(new BigDecimal(cmContractData.getContractHeader().getContractAmt()));
+        }
         //由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字
         contract.setSponsorUid(cmContractData.getContractHeader().getCreateUserName());
 
@@ -633,12 +641,12 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             insertOrUpdateOrganizationAddresses(cmContractData.getContractUnit(),customer);
             contract.setCustomerId(customer.getId());
         }
-         
+
         contractProvider.updateContract(contract);
         dealContractApartments(contract, cmContractData.getContractUnit());
         contractSearcher.feedDoc(contract);
     }
-    
+
     private void dealContractApartments(Contract contract, List<CMContractUnit> cmContractRoomInfos) {
         List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
         Map<String, ContractBuildingMapping> map = new HashMap<>();
@@ -676,10 +684,10 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                     if(address != null) {
                         CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
                         if(addressMapping != null) {
-                            addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+                            addressMapping.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
                             propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
                         } else {
-                            address.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+                            address.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
                             addressProvider.updateAddress(address);
                         }
 
@@ -700,7 +708,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                     propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
                 } else {
                     Address address = addressProvider.findAddressById(apartment.getAddressId());
-                    address.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+                    address.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
                     addressProvider.updateAddress(address);
                 }
 
@@ -708,7 +716,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
 
     }
-    
+
     private Byte convertContractStatus(String ebeiContractStatus) {
         if(ebeiContractStatus != null) {
             switch (ebeiContractStatus) {
@@ -724,7 +732,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
         return null;
     }
-    
+
     private <T> List<T> mergeBackupList(List<ZjSyncdataBackup> backupList, Class<T> targetClz) {
         List<T> resultList = new ArrayList<>();
         for (ZjSyncdataBackup syncdataBackup : backupList) {
@@ -737,7 +745,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
         return resultList;
     }
-    
+
     private Timestamp dateStrToTimestamp(String str) {
         LocalDate localDate = LocalDate.parse(str,dateSF);
         Timestamp ts = new Timestamp(Date.valueOf(localDate).getTime());
@@ -760,9 +768,12 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
         syncObjects.forEach(object -> {
             object.getData().forEach(data -> {
-                Community community1 = addressProvider.findCommunityByThirdPartyId("ruian_cm", data.getContractHeader().getPropertyID());
-                if(community1 != null) {
-                    data.setCommunityId(community1.getId());
+                CMContractUnit cmContractUnit = data.getContractUnit().get(0);
+                Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
+                if(address != null) {
+                    data.setCommunityId(address.getCommunityId());
+                }else{
+                    return;
                 }
                 //进行去重判断
                 Boolean pushFlag = true;
@@ -779,7 +790,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                     customer.setConnector(data.getContractHeader().getConnector());
                     customer.setMail(data.getContractHeader().getMail());
                     customer.setConnectorPhone(data.getContractHeader().getConnectorPhone());
-                    customer.setCommunityId(community1.getId());
+                    customer.setCommunityId(address.getCommunityId());
                     cmCustomers.add(customer);
                 }
             });
@@ -828,8 +839,10 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                     CMContractHeader cmContractHeader = dataObject.getContractHeader();
 
                     for(CMCustomer customer : cmCustomers){
-                        if(dataObject.getCommunityId().equals(customer.getCommunityId()) && cmContractHeader.getAccountID().equals(customer.getAccountId())){
-                            dataObject.setCustomerId(customer.getCustomerId());
+                        if(dataObject.getCommunityId() != null){
+                            if (dataObject.getCommunityId().equals(customer.getCommunityId()) && cmContractHeader.getAccountID().equals(customer.getAccountId())) {
+                                dataObject.setCustomerId(customer.getCustomerId());
+                            }
                         }
                     }
                 }
@@ -1025,7 +1038,6 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             LOGGER.error("sync organization members error: organizationId="+organization.getId()+", contact="+contact+", contactPhone="+contactPhone, e);
         }
     }
-
 
 
 }

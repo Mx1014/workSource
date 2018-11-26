@@ -46,14 +46,10 @@ public interface ServiceModuleAppProvider {
 
 	List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId);
 
-	List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId, Long moduleId);
-	
 	List<ServiceModuleApp> listSystemApps(Long versionId);
 
 	List<ServiceModuleApp> listDefaultApps(Long versionId);
 
 	List<ServiceModuleApp> listServiceModuleAppsForEnterprisePay(Long versionId, Byte enableEnterprisePayFlag);
-
-
 
 }

@@ -19,6 +19,7 @@ public class RechargeCardCommand {
     private Long cardId;
     private BigDecimal amount;
 	private String clientAppName;
+	private Long organizationId;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -52,6 +53,14 @@ public class RechargeCardCommand {
 
 	public void setClientAppName(String clientAppName) {
 		this.clientAppName = clientAppName;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	@Override

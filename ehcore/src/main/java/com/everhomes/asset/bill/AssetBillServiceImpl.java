@@ -14,10 +14,16 @@ import com.everhomes.asset.third.ThirdOpenBillHandler;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.AssetService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
+import com.everhomes.rest.asset.bill.BatchDeleteBillDTO;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractDTO;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
+import com.everhomes.rest.asset.bill.BatchDeleteBillResponse;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
 import com.everhomes.rest.asset.bill.DeleteContractBillFlag;
@@ -39,11 +45,58 @@ public class AssetBillServiceImpl implements AssetBillService {
 	@Autowired
 	private AssetBillProvider assetBillProvider;
 	
-	//缴费V7.3(账单组规则定义)：批量删除“非已缴”账单接口
-	public String batchDeleteBill(BatchDeleteBillCommand cmd) {
-		String result = "OK";
-        assetBillProvider.batchDeleteBill(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getBillIdList());
-        return result;
+	@Autowired
+	private AssetProvider assetProvider;
+	
+	@Autowired
+	private AssetService assetService;
+
+	/**
+	 * 缴费V7.3(账单组规则定义)：批量删除“非已缴”账单接口
+	 * 批量删除只支持删除只支持：手动新增 、 批量导入 、合同产生的账单
+	 * 第三方或对接其他模块不管是已缴还是未缴都不允许删除
+	 */
+	public BatchDeleteBillResponse batchDeleteBill(BatchDeleteBillCommand cmd) {
+		assetService.checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_BATCH_DELETE_BILL,cmd.getOrganizationId());
+		BatchDeleteBillResponse response = new BatchDeleteBillResponse();
+		List<Long> billIdList = cmd.getBillIdList();
+		Integer selectCount, deleteFail, deleteSuccess;
+		if(billIdList != null) {
+			selectCount = cmd.getBillIdList().size();
+			response.setSelectCount(selectCount);//共选中条数
+			//过滤出不能删除的账单
+			List<PaymentBills> failDeleteBill = assetBillProvider.findCannotDeleteBill(billIdList);
+			if(failDeleteBill != null) {
+				deleteFail = failDeleteBill.size();
+				List<BatchDeleteBillDTO> batchDeleteBillDTOList = new ArrayList<>();
+				for(PaymentBills paymentBill : failDeleteBill) {
+					String billGroupName = assetProvider.findBillGroupNameById(paymentBill.getBillGroupId());
+					String deleteErrorMsg = "";
+					if(!paymentBill.getSourceType().equals(AssetSourceType.ASSET_MODULE) 
+							&& !paymentBill.getSourceType().equals(AssetSourceType.CONTRACT_MODULE) ) {
+						deleteErrorMsg = "第三方账单，不允许删除";
+					}else{
+						deleteErrorMsg = "已缴账单，不允许删除";
+					}
+		            BatchDeleteBillDTO dto = new BatchDeleteBillDTO();
+		            dto.setBillId(paymentBill.getId());
+		            dto.setDateStrBegin(paymentBill.getDateStrBegin());
+		            dto.setDateStrEnd(paymentBill.getDateStrEnd());
+		            dto.setBillGroupName(billGroupName);
+		            dto.setDeleteErrorMsg(deleteErrorMsg);
+		            batchDeleteBillDTOList.add(dto);
+		            billIdList.remove(paymentBill.getId());
+				}
+				response.setBatchDeleteBillDTOList(batchDeleteBillDTOList);
+			}else {
+				deleteFail = 0;
+			}
+			deleteSuccess = selectCount - deleteFail;
+			response.setDeleteFail(deleteFail);
+			response.setDeleteSuccess(deleteSuccess);
+			assetBillProvider.batchDeleteBill(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), billIdList);
+		}
+        return response;
 	}
 
 	//校验合同是否产生已缴账单接口（合同模块调用）
