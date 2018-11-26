@@ -168,6 +168,7 @@ import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ImportAuthorizePriceDataDTO;
 import com.everhomes.rest.address.ListAddressByKeywordCommand;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
+import com.everhomes.rest.address.ListApartmentsByMultiStatusResponse;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
@@ -8599,4 +8600,42 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		return response;
 	}
 
+	@Override
+	public ListApartmentsByMultiStatusResponse listApartmentsByMultiStatus(ListApartmentsByMultiStatusCommand cmd) {
+		Long pageAnchor = cmd.getPageAnchor();
+		if ( pageAnchor == null) {
+            pageAnchor = 0L;
+        }
+        Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        //取得门牌列表
+        List<ApartmentBriefInfoDTO> aptList = addressProvider.listApartmentsByMultiStatus(cmd.getNamespaceId(),
+                cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartment(), cmd.getLivingStatus(), pageAnchor, pageSize+1);
+       
+        ListApartmentsByMultiStatusResponse response = new ListApartmentsByMultiStatusResponse();
+        List<ApartmentBriefInfoDTO> apartments = new ArrayList<>();
+        //设置门牌的入住状态
+        if (aptList != null && aptList.size() > 0) {
+            if (aptList.size() > pageSize) {
+                aptList.remove(aptList.size() - 1);
+                response.setNextPageAnchor(pageAnchor + pageSize.longValue());
+            }
+            //门牌转化成门牌id列表
+            List<Long> aptIdList = aptList.stream().map(a -> a.getId()).collect(Collectors.toList());
+            //处理小区地址关联表
+            Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
+            aptList.forEach(apt -> {
+                if (apt.getLivingStatus() == null) {
+                    CommunityAddressMapping mapping = communityAddressMappingMap.get(apt.getId());
+                    if (mapping != null) {
+                        apt.setLivingStatus(mapping.getLivingStatus());
+                    } else {
+                        apt.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+                    }
+                }
+                apartments.add(apt);
+            });
+        }
+        response.setApartments(apartments);
+        return response;
+    }
 }
