@@ -60,4 +60,29 @@ public interface OfficeCubicleProvider {
 
 	OfficeCubicleConfig findConfigByOwnerId(String ownerType,Long ownerId);
 
+	void createCubicleSite(OfficeCubicleStation station);
+
+	List<OfficeCubicleStation> getOfficeCubicleStation(String ownerType, Long ownerId, Long spaceId);
+
+	List<OfficeCubicleRentOrder> searchCubicleOrders(String ownerType, Long ownerId, Long beginDate, Long endDate,
+			 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,
+			Byte paidType, Byte paidMode, Byte requestType, Byte rentType, Byte orderStatus);
+
+	void createCubicleRoom(OfficeCubicleRoom room);
+
+	void updateRoom(OfficeCubicleRoom room);
+
+	void createCubicleRentOrder(OfficeCubicleRentOrder order);
+
+	void createCubicleStationRent(OfficeCubicleStationRent stationRent);
+
+	List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId, Integer currentNamespaceId, Byte rentType,
+			Byte stationType);
+
+	void updateCubicleRentOrder(OfficeCubicleRentOrder order);
+
+	OfficeCubicleRentOrder findOfficeCubicleRentOrderByBizOrderNum(String bizOrderNum);
+
+	OfficeCubicleRentOrder findOfficeCubicleRentOrderById(Long orderId);
+
 }

@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>beginDate: 查询开始时间</li>
  * <li>endDate: 查询结束时间</li>
  * <li>spaceName: 查询空间名</li>
+ * <li>reserveKeyword: 查询预订人关键字</li>
+ * <li>workFlowStatus: 工作流状态， {@link com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 一页的大小</li> 
  * <li>currentPMId: 当前管理公司ID</li>
@@ -19,7 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>orderStatus</li>
  * </ul>
  */
-public class SearchSpaceOrdersCommand {
+public class SearchCubicleOrdersCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
@@ -34,8 +36,11 @@ public class SearchSpaceOrdersCommand {
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
-
-
+	private Byte orderStatus;
+	private Byte paidType;
+	private Byte paidMode;
+	private Byte requestType;
+	private Byte rentType;
 	public Long getCurrentPMId() {
 		return currentPMId;
 	}
@@ -91,6 +96,17 @@ public class SearchSpaceOrdersCommand {
 		this.ownerId = ownerId;
 	}
 
+
+	public Byte getWorkFlowStatus() {
+		return workFlowStatus;
+	}
+
+
+	public void setWorkFlowStatus(Byte workFlowStatus) {
+		this.workFlowStatus = workFlowStatus;
+	}
+
+
 	public Long getBeginDate() {
 		return beginDate;
 	}
@@ -109,6 +125,27 @@ public class SearchSpaceOrdersCommand {
 	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
 	}
+
+
+	public String getSpaceName() {
+		return spaceName;
+	}
+
+
+	public void setSpaceName(String spaceName) {
+		this.spaceName = spaceName;
+	}
+
+
+	public String getReserveKeyword() {
+		return reserveKeyword;
+	}
+
+
+	public void setReserveKeyword(String reserveKeyword) {
+		this.reserveKeyword = reserveKeyword;
+	}
+
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -129,30 +166,44 @@ public class SearchSpaceOrdersCommand {
 		this.pageSize = pageSize;
 	}
 
-
-
-	public String getSpaceName() {
-		return spaceName;
+	public Byte getOrderStatus() {
+		return orderStatus;
 	}
 
-	public void setSpaceName(String spaceName) {
-		this.spaceName = spaceName;
+	public void setOrderStatus(Byte orderStatus) {
+		this.orderStatus = orderStatus;
 	}
 
-	public String getReserveKeyword() {
-		return reserveKeyword;
+	public Byte getPaidType() {
+		return paidType;
 	}
 
-	public void setReserveKeyword(String reserveKeyword) {
-		this.reserveKeyword = reserveKeyword;
+	public void setPaidType(Byte paidType) {
+		this.paidType = paidType;
 	}
 
-	public Byte getWorkFlowStatus() {
-		return workFlowStatus;
+	public Byte getPaidMode() {
+		return paidMode;
 	}
 
-	public void setWorkFlowStatus(Byte workFlowStatus) {
-		this.workFlowStatus = workFlowStatus;
+	public void setPaidMode(Byte paidMode) {
+		this.paidMode = paidMode;
+	}
+
+	public Byte getRequestType() {
+		return requestType;
+	}
+
+	public void setRequestType(Byte requestType) {
+		this.requestType = requestType;
+	}
+
+	public Byte getRentType() {
+		return rentType;
+	}
+
+	public void setRentType(Byte rentType) {
+		this.rentType = rentType;
 	}
 
 	@Override

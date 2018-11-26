@@ -169,7 +169,9 @@ public enum CoordinationLocks {
     SERVICE_ALLIANCE_FAQ_ORDERS("service_alliance_faq_orders"),
     SERVICE_ALLIANCE_OPERATE_ORDERS("service_alliance_operate_orders"),
     
-	STATISTIC_BILL_BY_COMMUNITY("statistic_bill_by_community");//issue-38508 根据项目+月份统计缴费报表
+	STATISTIC_BILL_BY_COMMUNITY("statistic_bill_by_community"),//issue-38508 根据项目+月份统计缴费报表
+	
+	OFFICE_CUBICLE_STATION_RENT("office_cubicle_station_rent");
 	
 
     private String code;

@@ -33,18 +33,11 @@ import com.everhomes.util.StringHelper;
  * <li>workFlowStatus: 工作流状态， {@link com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus}</li>
  * </ul>
  */
-public class OfficeOrderDTO {
+public class OfficeRentOrderDTO {
     private Long id;
     private Long namespaceId;
     private Long spaceId;
     private String spaceName; 
-    private String provinceName; 
-    private String cityName;
-    private String coverUrl;
-    private String address;
-    private Double longitude;
-    private Double latitude; 
-    private String contactPhone; 
     private String description;
     private Byte rentType;
     private Byte spaceType;
@@ -55,25 +48,7 @@ public class OfficeOrderDTO {
     private String reserverName;
     private String reserveContactToken;
     private String reserveEnterprise;
-	private Byte workFlowStatus;
-	private Long flowCaseId;
 
-	
-	public Long getFlowCaseId() {
-		return flowCaseId;
-	}
-
-	public void setFlowCaseId(Long flowCaseId) {
-		this.flowCaseId = flowCaseId;
-	}
-
-	public Byte getWorkFlowStatus() {
-		return workFlowStatus;
-	}
-
-	public void setWorkFlowStatus(Byte workFlowStatus) {
-		this.workFlowStatus = workFlowStatus;
-	}
 
 	@Override
     public String toString() {
@@ -189,50 +164,6 @@ public class OfficeOrderDTO {
 	}
 	public void setId(Long id) {
 		this.id = id;
-	} 
-	public String getProvinceName() {
-		return provinceName;
-	}
-	public void setProvinceName(String provinceName) {
-		this.provinceName = provinceName;
-	}
-	public String getCityName() {
-		return cityName;
-	}
-	public void setCityName(String cityName) {
-		this.cityName = cityName;
-	}
-	public String getAddress() {
-		return address;
-	}
-	public void setAddress(String address) {
-		this.address = address;
-	}
-	public Double getLongitude() {
-		return longitude;
-	}
-	public void setLongitude(Double longitude) {
-		this.longitude = longitude;
-	}
-	public Double getLatitude() {
-		return latitude;
-	}
-	public void setLatitude(Double latitude) {
-		this.latitude = latitude;
-	}
-	public String getContactPhone() {
-		return contactPhone;
-	}
-	public void setContactPhone(String contactPhone) {
-		this.contactPhone = contactPhone;
-	} 
-	
-	public String getCoverUrl() {
-		return coverUrl;
-	}
-
-	public void setCoverUrl(String coverUrl) {
-		this.coverUrl = coverUrl;
 	}
 	
 }

@@ -3,6 +3,7 @@ package com.everhomes.officecubicle;
 import java.util.List;
 
 import com.everhomes.rest.officecubicle.*;
+import com.everhomes.rest.officecubicle.admin.AddCubicleAdminCommand;
 import com.everhomes.rest.officecubicle.admin.CityDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,6 +145,23 @@ public class OfficeCubicleController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /officecubicle/addCubicle</b> 
+     * <p>增加工位</p>
+     */
+    @RequestMapping("addCubicle")
+    @RestReturn(value=OfficeOrderDTO.class ,collection = true)
+    public RestResponse addCubicle(AddCubicleAdminCommand cmd) {
+    	 this.officeCubicleService.addCubicle(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
     
 }
 

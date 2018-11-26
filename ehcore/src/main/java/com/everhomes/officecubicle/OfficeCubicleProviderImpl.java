@@ -9,7 +9,6 @@ import com.everhomes.server.schema.tables.daos.EhOfficeCubicleConfigsDao;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleConfigs;
 import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.util.StringUtil;
 import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
@@ -23,21 +22,39 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.Organization;
-import com.everhomes.print.SiyinPrintOrder;
+import com.everhomes.rentalv2.RentalCloseDate;
+import com.everhomes.rentalv2.RentalResource;
+import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rest.officecubicle.OfficeOrderStatus;
 import com.everhomes.rest.officecubicle.OfficeStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOfficeCubicleCategories;
+import com.everhomes.server.schema.tables.EhOfficeCubicleRoom;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleOrdersDao;
+import com.everhomes.server.schema.tables.daos.EhOfficeCubicleRentOrdersDao;
+import com.everhomes.server.schema.tables.daos.EhOfficeCubicleRoomDao;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleSpacesDao;
+import com.everhomes.server.schema.tables.daos.EhRentalv2DefaultRulesDao;
+import com.everhomes.server.schema.tables.daos.EhRentalv2ResourceTypesDao;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleOrders;
+import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleRentOrders;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleSpaces;
+import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleStationRent;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceTypes;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhOfficeCubicleRentOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhOfficeCubicleRoomRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleSpacesRecord;
+import com.everhomes.server.schema.tables.records.EhOfficeCubicleStationRecord;
+import com.everhomes.server.schema.tables.records.EhOfficeCubicleStationRentRecord;
+import com.everhomes.server.schema.tables.records.EhRentalv2CloseDatesRecord;
+import com.everhomes.server.schema.tables.records.EhRentalv2ResourcesRecord;
+import com.everhomes.server.schema.tables.records.EhRentalv2TimeIntervalRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -119,6 +136,16 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 
 	@Override
+	public void updateRoom(OfficeCubicleRoom room) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleRoomDao dao = new EhOfficeCubicleRoomDao(context.configuration());
+		dao.update(room);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleRoom.class, room.getId());
+
+	}
+	
+	@Override
 	public void deleteCategoriesBySpaceId(Long id) {
 //		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 //		DeleteWhereStep<EhOfficeCubicleCategoriesRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_CATEGORIES);
@@ -132,7 +159,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 	@Override
 	public List<OfficeCubicleOrder> searchOrders(String ownerType,Long ownerId,Long beginDate, Long endDate, String reserveKeyword, String spaceName,
-												 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId, Byte workFlowStatus) {
+												 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId, Byte workFlowStatus
+												) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(currentNamespaceId);
@@ -165,6 +193,66 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			return result;
 		return null;
 	}
+	
+	@Override
+	public List<OfficeCubicleRentOrder> searchCubicleOrders(String ownerType,Long ownerId,Long beginDate, Long endDate,
+												 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,Byte paidType,
+												Byte paidMode, Byte requestType, Byte rentType, Byte orderStatus) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.NAMESPACE_ID.eq(currentNamespaceId);
+		if(ownerType!=null) {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.OWNER_TYPE.eq(ownerType));
+		}
+		if(ownerId!=null) {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.OWNER_ID.eq(ownerId));
+		}
+		if (null != beginDate)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.BEGIN_TIME.gt(new Timestamp(beginDate)));
+		if (null != endDate)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.END_TIME.lt(new Timestamp(endDate)));
+		if (null != paidType)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.PAID_TYPE.eq(paidType));
+		if (null != paidMode)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.PAID_MODE.eq(paidMode));
+		if (null != requestType)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.REQUEST_TYPE.eq(requestType));
+		if (null != rentType)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.RENT_TYPE.eq(rentType));
+		if (null != orderStatus)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.eq(orderStatus));
+		if (null != locator && locator.getAnchor() != null)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ID.lt(locator.getAnchor()));
+		step.limit(pageSize);
+		step.where(condition);
+		List<OfficeCubicleRentOrder> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.OPERATE_TIME.desc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleRentOrder.class);
+		});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+	
+	@Override
+	public List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId,
+												 Integer currentNamespaceId, Byte rentType, Byte stationType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.NAMESPACE_ID.eq(currentNamespaceId);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.gt(new Timestamp(System.currentTimeMillis())));
+		condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.lt(new Timestamp(System.currentTimeMillis())));
+		if (null != rentType)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATUS.eq((byte)0));
+		step.where(condition);
+		List<OfficeCubicleStationRent> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_STATION_RENT.OPERATE_TIME.desc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleStationRent.class);
+		});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+	
 	@Override
 	public void deleteAttachmentsBySpaceId(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -423,6 +511,122 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		if(null != result && result.size() > 0){
 			return result.get(0);
 		}
+		return null;
+	}
+
+
+	
+
+	
+	@Override
+	public void createCubicleSite(OfficeCubicleStation station) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2Resources.class));
+		station.setId(id);
+		station.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		station.setCreatorUid(UserContext.currentUserId());
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleStationRecord record = ConvertHelper.convert(station,
+				EhOfficeCubicleStationRecord.class);
+		InsertQuery<EhOfficeCubicleStationRecord> query = context
+				.insertQuery(Tables.EH_OFFICE_CUBICLE_STATION);
+		query.setRecord(record);
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2Resources.class, null);
+	}
+
+	@Override
+	public void createCubicleRoom(OfficeCubicleRoom room) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2Resources.class));
+		room.setId(id);
+		room.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		room.setCreatorUid(UserContext.currentUserId());
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleRoomRecord record = ConvertHelper.convert(room,
+				EhOfficeCubicleRoomRecord.class);
+		InsertQuery<EhOfficeCubicleRoomRecord> query = context
+				.insertQuery(Tables.EH_OFFICE_CUBICLE_ROOM);
+		query.setRecord(record);
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleRoom.class, null);
+	}
+	
+	@Override
+	public void createCubicleRentOrder(OfficeCubicleRentOrder order) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2Resources.class));
+		order.setId(id);
+		order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		order.setCreatorUid(UserContext.currentUserId());
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleRentOrdersRecord record = ConvertHelper.convert(order,
+				EhOfficeCubicleRentOrdersRecord.class);
+		InsertQuery<EhOfficeCubicleRentOrdersRecord> query = context
+				.insertQuery(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
+		query.setRecord(record);
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleRentOrders.class, null);
+	}
+	
+	@Override
+    public void updateCubicleRentOrder(OfficeCubicleRentOrder order) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOfficeCubicleRentOrdersDao dao = new EhOfficeCubicleRentOrdersDao(context.configuration());
+        
+        dao.update(order);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleRentOrders.class, order.getId());
+
+    }
+	
+	@Override
+	public OfficeCubicleRentOrder findOfficeCubicleRentOrderByBizOrderNum(String bizOrderNum) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOfficeCubicleRentOrdersRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.BIZ_ORDER_NO.eq(bizOrderNum));
+		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleRentOrder.class);
+	}
+
+	@Override
+	public OfficeCubicleRentOrder findOfficeCubicleRentOrderById(Long orderId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOfficeCubicleRentOrdersRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ID.eq(orderId));
+		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleRentOrder.class);
+	}
+	
+	@Override
+	public void createCubicleStationRent(OfficeCubicleStationRent stationRent) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2Resources.class));
+		stationRent.setId(id);
+		stationRent.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		stationRent.setCreatorUid(UserContext.currentUserId());
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleStationRentRecord record = ConvertHelper.convert(stationRent,
+				EhOfficeCubicleStationRentRecord.class);
+		InsertQuery<EhOfficeCubicleStationRentRecord> query = context
+				.insertQuery(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
+		query.setRecord(record);
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleStationRent.class, null);
+	}
+	
+	private DSLContext getReadWriteContext() {
+		return getContext(AccessSpec.readWrite());
+	}
+
+	@Override
+	public List<OfficeCubicleStation> getOfficeCubicleStation(String ownerType, Long ownerId, Long spaceId) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

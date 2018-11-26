@@ -1,5 +1,7 @@
 package com.everhomes.rest.officecubicle;
 
+import java.math.BigDecimal;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -37,6 +39,7 @@ public class AddSpaceOrderCommand {
 
 	private Integer employeeNumber;
 	private Byte financingFlag;
+
 
 	public Integer getEmployeeNumber() {
 		return employeeNumber;
@@ -163,6 +166,4 @@ public class AddSpaceOrderCommand {
 	public void setReserveContactToken(String reserveContactToken) {
 		this.reserveContactToken = reserveContactToken;
 	}
- 
-    
 }

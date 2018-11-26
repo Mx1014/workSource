@@ -25,8 +25,10 @@ import com.everhomes.util.StringHelper;
 *<li>contactPhone  : 咨询电话	</li>
 *<li> chargeUid : 负责人uid	</li>
 *<li> description : 详情-html片	</li>
-*<li> coverUri : 封面图片uri</li>
- * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
+ * <li>spaceAttachments: 空间banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
+ * <li> stationCoverUri : 开放式工位图片uri</li>
+ * <li> shortRentUri : 短租封面图片uri</li>
+ * <li>shortRentAttachments: 短租banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
  * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
  * <li>ranges: 空间可见范围{@link OfficeRangeDTO}</li>
  * <li>currentPMId: 当前管理公司ID</li>
@@ -49,9 +51,13 @@ public class AddSpaceCommand {
 	private String contactPhone;
 	private Long managerUid; 
 	private String description;
-	private String coverUri; 
+	private String spaceCoverUri; 
 	@ItemType(OfficeAttachmentDTO.class)
-	private List<OfficeAttachmentDTO> attachments;
+	private List<OfficeAttachmentDTO> spaceAttachments;
+	private String shortRentUri; 
+	@ItemType(OfficeAttachmentDTO.class)
+	private List<OfficeAttachmentDTO> shortRentAttachments;
+	private String stationCoverUri; 
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
 	@ItemType(OfficeRangeDTO.class)
@@ -160,18 +166,47 @@ public class AddSpaceCommand {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public String getCoverUri() {
-		return coverUri;
+
+	public String getSpaceCoverUri() {
+		return spaceCoverUri;
 	}
-	public void setCoverUri(String coverUri) {
-		this.coverUri = coverUri;
+
+	public void setSpaceCoverUri(String spaceCoverUri) {
+		this.spaceCoverUri = spaceCoverUri;
 	}
-	public List<OfficeAttachmentDTO> getAttachments() {
-		return attachments;
+
+	public List<OfficeAttachmentDTO> getSpaceAttachments() {
+		return spaceAttachments;
 	}
-	public void setAttachments(List<OfficeAttachmentDTO> attachments) {
-		this.attachments = attachments;
+
+	public void setSpaceAttachments(List<OfficeAttachmentDTO> spaceAttachments) {
+		this.spaceAttachments = spaceAttachments;
 	}
+
+	public String getShortRentUri() {
+		return shortRentUri;
+	}
+
+	public void setShortRentUri(String shortRentUri) {
+		this.shortRentUri = shortRentUri;
+	}
+
+	public List<OfficeAttachmentDTO> getShortRentAttachments() {
+		return shortRentAttachments;
+	}
+
+	public void setShortRentAttachments(List<OfficeAttachmentDTO> shortRentAttachments) {
+		this.shortRentAttachments = shortRentAttachments;
+	}
+
+	public String getStationCoverUri() {
+		return stationCoverUri;
+	}
+
+	public void setStationCoverUri(String stationCoverUri) {
+		this.stationCoverUri = stationCoverUri;
+	}
+
 	public List<OfficeCategoryDTO> getCategories() {
 		return categories;
 	}
