@@ -48,7 +48,61 @@ public class OfficeRentOrderDTO {
     private String reserverName;
     private String reserveContactToken;
     private String reserveEnterprise;
+    private String userDetail;
+    private Long createTime;
+    private BigDecimal price;
+    private Byte paidMode;
+    private Byte paidType;
+    private Byte requestType;
 
+
+	public Byte getRequestType() {
+		return requestType;
+	}
+
+	public void setRequestType(Byte requestType) {
+		this.requestType = requestType;
+	}
+
+	public Byte getPaidMode() {
+		return paidMode;
+	}
+
+	public void setPaidMode(Byte paidMode) {
+		this.paidMode = paidMode;
+	}
+
+	public Byte getPaidType() {
+		return paidType;
+	}
+
+	public void setPaidType(Byte paidType) {
+		this.paidType = paidType;
+	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+
+	public Long getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUserDetail() {
+		return userDetail;
+	}
+
+	public void setUserDetail(String userDetail) {
+		this.userDetail = userDetail;
+	}
 
 	@Override
     public String toString() {

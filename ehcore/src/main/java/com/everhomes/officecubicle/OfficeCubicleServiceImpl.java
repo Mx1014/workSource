@@ -57,6 +57,7 @@ import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.general.order.CreateOrderBaseInfo;
+import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
@@ -518,6 +519,39 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	}
 
+	@Override
+	public HttpServletResponse exportCubicleOrders(SearchCubicleOrdersCommand cmd, HttpServletResponse response) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040220L, cmd.getAppId(), null,cmd.getCurrentProjectId());//预定详情权限
+		}
+		Integer pageSize = Integer.MAX_VALUE;
+		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginDate(), cmd.getEndDate(),
+				new CrossShardListingLocator(), pageSize + 1, getNamespaceId(cmd.getNamespaceId()),cmd.getPaidType(),cmd.getPaidMode(),cmd.getRequestType(),cmd.getRentType(), cmd.getOrderStatus());
+
+		if (null == orders) {
+			return null;
+		}
+
+		List<OfficeRentOrderDTO> dtos = new ArrayList<OfficeRentOrderDTO>();
+
+		orders.forEach((other) -> {
+			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
+			dto.setReserveTime(other.getReserveTime().getTime());
+			dtos.add(dto);
+		});
+		URL rootPath = OfficeCubicleServiceImpl.class.getResource("/");
+		String filePath = rootPath.getPath() + this.downloadDir;
+		File file = new File(filePath);
+		if (!file.exists())
+			file.mkdirs();
+		filePath = filePath + "RentalBills" + System.currentTimeMillis() + ".xlsx";
+		// 新建了一个文件
+		this.createCubicleRentBillsBook(filePath, dtos);
+
+		return download(filePath, response);
+
+	}
+	
 	public HttpServletResponse download(String path, HttpServletResponse response) {
 		try {
 			// path是指欲下载的文件的路径。
@@ -580,7 +614,32 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					e.getLocalizedMessage());
 		}
 	}
+	
+	public void createCubicleRentBillsBook(String path, List<OfficeRentOrderDTO> dtos) {
+		if (null == dtos || dtos.size() == 0)
+			return;
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("rentalBill");
 
+		this.createRentalBillsBookSheetHead(sheet);
+		for (OfficeRentOrderDTO dto : dtos) {
+			this.setNewCubicleRentBillsBookRow(sheet, dto);
+		}
+
+		try {
+			FileOutputStream out = new FileOutputStream(path);
+
+			wb.write(out);
+			wb.close();
+			out.close();
+
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_CREATE_EXCEL,
+					e.getLocalizedMessage());
+		}
+	}
+	
 	private void createRentalBillsBookSheetHead(Sheet sheet) {
 
 		Row row = sheet.createRow(sheet.getLastRowNum());
@@ -632,6 +691,32 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 	}
 
+	private void setNewCubicleRentBillsBookRow(Sheet sheet, OfficeRentOrderDTO dto) {
+		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+		int i = -1;
+		// 序号
+		row.createCell(++i).setCellValue(row.getRowNum());
+		// 申请时间
+		row.createCell(++i).setCellValue(dto.getCreateTime());
+		// 预定时间
+		row.createCell(++i).setCellValue(dto.getUserDetail());
+		//订单金额
+		row.createCell(++i).setCellValue(String.valueOf(dto.getPrice()));
+		//支付类型
+		GorderPayType gorderPayType = GorderPayType.fromCode(dto.getPaidMode());
+		row.createCell(++i).setCellValue(gorderPayType == null?"":gorderPayType.getDesc());
+		// 订单来源
+		OfficeCubicleRequestType requestTpye = OfficeCubicleRequestType.fromCode(dto.getRequestType());
+		row.createCell(++i).setCellValue(requestTpye==null?"":requestTpye.getDesc());
+
+		// 预订人
+		row.createCell(++i).setCellValue(dto.getReserverName());
+
+		// 联系电话
+		row.createCell(++i).setCellValue(dto.getReserveContactToken());
+
+	}
+	
 	@Override
 	public List<CityDTO> queryCities(QueryCitiesCommand cmd) {
 		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
@@ -1265,7 +1350,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	
 	@Override
 	public void updateShortRentNums(UpdateShortRentNumsCommand cmd){
-
+		OfficeCubicleSpace space = this.officeCubicleProvider.getSpaceById(cmd.getSpaceId());
+		
+		this.officeCubicleProvider.updateSpace(space);
 	}
 	
 	

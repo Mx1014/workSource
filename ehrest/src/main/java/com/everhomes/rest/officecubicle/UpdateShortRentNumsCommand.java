@@ -17,7 +17,6 @@ public class UpdateShortRentNumsCommand {
     private String ownerType;
     private Long ownerId;
     private Long spaceId;
-    private Long roomId;
 
 
     public Integer getNamespaceId() {
@@ -51,13 +50,7 @@ public class UpdateShortRentNumsCommand {
 	public void setSpaceId(Long spaceId) {
 		this.spaceId = spaceId;
 	}
-	public Long getRoomId() {
-		return roomId;
-	}
 
-	public void setRoomId(Long roomId) {
-		this.roomId = roomId;
-	}
 
 	@Override
     public String toString() {

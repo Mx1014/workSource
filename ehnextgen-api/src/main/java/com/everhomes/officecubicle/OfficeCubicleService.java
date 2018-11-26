@@ -100,4 +100,6 @@ public interface OfficeCubicleService {
 
 	void refundOrder(RefundOrderCommand cmd);
 
+	HttpServletResponse exportCubicleOrders(SearchCubicleOrdersCommand cmd, HttpServletResponse response);
+
 }

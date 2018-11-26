@@ -2,6 +2,9 @@ package com.everhomes.officecubicle;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
 import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.AddCubicleAdminCommand;
 import com.everhomes.rest.officecubicle.admin.AddRoomAdminCommand;
@@ -227,6 +230,19 @@ public class OfficeCubicleController extends ControllerBase {
     	
     }
     
+	/**
+	 * <b>URL: /officecubicle/exprotCubicleOrders</b>
+	 * <p>
+	 * 导出订单
+	 * </p>
+	 */
+	@RequestMapping("exprotCubicleOrders")
+	public String exprotSpaceOrders(@Valid SearchCubicleOrdersCommand cmd,HttpServletResponse response) {
+//		HttpServletResponse commandResponse = rentalService.exportRentalBills(cmd, response );
+		HttpServletResponse commandResponse = this.officeCubicleService.exportCubicleOrders(cmd,response);
+		return null;
+	}
+	
     /**
      * <b>URL: /officecubicle/updateRoom</b> 
      * <p>编辑办公室</p>
