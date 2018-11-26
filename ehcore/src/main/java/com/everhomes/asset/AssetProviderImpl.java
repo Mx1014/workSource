@@ -2754,45 +2754,46 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         EhPaymentBillGroups billGroup = Tables.EH_PAYMENT_BILL_GROUPS.as("billGroup");
         Set<PaymentExpectancyDTO> set = new LinkedHashSet<>();
-
-        List<Long> fetch = context.select(bill.ID)
-                .from(bill)
-                .where(bill.CONTRACT_NUM.eq(contractNum))
-                .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
-                .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
-                .fetch(bill.ID);
-        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
-        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME,t.DELETE_FLAG)
-                .from(t,t1,billGroup)
-                .where(t.BILL_ID.in(fetch))
-                .and(t.BILL_GROUP_ID.eq(billGroup.ID))
-                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-                .orderBy(t1.NAME,t.DATE_STR)
-                .limit(pageOffset,pageSize+1)
-                .fetch()
-                .map(r -> {
-                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
-                    dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
-                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
-                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setChargingItemName(r.getValue(t1.NAME));
-                    dto.setBillItemId(r.getValue(t.ID));
-                    dto.setChargingItemId(r.getValue(t1.ID));
-                    dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
-                    //物业缴费V6.0 账单、费项表增加是否删除状态字段
-                    dto.setDeleteFlag(r.getValue(t.DELETE_FLAG));
-                    //缺陷 #42852 【中天】【缴费管理】联科园区6栋5-6F合同录入信息无误，但是展示账单数据金额却有小数
-                    BigDecimal taxAmount = r.getValue(t.TAX_AMOUNT);//税额
-                    BigDecimal amountReceivable = r.getValue(t.AMOUNT_RECEIVABLE);//应收金额含税
-                    BigDecimal amountReceivableWithoutTax = r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX);//应收不含税
-                    dto.setTaxAmount(taxAmount != null ? taxAmount.stripTrailingZeros() : taxAmount);
-                    dto.setAmountReceivable(amountReceivable != null ? amountReceivable.stripTrailingZeros() : amountReceivable);
-                    dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax.stripTrailingZeros() : amountReceivableWithoutTax);
-                    set.add(dto);
-                    return null;
-                });
+        
+        //修复缺陷 #42398 【中天】【合同管理】中天大厦租赁合同，编号为20171024，产生费用清单数据有问题
+//        List<Long> fetch = context.select(bill.ID)
+//                .from(bill)
+//                .where(bill.CONTRACT_NUM.eq(contractNum))
+//                .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+//                .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+//                .fetch(bill.ID);
+//        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
+//        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME,t.DELETE_FLAG)
+//                .from(t,t1,billGroup)
+//                .where(t.BILL_ID.in(fetch))
+//                .and(t.BILL_GROUP_ID.eq(billGroup.ID))
+//                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+//                .orderBy(t1.NAME,t.DATE_STR)
+//                .limit(pageOffset,pageSize+1)
+//                .fetch()
+//                .map(r -> {
+//                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+//                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+//                    dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+//                    dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
+//                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+//                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+//                    dto.setChargingItemName(r.getValue(t1.NAME));
+//                    dto.setBillItemId(r.getValue(t.ID));
+//                    dto.setChargingItemId(r.getValue(t1.ID));
+//                    dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
+//                    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+//                    dto.setDeleteFlag(r.getValue(t.DELETE_FLAG));
+//                    //缺陷 #42852 【中天】【缴费管理】联科园区6栋5-6F合同录入信息无误，但是展示账单数据金额却有小数
+//                    BigDecimal taxAmount = r.getValue(t.TAX_AMOUNT);//税额
+//                    BigDecimal amountReceivable = r.getValue(t.AMOUNT_RECEIVABLE);//应收金额含税
+//                    BigDecimal amountReceivableWithoutTax = r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX);//应收不含税
+//                    dto.setTaxAmount(taxAmount != null ? taxAmount.stripTrailingZeros() : taxAmount);
+//                    dto.setAmountReceivable(amountReceivable != null ? amountReceivable.stripTrailingZeros() : amountReceivable);
+//                    dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax.stripTrailingZeros() : amountReceivableWithoutTax);
+//                    set.add(dto);
+//                    return null;
+//                });
 
         List<Long> fetch1 = context.select(bill.ID)
                 .from(bill)
@@ -3844,36 +3845,38 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         HashSet<PaymentExpectancyDTO> set = new HashSet<>();
-        List<Long> fetch = new ArrayList<Long>();
-        if(categoryId != null) {
-        	fetch = context.select(bill.ID)
-                    .from(bill)
-                    .where(bill.CONTRACT_NUM.eq(contractNum))
-                    .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
-                    .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
-                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
-                    .fetch(bill.ID);
-        }else {
-        	fetch = context.select(bill.ID)
-                    .from(bill)
-                    .where(bill.CONTRACT_NUM.eq(contractNum))
-                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
-                    .fetch(bill.ID);
-        }
-        context.select(t.ID,t.AMOUNT_RECEIVABLE)
-	        .from(t,t1)
-	        .where(t.BILL_ID.in(fetch))
-	        .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-	        .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
-	        .orderBy(t1.NAME,t.DATE_STR)
-	        .fetch()
-	        .map(r -> {
-	            PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-	            dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
-	            dto.setBillItemId(r.getValue(t.ID));
-	            set.add(dto);
-	            return null;
-        });
+        
+      //修复缺陷 #42398 【中天】【合同管理】中天大厦租赁合同，编号为20171024，产生费用清单数据有问题
+//        List<Long> fetch = new ArrayList<Long>();
+//        if(categoryId != null) {
+//        	fetch = context.select(bill.ID)
+//                    .from(bill)
+//                    .where(bill.CONTRACT_NUM.eq(contractNum))
+//                    .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+//                    .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+//                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
+//                    .fetch(bill.ID);
+//        }else {
+//        	fetch = context.select(bill.ID)
+//                    .from(bill)
+//                    .where(bill.CONTRACT_NUM.eq(contractNum))
+//                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
+//                    .fetch(bill.ID);
+//        }
+//        context.select(t.ID,t.AMOUNT_RECEIVABLE)
+//	        .from(t,t1)
+//	        .where(t.BILL_ID.in(fetch))
+//	        .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+//	        .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
+//	        .orderBy(t1.NAME,t.DATE_STR)
+//	        .fetch()
+//	        .map(r -> {
+//	            PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+//	            dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+//	            dto.setBillItemId(r.getValue(t.ID));
+//	            set.add(dto);
+//	            return null;
+//        });
 
         List<Long> fetch1 = new ArrayList<Long>();
         if(categoryId != null) {
