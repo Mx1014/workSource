@@ -6018,10 +6018,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
 
-		//用于存储已经计算过的合同id
-//		List<Long> contractIds = new ArrayList<>();
-
-
 		List<Long> filterAddressIdList = new ArrayList<>();
 		for (Address address : addresses) {
 			filterAddressIdList.add(address.getId());
@@ -6040,27 +6036,6 @@ public class CommunityServiceImpl implements CommunityService {
 			ApartmentInfoDTO dto = convertToApartmentInfoDTO(address,livingStatus);
 			apartments.add(dto);
 			caculateTotalApartmentStatistic(result,dto);
-//			List<Contract> contracts = contractProvider.findContractByAddressId(address.getId());
-//			if (contracts != null && contracts.size() > 0){
-//				for (Contract contract : contracts) {
-//					if (!contractIds.contains(contract.getId())) {
-//						contractIds.add(contract.getId());
-//						totalRent += (contract.getRent()!=null ? contract.getRent().doubleValue() : 0);
-//						relatedContractNumber++;
-//					}
-//				}
-//				totalRent = doubleRoundHalfUp(totalRent,2);
-//			}
-//			if (address.getRentArea() != null && address.getRentArea() > 0) {
-//				areaAveragePrice = doubleRoundHalfUp(totalRent/address.getRentArea(),2);
-//	    	}
-			//按在租实时均价筛选
-//			if (cmd.getAreaAveragePriceFrom() != null && areaAveragePrice < cmd.getAreaAveragePriceFrom().doubleValue()) {
-//				continue;
-//			}
-//			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
-//				continue;
-//			}
 		}
 		//在租合同数
 		int totalRelatedContractNumber = 0;
@@ -6070,38 +6045,12 @@ public class CommunityServiceImpl implements CommunityService {
 		double totalRent = 0;
 		totalRent = contractProvider.getTotalRentByAddressIds(filterAddressIdList);
 		result.setTotalRent(totalRent);
-
-
-		//分页,每次多拿一个数据，决定要不要设置NextPageAnchor
-//		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
-//		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
-//		long pageAnchor = cmd.getPageAnchor()!= null ? cmd.getPageAnchor() : 0;
-//		int size = 0;
-//		for (ApartmentInfoDTO apartmentInfoDTO : apartments) {
-//			if (apartmentInfoDTO.getAddressId() > pageAnchor) {
-//				apartmentsForOnePage.add(apartmentInfoDTO);
-//				size ++;
-//				if (size > pageSize) {
-//					break;
-//				}
-//			}
-//		}
-//		if (apartmentsForOnePage != null && apartmentsForOnePage.size() > 0) {
-//			if (size > pageSize) {
-//				apartmentsForOnePage.remove(apartmentsForOnePage.size()-1);
-//				result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
-//			}
-//			result.setApartments(apartmentsForOnePage);
-//		}
 		result.setApartments(apartments);
 		result.setTotalAreaSize(doubleRoundHalfUp(result.getTotalAreaSize(),2));
 		result.setTotalRentArea(doubleRoundHalfUp(result.getTotalRentArea(),2));
 		result.setTotalFreeArea(doubleRoundHalfUp(result.getTotalFreeArea(),2));
 		result.setTotalChargeArea(doubleRoundHalfUp(result.getTotalChargeArea(),2));
 		result.setTotalRent(doubleRoundHalfUp(result.getTotalRent(),2));
-//		if (result.getTotalRentArea()!=null && result.getTotalRentArea().doubleValue() > 0) {
-//			result.setTotalAreaAveragePrice(doubleRoundHalfUp(result.getTotalRent()/result.getTotalRentArea(),2));
-//		}
 		return result;
 	}
 
