@@ -752,7 +752,8 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	private Object createGeneralOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType, ActivityRosterPayVersionFlag version) {
-		checkPlateNumber(cmd.getPlateNumber());
+		String plateNumber = cmd.getPlateNumber().trim();
+		checkPlateNumber(plateNumber);
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
@@ -774,7 +775,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
 		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
 		parkingRechargeOrder.setParkingLotId(parkingLot.getId());
-		parkingRechargeOrder.setPlateNumber(cmd.getPlateNumber());
+		parkingRechargeOrder.setPlateNumber(plateNumber);
 		parkingRechargeOrder.setPlateOwnerName(null != cmd.getPlateOwnerName()?cmd.getPlateOwnerName():user.getNickName());
 		parkingRechargeOrder.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
 
@@ -795,7 +796,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setPaidVersion(version.getCode());
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
-			ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
+			ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, plateNumber);
 
 			if (null == dto || null == dto.getPrice()) {
 				LOGGER.error("Parking request temp fee failed, cmd={}", cmd);
@@ -2060,13 +2061,14 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(GetParkingTempFeeCommand cmd) {
-		checkPlateNumber(cmd.getPlateNumber());
+		String plateNumber = cmd.getPlateNumber().trim();
+		checkPlateNumber(plateNumber);
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
 		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
 
-		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
+		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, plateNumber);
 
 		if (null != parkingLot.getTempFeeDiscountFlag()) {
 			if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
@@ -2099,7 +2101,7 @@ public class ParkingServiceImpl implements ParkingService {
 				Timestamp endDate = new Timestamp(now);
 
 				ParkingRechargeOrder order = parkingProvider.getParkingRechargeTempOrder(cmd.getOwnerType(), cmd.getOwnerId(),
-						cmd.getParkingLotId(), cmd.getPlateNumber(), startDate, endDate);
+						cmd.getParkingLotId(), plateNumber, startDate, endDate);
 
 				if (null != order) {
 					//如果已缴费，显示剩余离场时间
