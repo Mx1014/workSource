@@ -961,6 +961,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
         query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%"+cmd.getKeyword()+"%"));
+        //issue-42749:租客管理模块楼宇信息跟实际楼宇数据不一致,其他有楼宇查询的地方全部都是这样的情况,其余模块将已删除的房源也查出来了
+        query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
         if(cmd.getBuildingName() != null){
             query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.eq(cmd.getBuildingName()));
         }
