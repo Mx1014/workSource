@@ -3,7 +3,7 @@ package com.everhomes.openapi.zhenzhihui;
 import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.rest.openapi.OpenApiRedirectHandler;
 import com.everhomes.user.UserContext;
-import java.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +44,7 @@ public class ZhenzhihuiOpenApiRedirectHandler implements OpenApiRedirectHandler 
             String ticket = ticketProvider.createTicket4User(userId, redirectCode);
 
             //AES加密ticket
-//            String encryptedTicket = Base64.encodeBase64String(AESCoder.encrypt(ticket.getBytes("utf-8"), ZhenzhihuiOpenController.KEY.getBytes("utf-8")));
-            String encryptedTicket = Base64.getUrlEncoder().encodeToString(AESCoder.encrypt(ticket.getBytes("utf-8"), ZhenzhihuiOpenController.KEY.getBytes("utf-8")));
+            String encryptedTicket = Base64.encodeBase64String(AESCoder.encrypt(ticket.getBytes("utf-8"), ZhenzhihuiOpenController.KEY.getBytes("utf-8")));
 
             return UriComponentsBuilder.fromHttpUrl(redirectUrl)
                     .queryParam("TICKET", encryptedTicket)
