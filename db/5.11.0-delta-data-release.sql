@@ -225,6 +225,27 @@ INSERT INTO eh_locale_strings (`scope`,`code`,`locale`,`text`) VALUES("export.pa
 INSERT INTO eh_locale_strings (`scope`,`code`,`locale`,`text`) VALUES("export.paymentbill","20006","zh_CN","对公转账");
 INSERT INTO eh_locale_strings (`scope`,`code`,`locale`,`text`) VALUES("export.paymentbill","30001","zh_CN","交易明细");
 
+
+-- AUTHOR: 张智伟
+-- REMARK: issue-37379 工作汇报时间格式化
+SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 1);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '1', 'zh_CN', '今天');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '2', 'zh_CN', '明天');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '11', 'zh_CN', '本周一');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '12', 'zh_CN', '本周二');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '13', 'zh_CN', '本周三');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '14', 'zh_CN', '本周四');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '15', 'zh_CN', '本周五');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '16', 'zh_CN', '本周六');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '17', 'zh_CN', '本周日');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '101', 'zh_CN', '下周一');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '102', 'zh_CN', '下周二');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '103', 'zh_CN', '下周三');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '104', 'zh_CN', '下周四');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '105', 'zh_CN', '下周五');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '106', 'zh_CN', '下周六');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'time_display_format', '107', 'zh_CN', '下周日');
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
