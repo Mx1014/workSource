@@ -45,6 +45,9 @@ public class VisitorSysHKWSUtil {
     @Autowired
     ConfigurationProvider configProvider;
 
+    @Autowired
+    VisitorSysThirdMappingProvider thirdMappingProvider;
+
     public HkwsThirdResponse addAppointment(VisitorSysVisitor visitor){
         JSONObject params = new JSONObject();
 
@@ -82,16 +85,29 @@ public class VisitorSysHKWSUtil {
 
         HkwsThirdResponse resp = HKWSHandler.post(ADD_APPOINTMENT,params);
         LOGGER.info("HKWS response:" + resp.toString());
+
+        if(HKWSHandler.isSuccess(resp)){
+            JSONObject data = JSONObject.parseObject(resp.getData());
+            VisitorSysThirdMapping mapping = new VisitorSysThirdMapping();
+            mapping.setVisitorId(visitor.getId());
+            mapping.setThirdType("HKWSVISITOR");
+            mapping.setThirdValue(data.getString("appointmentUuid"));
+            mapping.setNamespaceId(visitor.getNamespaceId());
+            mapping.setOwnerType(visitor.getOwnerType());
+            mapping.setOwnerId(visitor.getOwnerId());
+            thirdMappingProvider.createMapping(mapping);
+        }
+
         return resp;
     }
 
-    public String delAppointment(VisitorSysVisitor visitor){
+    public void delAppointment(VisitorSysVisitor visitor){
         JSONObject params = new JSONObject();
 
         Integer personId = 0;
         List<HKWSUser> users = HKWSUserProvider.findUserByPhone(UserContext.current().getUser().getIdentifierToken());
         if(users == null || users.size() == 0){
-            Long startTime = configProvider.getLongValue("HKWS.user.syncTime", Long.MIN_VALUE);
+            Long startTime = configProvider.getLongValue("HKWS.user.syncTime", 0L);
             syncHKWSUsers(startTime);
             users = HKWSUserProvider.findUserByPhone(UserContext.current().getUser().getIdentifierToken());
             if(users == null || users.size() == 0){
@@ -101,9 +117,21 @@ public class VisitorSysHKWSUtil {
         }
         params.put("personId",personId);
 
-//        params.put("appointmentUuid",);
+        String appointmentUuid;
+        List<VisitorSysThirdMapping> mappings = thirdMappingProvider.findMappingByVisitorId(visitor.getId());
 
-        return "";
+        if(mappings == null || mappings.size() == 0){
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_NOT_EXIST,"third mapping id not exist");
+        }
+        appointmentUuid = mappings.get(0).getThirdValue();
+
+        params.put("appointmentUuid",appointmentUuid);
+
+        HkwsThirdResponse resp = HKWSHandler.post(DELETE_APPOINTMENT,params);
+        LOGGER.info("HKWS response:" + resp.toString());
+        if(!HKWSHandler.isSuccess(resp)){
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_REQUEST_THIRD_INTERFACE,resp.getErrorMessage());
+        }
     }
 
     public void syncHKWSUsers(Long startTime){
@@ -113,29 +141,27 @@ public class VisitorSysHKWSUtil {
         Integer pageSize = 400;
         Integer pageNo = 1;
 
+        Integer total = 0;
+
         JSONObject params = new JSONObject();
 
-        params.put("pageNo",pageNo);
         params.put("pageSize",pageSize);
         params.put("opUserUuid",HKWSHandler.getOpUserUuid(false));
-        params.put("startTime",startTime == null ? Long.MIN_VALUE : startTime);
+        params.put("startTime",startTime == null ? 0L : startTime);
         params.put("endTime",now);
-        HkwsThirdResponse resp = HKWSHandler.post(GET_PERSON_INFO,params);
-        if(!HKWSHandler.isSuccess(resp)){
-
-        }
-        HKWSDataSet<HKWSUser> datas = JSONObject.parseObject(resp.getData(),new TypeReference<HKWSDataSet<HKWSUser>>(){});
-
-        while (datas.getTotal() >= pageSize) {
+        while (true) {
+            params.put("pageNo",pageNo++);
+            HkwsThirdResponse resp = HKWSHandler.post(GET_PERSON_INFO,params);
+            if(!HKWSHandler.isSuccess(resp)){
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_REQUEST_THIRD_INTERFACE,resp.getErrorMessage());
+            }
+            HKWSDataSet<HKWSUser> datas = JSONObject.parseObject(resp.getData(),new TypeReference<HKWSDataSet<HKWSUser>>(){});
             HKWSUserProvider.deleteUsers(datas.getList().stream().map(r-> r.getPersonId()).collect(Collectors.toList()));
             HKWSUserProvider.createUsers(datas.getList());
-            params.put("pageNo",pageNo++);
-            resp = HKWSHandler.post(GET_PERSON_INFO,params);
-            if(!HKWSHandler.isSuccess(resp)){
-
+            total += datas.getPageSize();
+            if(datas.getTotal() < total || datas.getPageSize() == 0){
+                break;
             }
-            datas = JSONObject.parseObject(resp.getData(),new TypeReference<HKWSDataSet<HKWSUser>>(){});
-
         }
 
         configProvider.setValue("HKWS.user.syncTime",String.valueOf(now));

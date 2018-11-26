@@ -176,6 +176,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private VisitorSysDoorAccessProvider visitorSysDoorAccessProvider;
     @Autowired
     private DoorAccessProvider doorAccessProvider;
+    @Autowired
+    private VisitorSysHKWSUtil HKWSUtil;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
@@ -2925,5 +2927,21 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public List<VisitorSysDoorAccessDTO> listDoorAccessForManage(BaseVisitorsysCommand cmd) {
         checkMoblieManagePrivilege(cmd);
         return listDoorAccess(cmd);
+    }
+
+    @Override
+    public void syncHKWSUsers() {
+        HKWSUtil.syncHKWSUsers(null);
+    }
+
+    @Override
+    public void HKWSTest(BaseVisitorsysCommand cmd) {
+        VisitorSysVisitor bean = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getPmId());
+        if(cmd.getAppId() == 1L){
+            HKWSUtil.addAppointment(bean);
+        } else if (cmd.getAppId() == 2L) {
+            HKWSUtil.delAppointment(bean);
+        }
+
     }
 }

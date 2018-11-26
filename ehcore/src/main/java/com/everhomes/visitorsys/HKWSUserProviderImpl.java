@@ -7,14 +7,15 @@ import com.everhomes.server.schema.tables.daos.EhVisitorSysHkwsUserDao;
 import com.everhomes.server.schema.tables.pojos.EhVisitorSysHkwsUser;
 import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class HKWSUserProviderImpl implements HKWSUserProvider {
 
     @Autowired
@@ -60,9 +61,9 @@ public class HKWSUserProviderImpl implements HKWSUserProvider {
     @Override
     public List<HKWSUser> findUserByPhone(String phone) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhVisitorSysHkwsUser.class));
-        SelectQuery query = context.selectQuery();
+        SelectConditionStep<Record> query = context.select().from(Tables.EH_VISITOR_SYS_HKWS_USER).where("1=1");
         if(StringUtils.isNotBlank(phone))
-            query.addConditions(Tables.EH_VISITOR_SYS_HKWS_USER.PHONE_NO.eq(phone));
+            query.and(Tables.EH_VISITOR_SYS_HKWS_USER.PHONE_NO.eq(phone));
         return query.fetch().map(record -> ConvertHelper.convert(record,HKWSUser.class));
     }
 }

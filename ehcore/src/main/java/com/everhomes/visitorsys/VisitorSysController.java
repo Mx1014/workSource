@@ -1004,5 +1004,33 @@ public class VisitorSysController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /visitorsys/syncHKWSUsers</b>
+	 * <p>
+	 * 同步海康威视用户
+	 * </p>
+	 */
+	@RequestMapping("syncHKWSUsers")
+	@RestReturn(value = String.class)
+	@RequireAuthentication(false)
+	public RestResponse syncHKWSUsers(BaseVisitorsysCommand cmd) {
+		visitorSysService.syncHKWSUsers();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("HKWSTest")
+	@RestReturn(value = String.class)
+	@RequireAuthentication(false)
+	public RestResponse HKWSTest(BaseVisitorsysCommand cmd) {
+		visitorSysService.HKWSTest(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 }
