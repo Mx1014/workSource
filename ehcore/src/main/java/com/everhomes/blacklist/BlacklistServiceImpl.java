@@ -134,7 +134,7 @@ public class BlacklistServiceImpl implements BlacklistService, LocalBusSubscribe
 				}
 
 				if(!StringUtils.isEmpty(cmd.getKeywords())){
-					query.addConditions(Tables.EH_USER_BLACKLISTS.CONTACT_NAME.like(cmd.getKeywords() + "%").or(Tables.EH_USER_BLACKLISTS.CONTACT_TOKEN.eq(cmd.getKeywords() + "%")));
+					query.addConditions(Tables.EH_USER_BLACKLISTS.CONTACT_NAME.like(cmd.getKeywords() + "%").or(Tables.EH_USER_BLACKLISTS.CONTACT_TOKEN.like(cmd.getKeywords() + "%")));
 				}
 				return query;
 			}
