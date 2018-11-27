@@ -37,4 +37,6 @@ public interface FlowProvider {
 
     List<Flow> listConfigFlowByCond(Integer namespaceId, String moduleType, Long moduleId,
 									String projectType, Long projectId, String ownerType, Long ownerId);
+
+    List<Flow> queryFlowVersions(Long flowMainId , Integer namespaceId);
 }
