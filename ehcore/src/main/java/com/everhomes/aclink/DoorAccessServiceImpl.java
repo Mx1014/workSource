@@ -5561,7 +5561,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
             Long orgId = org.getId();
             if (orgId != null) {
-                if (!set.contains(orgId)) { //set中不包含重复的
+                if (!set.contains(orgId)) {
                     set.add(orgId);
                     distinctOrgs.add(org);
                 } else {
