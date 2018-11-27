@@ -511,6 +511,7 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setAptitudeFlagItemId((long)CustomerAptitudeFlag.NOAPTITUDE.getCode());
         }
 //        customer.setSourceId(cmd.getSourceItemId());
+        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         //创建或更新customer的bannerUri
         enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
@@ -577,6 +578,8 @@ public class CustomerServiceImpl implements CustomerService {
         if(customer.getAptitudeFlagItemId() == null){
             customer.setAptitudeFlagItemId((long)CustomerAptitudeFlag.NOAPTITUDE.getCode());
         }
+        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
 //        customer.setSourceId(cmd.getSourceItemId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         //创建或更新customer的bannerUri

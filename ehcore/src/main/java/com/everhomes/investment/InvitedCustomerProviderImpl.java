@@ -385,7 +385,11 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
                     .from(trackers)
                     .where(trackers.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                     .and(trackers.TRACKER_UID.in(memberIds))
-                    .union(context.select(contacts.CUSTOMER_ID)
+                    .union(context.select(customers.ID)
+                            .from(customers)
+                            .where(customers.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                            .and(customers.NAME.like("%" + keyWord + "%"))
+                    ).union(context.select(contacts.CUSTOMER_ID)
                             .from(contacts)
                             .where(contacts.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                             .and(contacts.NAME.like("%" + keyWord + "%"))
@@ -393,6 +397,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
                             .from(customers)
                             .where(customers.STATUS.eq(CommonStatus.ACTIVE.getCode())
                                     .and(customers.TRACKING_UID.in(memberIds))))
+
                     .fetchInto(Long.class);
         }
         return keyWordIds;
