@@ -98,7 +98,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id);
-		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_TYPE.equal(ownerType));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.TYPE.equal(ownerType));
 		step.where(condition);
 		List<OfficeCubicleAttachment> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.ID.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleAttachment.class);
