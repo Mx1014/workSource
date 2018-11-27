@@ -19,10 +19,12 @@ import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.goods.GoodBizEnum;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
+import com.everhomes.rest.promotion.merchant.GetPayUserByMerchantIdCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
 import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
 import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUserIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.GetPayerInfoByMerchantIdRestResponse;
 import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
@@ -649,16 +651,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		
         //3、收款方是否有会员，无则报错
 		Long bizPayeeId = getOrderPayeeAccount(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-
-		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
-		cmd2.setIds(Arrays.asList(bizPayeeId));
-		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
-			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
-		}
-		List<PayUserDTO> payUserDTOs = resp.getResponse();
-        if (payUserDTOs == null || payUserDTOs.size() == 0){
-            LOGGER.error("payeeUserId no find, cmd={}", cmd);
+        if (null == bizPayeeId){
+            LOGGER.error("bizPayeeId no find, cmd={}", StringHelper.toJsonString(cmd));
             throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PAYEE_ACCOUNT_NOT_CONFIG,
                     "暂未绑定收款账户");
         }
@@ -676,7 +670,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         order.setPayDto(StringHelper.toJsonString(preOrderDTO));
         order.setGeneralOrderId(orderCommandResponse.getPayResponse().getBizOrderNum());
 		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
-
 		return preOrderDTO;
 	}
 	
@@ -696,7 +689,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		createOrderCommand.setCommitFlag(1);
 
 		// 公众号支付
-		if (paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+		if (paymentType == PaymentType.WECHAT_JS_PAY.getCode() || paymentType == PaymentType.WECHAT_JS_ORG_PAY.getCode()) {
 			createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
 			createOrderCommand.setPaymentParams(flattenMap);
 		} else if (paymentType != null && paymentType == PaymentType.ALI_JS_PAY.getCode()) {
@@ -857,7 +850,17 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			return null;
 		}
 		
-		return account.getPayeeId();
+		if (null != account.getPayeeId()) {
+			return account.getPayeeId();
+		}
+		
+		Long payeeId =  getPayeeIdByMerchantId(account.getMerchantId());
+		if (null != payeeId) {
+			account.setPayeeId(payeeId);
+			siyinBusinessPayeeAccountProvider.updateSiyinPrintBusinessPayeeAccount(account);
+		}
+		
+		return payeeId;
 	}
 
 	private Long getOrderPayeeMerchantId(Integer namespaceId, String ownerType, Long ownerId) {
@@ -919,6 +922,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		 CreatePurchaseOrderCommand createOrderCommand = preparePaymentBillOrder(cmd, order, bizPayeeId);
 	        CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
 	        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+	        	
+		        if (null != createOrderResp) {
+		        	LOGGER.info("createOrder err:"+StringHelper.toJsonString(createOrderResp));
+		        }
+	        	
 	            String scope = OrderErrorCode.SCOPE;
 	            int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
 	            String description = "Failed to create order";
@@ -2107,15 +2115,26 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					SiyinPrintBusinessPayeeAccount.class);
 			newPayeeAccount.setStatus((byte) 2);
 			newPayeeAccount.setMerchantId(cmd.getPayeeId());
-			newPayeeAccount.setPayeeId(cmd.getPayeeId());
+			newPayeeAccount.setPayeeId(getPayeeIdByMerchantId(cmd.getPayeeId()));
 			siyinBusinessPayeeAccountProvider.createSiyinPrintBusinessPayeeAccount(newPayeeAccount);
 			return;
 		}
 
-		oldPayeeAccount.setPayeeId(cmd.getPayeeId());
+		oldPayeeAccount.setPayeeId(getPayeeIdByMerchantId(cmd.getPayeeId()));
 		oldPayeeAccount.setMerchantId(cmd.getPayeeId());
 		oldPayeeAccount.setPayeeUserType(cmd.getPayeeUserType());
 		siyinBusinessPayeeAccountProvider.updateSiyinPrintBusinessPayeeAccount(oldPayeeAccount);
+	}
+	
+	private Long getPayeeIdByMerchantId(Long merchantId) {
+		GetPayUserByMerchantIdCommand cmd = new GetPayUserByMerchantIdCommand();
+		cmd.setMerchantId(merchantId);
+		GetPayerInfoByMerchantIdRestResponse resp = payServiceV2.getPayerInfoByMerchantId(cmd);
+		if (null == resp || null == resp.getResponse()) {
+			return null;
+		}
+		
+		return resp.getResponse().getId(); 
 	}
 
 	@Override
@@ -2303,10 +2322,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 		if (cmd.getOrderType() == 3) {
 
-			//根据统一订单生成的支付编号获得记录
-			SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByGeneralOrderId(cmd.getMerchantOrderId() + "");
+			SiyinPrintOrder order = findOrderByPaymentNotify(cmd);
 			if (order == null) {
-				LOGGER.error("the order {} not found.", cmd.getMerchantOrderId());
+				LOGGER.error("the order not found. total msg {}",  StringHelper.toJsonString(cmd));
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"the order not found.");
 			}
@@ -2361,6 +2379,21 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			}
 		}
 	}
+
+	private SiyinPrintOrder findOrderByPaymentNotify(MerchantPaymentNotificationCommand cmd) {
+
+		SiyinPrintOrder order = null;
+		if (null != cmd.getMerchantOrderId()) {
+			order = siyinPrintOrderProvider.findSiyinPrintOrderByGeneralOrderId(cmd.getMerchantOrderId() + "");
+		}
+
+		if (null == order) {
+			order = siyinPrintOrderProvider.findSiyinPrintOrderByGeneralOrderId(cmd.getBizOrderNum());
+		}
+
+		return order;
+	}
+
 
 	@Override
 	public void updatePrintOrder(SiyinPrintOrder order, String payOrderNo) {

@@ -1510,14 +1510,15 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 	}
 	 public static boolean naiveDownloadPicture(File file,String urlstr) {
         URL url = null;
-
+        DataInputStream dataInputStream = null;
+        FileOutputStream fileOutputStream = null;
         try {
             //生成图片链接的url类
             url = new URL(urlstr);
             //将url链接下的图片以字节流的形式存储到 DataInputStream类中
-            DataInputStream dataInputStream = new DataInputStream(url.openStream());
+            dataInputStream = new DataInputStream(url.openStream());
             //为file生成对应的文件输出流
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            fileOutputStream = new FileOutputStream(file);
             //定义字节数组大小
             byte[] buffer = new byte[1024];
             //从所包含的输入流中读取[buffer.length()]的字节，并将它们存储到缓冲区数组buffer 中。
@@ -1525,14 +1526,28 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             while (dataInputStream.read(buffer) > 0) { 
                  fileOutputStream.write(buffer);//将buffer中的字节写入文件中区
             }
-            dataInputStream.close();//关闭输入流
-            fileOutputStream.close();//关闭输出流
-
+            fileOutputStream.flush();
             return true;
         } catch (MalformedURLException e) {
-        	LOGGER.error("获取contentserver的资源到本地文件时出错: URL [{}] 有问题 ",urlstr,e);
+        	LOGGER.error("获取contentserver的资源到本地文件时出错: URL [{}] 有问题 ", urlstr, e);
         } catch (IOException e) {
-        	LOGGER.error("获取contentserver的资源到本地文件时出错:  io 有问题 ",e);
+        	LOGGER.error("获取contentserver的资源到本地文件时出错:  io 有问题 ", e);
+        } finally{
+            try {
+            	if(fileOutputStream != null){            		
+            		fileOutputStream.close(); 
+            	}
+			}  catch (IOException e) {
+	        	LOGGER.error("关闭 fileOutputStream 时出错:  io 有问题 ", e);
+	        }
+
+            try {
+            	if(dataInputStream != null){
+            		dataInputStream.close(); 
+            	}
+			}  catch (IOException e) {
+	        	LOGGER.error("关闭 dataInputStream 时出错:  io 有问题 ", e);
+	        }
         }
         return false;
 	}

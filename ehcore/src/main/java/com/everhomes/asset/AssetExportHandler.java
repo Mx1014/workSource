@@ -46,23 +46,23 @@ public class AssetExportHandler  implements FileDownloadTaskHandler {
     @Override
     public void execute(Map<String, Object> params) {
     	//前端传过来的所有数据信息
-        String userStr =  String.valueOf(params.get("UserContext"));
-        User user = (User) StringHelper.fromJsonString(userStr, User.class);
+        //String userStr =  String.valueOf(params.get("UserContext"));
+        //User user = (User) StringHelper.fromJsonString(userStr, User.class);
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
     	OutputStream outputStream ;
     	if (params.get("ListBillsCMD") != null) {
     		String ListBillsCMDStr =  String.valueOf(params.get("ListBillsCMD"));
         	ListBillsCommand cmd = (ListBillsCommand) StringHelper.fromJsonString(ListBillsCMDStr, ListBillsCommand.class);
-        	user.setNamespaceId(cmd.getNamespaceId());
-            UserContext.setCurrentUser(user);
+        	//user.setNamespaceId(cmd.getNamespaceId());
+            //UserContext.setCurrentUser(user);
 
         	outputStream = assetService.exportOutputStreamAssetListByContractList(cmd, taskId);
 		}else if (params.get("ListBillsCMDForEnt") != null) {
 			String ListBillsCMDForEntStr =  String.valueOf(params.get("ListBillsCMDForEnt"));
 			ListBillsCommandForEnt cmd = (ListBillsCommandForEnt) StringHelper.fromJsonString(ListBillsCMDForEntStr, ListBillsCommandForEnt.class);
-        	user.setNamespaceId(cmd.getNamespaceId());
-            UserContext.setCurrentUser(user);
+        	//user.setNamespaceId(cmd.getNamespaceId());
+            //UserContext.setCurrentUser(user);
             
         	outputStream = assetService.exportOutputStreamAssetListByContractList(cmd, taskId);
 		}else {

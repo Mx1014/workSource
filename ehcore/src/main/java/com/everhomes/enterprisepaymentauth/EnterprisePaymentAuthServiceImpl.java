@@ -825,9 +825,11 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
         }
         response.setNextPageOffset(nextPageOffset);
         Map<Long, List<EmployeePaymentLimitChangeLogItemDTO>> groupMap = buildEmployeePaymentLimitChangeLogItemGroupByOperateNo(logDetails);
+        Map<Long, String> userNameMap = new HashMap<>();
         response.setPaymentEmployeeChangeLogs(groupDTOS.stream().map(r -> {
             PaymentAuthOperateLogDTO dto = new PaymentAuthOperateLogDTO();
             dto.setOperatorUid(r.getOperatorUid());
+            setOperatorName(userNameMap, r, cmd.getOrganizationId());
             dto.setOperatorName(r.getOperatorName());
             dto.setOperateTime(r.getOperateTime());
             StringBuilder operateLog = processChangeLog(groupMap, r);

@@ -42,6 +42,12 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         if (params.get("ownerType") != null) {
             ownerType = String.valueOf(params.get("ownerType"));
         }
+
+        List<Long> departmentIds = null;
+        if (params.get("departmentIds") != null) {
+            departmentIds = (List<Long>) params.get("departmentIds");
+        }
+
         String userName = null;
         if (params.get("userName") != null) {
             userName = String.valueOf(params.get("userName"));
@@ -90,7 +96,7 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         Long taskId = (Long) params.get("taskId");
         OutputStream outputStream = null;
         if (reportType.equals("exportPunchStatistics")) {
-            outputStream = punchService.getPunchStatisticsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId, taskId, monthReportId);
+            outputStream = punchService.getPunchStatisticsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId, departmentIds, taskId, monthReportId);
         } else if (reportType.equals("exportPunchDetails")) {
             outputStream = punchService.getPunchDetailsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId, taskId, userId);
         } else if (reportType.equals("exportPunchScheduling")) {
