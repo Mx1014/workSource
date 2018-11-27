@@ -3,6 +3,7 @@ package com.everhomes.openapi.zhenzhihui;
 import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.rest.openapi.OpenApiRedirectHandler;
 import com.everhomes.user.UserContext;
+import com.everhomes.zhenzhihui.ZhenZhiHuiServiceImpl;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,6 @@ import java.util.Map;
 public class ZhenzhihuiOpenApiRedirectHandler implements OpenApiRedirectHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZhenzhihuiOpenApiRedirectHandler.class);
-    private static final Integer ZHENZHIHUI_NAMESPACE_ID = 9999311;
 
     @Autowired
     private TicketProvider ticketProvider;
@@ -36,7 +36,7 @@ public class ZhenzhihuiOpenApiRedirectHandler implements OpenApiRedirectHandler 
             Integer namespaceId = UserContext.getCurrentNamespaceId();
 
             //仅圳智慧域空间允许用此接口
-            if ( namespaceId == null || ZHENZHIHUI_NAMESPACE_ID.compareTo(namespaceId) != 0 ) {
+            if ( namespaceId == null || ZhenZhiHuiServiceImpl.ZHENZHIHUI_NAMESPACE_ID.compareTo(namespaceId) != 0 ) {
                 LOGGER.error("user in namespace[" + namespaceId + "] is not allowed to redirect to zhenzhihui");
                 return null;
             }
