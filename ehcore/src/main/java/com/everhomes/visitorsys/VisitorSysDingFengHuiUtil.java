@@ -1,7 +1,10 @@
 package com.everhomes.visitorsys;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.visitorsys.VisitorsysConstant;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.visitorsys.jsst.JsstEntity;
 import com.everhomes.visitorsys.jsst.JsstRequestParams;
 import org.apache.commons.lang.StringUtils;
@@ -17,6 +20,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.apache.xmlbeans.impl.jam.JSourcePosition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,13 +41,22 @@ import static com.everhomes.util.StringHelper.toHexString;
 @Component
 public class VisitorSysDingFengHuiUtil {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(VisitorSysDingFengHuiUtil.class);
+
     @Autowired
-    VisitorSysVisitReasonProvider visitReasonProvider;
+    private VisitorSysVisitReasonProvider visitReasonProvider;
+    @Autowired
+    private ConfigurationProvider configProvider;
+    @Autowired
+    VisitorSysThirdMappingProvider thirdMappingProvider;
 
-    public Object getInviteInfo(VisitorSysVisitor visitor){
 
-        String cid = "880075500000001";
-        String parkCode = "0010028888";
+    public Object doInvite(VisitorSysVisitor visitor){
+
+//        String cid = "880075500000001";
+//        String parkCode = "0010028888";
+        String cid = configProvider.getValue("visitorsys.dingfenghui.cid","880075500000001");
+        String parkCode = configProvider.getValue("visitorsys.dingfenghui.parkCode","0010028888");
 
         JsstRequestParams params = new JsstRequestParams();
         params.setServiceId("3c.visitor.invite");
@@ -83,13 +97,54 @@ public class VisitorSysDingFengHuiUtil {
         params.setDataItems(dataItems);
 
         String json = post(params.toString());
+        LOGGER.info("visitorsys dingfenghui response:" + json);
+        JSONObject result = JSONObject.parseObject(json);
+        if(result.getIntValue("resultCode") == 0){
+            String inviteKey = result.getJSONObject("attributes").getString("visitorId");
+            VisitorSysThirdMapping mapping = new VisitorSysThirdMapping();
+            mapping.setVisitorId(visitor.getId());
+            mapping.setThirdType("JSSTVISITOR");
+            mapping.setThirdValue(inviteKey);
+            mapping.setNamespaceId(visitor.getNamespaceId());
+            mapping.setOwnerType(visitor.getOwnerType());
+            mapping.setOwnerId(visitor.getOwnerId());
+            thirdMappingProvider.createMapping(mapping);
+        }
 
-        return "";
+        return json;
+    }
+
+    public void cancelInvite(VisitorSysVisitor visitor){
+
+//        String cid = "880075500000001";
+//        String parkCode = "0010028888";
+        String cid = configProvider.getValue("visitorsys.dingfenghui.cid","880075500000001");
+        String parkCode = configProvider.getValue("visitorsys.dingfenghui.parkCode","0010028888");
+
+        JsstRequestParams params = new JsstRequestParams();
+        params.setServiceId("3c.visitor.cancelinvite");
+        JSONObject attr = new JSONObject();
+        attr.put("areaCode", parkCode);
+        String personCode = getPersonCode(UserContext.current().getUser().getIdentifierToken());
+        attr.put("personCode",personCode);
+
+        String visitorId;
+        List<VisitorSysThirdMapping> mappings = thirdMappingProvider.findMappingByVisitorId(visitor.getId());
+
+        if(mappings == null || mappings.size() == 0){
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_NOT_EXIST,"third mapping id not exist");
+        }
+        visitorId = mappings.get(0).getThirdValue();
+        attr.put("visitorId",visitorId);
+        params.setAttributes(attr);
+        String json = post(params.toString());
+        LOGGER.info("visitorsys dingfenghui response:" + json);
     }
 
     public String getPersonCode(String phone){
         String personCode = "";
-        String parkCode = "0010028888";
+//        String parkCode = "0010028888";
+        String parkCode = configProvider.getValue("visitorsys.dingfenghui.parkCode","0010028888");
         JsstRequestParams params = new JsstRequestParams();
         params.setServiceId("3c.base.querypersonsbytel");
         JSONObject attr = new JSONObject();
@@ -112,13 +167,18 @@ public class VisitorSysDingFengHuiUtil {
 
     public String login(){
 //      接口地址
-        String url = "http://syx.jslife.com.cn/jsaims/login";
+//        String url = "http://syx.jslife.com.cn/jsaims/login";
 //      客户号
-        String cid = "880075500000001";
+//        String cid = "880075500000001";
 //      帐号
-        String usr = "880075500000001";
+//        String usr = "880075500000001";
 //      密码
-        String psw = "888888";
+//        String psw = "888888";
+
+        String url = configProvider.getValue("visitorsys.dingfenghui.url.login","http://syx.jslife.com.cn/jsaims/login");
+        String cid = configProvider.getValue("visitorsys.dingfenghui.cid","880075500000001");
+        String usr = configProvider.getValue("visitorsys.dingfenghui.usr","880075500000001");
+        String psw = configProvider.getValue("visitorsys.dingfenghui.psw","888888");
 
         String token = "";
 
@@ -157,15 +217,18 @@ public class VisitorSysDingFengHuiUtil {
 
     public String post(String params){
 //      接口地址
-        String url = "http://syx.jslife.com.cn/jsaims/as";
+//        String url = "http://syx.jslife.com.cn/jsaims/as";
 //      客户号
-        String cid = "880075500000001";
+//        String cid = "880075500000001";
 //      接口版本号
-        String v = "2";
-//      参数
-//        String p = "{\"serviceId\":\"common.queryuserinfo\", \"userId\":\"00001\"}";
+//        String v = "2";
 //      签名signKey
-        String signKey = "7ac3e2ee1075bf4bb6b816c1e80126c0";
+//        String signKey = "7ac3e2ee1075bf4bb6b816c1e80126c0";
+
+        String url = configProvider.getValue("visitorsys.dingfenghui.url.interface","http://syx.jslife.com.cn/jsaims/as");
+        String cid = configProvider.getValue("visitorsys.dingfenghui.cid","880075500000001");
+        String v = configProvider.getValue("visitorsys.dingfenghui.version","2");
+        String signKey = configProvider.getValue("visitorsys.dingfenghui.signKey","7ac3e2ee1075bf4bb6b816c1e80126c0");
 
         String token = login();
 
@@ -178,23 +241,15 @@ public class VisitorSysDingFengHuiUtil {
         try {
             MessageDigest md5Tool = MessageDigest.getInstance("MD5");
             byte[] bytes = (params + signKey).getBytes("UTF-8");
-            System.out.print("签名前序列:");
-            for(byte b : bytes){
-                System.out.print(Byte.toString(b));
-            }
-            System.out.println();
             byte[] md5Data = md5Tool.digest((params + signKey).getBytes("UTF-8"));
             sn = toHexString(md5Data);
             sn = StringUtils.upperCase(sn);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            LOGGER.error("visitorsys dingfenghui post",e);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LOGGER.error("visitorsys dingfenghui post",e);
         }
-        System.out.println("签名:" + sn);
-
         String result = "";
-
         try {
 //          构造参数
             HttpClient client = new DefaultHttpClient();
@@ -211,14 +266,13 @@ public class VisitorSysDingFengHuiUtil {
 //          发送消息和处理结果
             HttpResponse response = client.execute(post);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                System.out.println("执行成功！");
                 result = EntityUtils.toString(response.getEntity());
-                System.out.println(result);
+                LOGGER.info("visitor dingfenghui response:" + result);
             } else {
-                System.out.println("执行失败！");
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_REQUEST_THIRD_INTERFACE,result);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("visitorsys dingfenghui post",e);
         }
         return result;
     }
