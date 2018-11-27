@@ -143,16 +143,8 @@ public class WelfareServiceImpl implements WelfareService {
         WelfaresDTO dto = ConvertHelper.convert(r, WelfaresDTO.class);
         //用户头像
         if (r.getSenderUid() != null) {
-            User queryUser = userProvider.findUserById(r.getSenderUid());
-            if (queryUser != null) {
-
-                String avatarUri = queryUser.getAvatar();
-                if (avatarUri == null || avatarUri.trim().length() == 0) {
-                    avatarUri = userService.getUserAvatarUriByGender(queryUser.getId(), queryUser.getNamespaceId(), queryUser.getGender());
-                }
-                String url = contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), r.getSenderUid());
-                dto.setSenderAvatarUrl(url);
-            }
+        	String url = getUserAvator(r.getSenderUid());
+			dto.setSenderAvatarUrl(url);
         }
         dto.setUpdateTime(r.getUpdateTime().getTime());
         if (null != r.getSendTime()) {
@@ -187,6 +179,20 @@ public class WelfareServiceImpl implements WelfareService {
         }
         return dto;
     }
+
+	private String getUserAvator(Long uid) {
+		User queryUser = userProvider.findUserById(uid);
+		if (queryUser != null) {
+
+		    String avatarUri = queryUser.getAvatar();
+		    if (avatarUri == null || avatarUri.trim().length() == 0) {
+		        avatarUri = userService.getUserAvatarUriByGender(queryUser.getId(), queryUser.getNamespaceId(), queryUser.getGender());
+		    }
+		    String url = contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), uid);
+		    return url;
+		}
+		return null;
+	}
 
     private WelfareCouponDTO getWelfareCouponDTO(WelfareCoupon coupon) {
         WelfareCouponDTO couponDTO = ConvertHelper.convert(coupon, WelfareCouponDTO.class);
@@ -460,11 +466,11 @@ public class WelfareServiceImpl implements WelfareService {
             return null;
         }
         GetUserWelfareResponse response = ConvertHelper.convert(welfare, GetUserWelfareResponse.class);
-        if(welfare.getSenderUid() != null){
-	        UserInfo senderInfo = userService.getUserInfo(welfare.getSenderUid());
-	        if (senderInfo != null) {
-	            response.setSenderAvatarUrl(senderInfo.getAvatarUrl());
-	        }
+
+        //用户头像
+        if (welfare.getSenderUid() != null) {
+        	String url = getUserAvator(welfare.getSenderUid());
+			response.setSenderAvatarUrl(url);
         }
         if (null != welfare.getSendTime()) {
             response.setSendTime(welfare.getSendTime().getTime());
