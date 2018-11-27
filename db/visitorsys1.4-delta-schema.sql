@@ -4,6 +4,10 @@ ALTER TABLE `eh_visitor_sys_visit_reason` ADD COLUMN `reason_type`  tinyint NULL
 ALTER TABLE `eh_visitor_sys_visit_reason` ADD COLUMN `visit_reason_code`  tinyint NULL DEFAULT null COMMENT '到访原因类型码';
 
 -- AUTHOR: 马世亨 20181122
+-- REMARK: 访客1.4 添加访客园区类型字段
+ALTER TABLE `eh_visitor_sys_visitors` ADD COLUMN `community_type`  tinyint NULL DEFAULT NULL COMMENT '园区类型 0为住宅小区,1为商业小区';
+
+-- AUTHOR: 马世亨 20181122
 -- REMARK: 访客1.4 第三方对接映射表
 CREATE TABLE `eh_visitor_sys_third_mapping` (
     `id` BIGINT NOT NULL COMMENT '主键',
