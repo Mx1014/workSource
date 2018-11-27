@@ -2784,12 +2784,13 @@ public class FlowServiceImpl implements FlowService {
         flowCase.setApplierOrganizationId(flowCaseCmd.getCurrentOrganizationId());
         flowCase.setStartNodeId(snapshotFlow.getStartNode());
         flowCase.setEndNodeId(snapshotFlow.getEndNode());
+        flowCase.setOriginAppId(0L);
 
         // 应用 id 的设置
         if (flowCaseCmd.getOriginAppId() == null) {
             AppContext appContext = UserContext.current().getAppContext();
             if (appContext != null && appContext.getAppId() != null) {
-                // flowCase.setOriginAppId(appContext.getAppId());
+                flowCase.setOriginAppId(appContext.getAppId());
             }
         }
 
