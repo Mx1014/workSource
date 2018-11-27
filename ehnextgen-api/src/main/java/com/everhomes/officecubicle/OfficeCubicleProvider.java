@@ -91,4 +91,10 @@ public interface OfficeCubicleProvider {
 
 	void deleteStation(OfficeCubicleStation station);
 
+	void createAttachments(OfficeCubicleAttachment attachment);
+
+	List<OfficeCubicleAttachment> listAttachmentsBySpaceId(Long id, Byte ownerType);
+
+	OfficeCubicleSpace getSpaceByOwnerId(Long ownerId);
+
 }

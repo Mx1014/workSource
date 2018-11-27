@@ -102,4 +102,8 @@ public interface OfficeCubicleService {
 
 	ListOfficeCubicleAccountDTO getOfficeCubiclPayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd);
 
+	ListCitiesByOrgIdAndCommunitIdResponse listCitiesByOrgIdAndCommunitId(ListCitiesByOrgIdAndCommunitIdCommand cmd);
+
+	GetSpaceResponse getSpace(GetSpaceCommand cmd);
+
 }

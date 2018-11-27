@@ -32,7 +32,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.alipay.api.domain.CardBinVO;
 import com.everhomes.asset.PaymentConstants;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
@@ -49,9 +51,12 @@ import com.everhomes.rentalv2.Rentalv2PriceRule;
 import com.everhomes.rentalv2.Rentalv2PriceRuleProvider;
 import com.everhomes.rentalv2.job.RentalMessageJob;
 import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdCommand;
+import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdResponse;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
@@ -64,6 +69,7 @@ import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.promotion.merchant.GetPayUserByMerchantIdCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
@@ -120,7 +126,10 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.ParkingBusinessPayeeAccount;
 import com.everhomes.parking.ParkingBusinessPayeeAccountProvider;
 import com.everhomes.parking.ParkingRechargeRate;
@@ -219,6 +228,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public Rentalv2PriceRuleProvider rentalv2PriceRuleProvider;
 	@Autowired
 	private SmsProvider smsProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	@Autowired
+	private CommunityService communityService;
 	private Integer getNamespaceId(Integer namespaceId){
 		if(namespaceId!=null){
 			return namespaceId;
@@ -281,14 +294,32 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setCoverUrl(this.contentServerService.parserUri(other.getCoverUri(), EntityType.USER.getCode(), UserContext.current()
 				.getUser().getId()));
 
-		List<Attachment> attachments = this.attachmentProvider.listAttachmentByOwnerId(EhOfficeCubicleAttachments.class, dto.getId());
-		if (null != attachments){
-			dto.setAttachments(new ArrayList<OfficeAttachmentDTO>());
-			attachments.forEach((attachment) -> {
-				OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
-				attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
-						UserContext.current().getUser().getId()));
-				dto.getAttachments().add(attachmentDTO);
+		//List<Attachment> attachments = this.attachmentProvider.listAttachmentByOwnerId(EhOfficeCubicleAttachments.class, dto.getId());
+		List<OfficeCubicleAttachment> spaceAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(dto.getId(),(byte)1);
+		if (null != spaceAttachments){
+//			dto.setAttachments(new ArrayList<OfficeAttachmentDTO>());
+//			attachments.forEach((attachment) -> {
+//				OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
+//				attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
+//						UserContext.current().getUser().getId()));
+//				dto.getAttachments().add(attachmentDTO);
+//			});
+			dto.setSpaceAttachments(new ArrayList<OfficeAttachmentDTO>());
+			spaceAttachments.forEach((attachment) -> {
+			OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
+			attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
+					UserContext.current().getUser().getId()));
+			dto.getSpaceAttachments().add(attachmentDTO);
+			});
+		}
+		List<OfficeCubicleAttachment> stationAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(dto.getId(),(byte)2);
+		if (null != stationAttachments){
+			dto.setShortRentAttachments(new ArrayList<OfficeAttachmentDTO>());
+			stationAttachments.forEach((attachment) -> {
+			OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
+			attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
+					UserContext.current().getUser().getId()));
+			dto.getShortRentAttachments().add(attachmentDTO);
 			});
 		}
 		List<OfficeCubicleCategory> categories = this.officeCubicleProvider.queryCategoriesBySpaceId(dto.getId());
@@ -347,11 +378,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			this.officeCubicleProvider.createSpace(space);
 			if (null != cmd.getSpaceAttachments())
 				cmd.getSpaceAttachments().forEach((dto) -> {
-					this.saveAttachment(dto, space.getId());
+					this.saveAttachment(dto, space.getId(),(byte)1);
 				});
 			if (null != cmd.getShortRentAttachments())
 				cmd.getShortRentAttachments().forEach((dto) -> {
-					this.saveAttachment(dto, space.getId());
+					this.saveAttachment(dto, space.getId(),(byte)2);
 				});
 			cmd.getCategories().forEach((dto) -> {
 				this.saveCategory(dto, space.getId(),getNamespaceId(cmd.getNamespaceId()));
@@ -404,9 +435,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId());
 			if (null != cmd.getSpaceAttachments()) {
 				cmd.getSpaceAttachments().forEach((dto) -> {
-					this.saveAttachment(dto, space.getId());
+					this.saveAttachment(dto, space.getId(),(byte)1);
 				});
 			}
+			if (null != cmd.getShortRentAttachments()) {
+				cmd.getShortRentAttachments().forEach((dto) -> {
+					this.saveAttachment(dto, space.getId(),(byte)2);
+				});
+			}
+			
 			this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
 			if (null != cmd.getCategories()) {
 				cmd.getCategories().forEach((dto) -> {
@@ -424,13 +461,14 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		});
 	}
 
-	public void saveAttachment(OfficeAttachmentDTO dto, Long spaceId) {
-		Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
-		attachment.setOwnerId(spaceId);
-		attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		attachment.setCreatorUid(UserContext.current().getUser().getId());
-
-		this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
+	public void saveAttachment(OfficeAttachmentDTO dto, Long spaceId,Byte ownerType) {
+//		Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
+//		attachment.setOwnerId(spaceId);
+//		attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		attachment.setCreatorUid(UserContext.current().getUser().getId());
+//		this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
+		OfficeCubicleAttachment attachment = ConvertHelper.convert(dto, OfficeCubicleAttachment.class);
+		this.officeCubicleProvider.createAttachments(attachment);
 	}
 
 	public void saveCategory(OfficeCategoryDTO dto, Long spaceId, Integer namespaceId) {
@@ -969,6 +1007,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	
 	@Override
 	public ListRentCubicleResponse listRentCubicle(ListRentCubicleCommand cmd){
+		
 		return null;
 	}
 	
@@ -1480,7 +1519,34 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		return null;
 		
 	}
-	
+	@Override
+	public ListCitiesByOrgIdAndCommunitIdResponse listCitiesByOrgIdAndCommunitId (ListCitiesByOrgIdAndCommunitIdCommand cmd){
+		List<OrganizationCommunityDTO> orgcoms = organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
+		Organization org = null;
+		if(orgcoms != null && orgcoms.size() > 0){
+			org = organizationProvider.findOrganizationById(orgcoms.get(0).getOrganizationId());
+		}
+		ListCommunitiesByOrgIdAndAppIdCommand cmd2 = new ListCommunitiesByOrgIdAndAppIdCommand();
+		cmd2.setAppId(cmd.getAppId());
+		cmd2.setOrgId(org.getId());
+		
+		ListCommunitiesByOrgIdAndAppIdResponse resp2 = communityService.listCommunitiesByOrgIdAndAppId(cmd2);
+		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+		ListCitiesByOrgIdAndCommunitIdResponse resp = new ListCitiesByOrgIdAndCommunitIdResponse();
+		List<Long> communityIds = new ArrayList<Long>();
+		for(ProjectDTO dto : resp2.getDtos()){
+			communityIds.add(dto.getProjectId());
+		}
+		List<String> cities = new ArrayList<String>();
+		Map<Long, Community> temp = communityProvider.listCommunitiesByIds(communityIds);
+		temp.values().stream().map(r -> {
+			cities.add(r.getCityName());
+			return cities;
+		}).collect(Collectors.toList());
+		resp.setCity(cities);
+		resp.setDefaultCity(community.getCityName());
+		return resp;
+	}
 	@Override
 	public void payNotify (MerchantPaymentNotificationCommand cmd){
 
@@ -1792,5 +1858,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeRentOrderDTO dto = ConvertHelper.convert(order, OfficeRentOrderDTO.class);
 		response.setOrders(dto);
 		return response;
+	}
+	
+	@Override
+	public GetSpaceResponse getSpace(GetSpaceCommand cmd){
+		GetSpaceResponse resp = new GetSpaceResponse();
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceByOwnerId(cmd.getOwnerId());
+		if (space !=null){
+			resp.setSpaceId(space.getId());
+		}
+		return resp;
 	}
 }

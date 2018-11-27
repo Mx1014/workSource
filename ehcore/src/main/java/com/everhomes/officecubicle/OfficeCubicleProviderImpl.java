@@ -29,6 +29,7 @@ import com.everhomes.rest.officecubicle.OfficeOrderStatus;
 import com.everhomes.rest.officecubicle.OfficeStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhOfficeCubicleAttachments;
 import com.everhomes.server.schema.tables.EhOfficeCubicleCategories;
 import com.everhomes.server.schema.tables.EhOfficeCubicleRoom;
 import com.everhomes.server.schema.tables.EhOfficeCubicleStation;
@@ -93,6 +94,21 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 
 	@Override
+	public List<OfficeCubicleAttachment> listAttachmentsBySpaceId(Long id,Byte ownerType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_TYPE.equal(ownerType));
+		step.where(condition);
+		List<OfficeCubicleAttachment> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.ID.desc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleAttachment.class);
+		});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+	
+	@Override
 	public void createSpace(OfficeCubicleSpace space) {
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleSpaces.class));
 		space.setId(id);
@@ -117,6 +133,19 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		query.execute();
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleCategories.class, null);
 	}
+	
+
+	@Override
+	public void createAttachments(OfficeCubicleAttachment attachment) {
+		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleAttachments.class));
+		attachment.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleAttachmentsRecord record = ConvertHelper.convert(attachment, EhOfficeCubicleAttachmentsRecord.class);
+		InsertQuery<EhOfficeCubicleAttachmentsRecord> query = context.insertQuery(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleAttachments.class, null);
+	}
 
 	@Override
 	public OfficeCubicleSpace getSpaceById(Long id) {
@@ -127,6 +156,15 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		return ConvertHelper.convert(space, OfficeCubicleSpace.class);
 	}
 
+	@Override
+	public OfficeCubicleSpace getSpaceByOwnerId(Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOfficeCubicleSpacesRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_SPACES);
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_ID.eq(ownerId));
+		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleSpace.class);
+
+	}
+	
 	@Override
 	public void updateSpace(OfficeCubicleSpace space) {
 

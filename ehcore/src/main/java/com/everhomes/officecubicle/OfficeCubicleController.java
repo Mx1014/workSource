@@ -11,6 +11,8 @@ import com.everhomes.rest.officecubicle.admin.AddRoomAdminCommand;
 import com.everhomes.rest.officecubicle.admin.CityDTO;
 import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderCommand;
 import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderResponse;
+import com.everhomes.rest.officecubicle.admin.GetSpaceCommand;
+import com.everhomes.rest.officecubicle.admin.GetSpaceResponse;
 import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersCommand;
 import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersResponse;
 import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
@@ -404,6 +406,34 @@ public class OfficeCubicleController extends ControllerBase {
     	
     }
     
+    /**
+     * <b>URL: /officecubicle/listRentCubicle</b> 
+     * <p>搜索订单</p>
+     */
+    @RequestMapping("listRentCubicle")
+    public RestResponse listRentCubicle(ListRentCubicleCommand cmd) {
+
+    	ListRentCubicleResponse resp = this.officeCubicleService.listRentCubicle(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
     
+    /**
+     * <b>URL: /officecubicle/getSpace</b> 
+     * <p>搜索订单</p>
+     */
+    @RequestMapping("getSpace")
+    public RestResponse getSpace(GetSpaceCommand cmd) {
+
+    	GetSpaceResponse resp = this.officeCubicleService.getSpace(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
 }
 

@@ -59,8 +59,13 @@ public class OfficeSpaceDTO {
 	private String description;
 	private String coverUri;
 	private String coverUrl;
+	private String spaceCoverUri; 
 	@ItemType(OfficeAttachmentDTO.class)
-	private List<OfficeAttachmentDTO> attachments;
+	private List<OfficeAttachmentDTO> spaceAttachments;
+	private String shortRentUri; 
+	@ItemType(OfficeAttachmentDTO.class)
+	private List<OfficeAttachmentDTO> shortRentAttachments;
+	private String stationCoverUri; 
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
 	private Byte status;
@@ -288,12 +293,46 @@ public class OfficeSpaceDTO {
 		this.coverUrl = coverUrl;
 	}
 
-	public List<OfficeAttachmentDTO> getAttachments() {
-		return attachments;
+
+
+	public String getSpaceCoverUri() {
+		return spaceCoverUri;
 	}
 
-	public void setAttachments(List<OfficeAttachmentDTO> attachments) {
-		this.attachments = attachments;
+	public void setSpaceCoverUri(String spaceCoverUri) {
+		this.spaceCoverUri = spaceCoverUri;
+	}
+
+	public List<OfficeAttachmentDTO> getSpaceAttachments() {
+		return spaceAttachments;
+	}
+
+	public void setSpaceAttachments(List<OfficeAttachmentDTO> spaceAttachments) {
+		this.spaceAttachments = spaceAttachments;
+	}
+
+	public String getShortRentUri() {
+		return shortRentUri;
+	}
+
+	public void setShortRentUri(String shortRentUri) {
+		this.shortRentUri = shortRentUri;
+	}
+
+	public List<OfficeAttachmentDTO> getShortRentAttachments() {
+		return shortRentAttachments;
+	}
+
+	public void setShortRentAttachments(List<OfficeAttachmentDTO> shortRentAttachments) {
+		this.shortRentAttachments = shortRentAttachments;
+	}
+
+	public String getStationCoverUri() {
+		return stationCoverUri;
+	}
+
+	public void setStationCoverUri(String stationCoverUri) {
+		this.stationCoverUri = stationCoverUri;
 	}
 
 	public List<OfficeCategoryDTO> getCategories() {

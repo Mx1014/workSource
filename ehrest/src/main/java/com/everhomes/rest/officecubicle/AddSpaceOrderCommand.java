@@ -39,7 +39,16 @@ public class AddSpaceOrderCommand {
 
 	private Integer employeeNumber;
 	private Byte financingFlag;
+	private Long reserveTime;
 
+
+	public Long getReserveTime() {
+		return reserveTime;
+	}
+
+	public void setReserveTime(Long reserveTime) {
+		this.reserveTime = reserveTime;
+	}
 
 	public Integer getEmployeeNumber() {
 		return employeeNumber;

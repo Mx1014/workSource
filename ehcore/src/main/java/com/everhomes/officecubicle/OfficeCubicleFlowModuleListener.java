@@ -110,7 +110,7 @@ public class OfficeCubicleFlowModuleListener implements FlowModuleListener {
         List<FlowCaseEntity> list = new ArrayList<FlowCaseEntity>();
         OfficeRentType officeRentType = OfficeRentType.fromCode(order.getRentType());
 
-        list.add(new FlowCaseEntity("申请时间", order.getCreateTime() == null ? null : order.getCreateTime().toLocalDateTime().format(dtf), FlowCaseEntityType.MULTI_LINE.getCode()));
+        list.add(new FlowCaseEntity("参观时间", order.getReserveTime() == null ? null : order.getReserveTime().toLocalDateTime().format(dtf), FlowCaseEntityType.MULTI_LINE.getCode()));
         list.add(new FlowCaseEntity("工位类型", officeRentType.getMsg(), FlowCaseEntityType.MULTI_LINE.getCode()));
         if (officeRentType == OfficeRentType.OPENSITE) {
             list.add(new FlowCaseEntity("预订工位数", order.getPositionNums()+"", FlowCaseEntityType.MULTI_LINE.getCode()));
