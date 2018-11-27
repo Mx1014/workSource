@@ -430,17 +430,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public void sendMessageToAuthCreator(Long authId){
         DoorAuth auth = doorAuthProvider.getDoorAuthById(authId);
-        User creator = userProvider.findUserById(auth.getApproveUserId());
-        String visitorName = auth.getNickname();
-        DoorAccess door = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+        AclinkFormValues notice = new AclinkFormValues();
+        notice = doorAccessProvider.findAclinkFormValues(auth.getId(), (byte)5, AclinkFormValuesType.VISITOR_NOTICE.getCode());
 
-        if(creator == null || visitorName == null || door == null){
+        if(notice == null || notice.getStatus() == (byte)0){
             return;
         }
-        sendMessageToAuthCreator(creator, visitorName, door);
-    }
+            User creator = userProvider.findUserById(auth.getApproveUserId());
+            String visitorName = auth.getNickname();
+            DoorAccess door = doorAccessProvider.getDoorAccessById(auth.getDoorId());
 
-    private void sendMessageToAuthCreator(User creator, String visitorName,DoorAccess door){
+            if(creator == null || visitorName == null || door == null){
+                return;
+            }
+            sendMessageToAuthCreator(creator, visitorName, door);
+        }
+        private void sendMessageToAuthCreator(User creator, String visitorName,DoorAccess door){
         String locale = creator.getLocale();
         Map<String, Object> map = new HashMap<String, Object>();
 //        String visitorName = visitor.getNickName();
