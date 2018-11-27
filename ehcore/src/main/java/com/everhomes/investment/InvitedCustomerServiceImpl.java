@@ -260,6 +260,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
                 EnterpriseCustomer dto = ConvertHelper.convert(customer, EnterpriseCustomer.class);
 
+                dto.setCreateTime(new Timestamp(customer.getCreateTime()));
                 dto.setStatus(CommonStatus.ACTIVE.getCode());
                 dto.setNamespaceId(cmd.getNamespaceId());
                 customerSearcher.feedDoc(dto);

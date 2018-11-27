@@ -650,6 +650,7 @@ public class CustomerServiceImpl implements CustomerService {
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
         //数据库冗余又从动态表单查的 又要删除不显示  暂时这样
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        dto.setCreateTime(customer.getCreateTime().getTime());
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
         ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), customer.getCategoryItemId());
         if (categoryItem != null) {
