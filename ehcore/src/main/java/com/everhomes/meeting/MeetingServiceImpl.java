@@ -1526,7 +1526,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             while (dataInputStream.read(buffer) > 0) { 
                  fileOutputStream.write(buffer);//将buffer中的字节写入文件中区
             }
-
+            fileOutputStream.flush();
             return true;
         } catch (MalformedURLException e) {
         	LOGGER.error("获取contentserver的资源到本地文件时出错: URL [{}] 有问题 ", urlstr, e);
@@ -1534,11 +1534,19 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         	LOGGER.error("获取contentserver的资源到本地文件时出错:  io 有问题 ", e);
         } finally{
             try {
-				dataInputStream.close();
-				fileOutputStream.flush();
-				fileOutputStream.close(); 
+            	if(fileOutputStream != null){            		
+            		fileOutputStream.close(); 
+            	}
 			}  catch (IOException e) {
-	        	LOGGER.error("获取contentserver的资源到本地文件时出错:  io 有问题 ", e);
+	        	LOGGER.error("关闭 fileOutputStream 时出错:  io 有问题 ", e);
+	        }
+
+            try {
+            	if(dataInputStream != null){
+            		dataInputStream.close(); 
+            	}
+			}  catch (IOException e) {
+	        	LOGGER.error("关闭 dataInputStream 时出错:  io 有问题 ", e);
 	        }
         }
         return false;
