@@ -11,26 +11,17 @@ import com.everhomes.util.StringHelper;
  *<li> id: 订单id	</li>
  *<li> namespaceId: namespace id	</li>
  *<li> spaceId: spaceId	</li>
- *<li> spaceName: 工位空间名称	</li> 
-*<li> provinceName : 省份名称	</li> 
-*<li> cityName : 城市名称	</li>
-*<li> address : 地址	</li>
-*<li> longitude : 经度	</li>
-*<li>latitude  : 纬度	</li>
+ *<li> spaceName: 工位空间名称	</li>
 *<li>contactPhone  : 咨询电话	</li>  
 *<li> description : 详情-html片	</li> 
-*<li> coverUrl : 封面图片url</li>   
- * <li>rentType: 租赁类别:1-开放式（默认space_type 1）,2-办公室</li>  
- * <li>spaceType: 空间类别:1-工位,2-面积 </li>  
- * <li>spaceSize: 场所大小 - 对于工位是个数，对于面积是平米</li> 
+ * <li>rentType: 1-长租,2-短租</li>  
  * <li>status: 状态 2-客户端可见  0-客户端不可见</li> 
  * <li>orderType: 预定类别：1-参观 2-预定 </li> 
  * <li>reserveTime: 预定时间 </li> 
  * <li>reservePerson: 预订人姓名 </li> 
  * <li>reserveContact:  预订人联系方式</li> 
- * <li>reservceCompany: 预订人公司</li> 
- * <li>flowCaseId: 工作流id</li> 
- * <li>workFlowStatus: 工作流状态， {@link com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus}</li>
+ * <li>reserveEnterpriseId: 预订人公司</li> 
+ * <li>reserveEnterpriseName: 预订人公司</li> 
  * </ul>
  */
 public class OfficeRentOrderDTO {
@@ -40,21 +31,27 @@ public class OfficeRentOrderDTO {
     private String spaceName; 
     private String description;
     private Byte rentType;
-    private Byte spaceType;
-    private String spaceSize;
-    private Byte status;
-    private Byte orderType; 
     private Long reserveTime;
     private String reserverName;
     private String reserveContactToken;
-    private String reserveEnterprise;
+    private Long reserveEnterpriseId;
+    private String reserveEnterpriseName;
     private String userDetail;
     private Long createTime;
     private BigDecimal price;
     private Byte paidMode;
     private Byte paidType;
     private Byte requestType;
+    private Byte orderStatus;
 
+
+	public Byte getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(Byte orderStatus) {
+		this.orderStatus = orderStatus;
+	}
 
 	public Byte getRequestType() {
 		return requestType;
@@ -149,38 +146,6 @@ public class OfficeRentOrderDTO {
 		this.rentType = rentType;
 	}
 
-	public Byte getSpaceType() {
-		return spaceType;
-	}
-
-	public void setSpaceType(Byte spaceType) {
-		this.spaceType = spaceType;
-	}
-
-	public String getSpaceSize() {
-		return spaceSize;
-	}
-
-	public void setSpaceSize(String spaceSize) {
-		this.spaceSize = spaceSize;
-	}
-
-	public Byte getStatus() {
-		return status;
-	}
-
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
-
-	public Byte getOrderType() {
-		return orderType;
-	}
-
-	public void setOrderType(Byte orderType) {
-		this.orderType = orderType;
-	}
-
 	public Long getReserveTime() {
 		return reserveTime;
 	}
@@ -205,12 +170,21 @@ public class OfficeRentOrderDTO {
 		this.reserveContactToken = reserveContactToken;
 	}
 
-	public String getReserveEnterprise() {
-		return reserveEnterprise;
+
+	public Long getReserveEnterpriseId() {
+		return reserveEnterpriseId;
 	}
 
-	public void setReserveEnterprise(String reserveEnterprise) {
-		this.reserveEnterprise = reserveEnterprise;
+	public void setReserveEnterpriseId(Long reserveEnterpriseId) {
+		this.reserveEnterpriseId = reserveEnterpriseId;
+	}
+
+	public String getReserveEnterpriseName() {
+		return reserveEnterpriseName;
+	}
+
+	public void setReserveEnterpriseName(String reserveEnterpriseName) {
+		this.reserveEnterpriseName = reserveEnterpriseName;
 	}
 
 	public Long getId() {

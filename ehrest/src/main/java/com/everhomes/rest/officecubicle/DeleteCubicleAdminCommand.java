@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>spaceId: 停车场ID</li>
- * <li>roomId: 办公室id</li>
+ * <li>stationId: 工位id</li>
  * </ul>
  */
 public class DeleteCubicleAdminCommand {
@@ -17,7 +17,7 @@ public class DeleteCubicleAdminCommand {
     private String ownerType;
     private Long ownerId;
     private Long spaceId;
-    private Long roomId;
+    private Long stationId;
 
 
     public Integer getNamespaceId() {
@@ -51,12 +51,13 @@ public class DeleteCubicleAdminCommand {
 	public void setSpaceId(Long spaceId) {
 		this.spaceId = spaceId;
 	}
-	public Long getRoomId() {
-		return roomId;
+
+	public Long getStationId() {
+		return stationId;
 	}
 
-	public void setRoomId(Long roomId) {
-		this.roomId = roomId;
+	public void setStationId(Long stationId) {
+		this.stationId = stationId;
 	}
 
 	@Override

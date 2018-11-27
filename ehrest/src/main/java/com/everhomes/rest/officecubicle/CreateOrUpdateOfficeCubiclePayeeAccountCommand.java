@@ -16,22 +16,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateOrUpdateOfficeCubiclePayeeAccountCommand {
-    private Long id;
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private Long spaceId;
-    private String spaceName;
-    private Long payeeId;
-    private String payeeUserType;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private Long accountId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -57,38 +45,14 @@ public class CreateOrUpdateOfficeCubiclePayeeAccountCommand {
         this.ownerId = ownerId;
     }
 
-    public Long getSpaceId() {
-		return spaceId;
+
+	public Long getAccountId() {
+		return accountId;
 	}
 
-	public void setSpaceId(Long spaceId) {
-		this.spaceId = spaceId;
+	public void setAccountId(Long accountId) {
+		this.accountId = accountId;
 	}
-
-	public String getSpaceName() {
-		return spaceName;
-	}
-
-	public void setSpaceName(String spaceName) {
-		this.spaceName = spaceName;
-	}
-
-	public Long getPayeeId() {
-        return payeeId;
-    }
-
-    public void setPayeeId(Long payeeId) {
-        this.payeeId = payeeId;
-    }
-
-    public String getPayeeUserType() {
-        return payeeUserType;
-    }
-
-    public void setPayeeUserType(String payeeUserType) {
-        this.payeeUserType = payeeUserType;
-    }
-
 
 	@Override
     public String toString() {

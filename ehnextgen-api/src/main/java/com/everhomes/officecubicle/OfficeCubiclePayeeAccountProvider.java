@@ -15,8 +15,8 @@ public interface OfficeCubiclePayeeAccountProvider {
 
 	List<OfficeCubiclePayeeAccount> findRepeatOfficeCubiclePayeeAccounts(Long id, Integer namespaceId, String ownerType, Long ownerId, Long spaceId);
 
-	List<OfficeCubiclePayeeAccount> listOfficeCubiclePayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId, Long spaceId);
+	List<OfficeCubiclePayeeAccount> listOfficeCubiclePayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
-    void deleteOfficeCubiclePayeeAccount(Long id);
+	void deleteOfficeCubiclePayeeAccount(Long id, Long ownerId);
 
 }

@@ -17,9 +17,18 @@ public class UpdateShortRentNumsCommand {
     private String ownerType;
     private Long ownerId;
     private Long spaceId;
+    private String count;
 
 
-    public Integer getNamespaceId() {
+    public String getCount() {
+		return count;
+	}
+
+	public void setCount(String count) {
+		this.count = count;
+	}
+
+	public Integer getNamespaceId() {
         return namespaceId;
     }
 

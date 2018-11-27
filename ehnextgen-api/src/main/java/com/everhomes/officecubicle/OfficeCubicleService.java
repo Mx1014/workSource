@@ -70,8 +70,6 @@ public interface OfficeCubicleService {
 
 	void createOrUpdateOfficeCubiclePayeeAccount(CreateOrUpdateOfficeCubiclePayeeAccountCommand cmd);
 
-	ListOfficeCubiclePayeeAccountResponse listOfficeCubiclPayeeAccount(ListOfficeCubiclePayeeAccountCommand cmd);
-
 	List<ListOfficeCubicleAccountDTO> listOfficeCubicleAccount(ListOfficeCubicleAccountCommand cmd);
 
 	SearchCubicleOrdersResponse searchCubicleOrders(SearchCubicleOrdersCommand cmd);
@@ -101,5 +99,7 @@ public interface OfficeCubicleService {
 	void refundOrder(RefundOrderCommand cmd);
 
 	HttpServletResponse exportCubicleOrders(SearchCubicleOrdersCommand cmd, HttpServletResponse response);
+
+	ListOfficeCubicleAccountDTO getOfficeCubiclPayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd);
 
 }

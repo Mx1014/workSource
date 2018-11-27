@@ -34,6 +34,9 @@ import com.everhomes.util.StringHelper;
  * <li>ranges: 空间可见范围{@link OfficeRangeDTO}</li>
  * <li>minUnitPrice: 最低价格</li>
  * <li>allPositionNums: 总工位数量</li>
+ * <li>refundTip:退款提示</li>
+ * <li>holidayOpenFlag:节假日是否开放预约 0不开放 1 开放</li>
+ * <li>holidayeType:节假日类型 {@link com.everhomes.rest.rentalv2.admin.RentalHolidayType}</li>
  * </ul>
  */
 public class OfficeSpaceDTO {
@@ -63,6 +66,43 @@ public class OfficeSpaceDTO {
 	private Byte status;
 	private BigDecimal minUnitPrice;
 	private Integer allPositionNums;
+	private String refundTip;
+	private Byte holidayOpenFlag;
+	private Byte holidayType;
+	private BigDecimal settingPrice;
+
+	
+	public BigDecimal getSettingPrice() {
+		return settingPrice;
+	}
+
+	public void setSettingPrice(BigDecimal settingPrice) {
+		this.settingPrice = settingPrice;
+	}
+
+	public String getRefundTip() {
+		return refundTip;
+	}
+
+	public void setRefundTip(String refundTip) {
+		this.refundTip = refundTip;
+	}
+
+	public Byte getHolidayOpenFlag() {
+		return holidayOpenFlag;
+	}
+
+	public void setHolidayOpenFlag(Byte holidayOpenFlag) {
+		this.holidayOpenFlag = holidayOpenFlag;
+	}
+
+	public Byte getHolidayType() {
+		return holidayType;
+	}
+
+	public void setHolidayType(Byte holidayType) {
+		this.holidayType = holidayType;
+	}
 
 	public BigDecimal getMinUnitPrice() {
 		return minUnitPrice;

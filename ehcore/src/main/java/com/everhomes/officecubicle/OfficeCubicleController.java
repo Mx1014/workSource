@@ -9,6 +9,8 @@ import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.AddCubicleAdminCommand;
 import com.everhomes.rest.officecubicle.admin.AddRoomAdminCommand;
 import com.everhomes.rest.officecubicle.admin.CityDTO;
+import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderCommand;
+import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderResponse;
 import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersCommand;
 import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersResponse;
 import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
@@ -306,13 +308,13 @@ public class OfficeCubicleController extends ControllerBase {
     
     
     /**
-     * <b>URL: /officecubicle/listOfficeCubiclPayeeAccount</b> 
+     * <b>URL: /officecubicle/getOfficeCubiclPayeeAccount</b> 
      * <p>6.获取工位预定收款账户</p>
      */
-    @RequestMapping("listOfficeCubiclPayeeAccount")
-    public RestResponse listOfficeCubiclPayeeAccount(ListOfficeCubiclePayeeAccountCommand cmd) {
-    	ListOfficeCubiclePayeeAccountResponse resp = new ListOfficeCubiclePayeeAccountResponse();
-    	resp = this.officeCubicleService.listOfficeCubiclPayeeAccount(cmd);
+    @RequestMapping("getOfficeCubiclPayeeAccount")
+    public RestResponse getOfficeCubiclPayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd) {
+    	ListOfficeCubicleAccountDTO resp = new ListOfficeCubicleAccountDTO();
+    	resp = this.officeCubicleService.getOfficeCubiclPayeeAccount(cmd);
     	
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -364,6 +366,22 @@ public class OfficeCubicleController extends ControllerBase {
     public RestResponse searchCubicleOrders(SearchCubicleOrdersCommand cmd) {
 
     	SearchCubicleOrdersResponse resp = this.officeCubicleService.searchCubicleOrders(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/getOfficeCubicleRentOrder</b> 
+     * <p>搜索订单</p>
+     */
+    @RequestMapping("getOfficeCubicleRentOrder")
+    @RestReturn(value=OfficeRentOrderDTO.class )
+    public RestResponse getOfficeCubicleRentOrder(GetOfficeCubicleRentOrderCommand cmd) {
+
+    	GetOfficeCubicleRentOrderResponse resp = this.officeCubicleService.getOfficeCubicleRentOrder(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
