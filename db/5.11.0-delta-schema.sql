@@ -386,3 +386,6 @@ ALTER TABLE `eh_flow_statistics_handle_log` ADD COLUMN flow_lanes_cycle BIGINT(3
 -- REMARK:  添加 flow_case_id 字段
 ALTER TABLE `eh_flow_statistics_handle_log` ADD COLUMN flow_case_id BIGINT(20);
 
+-- AUTHOR: 黄明波 20181127
+-- REMARK: 云打印微信支付需求
+ALTER TABLE `eh_siyin_print_business_payee_accounts` MODIFY COLUMN `payee_id` BIGINT(20) NULL DEFAULT NULL COMMENT '支付帐号id';
