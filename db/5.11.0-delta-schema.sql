@@ -377,7 +377,7 @@ CREATE TABLE `eh_flow_statistics_handle_log` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE eh_flow_cases ADD COLUMN origin_app_id NOT NULL DEFAULT 0 BIGINT COMMENT '应用 id';
+ALTER TABLE eh_flow_cases ADD COLUMN origin_app_id BIGINT NOT NULL DEFAULT 0 COMMENT '应用 id';
 
 -- AUTHOR:  胡琪
 -- REMARK:　添加‘泳道周期时长’字段
