@@ -254,7 +254,7 @@ public class OrganizationDTO {
 
 	public OrganizationDTO() {
     }
-	
+
 	public java.lang.Long getParentId() {
 		return parentId;
 	}

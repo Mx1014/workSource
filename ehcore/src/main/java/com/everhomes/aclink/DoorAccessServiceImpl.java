@@ -5666,8 +5666,25 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         User user = UserContext.current().getUser();
 //      获取用户公司楼层
         List<OrganizationDTO> orgs = organizationService.listUserRelateOrganizations(cmd.getNamespaceId(), user.getId(), OrganizationGroupType.ENTERPRISE);
+        List<OrganizationDTO> distinctOrgs= new ArrayList<OrganizationDTO>();
+        Set<Long> set=new HashSet<Long>();
+        for (OrganizationDTO org : orgs) {
+            if (org == null) {
+                continue;
+            }
+            Long orgId = org.getId();
+            if (orgId != null) {
+                if (!set.contains(orgId)) { //set中不包含重复的
+                    set.add(orgId);
+                    distinctOrgs.add(org);
+                } else {
+                    continue;
+                }
+            }
+        }
+        set.clear();
         List<AddressDTO> userFloors = new ArrayList<>();
-        for(OrganizationDTO dto : orgs) {
+        for(OrganizationDTO dto : distinctOrgs) {
             List<OrganizationAddress> addrs = organizationProvider.findOrganizationAddressByOrganizationId(dto.getId());
             for(OrganizationAddress addr  : addrs) {
                 Address addr2 = addressProvider.findAddressById(addr.getAddressId());
