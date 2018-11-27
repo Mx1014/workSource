@@ -1,8 +1,17 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
+
 -- AUTHOR: xq.tian 20181116
 -- REMARK: 替换最新的 contentserver 二进制 #40547 contentserver/release/server/contentserver
+
+-- AUTHOR: xq.tian 20181108
+-- REMARK: 修改配置文件 config.yml
+-- REMARK: 网关路由转发去掉用户申诉的路由, 把以下的几个配置从网关配置文件中删掉
+-- REMARK: - Path=/evh/user/createResetIdentifierAppeal
+-- REMARK: - Path=/evh/user/sendVerificationCodeByResetIdentifier
+-- REMARK: - Path=/evh/user/listResetIdentifierCode
+-- REMARK: - Path=/evh/user/verifyResetIdentifierCode
 
 
 -- AUTHOR: 黄鹏宇
