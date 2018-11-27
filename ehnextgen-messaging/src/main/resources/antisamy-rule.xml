@@ -1133,6 +1133,12 @@ http://www.w3.org/TR/html401/struct/global.html
             </regexp-list>
         </property>
 
+        <property name="background">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
         <property name="background-clip">
             <regexp-list>
                 <regexp name="anything"/>
@@ -2208,7 +2214,7 @@ http://www.w3.org/TR/html401/struct/global.html
         </property>
 
 
-        <property name="azimuth" description="This property is most likely to be implemented by mixing the same signal into different channels at differing volumes.">
+        <!--<property name="azimuth" description="This property is most likely to be implemented by mixing the same signal into different channels at differing volumes.">
             <literal-list>
                 <literal value="left-side"/>
                 <literal value="far-left"/>
@@ -2300,7 +2306,7 @@ http://www.w3.org/TR/html401/struct/global.html
             </literal-list>
         </property>
 
-        <!-- Begin simple properties -->
+        &lt;!&ndash; Begin simple properties &ndash;&gt;
         <property name="border-collapse" default="collapse" description="">
             <category-list>
                 <category value="visual"/>
@@ -2920,12 +2926,12 @@ http://www.w3.org/TR/html401/struct/global.html
             </category-list>
             <literal-list>
                 <literal value="static"/>
-                <!-- possible to perform phishing attacks with the following -->
-                <!--
+                &lt;!&ndash; possible to perform phishing attacks with the following &ndash;&gt;
+                &lt;!&ndash;
                 <literal value="relative"/>
                 <literal value="absolute"/>
                 <literal value="fixed"/>
-                 -->
+                 &ndash;&gt;
                 <literal value="inherit"/>
             </literal-list>
         </property>
@@ -3194,9 +3200,9 @@ http://www.w3.org/TR/html401/struct/global.html
             </regexp-list>
         </property>
 
-        <!-- end simple properties -->
+        &lt;!&ndash; end simple properties &ndash;&gt;
 
-        <!-- begin medium properties -->
+        &lt;!&ndash; begin medium properties &ndash;&gt;
         <property name="border-style" description="">
             <category-list>
                 <category value="visual"/>
@@ -3453,9 +3459,9 @@ http://www.w3.org/TR/html401/struct/global.html
                 <shorthand name="padding"/>
             </shorthand-list>
         </property>
-        <!-- end medium properties -->
+        &lt;!&ndash; end medium properties &ndash;&gt;
 
-        <!-- begin hard properties -->
+        &lt;!&ndash; begin hard properties &ndash;&gt;
         <property name="border" description="">
             <category-list>
                 <category value="visual"/>
@@ -3623,8 +3629,8 @@ http://www.w3.org/TR/html401/struct/global.html
                 <literal value="inherit"/>
             </literal-list>
         </property>
-        <!-- end hard properties -->
-        <!--  begin manual properties -->
+        &lt;!&ndash; end hard properties &ndash;&gt;
+        &lt;!&ndash;  begin manual properties &ndash;&gt;
         <property name="border-spacing" default="0" description="The lengths specify the distance that separates adjacent cell borders. If one length is specified, it gives both the horizontal and vertical spacing. If two are specified, the first gives the horizontal spacing and the second the vertical spacing. Lengths may not be negative.">
             <category-list>
                 <category value="visual"/>
@@ -3747,7 +3753,7 @@ http://www.w3.org/TR/html401/struct/global.html
             <category-list>
                 <category value="visual"/>
             </category-list>
-            <!-- allowing only generic font families -->
+            &lt;!&ndash; allowing only generic font families &ndash;&gt;
             <literal-list>
                 <literal value="serif"/>
                 <literal value="arial"/>
@@ -3797,7 +3803,7 @@ http://www.w3.org/TR/html401/struct/global.html
             <category-list>
                 <category value="visual"/>
             </category-list>
-            <!--  For safety, ignoring string alignment which can be used to line table cells on characters -->
+            &lt;!&ndash;  For safety, ignoring string alignment which can be used to line table cells on characters &ndash;&gt;
             <literal-list>
                 <literal value="left"/>
                 <literal value="right"/>
@@ -3810,14 +3816,14 @@ http://www.w3.org/TR/html401/struct/global.html
             <category-list>
                 <category value="aural"/>
             </category-list>
-            <!--  Allowing only generic voice family -->
+            &lt;!&ndash;  Allowing only generic voice family &ndash;&gt;
             <literal-list>
                 <literal value="male"/>
                 <literal value="female"/>
                 <literal value="child"/>
                 <literal value="inherit"/>
             </literal-list>
-        </property>
+        </property>-->
         <!--  end manual properties -->
     </css-rules>
     <allowed-empty-tags>

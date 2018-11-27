@@ -4383,14 +4383,20 @@ public class FlowServiceImpl implements FlowService {
         List<FlowSMSTemplateDTO> dtos = new ArrayList<>();
         resp.setDtos(dtos);
 
-        List<LocaleTemplate> templates = localeTemplateProvider.listLocaleTemplatesByScope(locator, cmd.getNamespaceId(), scope, locale, cmd.getKeyword(), count);
+        List<LocaleTemplate> templates = localeTemplateProvider.listLocaleTemplatesByScope(
+                locator, cmd.getNamespaceId(), scope, locale, cmd.getKeyword(), count);
+        if (templates == null || templates.size() == 0) {
+            locator.setAnchor(cmd.getAnchor());
+            templates = localeTemplateProvider.listLocaleTemplatesByScope(
+                    locator, Namespace.DEFAULT_NAMESPACE, scope, locale, cmd.getKeyword(), count);
+        }
+
         resp.setNextPageAnchor(locator.getAnchor());
         if (templates != null) {
             templates.forEach(t -> {
                 dtos.add(ConvertHelper.convert(t, FlowSMSTemplateDTO.class));
             });
         }
-
         return resp;
     }
 
