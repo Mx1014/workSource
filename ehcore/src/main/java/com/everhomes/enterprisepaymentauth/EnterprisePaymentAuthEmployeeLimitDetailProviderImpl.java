@@ -132,10 +132,7 @@ public class EnterprisePaymentAuthEmployeeLimitDetailProviderImpl implements Ent
 				.and(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.PAYMENT_SCENE_APP_ID.eq(sceneAppId))
 				.and(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.IS_DELETE.eq((byte) 0))
 				//增加对离职员工的判断
-				.and(DSL.notExists(DSL.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID)
-						.from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
-						.where(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
-						.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()))))
+				.and(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.WAIT_AUTO_DELETE_MONTH.isNull())
 				.orderBy(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.ID.asc());
 		Result<Record> record = step.limit(pageOffSet, pageSize)
 				.fetch();
