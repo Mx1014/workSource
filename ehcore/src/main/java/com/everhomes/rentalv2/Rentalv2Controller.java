@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.archives.ArchivesContactDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
@@ -78,6 +79,38 @@ public class Rentalv2Controller extends ControllerBase {
 		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
 			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		RestResponse response = new RestResponse(rentalService.findRentalSiteById(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/getSceneType</b>
+	 * <p>
+	 * 获取用户当前的用户类型
+	 * </p>
+	 */
+	@RequestMapping("getSceneType")
+	@RestReturn(value = GetSceneTypeResponse.class)
+	@RequireAuthentication()
+	public RestResponse getSceneType(@Valid GetSceneTypeCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getSceneType(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/registerUser</b>
+	 * <p>
+	 * 注册用户到公司
+	 * </p>
+	 */
+	@RequestMapping("registerUser")
+	@RestReturn(value = ArchivesContactDTO.class)
+	@RequireAuthentication()
+	public RestResponse registerUser(@Valid RegisterUserCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.registerUser(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -769,8 +802,8 @@ public class Rentalv2Controller extends ControllerBase {
 	 * <p>test</p>
 	 */
 	@RequestMapping("test")
-	public void test() {
-		rentalService.test();
+	public void test(GetRentalOrderDetailCommand cmd) {
+		rentalService.test(cmd);
 
 	}
 }

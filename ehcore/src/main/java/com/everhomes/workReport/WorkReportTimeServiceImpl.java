@@ -1,7 +1,9 @@
 package com.everhomes.workReport;
 
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.workReport.ReportValiditySettingDTO;
 import com.everhomes.rest.workReport.WorkReportType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -12,9 +14,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 
 @Component
-public class WorkReportTimeServiceImpl implements WorkReportTimeService{
+public class WorkReportTimeServiceImpl implements WorkReportTimeService {
+    private static final String TIME_DISPLAY_FORMAT_SCOPE = "time_display_format";
+    private static final String LOCALE = "zh_CN";
+    @Autowired
+    private LocaleStringService localeStringService;
 
     /**
      * 根据汇报时间与设定得到具体时间
@@ -264,19 +271,55 @@ public class WorkReportTimeServiceImpl implements WorkReportTimeService{
 
     /**
      * 格式化时间
+     * 截止时间显示格式
+     * time=当前时间的日期：今天 hh:mm；
+     * time=当前时间的日期=1：明天 hh:mm；
+     * time时间的周=当前时间的周：本周X hh:mm；
+     * time时间的周-当前时间的周=1：下周X hh:mm；
+     * 其余： m月d日 hh:mm；
      */
     @Override
-    public String formatTime(LocalDateTime time){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M月d日 HH:mm");
-        return formatter.format(time);
+    public String formatTime(LocalDateTime time) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("M月d日 HH:mm");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        String timeStr = timeFormatter.format(time);
+        LocalDate today = LocalDate.now();
+        // 今天 HH:mm
+        if (today.compareTo(time.toLocalDate()) == 0) {
+            String tag = localeStringService.getLocalizedString(TIME_DISPLAY_FORMAT_SCOPE, "1", LOCALE, "今天");
+            return String.format("%s %s", tag, timeStr);
+        }
+        // 明天 HH:mm
+        if (today.plusDays(1).compareTo(time.toLocalDate()) == 0) {
+            String tag = localeStringService.getLocalizedString(TIME_DISPLAY_FORMAT_SCOPE, "2", LOCALE, "明天");
+            return String.format("%s %s", tag, timeStr);
+        }
+        // 今天是一年中的第几周
+        int todayOfWeek = today.get(WeekFields.ISO.weekOfWeekBasedYear());
+        // time对应的是一年中的第几周
+        int timeOfWeek = time.toLocalDate().get(WeekFields.ISO.weekOfWeekBasedYear());
+
+        // 本周x HH:mm
+        if (todayOfWeek == timeOfWeek) {
+            String tag = localeStringService.getLocalizedString(TIME_DISPLAY_FORMAT_SCOPE, String.valueOf(10 + time.getDayOfWeek().getValue()), LOCALE, "");
+            return String.format("%s %s", tag, timeStr);
+        }
+        // 下周x HH:mm
+        if (todayOfWeek + 1 == timeOfWeek) {
+            String tag = localeStringService.getLocalizedString(TIME_DISPLAY_FORMAT_SCOPE, String.valueOf(100 + time.getDayOfWeek().getValue()), LOCALE, "");
+            return String.format("%s %s", tag, timeStr);
+        }
+        return dateTimeFormatter.format(time);
     }
 
     /**
      * 当前时间点(HH:mm)
      */
     @Override
-    public String currenHHmmTime(){
+    public String currenHHmmTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         return formatter.format(LocalDateTime.now());
     }
+
 }

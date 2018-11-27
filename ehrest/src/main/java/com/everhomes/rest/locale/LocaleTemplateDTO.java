@@ -12,7 +12,6 @@ import com.everhomes.util.StringHelper;
  * <li>code: 代码</li>
  * <li>locale: 语言</li>
  * <li>text: 模板文本</li>
- * <li>description: 描述</li>
  * </ul>
  */
 public class LocaleTemplateDTO {

@@ -63,4 +63,6 @@ public interface ServiceModuleAppService {
     ListAllAppsResponse listAllApps(ListAllLaunchPadAppsCommand cmd);
     
     ListServiceModuleAppsForEnterprisePayResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd);
+
+	List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps);
 }

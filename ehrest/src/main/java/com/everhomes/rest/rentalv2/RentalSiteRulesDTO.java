@@ -79,6 +79,8 @@ public class RentalSiteRulesDTO {
 	private BigDecimal halfApprovingUserPrice;
 	@ItemType(RentalSitePackagesDTO.class)
 	private List<RentalSitePackagesDTO> sitePackages;
+	//新版本的价格
+	private List<RentalPriceClassificationDTO> priceRules;
 	private Byte userPriceType;
 	@Override
     public String toString() {
@@ -455,5 +457,13 @@ public class RentalSiteRulesDTO {
 
 	public void setUserPriceType(Byte userPriceType) {
 		this.userPriceType = userPriceType;
+	}
+
+	public List<RentalPriceClassificationDTO> getPriceRules() {
+		return priceRules;
+	}
+
+	public void setPriceRules(List<RentalPriceClassificationDTO> priceRules) {
+		this.priceRules = priceRules;
 	}
 }

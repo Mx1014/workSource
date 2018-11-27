@@ -1,10 +1,5 @@
 package com.everhomes.locale;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.locale.ListLocaleTemplateCommand;
@@ -14,6 +9,10 @@ import com.everhomes.rest.locale.UpdateLocaleTemplateCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class LocaleStringServiceImpl implements LocaleStringService {

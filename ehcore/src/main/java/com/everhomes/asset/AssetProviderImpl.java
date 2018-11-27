@@ -1,46 +1,5 @@
 package com.everhomes.asset;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections.CollectionUtils;
-
-//import scala.languageFeature.reflectiveCalls;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.JoinType;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.jooq.Table;
-import org.jooq.UpdateQuery;
-import org.jooq.exception.DataAccessException;
-import org.jooq.impl.DSL;
-import org.jooq.impl.DefaultRecordMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-
 import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.asset.util.TimeUtils;
 import com.everhomes.constants.ErrorCodes;
@@ -58,125 +17,21 @@ import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.asset.AssetBillDateDTO;
-import com.everhomes.rest.asset.AssetBillStatus;
-import com.everhomes.rest.asset.AssetBillStatusType;
-import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
-import com.everhomes.rest.asset.AssetEnergyType;
-import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
-import com.everhomes.rest.asset.AssetItemFineType;
-import com.everhomes.rest.asset.AssetPaymentBillAttachment;
-import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
-import com.everhomes.rest.asset.AssetPaymentBillSourceId;
-import com.everhomes.rest.asset.AssetPaymentBillStatus;
+import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
-import com.everhomes.rest.asset.AssetSubtractionType;
-import com.everhomes.rest.asset.AssetTargetType;
-import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
-import com.everhomes.rest.asset.BatchUpdateBillsToPaidCmd;
-import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
-import com.everhomes.rest.asset.BillDTO;
-import com.everhomes.rest.asset.BillDetailDTO;
-import com.everhomes.rest.asset.BillGroupDTO;
-import com.everhomes.rest.asset.BillItemDTO;
-import com.everhomes.rest.asset.BillStaticsDTO;
-import com.everhomes.rest.asset.BillingCycle;
-import com.everhomes.rest.asset.BillsDayType;
-import com.everhomes.rest.asset.CreateBillCommand;
-import com.everhomes.rest.asset.ExemptionItemDTO;
-import com.everhomes.rest.asset.GetChargingStandardCommand;
-import com.everhomes.rest.asset.GetChargingStandardDTO;
-import com.everhomes.rest.asset.GetDoorAccessParamCommand;
-import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
-import com.everhomes.rest.asset.ListAllBillsForClientDTO;
-import com.everhomes.rest.asset.ListAvailableVariablesCommand;
-import com.everhomes.rest.asset.ListAvailableVariablesDTO;
-import com.everhomes.rest.asset.ListBillDetailResponse;
-import com.everhomes.rest.asset.ListBillDetailVO;
-import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
-import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
-import com.everhomes.rest.asset.ListChargingItemsDTO;
-import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
-import com.everhomes.rest.asset.ListChargingStandardsDTO;
-import com.everhomes.rest.asset.ListLateFineStandardsDTO;
-import com.everhomes.rest.asset.ListPaymentBillCmd;
-import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
-import com.everhomes.rest.asset.OwnerIdentityCommand;
-import com.everhomes.rest.asset.PaymentExpectancyDTO;
-import com.everhomes.rest.asset.PaymentOrderBillDTO;
-import com.everhomes.rest.asset.PaymentVariable;
-import com.everhomes.rest.asset.ReSortCmd;
-import com.everhomes.rest.asset.SetDoorAccessParamCommand;
-import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
-import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
-import com.everhomes.rest.asset.ShowCreateBillDTO;
-import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
-import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
-import com.everhomes.rest.asset.SubItemDTO;
-import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
 import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.rest.contract.ContractTemplateStatus;
 import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhAddresses;
-import com.everhomes.server.schema.tables.EhAssetDooraccessLogs;
-import com.everhomes.server.schema.tables.EhAssetDooraccessParams;
-import com.everhomes.server.schema.tables.EhAssetModuleAppMappings;
-import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
-import com.everhomes.server.schema.tables.EhCommunities;
-import com.everhomes.server.schema.tables.EhContractChargingItems;
-import com.everhomes.server.schema.tables.EhOrganizationOwners;
-import com.everhomes.server.schema.tables.EhOrganizations;
-import com.everhomes.server.schema.tables.EhPaymentAccounts;
-import com.everhomes.server.schema.tables.EhPaymentBillCertificate;
-import com.everhomes.server.schema.tables.EhPaymentBillGroups;
-import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
-import com.everhomes.server.schema.tables.EhPaymentBillItems;
-import com.everhomes.server.schema.tables.EhPaymentBillStatisticBuilding;
-import com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity;
-import com.everhomes.server.schema.tables.EhPaymentBills;
-import com.everhomes.server.schema.tables.EhPaymentChargingItemScopes;
-import com.everhomes.server.schema.tables.EhPaymentChargingItems;
-import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
-import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
-import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
-import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
-import com.everhomes.server.schema.tables.EhPaymentLateFine;
-import com.everhomes.server.schema.tables.EhPaymentNoticeConfig;
-import com.everhomes.server.schema.tables.EhPaymentUsers;
-import com.everhomes.server.schema.tables.EhPaymentVariables;
-import com.everhomes.server.schema.tables.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.daos.EhAssetAppCategoriesDao;
-import com.everhomes.server.schema.tables.daos.EhAssetDooraccessLogsDao;
-import com.everhomes.server.schema.tables.daos.EhAssetDooraccessParamsDao;
-import com.everhomes.server.schema.tables.daos.EhAssetModuleAppMappingsDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillCertificateDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillItemsDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillOrdersDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillsDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentChargingStandardsDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentChargingStandardsScopesDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentContractReceiverDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentExemptionItemsDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentFormulaDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentLateFineDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentNoticeConfigDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentSubtractionItemsDao;
+import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
-import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
-import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
-import com.everhomes.server.schema.tables.records.EhAssetDooraccessLogsRecord;
-import com.everhomes.server.schema.tables.records.EhAssetModuleAppMappingsRecord;
-import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
-import com.everhomes.server.schema.tables.records.EhPaymentBillOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhPaymentBillsRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -186,6 +41,26 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.DecimalUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.*;
+import org.jooq.exception.DataAccessException;
+import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+//import scala.languageFeature.reflectiveCalls;
 /**
  * Created by Administrator on 2017/2/20.
  */
@@ -687,7 +562,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(cmd.getContractId())) {
         	query.addConditions(t.CONTRACT_ID.eq(cmd.getContractId()));
         }
-        
+
         if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
@@ -2840,7 +2715,7 @@ public class AssetProviderImpl implements AssetProvider {
             return null;
         });
     }
-    
+
     /**
      * 合同更新/根据合同id,自动刷新合同账单
      * @param contractId
@@ -2879,41 +2754,46 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         EhPaymentBillGroups billGroup = Tables.EH_PAYMENT_BILL_GROUPS.as("billGroup");
         Set<PaymentExpectancyDTO> set = new LinkedHashSet<>();
-
-        List<Long> fetch = context.select(bill.ID)
-                .from(bill)
-                .where(bill.CONTRACT_NUM.eq(contractNum))
-                .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
-                .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
-                .fetch(bill.ID);
-        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
-        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME,t.DELETE_FLAG)
-                .from(t,t1,billGroup)
-                .where(t.BILL_ID.in(fetch))
-                .and(t.BILL_GROUP_ID.eq(billGroup.ID))
-                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-                .orderBy(t1.NAME,t.DATE_STR)
-                .limit(pageOffset,pageSize+1)
-                .fetch()
-                .map(r -> {
-                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
-                    dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
-                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
-                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
-                    dto.setChargingItemName(r.getValue(t1.NAME));
-                    dto.setBillItemId(r.getValue(t.ID));
-                    dto.setChargingItemId(r.getValue(t1.ID));
-                    dto.setAmountReceivableWithoutTax(r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
-                    dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));//税额
-                    dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
-                    //物业缴费V6.0 账单、费项表增加是否删除状态字段
-                    dto.setDeleteFlag(r.getValue(t.DELETE_FLAG));
-                    set.add(dto);
-                    return null;
-                });
+        
+        //修复缺陷 #42398 【中天】【合同管理】中天大厦租赁合同，编号为20171024，产生费用清单数据有问题
+//        List<Long> fetch = context.select(bill.ID)
+//                .from(bill)
+//                .where(bill.CONTRACT_NUM.eq(contractNum))
+//                .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+//                .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+//                .fetch(bill.ID);
+//        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
+//        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME,t.DELETE_FLAG)
+//                .from(t,t1,billGroup)
+//                .where(t.BILL_ID.in(fetch))
+//                .and(t.BILL_GROUP_ID.eq(billGroup.ID))
+//                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+//                .orderBy(t1.NAME,t.DATE_STR)
+//                .limit(pageOffset,pageSize+1)
+//                .fetch()
+//                .map(r -> {
+//                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+//                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+//                    dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+//                    dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
+//                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+//                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+//                    dto.setChargingItemName(r.getValue(t1.NAME));
+//                    dto.setBillItemId(r.getValue(t.ID));
+//                    dto.setChargingItemId(r.getValue(t1.ID));
+//                    dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
+//                    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+//                    dto.setDeleteFlag(r.getValue(t.DELETE_FLAG));
+//                    //缺陷 #42852 【中天】【缴费管理】联科园区6栋5-6F合同录入信息无误，但是展示账单数据金额却有小数
+//                    BigDecimal taxAmount = r.getValue(t.TAX_AMOUNT);//税额
+//                    BigDecimal amountReceivable = r.getValue(t.AMOUNT_RECEIVABLE);//应收金额含税
+//                    BigDecimal amountReceivableWithoutTax = r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX);//应收不含税
+//                    dto.setTaxAmount(taxAmount != null ? taxAmount.stripTrailingZeros() : taxAmount);
+//                    dto.setAmountReceivable(amountReceivable != null ? amountReceivable.stripTrailingZeros() : amountReceivable);
+//                    dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax.stripTrailingZeros() : amountReceivableWithoutTax);
+//                    set.add(dto);
+//                    return null;
+//                });
 
         List<Long> fetch1 = context.select(bill.ID)
                 .from(bill)
@@ -2937,13 +2817,17 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setChargingItemId(r.getValue(t1.ID));
-                    dto.setAmountReceivableWithoutTax(r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
-                    dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));//税额
                     dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
+                    //缺陷 #42852 【中天】【缴费管理】联科园区6栋5-6F合同录入信息无误，但是展示账单数据金额却有小数
+                    BigDecimal taxAmount = r.getValue(t.TAX_AMOUNT);//税额
+                    BigDecimal amountReceivable = r.getValue(t.AMOUNT_RECEIVABLE);//应收金额含税
+                    BigDecimal amountReceivableWithoutTax = r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX);//应收不含税
+                    dto.setTaxAmount(taxAmount != null ? taxAmount.stripTrailingZeros() : taxAmount);
+                    dto.setAmountReceivable(amountReceivable != null ? amountReceivable.stripTrailingZeros() : amountReceivable);
+                    dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax.stripTrailingZeros() : amountReceivableWithoutTax);
                     set.add(dto);
                     return null;
                 });
@@ -3961,36 +3845,38 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         HashSet<PaymentExpectancyDTO> set = new HashSet<>();
-        List<Long> fetch = new ArrayList<Long>();
-        if(categoryId != null) {
-        	fetch = context.select(bill.ID)
-                    .from(bill)
-                    .where(bill.CONTRACT_NUM.eq(contractNum))
-                    .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
-                    .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
-                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
-                    .fetch(bill.ID);
-        }else {
-        	fetch = context.select(bill.ID)
-                    .from(bill)
-                    .where(bill.CONTRACT_NUM.eq(contractNum))
-                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
-                    .fetch(bill.ID);
-        }
-        context.select(t.ID,t.AMOUNT_RECEIVABLE)
-	        .from(t,t1)
-	        .where(t.BILL_ID.in(fetch))
-	        .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-	        .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
-	        .orderBy(t1.NAME,t.DATE_STR)
-	        .fetch()
-	        .map(r -> {
-	            PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-	            dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
-	            dto.setBillItemId(r.getValue(t.ID));
-	            set.add(dto);
-	            return null;
-        });
+        
+      //修复缺陷 #42398 【中天】【合同管理】中天大厦租赁合同，编号为20171024，产生费用清单数据有问题
+//        List<Long> fetch = new ArrayList<Long>();
+//        if(categoryId != null) {
+//        	fetch = context.select(bill.ID)
+//                    .from(bill)
+//                    .where(bill.CONTRACT_NUM.eq(contractNum))
+//                    .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+//                    .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+//                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
+//                    .fetch(bill.ID);
+//        }else {
+//        	fetch = context.select(bill.ID)
+//                    .from(bill)
+//                    .where(bill.CONTRACT_NUM.eq(contractNum))
+//                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
+//                    .fetch(bill.ID);
+//        }
+//        context.select(t.ID,t.AMOUNT_RECEIVABLE)
+//	        .from(t,t1)
+//	        .where(t.BILL_ID.in(fetch))
+//	        .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+//	        .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
+//	        .orderBy(t1.NAME,t.DATE_STR)
+//	        .fetch()
+//	        .map(r -> {
+//	            PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+//	            dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+//	            dto.setBillItemId(r.getValue(t.ID));
+//	            set.add(dto);
+//	            return null;
+//        });
 
         List<Long> fetch1 = new ArrayList<Long>();
         if(categoryId != null) {
@@ -5000,6 +4886,7 @@ public class AssetProviderImpl implements AssetProvider {
         	dto.setPaymentOrderNum(r.getValue(t2.PAYMENT_ORDER_ID).toString());//支付订单ID
             SimpleDateFormat yyyyMMddHHmm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             //缴费时间
+
             String payTime = r.getValue(t2.PAYMENT_TIME).toString();
 			try {
 				payTime = yyyyMMddHHmm.format(yyyyMMddHHmm.parse(payTime));

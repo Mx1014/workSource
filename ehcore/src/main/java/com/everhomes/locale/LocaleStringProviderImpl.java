@@ -25,7 +25,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class LocaleStringProviderImpl implements LocaleStringProvider, Applicati
     } 
     
     @Cacheable(value="LocaleStringFind", key="{#scope, #code, #locale}")
-    @Override
+	@Override
     public LocaleString find(String scope, String code, String locale) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         
@@ -130,7 +129,7 @@ public class LocaleStringProviderImpl implements LocaleStringProvider, Applicati
 		
 		return new ArrayList<LocaleTemplateDTO>();
 	}
-	
+
 	@Override
 	public LocaleTemplate findTemplateById(Long id){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());

@@ -8,4 +8,6 @@ INSERT INTO `eh_locale_strings` (scope, code, locale, text)
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
-
+SET @eh_flow_variables_id = (SELECT MAX(id) FROM eh_flow_variables);
+INSERT INTO eh_flow_variables (id, namespace_id, owner_id, owner_type, module_id, module_type, name, label, var_type, script_type, script_cls, status)
+  VALUES ((@eh_flow_variables_id := @eh_flow_variables_id + 1), 0, 0, '', 0, '', 'text_button_tracker_input_content', '文本备注内容', 'text_tracker', 'bean_id', 'flow-variable-text-button-msg-user-input-content', 1);

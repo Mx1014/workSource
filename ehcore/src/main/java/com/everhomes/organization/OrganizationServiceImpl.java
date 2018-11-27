@@ -2,8 +2,6 @@
 package com.everhomes.organization;
 
 import com.everhomes.acl.*;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -18,15 +16,10 @@ import com.everhomes.bus.SystemEvent;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.common.IdentifierTypeEnum;
-import com.everhomes.community.Building;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityService;
-import com.everhomes.community.ResourceCategory;
+import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerEntryInfo;
@@ -36,7 +29,6 @@ import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.discover.RestReturn;
 import com.everhomes.enterprise.EnterpriseCommunityMap;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
@@ -74,14 +66,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rest.acl.DeleteServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.ListAppAuthorizationsByOrganizatioinIdCommand;
-import com.everhomes.rest.acl.ListAppAuthorizationsByOwnerIdResponse;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.acl.RoleConstants;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
@@ -93,21 +78,15 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.address.CreateOfficeSiteCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.archives.AddArchivesContactCommand;
-import com.everhomes.rest.archives.ArchivesContactDTO;
-import com.everhomes.rest.archives.ListArchivesContactsCommand;
-import com.everhomes.rest.archives.ListArchivesContactsResponse;
-import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
+import com.everhomes.rest.archives.*;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.comment.AddCommentCommand;
 import com.everhomes.rest.common.*;
-import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.community.admin.OperateType;
 import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdCommand;
 import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdResponse;
+import com.everhomes.rest.community.admin.OperateType;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.customer.CustomerType;
@@ -126,32 +105,17 @@ import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
-import com.everhomes.rest.organization.pm.ChildrenOrganizationJobLevelDTO;
-import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
-import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
-import com.everhomes.rest.organization.pm.ListPmManagementsCommand;
-import com.everhomes.rest.organization.pm.PmBuildingDTO;
-import com.everhomes.rest.organization.pm.PmManagementsDTO;
-import com.everhomes.rest.organization.pm.PmManagementsResponse;
-import com.everhomes.rest.organization.pm.PmMemberGroup;
-import com.everhomes.rest.organization.pm.PmMemberStatus;
-import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
-import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
-import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
+import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
-import com.everhomes.rest.servicemoduleapp.ServiceModuleAppAuthorizationDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
@@ -159,24 +123,10 @@ import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.rest.user.UserGender;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
-import com.everhomes.rest.user.UserTokenCommand;
-import com.everhomes.rest.user.UserTokenCommandResponse;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.search.EnterpriseCustomerSearcher;
-import com.everhomes.search.OrganizationSearcher;
-import com.everhomes.search.PostAdminQueryFilter;
-import com.everhomes.search.PostSearcher;
-import com.everhomes.search.UserWithoutConfAccountSearcher;
+import com.everhomes.search.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
@@ -187,16 +137,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.uniongroup.UniongroupService;
-import com.everhomes.user.EncryptionUtils;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
+import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.userOrganization.UserOrganizationProvider;
@@ -205,9 +146,6 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.mysql.fabric.xmlrpc.base.Array;
-
-
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -217,7 +155,6 @@ import org.elasticsearch.common.collect.Lists;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -227,40 +164,15 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-
-import javassist.bytecode.stackmap.BasicBlock.Catch;
-
 import javax.servlet.http.HttpServletResponse;
-
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
@@ -4015,7 +3927,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                     this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                 }
                 OrganizationMember organizationMember = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
-                if (OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
+                if(organizationMember == null)
+                	LOGGER.error("找不到organizationMember: uid ={}.orgId = {}", userId, organizationId);
+                if (organizationMember != null && OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
                     tempSimpleOrgDTO.setUserIsManage(TrueOrFalseFlag.TRUE.getCode());
                 }else {
                     tempSimpleOrgDTO.setUserIsManage(TrueOrFalseFlag.FALSE.getCode());
@@ -8444,22 +8358,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
-        UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
-        LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
-        if (identifier == null) {
-            identifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifierByIdentifierToken(namespaceId,identifierToken), UserIdentifier.class);
-            LOGGER.info("get userIdentifier from unite user namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
-            if (identifier != null) {
-                this.userProvider.createIdentifierFromUnite(identifier);
-            } else {
-                LOGGER.warn("Sdk user service getUserIdentifier return null, namespaceId={}, identifierToken= {}", namespaceId,identifierToken);
-                return null;
-            }
+        UserIdentifier userIdentifier = fetchUserIdentifier(namespaceId, identifierToken, ownerId);
+        if (userIdentifier == null) {
+            return null;
         }
-        this.propertyMgrService.processUserForOwner(identifier);
-        return processUserForMember(identifier, true);
+
+        this.propertyMgrService.processUserForOwner(userIdentifier);
+        return processUserForMember(userIdentifier, true);
     }
 
+    private UserIdentifier fetchUserIdentifier(Integer namespaceId, String identifierToken, Long ownerId) {
+        Tuple<UserIdentifier, Boolean> userIdenTuple = coordinationProvider.getNamedLock(CoordinationLocks.SYNC_USER_IDEN_MODIFY.getCode() + ownerId).enter(() -> {
+            UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
+            LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
+            if (identifier == null) {
+                identifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifierByIdentifierToken(namespaceId, identifierToken), UserIdentifier.class);
+                LOGGER.info("get userIdentifier from unite user namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
+                if (identifier != null) {
+                    this.userProvider.createIdentifierFromUnite(identifier);
+                } else {
+                    LOGGER.warn("Sdk user service getUserIdentifier return null, namespaceId={}, identifierToken= {}", namespaceId, identifierToken);
+                }
+            }
+            return identifier;
+        });
+
+        return userIdenTuple.first();
+    }
 
     private OrganizationMemberDTO processUserForMember(UserIdentifier identifier, boolean needSendMessage) {
         try {

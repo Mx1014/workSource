@@ -67,6 +67,13 @@ public class ContractDTO {
 	private String namespaceContractToken;
 	private Byte paymentFlag;
 	private Byte contractApplicationScene;
+	private String sponsorName;
+	private Long sponsorUid;
+	private BigDecimal deposit;
+	private Byte depositStatus;
+	private Long communityId;
+	private String communityName;
+	private Byte assetPaymentBillStatus;
 	
 	@ItemType(OrganizationContactDTO.class)
 	private List<OrganizationContactDTO> adminMembers;
@@ -76,13 +83,6 @@ public class ContractDTO {
 	
 	@ItemType(ContractTemplateDTO.class)
     private ContractTemplateDTO contractTemplate;
-	
-	private String sponsorName;
-	private Long sponsorUid;
-	private BigDecimal deposit;
-	private Byte depositStatus;
-	private Long communityId;
-	private String communityName;
 	
 	public Long getCommunityId() {
 		return communityId;
@@ -98,6 +98,14 @@ public class ContractDTO {
 
 	public void setCommunityName(String communityName) {
 		this.communityName = communityName;
+	}
+
+	public Byte getAssetPaymentBillStatus() {
+		return assetPaymentBillStatus;
+	}
+
+	public void setAssetPaymentBillStatus(Byte assetPaymentBillStatus) {
+		this.assetPaymentBillStatus = assetPaymentBillStatus;
 	}
 
 	public BigDecimal getDeposit() {

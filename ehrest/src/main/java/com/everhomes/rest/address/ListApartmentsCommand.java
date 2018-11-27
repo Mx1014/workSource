@@ -1,5 +1,7 @@
 package com.everhomes.rest.address;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -12,6 +14,7 @@ import javax.validation.constraints.NotNull;
  * <li>livingStatus: 资产状态 参考{@link com.everhomes.rest.organization.pm.AddressMappingStatus}</li>
  * <li>pageSize: 页面大小</li>
  * <li>pageAnchor: 锚点</li>
+ * <li>livingStatusList: 兼容可以同时查询多种状态房源的需求</li>
  * </ul>
  * Created by ying.xiong on 2017/8/18.
  */
@@ -32,8 +35,8 @@ public class ListApartmentsCommand {
     private Integer pageSize;
 
     private Long pageAnchor;
-
-    public Integer getNamespaceId() {
+    
+	public Integer getNamespaceId() {
         return namespaceId;
     }
 

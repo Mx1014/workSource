@@ -60,7 +60,7 @@ public class AddResourceAdminCommand {
 	private Long communityId;
 	private String contactPhonenum;
 	@NotNull
-	private Long chargeUid;
+	private String chargeUid;
 	@NotNull
 	private String introduction;
 	private String notice;
@@ -185,11 +185,11 @@ public class AddResourceAdminCommand {
 		this.contactPhonenum = contactPhonenum;
 	}
 
-	public Long getChargeUid() {
+	public String getChargeUid() {
 		return chargeUid;
 	}
 
-	public void setChargeUid(Long chargeUid) {
+	public void setChargeUid(String chargeUid) {
 		this.chargeUid = chargeUid;
 	}
 

@@ -16,4 +16,5 @@ public interface LocaleStringProvider {
 	LocaleTemplate findTemplateById(Long id);
 
 	void updateLocaleTemplate(LocaleTemplate template);
+
 }

@@ -20,6 +20,7 @@ import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
+import com.everhomes.rest.address.ListApartmentsByMultiStatusResponse;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
@@ -2447,7 +2448,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("listApartmentsInBuilding")
 	@RestReturn(value=ApartmentBriefInfoDTO.class,collection=true)
-	public RestResponse listPropApartments(ListApartmentsInBuildingCommand cmd) {
+	public RestResponse listApartmentsInBuilding(ListApartmentsInBuildingCommand cmd) {
 		List<ApartmentBriefInfoDTO> results =  propertyMgrService.listApartmentsInBuilding(cmd);
 		RestResponse response = new RestResponse(results);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -2482,6 +2483,36 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse getOrgOwnerByContactToken(GetOrgOwnerByContactTokenCommand cmd) {
 		OrganizationOwnerDTO dto =  propertyMgrService.getOrgOwnerByContactToken(cmd);
 		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/listApartmentsForApp</b>
+	 * <p>获取楼宇下的所有房源  for app端</p>
+	 * @param cmd
+	 * @return
+	 */
+	@RequestMapping("listApartmentsForApp")
+	@RestReturn(value = ListApartmentsForAppResponse.class)
+	public RestResponse listApartmentsForApp(ListApartmentsForAppCommand cmd) {
+		ListApartmentsForAppResponse res =  propertyMgrService.listApartmentsForApp(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/listApartmentsByMultiStatus</b>
+	 * <p>支持同时查询多个状态的房源列表</p>
+	 */
+	@RequestMapping("listApartmentsByMultiStatus")
+	@RestReturn(value=ListApartmentsByMultiStatusResponse.class)
+	public RestResponse listApartmentsByMultiStatus(ListApartmentsByMultiStatusCommand cmd) {
+		ListApartmentsByMultiStatusResponse results =  propertyMgrService.listApartmentsByMultiStatus(cmd);
+		RestResponse response = new RestResponse(results);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

@@ -1,13 +1,6 @@
 package com.everhomes.module.security;
 
-import com.everhomes.acl.WebMenu;
-import com.everhomes.acl.WebMenuPrivilegeProvider;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.module.security.GetServiceModuleSecurityStatusCommand;
 import com.everhomes.rest.module.security.GetServiceModuleSecurityStatusResponse;
 import com.everhomes.rest.module.security.ServiceModuleSecurityResetCommand;
@@ -23,21 +16,14 @@ import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
- *  注：该密码模块主要作用类似客户端的屏保功能，由前端保存登陆状态，后台不保存
+ * 注：该密码模块主要作用类似客户端的屏保功能，登陆状态和登陆超时状态都有前端处理控制，后台只提供密码验证功能，不保存登陆状态
  */
 @Component
 public class ServiceModuleSecurityServiceImpl implements ServiceModuleSecurityService {
@@ -46,21 +32,7 @@ public class ServiceModuleSecurityServiceImpl implements ServiceModuleSecuritySe
     private ServiceModuleSecurityProvider serviceModuleSecurityProvider;
     @Autowired
     private UserProvider userProvider;
-    @Autowired
-    private ConfigurationProvider configurationProvider;
-    @Autowired
-    protected BigCollectionProvider bigCollectionProvider;
-    @Autowired
-    private WebMenuPrivilegeProvider webMenuProvider;
 
-    private ValueOperations<String, String> getValueOperations(String key) {
-        final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-        Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-
-        return valueOperations;
-    }
 
     @Override
     public GetServiceModuleSecurityStatusResponse getServiceModuleSecurityStatus(GetServiceModuleSecurityStatusCommand cmd, HttpServletRequest request) {
@@ -135,75 +107,6 @@ public class ServiceModuleSecurityServiceImpl implements ServiceModuleSecuritySe
         if (!EncryptionUtils.validateHashPassword(cmd.getPassword(), existSecurity.getSalt(), existSecurity.getPasswordHash())) {
             throw RuntimeErrorException.errorWith(ServiceModuleSecurityErrorCodes.SCOPE, ServiceModuleSecurityErrorCodes.SECURITY_PASSWORD_VERIFY_ERROR, "security password verify error");
         }
-        // 屏保功能由客户端保存登陆状态，后台暂不保存
-        // refreshModuleSecurityVerifyInfo(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getModuleId(), request, response);
-    }
-
-    @Override
-    public void refreshModuleSecurityVerifyInfo(Long ownerId, String ownerType, Long moduleId, HttpServletRequest request, HttpServletResponse response) {
-        try {
-            Cookie cookie = findCookieInRequest(SERVICE_MODULE_SECURITY_SESSION_ID, request);
-            String smsSessionId = null;
-            if (cookie == null) {
-                smsSessionId = generateSessionId();
-                setCookieInResponse(SERVICE_MODULE_SECURITY_SESSION_ID, smsSessionId, request, response);
-            } else {
-                smsSessionId = cookie.getValue();
-            }
-
-            int expiry = configurationProvider.getIntValue(ConfigConstants.SERVICE_MODULE_SECURITY_TIME_OUT + "-" + moduleId, 5);
-            String key = String.format("ServiceModule-%s-%d-%s", smsSessionId, UserContext.currentUserId(), moduleId);
-            ValueOperations<String, String> valueOperations = getValueOperations(key);
-            valueOperations.set(key, String.format("%s-%s", ownerId, ownerType), expiry, TimeUnit.MINUTES);
-        } catch (Exception e) {
-            LOGGER.error("buildModuleSecurityCookieName error", e);
-        }
-    }
-
-    @Override
-    public boolean isModuleSecurityVerified(Long ownerId, String ownerType, Long moduleId, HttpServletRequest request) {
-        Cookie cookie = findCookieInRequest(SERVICE_MODULE_SECURITY_SESSION_ID, request);
-        if (cookie == null) {
-            return false;
-        }
-        String key = String.format("ServiceModule-%s-%d-%s", cookie.getValue(), UserContext.currentUserId(), moduleId);
-        ValueOperations<String, String> valueOperations = getValueOperations(key);
-        return String.format("%s-%s", ownerId, ownerType).equals(valueOperations.get(key));
-    }
-
-    @Override
-    public void setReturnUrlCookie(Long moduleId, HttpServletRequest request, HttpServletResponse response) {
-        List<WebMenu> webMenus = webMenuProvider.listMenuByModuleIdAndType(moduleId, WebMenuType.PARK.getCode());
-        if (webMenus != null && webMenus.size() > 0) {
-            setCookieInResponse(SERVICE_MODULE_RETURN_URL, webMenus.get(0).getDataType(), request, response);
-        }
-    }
-
-    private static void setCookieInResponse(String name, String value, HttpServletRequest request, HttpServletResponse response) {
-        Cookie cookie = findCookieInRequest(name, request);
-        if (cookie == null) {
-            cookie = new Cookie(name, value);
-        } else {
-            cookie.setValue(value);
-        }
-        cookie.setPath("/");
-        response.addCookie(cookie);
-    }
-
-    private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(name)) {
-                    return cookie;
-                }
-            }
-        }
-        return null;
-    }
-
-    private String generateSessionId() {
-        return UUID.randomUUID().toString().replace("-", "");
     }
 
 }
