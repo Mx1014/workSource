@@ -140,13 +140,6 @@ VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @mod
 INSERT INTO eh_locale_templates (scope, code, locale, description, text, namespace_id) VALUES ( 'sms.default', '87', 'zh_CN', '服务申请推送', '${applierName}（${applierPhone}）提交了${serviceName}申请，请及时处理', '0');    
 INSERT INTO eh_locale_templates (scope, code, locale, description, text, namespace_id) VALUES ( 'sms.default', '88', 'zh_CN', '服务申请提醒', '你提交的${serviceName}申请正在处理，可在app“我”-“我的申请”中查看处理进度', '0');
 
-SET @id = (SELECT IFNULL(MIN(id),0) from `eh_vip_priority`);
-INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
-VALUES (@id := @id + 1,999929,1,'银卡',10 );
-INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
-VALUES (@id := @id + 1,999929,2,'金卡',20 );
-INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
-VALUES (@id := @id + 1,999929,3,'白金卡',30 );
 
 set @classification_id = 0;
 -- 普通公司用户价格迁移
@@ -333,6 +326,15 @@ VALUES ('zhenzhihui.redirect.url', 'http://120.132.117.22:8016/ZHYQ/restservices
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
+-- AUTHOR: st.zheng 20181127
+-- REMARK: 会员等级
+SET @id = (SELECT IFNULL(MIN(id),0) from `eh_vip_priority`);
+INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
+VALUES (@id := @id + 1,999929,1,'银卡',10 );
+INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
+VALUES (@id := @id + 1,999929,2,'金卡',20 );
+INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
+VALUES (@id := @id + 1,999929,3,'白金卡',30 );
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本

@@ -6488,6 +6488,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public GetResourceListAdminResponse listResourceAbstract(GetResourceListAdminCommand cmd) {
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
 
 		GetResourceListAdminResponse response = new GetResourceListAdminResponse();
 		List<Long> siteIds = null;
