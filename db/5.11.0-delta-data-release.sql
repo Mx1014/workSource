@@ -193,7 +193,7 @@ VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @mod
 
 -- AUTHOR:tangcen 2018年11月12日14:31:01
 -- REMARK:修改楼宇资产管理模块配置
-UPDATE eh_service_modules SET instance_config='{\"url\":\"${home.url}/assets-web/build/index.html?hideNavigationBar=1&ehnavigatorstyle=2#/home/#sign_suffix\"}' WHERE id=38000;
+UPDATE eh_service_modules SET instance_config='{\"url\":\"${home.url}/assets-web/build/index.html?hideNavigationBar=1#/home/#sign_suffix\"}' WHERE id=38000;
 
 UPDATE eh_service_modules SET action_type=14 WHERE id=38000;
 
