@@ -1,5 +1,7 @@
 package com.everhomes.rest.community;
 
+import java.math.BigDecimal;
+
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -16,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *     <li>relatedEnterpriseCustomerNumber: 入驻企业数</li>
  *     <li>relatedOrganizationOwnerNumber: 入驻用户数</li>
  *     <li>totalRent: 在租合同总金额</li>
+ *     <li>freeRate: 空置率，空置率=总的可招租面积/总的建筑面积*100%</li>
  * </ul>
  */
 public class BuildingStatisticsDTO {
@@ -33,6 +36,7 @@ public class BuildingStatisticsDTO {
 	private Integer relatedEnterpriseCustomerNumber;
 	private Integer relatedOrganizationOwnerNumber;
 	private Double totalRent;
+	private BigDecimal freeRate;
 	
 	public Double getTotalRent() {
 		return totalRent;
@@ -112,6 +116,13 @@ public class BuildingStatisticsDTO {
 	public void setRelatedOrganizationOwnerNumber(Integer relatedOrganizationOwnerNumber) {
 		this.relatedOrganizationOwnerNumber = relatedOrganizationOwnerNumber;
 	}
+	public BigDecimal getFreeRate() {
+		return freeRate;
+	}
+	public void setFreeRate(BigDecimal freeRate) {
+		this.freeRate = freeRate;
+	}
+	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

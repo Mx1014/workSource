@@ -16,5 +16,6 @@ public interface ContractSearcher {
     void feedDoc(Contract contract);
     void syncFromDb();
     ListContractsResponse queryContracts(SearchContractCommand cmd);
+    ListContractsResponse searchNoOrgIdContracts(SearchContractCommand cmd);
     ListContractsResponse openapiListContracts(OpenapiListContractsCommand cmd);
 }

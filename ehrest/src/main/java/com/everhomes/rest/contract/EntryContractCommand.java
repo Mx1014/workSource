@@ -23,6 +23,16 @@ public class EntryContractCommand {
     private Integer namespaceId;
     
     private Long categoryId;
+    
+    private String user;
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
 
 	public Long getCategoryId() {
 		return categoryId;

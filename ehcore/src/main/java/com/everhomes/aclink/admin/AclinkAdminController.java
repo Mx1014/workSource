@@ -12,18 +12,14 @@ import com.everhomes.rest.aclink.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RequireAuthentication;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.xml.transform.Result;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 
 @RestDoc(value="Aclink Admin controller", site="core")
@@ -70,7 +66,21 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /admin/aclink/searchDoorServer</b>
+     * <p>获取门禁列表</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("searchDoorServer")
+    @RestReturn(value=SearchDoorServerResponse.class)
+    public RestResponse searchDoorServer(@Valid SearchDoorServerCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.searchDoorServer(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/aclink/listDoorAccess</b>
      * <p>获取门禁列表 lite版</p>
@@ -388,6 +398,20 @@ public class AclinkAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/aclink/exportTempAuthXls</b>
+     * <p>导出临时授权列表</p>
+     */
+    @RequestMapping("exportTempAuthXls")
+    @RestReturn(value=String.class)
+    public RestResponse exportTempAuthXls(@Valid SearchDoorAuthCommand cmd, HttpServletResponse httpResponse) {
+        doorAccessService.exportTempAuthXls(cmd, httpResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/aclink/createTempAuthCustomField</b>
      * <p>创建临时授权自定义字段</p>
      * @return OK 成功
@@ -397,6 +421,20 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse createTempAuthCustomField (@Valid CreateTempAuthCustomFieldCommand cmd){
         RestResponse response = new RestResponse();
         doorAccessService.createTempAuthCustomField(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/listSelectDoorsAndGroups</b>
+     * <p>列出可选门禁（组）</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listSelectDoorsAndGroups")
+    @RestReturn(value=ListSelectDoorsAndGroupsResponse.class)
+    public RestResponse listSelectDoorsAndGroups (@Valid ListSelectDoorsAndGroupsCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.listSelectDoorsAndGroups(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -417,6 +455,62 @@ public class AclinkAdminController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /admin/aclink/deleteTempAuthPriority</b>
+     * <p>删除临时授权优先门禁</p>
+     * @return OK 成功
+     */
+    @RequestMapping("deleteTempAuthPriority")
+    @RestReturn(value=DeleteTempAuthPriorityResponse.class)
+    public RestResponse deleteTempAuthPriority (@Valid DeleteTempAuthPriorityCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.deleteTempAuthPriority(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/listTempAuthPriority</b>
+     * <p>列出临时授权优先门禁</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listTempAuthPriority")
+    @RestReturn(value=ListTempAuthPriorityResponse.class)
+    public RestResponse listTempAuthPriority (@Valid ListTempAuthPriorityCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.listTempAuthPriority(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/listTempAuthDefaultRule</b>
+     * <p>列出临时授权默认规则</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listTempAuthDefaultRule")
+    @RestReturn(value=ListTempAuthDefaultRuleResponse.class)
+    public RestResponse listTempAuthDefaultRule (@Valid ListTempAuthDefaultRuleCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.listTempAuthDefaultRule(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/createTempAuthDefaultRule</b>
+     * <p>创建临时授权默认规则</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createTempAuthDefaultRule")
+    @RestReturn(value=String.class)
+    public RestResponse createTempAuthDefaultRule (@Valid CreateTempAuthDefaultRuleCommand cmd){
+        RestResponse response = new RestResponse();
+        doorAccessService.createTempAuthDefaultRule(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /admin/aclink/listTempAuthCustomField</b>
@@ -474,6 +568,50 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=ListAccessGroupRelResponse.class)
     public RestResponse listDoorGroup(@Valid ListDoorAccessGroupCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.listDoorGroupRel(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/updateDoorGroup</b>
+     * <p>更新门禁组</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("updateDoorGroup")
+    @RestReturn(value=String.class)
+    public RestResponse updateDoorGroup(@Valid UpdateDoorAccessGroupCommand cmd) {
+        doorAccessService.updateDoorGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/createDoorGroup</b>
+     * <p>新增门禁组</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("createDoorGroup")
+    @RestReturn(value=String.class)
+    public RestResponse createDoorGroup(@Valid CreateDoorAccessGroupCommand cmd) {
+        doorAccessService.createDoorGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/listGroupDoors</b>
+     * <p>列出门禁组</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listGroupDoors")
+    @RestReturn(value=ListGroupDoorsResponse.class)
+    public RestResponse listGroupDoors(@Valid ListGroupDoorsCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listGroupDoors(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -556,37 +694,7 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    /**
-     * <b>URL: /admin/aclink/updateDoorGroup</b>
-     * <p>更新门禁组</p>
-     * @return 门禁列表
-     */
-    @RequestMapping("updateDoorGroup")
-    @RestReturn(value=String.class)
-    public RestResponse updateDoorGroup(@Valid UpdateDoorAccessGroupCommand cmd) {
-        doorAccessService.updateDoorGroup(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /admin/aclink/createDoorGroup</b>
-     * <p>新增门禁组</p>
-     * @return 门禁列表
-     */
-    @RequestMapping("createDoorGroup")
-    @RestReturn(value=String.class)
-    public RestResponse createDoorGroup(@Valid CreateDoorAccessGroupCommand cmd) {
-        doorAccessService.createDoorGroup(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
+
     /**
      * 
      * <b>URL: /admin/aclink/updateAccessType</b>
@@ -823,7 +931,6 @@ public class AclinkAdminController extends ControllerBase {
         return response;
     }
 
-//add by liqingyan
     /**
      * <b>URL: /admin/aclink/doorStatistic</b>
      * <p>门禁综合统计</p>
@@ -1469,6 +1576,20 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse updateLocalIpad(UpdateLocalIpadCommand cmd){
     	aclinkIpadService.updateLocalIpad(cmd);
     	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/updateIpadLogo</b>
+     * <p>修改内网ipadLogo</p>
+     */
+    @RequestMapping("updateIpadLogo")
+    @RestReturn(value=String.class)
+    public RestResponse updateLocalIpad(UpdateIpadLogoCommand cmd){
+        aclinkIpadService.updateIpadLogo(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

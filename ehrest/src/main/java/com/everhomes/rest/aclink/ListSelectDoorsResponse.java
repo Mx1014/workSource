@@ -15,14 +15,14 @@ import java.util.List;
  */
 public class ListSelectDoorsResponse {
 
-	@ItemType(DoorAccessNewDTO.class)
-	private List<DoorAccessNewDTO> doors;
+	@ItemType(DoorAccessDTO.class)
+	private List<DoorAccessDTO> doors;
 
-	public List<DoorAccessNewDTO> getDoors() {
+	public List<DoorAccessDTO> getDoors() {
 		return doors;
 	}
 
-	public void setDoors(List<DoorAccessNewDTO> doors) {
+	public void setDoors(List<DoorAccessDTO> doors) {
 		this.doors = doors;
 	}
 
