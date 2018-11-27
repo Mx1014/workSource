@@ -6431,7 +6431,7 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		if (dto.getAreaSize()!=null && dto.getAreaSize()!=0) {
 			if (dto.getFreeArea()!=null) {
-				BigDecimal freeRate = new BigDecimal(dto.getFreeArea()).divide(new BigDecimal(dto.getAreaSize()),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+				BigDecimal freeRate = new BigDecimal(dto.getFreeArea()).divide(new BigDecimal(dto.getAreaSize()),4,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 				dto.setFreeRate(freeRate);
 			}else {
 				dto.setFreeRate(BigDecimal.ZERO);
