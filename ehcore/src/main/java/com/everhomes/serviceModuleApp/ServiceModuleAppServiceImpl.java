@@ -1719,7 +1719,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 
             //没有自己的就返回吧
-            if(cmd.getAppIds() == null){
+            if(cmd.getEntryIds() == null){
             	return null;
 			}
 
