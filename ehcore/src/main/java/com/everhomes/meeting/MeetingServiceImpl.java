@@ -1526,6 +1526,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
                  fileOutputStream.write(buffer);//将buffer中的字节写入文件中区
             }
             dataInputStream.close();//关闭输入流
+            fileOutputStream.flush();
             fileOutputStream.close();//关闭输出流
 
             return true;
