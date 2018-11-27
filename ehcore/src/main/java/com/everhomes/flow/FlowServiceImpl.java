@@ -5575,44 +5575,54 @@ public class FlowServiceImpl implements FlowService {
                 apps = flowCaseProvider.listAdminApps(namespaceId, cmd);
         }
 
-        apps = apps.stream().filter(r -> {
-            return serviceModuleAppService.findReleaseServiceModuleAppByOriginId(r.getOriginId()) != null;
-        }).peek(r -> {
+        apps = apps.stream().map(r -> {
             ServiceModuleApp moduleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(r.getOriginId());
             if (moduleApp != null) {
                 r.setName(moduleApp.getName());
                 r.setModuleId(moduleApp.getModuleId());
+                return r;
             }
-        }).collect(Collectors.toList());
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        // 以下代码是为了兼容老的数据 20181120
-        Set<Long> flowCaseModuleIds = apps.stream().map(FlowModuleAppDTO::getModuleId).collect(Collectors.toSet());
-
-        ListFlowServiceTypeResponse listFlowServiceTypeResponse = this.listFlowServiceTypes(cmd);
-        List<FlowServiceTypeDTO> serviceTypes = listFlowServiceTypeResponse.getServiceTypes();
-        Set<Long> moduleIdSet = serviceTypes.stream().map(FlowServiceTypeDTO::getModuleId).collect(Collectors.toSet());
-
-        List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleApps(namespaceId);
-        Map<Long, List<ServiceModuleApp>> moduleIdToApp = serviceModuleApps.stream()
-                .collect(Collectors.groupingBy(ServiceModuleApp::getModuleId));
-
-        final List<FlowModuleAppDTO> finalApps = apps;
-        moduleIdToApp.forEach((k, v) -> {
-            //
-            if (v.size() == 1 && moduleIdSet.contains(k) && !flowCaseModuleIds.contains(k)) {
-                FlowModuleAppDTO appDTO = new FlowModuleAppDTO();
-                appDTO.setOriginId(0L);
-                appDTO.setModuleId(k);
-                appDTO.setNamespaceId(namespaceId);
-                appDTO.setName(v.iterator().next().getName());
-                finalApps.add(appDTO);
-            }
-        });
-        // END
+        compatibleFlowModuleApp(cmd, namespaceId, apps);
 
         ListFlowModuleAppsResponse response = new ListFlowModuleAppsResponse();
-        response.setApps(finalApps);
+        response.setApps(apps);
         return response;
+    }
+
+    private void compatibleFlowModuleApp(SearchFlowCaseCommand cmd, Integer namespaceId, List<FlowModuleAppDTO> apps) {
+        // 以下代码是为了兼容老的数据 20181120
+        try {
+            Set<Long> flowCaseModuleIds = apps.stream().map(FlowModuleAppDTO::getModuleId).collect(Collectors.toSet());
+
+            ListFlowServiceTypeResponse listFlowServiceTypeResponse = this.listFlowServiceTypes(cmd);
+            List<FlowServiceTypeDTO> serviceTypes = listFlowServiceTypeResponse.getServiceTypes();
+            Set<Long> moduleIdSet = serviceTypes.stream().map(FlowServiceTypeDTO::getModuleId).collect(Collectors.toSet());
+
+            List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleApps(namespaceId);
+            Map<Long, List<ServiceModuleApp>> moduleIdToApp = serviceModuleApps.stream()
+                    .filter(r -> r.getModuleId() != null)
+                    .collect(Collectors.groupingBy(ServiceModuleApp::getModuleId));
+
+            for (Map.Entry<Long, List<ServiceModuleApp>> entry : moduleIdToApp.entrySet()) {
+                final List<ServiceModuleApp> value = entry.getValue();
+                final Long key = entry.getKey();
+                //
+                if (value.size() == 1 && moduleIdSet.contains(key) && !flowCaseModuleIds.contains(key)) {
+                    FlowModuleAppDTO appDTO = new FlowModuleAppDTO();
+                    appDTO.setOriginId(0L);
+                    appDTO.setModuleId(key);
+                    appDTO.setNamespaceId(namespaceId);
+                    appDTO.setName(value.iterator().next().getName());
+                    apps.add(appDTO);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("compatible flow module app error, cmd="+cmd, e);
+        }
+        // END
     }
 
     @Override
