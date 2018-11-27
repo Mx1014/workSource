@@ -14,13 +14,11 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 页面大小</li>
  * </ul>
  */
-public class ListOfficeCubiclePayeeAccountCommand {
+public class GetOfficeCubiclePayeeAccountCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private Long spaceId;
-    private Long pageAnchor;
-    private Integer pageSize;
+
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -44,31 +42,6 @@ public class ListOfficeCubiclePayeeAccountCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
-    }
-
-
-    public Long getSpaceId() {
-		return spaceId;
-	}
-
-	public void setSpaceId(Long spaceId) {
-		this.spaceId = spaceId;
-	}
-
-	public Long getPageAnchor() {
-        return pageAnchor;
-    }
-
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
     }
 
     @Override

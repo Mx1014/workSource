@@ -87,21 +87,15 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
 
 CREATE TABLE `eh_office_cubicle_payee_accounts` (
   `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL,
+  `namespace_id` INTEGER,
   `owner_type` VARCHAR(32) NOT NULL COMMENT 'community 园区或者其他类型',
   `owner_id` BIGINT NOT NULL COMMENT '园区id或者其他id',
-  `space_id` BIGINT NOT NULL COMMENT '空间id',
-  `space_name` VARCHAR(512) NOT NULL COMMENT '空间名称',
-  `payee_user_type` VARCHAR(128) NOT NULL COMMENT '帐号类型，1-个人帐号、2-企业帐号',
-  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 2: active',
-  `creator_uid` BIGINT,
+  `account_id` BIGINT,
+  `merchant_id` BIGINT,
   `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
-  `merchant_id` BIGINT COMMENT '商户ID',
-  `payee_id` BIGINT,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='工位预定收款账户表';
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN space_cover_uri VARCHAR(1024) COMMENT '封面URI';
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_uri VARCHAR(1024) COMMENT '短租封面URI';
