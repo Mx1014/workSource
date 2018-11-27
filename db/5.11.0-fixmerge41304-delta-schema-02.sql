@@ -315,3 +315,113 @@ ALTER TABLE `eh_aclink_ipads` ADD COLUMN `logo_url` VARCHAR(2048) DEFAULT NULL C
 -- REMARK: 调整eh_door_access列名
 ALTER TABLE `eh_door_access` CHANGE adress_detail address_detail VARCHAR(64);
 
+
+-- AUTHOR: djm
+-- REMARK: 合同初始化，审批，复制进度记录表
+CREATE TABLE `eh_contract_task_operate_logs` (
+	`id` BIGINT (20) NOT NULL,
+	`namespace_id` INT (11) DEFAULT NULL,
+	`owner_id` BIGINT (20) DEFAULT NULL COMMENT '园区id',
+	`owner_type` VARCHAR (64) NOT NULL,
+	`org_id` BIGINT (20) DEFAULT NULL,
+	`name` VARCHAR (64),
+	`process` INTEGER COMMENT 'rate of progress',
+	`operate_type` TINYINT (4) DEFAULT NULL COMMENT '1 合同初始化, ２　合同免批,3　合同复制',
+	`processed_number` INT (11) DEFAULT NULL COMMENT '已处理记录数',
+	`total_number` INT (11) DEFAULT NULL COMMENT '总记录数',
+	`status` TINYINT (4) DEFAULT NULL COMMENT '0:无效状态，2：激活状态',
+	`start_time` DATETIME DEFAULT NULL,
+	`finish_time` DATETIME DEFAULT NULL,
+	`execute_time` BIGINT DEFAULT NULL,
+	`params` TEXT,
+	`error_description` VARCHAR(255),
+	`category_id` BIGINT COMMENT 'asset category id',
+	`creator_uid` BIGINT (20) DEFAULT NULL,
+	`create_time` DATETIME DEFAULT NULL,
+	`operator_uid` BIGINT (20) DEFAULT NULL,
+	`operator_time` DATETIME DEFAULT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '合同初始化,审批,复制进度记录表';
+
+-- AUTHOR: xq.tian 20181123
+-- REMARK: 用户两张表加一个版本号，用于在同步数据的时候避免旧数据覆盖新数据
+ALTER TABLE eh_users ADD COLUMN update_version BIGINT NOT NULL DEFAULT 0 COMMENT '版本号, 数据同步时候的版本号';
+ALTER TABLE eh_user_identifiers ADD COLUMN update_version BIGINT NOT NULL DEFAULT 0 COMMENT '版本号, 数据同步时候的版本号';
+
+-- AUTHOR: 郑思挺 20181123
+-- REMARK: 资源预约3.8.1
+CREATE TABLE `eh_rentalv2_price_classification` (
+`id` bigint(20) NOT NULL ,
+`namespace_id`  int NULL ,
+`source_id`  bigint(20) NULL ,
+`source_type`  varchar(255) NULL ,
+`owner_id`  bigint(20) NULL ,
+`owner_type`  varchar(255) NULL ,
+`user_price_type`  tinyint(4) NULL ,
+`classification`  varchar(255) NULL ,
+`workday_price`  decimal(10,2) NULL ,
+`original_price`  decimal(10,2) NULL ,
+`initiate_price`  decimal(10,2) NULL ,
+`discount_type`  tinyint(4) NULL ,
+`full_price`  decimal(10,2) NULL ,
+`cut_price`  decimal(10,2) NULL ,
+`discount_ratio`  double NULL ,
+`resource_type`  varchar(255) NULL,
+PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `vip_level`  varchar(255) NULL COMMENT '会员等级 白金卡 金卡 银卡' AFTER `pay_channel`;
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `source`  tinyint(4) NULL COMMENT '0 用户发起 1后台录入' AFTER `vip_level`;
+ALTER TABLE `eh_rentalv2_resource_types`
+ADD COLUMN `cross_commu_flag`  tinyint(4) NULL COMMENT '是否支持跨项目' AFTER `identify`;
+
+
+ALTER TABLE `eh_rentalv2_resources`
+MODIFY COLUMN `charge_uid`  varchar(256) NULL DEFAULT NULL COMMENT '负责人id' AFTER `notice`;
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `file_flag`  tinyint(4) NULL COMMENT '附件是否必传 0否 1是' AFTER `remark`;
+
+CREATE TABLE `eh_vip_priority` (
+  `id`  bigint(20) NOT NULL ,
+  `namespace_id`  int NULL ,
+  `vip_level` INT COMMENT '会员等级',
+  `vip_level_text` VARCHAR(64)  COMMENT '会员等级文本',
+  `priority` INT COMMENT '优先级,数字越大，优先级越高',
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '会员等级优先级表';
+
+-- AUTHOR: xq.tian 20181126
+-- REMARK: target_data 字段增加长度
+ALTER TABLE `eh_banners` MODIFY COLUMN target_data TEXT;
+
+
+-- AUTHOR: 黄良铭
+-- REMARK:　添加工作流记录处理表
+CREATE TABLE `eh_flow_statistics_handle_log` (
+  `id` BIGINT(32) NOT NULL COMMENT '主键',
+  `log_id`   BIGINT(32)  COMMENT 'log主键',
+  `namespace_id` INT(11) DEFAULT NULL COMMENT '域空间ＩＤ',
+  `flow_main_id` BIGINT(32) DEFAULT NULL,
+  `flow_version` INT(11) DEFAULT NULL COMMENT '版本号',
+  `flow_node_id` BIGINT(32) DEFAULT NULL COMMENT '节点ＩＤ',
+  `flow_node_name` VARCHAR(64) DEFAULT NULL COMMENT '节点名',
+  `flow_lanes_id` BIGINT(32) DEFAULT NULL COMMENT '泳道ＩＤ',
+  `flow_lanes_name` VARCHAR(64) DEFAULT NULL COMMENT '泳道名',
+  `start_time` DATETIME DEFAULT NULL COMMENT '起始时间',
+  `end_time` DATETIME DEFAULT NULL COMMENT '结束时间',
+  `cycle` BIGINT(32) DEFAULT NULL COMMENT '周期时长（单位为秒 s）',
+  `create_time` DATETIME DEFAULT NULL COMMENT '记录创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE eh_flow_cases ADD COLUMN origin_app_id BIGINT NOT NULL DEFAULT 0 COMMENT '应用 id';
+
+-- AUTHOR:  胡琪
+-- REMARK:　添加‘泳道周期时长’字段
+ALTER TABLE `eh_flow_statistics_handle_log` ADD COLUMN flow_lanes_cycle BIGINT(32) DEFAULT 0 COMMENT '泳道周期时长（单位为秒 s）';
+
+-- REMARK:  添加 flow_case_id 字段
+ALTER TABLE `eh_flow_statistics_handle_log` ADD COLUMN flow_case_id BIGINT(20);
+
