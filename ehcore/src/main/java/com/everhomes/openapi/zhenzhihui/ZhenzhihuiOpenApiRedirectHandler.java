@@ -19,7 +19,7 @@ import java.util.Map;
 public class ZhenzhihuiOpenApiRedirectHandler implements OpenApiRedirectHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZhenzhihuiOpenApiRedirectHandler.class);
-    private static final Integer NAMESPACEALLOWED = 999931; //仅999931域空间允许跳第三方
+    private static final Integer ZHENZHIHUI_NAMESPACE_ID = 9999311;
 
     @Autowired
     private TicketProvider ticketProvider;
@@ -33,13 +33,13 @@ public class ZhenzhihuiOpenApiRedirectHandler implements OpenApiRedirectHandler 
             String redirectCode = parameterMap.get("redirectCode")[0];
 
             Long userId = UserContext.currentUserId();
-//            Integer namespaceId = UserContext.getCurrentNamespaceId();
+            Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-            //仅XXX域空间被允许跳第三方
-//            if ( namespaceId == null || NAMESPACEALLOWED.compareTo(namespaceId) != 0 ) {
-//                LOGGER.error("user in namespace[" + namespaceId + "] is not allowed to redirect to zhenzhihui");
-//                return null;
-//            }
+            //仅圳智慧域空间允许用此接口
+            if ( namespaceId == null || ZHENZHIHUI_NAMESPACE_ID.compareTo(namespaceId) != 0 ) {
+                LOGGER.error("user in namespace[" + namespaceId + "] is not allowed to redirect to zhenzhihui");
+                return null;
+            }
 
             //生成ticket并保存
             String ticket = ticketProvider.createTicket4User(userId, redirectCode);
