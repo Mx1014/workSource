@@ -5561,11 +5561,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
             Long orgId = org.getId();
             if (orgId != null) {
-                if (!set.contains(orgId)) {
-                    set.add(orgId);
+                if (set.add(orgId)) {
                     distinctOrgs.add(org);
-                } else {
-                    continue;
                 }
             }
         }
@@ -5589,15 +5586,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
 //      分别返回旺龙门禁组，梯控组
             boolean doorType = true;
-            if(null != access){
-                if( null != cmd.getDoorType()){
+            if(access != null){
+                if(cmd.getDoorType() != null){
                     doorType = access.getDoorType().equals(cmd.getDoorType());
                 }
                 else{
                     doorType = access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode()) || access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_DOOR_GROUP.getCode());
                 }
             }
-            if(null != access && doorType){
+            if(access != null && doorType){
                 DoorAccessGroupDTO group = new DoorAccessGroupDTO();
                 groups.add(group);
                 group.setId(access.getId());
