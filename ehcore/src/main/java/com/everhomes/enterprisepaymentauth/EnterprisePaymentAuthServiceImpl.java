@@ -280,11 +280,10 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
     }
 
     private String processSceneListString(String paymentSceneList, Map<Long, String> sceneAppMap) {
-        String[] sceneAppIds = StringUtils.split(paymentSceneList, ",");
-        if(sceneAppIds == null){
-            sceneAppIds = new String[1];
-            sceneAppIds[0] = paymentSceneList;
+        if(paymentSceneList == null){
+            return null;
         }
+        String[] sceneAppIds = paymentSceneList.split(",");
         String result = "";
         for(int i = 0 ; i<sceneAppIds.length ; i++) {
             Long appId = null;
