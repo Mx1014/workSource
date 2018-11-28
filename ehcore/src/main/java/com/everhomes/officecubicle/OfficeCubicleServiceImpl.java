@@ -1425,13 +1425,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		officeCubicleProvider.deleteStation(station);
 	}
 	
-	@Override
-	public void updateShortRentNums(UpdateShortRentNumsCommand cmd){
-		OfficeCubicleSpace space = this.officeCubicleProvider.getSpaceById(cmd.getSpaceId());
-		space.setShortRentNums(cmd.getCount());
-		this.officeCubicleProvider.updateSpace(space);
-	}
-	
 	
 	@Override
 	public void refundOrder(RefundOrderCommand cmd){
@@ -1944,7 +1937,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		return associateStaionList;
 	}
-	
 	
 	@Override
 	public GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd){

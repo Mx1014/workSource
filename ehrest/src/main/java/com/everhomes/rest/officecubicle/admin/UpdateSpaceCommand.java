@@ -1,5 +1,6 @@
 package com.everhomes.rest.officecubicle.admin;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -37,6 +38,8 @@ import com.everhomes.util.StringHelper;
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
+ * <li>longRentPrice:长租工位价格</li>
+ * <li>shortRentNums:短租工位数量</li>
  * </ul>
  */
 public class UpdateSpaceCommand { 
@@ -70,7 +73,26 @@ public class UpdateSpaceCommand {
 	private Long currentProjectId;
 	private Long appId;
 	private Byte openFlag;
+	private BigDecimal longRentPrice;
+	private String shortRentNums;
 	
+	
+	public String getShortRentNums() {
+		return shortRentNums;
+	}
+
+	public void setShortRentNums(String shortRentNums) {
+		this.shortRentNums = shortRentNums;
+	}
+
+	public BigDecimal getLongRentPrice() {
+		return longRentPrice;
+	}
+
+	public void setLongRentPrice(BigDecimal longRentPrice) {
+		this.longRentPrice = longRentPrice;
+	}
+
 	public Byte getOpenFlag() {
 		return openFlag;
 	}

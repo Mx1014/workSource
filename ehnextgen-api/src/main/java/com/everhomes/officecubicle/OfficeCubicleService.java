@@ -94,8 +94,6 @@ public interface OfficeCubicleService {
 
 	void deleteCubicle(DeleteCubicleAdminCommand cmd);
 
-	void updateShortRentNums(UpdateShortRentNumsCommand cmd);
-
 	void refundOrder(RefundOrderCommand cmd);
 
 	HttpServletResponse exportCubicleOrders(SearchCubicleOrdersCommand cmd, HttpServletResponse response);
@@ -111,5 +109,6 @@ public interface OfficeCubicleService {
 	GetRoomDetailResponse getRoomDetail(GetRoomDetailCommand cmd);
 
 	GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd);
+
 
 }

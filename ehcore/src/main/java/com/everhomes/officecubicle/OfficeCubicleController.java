@@ -225,20 +225,6 @@ public class OfficeCubicleController extends ControllerBase {
     	
     }
     
-    /**
-     * <b>URL: /officecubicle/updateShortRentNums</b> 
-     * <p>删除工位</p>
-     */
-    @RequestMapping("updateShortRentNums")
-    public RestResponse updateShortRentNums(UpdateShortRentNumsCommand cmd) {
-    	 this.officeCubicleService.updateShortRentNums(cmd);
-    	
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    	
-    }
     
 	/**
 	 * <b>URL: /officecubicle/exprotCubicleOrders</b>
