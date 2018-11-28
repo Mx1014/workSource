@@ -2201,6 +2201,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 				dto.setBuildingId(r.getValue(Tables.EH_BUILDINGS.ID));
 				dto.setBuildingName(r.getValue(Tables.EH_BUILDINGS.NAME));
 				dto.setCommunityId(r.getValue(Tables.EH_BUILDINGS.COMMUNITY_ID));
+				dto.setBuildingNumber(r.getValue(Tables.EH_BUILDINGS.BUILDING_NUMBER));
 				results.add(dto);
 			});
 		}

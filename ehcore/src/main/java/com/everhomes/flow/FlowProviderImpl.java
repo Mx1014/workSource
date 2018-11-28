@@ -379,4 +379,17 @@ public class FlowProviderImpl implements FlowProvider {
         }
         return null;
     }
+
+    @Override
+    public List<Flow> queryFlowVersions(Long flowMainId , Integer namespaceId){
+        com.everhomes.server.schema.tables.EhFlows t = Tables.EH_FLOWS;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.select(t.fields())
+                .from(t)
+                .where(t.FLOW_MAIN_ID.eq(flowMainId))
+                .and(t.NAMESPACE_ID.eq(namespaceId))
+                .orderBy(t.FLOW_VERSION.desc()).getQuery();
+        List<Flow> flows = query.fetchInto(Flow.class);
+        return flows;
+    }
 }

@@ -67,7 +67,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         }
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         cmd.setNamespaceId(namespaceId);
-        List<Flow> list =  flowProvider.findFlowVersion(cmd.getFlowMainId() , cmd.getNamespaceId());
+        List<Flow> list =  flowProvider.queryFlowVersions(cmd.getFlowMainId() , cmd.getNamespaceId());
         if(list == null || list.size() < 1){
             return dto ;
         }

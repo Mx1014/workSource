@@ -231,6 +231,7 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
     @Override
     public ListEnterprisePaymentAuthOfEmployeesResponse listEnterprisePaymentAuthOfEmployees(ListEnterprisePaymentAuthOfEmployeesCommand cmd) {
         ListEnterprisePaymentAuthOfEmployeesResponse response = new ListEnterprisePaymentAuthOfEmployeesResponse();
+        Map<Long, String> sceneAppMap = getEnterprisePaymentSceneIdNameMap();
         int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
         int pageOffset = (cmd.getPageOffset() != null && cmd.getPageOffset() > 1) ? cmd.getPageOffset() : 1;
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
@@ -253,21 +254,21 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
         List<EnterprisePaymentAuthEmployeePayHistory> employeeHistories = enterprisePaymentAuthEmployeePayHistoryProvider
                 .listEnterprisePaymentAuthEmployeePayHistory(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), MONTH_DF.format(LocalDateTime.now()));
 
-        response.setEmployeeAuths(members.stream().map(r -> convertMember2EmployeePaymentAuthDTO(r, employeeLimits, employeeHistories)).collect(Collectors.toList()));
+        response.setEmployeeAuths(members.stream().map(r -> convertMember2EmployeePaymentAuthDTO(r, employeeLimits, employeeHistories, sceneAppMap)).collect(Collectors.toList()));
         return response;
     }
 
     private EmployeePaymentAuthDTO convertMember2EmployeePaymentAuthDTO(OrganizationMemberDetails detail,
-                                                                        List<EnterprisePaymentAuthEmployeeLimit> employeeLimits, List<EnterprisePaymentAuthEmployeePayHistory> employeeHistories) {
+                                                                        List<EnterprisePaymentAuthEmployeeLimit> employeeLimits, List<EnterprisePaymentAuthEmployeePayHistory> employeeHistories, Map<Long, String> sceneAppMap) {
         EnterprisePaymentAuthEmployeeLimit limit = findEmployeeLimit(employeeLimits, detail.getId());
         EnterprisePaymentAuthEmployeePayHistory history = findEmployeeHistory(employeeHistories, detail.getId());
-        return convertMember2EmployeePaymentAuthDTO(detail, limit, history);
+        return convertMember2EmployeePaymentAuthDTO(detail, limit, history, sceneAppMap);
     }
 
-    private EmployeePaymentAuthDTO convertMember2EmployeePaymentAuthDTO(OrganizationMemberDetails detail, EnterprisePaymentAuthEmployeeLimit limit, EnterprisePaymentAuthEmployeePayHistory history) {
+    private EmployeePaymentAuthDTO convertMember2EmployeePaymentAuthDTO(OrganizationMemberDetails detail, EnterprisePaymentAuthEmployeeLimit limit, EnterprisePaymentAuthEmployeePayHistory history, Map<Long, String> sceneAppMap) {
         EmployeePaymentAuthDTO dto = convertMember2EmployeePaymentAuthDTO(detail);
         if (limit != null) {
-            dto.setSceneString(limit.getPaymentSceneList());
+            dto.setSceneString(processSceneListString(limit.getPaymentSceneList(), sceneAppMap));
         }
         dto.setLimitAmount(limit != null ? limit.getLimitAmount() : BigDecimal.ZERO);
         dto.setUsedAmount(history != null ? history.getUsedAmount() : BigDecimal.ZERO);
@@ -276,6 +277,30 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
             dto.setCurrentMonthRemainAmount(BigDecimal.ZERO);
         }
         return dto;
+    }
+
+    private String processSceneListString(String paymentSceneList, Map<Long, String> sceneAppMap) {
+        if(paymentSceneList == null){
+            return null;
+        }
+        String[] sceneAppIds = paymentSceneList.split(",");
+        String result = "";
+        for(int i = 0 ; i<sceneAppIds.length ; i++) {
+            Long appId = null;
+            try{
+                appId = Long.valueOf(sceneAppIds[i]);
+            }catch (Exception e){
+                LOGGER.error("appId can not parse to Long type id = " + sceneAppIds[i]);
+            }
+            String appName = sceneAppMap.get(appId);
+            if(appName != null) {
+                if (!result.equals("")) {
+                    result = result + "、";
+                }
+                result = result + appName;
+            }
+        }
+        return result;
     }
 
     private EmployeePaymentAuthDTO convertMember2EmployeePaymentAuthDTO(OrganizationMemberDetails detail) {
@@ -497,8 +522,8 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
 		                if (null != cmd.getEmployeePaymentSceneLimits()) {
 		                    for (EmployeePaymentSceneLimitSimpleDTO scene : cmd.getEmployeePaymentSceneLimits()) {
 		                        deleteOriginLimitDetailByScene(originLimitDetails, scene.getSceneAppId());
-		                        employeeLimit.setPaymentSceneList((employeeLimit.getPaymentSceneList().length() < 1 ? employeeLimit.getPaymentSceneList() : employeeLimit.getPaymentSceneList() + "、")
-		                                + scene.getSceneAppName());
+		                        employeeLimit.setPaymentSceneList((employeeLimit.getPaymentSceneList().length() < 1 ? employeeLimit.getPaymentSceneList() : employeeLimit.getPaymentSceneList() + ",")
+		                                + scene.getSceneAppId());
 		                        EnterprisePaymentAuthEmployeeLimitDetail limitDetail = enterprisePaymentAuthEmployeeLimitDetailProvider
 		                                .findEnterprisePaymentAuthEmployeeLimitDetailByDetailId(detail.getNamespaceId(), cmd.getOrganizationId(), r.getDetailId(), scene.getSceneAppId());
 		                        EnterprisePaymentAuthEmployeeLimitChangeLog sceneChangeLog = initChangeLog(detail);

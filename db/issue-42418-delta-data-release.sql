@@ -49,7 +49,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('ente
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','4','zh_CN','订单编号;使用人;使用人手机;支付场景;支付时间;支付金额');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','5','zh_CN','企业支付记录');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','6','zh_CN','支付时间:');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','7','zh_CN','企业支付');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','7','zh_CN','企业支付额度');
 
 -- AUTHOR: 吴寒
 -- REMARK: 企业支付授权   支付授权的菜单
@@ -195,7 +195,7 @@ VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @mod
 
 -- AUTHOR:tangcen 2018年11月12日14:31:01
 -- REMARK:修改楼宇资产管理模块配置
-UPDATE eh_service_modules SET instance_config='{\"url\":\"${home.url}/assets-web/build/index.html?hideNavigationBar=1#/home/#sign_suffix\"}' WHERE id=38000;
+UPDATE eh_service_modules SET instance_config='{\"url\":\"${home.url}/assets-web/build/index.html?hideNavigationBar=1&ehnavigatorstyle=2#/home/#sign_suffix\"}' WHERE id=38000;
 
 UPDATE eh_service_modules SET action_type=14 WHERE id=38000;
 
@@ -255,18 +255,6 @@ INSERT INTO eh_flow_variables (id, namespace_id, owner_id, owner_type, module_id
   VALUES ((@eh_flow_variables_id := @eh_flow_variables_id + 1), 0, 0, '', 0, '', 'text_button_tracker_input_content', '文本备注内容', 'text_tracker', 'bean_id', 'flow-variable-text-button-msg-user-input-content', 1);
 
 update eh_locale_strings set text='当前流程未经过预设待驳回节点。' where scope='flow' and code='100015';
-
-
-
--- AUTHOR: 黄明波
--- REMARK: 修复云打印有误链接
-update eh_service_modules set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' where id = 41400 ;
-
-update eh_service_module_apps set instance_config = replace (instance_config, '#/home#sign_suffix', concat('?namespaceId=', namespace_id, '#/home#sign_suffix')) where module_id = 41400 and  instance_config not like '%?namespaceId=%';
-
-update eh_launch_pad_items set action_data = replace (action_data, '#/home#sign_suffix', concat('?namespaceId=', namespace_id, '#/home#sign_suffix')) where action_data like '%/cloud-print/build/index.html%' and  action_data not like '%?namespaceId=%';
-
-
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
