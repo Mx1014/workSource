@@ -67,6 +67,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -159,6 +160,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
 
+            //EnterpriseCustomer customerTemp = enterpriseCustomerProvider.findById(customer.getId());
             builder.field("id", customer.getId());
             builder.field("ownerId", customer.getOwnerId());
             builder.field("communityId", customer.getCommunityId());
@@ -220,6 +222,17 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                     }
                 });
                 builder.field("customerContactName", StringUtils.join(customerContactName, "|"));
+            }
+            List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId(),customer.getCustomerSource());
+            if(trackings != null && trackings.size() > 0){
+                List<Timestamp> trackingTime = new ArrayList<>();
+
+                trackings.forEach(r -> {
+                    if(r.getTrackingTime() != null){
+                        trackingTime.add(r.getTrackingTime());
+                    }
+                });
+                builder.field("trackingTime", trackingTime);
             }
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
@@ -479,7 +492,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         FilterBuilder rfbt = null;
 
         if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
-            RangeFilterBuilder rf1 = new RangeFilterBuilder("lastTrackingTime");
+            RangeFilterBuilder rf1 = new RangeFilterBuilder("trackingTime");
             RangeFilterBuilder rf2 = new RangeFilterBuilder("createTime");
             Long startTime = cmd.getMinTrackingPeriod();
             Long endTime = cmd.getMaxTrackingPeriod();
