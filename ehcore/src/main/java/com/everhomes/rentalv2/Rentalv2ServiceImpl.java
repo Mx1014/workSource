@@ -1725,8 +1725,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		String scene = getClassification(pricePackages.get(0).getUserPriceType());
 		List<Long> packageIds = rentalv2Provider.listCellPackageId(rentalSite.getResourceType(), rentalSite.getId(),
 				pricePackages.get(0).getRentalType());
-		BigDecimal maxPrice = null;
-		BigDecimal minPrice = null;
+		BigDecimal maxPrice = new BigDecimal(0);
+		BigDecimal minPrice = new BigDecimal(Integer.MAX_VALUE);
 		if (SceneType.PARK_TOURIST.getCode().equals(scene) && TrueOrFalseFlag.fromCode(resourceType.getUnauthVisible()) == TrueOrFalseFlag.FALSE){
 			sitePriceRuleDTO.setPriceStr("");
 		}else if (RentalUserPriceType.UNIFICATION.getCode() == pricePackages.get(0).getUserPriceType()) { // 统一价格
@@ -1757,8 +1757,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		pricePackages.forEach(r -> {
 			SitePricePackageDTO dto = new SitePricePackageDTO();
 			dto.setName(r.getName());
-			BigDecimal maxPrice2;
-			BigDecimal minPrice2;
+			BigDecimal maxPrice2 = new BigDecimal(0);;
+			BigDecimal minPrice2 = new BigDecimal(Integer.MAX_VALUE);
 			MaxMinPrice maxMinPrice2;
 			if (SceneType.PARK_TOURIST.getCode().equals(scene) && TrueOrFalseFlag.fromCode(resourceType.getUnauthVisible()) == TrueOrFalseFlag.FALSE){
 				dto.setPriceStr("");
@@ -1804,8 +1804,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			sitePriceRuleDTO.setPriceStr("");
 			return sitePriceRuleDTO;
 		}
-		BigDecimal maxPrice = null;
-		BigDecimal minPrice = null;
+		BigDecimal maxPrice = new BigDecimal(0);
+		BigDecimal minPrice = new BigDecimal(Integer.MAX_VALUE);
         MaxMinPrice maxMinPrice = null;
 		if (RentalUserPriceType.UNIFICATION.getCode() == priceRule.getUserPriceType()){ //统一价格
 			maxPrice = priceRule.getWorkdayPrice();
@@ -6488,6 +6488,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public GetResourceListAdminResponse listResourceAbstract(GetResourceListAdminCommand cmd) {
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
 
 		GetResourceListAdminResponse response = new GetResourceListAdminResponse();
 		List<Long> siteIds = null;

@@ -297,10 +297,10 @@ public class AssetServiceImpl implements AssetService {
         //物业缴费V6.0（UE优化） 将“ 账单查看、筛选”的权限去掉，因为有此模块权限的用户默认就会有查看和筛选的权限；
         //checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW, cmd.getOrganizationId());
         ListBillsResponse response = new ListBillsResponse();
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId(), 0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),response, cmd);
+        List<ListBillsDTO> list = handler.listBills(cmd.getNamespaceId(),response, cmd);
         response.setListBillsDTOS(list);
         return response;
     }
@@ -4961,7 +4961,7 @@ public class AssetServiceImpl implements AssetService {
 	@Override
 	public void exportAssetListByParams(Object cmd) {
 		Map<String, Object> params = new HashMap<>();
-		params.put("UserContext", UserContext.current().getUser());
+		//params.put("UserContext", UserContext.current().getUser());
 		Long communityId;
 		String moduleName = "";
 		if (cmd instanceof ListBillsCommand) {
@@ -5025,7 +5025,8 @@ public class AssetServiceImpl implements AssetService {
 			ListBillsCommand ListBillsCMD = (ListBillsCommand) cmd;
 			communityId = ListBillsCMD.getCommunityId();
 			ListBillsCMD.setPageSize(100000);
-			namespaceId = UserContext.getCurrentNamespaceId(ListBillsCMD.getNamespaceId());
+			//namespaceId = UserContext.getCurrentNamespaceId(ListBillsCMD.getNamespaceId());
+			namespaceId = ListBillsCMD.getNamespaceId(); //修复缺陷 #43443 【智谷汇】缴费管理导出账单失败
 			dtos = listBills(ListBillsCMD).getListBillsDTOS();
 			command = ConvertHelper.convert(ListBillsCMD, ListFieldCommand.class);
 			command.setModuleName("asset");
@@ -5040,7 +5041,8 @@ public class AssetServiceImpl implements AssetService {
 			ListBillsCommandForEnt ListBillsCMDForEnt = (ListBillsCommandForEnt) cmd;
 			communityId = ListBillsCMDForEnt.getOwnerId();
 			ListBillsCMDForEnt.setPageSize(100000);
-			namespaceId = UserContext.getCurrentNamespaceId(ListBillsCMDForEnt.getNamespaceId());
+			//namespaceId = UserContext.getCurrentNamespaceId(ListBillsCMDForEnt.getNamespaceId());
+			namespaceId = ListBillsCMDForEnt.getNamespaceId(); //修复缺陷 #43443 【智谷汇】缴费管理导出账单失败
 			dtos = listBillsForEnt(ListBillsCMDForEnt).getListBillsDTOS();
 			command = ConvertHelper.convert(ListBillsCMDForEnt, ListFieldCommand.class);
 			command.setModuleName("asset");

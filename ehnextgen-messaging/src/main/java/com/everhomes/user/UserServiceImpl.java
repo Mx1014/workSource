@@ -5304,9 +5304,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     public SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd) {
         // 1.通过 userId 与 organizationId 去找到 detailId
         // 2.根据 detailId 调用之前的获取信息接口
-        List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+    	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getUserId(), cmd.getOrganizationId());
         GetRelevantContactInfoCommand command = new GetRelevantContactInfoCommand();
-        command.setDetailId(members.get(0).getDetailId());
+        command.setDetailId(detail == null ? null : detail.getId());
         command.setOrganizationId(cmd.getOrganizationId());
         SceneContactV2DTO dto = this.getRelevantContactInfo(command);
         if (dto != null)

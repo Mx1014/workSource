@@ -396,7 +396,3 @@ CREATE TABLE `eh_tickets` (
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '圳智慧TICKET表';
-
--- AUTHOR: 黄明波 20181127
--- REMARK: 云打印微信支付需求
-ALTER TABLE `eh_siyin_print_business_payee_accounts` MODIFY COLUMN `payee_id` BIGINT(20) NULL DEFAULT NULL COMMENT '支付帐号id';
