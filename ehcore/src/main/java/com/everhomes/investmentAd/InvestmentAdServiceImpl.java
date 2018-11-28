@@ -487,30 +487,46 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		//资产类型是房源时，如果房源不是待租状态，则不在招商广告中显示
 		if (InvestmentAdAssetType.BUILDING.equals(InvestmentAdAssetType.fromCode(investmentAdAsset.getAssetType()))) {
 			Building building = communityProvider.findBuildingById(investmentAdAsset.getAssetId());
-			if (building.getStatus() == BuildingAdminStatus.INACTIVE.getCode()) {
+			if (building != null) {
+				if (building.getStatus() == BuildingAdminStatus.INACTIVE.getCode()) {
+					return false;
+				}
+			}else {
 				return false;
 			}
+			
 			//如果楼宇下的房源都不是待租状态，则返回false
 			List<Address> apartments = addressProvider.findActiveApartmentsByBuildingId(building.getId());
-			List<Long> aptIdList = apartments.stream().map(a->a.getId()).collect(Collectors.toList());
-			Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
-			Set<Entry<Long, CommunityAddressMapping>> entrySet = communityAddressMappingMap.entrySet();
-			for (Entry<Long, CommunityAddressMapping> entry : entrySet) {
-				if (entry.getValue().getLivingStatus() == AddressMappingStatus.FREE.getCode()) {
-					return true;
+			if (apartments != null && apartments.size()>0) {
+				List<Long> aptIdList = apartments.stream().map(a->a.getId()).collect(Collectors.toList());
+				Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
+				Set<Entry<Long, CommunityAddressMapping>> entrySet = communityAddressMappingMap.entrySet();
+				for (Entry<Long, CommunityAddressMapping> entry : entrySet) {
+					if (entry.getValue().getLivingStatus() == AddressMappingStatus.FREE.getCode()) {
+						return true;
+					}
 				}
 			}
 			return false;
 		}else if (InvestmentAdAssetType.APARTMENT.equals(InvestmentAdAssetType.fromCode(investmentAdAsset.getAssetType()))) {
 			Address address = addressProvider.findAddressById(investmentAdAsset.getAssetId());
-			if (address.getStatus() == AddressAdminStatus.INACTIVE.getCode()) {
+			if (address != null) {
+				if (address.getStatus() == AddressAdminStatus.INACTIVE.getCode()) {
+					return false;
+				}
+			}else {
 				return false;
 			}
-			//CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+			
 			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
-			if (communityAddressMapping.getLivingStatus() != AddressMappingStatus.FREE.getCode()) {
+			if (communityAddressMapping != null) {
+				if (communityAddressMapping.getLivingStatus() != AddressMappingStatus.FREE.getCode()) {
+					return false;
+				}
+			}else {
 				return false;
 			}
+			
 		}
 		return true;
 	}

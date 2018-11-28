@@ -8695,7 +8695,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 					CommunityAddressMapping communityAddressMapping = addressMappinglist.get(0);
 					if (communityAddressMapping != null) {
 						Byte livingStatus = communityAddressMapping.getLivingStatus();
-						if (livingStatus != null && livingStatus.equals(AddressMappingStatus.OCCUPIED.getCode())) {
+						if (livingStatus != null) {
 							List<Contract> contracts = contractProvider.findAnyStatusContractByAddressId(address.getId());
 							if (contracts != null && contracts.size()>0) {
 								Contract contract = contracts.get(0);
@@ -8718,6 +8718,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 											communityAddressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
 											communityAddressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 											organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+										}else if (ContractStatus.ACTIVE.getCode() == contractStatus.byteValue() ||
+												ContractStatus.EXPIRING.getCode() == contractStatus.byteValue()) {
+											//正常、快过期-》已租
+											if (livingStatus.byteValue() != AddressMappingStatus.SALED.getCode()) {
+												communityAddressMapping.setLivingStatus(AddressMappingStatus.RENT.getCode());
+												communityAddressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+												organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+											}
 										}
 									}
 								}
