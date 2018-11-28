@@ -1,5 +1,6 @@
 package com.everhomes.officecubicle;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleConfigs;
 import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,6 +165,37 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		query.addConditions(Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_ID.eq(ownerId));
 		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleSpace.class);
 
+	}
+	
+	@Override
+	public BigDecimal getRoomMinPrice(Long spaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		Record record = context.select(DSL.min(Tables.EH_OFFICE_CUBICLE_ROOM.PRICE)).from(Tables.EH_OFFICE_CUBICLE_ROOM)
+				.where(Tables.EH_OFFICE_CUBICLE_ROOM.SPACE_ID.eq(spaceId)).fetchOne();
+		return record.getValue(DSL.min(Tables.EH_OFFICE_CUBICLE_ROOM.PRICE));
+	}
+	
+	@Override
+	public BigDecimal getRoomMaxPrice(Long spaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		Record record = context.select(DSL.max(Tables.EH_OFFICE_CUBICLE_ROOM.PRICE)).from(Tables.EH_OFFICE_CUBICLE_ROOM)
+				.where(Tables.EH_OFFICE_CUBICLE_ROOM.SPACE_ID.eq(spaceId)).fetchOne();
+		return record.getValue(DSL.max(Tables.EH_OFFICE_CUBICLE_ROOM.PRICE));
+	}
+	@Override
+	public BigDecimal getStationMinPrice(Long spaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		Record record = context.select(DSL.min(Tables.EH_OFFICE_CUBICLE_STATION.PRICE)).from(Tables.EH_OFFICE_CUBICLE_STATION)
+				.where(Tables.EH_OFFICE_CUBICLE_STATION.SPACE_ID.eq(spaceId)).fetchOne();
+		return record.getValue(DSL.min(Tables.EH_OFFICE_CUBICLE_STATION.PRICE));
+	}
+	
+	@Override
+	public BigDecimal getStationMaxPrice(Long spaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		Record record = context.select(DSL.max(Tables.EH_OFFICE_CUBICLE_STATION.PRICE)).from(Tables.EH_OFFICE_CUBICLE_STATION)
+				.where(Tables.EH_OFFICE_CUBICLE_STATION.SPACE_ID.eq(spaceId)).fetchOne();
+		return record.getValue(DSL.max(Tables.EH_OFFICE_CUBICLE_STATION.PRICE));
 	}
 	
 	@Override
@@ -675,9 +708,37 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 
 	@Override
-	public List<OfficeCubicleStation> getOfficeCubicleStation(String ownerType, Long ownerId, Long spaceId) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<OfficeCubicleStation> getOfficeCubicleStation(Long ownerId, String ownerType,Long spaceId, Long roomId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOfficeCubicleStationRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION);
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_TYPE.eq(ownerType));
+		if (spaceId != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.SPACE_ID.eq(spaceId));
+		if (roomId != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.ASSOCIATE_ROOM_ID.eq(roomId));
+
+		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleStation.class));
+	}
+
+	
+	@Override
+	public List<OfficeCubicleStationRent> getOfficeCubicleStationRent(Long spaceId, Byte rentType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOfficeCubicleStationRentRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId));
+		if (rentType!=null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType));
+		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleStationRent.class));
+	}
+	
+	@Override
+	public List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType,Long spaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOfficeCubicleRoomRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_ROOM);
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.SPACE_ID.eq(spaceId));
+		
+		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleRoom.class));
 	}
 	
     @Override

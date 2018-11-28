@@ -68,7 +68,10 @@ import com.everhomes.rest.officecubicle.admin.*;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.promotion.merchant.GetPayUserByMerchantIdCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
@@ -80,9 +83,11 @@ import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantId
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.CreateRefundOrderCommand;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.rentalv2.PriceRuleType;
@@ -108,6 +113,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -136,6 +142,7 @@ import com.everhomes.parking.ParkingRechargeRate;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.PaySettings;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
@@ -159,6 +166,7 @@ import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -232,6 +240,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	private OrganizationProvider organizationProvider;
 	@Autowired
 	private CommunityService communityService;
+	@Autowired
+	private OnlinePayService onlinePayService;
 	private Integer getNamespaceId(Integer namespaceId){
 		if(namespaceId!=null){
 			return namespaceId;
@@ -1007,8 +1017,25 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	
 	@Override
 	public ListRentCubicleResponse listRentCubicle(ListRentCubicleCommand cmd){
-		
-		return null;
+		List<OfficeCubicleRange> ranges = 
+				officeCubicleRangeProvider.getOfficeCubicleRangeByOwner(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
+		ListRentCubicleResponse resp = new ListRentCubicleResponse();
+		if (ranges == null){
+			resp.setLongRentFlag((byte)0);
+			resp.setShortRentFlag((byte)0);
+		}else{
+			resp.setLongRentFlag((byte)1);
+			for(OfficeCubicleRange range : ranges){
+				List<OfficeCubicleStation> station = 
+						officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), range.getSpaceId(),null);
+				if (station ==null){
+					resp.setShortRentFlag((byte)0);
+				} else {
+					resp.setShortRentFlag((byte)1);
+				}
+			}
+		}
+		return resp;
 	}
 	
 	@Override
@@ -1408,7 +1435,37 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	
 	@Override
 	public void refundOrder(RefundOrderCommand cmd){
+		OfficeCubicleRentOrder order = this.officeCubicleProvider.findOfficeCubicleRentOrderById(cmd.getOrderId());
+		if(order==null){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE,
+					OfficeCubicleErrorCode.ERROR_REFUND_ERROR,
+					"支付系统订单号不存在");
+		}
+		 CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
+	        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
+	        createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+	        createRefundOrderCommand.setAccountCode("NS"+order.getNamespaceId().toString());
 
+	        createRefundOrderCommand.setBusinessOrderNumber(order.getBizOrderNo());
+	        createRefundOrderCommand.setAmount(order.getPrice().longValue());
+	        createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
+	        createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
+	        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+	        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"refund.v2.callback.url.rental", "");
+	        String backUrl = homeUrl + contextPath + backUri;
+	        createRefundOrderCommand.setCallbackUrl(backUrl);
+	        createRefundOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+
+	        CreateRefundOrderRestResponse refundOrderRestResponse = this.orderService.createRefundOrder(createRefundOrderCommand);
+	        if(refundOrderRestResponse != null && refundOrderRestResponse.getErrorCode() != null && refundOrderRestResponse.getErrorCode().equals(HttpStatus.OK.value())){
+
+	        } else{
+	            LOGGER.error("Refund failed from vendor, refundOrderNo={}, order={}, response={}", order.getOrderNo(), order,
+	                    refundOrderRestResponse);
+	            throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE,
+	            		OfficeCubicleErrorCode.ERROR_REFUND_ERROR,
+	                    "bill refund error");
+	        }
 	}
 	
 	@Override
@@ -1514,11 +1571,53 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
 
 		OrderCommandResponse response = orderCommandResponse.getPayResponse();
+		CreateOfficeCubicleOrderResponse resp = new CreateOfficeCubicleOrderResponse();
+		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
+		preDto.setExpiredIntervalTime(response.getExpirationMillis());
+		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+		if(paymentMethods!=null){
+			preDto.setPayMethod(paymentMethods.stream().map(bizPayMethod->{
+				PayMethodDTO payMethodDTO = ConvertHelper.convert(bizPayMethod, PayMethodDTO.class);
+				payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+				payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+				String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+				payMethodDTO.setPaymentLogo(paymentLogo);
+				payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+				PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+				com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+				if(bizPaymentParamsDTO != null) {
+					paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+				}
+				payMethodDTO.setPaymentParams(paymentParamsDTO);
+
+				return payMethodDTO;
+			}).collect(Collectors.toList()));//todo
+		}
+		Long expiredIntervalTime = getExpiredIntervalTime(response.getExpirationMillis());
+		preDto.setExpiredIntervalTime(expiredIntervalTime);
+		preDto.setOrderId(order.getId());
+		resp.setPreDTO(preDto);
 		order.setBizOrderNo(response.getBizOrderNum());
+		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
+		order.setOrderNo(orderNo);
 		officeCubicleProvider.updateCubicleRentOrder(order);
-		return null;
+		return resp;
 		
 	}
+	private Long getExpiredIntervalTime(Long expiration){
+		Long expiredIntervalTime = null;
+		if(expiration != null){
+			expiredIntervalTime = expiration - System.currentTimeMillis();
+			//转换成秒
+			expiredIntervalTime = expiredIntervalTime/1000;
+			if(expiredIntervalTime < 0){
+				expiredIntervalTime = 0L;
+			}
+		}
+		return expiredIntervalTime;
+	}
+	
 	@Override
 	public ListCitiesByOrgIdAndCommunitIdResponse listCitiesByOrgIdAndCommunitId (ListCitiesByOrgIdAndCommunitIdCommand cmd){
 		List<OrganizationCommunityDTO> orgcoms = organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
@@ -1691,7 +1790,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public CreateCubicleOrderBackgroundResponse createCubicleOrderBackground(CreateCubicleOrderBackgroundCommand cmd){
 		List<OfficeCubicleStationRent> stationRent = 
 				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(), cmd.getRentType(), cmd.getStationType());
-		List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSpaceId());
+		List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getSpaceId(), null);
 		Integer stationNums = station.size();
 		OfficeCubicleRentOrder order = ConvertHelper.convert(cmd, OfficeCubicleRentOrder.class);
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -1815,8 +1914,44 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public ListOfficeCubicleStatusResponse listOfficeCubicleStatus(ListOfficeCubicleStatusCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ListOfficeCubicleStatusResponse resp = new ListOfficeCubicleStatusResponse();
+		return resp;
+	}
+	
+	@Override
+	public GetRoomDetailResponse getRoomDetail(GetRoomDetailCommand cmd){
+		GetRoomDetailResponse resp = new GetRoomDetailResponse();
+		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId());
+		resp.setRoom(room.stream().map(r->{
+			RoomDTO dto = new RoomDTO();
+			ConvertHelper.convert(r,RoomDTO.class);
+			List<OfficeCubicleStation> station = 
+					officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),r.getId());
+			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
+			dto.setAssociateStation(associateStaionList);
+			return dto;
+			}).collect(Collectors.toList()));
+		return resp;
+	}
+	
+	private List<AssociateStationDTO> setAssociateStaion(List<OfficeCubicleStation> station){
+		List<AssociateStationDTO> associateStaionList = new ArrayList<AssociateStationDTO>();
+		for (OfficeCubicleStation s :station){
+			AssociateStationDTO dto = new AssociateStationDTO();
+			dto.setStationId(s.getId());
+			dto.setStationName(s.getStationName());
+			associateStaionList.add(dto);
+		}
+		return associateStaionList;
+	}
+	
+	
+	@Override
+	public GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd){
+		GetStationDetailResponse resp = new GetStationDetailResponse();
+		List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null);
+		resp.setStation(station.stream().map(r->ConvertHelper.convert(r,StationDTO.class)).collect(Collectors.toList()));
+		return resp;
 	}
 	
 	@Override
@@ -1867,6 +2002,33 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (space !=null){
 			resp.setSpaceId(space.getId());
 		}
+		return resp;
+	}
+	
+	@Override
+	public ListSpaceByCityResponse listSpaceByCity(ListSpaceByCityCommand cmd){
+		ListSpaceByCityResponse resp = new ListSpaceByCityResponse();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<OfficeCubicleSpace> list = 
+				officeCubicleProvider.querySpacesByCityId(
+						cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCityId(), locator, pageSize + 1, getNamespaceId(UserContext.getCurrentNamespaceId()));
+		
+		resp.setSpace(list.stream().map(r->{
+			SpaceForAppDTO dto = new SpaceForAppDTO();
+			dto.setAddress(r.getAddress());
+			dto.setSpaceId(r.getId());
+			dto.setSpaceName(r.getName());
+			BigDecimal roomMinPrice = officeCubicleProvider.getRoomMinPrice(r.getId());
+			BigDecimal stationMinPrice = officeCubicleProvider.getStationMinPrice(r.getId());
+			dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
+			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null);
+			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId());
+			Integer allPositonNums = station.size() + room.size();
+			dto.setAllPositonNums(allPositonNums);
+			return dto;
+		}).collect(Collectors.toList()));
 		return resp;
 	}
 }

@@ -11,8 +11,14 @@ import com.everhomes.rest.officecubicle.admin.AddRoomAdminCommand;
 import com.everhomes.rest.officecubicle.admin.CityDTO;
 import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderCommand;
 import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderResponse;
+import com.everhomes.rest.officecubicle.admin.GetRoomDetailCommand;
+import com.everhomes.rest.officecubicle.admin.GetRoomDetailResponse;
 import com.everhomes.rest.officecubicle.admin.GetSpaceCommand;
 import com.everhomes.rest.officecubicle.admin.GetSpaceResponse;
+import com.everhomes.rest.officecubicle.admin.GetStationDetailCommand;
+import com.everhomes.rest.officecubicle.admin.GetStationDetailResponse;
+import com.everhomes.rest.officecubicle.admin.ListOfficeCubicleStatusCommand;
+import com.everhomes.rest.officecubicle.admin.ListOfficeCubicleStatusResponse;
 import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersCommand;
 import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersResponse;
 import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
@@ -429,6 +435,51 @@ public class OfficeCubicleController extends ControllerBase {
     public RestResponse getSpace(GetSpaceCommand cmd) {
 
     	GetSpaceResponse resp = this.officeCubicleService.getSpace(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/listOfficeCubicleStatus</b> 
+     * <p>列出空间工位状态</p>
+     */
+    @RequestMapping("listOfficeCubicleStatus")
+    public RestResponse listOfficeCubicleStatus(ListOfficeCubicleStatusCommand cmd) {
+
+    	ListOfficeCubicleStatusResponse resp = this.officeCubicleService.listOfficeCubicleStatus(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/getCubicleDetail</b> 
+     * <p>搜索订单</p>
+     */
+    @RequestMapping("getCubicleDetail")
+    public RestResponse getCubicleDetail(GetStationDetailCommand cmd) {
+
+    	GetStationDetailResponse resp = this.officeCubicleService.getCubicleDetail(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/getRoomDetail</b> 
+     * <p>搜索订单</p>
+     */
+    @RequestMapping("getRoomDetail")
+    public RestResponse getRoomDetail(GetRoomDetailCommand cmd) {
+
+    	GetRoomDetailResponse resp = this.officeCubicleService.getRoomDetail(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -43,7 +43,16 @@ public class OfficeRentOrderDTO {
     private Byte paidType;
     private Byte requestType;
     private Byte orderStatus;
+    private Long orderNo;
 
+
+	public Long getOrderNo() {
+		return orderNo;
+	}
+
+	public void setOrderNo(Long orderNo) {
+		this.orderNo = orderNo;
+	}
 
 	public Byte getOrderStatus() {
 		return orderStatus;

@@ -15,4 +15,5 @@ public interface OfficeCubicleErrorCode {
     int ERROR_NO_PAYEE_ACCOUNT= 10009; //  未设置收款方账号
     int ERROR_REPEATE_ACCOUNT= 10010; //  重复账号
     int PARAMTER_LOSE = 10011;
+    int ERROR_REFUND_ERROR = 10012;//退款失败
 }

@@ -106,4 +106,10 @@ public interface OfficeCubicleService {
 
 	GetSpaceResponse getSpace(GetSpaceCommand cmd);
 
+	ListSpaceByCityResponse listSpaceByCity(ListSpaceByCityCommand cmd);
+
+	GetRoomDetailResponse getRoomDetail(GetRoomDetailCommand cmd);
+
+	GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd);
+
 }

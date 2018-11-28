@@ -1,0 +1,93 @@
+package com.everhomes.rest.officecubicle.admin;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * </ul>
+ */
+public class GetStationDetailCommand {
+	private Integer namespaceId;
+	private Long ownerId;
+	private String ownerType;
+	private Long spaceId;
+	private Long stationId;
+    
+
+
+
+	public Long getSpaceId() {
+		return spaceId;
+	}
+
+
+
+
+	public void setSpaceId(Long spaceId) {
+		this.spaceId = spaceId;
+	}
+
+
+
+
+	public Long getStationId() {
+		return stationId;
+	}
+
+
+
+
+	public void setStationId(Long stationId) {
+		this.stationId = stationId;
+	}
+
+
+
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+
+
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+
+
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+
+
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+
+
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

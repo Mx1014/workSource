@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -21,110 +22,20 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateOfficeCubicleOrderResponse {
-    private Long orderId;
-    private Long expiredIntervalTime;
-    private Long amount;
-    private String orderCommitUrl;
-    private String orderCommitToken;
-    private String orderCommitNonce;
-    private Long orderCommitTimestamp;
-    private String payInfo;
-    private String extendInfo;
-    @ItemType(PayMethodDTO.class)
-    private List<PayMethodDTO> payMethod;
-    private Long userId;
+
+    private PreOrderDTO preDTO;
 	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
 
-	public Long getOrderId() {
-		return orderId;
+	public PreOrderDTO getPreDTO() {
+		return preDTO;
 	}
 
-	public void setOrderId(Long orderId) {
-		this.orderId = orderId;
-	}
-
-	public Long getExpiredIntervalTime() {
-		return expiredIntervalTime;
-	}
-
-	public void setExpiredIntervalTime(Long expiredIntervalTime) {
-		this.expiredIntervalTime = expiredIntervalTime;
-	}
-
-	public Long getAmount() {
-		return amount;
-	}
-
-	public void setAmount(Long amount) {
-		this.amount = amount;
-	}
-
-	public String getOrderCommitUrl() {
-		return orderCommitUrl;
-	}
-
-	public void setOrderCommitUrl(String orderCommitUrl) {
-		this.orderCommitUrl = orderCommitUrl;
-	}
-
-	public String getOrderCommitToken() {
-		return orderCommitToken;
-	}
-
-	public void setOrderCommitToken(String orderCommitToken) {
-		this.orderCommitToken = orderCommitToken;
-	}
-
-	public String getOrderCommitNonce() {
-		return orderCommitNonce;
-	}
-
-	public void setOrderCommitNonce(String orderCommitNonce) {
-		this.orderCommitNonce = orderCommitNonce;
-	}
-
-	public Long getOrderCommitTimestamp() {
-		return orderCommitTimestamp;
-	}
-
-	public void setOrderCommitTimestamp(Long orderCommitTimestamp) {
-		this.orderCommitTimestamp = orderCommitTimestamp;
-	}
-
-	public String getPayInfo() {
-		return payInfo;
-	}
-
-	public void setPayInfo(String payInfo) {
-		this.payInfo = payInfo;
-	}
-
-	public String getExtendInfo() {
-		return extendInfo;
-	}
-
-	public void setExtendInfo(String extendInfo) {
-		this.extendInfo = extendInfo;
-	}
-
-	public List<PayMethodDTO> getPayMethod() {
-		return payMethod;
-	}
-
-	public void setPayMethod(List<PayMethodDTO> payMethod) {
-		this.payMethod = payMethod;
-	}
-
-	public Long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setPreDTO(PreOrderDTO preDTO) {
+		this.preDTO = preDTO;
 	}
 
 

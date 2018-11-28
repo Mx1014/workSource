@@ -1,5 +1,6 @@
 package com.everhomes.officecubicle;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
@@ -62,8 +63,10 @@ public interface OfficeCubicleProvider {
 
 	void createCubicleSite(OfficeCubicleStation station);
 
-	List<OfficeCubicleStation> getOfficeCubicleStation(String ownerType, Long ownerId, Long spaceId);
-
+	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId);
+	
+	List<OfficeCubicleRoom> getOfficeCubicleRoom(Long owner, String ownerType, Long spaceId);
+	
 	List<OfficeCubicleRentOrder> searchCubicleOrders(String ownerType, Long ownerId, Long beginDate, Long endDate,
 			 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,
 			Byte paidType, Byte paidMode, Byte requestType, Byte rentType, Byte orderStatus);
@@ -96,5 +99,16 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleAttachment> listAttachmentsBySpaceId(Long id, Byte ownerType);
 
 	OfficeCubicleSpace getSpaceByOwnerId(Long ownerId);
+
+	BigDecimal getRoomMinPrice(Long spaceId);
+
+	BigDecimal getRoomMaxPrice(Long spaceId);
+
+	BigDecimal getStationMinPrice(Long spaceId);
+
+	BigDecimal getStationMaxPrice(Long spaceId);
+
+	List<OfficeCubicleStationRent> getOfficeCubicleStationRent(Long spaceId, Byte rentType);
+
 
 }
