@@ -83,7 +83,6 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
   `use_detail` VARCHAR(255),
-  `pay_order_no` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
