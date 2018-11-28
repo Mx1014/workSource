@@ -4287,7 +4287,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		}
 		if (apartmentsNoRent.length() > 0) {
 			apartmentsNoRents = (apartmentsNoRent.toString()).substring(0,
-					(apartmentsNoRent.toString()).length() - 1) + "合同关联房源已出租";
+					(apartmentsNoRent.toString()).length() - 1) + "合同关联的房源不是待租状态的房源，该房源不可用";
 		}
 
 		Date FinishTime = new Date();
@@ -4314,7 +4314,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		Boolean possibleEnterContractStatus = false;
 		// 1、 循环签合同的房源，查看这些房源是否支持签合同
 		for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
-			// 查询当前房源状态
 			// 根据房源id查询该房源的状态信息
 			// 1、查询该房源是否签过合同，获取合同的签署有效期，如果不再本合同的范围内可以签署合同
 			// 查房源签署过的合同
@@ -4342,8 +4341,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			} else {
 				possibleEnterContractStatus = true;
 			}
-			// 查询房源是否为待租状态
-
+			// 查询当前房源状态,这里暂时这样改只有待租房源才能签合同，后面可以签未来合同，不能这样判断，而是判断时间段的状态
+			// issue-43523(签约合同关联房源201，走到待发起状态，手动修改房源状态为已预订、待签约等（非待出租），在域空间一键审批为正常合同)
+			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(apartment.getAddressId());
+			if (communityAddressMapping.getLivingStatus() != (byte)2) {
+				return false;
+			}
 		}
 		return possibleEnterContractStatus;
 	}
