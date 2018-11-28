@@ -404,5 +404,5 @@ ALTER TABLE `eh_siyin_print_business_payee_accounts` MODIFY COLUMN `payee_id` BI
 
 -- AUTHOR: 黄鹏宇 20181128
 -- REMARK: 去除创建管理员一定要有用户的限制
-ALTER TABLE eh_enterprise_customer_admins ADD COLUMN creator_uid BIGINT NULL;
+ALTER TABLE eh_enterprise_customer_admins MODIFY creator_uid BIGINT NULL;
 -- END
