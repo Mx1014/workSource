@@ -14,6 +14,7 @@ CREATE TABLE `eh_office_cubicle_station` (
   `cover_uri` VARCHAR(1024) COMMENT '封面图uri',
   `rent_flag` TINYINT COMMENT '是否开放预定 1是 0否',
   `price` DECIMAL(10,2) COMMENT '价格',
+  `associate_room_id` BIGINT COMMENT '关联办公室id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
