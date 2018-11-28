@@ -267,7 +267,7 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
     private EmployeePaymentAuthDTO convertMember2EmployeePaymentAuthDTO(OrganizationMemberDetails detail, EnterprisePaymentAuthEmployeeLimit limit, EnterprisePaymentAuthEmployeePayHistory history) {
         EmployeePaymentAuthDTO dto = convertMember2EmployeePaymentAuthDTO(detail);
         if (limit != null) {
-            dto.setSceneString(limit.getPaymentSceneList());
+            dto.setSceneString(processSceneListString(limit.getPaymentSceneList()));
         }
         dto.setLimitAmount(limit != null ? limit.getLimitAmount() : BigDecimal.ZERO);
         dto.setUsedAmount(history != null ? history.getUsedAmount() : BigDecimal.ZERO);
@@ -276,6 +276,32 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
             dto.setCurrentMonthRemainAmount(BigDecimal.ZERO);
         }
         return dto;
+    }
+
+    private String processSceneListString(String paymentSceneList) {
+        String[] sceneAppIds = StringUtils.split(paymentSceneList, ",");
+        if(sceneAppIds == null){
+            sceneAppIds = new String[1];
+            sceneAppIds[0] = paymentSceneList;
+        }
+        Map<Long, String> sceneAppMap = getEnterprisePaymentSceneIdNameMap();
+        String result = "";
+        for(int i = 0 ; i<sceneAppIds.length ; i++) {
+            Long appId = null;
+            try{
+                appId = Long.valueOf(sceneAppIds[i]);
+            }catch (Exception e){
+                LOGGER.error("appId can not parse to Long type id = " + sceneAppIds[i]);
+            }
+            String appName = sceneAppMap.get(appId);
+            if(appName != null) {
+                if (!result.equals("")) {
+                    result = result + "、";
+                }
+                result = result + appName;
+            }
+        }
+        return result;
     }
 
     private EmployeePaymentAuthDTO convertMember2EmployeePaymentAuthDTO(OrganizationMemberDetails detail) {
@@ -497,8 +523,8 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
 		                if (null != cmd.getEmployeePaymentSceneLimits()) {
 		                    for (EmployeePaymentSceneLimitSimpleDTO scene : cmd.getEmployeePaymentSceneLimits()) {
 		                        deleteOriginLimitDetailByScene(originLimitDetails, scene.getSceneAppId());
-		                        employeeLimit.setPaymentSceneList((employeeLimit.getPaymentSceneList().length() < 1 ? employeeLimit.getPaymentSceneList() : employeeLimit.getPaymentSceneList() + "、")
-		                                + scene.getSceneAppName());
+		                        employeeLimit.setPaymentSceneList((employeeLimit.getPaymentSceneList().length() < 1 ? employeeLimit.getPaymentSceneList() : employeeLimit.getPaymentSceneList() + ",")
+		                                + scene.getSceneAppId());
 		                        EnterprisePaymentAuthEmployeeLimitDetail limitDetail = enterprisePaymentAuthEmployeeLimitDetailProvider
 		                                .findEnterprisePaymentAuthEmployeeLimitDetailByDetailId(detail.getNamespaceId(), cmd.getOrganizationId(), r.getDetailId(), scene.getSceneAppId());
 		                        EnterprisePaymentAuthEmployeeLimitChangeLog sceneChangeLog = initChangeLog(detail);
