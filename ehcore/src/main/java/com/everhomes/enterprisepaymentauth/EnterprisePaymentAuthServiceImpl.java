@@ -939,10 +939,7 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         int pageOffset = (cmd.getPageOffset() != null && cmd.getPageOffset() > 1) ? cmd.getPageOffset() : 1;
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if (null != cmd.getNamespaceId()) {
-            namespaceId = cmd.getNamespaceId();
-        }
+        Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
         Long merchantOrderId = null;
         try {
             if (StringUtils.hasText(cmd.getOrderNo())) {
@@ -982,7 +979,7 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
             return response;
         }
         response.setNextPageOffset(nextPageOffset);
-        Map<Long, String> appMap = getEnterprisePaymentSceneIdNameMap();
+        Map<Long, String> appMap = getEnterprisePaymentSceneIdNameMap(namespaceId);
         Map<Long, OrganizationMemberDetails> memberDetailsMap = new HashMap<>();
         response.setPayLogs(payLogs.stream().map(r -> convertPayLogDTO(r, appMap, memberDetailsMap)).collect(Collectors.toList()));
 
