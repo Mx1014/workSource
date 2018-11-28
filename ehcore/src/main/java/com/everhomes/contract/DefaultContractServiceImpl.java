@@ -94,6 +94,7 @@ import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
 import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
+import com.everhomes.rest.asset.calculate.AssetOneTimeBillStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
@@ -1016,7 +1017,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		command.setContractNum(contract.getContractNumber());
 
 		if(chargingItems != null && chargingItems.size() > 0) {
-			List<FeeRules> feeRules = generateChargingItemsFeeRules(chargingItems);
+			List<FeeRules> feeRules = generateChargingItemsFeeRules(chargingItems, contract);
 			command.setFeesRules(feeRules);
 		}
 
@@ -1122,7 +1123,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 
 
-	protected List<FeeRules> generateChargingItemsFeeRules(List<ContractChargingItemDTO> chargingItems) {
+	protected List<FeeRules> generateChargingItemsFeeRules(List<ContractChargingItemDTO> chargingItems, Contract contract) {
 		Gson gson = new Gson();
 		List<FeeRules> feeRules = new ArrayList<>();
 		chargingItems.forEach(chargingItem -> {
@@ -1164,8 +1165,13 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				});
 			}
 			feeRule.setVariableIdAndValueList(vv);
-			//缺陷 #42424 是否是一次性产生费用 add by 杨崇鑫
-			feeRule.setOneTimeBillStatus(chargingItem.getOneTimeBillStatus());
+			//缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
+            //缺陷 #42424 如果是一次性产生费用，那么只在第一个收费周期产生费用
+            if(AssetOneTimeBillStatus.TRUE.getCode().equals(chargingItem.getOneTimeBillStatus())) {
+            	feeRule.setOneTimeBillStatus(chargingItem.getOneTimeBillStatus());
+            	feeRule.setDateStrBegin(contract.getContractStartDate());
+            	feeRule.setDateStrEnd(contract.getContractEndDate());
+            }
 			feeRules.add(feeRule);
 		});
 

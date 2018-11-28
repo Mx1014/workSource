@@ -54,6 +54,7 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.calculate.AssetOneTimeBillStatus;
 import com.everhomes.rest.asset.calculate.NatualQuarterMonthDTO;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -829,38 +830,55 @@ public class AssetServiceImpl implements AssetService {
                     	throw new RuntimeException("group rule is null, billGroupId=" + rule.getBillGroupId());
                     }
                     Byte balanceDateType = group.getBalanceDateType();
-                    //开始循环地址包裹
-                    for(int j = 0; j < contractPropertyList.size(); j ++){
-                        List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
-                        //从地址包裹中获得一个地址
-                        ContractProperty property = contractPropertyList.get(j);
+                    
+                    //缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
+                    //缺陷 #42424 如果是一次性产生费用，那么只在第一个收费周期产生费用
+                    if(AssetOneTimeBillStatus.TRUE.getCode().equals(rule.getOneTimeBillStatus())) {
+                    	List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
                         //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
                         BillingCycle standardBillingCycle = BillingCycle.fromCode(billingCycle);
                         if(standardBillingCycle == null || standardBillingCycle == BillingCycle.DAY){
                             assetProvider.deleteContractPayment(contractId);
-//                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-//                                        ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
                             		"目前计费周期只支持按月，按季，按年");
                         }
-                        // #31113 by-dinfjianmin
-    					if (property.getAddressId() != null) {
-    						Double apartmentChargeArea = assetProvider.getApartmentInfo(property.getAddressId(), contractId);
-    						for (int k = 0; k < var2.size(); k++) {
-    							VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-    							if (variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null
-    									&& variableIdAndValue.getVaribleIdentifier().equals("mj")) {
-    								variableIdAndValue.setVariableValue(apartmentChargeArea);
-    							}
-    							var2.set(k, variableIdAndValue);
-    						}
-    					}
                         //calculate the bill items expectancies for each of the address
-                        assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,property
+                        assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,null
                                 ,standard,formulaCondition,billingCycle,itemScope);
                         billItemsExpectancies.addAll(billItemsExpectancies_inner);
+                    }else {
+                    	//开始循环地址包裹
+                        for(int j = 0; j < contractPropertyList.size(); j ++){
+                            List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
+                            //从地址包裹中获得一个地址
+                            ContractProperty property = contractPropertyList.get(j);
+                            //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
+                            BillingCycle standardBillingCycle = BillingCycle.fromCode(billingCycle);
+                            if(standardBillingCycle == null || standardBillingCycle == BillingCycle.DAY){
+                                assetProvider.deleteContractPayment(contractId);
+//                                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+//                                            ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
+                                		"目前计费周期只支持按月，按季，按年");
+                            }
+                            // #31113 by-dinfjianmin
+        					if (property.getAddressId() != null) {
+        						Double apartmentChargeArea = assetProvider.getApartmentInfo(property.getAddressId(), contractId);
+        						for (int k = 0; k < var2.size(); k++) {
+        							VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+        							if (variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null
+        									&& variableIdAndValue.getVaribleIdentifier().equals("mj")) {
+        								variableIdAndValue.setVariableValue(apartmentChargeArea);
+        							}
+        							var2.set(k, variableIdAndValue);
+        						}
+        					}
+                            //calculate the bill items expectancies for each of the address
+                            assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,property
+                                    ,standard,formulaCondition,billingCycle,itemScope);
+                            billItemsExpectancies.addAll(billItemsExpectancies_inner);
+                        }
                     }
-                    
                     //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
                     BillingCycle balanceBillingCycle = BillingCycle.fromCode(balanceDateType);
                     if(balanceBillingCycle == null || balanceBillingCycle == BillingCycle.DAY){
@@ -1267,7 +1285,35 @@ public class AssetServiceImpl implements AssetService {
             Calendar aWithoutLimit = newClearedCalendar();
             if(billingCycle.byteValue() == (byte) 5){
                 // in this case, 5 stands for the one time pay mode
-                d.setTime(dateStrEnd.getTime());
+            	//缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
+                //缺陷 #42424 如果是一次性产生费用，那么只在第一个收费周期产生费用
+                if(AssetOneTimeBillStatus.TRUE.getCode().equals(rule.getOneTimeBillStatus())) {
+                	d.setTime(a.getTime());
+                	//按照账单组的计费周期分为按月，按季，按年，均有固定和自然两种情况
+                    BillingCycle billGroupBillingCycle = BillingCycle.fromCode(group.getBalanceDateType());
+                    if(!billGroupBillingCycle.isContract()){
+                        //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                        int monthOffset;
+                        if(billGroupBillingCycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                        	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                        	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                        }else {
+                        	monthOffset = billGroupBillingCycle.getMonthOffset();
+                        }
+                        d.add(Calendar.MONTH, monthOffset);
+                        d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+                     }else{
+                        // #32243  check if the next day is beyond the maximum day of the next month
+                        int prevDay = d.get(Calendar.DAY_OF_MONTH);
+                        d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
+                        int maximumDay = d.getActualMaximum(Calendar.DAY_OF_MONTH);
+                        if(prevDay <= maximumDay){
+                            d.add(Calendar.DAY_OF_MONTH, -1);
+                        }
+                    }
+                }else {
+                	d.setTime(dateStrEnd.getTime());
+                }
             } else {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 d.setTime(a.getTime());

@@ -11,6 +11,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.rest.asset.AssetBillDateDTO;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
 import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
@@ -513,5 +514,6 @@ public interface AssetProvider {
 	
 	PaymentOrderBillDTO listPaymentBillDetail(Long billId);
 
+	AssetBillDateDTO generateBillDate(Long billGroupId, String dateStrBegin, String dateStrEnd);
 	
 }
