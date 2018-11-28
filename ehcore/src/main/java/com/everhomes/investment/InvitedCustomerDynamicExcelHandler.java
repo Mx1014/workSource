@@ -1029,7 +1029,9 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
 
             //对比 如果被更新有数据则补上exist
             compareCustomerFieldValues(exist, enterpriseCustomer);
-
+            if(enterpriseCustomer.getLevelItemId() != null){
+                invitedCustomerService.changeCustomerLevelByCustomerId(enterpriseCustomer.getId(), enterpriseCustomer.getLevelItemId());
+            }
 
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
 
