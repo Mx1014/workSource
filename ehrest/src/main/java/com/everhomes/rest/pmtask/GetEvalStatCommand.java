@@ -10,6 +10,7 @@ package com.everhomes.rest.pmtask;
  * <li>projectType: 项目类型 {@link com.everhomes.rest.common.EntityType}</li>
  * <li>beginTime: 统计起始时间</li>
  * <li>endTime: 统计结束时间</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class GetEvalStatCommand {
@@ -22,6 +23,8 @@ public class GetEvalStatCommand {
     private Long endTime;
     private Long projectId;
     private String projectType;
+
+    private Long appId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -85,5 +88,13 @@ public class GetEvalStatCommand {
 
     public void setProjectType(String projectType) {
         this.projectType = projectType;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 }
