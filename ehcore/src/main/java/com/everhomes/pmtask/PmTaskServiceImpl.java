@@ -2418,13 +2418,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 					List<OrgAddressDTO> addresses = new ArrayList<OrgAddressDTO>();
 					organizationAddresses.stream().map( r -> {
 						Address address = addressProvider.findAddressById(r.getAddressId());
-						OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
-						if(dto != null) {
-							dto.setOrganizationId(o.getId());
-							dto.setDisplayName(o.getName());
-							dto.setAddressId(address.getId());
-							dto.setCommunityName(o.getCommunityName());
-							addresses.add(dto);
+						if(address != null && address.getCommunityId() != null && address.getCommunityId().equals(communityId)){
+							OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
+							if(dto != null) {
+								dto.setOrganizationId(o.getId());
+								dto.setDisplayName(o.getName());
+								dto.setAddressId(address.getId());
+								dto.setCommunityName(o.getCommunityName());
+								addresses.add(dto);
+							}
 						}
 						return null;
 					}).collect(Collectors.toList());
