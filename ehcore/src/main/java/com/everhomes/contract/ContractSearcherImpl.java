@@ -710,6 +710,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(contractApartments != null && contractApartments.size() > 0) {
             List<BuildingApartmentDTO> apartmentDtos = contractApartments.stream().map(apartment -> {
                 BuildingApartmentDTO apartmentDto = ConvertHelper.convert(apartment, BuildingApartmentDTO.class);
+                apartmentDto.setChargeArea(apartment.getAreaSize());
                 return apartmentDto;
             }).collect(Collectors.toList());
             dto.setBuildings(apartmentDtos);
