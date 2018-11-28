@@ -1896,7 +1896,21 @@ public class PortalServiceImpl implements PortalService {
                     }
                 }
             }
-        }
+        }else {
+        	if (!CollectionUtils.isEmpty(appEntries) && !CollectionUtils.isEmpty(moduleEntries)) {
+        	    for (ServiceModuleAppEntry appEntry : appEntries) {
+                    for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                        if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
+                            appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
+                            appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
+                            appEntry.setEntryName(moduleEntry.getEntryName());
+                            appEntry.setIconUri(moduleEntry.getIconUri());
+                            this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
+                        }
+                    }
+                }
+            }
+		}
     }
 
 	/**
