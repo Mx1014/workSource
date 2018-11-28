@@ -83,6 +83,10 @@ public interface ArchivesService {
 
     ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType);
 
+    List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, List<Long> departmentIds, ListingQueryBuilderCallback queryBuilderCallback);
+
+    void addSubDptIds(Long departmentId, List<Long> subDptIds);
+
     List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback);
 
     void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd);

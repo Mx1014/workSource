@@ -5553,8 +5553,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         User user = UserContext.current().getUser();
 //      获取用户公司楼层
         List<OrganizationDTO> orgs = organizationService.listUserRelateOrganizations(cmd.getNamespaceId(), user.getId(), OrganizationGroupType.ENTERPRISE);
+        List<OrganizationDTO> distinctOrgs= new ArrayList<OrganizationDTO>();
+        Set<Long> set=new HashSet<Long>();
+        for (OrganizationDTO org : orgs) {
+            if (org == null) {
+                continue;
+            }
+            Long orgId = org.getId();
+            if (orgId != null) {
+                if (set.add(orgId)) {
+                    distinctOrgs.add(org);
+                }
+            }
+        }
+        set.clear();
         List<AddressDTO> userFloors = new ArrayList<>();
-        for(OrganizationDTO dto : orgs) {
+        for(OrganizationDTO dto : distinctOrgs) {
             List<OrganizationAddress> addrs = organizationProvider.findOrganizationAddressByOrganizationId(dto.getId());
             for(OrganizationAddress addr  : addrs) {
                 Address addr2 = addressProvider.findAddressById(addr.getAddressId());
@@ -5572,13 +5586,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
 //      分别返回旺龙门禁组，梯控组
             boolean doorType = true;
-            if( cmd.getDoorType() != null){
-                doorType = access.getDoorType().equals(cmd.getDoorType());
+            if(access != null){
+                if(cmd.getDoorType() != null){
+                    doorType = access.getDoorType().equals(cmd.getDoorType());
+                }
+                else{
+                    doorType = access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode()) || access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_DOOR_GROUP.getCode());
+                }
             }
-            else{
-                doorType = access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode()) || access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_DOOR_GROUP.getCode());
-            }
-            if(null != access && doorType){
+            if(access != null && doorType){
                 DoorAccessGroupDTO group = new DoorAccessGroupDTO();
                 groups.add(group);
                 group.setId(access.getId());
@@ -5616,7 +5632,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                             //楼层名改为BuildingName
                             dto.setFloorName(r.getBuildingName());
                             return dto;
-                        }).collect(Collectors.toList()));
+                        }).distinct().collect(Collectors.toList()));//去重
                     }
                 }
             }

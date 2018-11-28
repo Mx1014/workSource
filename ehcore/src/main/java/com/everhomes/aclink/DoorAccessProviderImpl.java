@@ -7,6 +7,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
 import java.sql.Timestamp;
+import java.text.Collator;
 import java.util.*;
 import java.util.Comparator;
 
@@ -717,7 +718,8 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         });
         objs.removeAll(Collections.singleton(null));
         //门禁按displayName排序
-        Collections.sort(objs,new DoorAccessComparator());
+        Comparator<DoorAccessDTO> valueComparator = (o1, o2) -> Collator.getInstance(Locale.CHINA).compare(o1.getDisplayName(), o2.getDisplayName());
+        Collections.sort(objs,valueComparator);
         return objs;
 	}
 

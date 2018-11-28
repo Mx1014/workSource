@@ -97,4 +97,5 @@ public interface ParkingErrorCode {
     // ------------------ 海康威视对接 ----------------------
     String SCOPE_HKWS = "parking.hkws";
     int ERROR_HKWS_FETCH_OP_USER_UUID = 10001;  //获取opUserUuid失败
+    int ERROR_HKWS_FETCH_PARKING_UUID = 10002;  //获取parkUuid失败
 }

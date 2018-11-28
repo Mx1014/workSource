@@ -34,7 +34,7 @@ public class ListPunchCountCommandResponse{
 
     @ItemType(String.class)
     private List<String> extColumns;
-
+	private List<Long> departmentIds;
     private List<String> dateList;
 
     private Integer process;
@@ -47,87 +47,73 @@ public class ListPunchCountCommandResponse{
     private String filerName;
 	private Integer punchMemberNumber;
 
-
-	public List<PunchCountDTO> getPunchCountList() {
-		return punchCountList;
-	}
-
-
-	public void setPunchCountList(List<PunchCountDTO> punchCountList) {
-		this.punchCountList = punchCountList;
-	}
-
-
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
-
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}
-
 
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
+	public List<PunchCountDTO> getPunchCountList() {
+		return punchCountList;
+	}
+
+	public void setPunchCountList(List<PunchCountDTO> punchCountList) {
+		this.punchCountList = punchCountList;
+	}
 
 	public List<String> getExtColumns() {
 		return extColumns;
 	}
 
-
 	public void setExtColumns(List<String> extColumns) {
 		this.extColumns = extColumns;
 	}
 
+	public List<Long> getDepartmentIds() {
+		return departmentIds;
+	}
+
+	public void setDepartmentIds(List<Long> departmentIds) {
+		this.departmentIds = departmentIds;
+	}
 
 	public List<String> getDateList() {
 		return dateList;
 	}
 
-
 	public void setDateList(List<String> dateList) {
 		this.dateList = dateList;
 	}
-
 
 	public Integer getProcess() {
 		return process;
 	}
 
-
 	public void setProcess(Integer process) {
 		this.process = process;
 	}
-
 
 	public String getErrorInfo() {
 		return errorInfo;
 	}
 
-
 	public void setErrorInfo(String errorInfo) {
 		this.errorInfo = errorInfo;
 	}
-
 
 	public Byte getStatus() {
 		return status;
 	}
 
-
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
 
-
 	public String getPunchMonth() {
 		return punchMonth;
 	}
-
 
 	public void setPunchMonth(String punchMonth) {
 		this.punchMonth = punchMonth;
@@ -141,6 +127,22 @@ public class ListPunchCountCommandResponse{
 		this.updateTime = updateTime;
 	}
 
+	public Timestamp getFileTime() {
+		return fileTime;
+	}
+
+	public void setFileTime(Timestamp fileTime) {
+		this.fileTime = fileTime;
+	}
+
+	public String getFilerName() {
+		return filerName;
+	}
+
+	public void setFilerName(String filerName) {
+		this.filerName = filerName;
+	}
+
 	public Integer getPunchMemberNumber() {
 		return punchMemberNumber;
 	}
@@ -149,23 +151,8 @@ public class ListPunchCountCommandResponse{
 		this.punchMemberNumber = punchMemberNumber;
 	}
 
-
-	public Timestamp getFileTime() {
-		return fileTime;
-	}
-
-
-	public void setFileTime(Timestamp fileTime) {
-		this.fileTime = fileTime;
-	}
-
-
-	public String getFilerName() {
-		return filerName;
-	}
-
-
-	public void setFilerName(String filerName) {
-		this.filerName = filerName;
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }
