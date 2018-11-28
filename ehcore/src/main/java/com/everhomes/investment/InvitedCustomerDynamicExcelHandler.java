@@ -138,6 +138,9 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
     @Autowired
     private InvitedCustomerProvider invitedCustomerProvider;
 
+    @Autowired
+    private InvitedCustomerService invitedCustomerService;
+
 
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport, boolean withData) {
@@ -907,6 +910,9 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
             }
             customerProvider.createEnterpriseCustomer(enterpriseCustomer);
 
+            if(enterpriseCustomer.getLevelItemId() != null){
+                invitedCustomerService.createCustomerLevelByCustomerId(enterpriseCustomer.getId(), enterpriseCustomer.getLevelItemId());
+            }
             //企业客户新增成功,保存客户事件
             customerService.saveCustomerEvent(1, enterpriseCustomer, null, (byte) 0);
             if (StringUtils.isNotEmpty(customerAddressString)) {

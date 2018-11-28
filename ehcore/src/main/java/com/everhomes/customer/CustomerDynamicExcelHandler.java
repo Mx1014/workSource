@@ -8,6 +8,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.dynamicExcel.*;
 import com.everhomes.enterprise.EnterpriseAttachment;
+import com.everhomes.investment.InvitedCustomerService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
@@ -135,6 +136,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private InvitedCustomerService invitedCustomerService;
 
 
     @Override
@@ -965,8 +969,13 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         //customerProvider.saveCustomerEvents(1, customers, (byte) 0);
 
 
+
         dynamicCustomers.forEach(r -> {
-            customerSearcher.feedDoc(r.getCustomer());
+            EnterpriseCustomer customer = r.getCustomer();
+            if(customer.getLevelItemId() != null){
+                invitedCustomerService.createCustomerLevelByCustomerId(customer.getId(), customer.getLevelItemId());
+            }
+            customerSearcher.feedDoc(customer);
         });
 
 

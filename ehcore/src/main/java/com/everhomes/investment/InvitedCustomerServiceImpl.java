@@ -260,7 +260,6 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
                 EnterpriseCustomer dto = ConvertHelper.convert(customer, EnterpriseCustomer.class);
 
-                dto.setCreateTime(new Timestamp(customer.getCreateTime()));
                 dto.setStatus(CommonStatus.ACTIVE.getCode());
                 dto.setNamespaceId(cmd.getNamespaceId());
                 customerSearcher.feedDoc(dto);
@@ -1509,7 +1508,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     public void statisticCustomerAll(Date date){
         LOGGER.info("the scheduleJob of customer monthly statistics is start!");
         StatisticTime statisticTime = getBeforeForStatistic(date , Calendar. YEAR);
-        startCustomerStatistic(statisticTime);
+        List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
     }
 
     @Override

@@ -515,7 +515,6 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setAptitudeFlagItemId((long)CustomerAptitudeFlag.NOAPTITUDE.getCode());
         }
 //        customer.setSourceId(cmd.getSourceItemId());
-        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         //创建或更新customer的bannerUri
         enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
@@ -650,7 +649,6 @@ public class CustomerServiceImpl implements CustomerService {
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
         //数据库冗余又从动态表单查的 又要删除不显示  暂时这样
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
-        dto.setCreateTime(customer.getCreateTime().getTime());
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
         ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), customer.getCategoryItemId());
         if (categoryItem != null) {

@@ -27,7 +27,7 @@ public class CustomerStatisticsScheduleJob extends QuartzJobBean {
     public static final String SCHEDELE_NAME = "invitedCustomer-";
 
     //public static String CRON_EXPRESSION = "0 0 3 * * ?";
-    public static String CRON_EXPRESSION = "0 10 * * * ?";
+    public static String CRON_EXPRESSION = "0 13/5 * * * ?";
 
 
     @Autowired
@@ -43,7 +43,7 @@ public class CustomerStatisticsScheduleJob extends QuartzJobBean {
 
         invitedCustomerService.statisticCustomerDaily(new Date());
         invitedCustomerService.statisticCustomerDailyTotal(new Date());
-        invitedCustomerService.statisticCustomerAll(new Date());
+        invitedCustomerService.statisticCustomerTotal(new Date());
         Calendar calendar = Calendar. getInstance();
         calendar.setTime(new Date());
         if(calendar.get(Calendar.DAY_OF_MONTH) == 1){
