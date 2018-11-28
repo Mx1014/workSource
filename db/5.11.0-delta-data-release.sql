@@ -49,7 +49,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('ente
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','4','zh_CN','订单编号;使用人;使用人手机;支付场景;支付时间;支付金额');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','5','zh_CN','企业支付记录');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','6','zh_CN','支付时间:');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','7','zh_CN','企业支付额度');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','7','zh_CN','企业支付');
 
 -- AUTHOR: 吴寒
 -- REMARK: 企业支付授权   支付授权的菜单
