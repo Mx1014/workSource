@@ -1164,6 +1164,8 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				});
 			}
 			feeRule.setVariableIdAndValueList(vv);
+			//缺陷 #42424 是否是一次性产生费用 add by 杨崇鑫
+			feeRule.setOneTimeBillStatus(chargingItem.getOneTimeBillStatus());
 			feeRules.add(feeRule);
 		});
 
