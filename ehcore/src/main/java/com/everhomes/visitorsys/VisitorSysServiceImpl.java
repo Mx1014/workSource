@@ -43,6 +43,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.enterprise.FindEnterpriseDetailCommand;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.OfficeSiteDTO;
@@ -2314,15 +2315,19 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         for (String s : checkMustFillField) {
             checkMustFillParams(visitor,s);
         }
+        CommunityType communitType = CommunityType.fromCode(visitor.getCommunityType());
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(visitor.getOwnerType(),visitor.getOwnerId());
-        checkOwner(VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
+        if(CommunityType.COMMERCIAL.equals(communitType))
+            checkOwner(VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
         GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(visitor, GetConfigurationCommand.class));
         //检查园区表单
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             checkFormConfiguration(configuration, visitor.getCommunityFormValues());
         }
         //检查公司表单
-        checkFormConfiguration(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId(),visitor.getEnterpriseFormValues());
+        if(CommunityType.COMMERCIAL.equals(communitType))
+            checkFormConfiguration(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId(),visitor.getEnterpriseFormValues());
+
         VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
         VisitorsysStatus visitStatus = checkInvaildVisitStatus(visitor.getVisitStatus());
 
