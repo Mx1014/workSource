@@ -1385,8 +1385,8 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
         }
         for (ServiceModuleAppDTO dto : response.getApps()) {
             //应用对应模块可能找不到
-            if (dto.getModuleName() != null) {
-                map.put(dto.getOriginId(), dto.getModuleName());
+            if (dto.getName() != null) {
+                map.put(dto.getOriginId(), dto.getName());
             }
         }
         return map;
