@@ -21,6 +21,8 @@ import com.everhomes.util.StringHelper;
 <li>saledApartmentCount: 已售房源总数</li>
 <li>unsaleApartmentCount: 代售房源总数</li>
 <li>defaultApartmentCount: 其他房源总数</li>
+<li>signedUpCount: 待签约房源总数</li>
+<li>waitingRoomCount: 待接房房源总数</li>
 <li>posterUri: 楼宇图片uri</li>
 <li>posterUrl: 楼宇图片url</li>
 </ul>*/
@@ -43,6 +45,8 @@ public class BuildingStatisticsForAppDTO {
 	private Integer saledApartmentCount;
 	private Integer unsaleApartmentCount;
 	private Integer defaultApartmentCount;
+	private Integer signedUpCount;
+	private Integer waitingRoomCount;
 	private String posterUri;
 	private String posterUrl;
 	
@@ -153,6 +157,18 @@ public class BuildingStatisticsForAppDTO {
 	}
 	public void setPosterUrl(String posterUrl) {
 		this.posterUrl = posterUrl;
+	}
+	public Integer getSignedUpCount() {
+		return signedUpCount;
+	}
+	public void setSignedUpCount(Integer signedUpCount) {
+		this.signedUpCount = signedUpCount;
+	}
+	public Integer getWaitingRoomCount() {
+		return waitingRoomCount;
+	}
+	public void setWaitingRoomCount(Integer waitingRoomCount) {
+		this.waitingRoomCount = waitingRoomCount;
 	}
 	@Override
 	public String toString() {

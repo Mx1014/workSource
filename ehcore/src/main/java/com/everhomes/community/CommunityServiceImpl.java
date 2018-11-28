@@ -6431,7 +6431,7 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		if (dto.getAreaSize()!=null && dto.getAreaSize()!=0) {
 			if (dto.getFreeArea()!=null) {
-				BigDecimal freeRate = new BigDecimal(dto.getFreeArea()).divide(new BigDecimal(dto.getAreaSize()),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+				BigDecimal freeRate = new BigDecimal(dto.getFreeArea()).divide(new BigDecimal(dto.getAreaSize()),4,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 				dto.setFreeRate(freeRate);
 			}else {
 				dto.setFreeRate(BigDecimal.ZERO);
@@ -6447,6 +6447,8 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setRentApartmentCount(apartmentCountResult.getRentApartmentCount());
 		dto.setSaledApartmentCount(apartmentCountResult.getSaledApartmentCount());
 		dto.setUnsaleApartmentCount(apartmentCountResult.getUnsaleApartmentCount());
+		dto.setSignedUpCount(apartmentCountResult.getSignedUpCount());
+		dto.setWaitingRoomCount(apartmentCountResult.getWaitingRoomCount());
 		
 		return dto;
 	}
@@ -6478,6 +6480,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resultMap.put(AddressMappingStatus.SALED.getCode(), 0);
 		resultMap.put(AddressMappingStatus.UNSALE.getCode(), 0);
 		resultMap.put(AddressMappingStatus.OCCUPIED.getCode(), 0);
+		resultMap.put(AddressMappingStatus.SIGNEDUP.getCode(), 0);
+		resultMap.put(AddressMappingStatus.WAITINGROOM.getCode(), 0);
 		
 		for(Address address : addresses){
 			totalApartmentCount++;
@@ -6497,6 +6501,8 @@ public class CommunityServiceImpl implements CommunityService {
 		result.setSaledApartmentCount(resultMap.get(AddressMappingStatus.SALED.getCode()));
 		result.setUnsaleApartmentCount(resultMap.get(AddressMappingStatus.UNSALE.getCode()));
 		result.setDefaultApartmentCount(resultMap.get(AddressMappingStatus.DEFAULT.getCode()));
+		result.setSignedUpCount(resultMap.get(AddressMappingStatus.SIGNEDUP.getCode()));
+		result.setWaitingRoomCount(resultMap.get(AddressMappingStatus.WAITINGROOM.getCode()));
 		
 		return result;
 	}
