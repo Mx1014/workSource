@@ -425,3 +425,18 @@ ALTER TABLE `eh_flow_statistics_handle_log` ADD COLUMN flow_lanes_cycle BIGINT(3
 -- REMARK:  添加 flow_case_id 字段
 ALTER TABLE `eh_flow_statistics_handle_log` ADD COLUMN flow_case_id BIGINT(20);
 
+
+-- AUTHOR: chenhe 2018-11-20
+-- REMARK: 圳智慧TICKET表
+CREATE TABLE `eh_tickets` (
+  `id` BIGINT NOT NULL,
+  `user_id` BIGINT COMMENT 'token所属用户id',
+  `ticket` VARCHAR(128) NOT NULL COMMENT 'token',
+  `redirect_code` VARCHAR(16) COMMENT '指定跳转页面的代码',
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '圳智慧TICKET表';
+
+-- AUTHOR: 黄明波 20181127
+-- REMARK: 云打印微信支付需求
+ALTER TABLE `eh_siyin_print_business_payee_accounts` MODIFY COLUMN `payee_id` BIGINT(20) NULL DEFAULT NULL COMMENT '支付帐号id';
