@@ -717,6 +717,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             query.fetch().map((r) -> {
             	DoorAccessDTO dto =ConvertHelper.convert(r, DoorAccessDTO.class);
             	dto.setGroupId(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID));
+            	dto.setDisplayName(dto.getDisplayNameNotEmpty());
             	//园区门禁门牌号
                 if(dto.getOwnerType() == (byte)1){
                     dto.getCommunityName();
@@ -745,7 +746,6 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         //门禁按displayName排序
         Comparator<DoorAccessDTO> valueComparator = (o1, o2) -> Collator.getInstance(Locale.CHINA).compare(o1.getDisplayName(), o2.getDisplayName());
         Collections.sort(objs,valueComparator);
-//        Collections.sort(objs,new DoorAccessComparator());
         return objs;
 	}
 
