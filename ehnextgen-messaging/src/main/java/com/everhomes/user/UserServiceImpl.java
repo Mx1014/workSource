@@ -4835,6 +4835,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                                     log.getOwnerUid(), userIdentifier.getIdentifierToken(),
                                     userIdentifier.getRegionCode(), log.getIdentifierToken(), log.getRegionCode());
                             resetUserIdentifier(currUser, vo);
+                            // 如果该用户有组织成员信息则更新其中的手机号码字段信息
+                            archivesService.updateArchivesEmployeeContact(namespaceId, currUser.getId(), log.getIdentifierToken());
                             return true;
                         });
                     } else {
