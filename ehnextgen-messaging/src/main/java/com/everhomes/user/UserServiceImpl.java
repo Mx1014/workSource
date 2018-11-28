@@ -4828,7 +4828,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     }
                     if (log.checkVerificationCode(cmd.getVerificationCode())) {
                         log.setClaimStatus(IdentifierClaimStatus.TAKEN_OVER.getCode());
-                        OrganizationMemberDetails orgMebDetOfUser = organizationProvider.findOrganizationMemberDetailsByTargetId(currUser.getId());
                         // 加个事务
                         dbProvider.execute(r -> {
                             userIdentifierLogProvider.updateUserIdentifierLog(log);
@@ -4837,9 +4836,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                                     userIdentifier.getRegionCode(), log.getIdentifierToken(), log.getRegionCode());
                             resetUserIdentifier(currUser, vo);
                             // 如果该用户有组织成员信息则更新其中的手机号码字段信息
-                            if ( orgMebDetOfUser != null ) {
-                                organizationService.modifyPhoneNumberByDetailId(orgMebDetOfUser.getId(), log.getIdentifierToken());
-                            }
+                            archivesService.updateArchivesEmployeeContact(namespaceId, currUser.getId(), log.getIdentifierToken());
                             return true;
                         });
                     } else {
