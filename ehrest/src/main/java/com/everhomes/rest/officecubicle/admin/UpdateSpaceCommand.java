@@ -58,13 +58,12 @@ public class UpdateSpaceCommand {
 	private String contactPhone;
 	private Long managerUid; 
 	private String description;
-	private String spaceCoverUri; 
 	@ItemType(OfficeAttachmentDTO.class)
 	private List<OfficeAttachmentDTO> spaceAttachments;
-	private String shortRentUri; 
 	@ItemType(OfficeAttachmentDTO.class)
 	private List<OfficeAttachmentDTO> shortRentAttachments;
-	private String stationCoverUri; 
+	@ItemType(OfficeAttachmentDTO.class)
+	private List<OfficeAttachmentDTO> stationAttachments; 
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
 	@ItemType(OfficeRangeDTO.class)
@@ -243,13 +242,7 @@ public class UpdateSpaceCommand {
 		this.description = description;
 	}
 
-	public String getSpaceCoverUri() {
-		return spaceCoverUri;
-	}
 
-	public void setSpaceCoverUri(String spaceCoverUri) {
-		this.spaceCoverUri = spaceCoverUri;
-	}
 
 	public List<OfficeAttachmentDTO> getSpaceAttachments() {
 		return spaceAttachments;
@@ -259,13 +252,6 @@ public class UpdateSpaceCommand {
 		this.spaceAttachments = spaceAttachments;
 	}
 
-	public String getShortRentUri() {
-		return shortRentUri;
-	}
-
-	public void setShortRentUri(String shortRentUri) {
-		this.shortRentUri = shortRentUri;
-	}
 
 	public List<OfficeAttachmentDTO> getShortRentAttachments() {
 		return shortRentAttachments;
@@ -275,12 +261,14 @@ public class UpdateSpaceCommand {
 		this.shortRentAttachments = shortRentAttachments;
 	}
 
-	public String getStationCoverUri() {
-		return stationCoverUri;
+
+
+	public List<OfficeAttachmentDTO> getStationAttachments() {
+		return stationAttachments;
 	}
 
-	public void setStationCoverUri(String stationCoverUri) {
-		this.stationCoverUri = stationCoverUri;
+	public void setStationAttachments(List<OfficeAttachmentDTO> stationAttachments) {
+		this.stationAttachments = stationAttachments;
 	}
 
 	public List<OfficeCategoryDTO> getCategories() {

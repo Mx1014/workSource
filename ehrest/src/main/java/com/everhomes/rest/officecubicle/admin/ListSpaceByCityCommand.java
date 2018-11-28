@@ -4,6 +4,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>namespaceId:域空间</li>
+ * <li>ownerId</li>
+ * <li>ownerType</li>
+ * <li>cityId：城市id</li>
+ * <li>cityName</li>
+ * <li>pageAnchor：锚点</li>
+ * <li>pageSize：一页大小</li>
  * </ul>
  */
 public class ListSpaceByCityCommand {

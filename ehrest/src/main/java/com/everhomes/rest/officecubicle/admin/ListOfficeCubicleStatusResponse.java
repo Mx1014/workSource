@@ -10,18 +10,25 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>longCubicleRentedNums:长租工位已出租数量</li>
+ * <li>shortCubicleRentedNums:短租工位已预定数量</li>
+ * <li>longRentCloseCubicleNums:长租工位未开放数量</li>
+ * <li>rentRates:预定率</li>
+ * <li>longCubicleIdleNums:长租工位未预定数量</li>
+ * <li>shortCubicleIdleNums:短租工位未预定数量</li>
+ * <li>cubicleIdleNums:工位总数</li>
  * </ul>
  */
 public class ListOfficeCubicleStatusResponse {
 
 	private Integer longCubicleRentedNums;
 	private Integer shortCubicleRentedNums;
-	private Integer idleCubicleNums;
-	private Integer idleRates;
+	private Integer longRentCloseCubicleNums;
+	private Integer rentRates;
 	private Integer longCubicleIdleNums;
 	private Integer shortCubicleIdleNums;
-	@ItemType(OfficeCubicleDTO.class)
-	private List<OfficeCubicleDTO> officeCubicleDTO;
+	private Integer cubicleNums;
+	
 	public Integer getLongCubicleRentedNums() {
 		return longCubicleRentedNums;
 	}
@@ -34,17 +41,13 @@ public class ListOfficeCubicleStatusResponse {
 	public void setShortCubicleRentedNums(Integer shortCubicleRentedNums) {
 		this.shortCubicleRentedNums = shortCubicleRentedNums;
 	}
-	public Integer getIdleCubicleNums() {
-		return idleCubicleNums;
+
+
+	public Integer getRentRates() {
+		return rentRates;
 	}
-	public void setIdleCubicleNums(Integer idleCubicleNums) {
-		this.idleCubicleNums = idleCubicleNums;
-	}
-	public Integer getIdleRates() {
-		return idleRates;
-	}
-	public void setIdleRates(Integer idleRates) {
-		this.idleRates = idleRates;
+	public void setRentRates(Integer rentRates) {
+		this.rentRates = rentRates;
 	}
 	public Integer getLongCubicleIdleNums() {
 		return longCubicleIdleNums;
@@ -58,12 +61,19 @@ public class ListOfficeCubicleStatusResponse {
 	public void setShortCubicleIdleNums(Integer shortCubicleIdleNums) {
 		this.shortCubicleIdleNums = shortCubicleIdleNums;
 	}
-	public List<OfficeCubicleDTO> getOfficeCubicleDTO() {
-		return officeCubicleDTO;
+	public Integer getLongRentCloseCubicleNums() {
+		return longRentCloseCubicleNums;
 	}
-	public void setOfficeCubicleDTO(List<OfficeCubicleDTO> officeCubicleDTO) {
-		this.officeCubicleDTO = officeCubicleDTO;
+	public void setLongRentCloseCubicleNums(Integer longRentCloseCubicleNums) {
+		this.longRentCloseCubicleNums = longRentCloseCubicleNums;
 	}
+	public Integer getCubicleNums() {
+		return cubicleNums;
+	}
+	public void setCubicleNums(Integer cubicleNums) {
+		this.cubicleNums = cubicleNums;
+	}
+
 
 
 }

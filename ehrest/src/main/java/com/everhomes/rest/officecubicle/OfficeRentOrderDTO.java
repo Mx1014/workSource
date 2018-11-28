@@ -9,19 +9,24 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *空间订单
  *<li> id: 订单id	</li>
+ *<li>orderNo</li>
  *<li> namespaceId: namespace id	</li>
  *<li> spaceId: spaceId	</li>
  *<li> spaceName: 工位空间名称	</li>
-*<li>contactPhone  : 咨询电话	</li>  
-*<li> description : 详情-html片	</li> 
- * <li>rentType: 1-长租,2-短租</li>  
- * <li>status: 状态 2-客户端可见  0-客户端不可见</li> 
- * <li>orderType: 预定类别：1-参观 2-预定 </li> 
+ *<li> description : 详情	</li> 
+ * <li>rentType: 1-长租,0-短租</li>  
  * <li>reserveTime: 预定时间 </li> 
  * <li>reservePerson: 预订人姓名 </li> 
  * <li>reserveContact:  预订人联系方式</li> 
  * <li>reserveEnterpriseId: 预订人公司</li> 
- * <li>reserveEnterpriseName: 预订人公司</li> 
+ * <li>reserveEnterpriseName: 预订人公司</li>
+ * <li>userDetail:预定使用时间</li> 
+ * <li>createTime:申请时间</li>
+ * <li>price:价格</li>
+ * <li>requestType：requestType:订单来源 {@link com.everhomes.rest.officecubicle.OfficeCubicleRequestType}</li>
+ * <li>orderStatus：订单状态{@link com.everhomes.rest.officecubicle.OfficeCubiceOrderStatus}</li>
+ * <li>paidType:支付方式,10001-支付宝，10002-微信 {@link com.everhomes.rest.organization.VendorType}</li>
+ * <li>paidMode:支付类型 {@link com.everhomes.rest.general.order.GorderPayType}</li>
  * </ul>
  */
 public class OfficeRentOrderDTO {

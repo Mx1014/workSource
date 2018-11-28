@@ -4,9 +4,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 城市dto
- * <li>cityId: 城市id</li>
- * <li>cityName: 城市名</li>
+ * <li>namespaceId:域空间id</li>
+ * <li>appId: 应用Id</li>
+ * <li>communityId</li>
  * </ul>
  */
 public class ListCitiesByOrgIdAndCommunitIdCommand {

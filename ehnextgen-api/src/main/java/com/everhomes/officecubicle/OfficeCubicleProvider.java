@@ -63,7 +63,7 @@ public interface OfficeCubicleProvider {
 
 	void createCubicleSite(OfficeCubicleStation station);
 
-	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId);
+	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId, Byte rentFlag);
 	
 	List<OfficeCubicleRoom> getOfficeCubicleRoom(Long owner, String ownerType, Long spaceId);
 	

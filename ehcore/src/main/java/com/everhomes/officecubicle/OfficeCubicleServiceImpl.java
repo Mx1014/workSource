@@ -322,16 +322,27 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.getSpaceAttachments().add(attachmentDTO);
 			});
 		}
-		List<OfficeCubicleAttachment> stationAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(dto.getId(),(byte)2);
-		if (null != stationAttachments){
+		List<OfficeCubicleAttachment> shortRentAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(dto.getId(),(byte)2);
+		if (null != shortRentAttachments){
 			dto.setShortRentAttachments(new ArrayList<OfficeAttachmentDTO>());
-			stationAttachments.forEach((attachment) -> {
+			shortRentAttachments.forEach((attachment) -> {
 			OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
 			attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
 					UserContext.current().getUser().getId()));
 			dto.getShortRentAttachments().add(attachmentDTO);
 			});
 		}
+		List<OfficeCubicleAttachment> stationAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(dto.getId(),(byte)3);
+		if (null != stationAttachments){
+			dto.setShortRentAttachments(new ArrayList<OfficeAttachmentDTO>());
+			stationAttachments.forEach((attachment) -> {
+			OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
+			attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
+					UserContext.current().getUser().getId()));
+			dto.getStationAttachments().add(attachmentDTO);
+			});
+		}
+
 		List<OfficeCubicleCategory> categories = this.officeCubicleProvider.queryCategoriesBySpaceId(dto.getId());
 		dto.setAllPositionNums(0);
 		if (null != categories){
@@ -394,6 +405,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd.getShortRentAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)2);
 				});
+			if (null != cmd.getStationAttachments())
+				cmd.getStationAttachments().forEach((dto) -> {
+					this.saveAttachment(dto, space.getId(),(byte)3);
+				});
 			cmd.getCategories().forEach((dto) -> {
 				this.saveCategory(dto, space.getId(),getNamespaceId(cmd.getNamespaceId()));
 
@@ -453,7 +468,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					this.saveAttachment(dto, space.getId(),(byte)2);
 				});
 			}
-			
+			if (null != cmd.getStationAttachments()) {
+				cmd.getStationAttachments().forEach((dto) -> {
+					this.saveAttachment(dto, space.getId(),(byte)3);
+				});
+			}
 			this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
 			if (null != cmd.getCategories()) {
 				cmd.getCategories().forEach((dto) -> {
@@ -1027,7 +1046,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			resp.setLongRentFlag((byte)1);
 			for(OfficeCubicleRange range : ranges){
 				List<OfficeCubicleStation> station = 
-						officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), range.getSpaceId(),null);
+						officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), range.getSpaceId(),null, null);
 				if (station ==null){
 					resp.setShortRentFlag((byte)0);
 				} else {
@@ -1499,7 +1518,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return null;
 		});
 		List<OfficeCubicleStationRent> stationRent = 
-				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(), cmd.getRentType(), cmd.getStationType());
+				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(),null, cmd.getStationType());
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		Integer rentNums = Integer.valueOf(space.getShortRentNums());
 		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getId()).enter(()-> {
@@ -1783,7 +1802,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public CreateCubicleOrderBackgroundResponse createCubicleOrderBackground(CreateCubicleOrderBackgroundCommand cmd){
 		List<OfficeCubicleStationRent> stationRent = 
 				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(), cmd.getRentType(), cmd.getStationType());
-		List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getSpaceId(), null);
+		List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getSpaceId(), null,null);
 		Integer stationNums = station.size();
 		OfficeCubicleRentOrder order = ConvertHelper.convert(cmd, OfficeCubicleRentOrder.class);
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -1808,15 +1827,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		
 	}
 	
-	@Override
-	public OfficeCubicleDTO getCubicleDetail(GetCubicleDetailCommand cmd) {
-		OfficeCubicleSpace space = this.officeCubicleProvider.getSpaceById(cmd.getSpaceId());
-		OfficeCubicleDTO dto = new OfficeCubicleDTO();
-		dto.setAddress(space.getAddress());
-		dto.setSpaceName(space.getName());
-		dto.setContactPhone(space.getContactPhone());
-		return dto;
-	}
 	
 	@Override
 	public ListOfficeCubicleAccountDTO getOfficeCubiclPayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd) {
@@ -1908,6 +1918,21 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public ListOfficeCubicleStatusResponse listOfficeCubicleStatus(ListOfficeCubicleStatusCommand cmd) {
 		ListOfficeCubicleStatusResponse resp = new ListOfficeCubicleStatusResponse();
+		List<OfficeCubicleStation> station = 
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, null);
+		resp.setCubicleNums(station.size());
+		List<OfficeCubicleStationRent> longRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)1);
+		List<OfficeCubicleStationRent> shortRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)0);
+		resp.setShortCubicleIdleNums(shortRentStation.size());
+		resp.setLongCubicleIdleNums(longRentStation.size());
+		List<OfficeCubicleStation> closeStation = 
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, (byte)0);
+		resp.setLongRentCloseCubicleNums(closeStation.size());
+		resp.setLongCubicleIdleNums(station.size()-longRentStation.size());
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
+		resp.setShortCubicleRentedNums(Integer.valueOf(space.getShortRentNums())-shortRentStation.size());
+		Integer rentRates =(shortRentStation.size()+longRentStation.size())/station.size();
+		resp.setRentRates(rentRates);
 		return resp;
 	}
 	
@@ -1919,7 +1944,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			RoomDTO dto = new RoomDTO();
 			ConvertHelper.convert(r,RoomDTO.class);
 			List<OfficeCubicleStation> station = 
-					officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),r.getId());
+					officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),r.getId(),null);
 			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
 			dto.setAssociateStation(associateStaionList);
 			return dto;
@@ -1941,7 +1966,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd){
 		GetStationDetailResponse resp = new GetStationDetailResponse();
-		List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null);
+		List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null);
 		resp.setStation(station.stream().map(r->ConvertHelper.convert(r,StationDTO.class)).collect(Collectors.toList()));
 		return resp;
 	}
@@ -2015,7 +2040,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			BigDecimal roomMinPrice = officeCubicleProvider.getRoomMinPrice(r.getId());
 			BigDecimal stationMinPrice = officeCubicleProvider.getStationMinPrice(r.getId());
 			dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
-			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null);
+			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId());
 			Integer allPositonNums = station.size() + room.size();
 			dto.setAllPositonNums(allPositonNums);

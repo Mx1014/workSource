@@ -59,13 +59,12 @@ public class OfficeSpaceDTO {
 	private String description;
 	private String coverUri;
 	private String coverUrl;
-	private String spaceCoverUri; 
 	@ItemType(OfficeAttachmentDTO.class)
 	private List<OfficeAttachmentDTO> spaceAttachments;
-	private String shortRentUri; 
 	@ItemType(OfficeAttachmentDTO.class)
 	private List<OfficeAttachmentDTO> shortRentAttachments;
-	private String stationCoverUri; 
+	@ItemType(OfficeAttachmentDTO.class)
+	private  List<OfficeAttachmentDTO>  stationAttachments; 
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
 	private Byte status;
@@ -74,15 +73,61 @@ public class OfficeSpaceDTO {
 	private String refundTip;
 	private Byte holidayOpenFlag;
 	private Byte holidayType;
-	private BigDecimal settingPrice;
+	private BigDecimal longRentPrice;
+	private BigDecimal dailyPrice;
+	private BigDecimal halfdailyPrice;
+	private Integer stationNums;
+	private Integer shortRentNums;
+	private Byte openFlag;
 
 	
-	public BigDecimal getSettingPrice() {
-		return settingPrice;
+	
+	public Byte getOpenFlag() {
+		return openFlag;
 	}
 
-	public void setSettingPrice(BigDecimal settingPrice) {
-		this.settingPrice = settingPrice;
+	public void setOpenFlag(Byte openFlag) {
+		this.openFlag = openFlag;
+	}
+
+	public BigDecimal getLongRentPrice() {
+		return longRentPrice;
+	}
+
+	public void setLongRentPrice(BigDecimal longRentPrice) {
+		this.longRentPrice = longRentPrice;
+	}
+
+	public BigDecimal getDailyPrice() {
+		return dailyPrice;
+	}
+
+	public void setDailyPrice(BigDecimal dailyPrice) {
+		this.dailyPrice = dailyPrice;
+	}
+
+	public BigDecimal getHalfdailyPrice() {
+		return halfdailyPrice;
+	}
+
+	public void setHalfdailyPrice(BigDecimal halfdailyPrice) {
+		this.halfdailyPrice = halfdailyPrice;
+	}
+
+	public Integer getStationNums() {
+		return stationNums;
+	}
+
+	public void setStationNums(Integer stationNums) {
+		this.stationNums = stationNums;
+	}
+
+	public Integer getShortRentNums() {
+		return shortRentNums;
+	}
+
+	public void setShortRentNums(Integer shortRentNums) {
+		this.shortRentNums = shortRentNums;
 	}
 
 	public String getRefundTip() {
@@ -294,15 +339,6 @@ public class OfficeSpaceDTO {
 	}
 
 
-
-	public String getSpaceCoverUri() {
-		return spaceCoverUri;
-	}
-
-	public void setSpaceCoverUri(String spaceCoverUri) {
-		this.spaceCoverUri = spaceCoverUri;
-	}
-
 	public List<OfficeAttachmentDTO> getSpaceAttachments() {
 		return spaceAttachments;
 	}
@@ -311,13 +347,6 @@ public class OfficeSpaceDTO {
 		this.spaceAttachments = spaceAttachments;
 	}
 
-	public String getShortRentUri() {
-		return shortRentUri;
-	}
-
-	public void setShortRentUri(String shortRentUri) {
-		this.shortRentUri = shortRentUri;
-	}
 
 	public List<OfficeAttachmentDTO> getShortRentAttachments() {
 		return shortRentAttachments;
@@ -327,12 +356,12 @@ public class OfficeSpaceDTO {
 		this.shortRentAttachments = shortRentAttachments;
 	}
 
-	public String getStationCoverUri() {
-		return stationCoverUri;
+	public List<OfficeAttachmentDTO> getStationAttachments() {
+		return stationAttachments;
 	}
 
-	public void setStationCoverUri(String stationCoverUri) {
-		this.stationCoverUri = stationCoverUri;
+	public void setStationAttachments(List<OfficeAttachmentDTO> stationAttachments) {
+		this.stationAttachments = stationAttachments;
 	}
 
 	public List<OfficeCategoryDTO> getCategories() {

@@ -8,6 +8,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>roomId:办公室id</li>
+ * <li>roomName:办公室名称</li>
+ * <li>price:价格</li>
+ * <li>coverUri:办公室封面图</li>
+ * <li>description:描述</li>
+ * <li>rentFlag:是否开启预定，1开启，0不开启</li>
+ * <li>associateStation:关联工位id{@link com.everhomes.rest.officecubicle.admin.AssociateStationDTO}</li>
  * </ul>
  */
 public class RoomDTO {

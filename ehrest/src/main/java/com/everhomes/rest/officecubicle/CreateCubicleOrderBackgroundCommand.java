@@ -8,18 +8,21 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *空间订单
- *<li> siteId: office site id	</li> 
- * <li>positionNums: 工位数量</li>  
+ *空间后台订单
+ *<li> spaceId: 空间 id	</li> 
+ * <li>rentCount: 预定工位数量</li>  
  * <li>reserverName: 预订人姓名 </li> 
  * <li>reserveContactToken:  预订人联系方式</li> 
- * <li>reserveEnterprise: 预订人公司</li> 
- * <li>categoryName: 预定空间名称</li>
- * <li>categoryId: 空间id</li>
+ * <li>reserveEnterpriseId: 预订人公司id</li> 
+ * <li>reserveEnterpriseName:预定人公司名称</li>
  * <li>price</li>
  * <li>beginTime：预定开始时间</li>
  * <li>endTime：预定结束时间</li>
  * <li>remark：备注</li>
+ * <li>ownerId</li>
+ * <li>ownerType</li>
+ * <li>stationId:工位Id</li>
+ * <li>rentType:1长租，0短租</li>
  * </ul>
  */
 public class CreateCubicleOrderBackgroundCommand {

@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 列出工位预定空间的请求参数
+ * 获取空间
  * <li>orderId</li>
  * </ul>
  */

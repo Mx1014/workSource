@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>空间id</li>
  * </ul>
  */
 public class GetSpaceResponse {

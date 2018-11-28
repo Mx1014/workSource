@@ -7,6 +7,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>stationId:工位id</li>
+ * <li>stationName:工位名称</li>
+ * <li>price:价格</li>
+ * <li>coverUri:办公室封面图</li>
+ * <li>description:描述</li>
+ * <li>rentFlag:是否开启预定，1开启，0不开启</li>
+ * <li>associateRoom:关联办公室id</li>
  * </ul>
  */
 public class StationDTO {

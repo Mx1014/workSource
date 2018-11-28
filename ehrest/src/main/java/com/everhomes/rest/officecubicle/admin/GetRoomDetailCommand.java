@@ -4,6 +4,11 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>namespaceId:域空间id</li>
+ * <li>ownerId:项目id</li>
+ * <li>ownerType:项目类型</li>
+ * <li>spaceId:空间id</li>
+ * <li>roomId:办公室id</li>
  * </ul>
  */
 public class GetRoomDetailCommand {

@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>namespaceId:域空间Id</li>
  * <li>spaceId: 空间id</li>
  * <li>siteName: 名称</li>
  * <li>communityId: 所属园区Id</li>
@@ -20,8 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>currentPMId: 当前管理公司ID(organizationID)</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
- * <li>associateFlag:是否关联工位，1是，0否</li>
- * <li>associateStation:关联的工位ID</li>
+ * <li>associateRoom:关联的办公室ID</li>
  * </ul>
  */
 public class AddCubicleAdminCommand {

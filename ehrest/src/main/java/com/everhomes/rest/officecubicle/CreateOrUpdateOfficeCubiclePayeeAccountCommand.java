@@ -7,12 +7,9 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>返回码: 200成功，14000重复添加了账号</li>
  * <li>namespaceId: 域空间id</li>
- * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
+ * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>spaceId: 停车场ID</li>
- * <li>spaceName: 停车场名称</li>
- * <li>payeeId: 收款方账号id</li>
- * <li>payeeUserType: 收款方账号类型 帐号类型，{@link com.everhomes.rest.order.OwnerType}</li>
+ * <li>accountId: 收款账户ID</li>
  * </ul>
  */
 public class CreateOrUpdateOfficeCubiclePayeeAccountCommand {

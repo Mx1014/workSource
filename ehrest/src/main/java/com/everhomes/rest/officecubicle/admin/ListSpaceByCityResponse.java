@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>space:空间列表{@link com.everhomes.rest.officecubicle.admin.SpaceForAppDTO}</li>
  * </ul>
  */
 public class ListSpaceByCityResponse {

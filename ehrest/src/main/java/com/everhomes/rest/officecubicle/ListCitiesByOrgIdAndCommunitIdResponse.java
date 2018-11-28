@@ -3,8 +3,12 @@ package com.everhomes.rest.officecubicle;
 import java.util.List;
 
 import com.everhomes.util.StringHelper;
-
-
+/**
+ * <ul>
+ * <li>defaultCity:默认城市</li>
+ * <li>city:城市列表 List</li>
+* </ul>
+*/
 public class ListCitiesByOrgIdAndCommunitIdResponse {
 	private String defaultCity;
 	private List<String> city;

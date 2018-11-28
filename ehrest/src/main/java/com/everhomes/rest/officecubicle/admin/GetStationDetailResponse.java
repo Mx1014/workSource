@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>station:工位详情{@link com.everhomes.rest.officecubicle.admin.StationDTO}</li>
  * </ul>
  */
 public class GetStationDetailResponse {

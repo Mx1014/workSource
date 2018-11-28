@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>namespaceId:域空间Id</li>
  * <li>spaceId: 空间id</li>
  * <li>siteName: 名称</li>
  * <li>communityId: 所属园区Id</li>
@@ -20,7 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>currentPMId: 当前管理公司ID(organizationID)</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
- * <li>associateStation:关联的工位ID</li>
+ * <li>associateStation:关联的工位ID{@link com.everhomes.rest.officecubicle.admin.AssociateStationDTO}</li>
  * </ul>
  */
 public class AddRoomAdminCommand {
@@ -40,7 +41,7 @@ public class AddRoomAdminCommand {
 	private Long currentProjectId;
 	private Long appId;
 	private Integer namespaceId;
-	private Long associateStation;
+	private List<AssociateStationDTO> associateStation;
 	
 
 	public Long getSpaceId() {
@@ -130,11 +131,11 @@ public class AddRoomAdminCommand {
 		this.ownerId = ownerId;
 	}
 
-	public Long getAssociateStation() {
+	public List<AssociateStationDTO> getAssociateStation() {
 		return associateStation;
 	}
 
-	public void setAssociateStation(Long associateStation) {
+	public void setAssociateStation(List<AssociateStationDTO> associateStation) {
 		this.associateStation = associateStation;
 	}
 

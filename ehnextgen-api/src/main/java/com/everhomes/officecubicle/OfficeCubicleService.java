@@ -66,8 +66,6 @@ public interface OfficeCubicleService {
 
 	CreateOfficeCubicleOrderResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd);
 
-	OfficeCubicleDTO getCubicleDetail(GetCubicleDetailCommand cmd);
-
 	void createOrUpdateOfficeCubiclePayeeAccount(CreateOrUpdateOfficeCubiclePayeeAccountCommand cmd);
 
 	List<ListOfficeCubicleAccountDTO> listOfficeCubicleAccount(ListOfficeCubicleAccountCommand cmd);

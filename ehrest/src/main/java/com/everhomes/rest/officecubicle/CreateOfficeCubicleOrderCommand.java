@@ -9,21 +9,18 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *空间订单
- *<li> siteId: office site id	</li> 
- * <li>orderType: 预定类别：1-参观 2-预定 </li>  
- * <li>rentType: 租赁类别:1-开放式（默认space_type 1）,2-办公室 {@link com.everhomes.rest.officecubicle.OfficeRentType}</li>  
- * <li>positionNums: 工位数量</li>  
+ *<li> spaceId: 空间 id	</li> 
+ * <li>rentCount: 预定工位数量</li>  
  * <li>reserverName: 预订人姓名 </li> 
  * <li>reserveContactToken:  预订人联系方式</li> 
- * <li>reserveEnterprise: 预订人公司</li> 
- * <li>categoryName: 预定空间名称</li>
- * <li>categoryId: 空间id</li>
+ * <li>reserveEnterpriseId: 预订人公司Id</li> 
+ *  <li>reserveEnterpriseName: 预订人公司名称</li> 
  * <li>price</li>
- * <li>beginTime：预定开始时间</li>
- * <li>endTime：预定结束时间</li>
+ * <li>rentalOrderNo:资源预约订单号</li>
  * <li>remark：备注</li>
- * <li>cubicleType:工位性质 0-短租，1-长租</li>
- * <li>requestType: 请求来源，为空或者0:客户端 1:后台管理 {@link com.everhomes.rest.officeCubicle.OfficeCubicleRequestType}</li>
+ * <li>ownerId:项目id</li>
+ * <li>ownerType：community</li>
+ * <li>paymentType: 支付方式, WECHAT_APPPAY(1): 微信APP支付  WECHAT_SCAN_PAY(7): 微信扫码支付(正扫) ALI_SCAN_PAY(8): 支付宝扫码支付(正扫) WECHAT_JS_PAY(9): 微信JS 支付（公众号） ALI_JS_PAY(10): 支付宝JS 支付（生活号）WECHAT_JS_ORG_PAY(21): 微信公众帐号支付</li>
  * </ul>
  */
 public class CreateOfficeCubicleOrderCommand {
@@ -36,7 +33,6 @@ public class CreateOfficeCubicleOrderCommand {
 	private String reserveContactToken;
 	private String remark;
 	private Long rentalOrderNo;
-	private Byte rentType;
 	private Byte stationType;
 	private String ownerType;
 	private Long ownerId;
@@ -127,18 +123,6 @@ public class CreateOfficeCubicleOrderCommand {
 
 	public void setRentCount(Integer rentCount) {
 		this.rentCount = rentCount;
-	}
-
-
-
-	public Byte getRentType() {
-		return rentType;
-	}
-
-
-
-	public void setRentType(Byte rentType) {
-		this.rentType = rentType;
 	}
 
 

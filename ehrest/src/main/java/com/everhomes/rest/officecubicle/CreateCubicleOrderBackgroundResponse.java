@@ -4,15 +4,11 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>orderId : 统一订单的订单id</li>
- * <li>merchantId : 商户id</li>
- * <li>payUrl:统一订单跳转链接</li>
+ * <li>orderId : 订单id</li>
  * </ul>
  */
 public class CreateCubicleOrderBackgroundResponse {
 	private Long orderId;
-	private Long merchantId;
-	private String payUrl;
 	
 	@Override
 	public String toString() {
@@ -29,21 +25,4 @@ public class CreateCubicleOrderBackgroundResponse {
 	}
 
 
-	public Long getMerchantId() {
-		return merchantId;
-	}
-
-
-	public void setMerchantId(Long merchantId) {
-		this.merchantId = merchantId;
-	}
-
-	public String getPayUrl() {
-		return payUrl;
-	}
-
-	public void setPayUrl(String payUrl) {
-		this.payUrl = payUrl;
-	}
-	
 }

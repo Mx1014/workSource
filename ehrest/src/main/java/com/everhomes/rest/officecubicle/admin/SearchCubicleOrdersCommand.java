@@ -11,13 +11,17 @@ import com.everhomes.util.StringHelper;
  * <li>beginDate: 查询开始时间</li>
  * <li>endDate: 查询结束时间</li>
  * <li>spaceName: 查询空间名</li>
- * <li>reserveKeyword: 查询预订人关键字</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 一页的大小</li> 
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
- * <li>orderStatus</li>
+ * <li>orderStatus：订单状态{@link com.everhomes.rest.officecubicle.OfficeCubiceOrderStatus}</li>
+ * <li>requestType:订单来源 {@link com.everhomes.rest.officecubicle.OfficeCubicleRequestType}</li>
+ * <li>paidType:支付方式,10001-支付宝，10002-微信 {@link com.everhomes.rest.organization.VendorType}</li>
+ * <li>paidMode:支付类型 {@link com.everhomes.rest.general.order.GorderPayType}</li>
+ * <li>spaceId:空间ID</li>
+ * <li>rentType:1长租，0短租</li>
  * </ul>
  */
 public class SearchCubicleOrdersCommand {
@@ -27,8 +31,8 @@ public class SearchCubicleOrdersCommand {
 	private Long beginDate;
 	private Long endDate;
 	private String spaceName;
+	private Long spaceId;
 	private String reserveKeyword;
-	private Byte workFlowStatus;
 	private Long pageAnchor;
     
 	private Integer pageSize;
@@ -43,6 +47,17 @@ public class SearchCubicleOrdersCommand {
 	public Long getCurrentPMId() {
 		return currentPMId;
 	}
+
+	
+	public Long getSpaceId() {
+		return spaceId;
+	}
+
+
+	public void setSpaceId(Long spaceId) {
+		this.spaceId = spaceId;
+	}
+
 
 	public void setCurrentPMId(Long currentPMId) {
 		this.currentPMId = currentPMId;
@@ -95,15 +110,6 @@ public class SearchCubicleOrdersCommand {
 		this.ownerId = ownerId;
 	}
 
-
-	public Byte getWorkFlowStatus() {
-		return workFlowStatus;
-	}
-
-
-	public void setWorkFlowStatus(Byte workFlowStatus) {
-		this.workFlowStatus = workFlowStatus;
-	}
 
 
 	public Long getBeginDate() {

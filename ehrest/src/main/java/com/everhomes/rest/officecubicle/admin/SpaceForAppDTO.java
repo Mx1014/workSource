@@ -7,6 +7,11 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>spaceId：空间id</li>
+ * <li>spaceName：空间名称</li>
+ * <li>minUnitPrice：最小价格</li>
+ * <li>allPositonNums：所有工位数量</li>
+ * <li>address:地址</li>
  * </ul>
  */
 public class SpaceForAppDTO {
