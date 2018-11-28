@@ -1346,8 +1346,7 @@ public class AddressProviderImpl implements AddressProvider {
         query.addConditions(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.equal((byte)0));
         
         if(StringUtils.isNotBlank(buildingName)) {
-            query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName)
-                    .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(buildingName)));
+            query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName));
         }
         if(StringUtils.isNotBlank(apartment)) {
             query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + apartment + "%"));
