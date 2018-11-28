@@ -2627,6 +2627,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         return context.select(DSL.max(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME))
                 .from(Tables.EH_CUSTOMER_TRACKINGS)
                 .where(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .and(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId))
                 .and(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_SOURCE.eq(customerSource))
                 .fetchAnyInto(Timestamp.class);
     }
