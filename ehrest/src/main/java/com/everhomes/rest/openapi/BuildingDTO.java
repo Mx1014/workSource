@@ -8,6 +8,7 @@ public class BuildingDTO {
 	private String communityName;
 	private Long buildingId;
 	private String buildingName;
+	private String buildingNumber;
 	
 	public Long getCommunityId() {
 		return communityId;
@@ -32,6 +33,12 @@ public class BuildingDTO {
 	}
 	public void setBuildingName(String buildingName) {
 		this.buildingName = buildingName;
+	}
+	public String getBuildingNumber() {
+		return buildingNumber;
+	}
+	public void setBuildingNumber(String buildingNumber) {
+		this.buildingNumber = buildingNumber;
 	}
 	
 	@Override
