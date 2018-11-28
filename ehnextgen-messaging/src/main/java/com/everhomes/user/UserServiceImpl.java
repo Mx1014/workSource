@@ -6872,7 +6872,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 					//根据公司id来查询eh_organization_details表中的信息，拿到公司的简称
 					OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
 					if(organizationDetail != null){
-						dto.setAliasName(organizationDetail.getDisplayName());
+						//add by momoubin,2018/11/28;由于一些企业detail信息的displayName是“”而不是null，导致了传给前端为“”，客户端优先使用aliasName代替name，导致无法显示。
+						dto.setAliasName((StringUtils.isBlank(organizationDetail.getDisplayName()))?null:(organizationDetail.getDisplayName()));
 					}
 					dto.setStatus(member.getStatus());
 					dto.setWorkPlatformFlag(org.getWorkPlatformFlag());
