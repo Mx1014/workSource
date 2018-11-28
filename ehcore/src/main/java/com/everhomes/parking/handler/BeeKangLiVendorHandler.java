@@ -75,11 +75,6 @@ public class BeeKangLiVendorHandler extends BeeVendorHandler{
         
 		@Override
 		public long getMonthlyRechargeStartTime(Long endTime) {
-			Long now = System.currentTimeMillis();
-			if (now > endTime) {
-				return now;
-			}
-	
 			return endTime;
 		}
 }

@@ -314,20 +314,20 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
             return false;
         }
         
-        Long newStart = getMonthlyRechargeStartTime(Long.valueOf(cardInfo.getEnddate()));
-        Timestamp timestampEnd = getMonthlyRechargeEndTime(newStart, order.getMonthCount().intValue());
+        Long cardStartTime = getCardStartTime(Long.valueOf(cardInfo.getEnddate()));
+        Timestamp timestampEnd = getMonthlyRechargeEndTime(cardStartTime, order.getMonthCount().intValue());
 
         JSONObject params=new JSONObject();
         processJSONParams(params);
         params.put("cardid",cardInfo.getId());
-        params.put("startdate",newStart+"");
+        params.put("startdate",cardStartTime+"");
         params.put("enddate",timestampEnd.getTime()+"");
         params.put("cardnum",order.getMonthCount());
         params.put("totalprice",order.getPrice());
         params.put("paymode","1");//付费方式 (1-现金 ,2-刷卡, 3-转账
         params.put("paytype","1");//续费类型(1-充值续费 2-封存延期)
 
-        order.setStartPeriod(new Timestamp(newStart));
+        order.setStartPeriod(new Timestamp(cardStartTime));
         order.setEndPeriod(timestampEnd);
         BeeResponse beeResponse;
         try{
@@ -463,7 +463,7 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         dto.setCardTypeName(targetRateDTO.getCardType());
         if (cardInfo != null  && cardInfo.getEndTime() != null) {
         	
-            long newStartTime = getMonthlyRechargeStartTime(cardInfo.getEndTime());
+            long newStartTime = getCardStartTime(cardInfo.getEndTime());
             Timestamp rechargeEndTimestamp = getMonthlyRechargeEndTime(newStartTime, parkingLot.getExpiredRechargeMonthCount());
             dto.setStartPeriod(newStartTime);
             dto.setEndPeriod(rechargeEndTimestamp.getTime());
@@ -563,29 +563,33 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         return false;
     }
     
-	public long getMonthlyRechargeStartTime(Long endTime) {
-    	
-		long now = System.currentTimeMillis();
-		if (now/1000 > endTime/1000) { // 比较时按秒计
-			endTime = now;
-		}
+	public long getMonthlyRechargeStartTime(Long cardStartTime) {
 		
     	Calendar cal = Calendar.getInstance(); 
-    	cal.setTimeInMillis(endTime);
+    	cal.setTimeInMillis(cardStartTime);
     	cal.add(Calendar.DAY_OF_MONTH, 1);
     	cal.set(Calendar.HOUR_OF_DAY, 0);
     	cal.set(Calendar.MINUTE, 0);
     	cal.set(Calendar.SECOND, 0);
 
-		return cal.getTimeInMillis(); //多加1秒
+		return cal.getTimeInMillis(); 
+	}
+	
+	public long getCardStartTime(Long endTime) {
+		Long now = System.currentTimeMillis();
+		if (now/1000 > endTime/1000) {
+			return now;
+		}
+
+		return endTime;
 	}
 	
 	
-	public Timestamp getMonthlyRechargeEndTime(long newStart, int monthCount) {
+	public Timestamp getMonthlyRechargeEndTime(long cardStartTime, int monthCount) {
+		Long newStart = getMonthlyRechargeStartTime(cardStartTime);
 		return Utils.getTimestampByAddThirtyDays(newStart, monthCount);
 	}
-    
-
+	
     protected abstract void processMapParams(TreeMap<String, Object> tmap);
     protected abstract void processJSONParams(JSONObject params);
 
