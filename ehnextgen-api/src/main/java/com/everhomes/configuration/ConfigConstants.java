@@ -232,6 +232,4 @@ public interface ConfigConstants {
     //资产报表定时任务
 	public static final String SCHEDULE_PROPERTY_TASK_TIME = "schedule.property.task.time";
 
-    // 模块安全防护会话静默时长
-    public static final String SERVICE_MODULE_SECURITY_TIME_OUT = "service.module.security.time.out";
 }

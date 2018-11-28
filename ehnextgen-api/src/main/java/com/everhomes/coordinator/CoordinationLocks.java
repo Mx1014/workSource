@@ -175,7 +175,6 @@ public enum CoordinationLocks {
     AUTO_DELETE_EMPLOYEE_PAYMENT_AUTH_LIMIT_OPERATE("auto_delete_employee_payment_limit"),
     ENTERPRISE_PAYMENT_AUTH_PAY_AMOUNT_LOCK("enterprise_payment_auth_pay_amount_lock"),
     ENTERPRISE_PAYMENT_AUTH_FROZEN("enterprise_payment_auth_frozen"),
-    INIT_ENTERPRISE_PAYMENT_AUTH_SCENE_LIMIT("init_enterprise_payment_auth_scene_limit"),
     CHECK_ENTERPRISE_PAYMENT_STATUS("check_enterprise_payment_status"),
 
     SYNC_USER_MODIFY("sync_user_modify"),
