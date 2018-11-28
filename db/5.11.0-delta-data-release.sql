@@ -64,7 +64,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '2', 'zh_CN', '未设置安全密码');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '3', 'zh_CN', '安全密码错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '4', 'zh_CN', '验证码错误');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '5', 'zh_CN', '验证码失效');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '5', 'zh_CN', '验证码已过期');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '6', 'zh_CN', '需要安全验证才能访问');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'enterprise_payment_auth_error', '506', 'zh_CN', '接口参数异常');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'enterprise_payment_auth_error', '100', 'zh_CN', '员工不存在');
@@ -74,8 +74,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- AUTHOR: 张智伟
 -- REMARK: 企业支付授权
-SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_configurations`),1);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id:=@id+1, 'service.module.security.time.out-79880000', '5', '', '0', NULL);
+UPDATE eh_locale_strings SET text='验证码已过期' WHERE scope='user' AND code='10003';
 
 -- AUTHOR: 黄鹏宇
 -- REMARK: fixbug #42303
