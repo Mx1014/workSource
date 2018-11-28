@@ -55,6 +55,7 @@ CREATE TABLE `eh_office_cubicle_station_rent` (
 
 CREATE TABLE `eh_office_cubicle_rent_orders` (
   `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `order_no` BIGINT,
   `biz_order_no` VARCHAR(128),
   `namespace_id` INTEGER NOT NULL,
   `owner_type`  VARCHAR(255) COMMENT 'owner type: community',
@@ -82,6 +83,7 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
   `use_detail` VARCHAR(255),
+  `pay_order_no` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
