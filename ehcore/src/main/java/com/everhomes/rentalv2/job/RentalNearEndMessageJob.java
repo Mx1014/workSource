@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 public class RentalNearEndMessageJob extends QuartzJobBean {
-    private static final Logger LOGGER = LoggerFactory.getLogger(QuartzJobBean.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RentalNearEndMessageJob.class);
     @Autowired
     private RentalCommonServiceImpl rentalCommonService;
     @Autowired
