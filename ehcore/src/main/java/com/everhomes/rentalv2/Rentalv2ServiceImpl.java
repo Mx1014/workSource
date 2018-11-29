@@ -2278,6 +2278,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 								priceRule.setDiscountRatio(priceClassification.getDiscountRatio());
 								break;
 							}
+					}else{
+						priceRule.setDiscountType(pricePackage.getDiscountType());
+						priceRule.setFullPrice(pricePackage.getFullPrice());
+						priceRule.setCutPrice(pricePackage.getCutPrice());
+						priceRule.setDiscountRatio(pricePackage.getDiscountRatio());
 					}
 				}
 			}
