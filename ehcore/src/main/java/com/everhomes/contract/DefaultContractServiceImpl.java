@@ -78,6 +78,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.portal.PortalService;
+import com.everhomes.quality.QualityConstant;
 import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -4374,6 +4375,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 	@Override
 	public void copyContract(InitializationCommand cmd) {
+		// 校验复制权限
+		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_COPY, cmd.getOrgId(), cmd.getCommunityId());
+		
 		// 1.查询合同列表,支持批量复制
 		if (cmd.getContractIds() == null) {
 			return;

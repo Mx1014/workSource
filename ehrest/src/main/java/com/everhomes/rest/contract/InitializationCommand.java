@@ -9,6 +9,15 @@ public class InitializationCommand {
 	private Integer namespaceId;
 	private Long communityId;
 	List<Long> contractIds;
+	private Long orgId;
+
+	public Long getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
+	}
 
 	public Long getCommunityId() {
 		return communityId;
