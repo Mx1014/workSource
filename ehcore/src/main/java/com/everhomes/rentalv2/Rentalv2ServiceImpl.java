@@ -5497,7 +5497,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		dto.setSitePackages(sitePackages);
 
 		//如果单元格单独设置价格
-		RentalCell dbCell = rentalv2Provider.getRentalCellById(rsr.getId(),rsr.getRentalResourceId(),priceRule.getRentalType(),rsr.getResourceType());
+		RentalCell dbCell = rentalv2Provider.getRentalCellById(rsr.getId(),rsr.getRentalResourceId(),priceRule.getRentalType(),priceRule.getResourceType());
 		if (dbCell != null){
 			dto.setUserPriceType(dbCell.getUserPriceType());
 			dto.setPrice(dbCell.getPrice());
@@ -5546,7 +5546,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						break;
 					}
 			}
-		}
+		}else if (packageName != null) {
+				dto.setPrice(dto.getSitePackages().get(0).getPrice());
+				dto.setOriginalPrice(dto.getSitePackages().get(0).getOriginalPrice());
+				dto.setInitiatePrice(dto.getSitePackages().get(0).getInitiatePrice());
+			}
 	}
 
 
