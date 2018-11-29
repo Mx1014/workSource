@@ -384,6 +384,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			ChargeUserDTO chargeUserDTO = new ChargeUserDTO();
 			chargeUserDTO.setChargeName(user.getChargeName());
 			chargeUserDTO.setChargeUId(user.getChargeUid());
+			users.add(chargeUserDTO);
 		}
 		dto.setChargeUserDTO(users);
 		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
