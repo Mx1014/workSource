@@ -247,7 +247,9 @@ public enum VersionRealmType {
     ANDROID_GUOMAOQUANWX("Android_GuoMaoQuanWx"),
     IOS_GUOMAOQUANWX("iOS_GuoMaoQuanWx"),
     ANDROID_GANGWANONEPLUS("Android_GangWanOnePlus"),
-    IOS_GANGWANONEPLUS("iOS_GangWanOnePlus")
+    IOS_GANGWANONEPLUS("iOS_GangWanOnePlus"),
+    ANDROID_HUITONGDASHA("Android_HuiTongDaSha"),
+    IOS_HUITONGDASHA("iOS_HuiTongDaSha")
     ;
 
     private String code;
