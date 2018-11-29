@@ -1730,7 +1730,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         GetConfigurationCommand command = new GetConfigurationCommand();
         command.setNamespaceId(namespaceId);
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(ownerType, ownerId);
-        if(visitorsysOwnerType ==VisitorsysOwnerType.COMMUNITY){
+        if(visitorsysOwnerType ==VisitorsysOwnerType.ENTERPRISE){
             command.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
             command.setOwnerId(enterpriseId);
         }else{
