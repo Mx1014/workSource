@@ -1760,6 +1760,14 @@ public class ContractProviderImpl implements ContractProvider {
 						.leftOuterJoin(Tables.EH_CONTRACTS)
 						.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
 						.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+						.and(
+								Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.APPROVE_QUALITIED.getCode())
+								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.WAITING_FOR_APPROVAL.getCode()))
+								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.EXPIRING.getCode()))
+								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.DRAFT.getCode()))
+								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.WAITING_FOR_LAUNCH.getCode()))
+							)
 						.fetchInto(Contract.class);
 	}
 
