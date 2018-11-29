@@ -5268,10 +5268,14 @@ public class AssetProviderImpl implements AssetProvider {
         //只要关联了合同（包括草稿合同）就不能删除标准
         //看是否关联了合同
         EhContractChargingItems t = Tables.EH_CONTRACT_CHARGING_ITEMS.as("t");
+        EhContracts contracts = Tables.EH_CONTRACTS.as("contracts");
         List<Long> fetch1 = context.select(t.CONTRACT_ID)
               .from(t)
+              .leftOuterJoin(contracts)
+              .on(t.CONTRACT_ID.eq(contracts.ID))
               .where(t.NAMESPACE_ID.eq(namespaceId))
               .and(t.CHARGING_STANDARD_ID.eq(chargingStandardId))
+              .and(contracts.STATUS.ne((byte)0)) //修复缺陷 #43425 【缴费管理】新增收费项计算规则，签草稿合同关联该规则，删掉合同，计算规则删不掉
               .fetch(t.CONTRACT_ID);
         if(fetch1.size()>0){
         	return true;
