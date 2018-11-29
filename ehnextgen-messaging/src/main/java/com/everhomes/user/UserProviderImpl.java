@@ -2138,6 +2138,29 @@ public class UserProviderImpl implements UserProvider {
         return user;
     }
 
+    @Override
+    public List<UserDTO> listUserInfoByIdentifierToken(Integer namespaceId, List<String> identifierTokens) {
+        List<UserDTO> userDTOList = new ArrayList<>();
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //表eh_users和表eh_user_identifiers进行联查
+        SelectQuery<Record> query = context.select().from(Tables.EH_USERS).getQuery();
+        query.addJoin(Tables.EH_USER_IDENTIFIERS,JoinType.JOIN,Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+        //添加查询条件
+        query.addConditions(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.in(identifierTokens));
+        query.fetch().map( r ->{
+            UserDTO user = new UserDTO();
+            user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+            user.setAccountName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
+            user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            user.setId(r.getValue(Tables.EH_USERS.ID));
+            userDTOList.add(user);
+            return null;
+        });
+        return userDTOList;
+    }
+
     /**
      * 查询该手机号是否已经进行注册
      * @param contactToken

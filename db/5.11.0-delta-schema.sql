@@ -412,6 +412,8 @@ ALTER TABLE eh_enterprise_customer_admins MODIFY creator_uid BIGINT NULL;
 ALTER TABLE `eh_contract_charging_items` ADD COLUMN `one_time_bill_status` TINYINT COMMENT '是否是一次性产生费用，1：是，0：否';
 
 
-
+-- AUTHOR: 梁燕龙 20181129
+-- REMARK: 增加手机号索引
+ALTER TABLE eh_user_identifiers ADD INDEX i_eh_user_idf_token(`identifier_token`);
 
 -- END
