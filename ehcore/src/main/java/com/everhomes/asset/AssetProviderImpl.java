@@ -2813,7 +2813,10 @@ public class AssetProviderImpl implements AssetProvider {
                 .map(r -> {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    //缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
+                    String buildingName = r.getValue(t.BUILDING_NAME) != null ? r.getValue(t.BUILDING_NAME) : "";
+                    String apartmentName = r.getValue(t.APARTMENT_NAME) != null ? r.getValue(t.APARTMENT_NAME) : "";
+                    dto.setPropertyIdentifier(buildingName + apartmentName);
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
