@@ -191,7 +191,7 @@ public class JMailHandler implements MailHandler, ApplicationListener<ContextRef
         MimeBodyPart attachmentPart = new MimeBodyPart(); 
         FileDataSource fds = new FileDataSource(filePath);  
         attachmentPart.setDataHandler(new DataHandler(fds));  
-        attachmentPart.setFileName(MimeUtility.encodeText(fds.getName(),"GBK",null));  
+        attachmentPart.setFileName(MimeUtility.encodeText(fds.getName(),"UTF8",null));  
         
         return attachmentPart;  
     }

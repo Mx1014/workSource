@@ -1485,7 +1485,6 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 	}
 
 	private File contentUrlToLocalFile(MeetingAttachmentDTO r) {
-		// TODO Auto-generated method stub
 		List<File> list = new ArrayList<File>();
 	    StringBuffer tmpdirBuffer = new StringBuffer(System.getProperty("java.io.tmpdir"));
 	    Long currentMillisecond = System.currentTimeMillis();
