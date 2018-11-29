@@ -516,6 +516,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //		attachment.setCreatorUid(UserContext.current().getUser().getId());
 //		this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
 		OfficeCubicleAttachment attachment = ConvertHelper.convert(dto, OfficeCubicleAttachment.class);
+		attachment.setType(ownerType);
 		this.officeCubicleProvider.createAttachments(attachment);
 	}
 
