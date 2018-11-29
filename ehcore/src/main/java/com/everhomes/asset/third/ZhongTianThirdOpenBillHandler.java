@@ -225,6 +225,7 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 	        BigDecimal amountOwed = bill.getAmountReceivable().subtract(cmd.getAmountReceived());
 	        amountOwed = amountOwed.setScale(2, BigDecimal.ROUND_HALF_UP);
 			assetBillProvider.changeChargeStatus(UserContext.getCurrentNamespaceId(), cmd.getBillId(), cmd.getAmountReceived(), amountOwed, cmd.getPaymentType());
+			dto.setBillId(cmd.getBillId().toString());
 			dto.setAmountReceivable(bill.getAmountReceivable());
 			dto.setAmountReceived(cmd.getAmountReceived());
 			dto.setAmountOwed(bill.getAmountOwed());
