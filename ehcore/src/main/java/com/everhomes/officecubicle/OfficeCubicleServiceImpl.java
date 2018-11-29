@@ -432,6 +432,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					OfficeCubicleChargeUser user = new OfficeCubicleChargeUser();
 					user.setChargeName(dto.getChargeName());
 					user.setChargeUid(dto.getChargeUId());
+					user.setSpaceId(space.getId());
+					user.setNamespaceId(cmd.getNamespaceId());
+					user.setOwnerId(cmd.getOwnerId());
+					user.setOwnerType(cmd.getOwnerType());
 					officeCubicleProvider.createChargeUsers(user);
 				}
 			}
@@ -482,15 +486,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setOperatorUid(UserContext.current().getUser().getId());
 			this.officeCubicleProvider.updateSpace(space);
-			if (cmd.getChargeUserDTO() != null){
-				officeCubicleProvider.deleteChargeUsers(space.getId());
-				for (ChargeUserDTO dto : cmd.getChargeUserDTO()){
-					OfficeCubicleChargeUser user = new OfficeCubicleChargeUser();
-					user.setChargeName(dto.getChargeName());
-					user.setChargeUid(dto.getChargeUId());
-					officeCubicleProvider.createChargeUsers(user);
-				}
-			}
+
 			// TODO:删除附件唐彤没有提供
 			this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId());
 			if (null != cmd.getSpaceAttachments()) {
@@ -515,6 +511,20 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //				});
 //			}
 
+			if (cmd.getChargeUserDTO() != null){
+				officeCubicleProvider.deleteChargeUsers(space.getId());
+				for (ChargeUserDTO dto : cmd.getChargeUserDTO()){
+					OfficeCubicleChargeUser user = new OfficeCubicleChargeUser();
+					user.setChargeName(dto.getChargeName());
+					user.setChargeUid(dto.getChargeUId());
+					user.setSpaceId(space.getId());
+					user.setNamespaceId(cmd.getNamespaceId());
+					user.setOwnerId(cmd.getOwnerId());
+					user.setOwnerType(cmd.getOwnerType());
+					officeCubicleProvider.createChargeUsers(user);
+				}
+			}
+			
 			this.officeCubicleRangeProvider.deleteRangesBySpaceId(space.getId());
 			if (null != cmd.getCategories()) {
 				cmd.getRanges().forEach((dto) -> {
