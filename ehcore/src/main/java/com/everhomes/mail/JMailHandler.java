@@ -30,6 +30,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.util.StringHelper;
 import com.mysql.fabric.xmlrpc.base.Array;
 
 @Component(MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP)
@@ -192,7 +193,7 @@ public class JMailHandler implements MailHandler, ApplicationListener<ContextRef
         FileDataSource fds = new FileDataSource(filePath);  
         attachmentPart.setDataHandler(new DataHandler(fds));  
         attachmentPart.setFileName(MimeUtility.encodeText(fds.getName(),"UTF8",null));  
-        
+        LOGGER.debug("attachementPart is : " + StringHelper.toJsonString(attachmentPart));
         return attachmentPart;  
     }
     
