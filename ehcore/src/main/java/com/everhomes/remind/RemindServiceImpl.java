@@ -678,7 +678,7 @@ public class RemindServiceImpl implements RemindService  {
         }
         if (!CollectionUtils.isEmpty(cmd.getShareToMembers())) {
         	if("".equals(shareName)){
-        		shareName = shares.get(0).getSharedContractName();
+        		shareName = cmd.getShareToMembers().get(0).getSourceName();
         	}
             shareCount += cmd.getShareToMembers().size();
         }
