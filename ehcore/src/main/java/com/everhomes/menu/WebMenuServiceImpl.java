@@ -14,20 +14,17 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
-import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
 import com.everhomes.rest.acl.WebMenuSelectedFlag;
-import com.everhomes.rest.common.TrueOrFalseFlag;
-import com.everhomes.rest.module.*;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
-import com.everhomes.server.schema.tables.pojos.EhServiceModules;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
-import com.everhomes.rest.community.CommunityFetchType;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.menu.*;
+import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
 import com.everhomes.serviceModuleApp.*;
 import com.everhomes.user.UserContext;
@@ -37,7 +34,6 @@ import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -481,7 +477,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		cmd.setParentId(0L);
 
 		ListAppCategoryResponse categoryResponse = serviceModuleService.listAppCategory(cmd);
-		if(categoryResponse == null && categoryResponse.getDtos() == null && categoryResponse.getDtos().size() == 0){
+		if(categoryResponse == null || categoryResponse.getDtos() == null || categoryResponse.getDtos().size() == 0){
 			return null;
 		}
 

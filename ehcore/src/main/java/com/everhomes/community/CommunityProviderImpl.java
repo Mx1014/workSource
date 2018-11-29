@@ -779,7 +779,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 
 	@Override
-	public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword) {
+	public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int pageSize, Long communityId, Integer namespaceId, String keyword) {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
 		List<Building> buildings = new ArrayList<Building>();
@@ -800,7 +800,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
         query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
-        query.addLimit(count);
+        query.addLimit(pageSize);
 
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query buildings by count, sql=" + query.getSQL());
@@ -2194,6 +2194,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 				dto.setBuildingId(r.getValue(Tables.EH_BUILDINGS.ID));
 				dto.setBuildingName(r.getValue(Tables.EH_BUILDINGS.NAME));
 				dto.setCommunityId(r.getValue(Tables.EH_BUILDINGS.COMMUNITY_ID));
+				dto.setBuildingNumber(r.getValue(Tables.EH_BUILDINGS.BUILDING_NUMBER));
 				results.add(dto);
 			});
 		}

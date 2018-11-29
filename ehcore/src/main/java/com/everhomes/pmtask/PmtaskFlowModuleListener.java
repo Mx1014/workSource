@@ -774,6 +774,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		cmd.setNamespaceId(namespaceId);
 		cmd.setOrganizationId(flow.getOrganizationId());
 		cmd.setAppId(Long.valueOf(flow.getModuleType()));
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(flow.getOwnerId());
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
 		if(null == response.getRequests()){

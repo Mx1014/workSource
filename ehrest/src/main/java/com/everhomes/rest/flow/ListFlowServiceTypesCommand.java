@@ -4,9 +4,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>flowUserType: 目前该参数没用 {@link com.everhomes.rest.flow.FlowUserType}</li>
+ *     <li>flowUserType: 用户角色 {@link com.everhomes.rest.flow.FlowUserType}</li>
  *     <li>moduleId: 模块id</li>
- *     <li>organizationId: organizationId</li>
+ *     <li>organizationId: 公司 id</li>
  * </ul>
  */
 public class ListFlowServiceTypesCommand {

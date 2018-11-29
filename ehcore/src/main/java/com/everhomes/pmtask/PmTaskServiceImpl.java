@@ -2418,13 +2418,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 					List<OrgAddressDTO> addresses = new ArrayList<OrgAddressDTO>();
 					organizationAddresses.stream().map( r -> {
 						Address address = addressProvider.findAddressById(r.getAddressId());
-						OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
-						if(dto != null) {
-							dto.setOrganizationId(o.getId());
-							dto.setDisplayName(o.getName());
-							dto.setAddressId(address.getId());
-							dto.setCommunityName(o.getCommunityName());
-							addresses.add(dto);
+						if(address != null && address.getCommunityId() != null && address.getCommunityId().equals(communityId)){
+							OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
+							if(dto != null) {
+								dto.setOrganizationId(o.getId());
+								dto.setDisplayName(o.getName());
+								dto.setAddressId(address.getId());
+								dto.setCommunityName(o.getCommunityName());
+								addresses.add(dto);
+							}
 						}
 						return null;
 					}).collect(Collectors.toList());
@@ -3333,7 +3335,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public List<PmTaskEvalStatDTO> getEvalStat(GetEvalStatCommand cmd) {
 		List<PmTaskEvalStatDTO> dtos = new ArrayList<>();
 //		取当前项目启用工作流
-		Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(),20100L,cmd.getModuleType(),cmd.getOwnerId(),cmd.getOwnerType());
+		Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(),20100L,String.valueOf(cmd.getAppId()),cmd.getOwnerId(),cmd.getOwnerType());
 		if(null == flow || !flow.getAllowFlowCaseEndEvaluate().equals((byte) 1)){
 //			不设置评价返回空列表
 			return dtos;

@@ -13,8 +13,11 @@ import java.util.Map;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.*;
+import com.everhomes.filedownload.Task;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAptitudeFlag;
+import com.everhomes.server.schema.tables.pojos.EhTasks;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
@@ -41,10 +44,13 @@ import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
+import com.everhomes.contract.ContractTaskOperateLog;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractStatus;
@@ -67,6 +73,7 @@ import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
+import com.everhomes.server.schema.tables.pojos.EhContractTaskOperateLogs;
 import com.everhomes.server.schema.tables.records.EhContractParamGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
@@ -113,6 +120,7 @@ import java.util.Map;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.PmResourceReservation;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -149,6 +157,8 @@ public class ContractProviderImpl implements ContractProvider {
 	public void createContract(Contract contract) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContracts.class));
 		contract.setId(id);
+		contract.setCreateUid(UserContext.currentUserId());
+		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		getReadWriteDao().insert(contract);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhContracts.class, null);
 	}
@@ -873,7 +883,7 @@ public class ContractProviderImpl implements ContractProvider {
 	//记录合同修改日志 by tangcen
 	@Override
 	public void saveContractEvent(int opearteType, Contract contract, Contract comparedContract) {	
-		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:MODIFY
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:MODIFY,20:COPY,21:INITIALIZE,22:EXEMPTION
 		String content = null;
 		Map<String,Object> map = new HashMap<String,Object>();
 		switch(opearteType){
@@ -893,6 +903,16 @@ public class ContractProviderImpl implements ContractProvider {
 			case ContractTrackingTemplateCode.CONTRACT_CHANGE:
 				map.put("contractName", comparedContract.getName());
 				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_CHANGE , UserContext.current().getUser().getLocale(), map, "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_COPY:
+				map.put("contractName", comparedContract.getContractNumber());
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_COPY , UserContext.current().getUser().getLocale(), map, "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_INITIALIZE:
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_INITIALIZE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_EXEMPTION:
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_EXEMPTION , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
 				break;
 			default :
 				break;
@@ -1662,5 +1682,85 @@ public class ContractProviderImpl implements ContractProvider {
 				       .fetchAnyInto(BigDecimal.class);
 	}
 
+	@Override
+	public Boolean possibleEnterContractFuture(ContractDetailDTO currentExistContract,ContractBuildingMapping contractBuildingMapping) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Contract> list = dslContext.select().from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()).or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.WAITING_FOR_APPROVAL.getCode()))
+						.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.APPROVE_QUALITIED.getCode())).or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.EXPIRING.getCode())))
+				.and((Tables.EH_CONTRACTS.CONTRACT_START_DATE.between(currentExistContract.getContractStartDate(), currentExistContract.getContractEndDate()))
+						.or(Tables.EH_CONTRACTS.CONTRACT_END_DATE.between(currentExistContract.getContractStartDate(), currentExistContract.getContractEndDate())))
+				
+				.and(Tables.EH_CONTRACTS.ID.eq(contractBuildingMapping.getContractId()))
+				
+				.fetchInto(Contract.class);
+
+		if (list!=null && list.size()>0) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public Boolean resoucreReservationsFuture(ContractDetailDTO contractDetailDTO,BuildingApartmentDTO apartment) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<PmResourceReservation> list = dslContext.select().from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID.eq(apartment.getAddressId()))
+				.and((Tables.EH_PM_RESOUCRE_RESERVATIONS.START_TIME.between(contractDetailDTO.getContractStartDate(), contractDetailDTO.getContractEndDate()))
+						.or(Tables.EH_PM_RESOUCRE_RESERVATIONS.END_TIME.between(contractDetailDTO.getContractStartDate(), contractDetailDTO.getContractEndDate())))
+				
+				.and(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+				.fetchInto(PmResourceReservation.class);
+
+		if (list!=null && list.size()>0) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+    public void createContractOperateTask(ContractTaskOperateLog job) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractTaskOperateLogs.class));
+        job.setId(id);
+        job.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        job.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
+        job.setCreatorUid(UserContext.currentUserId());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhContractTaskOperateLogsDao dao = new EhContractTaskOperateLogsDao(context.configuration());
+        dao.insert(job);
+    }
+
+    @Override
+    public void updateContractOperateTask(ContractTaskOperateLog job) {
+        assert(job.getId() != null);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhContractTaskOperateLogsDao dao = new EhContractTaskOperateLogsDao(context.configuration());
+        dao.update(job);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractTaskOperateLogs.class, job.getId());
+    }
+
+
+    @Override
+    public ContractTaskOperateLog findContractOperateTaskById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContractTaskOperateLogs.class, id));
+        EhContractTaskOperateLogsDao dao = new EhContractTaskOperateLogsDao(context.configuration());
+        EhContractTaskOperateLogs result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, ContractTaskOperateLog.class);
+    }
+
+	@Override
+	public List<Contract> findAnyStatusContractByAddressId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return 	 context.select()
+						.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+						.leftOuterJoin(Tables.EH_CONTRACTS)
+						.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
+						.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+						.fetchInto(Contract.class);
+	}
 
 }

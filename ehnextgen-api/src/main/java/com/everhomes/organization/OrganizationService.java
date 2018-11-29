@@ -58,6 +58,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Condition;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -638,4 +639,8 @@ public interface OrganizationService {
     UserAuthenticationOrganizationDTO createUserAuthenticationOrganization(CreateUserAuthenticationOrganizationCommand cmd);
 
     UserAuthenticationOrganizationDTO getUserAuthenticationOrganization(GetUserAuthenticationOrganizationCommand cmd);
+
+	List<Long> listMemberDetailIds(Long ownerId, Long deptId, Integer pageSize, Integer pageOffSet, String userName);
+
+	List<OrganizationMemberDetails> listMembers(Long ownerId, Long deptId, Integer pageSize, Integer pageOffSet, String userName, Condition condition);
 }

@@ -148,6 +148,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
     @Autowired
 	private LaunchPadConfigProvider launchPadConfigProvider;
 
+    @Autowired
+    private OrdinaryLinkRouterListener ordinaryLinkRouterListener;
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
 
@@ -820,7 +822,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			//没有实现接口的模块默认的返回
 			routerInfo.setPath(path);
-			String queryInDefaultWay = routerService.getQueryInDefaultWay(actionData);
+			String queryInDefaultWay = null;
+			if (moduleId == 90100L) {
+			    queryInDefaultWay = this.ordinaryLinkRouterListener.getQueryString(actionData, appId);
+            }else {
+                queryInDefaultWay = routerService.getQueryInDefaultWay(actionData);
+            }
 			if(queryInDefaultWay != null){
 				query = query  + "&" + queryInDefaultWay;
 			}
@@ -1350,7 +1357,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		return response;
 	}
 
-	private List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
+	@Override
+	public List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
 		List<AppDTO> appDtos = new ArrayList<>() ;
 		if(userCommunityApps != null && userCommunityApps.size() > 0){
 			for (ServiceModuleApp app: userCommunityApps){

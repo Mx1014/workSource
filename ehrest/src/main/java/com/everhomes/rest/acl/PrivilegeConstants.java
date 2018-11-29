@@ -204,6 +204,7 @@ public interface PrivilegeConstants {
     long ASSET_MANAGEMENT_TO_SETTLED = 204001008L;//未出批量转已出
     long ASSET_MANAGEMENT_TO_PAID = 204001009L;//未缴批量转已缴
     long ASSET_MANAGEMENT_MODIFY_BILL_SUBITEM = 204001010L;//批量减免
+    long ASSET_MANAGEMENT_BATCH_DELETE_BILL = 204001011L;//批量删除账单
     
     long ASSET_STATISTICS_VIEW = 204001005L;
 
@@ -302,6 +303,8 @@ public interface PrivilegeConstants {
     
     long CONTRACT_PREVIEW = 21215L;//打印预览 
     long CONTRACT_PRINT = 21216L;//打印
+    long CONTRACT_COPY = 21224L;//合同复制
+    
 
 
     long PAYMENT_CONTRACT_CREATE = 21215L;//新增付款合同

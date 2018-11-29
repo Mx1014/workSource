@@ -252,9 +252,7 @@ public class SiyinJobValidateServiceImpl {
 				SiyinPrintNotifyJob.class,
 				notifyMap
 		);
-		String appName = getAppName(order.getNamespaceId());
 		Map<String, Object> messageMap = new HashMap<>();
-		messageMap.put("appName",appName);
 		messageMap.put("orderNo", order.getOrderNo());
 		scheduleProvider.scheduleSimpleJob(
 				"siyinprintmessage" +order.getId(),
@@ -604,11 +602,9 @@ public class SiyinJobValidateServiceImpl {
 				PrintJobTypeType jobType = PrintJobTypeType.fromCode(setting.getJobType());
 				if(settingType == PrintSettingType.PRINT_COPY_SCAN){
 					//产品要求复印扫描作为统一价格，目前后台存的打印价格，也是复印价格。
-					if(jobType == PrintJobTypeType.PRINT){
+					if(jobType == PrintJobTypeType.PRINT || jobType == PrintJobTypeType.COPY){
 						priceMap.put(setting.getJobType()+"-"+setting.getPaperSize()+"-"+PrintColorType.BLACK_WHITE.getCode(), setting.getBlackWhitePrice());
 						priceMap.put(setting.getJobType()+"-"+setting.getPaperSize()+"-"+PrintColorType.COLOR.getCode(), setting.getColorPrice());
-						priceMap.put(PrintJobTypeType.COPY.getCode()+"-"+setting.getPaperSize()+"-"+PrintColorType.BLACK_WHITE.getCode(), setting.getBlackWhitePrice());
-						priceMap.put(PrintJobTypeType.COPY.getCode()+"-"+setting.getPaperSize()+"-"+PrintColorType.COLOR.getCode(), setting.getColorPrice());
 					}else{
 						priceMap.put(setting.getJobType()+"-"+PrintColorType.BLACK_WHITE.getCode(), setting.getBlackWhitePrice());
 						priceMap.put(setting.getJobType()+"-"+PrintColorType.COLOR.getCode(), setting.getColorPrice());

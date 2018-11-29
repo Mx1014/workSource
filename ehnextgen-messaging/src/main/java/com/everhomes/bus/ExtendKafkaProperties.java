@@ -161,6 +161,10 @@ public class ExtendKafkaProperties {
         return properties;
     }
 
+    public Map<String, Object> buildAdminProperties() {
+        return buildCommonProperties();
+    }
+
     private static String resourceToPath(Resource resource) {
         try {
             return resource.getFile().getAbsolutePath();

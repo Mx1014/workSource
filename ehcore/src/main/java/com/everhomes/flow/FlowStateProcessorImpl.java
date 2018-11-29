@@ -273,6 +273,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         flowService.fixupUserInfoInContext(ctx, userInfo);
         ctx.setOperator(userInfo);
         FlowGraphNoStepEvent event = new FlowGraphNoStepEvent(stepDTO);
+        if (stepDTO.getSubjectId() != null) {
+            FlowSubject subject = flowSubjectProvider.getFlowSubjectById(stepDTO.getSubjectId());
+            event.setSubject(subject);
+        }
         ctx.setCurrentEvent(event);
         ctx.setStepType(FlowStepType.NO_STEP);
 

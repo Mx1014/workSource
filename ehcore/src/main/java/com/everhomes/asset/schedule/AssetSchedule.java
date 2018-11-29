@@ -14,6 +14,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -415,7 +418,16 @@ public class AssetSchedule{
                         String formulaJson = formulas.get(0).getFormulaJson();
                         if(formulaJson.contains("qf")) {//issue-34468 【物业缴费】执行接口，报错
                         	formulaJson = formulaJson.replace("qf",amountOwed.toString());
-	                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
+	                        //BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
+                        	ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+                        	BigDecimal fineAmount = BigDecimal.ZERO;
+                    		try {
+                    			Object object = jse.eval(formulaJson);
+                    			fineAmount = new BigDecimal(object.toString());
+                    			fineAmount = fineAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
+                    		} catch (Exception e) {
+                    			LOGGER.info("lateFineCal scriptEngine error, formulaJson={}, exception={}", formulaJson, e);
+                    		}
 	                        //开始构造一条滞纳金记录
 	                        //查看item是否已经有滞纳金产生了
 	                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());

@@ -1,6 +1,7 @@
 package com.everhomes.rest.rentalv2;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -45,6 +46,8 @@ public class RentalSitePackagesDTO {
     private BigDecimal halfOrgMemberPrice;
     private BigDecimal halfApprovingUserOriginalPrice;
     private BigDecimal halfApprovingUserPrice;
+    //新版本的价格
+    private List<RentalPriceClassificationDTO> priceRules;
     private Byte userPriceType;
 
     public Long getId() {
@@ -213,5 +216,13 @@ public class RentalSitePackagesDTO {
 
     public void setUserPriceType(Byte userPriceType) {
         this.userPriceType = userPriceType;
+    }
+
+    public List<RentalPriceClassificationDTO> getPriceRules() {
+        return priceRules;
+    }
+
+    public void setPriceRules(List<RentalPriceClassificationDTO> priceRules) {
+        this.priceRules = priceRules;
     }
 }

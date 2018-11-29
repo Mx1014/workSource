@@ -1,7 +1,9 @@
 package com.everhomes.scheduler;
 
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.filedownload.*;
+import com.everhomes.filedownload.Task;
+import com.everhomes.filedownload.TaskHandler;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.filedownload.TaskStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
