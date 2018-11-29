@@ -1507,6 +1507,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 	    //附件
 	    File file = new File(tempName);
 	    if(naiveDownloadPicture(file, r.getContentUrl())){
+	    	LOGGER.debug("file path is "+file.getAbsolutePath());
 	    	return file;
 	    }
 		return null;
