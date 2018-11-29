@@ -17,6 +17,8 @@
 -- AUTHOR: 黄鹏宇
 -- REMARK: 请在执行release前备份eh_var_field_scopes表
 
+-- AUTHOR: xq.tian 20181129
+-- REMARK: 在 /user/api 界面调用 api /fixUserInfoOnceTime 修复原来的用户数据同步状态
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
