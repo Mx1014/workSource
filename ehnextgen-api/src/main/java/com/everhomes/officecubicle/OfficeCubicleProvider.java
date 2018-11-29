@@ -117,4 +117,6 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleRefundRule> findRefundRule(Long spaceId);
 
 	void deleteRefundRule(Long spaceId);
+
+	List<OfficeCubicleChargeUser> findChargeUserBySpaceId(Long spaceId);
 }

@@ -378,7 +378,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	            }
 			});	
 		}
-		
+		List<OfficeCubicleChargeUser> chargeUsers = officeCubicleProvider.findChargeUserBySpaceId(other.getId());
+		dto.setChargeUserDTO(chargeUsers.stream().map(r->ConvertHelper.convert(r,ChargeUserDTO.class)).collect(Collectors.toList()));
 		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
 		dto.setRanges(ranges.stream().map(r->ConvertHelper.convert(r,OfficeRangeDTO.class)).collect(Collectors.toList()));
 		
@@ -419,6 +420,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd.getStationAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)3);
 				});
+			if (cmd.getChargeUserDTO() != null){
+				officeCubicleProvider.deleteChargeUsers(space.getId());
+				for (ChargeUserDTO dto : cmd.getChargeUserDTO()){
+					OfficeCubicleChargeUser user = new OfficeCubicleChargeUser();
+					user.setChargeName(dto.getChargeName());
+					user.setChargeUid(dto.getChargeUId());
+					officeCubicleProvider.createChargeUsers(user);
+				}
+			}
 //			cmd.getCategories().forEach((dto) -> {
 //				this.saveCategory(dto, space.getId(),getNamespaceId(cmd.getNamespaceId()));
 //

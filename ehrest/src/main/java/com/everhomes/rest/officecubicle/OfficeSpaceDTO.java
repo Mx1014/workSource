@@ -79,9 +79,17 @@ public class OfficeSpaceDTO {
 	private Integer stationNums;
 	private Integer shortRentNums;
 	private Byte openFlag;
+	private List<ChargeUserDTO> chargeUserDTO;
+	
+	
+	public List<ChargeUserDTO> getChargeUserDTO() {
+		return chargeUserDTO;
+	}
 
-	
-	
+	public void setChargeUserDTO(List<ChargeUserDTO> chargeUserDTO) {
+		this.chargeUserDTO = chargeUserDTO;
+	}
+
 	public Byte getOpenFlag() {
 		return openFlag;
 	}

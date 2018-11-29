@@ -733,6 +733,20 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleRentOrder.class);
 	}
 	
+
+	@Override
+	public List<OfficeCubicleChargeUser> findChargeUserBySpaceId(Long spaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OfficeCubicleChargeUser> result = context.select().from(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS)
+				.where(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS.SPACE_ID.eq(spaceId))
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleChargeUser.class));
+		if(null != result && result.size() > 0){
+			return result;
+		}
+		return null;
+	}
+	
+	
 	@Override
 	public void createCubicleStationRent(OfficeCubicleStationRent stationRent) {
 		long id = sequenceProvider.getNextSequence(NameMapper
