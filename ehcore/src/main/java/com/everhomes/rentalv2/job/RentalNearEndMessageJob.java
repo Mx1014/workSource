@@ -21,6 +21,7 @@ public class RentalNearEndMessageJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        LOGGER.info("start RentalNearEndMessageJob ");
         try {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
             String orderId = jobMap.getString("orderId");
