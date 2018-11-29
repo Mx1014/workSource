@@ -3916,10 +3916,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			//如果是预约成功，则要判断是否退款，否则将订单置为已取消
 			if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
 				if (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()
-						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)) {
+						&& (order.getPayTotalMoney().compareTo(new BigDecimal(0)) > 0)) {
 
 					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
-					if (orderAmount.compareTo(new BigDecimal(0)) == 1) {
+					if (orderAmount.compareTo(new BigDecimal(0)) > 0) {
 						if (PayMode.ONLINE_PAY.getCode() == (order.getPayMode()) || PayMode.APPROVE_ONLINE_PAY.getCode() == (order.getPayMode())) {
 							rentalCommonService.refundOrder(order, timestamp, orderAmount);
 							//更新bill状态
@@ -3930,13 +3930,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 							order.setRefundAmount(orderAmount);
 							order.setStatus(SiteBillStatus.REFUNDING.getCode());//线下支付人工退款
 						}
-					} else //退款金额过小
+					} else {//退款金额过小
+						if (PayMode.ONLINE_PAY.getCode() == (order.getPayMode()) || PayMode.APPROVE_ONLINE_PAY.getCode() == (order.getPayMode()))
+							rentalCommonService.refundOrder(order, timestamp, orderAmount);//可能有卡券
 						order.setStatus(SiteBillStatus.FAIL.getCode());
 						messageHandler.cancelOrderWithoutRefund(order);
-				} else
+					}
+				} else {
 					//如果不需要退款，直接状态为已取消
 					order.setStatus(SiteBillStatus.FAIL.getCode());
-				    messageHandler.cancelOrderWithoutPaySendMessage(order);
+					if (order.getPaidMoney().compareTo(new BigDecimal(0)) > 0)
+						messageHandler.cancelOrderWithoutRefund(order);
+					else
+						messageHandler.cancelOrderWithoutPaySendMessage(order);
+				}
 			} else if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode()) ||
 					order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
 				//如果不需要退款，直接状态为已取消
@@ -5495,7 +5502,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		dto.setSitePackages(sitePackages);
 
 		//如果单元格单独设置价格
-		RentalCell dbCell = rentalv2Provider.getRentalCellById(rsr.getId(),rsr.getRentalResourceId(),priceRule.getRentalType(),rsr.getResourceType());
+		RentalCell dbCell = rentalv2Provider.getRentalCellById(rsr.getId(),rsr.getRentalResourceId(),priceRule.getRentalType(),priceRule.getResourceType());
 		if (dbCell != null){
 			dto.setUserPriceType(dbCell.getUserPriceType());
 			dto.setPrice(dbCell.getPrice());
@@ -5544,7 +5551,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						break;
 					}
 			}
-		}
+		}else if (packageName != null) {
+				dto.setPrice(dto.getSitePackages().get(0).getPrice());
+				dto.setOriginalPrice(dto.getSitePackages().get(0).getOriginalPrice());
+				dto.setInitiatePrice(dto.getSitePackages().get(0).getInitiatePrice());
+			}
 	}
 
 
