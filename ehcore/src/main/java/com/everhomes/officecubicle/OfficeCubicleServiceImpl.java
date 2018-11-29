@@ -316,7 +316,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				.getUser().getId()));
 
 		//List<Attachment> attachments = this.attachmentProvider.listAttachmentByOwnerId(EhOfficeCubicleAttachments.class, dto.getId());
-		List<OfficeCubicleAttachment> spaceAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(dto.getId(),(byte)1);
+		List<OfficeCubicleAttachment> spaceAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(other.getId(),(byte)1);
 		if (null != spaceAttachments){
 //			dto.setAttachments(new ArrayList<OfficeAttachmentDTO>());
 //			attachments.forEach((attachment) -> {
@@ -543,6 +543,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //		this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
 		OfficeCubicleAttachment attachment = ConvertHelper.convert(dto, OfficeCubicleAttachment.class);
 		attachment.setType(ownerType);
+		attachment.setOwnerId(spaceId);
+		attachment.setCreatorUid(UserContext.current().getUser().getId());
 		this.officeCubicleProvider.createAttachments(attachment);
 	}
 
