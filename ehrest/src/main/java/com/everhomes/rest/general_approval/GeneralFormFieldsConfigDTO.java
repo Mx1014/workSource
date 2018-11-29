@@ -2,13 +2,15 @@ package com.everhomes.rest.general_approval;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
  *     <li>formFieldsConfigId：表单字段配置ID</li>
  *     <li>formOriginId: 表单原始ID</li>
  *     <li>formVersion: 表单版本</li>
  *     <li>configType：配置类型，默认"flowNode-visible"</li>
- *     <li>formFields：表单字段</li>
+ *     <li>formFields：表单字段 {@link GeneralFormFieldsConfigFieldDTO}</li>
  * </ul>
  * @author huqi
  */
@@ -17,7 +19,8 @@ public class GeneralFormFieldsConfigDTO {
     private Long formOriginId;
     private Long formVersion;
     private String configType;
-    private String formFields;
+    private List<GeneralFormFieldsConfigFieldDTO> formFields;
+
     @Override
     public String toString(){
         return StringHelper.toJsonString(this);
@@ -55,11 +58,11 @@ public class GeneralFormFieldsConfigDTO {
         this.configType = configType;
     }
 
-    public String getFormFields() {
+    public List<GeneralFormFieldsConfigFieldDTO> getFormFields() {
         return formFields;
     }
 
-    public void setFormFields(String formFields) {
+    public void setFormFields(List<GeneralFormFieldsConfigFieldDTO> formFields) {
         this.formFields = formFields;
     }
 }

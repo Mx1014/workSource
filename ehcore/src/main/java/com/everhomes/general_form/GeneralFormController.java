@@ -385,4 +385,19 @@ public class GeneralFormController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /general_form/getGeneralFormByOriginIdAndVersion</b>
+	 * <p>根据表单原始ID和版本获取表单</p>
+	 * @return {@link GeneralFormDTO}
+	 */
+	@RequestMapping("getGeneralFormByOriginIdAndVersion")
+	@RestReturn(value=GeneralFormDTO.class)
+	public RestResponse getGeneralFormByOriginIdAndVersion(GetGeneralFormByOriginIdAndVersionCommand cmd){
+		GeneralFormDTO result = generalFormService.getGeneralFormByOriginIdAndVersion(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

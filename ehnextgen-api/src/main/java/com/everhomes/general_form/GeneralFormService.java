@@ -112,4 +112,6 @@ public interface GeneralFormService {
 	void deleteFormFieldsConfig(DeleteFormFieldsConfigCommand cmd);
 
 	GeneralFormFieldsConfigDTO getFormFieldsConfig(GetFormFieldsConfigCommand cmd);
+
+	GeneralFormDTO getGeneralFormByOriginIdAndVersion(GetGeneralFormByOriginIdAndVersionCommand cmd);
 }
