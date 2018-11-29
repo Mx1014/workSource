@@ -13,12 +13,7 @@ public interface GeneralFormFieldsConfigProvider {
     /**
      * 更新表单字段配置
      */
-    Long updateFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig);
-
-    /**
-     * 删除表单字段配置
-     */
-    void deleteFormFieldsConfig(Long formFieldsConfigId);
+    void updateFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig);
 
     /**
      * 获取表单字段配置

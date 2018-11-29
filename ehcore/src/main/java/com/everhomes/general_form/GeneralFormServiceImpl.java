@@ -1176,30 +1176,77 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public CreateFormFieldsConfigResponse createFormFieldsConfig(CreateFormFieldsConfigCommand cmd){
-        CreateFormFieldsConfigResponse response = new CreateFormFieldsConfigResponse();
+
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(),cmd.getFormVersion());
+        if(form == null){
+            LOGGER.error("The form using to create formFieldsConfig is null, formOriginId = {}, formVersion = {}",
+                    cmd.getFormOriginId(), cmd.getFormVersion());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The form using to create formFieldsConfig is null is null");
+        }
         GeneralFormFieldsConfig formFieldsConfig = ConvertHelper.convert(cmd, GeneralFormFieldsConfig.class);
+        formFieldsConfig.setNamespaceId(UserContext.getCurrentNamespaceId());
+        formFieldsConfig.setOrganizationId(form.getOrganizationId());
+        formFieldsConfig.setOwnerId(form.getOwnerId());
+        formFieldsConfig.setOwnerType(form.getOwnerType());
+        formFieldsConfig.setModuleId(form.getModuleId());
+        formFieldsConfig.setModuleType(form.getModuleType());
+        formFieldsConfig.setProjectId(form.getProjectId());
+        formFieldsConfig.setProjectType(form.getProjectType());
+        if(formFieldsConfig.getConfigType() == null || "".equals(formFieldsConfig.getConfigType())){
+            formFieldsConfig.setConfigType(GeneralFormConstants.FORM_FIELDS_CONFIG_TYPE);
+        }
+        formFieldsConfig.setFormFields(JSON.toJSONString(cmd.getFormFields()));
+        formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.VALID.getCode());
         Long formFieldsConfigId = generalFormFieldsConfigProvider.createFormFieldsConfig(formFieldsConfig);
+
+        CreateFormFieldsConfigResponse response = new CreateFormFieldsConfigResponse();
         response.setFormFieldsConfigId(formFieldsConfigId);
         return response;
     }
 
     @Override
     public UpdateFormFieldsConfigResponse updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd){
+
+        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getFormFieldsConfig(cmd.getFormFieldsConfigId());
+        if(formFieldsConfig == null){
+            LOGGER.error("The formFieldsConfig updating is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig updating is null");
+        }
+        formFieldsConfig.setFormOriginId(cmd.getFormOriginId());
+        formFieldsConfig.setFormVersion(cmd.getFormVersion());
+        if(cmd.getConfigType() != null && !"".equals(cmd.getConfigType())){
+            formFieldsConfig.setConfigType(cmd.getConfigType());
+        }
+        formFieldsConfig.setFormFields(JSON.toJSONString(cmd.getFormFields()));
+        generalFormFieldsConfigProvider.updateFormFieldsConfig(formFieldsConfig);
+
         UpdateFormFieldsConfigResponse response = new UpdateFormFieldsConfigResponse();
-        GeneralFormFieldsConfig formFieldsConfig = ConvertHelper.convert(cmd, GeneralFormFieldsConfig.class);
-        Long formFieldsConfigId = generalFormFieldsConfigProvider.updateFormFieldsConfig(formFieldsConfig);
-        response.setFormFieldsConfigId(formFieldsConfigId);
+        response.setFormFieldsConfigId(formFieldsConfig.getId());
         return response;
     }
 
     @Override
     public void deleteFormFieldsConfig(DeleteFormFieldsConfigCommand cmd){
-        generalFormFieldsConfigProvider.deleteFormFieldsConfig(cmd.getFormFieldsConfigId());
+        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getFormFieldsConfig(cmd.getFormFieldsConfigId());
+        if(formFieldsConfig == null){
+            LOGGER.error("The formFieldsConfig deleting is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig deleting is null");
+        }
+        formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.INVALID.getCode());
+        generalFormFieldsConfigProvider.updateFormFieldsConfig(formFieldsConfig);
     }
 
     @Override
     public GeneralFormFieldsConfigDTO getFormFieldsConfig(GetFormFieldsConfigCommand cmd){
         GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getFormFieldsConfig(cmd.getFormFieldsConfigId());
+        if(formFieldsConfig == null){
+            LOGGER.error("The formFieldsConfig gotten is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig gotten is null");
+        }
         GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(formFieldsConfig, GeneralFormFieldsConfigDTO.class);
         return dto;
     }
