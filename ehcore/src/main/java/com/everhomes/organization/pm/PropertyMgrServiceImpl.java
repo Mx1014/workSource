@@ -8673,6 +8673,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Start fixApartmentLivingStatus for "+ (currentPage+1) +" time.........");
 			}
+			long startTime = System.currentTimeMillis();
 			
 			int startIndex = currentPage * pageSize;
 			List<Address> addressList = addressProvider.findActiveAddress(startIndex,pageSize);
@@ -8790,12 +8791,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				}else {
 					//通过查数据库，不会有超过2条数据的情况
 				}
-				
-				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("Start fixApartmentLivingStatus for "+ (currentPage+1) +" time.........");
-				}
 			}
-				
+			long endTime = System.currentTimeMillis();
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("stop fixApartmentLivingStatus for "+ (currentPage+1) +" time.........");
+				LOGGER.debug("fixApartmentLivingStatus for "+ (currentPage+1) +" time spends + "+(endTime-startTime)+ "ms");
+			}
 		}
 			
 	}
