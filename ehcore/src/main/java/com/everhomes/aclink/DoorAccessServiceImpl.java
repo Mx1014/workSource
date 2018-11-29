@@ -5615,7 +5615,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     }).collect(Collectors.toList()));
                 }
                 List<AddressDTO> floors = new ArrayList<>();
-                floors.addAll(userFloors);
                 if(org.apache.commons.lang.StringUtils.isNotEmpty(access.getFloorId())){
                     JSONObject data = JSON.parseObject(access.getFloorId());
                     JSONArray jsonfloors = data.getJSONArray("floors");
@@ -5624,6 +5623,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                             String floorId = jsonfloors.getJSONObject(i).getString("id");
                             floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
                         }
+                    }
+                    //匹配门禁buildingId和userFloors的
+                    Long buildingId = data.getLong("building");
+                    if(buildingId != null){
+                        List<AddressDTO> matchFloors = new ArrayList<>();
+                        matchFloors = userFloors.stream()
+                                .filter((AddressDTO add) -> buildingId.equals(add.getBuildingId()))
+                                .collect(Collectors.toList());
+                        floors.addAll(matchFloors);
                     }
                     if (null != floors & floors.size() > 0) {
                         group.setFloors(floors.stream().distinct().map(r -> {
