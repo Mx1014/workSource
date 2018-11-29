@@ -275,6 +275,9 @@ INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `ex
 set @id=(select ifnull((SELECT max(id) from eh_service_module_include_functions),1));
 INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `module_id`, `community_id`, `function_id`) VALUES (@id:= @id +1, 999945, 21200, NULL, 21225);
 
+-- AUTHOR: 李清岩
+-- REMARK: 配置我的钥匙模块路由
+UPDATE `eh_service_modules` SET `host`='access-control1' WHERE (`id`='42000');
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
