@@ -3016,7 +3016,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	public void test(GetRentalOrderDetailCommand cmd) {
 		RentalOrder order = this.rentalv2Provider.findRentalBillById(cmd.getOrderId());
 			Map<String, Object> messageMap = new HashMap<>();
-			messageMap.put("orderId",order.getId());
+			messageMap.put("orderId",order.getId().toString());
 			messageMap.put("resourceType",order.getResourceType());
 			scheduleProvider.scheduleSimpleJob(
 					"RentalNearStartMessageJob" + order.getId(),
@@ -3029,7 +3029,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		//结束时间快到发推送
 			messageMap = new HashMap<>();
-			messageMap.put("orderId",order.getId());
+			messageMap.put("orderId",order.getId().toString());
 			messageMap.put("resourceType",order.getResourceType());
 			scheduleProvider.scheduleSimpleJob(
 					"RentalNearEndMessageJob" + order.getId(),
