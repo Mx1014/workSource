@@ -4353,7 +4353,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			// 查询当前房源状态,这里暂时这样改只有待租房源才能签合同，后面可以签未来合同，不能这样判断，而是判断时间段的状态
 			// issue-43523(签约合同关联房源201，走到待发起状态，手动修改房源状态为已预订、待签约等（非待出租），在域空间一键审批为正常合同)
 			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(apartment.getAddressId());
-			if (communityAddressMapping.getLivingStatus() != (byte)2) {
+			if (communityAddressMapping.getLivingStatus() != AddressMappingStatus.FREE.getCode()) {
 				return false;
 			}
 		}
