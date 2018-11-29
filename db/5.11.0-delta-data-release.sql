@@ -295,6 +295,7 @@ update eh_alliance_service_category_match cm, eh_service_alliance_categories ca 
 
 
 
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev
@@ -381,7 +382,9 @@ update eh_siyin_print_printers set namespace_id = 999929 ;
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
 
-
+-- AUTHOR: 黄明波
+-- REMARK: 离线包升级
+update eh_version_urls set target_version = '1.1.0', download_url = replace(download_url, '-1-0-0', '-1-1-0'), info_url =  replace(info_url, '-1-0-0', '-1-1-0'), publish_time = now() where download_url like '%/nar/serviceAlliance/offline/serviceAlliance%';
 
 
 -- --------------------- SECTION END wanzhihui ------------------------------------------
