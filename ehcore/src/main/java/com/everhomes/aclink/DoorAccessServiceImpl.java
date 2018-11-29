@@ -640,6 +640,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             dto.setRegisterTime(user.getCreateTime().getTime());
             if(null != organizationDTOs && organizationDTOs.size() > 0){
                 OrganizationSimpleDTO organization =  organizationDTOs.get(0);
+                if(cmd.getOrganizationId() != null){
+                	try{
+                		organization = organizationDTOs.stream().filter(r -> cmd.getOrganizationId().equals(r.getId())).findFirst().get();
+                	}catch (Exception e) {
+						LOGGER.warn(String.format("user{%d} has no org with cmdOrganizationId{%d}", user.getId(),cmd.getOrganizationId()));
+					}
+                }
                 dto.setUserName(organization.getContactName());
                 dto.setCompany(organization.getName());
                 dto.setCompanyId(organization.getId());
