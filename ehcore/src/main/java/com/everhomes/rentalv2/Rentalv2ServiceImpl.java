@@ -2946,7 +2946,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						messageMap.put("orderId",order.getId());
 						messageMap.put("resourceType",order.getResourceType());
 						scheduleProvider.scheduleSimpleJob(
-								queueName,
+								"RentalNearStartMessageJob" + order.getId(),
 								"RentalNearStartMessageJob" + order.getId(),
 								new java.util.Date(orderReminderTimeLong),
 								RentalNearStartMessageJob.class,
@@ -2960,7 +2960,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						messageMap.put("orderId",order.getId());
 						messageMap.put("resourceType",order.getResourceType());
 						scheduleProvider.scheduleSimpleJob(
-								queueName,
+								"RentalNearStartMessageJob" + order.getId(),
 								"RentalNearEndMessageJob" + order.getId(),
 								new java.util.Date(orderReminderEndTimeLong),
 								RentalNearEndMessageJob.class,
@@ -2991,7 +2991,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						messageMap.put("orderId",order.getId());
 						messageMap.put("methodName", "endReminderSendMessage");
 						scheduleProvider.scheduleSimpleJob(
-								queueName,
+								"RentalMessageQuartzJob" + order.getId(),
 								"RentalMessageQuartzJob" + order.getId(),
 								new java.util.Date(orderReminderEndTimeLong),
 								RentalMessageQuartzJob.class,
@@ -3016,7 +3016,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	public void test(GetRentalOrderDetailCommand cmd) {
 		RentalOrder order = this.rentalv2Provider.findRentalBillById(cmd.getOrderId());
 			Map<String, Object> messageMap = new HashMap<>();
-			messageMap.put("orderId",order.getId().toString());
+			messageMap.put("orderId",order.getId());
 			messageMap.put("resourceType",order.getResourceType());
 			scheduleProvider.scheduleSimpleJob(
 					"RentalNearStartMessageJob" + order.getId(),
@@ -3029,7 +3029,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		//结束时间快到发推送
 			messageMap = new HashMap<>();
-			messageMap.put("orderId",order.getId().toString());
+			messageMap.put("orderId",order.getId());
 			messageMap.put("resourceType",order.getResourceType());
 			scheduleProvider.scheduleSimpleJob(
 					"RentalNearEndMessageJob" + order.getId(),
