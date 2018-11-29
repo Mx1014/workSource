@@ -13,7 +13,7 @@ public interface SiyinPrintPrinterProvider {
 	
 	SiyinPrintPrinter findSiyinPrintPrinterByReadName(String readerName);
 
-	List<SiyinPrintPrinter> listSiyinPrintPrinter();
+	List<SiyinPrintPrinter> listSiyinPrintPrinter(Integer namespaceId);
 
 	List<SiyinPrintPrinter> findSiyinPrintPrinterByOwnerId(Long ownerId);
 
