@@ -379,7 +379,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			});	
 		}
 		List<OfficeCubicleChargeUser> chargeUsers = officeCubicleProvider.findChargeUserBySpaceId(other.getId());
-		dto.setChargeUserDTO(chargeUsers.stream().map(r->ConvertHelper.convert(r,ChargeUserDTO.class)).collect(Collectors.toList()));
+		List<ChargeUserDTO> users = new ArrayList<ChargeUserDTO>();
+		for(OfficeCubicleChargeUser user : chargeUsers){
+			ChargeUserDTO chargeUserDTO = new ChargeUserDTO();
+			chargeUserDTO.setChargeName(user.getChargeName());
+			chargeUserDTO.setChargeUId(user.getChargeUid());
+		}
+		dto.setChargeUserDTO(users);
 		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
 		dto.setRanges(ranges.stream().map(r->ConvertHelper.convert(r,OfficeRangeDTO.class)).collect(Collectors.toList()));
 		

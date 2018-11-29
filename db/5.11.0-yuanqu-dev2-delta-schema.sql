@@ -104,8 +104,8 @@ CREATE TABLE `eh_office_cubicle_payee_accounts` (
 CREATE TABLE `eh_office_cubicle_charge_users` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER,
-  `owner_type` VARCHAR(32) NOT NULL COMMENT 'community 园区或者其他类型',
-  `owner_id` BIGINT NOT NULL COMMENT '园区id或者其他id',
+  `owner_type` VARCHAR(32) COMMENT 'community 园区或者其他类型',
+  `owner_id` BIGINT COMMENT '园区id或者其他id',
   `space_id` BIGINT,
   `charge_uid` BIGINT,
   `charge_name` VARCHAR(32),
