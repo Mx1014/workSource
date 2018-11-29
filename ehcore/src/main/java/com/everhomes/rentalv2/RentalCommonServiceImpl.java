@@ -282,7 +282,8 @@ public class RentalCommonServiceImpl {
         rentalRefundOrder.setOrderNo(Long.valueOf(order.getOrderNo()));
         rentalRefundOrder.setRefundOrderNo(refundOrderNo);
         rentalRefundOrder.setResourceTypeId(order.getResourceTypeId());
-        rentalRefundOrder.setOnlinePayStyleNo(VendorType.fromCode(order.getVendorType()).getStyleNo());
+        if (StringHelper.hasContent(order.getVendorType()))
+            rentalRefundOrder.setOnlinePayStyleNo(VendorType.fromCode(order.getVendorType()).getStyleNo());
         rentalRefundOrder.setResourceType(order.getResourceType());
 
         rentalRefundOrder.setAmount(orderAmount);
