@@ -5,32 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.general_approval.AddGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.CreateOrUpdateGeneralFormValuesWithFlowCommand;
-import com.everhomes.rest.general_approval.DisableProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.DoFormMirrorCommand;
-import com.everhomes.rest.general_approval.EnableProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.GeneralFormPrintTemplateDTO;
-import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
-import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
-import com.everhomes.rest.general_approval.GeneralFormValDTO;
-import com.everhomes.rest.general_approval.GetGeneralFormFilterCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormValCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormsAndValuesByFlowNodeCommand;
-import com.everhomes.rest.general_approval.GetProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
-import com.everhomes.rest.general_approval.ListDefaultFieldsCommand;
-import com.everhomes.rest.general_approval.ListGeneralFormResponse;
-import com.everhomes.rest.general_approval.ListGeneralFormValResponse;
-import com.everhomes.rest.general_approval.PostGeneralFormDTO;
-import com.everhomes.rest.general_approval.PostGeneralFormFilterCommand;
-import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
-import com.everhomes.rest.general_approval.SearchFormValDTO;
-import com.everhomes.rest.general_approval.SearchFormValsCommand;
-import com.everhomes.rest.general_approval.UpdateGeneralFormPrintTemplateCommand;
+import com.everhomes.rest.general_approval.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -347,6 +322,64 @@ public class GeneralFormController extends ControllerBase {
 	public RestResponse syncFromDbV2(){
 		generalFormSearcher.syncFromDbV2();
 		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/createFormFieldsConfig</b>
+	 * <p>创建工作流节点关联的全局表单字段配置</p>
+	 * @return {@link CreateFormFieldsConfigResponse}
+	 */
+	@RequestMapping("createFormFieldsConfig")
+	@RestReturn(value=CreateFormFieldsConfigResponse.class)
+	public RestResponse createFormFieldsConfig(CreateFormFieldsConfigCommand cmd){
+		CreateFormFieldsConfigResponse result = generalFormService.createFormFieldsConfig(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/updateFormFieldsConfig</b>
+	 * <p>修改工作流节点关联的全局表单字段配置</p>
+	 */
+	@RequestMapping("updateFormFieldsConfig")
+	@RestReturn(value=String.class)
+	public RestResponse updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd){
+		UpdateFormFieldsConfigResponse result = generalFormService.updateFormFieldsConfig(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/deleteFormFieldsConfig</b>
+	 * <p>删除工作流节点关联的全局表单字段配置</p>
+	 */
+	@RequestMapping("deleteFormFieldsConfig")
+	@RestReturn(value=String.class)
+	public RestResponse deleteFormFieldsConfig(DeleteFormFieldsConfigCommand cmd){
+		generalFormService.deleteFormFieldsConfig(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/getFormFieldsConfig</b>
+	 * <p>获取工作流节点关联的全局表单字段配置</p>
+	 * @return {@link GeneralFormFieldsConfigDTO}
+	 */
+	@RequestMapping("getFormFieldsConfig")
+	@RestReturn(value=GeneralFormFieldsConfigDTO.class)
+	public RestResponse getFormFieldsConfig(GetFormFieldsConfigCommand cmd){
+		GeneralFormFieldsConfigDTO result = generalFormService.getFormFieldsConfig(cmd);
+		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

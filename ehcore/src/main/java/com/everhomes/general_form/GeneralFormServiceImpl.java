@@ -87,6 +87,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private GeneralFormFieldsConfigProvider generalFormFieldsConfigProvider;
+
     @Override
     public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
         GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormId());
@@ -1169,6 +1172,36 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         selectValue = StringHelper.toJsonString(dto);
 
         return selectValue ;
+    }
+
+    @Override
+    public CreateFormFieldsConfigResponse createFormFieldsConfig(CreateFormFieldsConfigCommand cmd){
+        CreateFormFieldsConfigResponse response = new CreateFormFieldsConfigResponse();
+        GeneralFormFieldsConfig formFieldsConfig = ConvertHelper.convert(cmd, GeneralFormFieldsConfig.class);
+        Long formFieldsConfigId = generalFormFieldsConfigProvider.createFormFieldsConfig(formFieldsConfig);
+        response.setFormFieldsConfigId(formFieldsConfigId);
+        return response;
+    }
+
+    @Override
+    public UpdateFormFieldsConfigResponse updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd){
+        UpdateFormFieldsConfigResponse response = new UpdateFormFieldsConfigResponse();
+        GeneralFormFieldsConfig formFieldsConfig = ConvertHelper.convert(cmd, GeneralFormFieldsConfig.class);
+        Long formFieldsConfigId = generalFormFieldsConfigProvider.updateFormFieldsConfig(formFieldsConfig);
+        response.setFormFieldsConfigId(formFieldsConfigId);
+        return response;
+    }
+
+    @Override
+    public void deleteFormFieldsConfig(DeleteFormFieldsConfigCommand cmd){
+        generalFormFieldsConfigProvider.deleteFormFieldsConfig(cmd.getFormFieldsConfigId());
+    }
+
+    @Override
+    public GeneralFormFieldsConfigDTO getFormFieldsConfig(GetFormFieldsConfigCommand cmd){
+        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getFormFieldsConfig(cmd.getFormFieldsConfigId());
+        GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(formFieldsConfig, GeneralFormFieldsConfigDTO.class);
+        return dto;
     }
 }
 
