@@ -23,6 +23,10 @@
 -- AUTHOR: 黄明波
 -- REMARK: /yellowPage/recoveryListCategoryDataDisappearBug 参数ownerId 1802，返回的字符串发我看下。
 
+-- AUTHOR: 唐岑 2018年11月29日21:40:08
+-- REMARK: 注意：执行/pm/fixApartmentLivingStatus接口前，需要备份eh_organization_address_mappings表
+-- REMARK: 升级完成后，需要执行接口/pm/fixApartmentLivingStatus
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
