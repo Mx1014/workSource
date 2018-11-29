@@ -411,9 +411,9 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			}
 		}else if(cmd.getCommunityId()!=null){
 			//标准版兼容，对于APP端的兼容
-//			Long orgId = communityProvider.getOrganizationIdByCommunityId(cmd.getCommunityId());
-//			List<Long> communityIdsManagedByOrg = communityProvider.findCommunityIdsByOrgId(orgId);
-//			authCommunities.addAll(communityIdsManagedByOrg);
+			Long orgId = communityProvider.getOrganizationIdByCommunityId(cmd.getCommunityId());
+			List<Long> communityIdsManagedByOrg = communityProvider.findCommunityIdsByOrgId(orgId);
+			authCommunities.addAll(communityIdsManagedByOrg);
 			authCommunities.add(cmd.getCommunityId());
 		}
 

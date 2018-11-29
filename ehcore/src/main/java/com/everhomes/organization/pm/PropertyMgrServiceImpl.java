@@ -254,6 +254,7 @@ import com.everhomes.rest.organization.TxType;
 import com.everhomes.rest.organization.UpdateReservationCommand;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.organization.pm.*;
+import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.pushmessagelog.PushMessageTypeCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -8647,4 +8648,156 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         response.setApartments(apartments);
         return response;
     }
+
+	/**
+	 * 该接口的目的：
+	 * 1、已占用状态不再存在了，被剥离了开来，新增了已预订，待签约，待接房这三个状态来细分已占用状态，因此需要对历史的已占用房源状态的数据进行处理
+	 * 2、将eh_addresses和eh_organization_address_mapping的关系改为一一对应的关系，目前现网有两个问题：
+	 * 	2.1、在智谷汇这个项目存在一个问题：一个房源会对应两条房源状态的记录。因此要删掉多余的状态记录。
+	 * 	2.2、有些房源又可能没有房源状态记录来对应，这部分房源在代码里都会被默认置为自用状态。因此要让没有房源状态记录的房源有一条对应的房源状态记录。
+	 * By tangcen 2018年11月28日17:29:53 Version：5.11.0
+	 */
+	@Override
+	public void fixApartmentLivingStatus() {
+		//开始遍历，进行数据统计
+		int pageSize = 2000;
+		int totalCount = addressProvider.getTotalApartmentCount();
+		int totalPage = 0;
+		if (totalCount%pageSize == 0) {
+			totalPage = totalCount/pageSize;
+		}else {
+			totalPage = totalCount/pageSize + 1;
+		}
+		//分页遍历开始
+		for (int currentPage = 0; currentPage < totalPage; currentPage++) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Start fixApartmentLivingStatus for "+ (currentPage+1) +" time.........");
+			}
+			
+			int startIndex = currentPage * pageSize;
+			List<Address> addressList = addressProvider.findActiveAddress(startIndex,pageSize);
+			
+			for (Address address : addressList) {
+				List<CommunityAddressMapping> addressMappinglist = propertyMgrProvider.findOrganizationAddressMapping(address.getId());
+				  
+				if (addressMappinglist == null || addressMappinglist.size()==0) {
+					//如果没有数据，创建一条，置为自用状态
+					CommunityAddressMapping communityAddressMapping = new CommunityAddressMapping();
+	                communityAddressMapping.setCommunityId(address.getCommunityId());
+	                communityAddressMapping.setAddressId(address.getId());
+	                communityAddressMapping.setOrganizationAddress(address.getAddress());
+	                communityAddressMapping.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+	                communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+	                organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
+				}else if (addressMappinglist.size()==1) {
+					//如果有一条数据
+					CommunityAddressMapping communityAddressMapping = addressMappinglist.get(0);
+					if (communityAddressMapping != null) {
+						Byte livingStatus = communityAddressMapping.getLivingStatus();
+						if (livingStatus != null) {
+							List<Contract> contracts = contractProvider.findAnyStatusContractByAddressId(address.getId());
+							if (contracts != null && contracts.size()>0) {
+								Contract contract = contracts.get(0);
+								if (contract != null) {
+									Byte contractStatus = contract.getStatus();
+									if (contractStatus != null) {
+										if (ContractStatus.APPROVE_QUALITIED.getCode() == contractStatus.byteValue()) {
+											//审批通过-》待接房
+											communityAddressMapping.setLivingStatus(AddressMappingStatus.WAITINGROOM.getCode());
+											communityAddressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+											organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+										}else if (ContractStatus.WAITING_FOR_APPROVAL.getCode() == contractStatus.byteValue()) {
+											//审批中-》待签约
+											communityAddressMapping.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
+											communityAddressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+											organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+										}else if (ContractStatus.DRAFT.getCode() == contractStatus.byteValue() || 
+												ContractStatus.WAITING_FOR_LAUNCH.getCode() == contractStatus.byteValue()) {
+											//草稿、待发起-》待租
+											communityAddressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+											communityAddressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+											organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+										}else if (ContractStatus.ACTIVE.getCode() == contractStatus.byteValue() ||
+												ContractStatus.EXPIRING.getCode() == contractStatus.byteValue()) {
+											//正常、快过期-》已租
+											if (livingStatus.byteValue() != AddressMappingStatus.SALED.getCode()) {
+												communityAddressMapping.setLivingStatus(AddressMappingStatus.RENT.getCode());
+												communityAddressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+												organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}else if(addressMappinglist.size()==2){
+					//如果有两条数据
+					//删除第1条，保留第2条
+					CommunityAddressMapping communityAddressMappingDeleted = addressMappinglist.get(0);
+					CommunityAddressMapping communityAddressMappingSaved = addressMappinglist.get(1);
+					
+					if (communityAddressMappingDeleted != null) {
+						organizationProvider.deleteOrganizationAddressMapping(communityAddressMappingDeleted);
+					}
+					
+					if (communityAddressMappingSaved != null) {
+						List<Contract> contracts = contractProvider.findAnyStatusContractByAddressId(address.getId());
+						if (contracts != null && contracts.size()>0) {
+							Contract contract = contracts.get(0);
+							if (contract != null) {
+								Byte contractStatus = contract.getStatus();
+								if (contractStatus != null) {
+									if (ContractStatus.APPROVE_QUALITIED.getCode() == contractStatus.byteValue()) {
+										//审批通过-》待接房
+										communityAddressMappingSaved.setLivingStatus(AddressMappingStatus.WAITINGROOM.getCode());
+										communityAddressMappingSaved.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+										organizationProvider.updateOrganizationAddressMapping(communityAddressMappingSaved);
+										continue;
+									}else if (ContractStatus.WAITING_FOR_APPROVAL.getCode() == contractStatus.byteValue()) {
+										//审批中-》待签约
+										communityAddressMappingSaved.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
+										communityAddressMappingSaved.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+										organizationProvider.updateOrganizationAddressMapping(communityAddressMappingSaved);
+										continue;
+									}else if (ContractStatus.DRAFT.getCode() == contractStatus.byteValue() || 
+											ContractStatus.WAITING_FOR_LAUNCH.getCode() == contractStatus.byteValue()) {
+										//草稿、待发起-》待租
+										communityAddressMappingSaved.setLivingStatus(AddressMappingStatus.FREE.getCode());
+										communityAddressMappingSaved.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+										organizationProvider.updateOrganizationAddressMapping(communityAddressMappingSaved);
+										continue;
+									}else if (ContractStatus.ACTIVE.getCode() == contractStatus.byteValue() ||
+											ContractStatus.EXPIRING.getCode() == contractStatus.byteValue()) {
+										//正常、快过期-》已租
+										communityAddressMappingSaved.setLivingStatus(AddressMappingStatus.RENT.getCode());
+										communityAddressMappingSaved.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+										organizationProvider.updateOrganizationAddressMapping(communityAddressMappingSaved);
+										continue;
+									}
+								}
+							}
+						}
+						
+						List<PmResourceReservation> reservations = propertyMgrProvider.findReservationByAddress(address.getId(), ReservationStatus.ACTIVE);
+						if (reservations != null && reservations.size() > 0) {
+							communityAddressMappingSaved.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+							communityAddressMappingSaved.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							organizationProvider.updateOrganizationAddressMapping(communityAddressMappingSaved);
+						}
+					}
+				}else {
+					//通过查数据库，不会有超过2条数据的情况
+				}
+				
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("Start fixApartmentLivingStatus for "+ (currentPage+1) +" time.........");
+				}
+			}
+				
+		}
+			
+	}
+	
 }
