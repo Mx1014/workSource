@@ -3609,9 +3609,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        if (!StringUtils.isEmpty(cmd.getSceneToken())) {
-            checkSceneToken(userId, cmd.getSceneToken());
-        }
+//        if (!StringUtils.isEmpty(cmd.getSceneToken())) {
+//            checkSceneToken(userId, cmd.getSceneToken());
+//        }
 
         GetUserRelatedAddressResponse response = new GetUserRelatedAddressResponse();
         List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
