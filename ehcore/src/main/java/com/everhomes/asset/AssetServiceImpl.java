@@ -3719,6 +3719,10 @@ public class AssetServiceImpl implements AssetService {
 			PaymentBillItems firstBillItemToDelete = assetProvider.findFirstBillItemToDelete(contractId, endTimeStr);
 			//如果退约/变更日期产生的billitem刚好落在最后一个bill中，需要对最后一个bill进行重新计算，而不是直接删除
 			//对应缴费项的生成规则：超过合同结束时间的billitem，不论billitem的开始时间是什么，全都会落在最后一个bill中
+			//issue-43498(退约，工作流设置节点处理人，处理人收到退约合同处理信心，操作“下一步”点确定，提示“应用开小差”)账单结束时间在今天之前，导致firstBillItemToDelete为空，这些账单是不用删除的
+			if (firstBillItemToDelete == null) {
+				return;
+			}
 			if (firstBillItemToDelete.getBillId().equals(bill.getId())) {
 				assetProvider.deleteBillItemsAfterDate(contractId, endTimeStr);
 				List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());

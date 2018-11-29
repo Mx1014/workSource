@@ -1346,8 +1346,7 @@ public class AddressProviderImpl implements AddressProvider {
         query.addConditions(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.equal((byte)0));
         
         if(StringUtils.isNotBlank(buildingName)) {
-            query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName)
-                    .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(buildingName)));
+            query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName));
         }
         if(StringUtils.isNotBlank(apartment)) {
             query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + apartment + "%"));
@@ -1377,4 +1376,28 @@ public class AddressProviderImpl implements AddressProvider {
         });
         return addresses;
     }
+
+	@Override
+	public List<Address> findActiveAddress(int startIndex, int pageSize) {
+		List<Address> result = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhAddresses a = Tables.EH_ADDRESSES;
+		context.select(a.ID,a.COMMUNITY_ID,a.ADDRESS)
+			   .from(a)
+			   .where(a.NAMESPACE_ID.ne(0))
+			   .and(a.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
+			   .and(a.IS_FUTURE_APARTMENT.eq((byte)0))
+			   .orderBy(a.COMMUNITY_ID,a.BUILDING_ID)
+			   .limit(startIndex, pageSize)
+			   .fetch()
+			   .forEach(r->{
+				   Address address = new Address();
+				   address.setId(r.getValue(a.ID));
+				   address.setCommunityId(r.getValue(a.COMMUNITY_ID));
+				   address.setAddress(r.getValue(a.ADDRESS));
+				   result.add(address);
+			   });
+		return result;
+	}
 }

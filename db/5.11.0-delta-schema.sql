@@ -400,3 +400,9 @@ CREATE TABLE `eh_tickets` (
 -- AUTHOR: 黄明波 20181127
 -- REMARK: 云打印微信支付需求
 ALTER TABLE `eh_siyin_print_business_payee_accounts` MODIFY COLUMN `payee_id` BIGINT(20) NULL DEFAULT NULL COMMENT '支付帐号id';
+
+
+-- AUTHOR: 黄鹏宇 20181128
+-- REMARK: 去除创建管理员一定要有用户的限制
+ALTER TABLE eh_enterprise_customer_admins MODIFY creator_uid BIGINT NULL;
+-- END

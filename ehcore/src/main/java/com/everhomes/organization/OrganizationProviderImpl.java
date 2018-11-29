@@ -3035,8 +3035,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public void createOrganizationAddressMapping(CommunityAddressMapping addressMapping) {
-
-        assert (addressMapping.getOrganizationId() != null);
+    	
+    	//CommunityAddressMapping中不再存OrganizationId，兼容标准版的修改
+        //assert (addressMapping.getOrganizationId() != null);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddressMappings.class));
@@ -3050,8 +3051,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public void updateOrganizationAddressMapping(CommunityAddressMapping addressMapping) {
-
-        assert (addressMapping.getOrganizationId() != null);
+    	//CommunityAddressMapping中不再存OrganizationId，兼容标准版的修改
+        //assert (addressMapping.getOrganizationId() != null);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 

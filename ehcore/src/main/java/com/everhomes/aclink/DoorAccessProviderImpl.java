@@ -692,6 +692,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             query.fetch().map((r) -> {
             	DoorAccessDTO dto =ConvertHelper.convert(r, DoorAccessDTO.class);
             	dto.setGroupId(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID));
+            	dto.setDisplayName(dto.getDisplayNameNotEmpty());
             	//园区门禁门牌号
                 if(dto.getOwnerType() == (byte)1){
                     dto.getCommunityName();
