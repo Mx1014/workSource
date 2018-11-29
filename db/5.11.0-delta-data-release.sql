@@ -281,6 +281,12 @@ INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `module_
 -- AUTHOR:
 -- REMARK:
 
+-- AUTHOR:黄明波
+-- REMARK:添加打印机域空间id
+update eh_siyin_print_printers set namespace_id = 2 where reader_name = 'TC101154727022';
+update eh_siyin_print_printers set namespace_id = 999969 where reader_name = 'TC101154727294';
+update eh_siyin_print_printers set namespace_id = 11 where reader_name = 'TC101157736913';
+update eh_siyin_print_printers set namespace_id = 999981 where reader_name = 'TC100887870538';
 
 
 
@@ -339,11 +345,16 @@ VALUES ('zhenzhihui.redirect.url', 'http://120.132.117.22:8016/ZHYQ/restservices
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guanzhouyuekongjian
 -- DESCRIPTION: 此SECTION只在广州越空间-999930执行的脚本
+
+-- AUTHOR: 黄明波
+-- REMARK: 商品对接
+update eh_siyin_print_printers set namespace_id = 999930 ;
+
 -- --------------------- SECTION END guanzhouyuekongjian -------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
--- --------------------- SECTION END ruianxintiandi ------------------------------------------
+
 -- AUTHOR: st.zheng 20181127
 -- REMARK: 会员等级
 SET @id = (SELECT IFNULL(MIN(id),0) from `eh_vip_priority`);
@@ -353,6 +364,14 @@ INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priorit
 VALUES (@id := @id + 1,999929,2,'金卡',20 );
 INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
 VALUES (@id := @id + 1,999929,3,'白金卡',30 );
+
+-- AUTHOR: 黄明波
+-- REMARK: 商品对接
+update eh_siyin_print_printers set namespace_id = 999929 ;
+
+
+-- --------------------- SECTION END ruianxintiandi ------------------------------------------
+
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
