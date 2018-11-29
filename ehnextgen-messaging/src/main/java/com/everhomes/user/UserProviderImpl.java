@@ -194,7 +194,8 @@ public class UserProviderImpl implements UserProvider {
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
             @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
-            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}"),
+            @CacheEvict(value="UserIdentifier-NamespaceAndToken", key="{#userIdentifier.namespaceId, #userIdentifier.identifierToken}" )})
     @Override
     public void updateIdentifierFromUnite(UserIdentifier userIdentifier) {
         assert(userIdentifier.getId() != null);
@@ -404,7 +405,8 @@ public class UserProviderImpl implements UserProvider {
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
             @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
-            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}"),
+            @CacheEvict(value="UserIdentifier-NamespaceAndToken", key="{#userIdentifier.namespaceId, #userIdentifier.identifierToken}" )})
     @Override
     public void updateIdentifier(UserIdentifier userIdentifier) {
         assert(userIdentifier.getId() != null);
@@ -424,7 +426,8 @@ public class UserProviderImpl implements UserProvider {
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
             @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
-            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}"),
+            @CacheEvict(value="UserIdentifier-NamespaceAndToken", key="{#userIdentifier.namespaceId, #userIdentifier.identifierToken}" )})
     @Override
     public void deleteIdentifier(UserIdentifier userIdentifier) {
         assert(userIdentifier.getId() != null);
@@ -665,6 +668,7 @@ public class UserProviderImpl implements UserProvider {
      * @param identifierToken
      * @return
      */
+    @Cacheable(value = "UserIdentifier-NamespaceAndToken", key="{#namespaceId, #identifierToken}", unless="#result == null")
     @Override
     public UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken) {
         final List<UserIdentifier> result = new ArrayList<>();
