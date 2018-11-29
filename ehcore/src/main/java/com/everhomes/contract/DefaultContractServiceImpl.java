@@ -4134,6 +4134,9 @@ long assetCategoryId = 0l;
 		communityStatistics.setDateType(ContractStatisticDateType.YEARMMSTR.getCode());
 		communityStatistics.setRentAmount(BigDecimal.ZERO);
 		communityStatistics.setRentalArea(BigDecimal.ZERO);
+		communityStatistics.setUserContractAmount(BigDecimal.ZERO);
+		communityStatistics.setOrgContractAmount(BigDecimal.ZERO);
+		
 		// 获取该园区所有合同租赁总额
 		communityStatistics.setStatus(ContractStatus.ACTIVE.getCode());
 		return communityStatistics;
@@ -4351,6 +4354,11 @@ long assetCategoryId = 0l;
         	endTimeStr = cmd.getEndTimeStr();
 		}else {
 	        formatDateStr = cmd.getDateStr();
+	        if ("".equals(formatDateStr) || formatDateStr == null) {
+	        	LOGGER.error("contractStaticsListTimeDimension cmd =", cmd);
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.CONTRACT_STATICS_TIME_DIMENSION_ERROR,
+						"contract statics time dimension is error");
+			}
 		}
         
         List<TotalContractStaticsDTO> resultList = contractProvider.listcontractStaticsListTimeDimension(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
