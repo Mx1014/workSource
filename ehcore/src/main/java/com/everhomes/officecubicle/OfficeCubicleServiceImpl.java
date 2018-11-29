@@ -397,9 +397,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //		if (null == cmd.getCategories())
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid paramter of Categories error: null ");
-		if (null == cmd.getCityName())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of city error: null id or name");
+//		if (null == cmd.getCityName())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of city error: null id or name");
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleSpace space = ConvertHelper.convert(cmd, OfficeCubicleSpace.class);
 			space.setNamespaceId(getNamespaceId(cmd.getNamespaceId()));
