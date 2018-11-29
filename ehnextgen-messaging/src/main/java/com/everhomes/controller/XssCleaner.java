@@ -16,13 +16,6 @@ public class XssCleaner {
     private static Policy policy = null;
 
     static {
-        XssClassLoader classLoader = new XssClassLoader();
-        try {
-            classLoader.loadClass("org.owasp.validator.css.CssValidator");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
         LOGGER.info("AntiSamy XSS config file [" + ANTISAMY_SLASHDOT_XML + "]");
         InputStream inputStream = XssCleaner.class.getClassLoader().getResourceAsStream(ANTISAMY_SLASHDOT_XML);
         try {
