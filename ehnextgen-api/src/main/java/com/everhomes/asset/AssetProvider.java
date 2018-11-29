@@ -32,7 +32,6 @@ import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.asset.ListBillDetailVO;
 import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
 import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
@@ -49,6 +48,7 @@ import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
 import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
@@ -161,6 +161,12 @@ public interface AssetProvider {
     void changeBillStatusOnContractSaved(Long contractId);
 
     void deleteContractPayment(Long contractId);
+    
+    /**
+     * 合同更新/根据合同id,自动刷新合同账单
+     * @param contractId
+     */
+    void deleteContractPaymentByContractId(Long contractId);
 
     List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId, Long categoryId, Integer namespaceId);
 
@@ -331,12 +337,7 @@ public interface AssetProvider {
 
     void insertAssetCategory(EhAssetAppCategories c);
 
-    ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
- 
-    //ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
-
     boolean checkBillByCategory(Long billId, Long categoryId);
-    //void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds);
     
 	void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds, Integer paymentType);
 	
@@ -509,6 +510,8 @@ public interface AssetProvider {
 	void deleteAllDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
 	SettledBillRes getAssetDoorAccessBillsUNPAID(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam);
 	List<AssetDooraccessLog> getDooraccessLogInStatus(AssetDooraccessParam doorAccessParamInStatus);
+	
+	PaymentOrderBillDTO listPaymentBillDetail(Long billId);
 
 	
 }

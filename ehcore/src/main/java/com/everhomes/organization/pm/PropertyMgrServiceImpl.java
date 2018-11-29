@@ -168,6 +168,7 @@ import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ImportAuthorizePriceDataDTO;
 import com.everhomes.rest.address.ListAddressByKeywordCommand;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
+import com.everhomes.rest.address.ListApartmentsByMultiStatusResponse;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
@@ -3060,10 +3061,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		//addressProvider.deleteAddressById(cmd.getId());
     }
 
+    //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+    //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
-        if (organizationId != null && community != null && address != null) {
-        	//针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
-            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+//        if (organizationId != null && community != null && address != null) {
+    	if (community != null && address != null) {
             //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
             CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
         	if (communityAddressMapping == null) {
@@ -3302,6 +3304,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		map.put(AddressMappingStatus.SALED.getCode(), 0);
 		map.put(AddressMappingStatus.UNSALE.getCode(), 0);
 		map.put(AddressMappingStatus.OCCUPIED.getCode(), 0);
+		map.put(AddressMappingStatus.SIGNEDUP.getCode(), 0);
+		map.put(AddressMappingStatus.WAITINGROOM.getCode(), 0);
 
 		for (PropFamilyDTO propFamilyDTO : resultList) {
 			map.put(propFamilyDTO.getLivingStatus(), map.get(propFamilyDTO.getLivingStatus()) + 1);
@@ -3315,7 +3319,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		statistics.setSaledCount(map.get(AddressMappingStatus.SALED.getCode()));
 		statistics.setUnsaleCount(map.get(AddressMappingStatus.UNSALE.getCode()));
 		statistics.setOccupiedCount(map.get(AddressMappingStatus.OCCUPIED.getCode()));
-		statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount() + statistics.getOccupiedCount());
+		statistics.setSignedUpCount(map.get(AddressMappingStatus.SIGNEDUP.getCode()));
+		statistics.setWaitingRoomCount(map.get(AddressMappingStatus.WAITINGROOM.getCode()));
+		statistics.setAptCount(
+				statistics.getDefaultCount() + statistics.getLiveCount() + 
+				statistics.getRentCount() + statistics.getFreeCount() + 
+				statistics.getSaledCount() + statistics.getUnsaleCount() + 
+				statistics.getOccupiedCount() + statistics.getSignedUpCount() +
+				statistics.getWaitingRoomCount());
 		statistics.setUserCount(userCount);
 		statistics.setHasOwnerCount(statistics.getLiveCount() + statistics.getRentCount() + statistics.getSaledCount());
 		statistics.setNoOwnerCount(statistics.getFreeCount() + statistics.getUnsaleCount());
@@ -3345,45 +3356,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		setLivingStatus(dto, communityAddressMappingMap, apartmentDTO.getLivingStatus());
 		//设置公寓是否欠费
 		setOwedFlag(dto, billOwedMap);
-//设置与该房源关联的有效合同中，结束日期最晚的合同的结束日期
+		//设置与该房源关联的有效合同中，结束日期最晚的合同的结束日期
 		Contract latestEndDateContract = findLatestEndDateContract(addressId);
 		if (latestEndDateContract!=null) {
 			dto.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
 		}
-		/*
-		* 因为通过addressService.listApartmentsByKeyword(cmd).second()方法获得的address，其IS_FUTURE_APARTMENT都为0，
-		* 所以如下代码可以注释掉，只留下else if分支的代码
-		*/
-		//设置该房源是否为未来房源，及与其关联的房源拆分合并计划的开始时间
-//		Address address = addressProvider.findAddressById(addressId);
-//		dto.setIsFutureApartment(address.getIsFutureApartment());
-//		if (address.getIsFutureApartment() == 1) {
-//			AddressArrangement addressArrangement = null;
-//			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByTargetIdV2(addressId);
-//			for (AddressArrangement arrangement : arrangements) {
-//    			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
-//    			if (targetIds.contains(addressId.toString())) {
-//    				addressArrangement = arrangement;
-//    				break;
-//				}
-//    		}
-//			if(addressArrangement!=null){
-//				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
-//			}
-//		}else if (address.getIsFutureApartment() == 0) {
-//			AddressArrangement addressArrangement = null;
-//			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(addressId);
-//			for (AddressArrangement arrangement : arrangements) {
-//    			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
-//    			if (originalIds.contains(addressId.toString())) {
-//    				addressArrangement = arrangement;
-//    				break;
-//				}
-//    		}
-//			if(addressArrangement!=null){
-//				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
-//			}
-//		}
+		
 		dto.setIsFutureApartment((byte)0);
 		AddressArrangement addressArrangement = null;
 		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(addressId);
@@ -8090,8 +8068,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public ListAuthorizePricesResponse listAuthorizePrices(AuthorizePriceCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<AddressProperties> list = propertyMgrProvider.listAuthorizePrices(cmd.getNamespaceId(), cmd.getBuildingId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+		List<AddressProperties> list = propertyMgrProvider.listAuthorizePrices(cmd.getNamespaceId(), cmd.getBuildingId(), cmd.getCommunityId(), locator, pageSize);
 		ListAuthorizePricesResponse response = new ListAuthorizePricesResponse();
+		Long nextPageAnchor = null;
+		if(list.size() > pageSize) {
+			list.remove(list.size() - 1);
+            response.setNextPageAnchor(list.get(list.size() - 1).getId());
+        }
 
 		if (list.size() > 0) {
 			List<AuthorizePriceDTO> resultList = list.stream().map((c) -> {
@@ -8115,11 +8100,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				return dto;
 			}).collect(Collectors.toList());
 			response.setAuthorizePricesList(resultList);
-			if (list.size() != pageSize) {
-				response.setNextPageAnchor(null);
-			} else {
-				response.setNextPageAnchor(list.get(list.size() - 1).getId());
-			}
 		}
 		return response;
 	}
@@ -8593,5 +8573,78 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     }
 
+	@Override
+	public ListApartmentsForAppResponse listApartmentsForApp(ListApartmentsForAppCommand cmd) {
+		ListApartmentsForAppResponse response = new ListApartmentsForAppResponse();
+		
+		List<Address> addresses = addressProvider.findActiveApartmentsByBuildingId(cmd.getBuildingId());
+		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
+		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
 
+		List<ApartmentForAPPDTO> results = new ArrayList<>();
+		for(Address address : addresses){
+			ApartmentForAPPDTO dto = ConvertHelper.convert(address, ApartmentForAPPDTO.class);
+			CommunityAddressMapping communityAddressMapping = communityAddressMappingMap.get(address.getId());
+			if (communityAddressMapping != null) {
+				dto.setLivingStatus(communityAddressMapping.getLivingStatus());
+			}else {
+				dto.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+			}
+			results.add(dto);
+		}
+		
+		if (cmd.getLivingStatus() != null) {
+			List<ApartmentForAPPDTO> filterResults = new ArrayList<>();
+			for (ApartmentForAPPDTO dto : results) {
+				filterResults.add(dto);
+				if (dto.getLivingStatus() != cmd.getLivingStatus()) {
+					filterResults.remove(dto);
+				}
+			}
+			response.setResults(filterResults);
+		}else {
+			response.setResults(results);
+		}
+		
+		return response;
+	}
+
+	@Override
+	public ListApartmentsByMultiStatusResponse listApartmentsByMultiStatus(ListApartmentsByMultiStatusCommand cmd) {
+		Long pageAnchor = cmd.getPageAnchor();
+		if ( pageAnchor == null) {
+            pageAnchor = 0L;
+        }
+        Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        //取得门牌列表
+        List<ApartmentBriefInfoDTO> aptList = addressProvider.listApartmentsByMultiStatus(cmd.getNamespaceId(),
+                cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartment(), cmd.getLivingStatus(), pageAnchor, pageSize+1);
+       
+        ListApartmentsByMultiStatusResponse response = new ListApartmentsByMultiStatusResponse();
+        List<ApartmentBriefInfoDTO> apartments = new ArrayList<>();
+        //设置门牌的入住状态
+        if (aptList != null && aptList.size() > 0) {
+            if (aptList.size() > pageSize) {
+                aptList.remove(aptList.size() - 1);
+                response.setNextPageAnchor(pageAnchor + pageSize.longValue());
+            }
+            //门牌转化成门牌id列表
+            List<Long> aptIdList = aptList.stream().map(a -> a.getId()).collect(Collectors.toList());
+            //处理小区地址关联表
+            Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
+            aptList.forEach(apt -> {
+                if (apt.getLivingStatus() == null) {
+                    CommunityAddressMapping mapping = communityAddressMappingMap.get(apt.getId());
+                    if (mapping != null) {
+                        apt.setLivingStatus(mapping.getLivingStatus());
+                    } else {
+                        apt.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+                    }
+                }
+                apartments.add(apt);
+            });
+        }
+        response.setApartments(apartments);
+        return response;
+    }
 }

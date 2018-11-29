@@ -14,6 +14,7 @@ import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
+import com.everhomes.rest.address.ListApartmentsByMultiStatusResponse;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
@@ -544,5 +545,9 @@ public interface PropertyMgrService {
 	List<ApartmentBriefInfoDTO> listApartmentsInBuilding(ListApartmentsInBuildingCommand cmd);
 
 	OrganizationOwnerDTO getOrgOwnerByContactToken(GetOrgOwnerByContactTokenCommand cmd);
+
+	ListApartmentsForAppResponse listApartmentsForApp(ListApartmentsForAppCommand cmd);
+
+	ListApartmentsByMultiStatusResponse listApartmentsByMultiStatus(ListApartmentsByMultiStatusCommand cmd);
 
 }

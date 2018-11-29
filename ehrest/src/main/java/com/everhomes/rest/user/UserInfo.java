@@ -2,6 +2,7 @@
 package com.everhomes.rest.user;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -42,6 +43,7 @@ import java.util.List;
  *  <li>registerDays: 用户注册天数</li>
  *  <li>showCompanyFlag: 是否展示公司</li>
  *  <li>companyId: 公司ID</li>
+ *  <li>organizationList: 用户所加入的公司</li>
  *  </ul>
  **/
 public class UserInfo {
@@ -87,6 +89,8 @@ public class UserInfo {
     private String sceneToken;
     private String registerDaysDesc;
 
+    @ItemType(OrganizationSimpleDTO.class)
+    private List<OrganizationSimpleDTO> organizationList;
     public UserInfo() {
     }
 
@@ -104,6 +108,14 @@ public class UserInfo {
 
     public void setShowCompanyFlag(Byte showCompanyFlag) {
         this.showCompanyFlag = showCompanyFlag;
+    }
+
+    public List<OrganizationSimpleDTO> getOrganizationList() {
+        return organizationList;
+    }
+
+    public void setOrganizationList(List<OrganizationSimpleDTO> organizationList) {
+        this.organizationList = organizationList;
     }
 
     public Long getId() {

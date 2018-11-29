@@ -9,6 +9,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
+import com.everhomes.flow.conditionvariable.FlowConditionNumberVariable;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.general_form.GeneralFormVal;
@@ -18,6 +19,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
@@ -35,6 +37,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.NumberUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
@@ -46,7 +49,10 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -767,30 +773,45 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
 		cmd.setOrganizationId(flow.getOrganizationId());
-//		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))
-//			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
-//		else
-//			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
-		cmd.setAppId(Long.valueOf(flow.getModuleType()));ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
+		cmd.setAppId(Long.valueOf(flow.getModuleType()));
+		cmd.setOwnerType(ownerType);
+		cmd.setOwnerId(ownerId);
+		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
 		if(null == response.getRequests()){
 			LOGGER.error("Categories is null.");
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
 					"Categories is null.");
 		}
-		response.getRequests().forEach(p-> dto.getOptions().add(p.getName()));
+		for (CategoryDTO p : response.getRequests()){
+		    dto.getOptions().add(p.getName());
+        }
 		list.add(dto);
+
+        dto = new FlowConditionVariableDTO();
+        dto.setDisplayName("发起时间");
+        dto.setValue("createTime");
+        dto.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        dto.setOperators(new ArrayList<>());
+        list.add(dto);
+
 		return list;
 	}
 
     @Override
     public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
+        FlowCase flowcase = ctx.getFlowCase();
+        PmTask pmTask = pmTaskProvider.findTaskById(flowcase.getReferId());
         //目前只有类型一个分支参数
         if ("taskCategoryId".equals(variable)) {
-            FlowCase flowcase = ctx.getFlowCase();
-            PmTask pmTask = pmTaskProvider.findTaskById(flowcase.getReferId());
             PmTaskCategory category = pmTaskProvider.findCategoryById(pmTask.getTaskCategoryId());
             FlowConditionStringVariable flowConditionStringVariable = new FlowConditionStringVariable(category.getName());
+            return flowConditionStringVariable;
+        } else if ("createTime".equals(variable)) {
+            Timestamp time = pmTask.getCreateTime();
+            DateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+            String value = format.format(time);
+            FlowConditionNumberVariable flowConditionStringVariable = new FlowConditionNumberVariable(Integer.valueOf(value.substring(value.length() - 4)));
             return flowConditionStringVariable;
         }
         return null;
@@ -803,7 +824,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
             PmTask task = pmTaskProvider.findTaskByFlowCaseId(flowCaseId);
             Double avgEval = evaluates.stream().collect(Collectors.averagingDouble(FlowEvaluate::getStar));
             BigDecimal avg = BigDecimal.valueOf(avgEval);
-            task.setStar(avg.setScale(1).toString());
+            task.setStar(avg.setScale(1,BigDecimal.ROUND_HALF_UP).toString());
             pmTaskProvider.updateTask(task);
             pmTaskSearch.feedDoc(task);
         }

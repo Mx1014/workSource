@@ -928,7 +928,7 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/syncOwnerIndex</b>
+     * <b>URL: /org/syncIndex</b>
      * <p>搜索索引同步 TODO: 求敢哥优化</p>
      *
      * @return {String.class}

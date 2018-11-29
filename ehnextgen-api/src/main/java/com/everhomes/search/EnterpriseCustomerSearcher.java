@@ -20,6 +20,8 @@ public interface EnterpriseCustomerSearcher {
 
     void syncFromDb();
 
+    SearchEnterpriseCustomerResponse queryEnterpriseCustomersForOpenAPI(SearchEnterpriseCustomerCommand cmd);
+
     SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd, Boolean isAdmin);
 
     List<EasySearchEnterpriseCustomersDTO> easyQueryEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd);

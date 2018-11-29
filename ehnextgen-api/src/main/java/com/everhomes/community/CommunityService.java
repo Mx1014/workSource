@@ -5,6 +5,12 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
+import com.everhomes.rest.openapi.ListAddressesForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListAddressesForThirdPartyResponse;
+import com.everhomes.rest.openapi.ListBuildingsForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListBuildingsForThirdPartyResponse;
+import com.everhomes.rest.openapi.ListCommunitiesForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListCommunitiesForThirdPartyResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -157,8 +163,6 @@ public interface CommunityService {
 
 	CommunityInfoDTO findDefaultCommunity();
 
-    ListCommunitiesResponse listCommunities(ListCommunitiesCommand cmd);
-
 	CreateCommunitiesResponse createCommunities(CreateCommunitiesCommand cmd);
 
     void updateCommunityPartial(UpdateCommunityPartialAdminCommand cmd);
@@ -203,5 +207,20 @@ public interface CommunityService {
 	void caculateAllBuildingArea();
 
 	OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd);
+
+	ApartmentCountInBuildingDTO countApartmentInBuilding(Long buildingId);
+
+	BuildingStatisticsForAppDTO getBuildingStatisticsForApp(GetBuildingStatisticsCommand cmd);
+
+	ListBuildingsForAppResponse listBuildingsForApp(ListBuildingsForAppCommand cmd);
+
+	ListCommunitiesForThirdPartyResponse listCommunitiesForThirdParty(ListCommunitiesForThirdPartyCommand cmd);
+
+	com.everhomes.rest.community.ListCommunitiesResponse listCommunities(com.everhomes.rest.community.ListCommunitiesCommand cmd);
+
+	ListBuildingsForThirdPartyResponse listBuildingsForThirdParty(ListBuildingsForThirdPartyCommand cmd);
+
+	ListAddressesForThirdPartyResponse listAddressesForThirdParty(ListAddressesForThirdPartyCommand cmd);
+
 
 }

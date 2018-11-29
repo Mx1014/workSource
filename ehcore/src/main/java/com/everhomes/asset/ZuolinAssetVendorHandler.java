@@ -62,6 +62,7 @@ import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
 import com.everhomes.rest.asset.AssetEnergyType;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillSourceId;
+import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.AssetServiceErrorCode;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BatchImportBillsCommand;
@@ -95,8 +96,6 @@ import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
 import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
 import com.everhomes.rest.asset.ListBillItemsResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListBillsDTO;
-import com.everhomes.rest.asset.ListBillsResponse;
 import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
 import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
 import com.everhomes.rest.asset.ListUploadCertificatesCommand;
@@ -114,6 +113,8 @@ import com.everhomes.rest.asset.TenantType;
 import com.everhomes.rest.asset.UploadCertificateInfoDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
@@ -877,6 +878,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
             query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
             query.addConditions(t2.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
+            query.addConditions(t.THIRD_PAID.isNull()
+            		.or(t.THIRD_PAID.ne(AssetPaymentBillStatus.PAID.getCode())));//物业缴费V7.5（中天-资管与财务EAS系统对接） ： 不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
             query.addGroupBy(t.ID);
             paymentBills = query.fetchInto(PaymentBills.class);
         }

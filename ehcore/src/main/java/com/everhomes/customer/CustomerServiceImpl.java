@@ -8,6 +8,7 @@ import com.everhomes.activity.ActivityProivider;
 import com.everhomes.activity.ActivityService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -268,6 +269,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private RequisitionService requisitionService;
+
+    @Autowired
+    private ArchivesService archivesService;
 
     private static final String queueDelay = "trackingPlanTaskDelays";
     private static final String queueNoDelay = "trackingPlanTaskNoDelays";
@@ -4141,8 +4145,16 @@ public class CustomerServiceImpl implements CustomerService {
                 Organization organization =  organizationProvider.findOrganizationById(r.getOrganizationId());
                 if(organization!=null){
                     r.setDepartmentName(organization.getName());
+                    Long detailId = organizationProvider.findOrganizationMemberDetailsByTargetId(r.getTargetId()).getId();
+                    Map<Long, String> dptMap = archivesService.getEmployeeDepartment(detailId);
+                    if (null != dptMap) {
+                        String depName = archivesService.convertToOrgNames(dptMap);
+                        r.setDeptName(depName);
+                    }
+
                 } else {
                     r.setDepartmentName("");
+                    r.setDeptName("");
                 }
             });
         }
@@ -4288,13 +4300,24 @@ public class CustomerServiceImpl implements CustomerService {
             cmd.setOrganizationId(customer.getOrganizationId() == null ? 0 : customer.getOrganizationId());
 //            result = rolePrivilegeService.listOrganizationAdministrators(cmd);
             // 标准版修改成此种概念
-            ListOrganizationContectDTOResponse organizationAdmins = rolePrivilegeService.listOrganizationSystemAdministrators(cmd);
-            result = organizationAdmins == null ? null : organizationAdmins.getDtos();
-            //复制organization管理员到企业客户管理中来
-            if (result != null && result.size() > 0) {
-                result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(),customer.getNamespaceId()));
-                customer.setAdminFlag(AdminFlag.YES.getCode());
-                enterpriseCustomerSearcher.feedDoc(customer);
+            if(cmd.getOrganizationId() != null && cmd.getOrganizationId() != 0) {
+                OrganizationContactDTO organizationAdmin = rolePrivilegeService.listOrganizationTopAdministrator(cmd);
+                if(organizationAdmin != null){
+                    result = new ArrayList<>();
+                    result.add(organizationAdmin);
+                    result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(),customer.getNamespaceId()));
+                    customer.setAdminFlag(AdminFlag.YES.getCode());
+                    enterpriseCustomerSearcher.feedDoc(customer);
+                }
+            } else if(result == null || result.size() < 1){
+                ListOrganizationContectDTOResponse organizationAdmins = rolePrivilegeService.listOrganizationSystemAdministrators(cmd);
+                result = organizationAdmins == null ? null : organizationAdmins.getDtos();
+                //复制organization管理员到企业客户管理中来
+                if (result != null && result.size() > 0) {
+                    result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(), customer.getNamespaceId()));
+                    customer.setAdminFlag(AdminFlag.YES.getCode());
+                    enterpriseCustomerSearcher.feedDoc(customer);
+                }
             }
         } else {
             result = customerAdminContacts;

@@ -20,5 +20,7 @@ public interface Rentalv2PricePackageProvider {
 
     MaxMinPrice findMaxMinPrice(List<Long> packageIds,Byte rentalType,String packageName);
 
+    List<Long> listPricePackageIdsByCellPackages(List<Long> packageIds,String packageName);
+
     void deletePricePackageByRentalTypes(String resourceType, String ownerType, Long ownerId, List<Byte> rentalTypes);
 }
