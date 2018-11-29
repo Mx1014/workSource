@@ -63,7 +63,7 @@ public interface OfficeCubicleProvider {
 
 	void createCubicleSite(OfficeCubicleStation station);
 
-	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId, Byte rentFlag);
+	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId, Byte rentFlag,String keyword);
 	
 	List<OfficeCubicleRoom> getOfficeCubicleRoom(Long owner, String ownerType, Long spaceId);
 	
@@ -113,6 +113,8 @@ public interface OfficeCubicleProvider {
 	void deleteChargeUsers(Long spaceId);
 
 	void createChargeUsers(OfficeCubicleChargeUser user);
+
+
 
 
 }
