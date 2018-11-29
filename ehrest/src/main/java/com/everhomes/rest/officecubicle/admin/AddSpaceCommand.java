@@ -68,10 +68,32 @@ public class AddSpaceCommand {
 	private Long appId;
 	@ItemType(ChargeUserDTO.class)
 	private List<ChargeUserDTO> chargeUserDTO;
+	private Byte openFlag;
 
 	public Long getCurrentPMId() {
 		return currentPMId;
 	}
+
+	
+	public List<ChargeUserDTO> getChargeUserDTO() {
+		return chargeUserDTO;
+	}
+
+
+	public void setChargeUserDTO(List<ChargeUserDTO> chargeUserDTO) {
+		this.chargeUserDTO = chargeUserDTO;
+	}
+
+
+	public Byte getOpenFlag() {
+		return openFlag;
+	}
+
+
+	public void setOpenFlag(Byte openFlag) {
+		this.openFlag = openFlag;
+	}
+
 
 	public void setCurrentPMId(Long currentPMId) {
 		this.currentPMId = currentPMId;
