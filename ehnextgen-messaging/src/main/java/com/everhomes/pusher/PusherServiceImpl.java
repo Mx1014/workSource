@@ -950,12 +950,12 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 				
 				// 4.3 根据 msgType 推送方式推送给用户
 				messagingService.routeMessage(null, User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING,ChannelType.USER.getCode(), String.valueOf(user.getOwnerUid()), messageDto, MSG_DEFAULT_SEND_TYPE);
-//				LOGGER.debug("调用第三方信息推送接口：=====【发送成功】===== message= ",messageDto.toString());
+				LOGGER.debug("调用第三方信息推送接口：=====【发送成功】===== messageDto= ",messageDto);
 
 			}else{
 				// 4.4 用户不存在，则加入失败列表
 				unReachTokenList.add(token);
-//				LOGGER.debug("调用第三方信息推送接口：=====【用户不存在】===== token=",token);
+				LOGGER.debug("调用第三方信息推送接口：=====【用户不存在】===== token=",token);
 				continue;
 			}
 		}
