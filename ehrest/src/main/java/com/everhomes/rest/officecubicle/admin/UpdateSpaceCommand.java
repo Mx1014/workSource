@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.officecubicle.ChargeUserDTO;
 import com.everhomes.rest.officecubicle.OfficeAttachmentDTO;
 import com.everhomes.rest.officecubicle.OfficeCategoryDTO;
 import com.everhomes.rest.officecubicle.OfficeRangeDTO;
@@ -40,6 +41,7 @@ import com.everhomes.util.StringHelper;
  * <li>appId: 应用id</li>
  * <li>longRentPrice:长租工位价格</li>
  * <li>shortRentNums:短租工位数量</li>
+ * <li>chargeUserDTO:负责人列表{@link com.everhomes.rest.officecubicle.ChargeUserDTO}</li>
  * </ul>
  */
 public class UpdateSpaceCommand { 
@@ -74,6 +76,8 @@ public class UpdateSpaceCommand {
 	private Byte openFlag;
 	private BigDecimal longRentPrice;
 	private String shortRentNums;
+	@ItemType(ChargeUserDTO.class)
+	private List<ChargeUserDTO> chargeUserDTO;
 	
 	
 	public String getShortRentNums() {
@@ -308,6 +312,14 @@ public class UpdateSpaceCommand {
 
 	public void setRanges(List<OfficeRangeDTO> ranges) {
 		this.ranges = ranges;
+	}
+
+	public List<ChargeUserDTO> getChargeUserDTO() {
+		return chargeUserDTO;
+	}
+
+	public void setChargeUserDTO(List<ChargeUserDTO> chargeUserDTO) {
+		this.chargeUserDTO = chargeUserDTO;
 	}
   
 

@@ -110,5 +110,9 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleStationRent> getOfficeCubicleStationRent(Long spaceId, Byte rentType);
 
+	void deleteChargeUsers(Long spaceId);
+
+	void createChargeUsers(OfficeCubicleChargeUser user);
+
 
 }

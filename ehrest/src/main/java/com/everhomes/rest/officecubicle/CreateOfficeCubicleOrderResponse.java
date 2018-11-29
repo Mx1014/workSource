@@ -9,16 +9,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>orderId: 业务订单id</li>
- *     <li>expiredIntervalTime: 订单失效间隔时间，单位为秒</li>
- *     <li>amount: 支付金额，以分为单位</li>
- *     <li>orderCommitUrl: 付系统createOrder返回参数</li>
- *     <li>orderCommitToken: 支付系统createOrder返回参数</li>
- *     <li>orderCommitNonce: 支付系统createOrder返回参数</li>
- *     <li>orderCommitTimestamp: 支付系统createOrder返回参数</li>
- *     <li>payInfo: 支付信息</li>
- *     <li>extendInfo: 扩展信息</li>
- *     <li>payMethod: 支付方式 {@link com.everhomes.rest.order.PayMethodDTO}</li>
+ *     <li>preDTO: {@link com.everhomes.rest.order.PreOrderDTO}</li>
  * </ul>
  */
 public class CreateOfficeCubicleOrderResponse {

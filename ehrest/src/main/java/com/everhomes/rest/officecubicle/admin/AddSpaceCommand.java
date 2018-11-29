@@ -3,6 +3,7 @@ package com.everhomes.rest.officecubicle.admin;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.officecubicle.ChargeUserDTO;
 import com.everhomes.rest.officecubicle.OfficeAttachmentDTO;
 import com.everhomes.rest.officecubicle.OfficeCategoryDTO;
 import com.everhomes.rest.officecubicle.OfficeRangeDTO;
@@ -34,6 +35,7 @@ import com.everhomes.util.StringHelper;
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
+ * <li>chargeUserDTO:负责人列表{@link com.everhomes.rest.officecubicle.ChargeUserDTO}</li>
  * </ul>
  */
 public class AddSpaceCommand { 
@@ -64,6 +66,8 @@ public class AddSpaceCommand {
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
+	@ItemType(ChargeUserDTO.class)
+	private List<ChargeUserDTO> chargeUserDTO;
 
 	public Long getCurrentPMId() {
 		return currentPMId;

@@ -9,6 +9,8 @@ import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.AddCubicleAdminCommand;
 import com.everhomes.rest.officecubicle.admin.AddRoomAdminCommand;
 import com.everhomes.rest.officecubicle.admin.CityDTO;
+import com.everhomes.rest.officecubicle.admin.GetCubicleForOrderCommand;
+import com.everhomes.rest.officecubicle.admin.GetCubicleForOrderResponse;
 import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderCommand;
 import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderResponse;
 import com.everhomes.rest.officecubicle.admin.GetRoomDetailCommand;
@@ -17,6 +19,8 @@ import com.everhomes.rest.officecubicle.admin.GetSpaceCommand;
 import com.everhomes.rest.officecubicle.admin.GetSpaceResponse;
 import com.everhomes.rest.officecubicle.admin.GetStationDetailCommand;
 import com.everhomes.rest.officecubicle.admin.GetStationDetailResponse;
+import com.everhomes.rest.officecubicle.admin.GetStationForRoomCommand;
+import com.everhomes.rest.officecubicle.admin.GetStationForRoomResponse;
 import com.everhomes.rest.officecubicle.admin.ListOfficeCubicleStatusCommand;
 import com.everhomes.rest.officecubicle.admin.ListOfficeCubicleStatusResponse;
 import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersCommand;
@@ -34,6 +38,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.point.pointpool.PreOrderDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
 
@@ -275,10 +280,11 @@ public class OfficeCubicleController extends ControllerBase {
      * <p>客户端创建订单</p>
      */
     @RequestMapping("createCubicleGeneralOrder")
+    @RestReturn(CreateOfficeCubicleOrderResponse.class)
     public RestResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd) {
-    	 this.officeCubicleService.createCubicleGeneralOrder(cmd);
+    	CreateOfficeCubicleOrderResponse  resp = this.officeCubicleService.createCubicleGeneralOrder(cmd);
     	
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -306,6 +312,7 @@ public class OfficeCubicleController extends ControllerBase {
      * <p>6.获取工位预定收款账户</p>
      */
     @RequestMapping("getOfficeCubiclPayeeAccount")
+    @RestReturn(ListOfficeCubicleAccountDTO.class)
     public RestResponse getOfficeCubiclPayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd) {
     	ListOfficeCubicleAccountDTO resp = new ListOfficeCubicleAccountDTO();
     	resp = this.officeCubicleService.getOfficeCubiclPayeeAccount(cmd);
@@ -385,7 +392,7 @@ public class OfficeCubicleController extends ControllerBase {
     
     /**
      * <b>URL: /officecubicle/refundOrder</b> 
-     * <p>搜索订单</p>
+     * <p>退款</p>
      */
     @RequestMapping("refundOrder")
     public RestResponse refundOrder(RefundOrderCommand cmd) {
@@ -400,9 +407,10 @@ public class OfficeCubicleController extends ControllerBase {
     
     /**
      * <b>URL: /officecubicle/listRentCubicle</b> 
-     * <p>搜索订单</p>
+     * <p>16.获取工位数量是否为0</p>
      */
     @RequestMapping("listRentCubicle")
+    @RestReturn(ListRentCubicleResponse.class)
     public RestResponse listRentCubicle(ListRentCubicleCommand cmd) {
 
     	ListRentCubicleResponse resp = this.officeCubicleService.listRentCubicle(cmd);
@@ -415,9 +423,10 @@ public class OfficeCubicleController extends ControllerBase {
     
     /**
      * <b>URL: /officecubicle/getSpace</b> 
-     * <p>搜索订单</p>
+     * <p>获取空间</p>
      */
     @RequestMapping("getSpace")
+    @RestReturn(GetSpaceResponse.class)
     public RestResponse getSpace(GetSpaceCommand cmd) {
 
     	GetSpaceResponse resp = this.officeCubicleService.getSpace(cmd);
@@ -433,6 +442,7 @@ public class OfficeCubicleController extends ControllerBase {
      * <p>列出空间工位状态</p>
      */
     @RequestMapping("listOfficeCubicleStatus")
+    @RestReturn(ListOfficeCubicleStatusResponse.class)
     public RestResponse listOfficeCubicleStatus(ListOfficeCubicleStatusCommand cmd) {
 
     	ListOfficeCubicleStatusResponse resp = this.officeCubicleService.listOfficeCubicleStatus(cmd);
@@ -445,9 +455,10 @@ public class OfficeCubicleController extends ControllerBase {
     
     /**
      * <b>URL: /officecubicle/getCubicleDetail</b> 
-     * <p>搜索订单</p>
+     * <p>工位详情</p>
      */
     @RequestMapping("getCubicleDetail")
+    @RestReturn(GetStationDetailResponse.class)
     public RestResponse getCubicleDetail(GetStationDetailCommand cmd) {
 
     	GetStationDetailResponse resp = this.officeCubicleService.getCubicleDetail(cmd);
@@ -460,9 +471,10 @@ public class OfficeCubicleController extends ControllerBase {
     
     /**
      * <b>URL: /officecubicle/getRoomDetail</b> 
-     * <p>搜索订单</p>
+     * <p>办公室详情</p>
      */
     @RequestMapping("getRoomDetail")
+    @RestReturn(GetRoomDetailResponse.class)
     public RestResponse getRoomDetail(GetRoomDetailCommand cmd) {
 
     	GetRoomDetailResponse resp = this.officeCubicleService.getRoomDetail(cmd);
@@ -472,5 +484,39 @@ public class OfficeCubicleController extends ControllerBase {
         return response;
     	
     }
+    
+    /**
+     * <b>URL: /officecubicle/getStationForRoom</b> 
+     * <p>新建办公室根据关键字获取工位</p>
+     */
+    @RequestMapping("getStationForRoom")
+    @RestReturn(GetStationForRoomResponse.class)
+    public RestResponse getStationForRoom(GetStationForRoomCommand cmd) {
+
+    	GetStationForRoomResponse resp = this.officeCubicleService.getStationForRoom(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    
+    /**
+     * <b>URL: /officecubicle/getCubicleForOrder</b> 
+     * <p>创建订单根据时间/关键字获取工位/办公室</p>
+     */
+    @RequestMapping("getCubicleForOrder")
+    @RestReturn(GetCubicleForOrderResponse.class)
+    public RestResponse getStationForRoom(GetCubicleForOrderCommand cmd) {
+
+    	GetCubicleForOrderResponse resp = this.officeCubicleService.getCubicleForOrder(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
 }
 

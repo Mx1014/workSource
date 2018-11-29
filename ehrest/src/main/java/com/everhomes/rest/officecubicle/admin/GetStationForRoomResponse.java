@@ -9,21 +9,33 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>spaceid:空间id,如果是空则为初始状态</li>
+ * <li>station:工位详情{@link com.everhomes.rest.officecubicle.admin.StationDTO}</li>
  * </ul>
  */
-public class GetSpaceResponse {
+public class GetStationForRoomResponse {
 
-	private Long spaceId;
+	private List<StationDTO> station;
 
-	public Long getSpaceId() {
-		return spaceId;
+
+
+
+
+	public List<StationDTO> getStation() {
+		return station;
 	}
 
-	public void setSpaceId(Long spaceId) {
-		this.spaceId = spaceId;
+
+
+
+
+	public void setStation(List<StationDTO> station) {
+		this.station = station;
 	}
-	
+
+
+
+
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

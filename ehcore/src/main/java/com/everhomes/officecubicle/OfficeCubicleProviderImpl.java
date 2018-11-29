@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.server.schema.tables.daos.EhOfficeCubicleChargeUsersDao;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleConfigsDao;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleConfigs;
 import com.everhomes.user.UserContext;
@@ -33,6 +34,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOfficeCubicleAttachments;
 import com.everhomes.server.schema.tables.EhOfficeCubicleCategories;
+import com.everhomes.server.schema.tables.EhOfficeCubicleChargeUsers;
 import com.everhomes.server.schema.tables.EhOfficeCubicleRoom;
 import com.everhomes.server.schema.tables.EhOfficeCubicleStation;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleOrdersDao;
@@ -51,6 +53,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceTypes;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleCategoriesRecord;
+import com.everhomes.server.schema.tables.records.EhOfficeCubicleChargeUsersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleRentOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleRoomRecord;
@@ -206,6 +209,30 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		dao.update(space);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleSpaces.class, space.getId());
 
+	}
+	
+	@Override
+	public void deleteChargeUsers(Long spaceId) {
+	    dbProvider.execute(r -> {
+	    	//删除原来的设置
+	    	getReadWriteContext().delete(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS)
+			.where(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS.SPACE_ID.eq(spaceId));
+		    return null;
+	    });
+	}
+	
+	
+	@Override
+	public void createChargeUsers(OfficeCubicleChargeUser user) {
+		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleChargeUsers.class));
+		user.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		user.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		EhOfficeCubicleChargeUsersRecord record = ConvertHelper.convert(user, EhOfficeCubicleChargeUsersRecord.class);
+		InsertQuery<EhOfficeCubicleChargeUsersRecord> query = context.insertQuery(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleChargeUsers.class, null);
 	}
 
 	@Override

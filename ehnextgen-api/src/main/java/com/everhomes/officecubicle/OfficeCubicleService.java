@@ -108,5 +108,9 @@ public interface OfficeCubicleService {
 
 	GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd);
 
+	GetStationForRoomResponse getStationForRoom(GetStationForRoomCommand cmd);
+
+	GetCubicleForOrderResponse getCubicleForOrder(GetCubicleForOrderCommand cmd);
+
 
 }
