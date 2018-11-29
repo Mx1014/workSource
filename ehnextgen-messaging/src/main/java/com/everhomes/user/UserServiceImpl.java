@@ -7587,28 +7587,17 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             return res ;
         }
         List<UserDTO> userDTOList = this.userProvider.listUserInfoByIdentifierToken(cmd.getNamespaceId(), cmd.getPhones());
-        List<String> userPhones = userDTOList.stream().map(UserDTO::getIdentifierToken).collect(Collectors.toList());
-        for (UserDTO userDTO : userDTOList) {
-            FindUsersByPhonesDTO dto = new FindUsersByPhonesDTO();
-            dto.setPhone(userDTO.getIdentifierToken());
-            dto.setUserDTO(userDTO);
-            if (userDTO.getId() != null) {
-                dto.setResult(TrueOrFalseCode.TRUE.getCode());
-            }else {
-                dto.setResult(TrueOrFalseCode.FALSE.getCode());
-            }
-            if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
-                    || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回
-                    && !TrueOrFalseCode.TRUE.getCode().equals(cmd.getClear()))){
-                res.getDtos().add(dto);
-            }
-        }
         for(String phone : phones){
             FindUsersByPhonesDTO dto = new FindUsersByPhonesDTO() ;
             dto.setPhone(phone);
-            if (!userPhones.contains(phone)) {
-                dto.setResult(TrueOrFalseCode.FALSE.getCode());
+            Byte resultCode = TrueOrFalseCode.FALSE.getCode();
+            for (UserDTO userDTO : userDTOList) {
+                if (phone.equals(userDTO.getIdentifierToken())) {
+                    dto.setUserDTO(userDTO);
+                    resultCode = TrueOrFalseCode.TRUE.getCode();
+                }
             }
+            dto.setResult(resultCode);
             if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
                     || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回
                     && !TrueOrFalseCode.TRUE.getCode().equals(cmd.getClear()))){
