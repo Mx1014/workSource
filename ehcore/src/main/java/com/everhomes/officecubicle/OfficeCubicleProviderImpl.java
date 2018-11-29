@@ -221,6 +221,15 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	    });
 	}
 	
+	@Override
+	public void deleteRefundRule(Long spaceId) {
+	    dbProvider.execute(r -> {
+	    	//删除原来的设置
+	    	getReadWriteContext().delete(Tables.EH_OFFICE_CUBICLE_REFUND_RULE)
+			.where(Tables.EH_OFFICE_CUBICLE_REFUND_RULE.SPACE_ID.eq(spaceId));
+		    return null;
+	    });
+	}
 	
 	@Override
 	public void createChargeUsers(OfficeCubicleChargeUser user) {
@@ -478,6 +487,19 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		return null;
 	}
 
+	@Override
+	public List<OfficeCubicleRefundRule> findRefundRule(Long spaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_REFUND_RULE);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_REFUND_RULE.SPACE_ID.eq(spaceId);
+		step.where(condition);
+		List<OfficeCubicleRefundRule> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_REFUND_RULE.CREATE_TIME.desc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleRefundRule.class);
+		});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
 	/**
 	 * 金地同步数据使用
 	 */

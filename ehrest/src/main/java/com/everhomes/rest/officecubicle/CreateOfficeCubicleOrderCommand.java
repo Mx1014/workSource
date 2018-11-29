@@ -10,12 +10,10 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *空间订单
  *<li> spaceId: 空间 id	</li> 
- * <li>rentCount: 预定工位数量</li>  
  * <li>reserverName: 预订人姓名 </li> 
  * <li>reserveContactToken:  预订人联系方式</li> 
  * <li>reserveEnterpriseId: 预订人公司Id</li> 
  *  <li>reserveEnterpriseName: 预订人公司名称</li> 
- * <li>price</li>
  * <li>rentalOrderNo:资源预约订单号</li>
  * <li>remark：备注</li>
  * <li>ownerId:项目id</li>
@@ -27,23 +25,33 @@ public class CreateOfficeCubicleOrderCommand {
 
 	private Long spaceId;
     
-    private Integer rentCount;
     private String reserverName;
     private String reserveEnterprise;
 	private String reserveContactToken;
 	private String remark;
 	private Long rentalOrderNo;
-	private Byte stationType;
 	private String ownerType;
 	private Long ownerId;
-	private Long stationId;
 	private Byte paymentType;
+	private Byte rentalType;
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 	  
+
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
+	}
+
 
 
 	public Byte getPaymentType() {
@@ -114,31 +122,6 @@ public class CreateOfficeCubicleOrderCommand {
 	}
 
 
-
-	public Integer getRentCount() {
-		return rentCount;
-	}
-
-
-
-	public void setRentCount(Integer rentCount) {
-		this.rentCount = rentCount;
-	}
-
-
-
-	public Byte getStationType() {
-		return stationType;
-	}
-
-
-
-	public void setStationType(Byte stationType) {
-		this.stationType = stationType;
-	}
-
-
-
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -160,18 +143,5 @@ public class CreateOfficeCubicleOrderCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-
-
-
-	public Long getStationId() {
-		return stationId;
-	}
-
-
-
-	public void setStationId(Long stationId) {
-		this.stationId = stationId;
-	}
-
 	
 }

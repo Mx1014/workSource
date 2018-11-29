@@ -112,5 +112,7 @@ public interface OfficeCubicleService {
 
 	GetCubicleForOrderResponse getCubicleForOrder(GetCubicleForOrderCommand cmd);
 
+	void updateOfficeCubicleRefundRule(UpdateOfficeCubicleRefundRuleCommand cmd);
+
 
 }

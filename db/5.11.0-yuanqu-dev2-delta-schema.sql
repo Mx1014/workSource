@@ -139,9 +139,7 @@ CREATE TABLE `eh_office_cubicle_refund_tip` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE eh_office_cubicle_spaces ADD COLUMN space_cover_uri VARCHAR(1024) COMMENT '封面URI';
-ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_uri VARCHAR(1024) COMMENT '短租封面URI';
-ALTER TABLE eh_office_cubicle_spaces ADD COLUMN station_uri VARCHAR(1024) COMMENT '开放式工位URI';
+
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN open_flag TINYINT COMMENT '是否开启空间，1是，0否';
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_nums VARCHAR(32) COMMENT '短租工位数量';
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN long_rent_price DECIMAL(10,2) COMMENT '长租工位价格';

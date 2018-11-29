@@ -42,6 +42,7 @@ import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rentalv2.RentalCommonServiceImpl;
 import com.everhomes.rentalv2.RentalDefaultRule;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rentalv2.RentalOrder;
@@ -49,6 +50,8 @@ import com.everhomes.rentalv2.RentalOrderHandler;
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.Rentalv2PriceRule;
 import com.everhomes.rentalv2.Rentalv2PriceRuleProvider;
+import com.everhomes.rentalv2.Rentalv2Provider;
+import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rentalv2.job.RentalMessageJob;
 import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
 import com.everhomes.rest.acl.ProjectDTO;
@@ -90,6 +93,8 @@ import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResp
 import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
+import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoCommand;
+import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoResponse;
 import com.everhomes.rest.rentalv2.PriceRuleType;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
@@ -242,6 +247,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	private CommunityService communityService;
 	@Autowired
 	private OnlinePayService onlinePayService;
+	@Autowired
+	private Rentalv2Service rentalv2Service;
+	@Autowired
+	private Rentalv2Provider rentalv2Provider;
+	@Autowired
+	private RentalCommonServiceImpl rentalCommonService;
 	private Integer getNamespaceId(Integer namespaceId){
 		if(namespaceId!=null){
 			return namespaceId;
@@ -380,12 +391,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//空间管理权限
 		}
-		if (null == cmd.getManagerUid())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of Categories error: null ");
-		if (null == cmd.getCategories())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of Categories error: null ");
+//		if (null == cmd.getManagerUid())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of Categories error: null ");
+//		if (null == cmd.getCategories())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of Categories error: null ");
 		if (null == cmd.getCityName())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of city error: null id or name");
@@ -887,6 +898,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		return flowService.createFlowCase(cmd21);
 	}
 
+
 	private void checkAddOrderCmd(AddSpaceOrderCommand cmd) {
 		if (null == cmd.getOrderType())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -986,6 +998,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
 
+	@Override
+	public void updateOfficeCubicleRefundRule(UpdateOfficeCubicleRefundRuleCommand cmd){
+		List<OfficeCubicleRefundRule> refundRule = officeCubicleProvider.findRefundRule(cmd.getSpaceId());
+		if (refundRule != null){
+			officeCubicleProvider.deleteRefundRule(cmd.getSpaceId());
+		}
+		
+	}
+	
 	@Override
 	public List<OfficeOrderDTO> getUserOrders() {
 		List<OfficeOrderDTO> resp = new ArrayList<OfficeOrderDTO>();
@@ -1522,21 +1543,29 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public CreateOfficeCubicleOrderResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd){
 		OfficeCubicleRentOrder order = ConvertHelper.convert(cmd, OfficeCubicleRentOrder.class);
+		RentalOrder rentalOrder = rentalv2Provider.findRentalBillById(cmd.getRentalOrderNo());
+		order.setUseDetail(rentalOrder.getUseDetail());
+		order.setRentCount(rentalOrder.getRentalCount().longValue());
+		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
+		List<Rentalv2PriceRule> price = rentalv2PriceRuleProvider.listPriceRuleByOwner("station_booking",
+				PriceRuleType.RESOURCE.getCode(), cmd.getSpaceId());
+		order.setPrice(price.get(0).getWorkdayPrice());
+		order.setOrderNo(orderNo);
 		this.dbProvider.execute((TransactionStatus status) -> {
 			officeCubicleProvider.createCubicleRentOrder(order);
 			return null;
 		});
 		List<OfficeCubicleStationRent> stationRent = 
-				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(),null, cmd.getStationType());
+				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(),null, null);
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		Integer rentNums = Integer.valueOf(space.getShortRentNums());
-		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getId()).enter(()-> {
-			if (rentNums<(stationRent.size()+cmd.getRentCount())){
+		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getOrderNo()).enter(()-> {
+			if (rentNums<(stationRent.size()+rentalOrder.getRentalCount().longValue())){
 				
 			} else {
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 				rent.setOrderId(order.getId());
-				for(int i=0;i<= cmd.getRentCount() ;i++){
+				for(int i=0;i<= rentalOrder.getRentalCount().longValue() ;i++){
 					officeCubicleProvider.createCubicleStationRent(rent);
 				}
 			}
@@ -1619,9 +1648,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		preDto.setExpiredIntervalTime(expiredIntervalTime);
 		preDto.setOrderId(order.getId());
 		resp.setPreDTO(preDto);
+		AddRentalOrderUsingInfoCommand rentalCommand = new AddRentalOrderUsingInfoCommand(); 
+		rentalCommand.setRentalBillId(cmd.getRentalOrderNo());
+		rentalCommand.setRentalType(cmd.getRentalType());
+		AddRentalOrderUsingInfoResponse rentalResponse = rentalv2Service.addRentalOrderUsingInfo(rentalCommand);
+		order.setRentalOrderNo(rentalResponse.getBillId());
 		order.setBizOrderNo(response.getBizOrderNum());
-		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
-		order.setOrderNo(orderNo);
 		officeCubicleProvider.updateCubicleRentOrder(order);
 		return resp;
 		
@@ -1698,6 +1730,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			order.setOperatorUid(UserContext.currentUserId());
 			officeCubicleProvider.updateCubicleRentOrder(order);
+			rentalCommonService.rentalOrderSuccess(order.getRentalOrderNo());
 			int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
 			List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
 			smsProvider.addToTupleList(variables, "createTime", order.getCreateTime());
@@ -1708,6 +1741,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			order.setOperatorUid(UserContext.currentUserId());
 			officeCubicleProvider.updateCubicleRentOrder(order);
+			rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
 			int templateId = SmsTemplateCode.OFFICE_CUBICLE_REFUND;
 			List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
 			smsProvider.addToTupleList(variables, "orderId", order.getId());
@@ -1738,7 +1772,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
                     templateId, templateLocale, variables);
         }
     }
-    
+
 	private CreatePurchaseOrderCommand convertToGorderCommand(CreateOrderCommand cmd){
 		CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
 		//PaymentParamsDTO转为Map
