@@ -86,6 +86,7 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
   `use_detail` VARCHAR(255),
+  `refund_strategy` TINYINT COMMENT '1-custom, 2-full',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -112,7 +113,31 @@ CREATE TABLE `eh_office_cubicle_charge_users` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_office_cubicle_refund_rule` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL COMMENT 'community 园区或者其他类型',
+  `owner_id` BIGINT NOT NULL COMMENT '园区id或者其他id',
+  `space_id` BIGINT,
+  `refund_strategy` TINYINT,
+  `duration_type` TINYINT COMMENT '1: 时长内, 2: 时长外',
+  `duration_unit` TINYINT COMMENT '时长单位，比如 天，小时',
+  `duration` DOUBLE COMMENT '时长',
+  `factor` DOUBLE COMMENT '价格系数',
+  `create_time` DATETIME,
+  `creator_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_office_cubicle_refund_tip` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL COMMENT 'community 园区或者其他类型',
+  `owner_id` BIGINT NOT NULL COMMENT '园区id或者其他id',
+  `space_id` BIGINT,
+  `refund_tip` VARCHAR(255) COMMENT '退款提示',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN space_cover_uri VARCHAR(1024) COMMENT '封面URI';
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_uri VARCHAR(1024) COMMENT '短租封面URI';
