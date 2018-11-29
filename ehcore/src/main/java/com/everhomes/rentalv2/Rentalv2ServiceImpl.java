@@ -3019,7 +3019,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			messageMap.put("orderId",order.getId());
 			messageMap.put("resourceType",order.getResourceType());
 			scheduleProvider.scheduleSimpleJob(
-					queueName + order.getId(),
+					"RentalNearStartMessageJob" + order.getId(),
 					"RentalNearStartMessageJob" + order.getId(),
 					new java.util.Date(order.getReminderTime().getTime()),
 					RentalNearStartMessageJob.class,
@@ -3032,7 +3032,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			messageMap.put("orderId",order.getId());
 			messageMap.put("resourceType",order.getResourceType());
 			scheduleProvider.scheduleSimpleJob(
-					queueName + order.getId(),
+					"RentalNearEndMessageJob" + order.getId(),
 					"RentalNearEndMessageJob" + order.getId(),
 					new java.util.Date(order.getReminderEndTime().getTime()),
 					RentalNearEndMessageJob.class,
