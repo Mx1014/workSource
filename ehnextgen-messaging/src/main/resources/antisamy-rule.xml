@@ -13,7 +13,7 @@ http://www.w3.org/TR/html401/struct/global.html
     <directives>
         <directive name="omitXmlDeclaration" value="true"/>
         <directive name="omitDoctypeDeclaration" value="true"/>
-        <directive name="maxInputSize" value="200000"/>
+        <directive name="maxInputSize" value="2000000"/>
         <directive name="useXHTML" value="true"/>
         <directive name="formatOutput" value="false"/>
         <directive name="preserveSpace" value="true"/>
@@ -1042,8 +1042,1179 @@ http://www.w3.org/TR/html401/struct/global.html
     <!--  CSS validation processing rules  -->
 
     <css-rules>
+        <!-- CSS property white list -->
+        <property name="@keyframes">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
 
-        <property name="azimuth" description="This property is most likely to be implemented by mixing the same signal into different channels at differing volumes.">
+        <property name="animation">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="animation-name">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="animation-duration">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="animation-timing-function">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="animation-delay">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="animation-iteration-count">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="animation-direction">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="animation-play-state">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="animation-fill-modebackground">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="background-attachment">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="background-color">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="background-image">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="background-position">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="background-repeat">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="background">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="background-clip">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="background-origin">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="background-sizeborder">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-bottom">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-bottom-color">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-bottom-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-bottom-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-color">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-left">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-left-color">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-left-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-left-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-right">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-right-color">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-right-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-right-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-top">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-top-color">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-top-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-top-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="outline">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="outline-color">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="outline-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="outline-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-bottom-left-radius">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-bottom-right-radius">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-image">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-image-outset">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-image-repeat">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-image-slice">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-image-source">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-image-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-radius">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-top-left-radius">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-top-right-radius">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-decoration-break">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-shadow">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="overflow-x">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="overflow-y">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="overflow-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="rotation">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="rotation-point">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="color-profile">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="opacity">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="rendering-intent">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="bookmark-label">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="bookmark-level">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="bookmark-target">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="float-offset">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="hyphenate-after">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="hyphenate-before">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="hyphenate-character">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="hyphenate-lines">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="hyphenate-resource">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="hyphens">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="image-resolution">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="marks">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="string-setheight">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="max-height">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="max-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="min-height">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="min-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-align">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-direction">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-flex">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-flex-group">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-lines">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-ordinal-group">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-orient">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-packfont">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="font-family">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="font-size">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="font-size-adjust">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="font-stretch">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="font-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="font-variant">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="font-weightcontent">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="counter-increment">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="counter-reset">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="quotes">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="crop">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="move-to">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="page-policygrid-columns">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="grid-rowstarget">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="target-name">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="target-new">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="target-positionlist-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="list-style-image">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="list-style-position">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="list-style-type">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="marker-offsetmargin">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="margin-bottom">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="margin-left">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="margin-right">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="margin-topmarquee-direction">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="marquee-play-count">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="marquee-speed">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="marquee-stylecolumn-count">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="column-fill">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="column-gap">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="column-rule">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="column-rule-color">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="column-rule-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="column-rule-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="column-span">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="column-width">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="columnspadding">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="padding-bottom">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="padding-left">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="padding-right">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="padding-topfit">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="fit-position">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="image-orientation">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="page">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="sizebottom">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="clear">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="clip">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="cursor">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="display">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="float">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="left">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="overflow">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="position">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="right">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="top">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="vertical-align">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="visibility">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="z-indexorphans">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="page-break-after">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="page-break-before">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="page-break-inside">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="widowsborder-collapse">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="border-spacing">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="caption-side">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="empty-cells">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="table-layoutcolor">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="direction">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="letter-spacing">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="line-height">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-align">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-decoration">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-indent">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-shadow">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-transform">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="unicode-bidi">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="white-space">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="word-spacing">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="hanging-punctuation">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="punctuation-trim">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-align-last">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-emphasis">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-justify">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-outline">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-overflow">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-shadow">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="text-wrap">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="word-break">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="word-wraptransform">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="transform-origin">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="transform-style">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="perspective">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="perspective-origin">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="backface-visibilitytransition">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="transition-property">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="transition-duration">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="transition-timing-function">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="transition-delayappearance">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="box-sizing">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="icon">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="nav-down">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="nav-index">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="nav-left">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="nav-right">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="nav-up">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="outline-offset">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+        <property name="resize">
+            <regexp-list>
+                <regexp name="anything"/>
+            </regexp-list>
+        </property>
+
+
+        <!--<property name="azimuth" description="This property is most likely to be implemented by mixing the same signal into different channels at differing volumes.">
             <literal-list>
                 <literal value="left-side"/>
                 <literal value="far-left"/>
@@ -1135,7 +2306,7 @@ http://www.w3.org/TR/html401/struct/global.html
             </literal-list>
         </property>
 
-        <!-- Begin simple properties -->
+        &lt;!&ndash; Begin simple properties &ndash;&gt;
         <property name="border-collapse" default="collapse" description="">
             <category-list>
                 <category value="visual"/>
@@ -1755,12 +2926,12 @@ http://www.w3.org/TR/html401/struct/global.html
             </category-list>
             <literal-list>
                 <literal value="static"/>
-                <!-- possible to perform phishing attacks with the following -->
-                <!--
+                &lt;!&ndash; possible to perform phishing attacks with the following &ndash;&gt;
+                &lt;!&ndash;
                 <literal value="relative"/>
                 <literal value="absolute"/>
                 <literal value="fixed"/>
-                 -->
+                 &ndash;&gt;
                 <literal value="inherit"/>
             </literal-list>
         </property>
@@ -2029,9 +3200,9 @@ http://www.w3.org/TR/html401/struct/global.html
             </regexp-list>
         </property>
 
-        <!-- end simple properties -->
+        &lt;!&ndash; end simple properties &ndash;&gt;
 
-        <!-- begin medium properties -->
+        &lt;!&ndash; begin medium properties &ndash;&gt;
         <property name="border-style" description="">
             <category-list>
                 <category value="visual"/>
@@ -2288,9 +3459,9 @@ http://www.w3.org/TR/html401/struct/global.html
                 <shorthand name="padding"/>
             </shorthand-list>
         </property>
-        <!-- end medium properties -->
+        &lt;!&ndash; end medium properties &ndash;&gt;
 
-        <!-- begin hard properties -->
+        &lt;!&ndash; begin hard properties &ndash;&gt;
         <property name="border" description="">
             <category-list>
                 <category value="visual"/>
@@ -2458,8 +3629,8 @@ http://www.w3.org/TR/html401/struct/global.html
                 <literal value="inherit"/>
             </literal-list>
         </property>
-        <!-- end hard properties -->
-        <!--  begin manual properties -->
+        &lt;!&ndash; end hard properties &ndash;&gt;
+        &lt;!&ndash;  begin manual properties &ndash;&gt;
         <property name="border-spacing" default="0" description="The lengths specify the distance that separates adjacent cell borders. If one length is specified, it gives both the horizontal and vertical spacing. If two are specified, the first gives the horizontal spacing and the second the vertical spacing. Lengths may not be negative.">
             <category-list>
                 <category value="visual"/>
@@ -2582,7 +3753,7 @@ http://www.w3.org/TR/html401/struct/global.html
             <category-list>
                 <category value="visual"/>
             </category-list>
-            <!-- allowing only generic font families -->
+            &lt;!&ndash; allowing only generic font families &ndash;&gt;
             <literal-list>
                 <literal value="serif"/>
                 <literal value="arial"/>
@@ -2632,7 +3803,7 @@ http://www.w3.org/TR/html401/struct/global.html
             <category-list>
                 <category value="visual"/>
             </category-list>
-            <!--  For safety, ignoring string alignment which can be used to line table cells on characters -->
+            &lt;!&ndash;  For safety, ignoring string alignment which can be used to line table cells on characters &ndash;&gt;
             <literal-list>
                 <literal value="left"/>
                 <literal value="right"/>
@@ -2645,14 +3816,14 @@ http://www.w3.org/TR/html401/struct/global.html
             <category-list>
                 <category value="aural"/>
             </category-list>
-            <!--  Allowing only generic voice family -->
+            &lt;!&ndash;  Allowing only generic voice family &ndash;&gt;
             <literal-list>
                 <literal value="male"/>
                 <literal value="female"/>
                 <literal value="child"/>
                 <literal value="inherit"/>
             </literal-list>
-        </property>
+        </property>-->
         <!--  end manual properties -->
     </css-rules>
     <allowed-empty-tags>
