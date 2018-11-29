@@ -7713,8 +7713,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             if (namespace != null) {
                 //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
                 //所以这里加个判断，是新增还是更新.
-                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(
-                        userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                UserIdentifier existsIdentifier = this.userProvider.findIdentifierById(userIdentifier.getId());
                 if (existsIdentifier != null) {
                     if (existsIdentifier.getUpdateVersion() < userIdentifier.getUpdateVersion()) {
                         this.userProvider.updateIdentifierFromUnite(userIdentifier);
