@@ -35,10 +35,8 @@ public class GeneralFormFieldsConfigProviderImpl implements GeneralFormFieldsCon
         long id = this.sequenceProvider.getNextSequence(NameMapper
                         .getSequenceDomainFromTablePojo(EhGeneralFormFieldsConfig.class));
         formFieldsConfig.setId(id);
-        User user = UserContext.current().getUser();
-        formFieldsConfig.setCreatorUid(user.getId());
-        Long currentTime = DateHelper.currentGMTTime().getTime();
-        formFieldsConfig.setCreateTime(new Timestamp(currentTime));
+        formFieldsConfig.setCreatorUid(UserContext.current().getUser().getId());
+        formFieldsConfig.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         rwDao().insert(formFieldsConfig);
         return id;
@@ -46,10 +44,8 @@ public class GeneralFormFieldsConfigProviderImpl implements GeneralFormFieldsCon
 
     @Override
     public void updateFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig){
-        User user = UserContext.current().getUser();
-        formFieldsConfig.setUpdaterUid(user.getId());
-        Long currentTime = DateHelper.currentGMTTime().getTime();
-        formFieldsConfig.setUpdateTime(new Timestamp(currentTime));
+        formFieldsConfig.setUpdaterUid(UserContext.current().getUser().getId());
+        formFieldsConfig.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         rwDao().update(formFieldsConfig);
     }
 
