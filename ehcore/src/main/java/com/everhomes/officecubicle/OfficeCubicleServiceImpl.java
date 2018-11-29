@@ -379,7 +379,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			});	
 		}
 		
-		dto.setOpenFlag(other.getOpenFlag());
 		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
 		dto.setRanges(ranges.stream().map(r->ConvertHelper.convert(r,OfficeRangeDTO.class)).collect(Collectors.toList()));
 		
