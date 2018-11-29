@@ -303,6 +303,8 @@ public interface PrivilegeConstants {
     
     long CONTRACT_PREVIEW = 21215L;//打印预览 
     long CONTRACT_PRINT = 21216L;//打印
+    long CONTRACT_COPY = 21224L;//合同复制
+    
 
 
     long PAYMENT_CONTRACT_CREATE = 21215L;//新增付款合同
