@@ -233,7 +233,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("deleteDoorAccess")
     @RestReturn(value=String.class)
     public RestResponse deleteDoorAccess(@Valid AclinkDeleteByIdCommand cmd) {
-        doorAccessService.deleteDoorAccess(cmd.getId());
+        doorAccessService.deleteDoorAccess(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1814,5 +1814,49 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }    
+    }
+
+    /**
+     * <b>URL: /admin/aclink/updateServiceHotline</b>
+     * <p>更新服务热线</p>
+     * @return
+     */
+    @RequestMapping("updateServiceHotline")
+    @RestReturn(value=String.class)
+    public RestResponse updateServiceHotline(@Valid UpdateServiceHotlineCommand cmd) {
+        RestResponse response = new RestResponse();
+        doorAccessService.updateServiceHotline(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/queryServiceHotline</b>
+     * <p>查询服务热线</p>
+     * @return
+     */
+    @RequestMapping("queryServiceHotline")
+    @RestReturn(value = QueryServiceHotlineResponse.class)
+    public RestResponse queryServiceHotline(@Valid QueryServiceHotlineCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.queryServiceHotline(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/sendMessageTest</b>
+     * <p>访客来访消息提示</p>
+     * @return
+     */
+    @RequestMapping("sendMessageTest")
+    @RestReturn(value = String.class)
+    public RestResponse sendMessageTest(@Valid SendMessageTestCommand cmd) {
+        doorAccessService.sendMessageToAuthCreator(cmd.getAuthId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

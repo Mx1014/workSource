@@ -11,6 +11,7 @@ import com.everhomes.rest.aclink.DoorAccessGroupRelDTO;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
 import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
 import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
+import com.everhomes.rest.admin.NamespaceDTO;
 
 public interface DoorAccessProvider {
 
@@ -51,6 +52,8 @@ public interface DoorAccessProvider {
     List<ActiveDoorByPlaceDTO> queryDoorAccessByPlaceNew (DoorStatisticEhCommand cmd);
     //门禁v3.0.6 左邻后台 add by liqingyan
     List<DoorAccessNewDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback);
+
+    List<NamespaceDTO> listDoorAccessNamespaces();
 
     DoorAccess findDoorAccessById(Long id);
 

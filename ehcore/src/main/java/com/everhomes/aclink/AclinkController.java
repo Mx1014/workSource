@@ -1028,4 +1028,17 @@ public class AclinkController extends ControllerBase {
      response.setErrorDescription("OK");
      return response;
  }
+    /**
+     * <b>URL: /aclink/queryServiceHotline</b>
+     * <p>查询服务热线</p>
+     * @return
+     */
+    @RequestMapping("queryServiceHotline")
+    @RestReturn(value = QueryServiceHotlineResponse.class)
+    public RestResponse queryServiceHotline(@Valid QueryServiceHotlineCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.queryServiceHotline(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
