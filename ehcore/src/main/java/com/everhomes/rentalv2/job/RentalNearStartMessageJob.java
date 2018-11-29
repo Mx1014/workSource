@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 public class RentalNearStartMessageJob extends QuartzJobBean {
-    private static final Logger LOGGER = LoggerFactory.getLogger(QuartzJobBean.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RentalNearStartMessageJob.class);
     @Autowired
     private RentalCommonServiceImpl rentalCommonService;
     @Autowired
@@ -22,12 +22,13 @@ public class RentalNearStartMessageJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        LOGGER.info("start RentalNearStartMessageJob ");
         try {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
-            String orderId = jobMap.getString("orderId");
+            Long orderId = jobMap.getLong("orderId");
             String resourceType = jobMap.getString("resourceType");
             RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(resourceType);
-            RentalOrder order = rentalv2Provider.findRentalBillById(Long.valueOf(orderId));
+            RentalOrder order = rentalv2Provider.findRentalBillById(orderId);
             messageHandler.orderNearStartSendMessage(order);
 
         }catch (Exception e) {
