@@ -2209,7 +2209,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 								pricePackage.setInitiatePrice(priceClassification.getInitiatePrice());
 								break;
 							}
-					}
+					}else{
+                        pricePackage.setPrice(pricePackage.getPrice());
+                        pricePackage.setInitiatePrice(pricePackage.getInitiatePrice());
+                    }
 				}
 				rentalCell.setPrice(pricePackage.getPrice());
 				//设置起步后价格
