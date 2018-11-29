@@ -52,7 +52,9 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
 			"requirementMinArea":{"type":"double"},
 			"requirementMaxArea":{"type":"double"},
 			"trackerName":{"type":"string", "index":"not_analyzed"},
-			"entryInfo":{"type":"long"}
+			"entryInfo":{"type":"long"},
+			"updateTime":{"type":"date"}
+
 		}
 	}
 }
