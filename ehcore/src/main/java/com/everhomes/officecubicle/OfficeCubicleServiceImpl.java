@@ -419,10 +419,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd.getStationAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)3);
 				});
-			cmd.getCategories().forEach((dto) -> {
-				this.saveCategory(dto, space.getId(),getNamespaceId(cmd.getNamespaceId()));
-
-			});
+//			cmd.getCategories().forEach((dto) -> {
+//				this.saveCategory(dto, space.getId(),getNamespaceId(cmd.getNamespaceId()));
+//
+//			});
 
 			cmd.getRanges().forEach(dto->saveRanges(dto,space.getId(),getNamespaceId(cmd.getNamespaceId())));
 
@@ -442,22 +442,22 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//空间管理权限
 		}
-		if (null == cmd.getManagerUid())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of Categories error: null ");
-		if (null == cmd.getCategories())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of Categories error: null ");
-		if (null == cmd.getId())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of ID error: null ");
-		if (null == cmd.getCityName())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of city error: null id or name");
-		OfficeCubicleSpace oldSpace = this.officeCubicleProvider.getSpaceById(cmd.getId());
-		if (null == oldSpace)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of space id error: no space found");
+//		if (null == cmd.getManagerUid())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of Categories error: null ");
+//		if (null == cmd.getCategories())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of Categories error: null ");
+//		if (null == cmd.getId())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of ID error: null ");
+//		if (null == cmd.getCityName())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of city error: null id or name");
+//		OfficeCubicleSpace oldSpace = this.officeCubicleProvider.getSpaceById(cmd.getId());
+//		if (null == oldSpace)
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of space id error: no space found");
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleSpace space = ConvertHelper.convert(cmd, OfficeCubicleSpace.class);
@@ -492,12 +492,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					this.saveAttachment(dto, space.getId(),(byte)3);
 				});
 			}
-			this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
-			if (null != cmd.getCategories()) {
-				cmd.getCategories().forEach((dto) -> {
-					this.saveCategory(dto, space.getId(), getNamespaceId(cmd.getNamespaceId()));
-				});
-			}
+//			this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
+//			if (null != cmd.getCategories()) {
+//				cmd.getCategories().forEach((dto) -> {
+//					this.saveCategory(dto, space.getId(), getNamespaceId(cmd.getNamespaceId()));
+//				});
+//			}
 
 			this.officeCubicleRangeProvider.deleteRangesBySpaceId(space.getId());
 			if (null != cmd.getCategories()) {
