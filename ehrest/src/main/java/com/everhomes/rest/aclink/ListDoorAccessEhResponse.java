@@ -2,6 +2,7 @@
 package com.everhomes.rest.aclink;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -17,6 +18,17 @@ public class ListDoorAccessEhResponse {
 
     @ItemType(DoorAccessNewDTO.class)
     private List<DoorAccessNewDTO> doors;
+
+    @ItemType(NamespaceDTO.class)
+    private List<NamespaceDTO> namespaces;
+
+    public List<NamespaceDTO> getNamespaces() {
+        return namespaces;
+    }
+
+    public void setNamespaces(List<NamespaceDTO> namespaces) {
+        this.namespaces = namespaces;
+    }
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;

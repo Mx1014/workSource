@@ -253,6 +253,8 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     private String syncErrorMsg;
 
+    private Timestamp updateTime;
+
     @ItemType(OrganizationContactDTO.class)
     private List<OrganizationContactDTO> enterpriseAdmins;
     @ItemType(CustomerEntryInfoDTO.class)
@@ -1593,5 +1595,12 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 	public int compareTo(EnterpriseCustomerDTO o) {
 		return o.getId() - this.getId() >= 0 ? 1 : -1;
 	}
-    
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
+    }
 }

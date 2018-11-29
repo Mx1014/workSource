@@ -258,11 +258,20 @@ public class RemindServiceImpl implements RemindService  {
                 //给修改的category里面新增的共享人发信息
                 if(!CollectionUtils.isEmpty(cmd.getShareToMembers())){
                 	List<Remind> reminds = remindProvider.findRemindsByCategoryId(existRemindCategory.getId());
+                	Map<Long,List<RemindShare>> remindsShares = new HashMap<>();
                 	if(CollectionUtils.isEmpty(reminds))
                 		return null;
                 	for(ShareMemberDTO shareToMember : cmd.getShareToMembers()){
+                		//判断是否在旧的分类共享人
                 		if(!checkCategoryShareExists(categoryShares, shareToMember)){
                 			for(Remind remind : reminds){
+                				List<RemindShare> shares = findRemindShare(remindsShares, remind.getId());
+                				//判断是否在手选的共享人中
+                				RemindShare share = findShareRemindInShares(shares, shareToMember);
+                				if(share != null){
+                					remindProvider.deleteRemindShare(share);
+                					continue;
+                				}
                 				if(remind.getStatus().equals(RemindStatus.DONE.getCode())){
                 					continue;
                 				}
@@ -279,8 +288,31 @@ public class RemindServiceImpl implements RemindService  {
         }
         return Long.valueOf(0);
     }
+ 
+	private RemindShare findShareRemindInShares(List<RemindShare> shares, ShareMemberDTO shareToMember) {
+		if (CollectionUtils.isEmpty(shares)) {
+            return null;
+        }
+    	for(RemindShare share: shares){
+    		if(share.getSharedSourceType().equals(shareToMember.getSourceType()) && share.getSharedSourceId().equals(shareToMember.getSourceId()))
+    			return share;
+    	}
+		return null;
+	}
 
-    private boolean checkCategoryShareExists(List<RemindCategoryDefaultShare> categoryShares,
+	private List<RemindShare> findRemindShare(Map<Long, List<RemindShare>> remindsShares, Long remindId) {
+		List<RemindShare> result = remindsShares.get(remindId);
+		if(null == result){
+			result = remindProvider.findShareMemberDetailsByRemindId(remindId);
+			if(result == null){
+				result = new ArrayList<>();
+			}
+			remindsShares.put(remindId, result);
+		}
+		return result;
+	}
+
+	private boolean checkCategoryShareExists(List<RemindCategoryDefaultShare> categoryShares,
 			ShareMemberDTO shareToMember) {
     	if (CollectionUtils.isEmpty(categoryShares)) {
             return false;

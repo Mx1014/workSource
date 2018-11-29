@@ -23,6 +23,9 @@ import javax.validation.constraints.NotNull;
  * <li>validEndMs: 有效期终止时间</li>
  * <li>totalAuthAmount: 有效开门次数</li>
  * <li>headImgUri:[String ]头像照片地址</li>
+ * <li>confirm：已有临时授权信息时，1 确认覆盖</li>
+ * <li>notice: 访客来访提示 1 需提示 null 不提示（只在app端）</li>
+ * <li>qrType: 二维码类型 0 动态 1 静态 null默认（只在pc端）</li>
  * </ul>
  *
  */
@@ -44,6 +47,24 @@ public class CreateTempAuthCommand {
 	private Integer totalAuthAmount;
     private String headImgUri;
     private Byte confirm;
+    private Byte notice;
+    private Byte qrType;
+
+    public Byte getQrType() {
+        return qrType;
+    }
+
+    public void setQrType(Byte qrType) {
+        this.qrType = qrType;
+    }
+
+    public Byte getNotice() {
+        return notice;
+    }
+
+    public void setNotice(Byte notice) {
+        this.notice = notice;
+    }
 
     public Byte getConfirm() {
         return confirm;

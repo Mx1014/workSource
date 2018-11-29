@@ -267,6 +267,13 @@ update eh_service_module_apps set instance_config = replace (instance_config, '#
 
 update eh_launch_pad_items set action_data = replace (action_data, '#/home#sign_suffix', concat('?namespaceId=', namespace_id, '#/home#sign_suffix')) where action_data like '%/cloud-print/build/index.html%' and  action_data not like '%?namespaceId=%';
 
+-- AUTHOR: 杨崇鑫
+-- REMARK: 缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费。 给智谷汇的权限
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (21225, 21200, 21225, '保证金一次性产生一笔费用');
+-- AUTHOR: 杨崇鑫
+-- REMARK: 缺陷 #42424 只是临时开给智谷汇这个域空间使用
+set @id=(select ifnull((SELECT max(id) from eh_service_module_include_functions),1));
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `module_id`, `community_id`, `function_id`) VALUES (@id:= @id +1, 999945, 21200, NULL, 21225);
 
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
@@ -276,6 +283,12 @@ update eh_launch_pad_items set action_data = replace (action_data, '#/home#sign_
 -- AUTHOR:
 -- REMARK:
 
+-- AUTHOR:黄明波
+-- REMARK:添加打印机域空间id
+update eh_siyin_print_printers set namespace_id = 2 where reader_name = 'TC101154727022';
+update eh_siyin_print_printers set namespace_id = 999969 where reader_name = 'TC101154727294';
+update eh_siyin_print_printers set namespace_id = 11 where reader_name = 'TC101157736913';
+update eh_siyin_print_printers set namespace_id = 999981 where reader_name = 'TC100887870538';
 
 
 
@@ -334,11 +347,16 @@ VALUES ('zhenzhihui.redirect.url', 'http://120.132.117.22:8016/ZHYQ/restservices
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guanzhouyuekongjian
 -- DESCRIPTION: 此SECTION只在广州越空间-999930执行的脚本
+
+-- AUTHOR: 黄明波
+-- REMARK: 商品对接
+update eh_siyin_print_printers set namespace_id = 999930 ;
+
 -- --------------------- SECTION END guanzhouyuekongjian -------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
--- --------------------- SECTION END ruianxintiandi ------------------------------------------
+
 -- AUTHOR: st.zheng 20181127
 -- REMARK: 会员等级
 SET @id = (SELECT IFNULL(MIN(id),0) from `eh_vip_priority`);
@@ -348,6 +366,14 @@ INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priorit
 VALUES (@id := @id + 1,999929,2,'金卡',20 );
 INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
 VALUES (@id := @id + 1,999929,3,'白金卡',30 );
+
+-- AUTHOR: 黄明波
+-- REMARK: 商品对接
+update eh_siyin_print_printers set namespace_id = 999929 ;
+
+
+-- --------------------- SECTION END ruianxintiandi ------------------------------------------
+
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本

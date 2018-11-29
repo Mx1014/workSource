@@ -2813,7 +2813,10 @@ public class AssetProviderImpl implements AssetProvider {
                 .map(r -> {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    //缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
+                    String buildingName = r.getValue(t.BUILDING_NAME) != null ? r.getValue(t.BUILDING_NAME) : "";
+                    String apartmentName = r.getValue(t.APARTMENT_NAME) != null ? r.getValue(t.APARTMENT_NAME) : "";
+                    dto.setPropertyIdentifier(buildingName + apartmentName);
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
@@ -5265,10 +5268,14 @@ public class AssetProviderImpl implements AssetProvider {
         //只要关联了合同（包括草稿合同）就不能删除标准
         //看是否关联了合同
         EhContractChargingItems t = Tables.EH_CONTRACT_CHARGING_ITEMS.as("t");
+        EhContracts contracts = Tables.EH_CONTRACTS.as("contracts");
         List<Long> fetch1 = context.select(t.CONTRACT_ID)
               .from(t)
+              .leftOuterJoin(contracts)
+              .on(t.CONTRACT_ID.eq(contracts.ID))
               .where(t.NAMESPACE_ID.eq(namespaceId))
               .and(t.CHARGING_STANDARD_ID.eq(chargingStandardId))
+              .and(contracts.STATUS.ne((byte)0)) //修复缺陷 #43425 【缴费管理】新增收费项计算规则，签草稿合同关联该规则，删掉合同，计算规则删不掉
               .fetch(t.CONTRACT_ID);
         if(fetch1.size()>0){
         	return true;

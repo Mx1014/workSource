@@ -6345,7 +6345,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		List<IndexDTO> indexDtos = launchPadService.listIndexDtos(namespaceId, userId);
 
 		resp.setIndexDtos(indexDtos);
-
+		
+		// 客户端地址模式配置, add by momoubin,18/11/09
+		resp.setClientAddressMode(this.configurationProvider.getIntValue(namespaceId, ConfigConstants.CLIENT_ADDRESS_MODE, 0));
+		
         return resp;
     }
 
@@ -7583,23 +7586,28 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             res.setErrorMsg("phones is null");
             return res ;
         }
+        List<UserDTO> userDTOList = this.userProvider.listUserInfoByIdentifierToken(cmd.getNamespaceId(), cmd.getPhones());
+        List<String> userPhones = userDTOList.stream().map(UserDTO::getIdentifierToken).collect(Collectors.toList());
+        for (UserDTO userDTO : userDTOList) {
+            FindUsersByPhonesDTO dto = new FindUsersByPhonesDTO();
+            dto.setPhone(userDTO.getIdentifierToken());
+            dto.setUserDTO(userDTO);
+            if (userDTO.getId() != null) {
+                dto.setResult(TrueOrFalseCode.TRUE.getCode());
+            }else {
+                dto.setResult(TrueOrFalseCode.FALSE.getCode());
+            }
+            if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
+                    || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回
+                    && !TrueOrFalseCode.TRUE.getCode().equals(cmd.getClear()))){
+                res.getDtos().add(dto);
+            }
+        }
         for(String phone : phones){
             FindUsersByPhonesDTO dto = new FindUsersByPhonesDTO() ;
             dto.setPhone(phone);
-            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
-            if (userIdentifier != null) {
-                User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-                if (user != null) {
-                    user.setIdentifierToken(userIdentifier.getIdentifierToken());
-                    UserDTO userDTO = ConvertHelper.convert(user, UserDTO.class);
-                    //查询有结果，保存
-                    dto.setUserDTO(userDTO);
-                    dto.setResult(TrueOrFalseCode.TRUE.getCode());
-                }else  {
-                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
-                }
-            } else if(TrueOrFalseCode.FALSE.getCode().equals(cmd.getClear())){//若是不消除查询失败的数据才返回这些
-                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
+            if (!userPhones.contains(phone)) {
+                dto.setResult(TrueOrFalseCode.FALSE.getCode());
             }
             if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
                     || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回

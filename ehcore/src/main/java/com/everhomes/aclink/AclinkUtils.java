@@ -141,7 +141,7 @@ public class AclinkUtils {
     
     public static boolean isZuolinDevice(DoorAccess doorAccess) {
         DoorAccessType dt = DoorAccessType.fromCode(doorAccess.getDoorType());
-        if(dt == DoorAccessType.ACLINK_ZL_GROUP || dt == DoorAccessType.ZLACLINK_WIFI || dt == DoorAccessType.ZLACLINK_NOWIFI || dt == DoorAccessType.ACLINK_BUS) {
+        if(dt == DoorAccessType.ACLINK_ZL_GROUP || dt == DoorAccessType.ZLACLINK_WIFI || dt == DoorAccessType.ZLACLINK_NOWIFI || dt == DoorAccessType.ACLINK_BUS || dt == DoorAccessType.ZLACLINK_WIFI_2) {
             return true;
         }
         

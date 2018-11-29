@@ -1866,7 +1866,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         List<SiyinUserPrinterMapping> mappings = siyinUserPrinterMappingProvider.listSiyinUserPrinterMappingByUserId(UserContext.current().getUser().getId(), namespaceId);
         List<String> readers = new ArrayList<>(5);
         if(mappings == null || mappings.size() == 0){
-        	List<SiyinPrintPrinter> lists = siyinPrintPrinterProvider.listSiyinPrintPrinter();
+        	List<SiyinPrintPrinter> lists = siyinPrintPrinterProvider.listSiyinPrintPrinter(namespaceId);
         	for (SiyinPrintPrinter printer : lists) {
 				readers.add(printer.getReaderName());
 			}

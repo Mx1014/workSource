@@ -1499,8 +1499,7 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
                             getPurchaseOrderByIdCommand.setMerchantOrderId(frozenRequest.getMerchantOrderId());
                             PurchaseOrderDTO order = orderService.getPurchaseOrderById(getPurchaseOrderByIdCommand).getResponse();
                             // 目前只有企业账单，企业账单是月结方式，因此只要账号记录产生，就扣减支付可用额度
-                            if (order != null && 29 == order.getPaymentType()
-                                    && (PurchaseOrderStatus.NEW_CREATED.getCode() == order.getOrderStatus() || PurchaseOrderStatus.COMPLETED.getCode() == order.getOrderStatus())) {
+                            if (order != null && 29 == order.getPaymentType() && PurchaseOrderStatus.COMPLETED.getCode() == order.getOrderStatus()) {
                                 confirmCommand.setNamespaceId(frozenRequest.getNamespaceId());
                                 confirmCommand.setOrganizationId(frozenRequest.getOrganizationId());
                                 confirmCommand.setUserId(frozenRequest.getUserId());

@@ -47,6 +47,24 @@ public class CreateLocalVistorCommand {
 	private Byte authRuleType;
 	private Integer totalAuthAmount;
 	private String headImgUri;
+	private Byte notice;
+	private Byte qrType;
+
+	public Byte getQrType() {
+		return qrType;
+	}
+
+	public void setQrType(Byte qrType) {
+		this.qrType = qrType;
+	}
+
+	public Byte getNotice() {
+		return notice;
+	}
+
+	public void setNotice(Byte notice) {
+		this.notice = notice;
+	}
 
 	@ItemType(CreateCustomFieldCommand.class)
 	private List<CreateCustomFieldCommand> list;
