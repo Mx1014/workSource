@@ -3934,10 +3934,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						order.setStatus(SiteBillStatus.FAIL.getCode());
 						messageHandler.cancelOrderWithoutRefund(order);
 					}
-				} else
-					//如果不需要退款，直接状态为已取消
-					order.setStatus(SiteBillStatus.FAIL.getCode());
-				    messageHandler.cancelOrderWithoutPaySendMessage(order);
+				} else {
+                    //如果不需要退款，直接状态为已取消
+                    order.setStatus(SiteBillStatus.FAIL.getCode());
+                    messageHandler.cancelOrderWithoutPaySendMessage(order);
+                }
 			} else if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode()) ||
 					order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
 				//如果不需要退款，直接状态为已取消
