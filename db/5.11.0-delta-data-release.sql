@@ -273,6 +273,11 @@ update eh_service_module_apps set instance_config = replace (instance_config, '#
 
 update eh_launch_pad_items set action_data = replace (action_data, '#/home#sign_suffix', concat('?namespaceId=', namespace_id, '#/home#sign_suffix')) where action_data like '%/cloud-print/build/index.html%' and  action_data not like '%?namespaceId=%';
 
+-- 更新不正确的ownerType和ownerId
+update eh_alliance_service_category_match cm, eh_service_alliance_categories ca set cm.owner_type = ca.owner_type, cm.owner_id = ca.owner_id  where cm.namespace_id = ca.namespace_id and cm.category_id = ca.id and cm.`type` = ca.`type`; 
+
+
+
 -- AUTHOR: 杨崇鑫
 -- REMARK: 缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费。 给智谷汇的权限
 INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (21225, 21200, 21225, '保证金一次性产生一笔费用');
@@ -298,10 +303,6 @@ update eh_siyin_print_printers set namespace_id = 2 where reader_name = 'TC10115
 update eh_siyin_print_printers set namespace_id = 999969 where reader_name = 'TC101154727294';
 update eh_siyin_print_printers set namespace_id = 11 where reader_name = 'TC101157736913';
 update eh_siyin_print_printers set namespace_id = 999981 where reader_name = 'TC100887870538';
-
--- 更新不正确的ownerType和ownerId
-update eh_alliance_service_category_match cm, eh_service_alliance_categories ca set cm.owner_type = ca.owner_type, cm.owner_id = ca.owner_id  where cm.namespace_id = ca.namespace_id and cm.category_id = ca.id and cm.`type` = ca.`type`; 
-
 
 
 
