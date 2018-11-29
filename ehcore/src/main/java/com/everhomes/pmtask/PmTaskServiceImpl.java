@@ -2381,6 +2381,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
 			List<OrganizationDTO> organizations = new ArrayList<>();
 			if(organizationList != null && organizationList.size() > 0) {
+				System.out.println(communityId);
 				organizationList.forEach(f -> {
 					if(OrganizationMemberStatus.ACTIVE.equals(OrganizationMemberStatus.fromCode(f.getMemberStatus()))) {
 						if(f.getCommunityId() != null && f.getCommunityId().equals(communityId))

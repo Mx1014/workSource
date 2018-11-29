@@ -6345,7 +6345,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		List<IndexDTO> indexDtos = launchPadService.listIndexDtos(namespaceId, userId);
 
 		resp.setIndexDtos(indexDtos);
-
+		
+		// 客户端地址模式配置, add by momoubin,18/11/09
+		resp.setClientAddressMode(this.configurationProvider.getIntValue(namespaceId, ConfigConstants.CLIENT_ADDRESS_MODE, 0));
+		
         return resp;
     }
 
