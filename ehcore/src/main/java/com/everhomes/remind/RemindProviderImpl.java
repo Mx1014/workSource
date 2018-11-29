@@ -701,4 +701,12 @@ public class RemindProviderImpl implements RemindProvider {
         EhReminds remind = dao.findById(id);
         return ConvertHelper.convert(remind, Remind.class);
     }
+
+	@Override
+	public void deleteRemindShare(RemindShare share) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhRemindSharesDao dao = new EhRemindSharesDao(context.configuration());
+        dao.delete(share);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRemindShares.class, share.getId());
+	}
 }
