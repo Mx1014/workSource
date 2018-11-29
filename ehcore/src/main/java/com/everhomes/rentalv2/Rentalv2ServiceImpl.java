@@ -2358,7 +2358,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 			if (rentalCell.getRentalType() == RentalType.HOUR.getCode()) {
 				startTime = new Timestamp(rentalCell.getBeginTime().getTime());
-				reminderTime = new Timestamp(rentalCell.getBeginTime().getTime() - 30 * 60 * 1000L);
+				reminderTime = new Timestamp(rentalCell.getBeginTime().getTime() - 15 * 60 * 1000L);
 				endTime = rentalCell.getEndTime();
 				reminderEndTime = new Timestamp(endTime.getTime() - 15 * 60 * 1000L);
 				authStartTime = new Timestamp(startTime.getTime() - 60 * 60 * 1000L);
@@ -3014,15 +3014,31 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public void test(GetRentalOrderDetailCommand cmd) {
-		Map<String, Object> messageMap = new HashMap<>();
-		messageMap.put("orderId", cmd.getOrderId());
-		scheduleProvider.scheduleSimpleJob(
-				queueName,
-				"cancelBill" + cmd.getOrderId(),
-				new java.util.Date(new java.util.Date().getTime() + 30 * 1000),
-				RentalCancelOrderJob.class,
-				messageMap
-		);
+		RentalOrder order = this.rentalv2Provider.findRentalBillById(cmd.getOrderId());
+			Map<String, Object> messageMap = new HashMap<>();
+			messageMap.put("orderId",order.getId());
+			messageMap.put("resourceType",order.getResourceType());
+			scheduleProvider.scheduleSimpleJob(
+					queueName,
+					"RentalNearStartMessageJob" + order.getId(),
+					new java.util.Date(order.getReminderTime().getTime()),
+					RentalNearStartMessageJob.class,
+					messageMap
+			);
+
+
+		//结束时间快到发推送
+			messageMap = new HashMap<>();
+			messageMap.put("orderId",order.getId());
+			messageMap.put("resourceType",order.getResourceType());
+			scheduleProvider.scheduleSimpleJob(
+					queueName,
+					"RentalNearEndMessageJob" + order.getId(),
+					new java.util.Date(order.getReminderEndTime().getTime()),
+					RentalNearEndMessageJob.class,
+					messageMap
+			);
+
 	}
 
 	@Override
