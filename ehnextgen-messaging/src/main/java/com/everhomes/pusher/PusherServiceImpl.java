@@ -908,7 +908,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 	 */
 	@Override
 	public ThirdPartResponseMessageDTO thirdPartPushMessage(ThirdPartPushMessageCommand cmd) {
-		LOGGER.debug("cmd: "+cmd.getAppkey()+" tokenList: "+cmd.getIdentifierTokenList());
+		LOGGER.debug("【ThirdPartPushMessageCommand】=",cmd);
 		// 1.用户token列表/发送失败手机号列表/这里设置默认发送方式为3（同时推送和应用消息）
 		String[] tokenArray = cmd.getIdentifierTokenList().split(",");
 		List<String> unReachTokenList = new ArrayList<String>(tokenArray.length);		 
@@ -920,7 +920,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 		for(String token : tokenArray){
 			
 			// 3.1 验证接受者在左邻系统是否存在,由 appkey/appsecret确定namespace
-			AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppkey());
+			AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
 			
 			// 3.2(tocken/namespace确定一个用户)
 			UserIdentifier user = userProvider.findClaimedIdentifierByTokenAndNamespaceId(token,appNamespaceMapping.getNamespaceId());
@@ -936,9 +936,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 				messageDto.setCreateTime(System.currentTimeMillis());
 				messageDto.setBodyType(MessageBodyType.TEXT.getCode());
 				if(cmd.getMsgType() == 1){//上车信息
-					messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 ",cmd.getRouteName()," 】即将到达 【 "+cmd.getNextStation()," 】站，请您做好乘车准备！"));				
+					messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 ",cmd.getRouteName()," 】即将到达 【 ",cmd.getNextStation()," 】站，请您做好乘车准备！"));				
 				}else if(cmd.getMsgType() == 2){//下车信息
-					messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 ",cmd.getRouteName()," 】即将到达 【 "+cmd.getNextStation()," 】站，请您做好下车准备！"));				
+					messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 ",cmd.getRouteName()," 】即将到达 【 ",cmd.getNextStation()," 】站，请您做好下车准备！"));				
 				}else{
 					// 4.2 班车信息类型有误则返回标志位3
 					messageDto.setBody("班车信息类型有误，请稍后重试！");
@@ -950,12 +950,12 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 				
 				// 4.3 根据 msgType 推送方式推送给用户
 				messagingService.routeMessage(null, User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING,ChannelType.USER.getCode(), String.valueOf(user.getOwnerUid()), messageDto, MSG_DEFAULT_SEND_TYPE);
-//				LOGGER.debug("调用第三方信息推送接口：=====【发送成功】=====message： "+messageDto.toString());
+//				LOGGER.debug("调用第三方信息推送接口：=====【发送成功】===== message= ",messageDto.toString());
 
 			}else{
 				// 4.4 用户不存在，则加入失败列表
 				unReachTokenList.add(token);
-//				LOGGER.debug("调用第三方信息推送接口：=====【用户不存在】=====token： "+token);
+//				LOGGER.debug("调用第三方信息推送接口：=====【用户不存在】===== token=",token);
 				continue;
 			}
 		}
