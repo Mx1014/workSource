@@ -18,6 +18,8 @@
 -- REMARK: 请在执行release前备份eh_var_field_scopes表
 
 
+-- AUTHOR: 黄明波
+-- REMARK: /yellowPage/recoveryListCategoryDataDisappearBug 参数ownerId 1802，返回的字符串发我看下。
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -287,6 +289,9 @@ update eh_siyin_print_printers set namespace_id = 2 where reader_name = 'TC10115
 update eh_siyin_print_printers set namespace_id = 999969 where reader_name = 'TC101154727294';
 update eh_siyin_print_printers set namespace_id = 11 where reader_name = 'TC101157736913';
 update eh_siyin_print_printers set namespace_id = 999981 where reader_name = 'TC100887870538';
+
+-- 更新不正确的ownerType和ownerId
+update eh_alliance_service_category_match cm, eh_service_alliance_categories ca set cm.owner_type = ca.owner_type, cm.owner_id = ca.owner_id  where cm.namespace_id = ca.namespace_id and cm.category_id = ca.id and cm.`type` = ca.`type`; 
 
 
 
