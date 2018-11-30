@@ -6539,7 +6539,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), null,
-				locator, pageSize+1,null, siteIds, cmd.getCommunityId());
+				locator, pageSize+1,cmd.getStatus(), siteIds, cmd.getCommunityId());
 		if(null == rentalSites)
 			return response;
 		Long nextPageAnchor = null;

@@ -26,6 +26,7 @@ public class GetResourceListAdminCommand {
 	@NotNull
 	private Long resourceTypeId;
 	private Long organizationId;
+	private Byte status;
 
     
 	private Long pageAnchor;
@@ -123,4 +124,11 @@ public class GetResourceListAdminCommand {
 		this.communityId = communityId;
 	}
 
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
 }
