@@ -1273,12 +1273,19 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
 					for (ServiceModuleEntry entry: serviceModuleEntries){
 						if(entry.getModuleId().equals(appCommunityConfigDto.getModuleId())){
-
-							if(StringUtils.isEmpty(appCommunityConfigDto.getDisplayName())){
+                            List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+                                    this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(appCommunityConfigDto.getAppOriginId(),entry.getId(),null,null);
+							if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
+							    appCommunityConfigDto.setDisplayName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                                String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
+                                        serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
+                                appCommunityConfigDto.setIconUrl(url);
+                            }
+                            if(StringUtils.isEmpty(appCommunityConfigDto.getDisplayName())){
 								appCommunityConfigDto.setDisplayName(entry.getEntryName());
 							}
 
-							if(!StringUtils.isEmpty(entry.getIconUri())){
+							if(StringUtils.isEmpty(appCommunityConfigDto.getIconUrl()) && !StringUtils.isEmpty(entry.getIconUri())){
 								String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
 								appCommunityConfigDto.setIconUrl(url);
 							}
@@ -1301,7 +1308,19 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			for (RecommendApp recommendApp: recommendApps){
 				for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
 					if(recommendApp.getAppId().equals(appCommunityConfigDto.getAppOriginId())){
-						recommendDtos.add(appCommunityConfigDto);
+                        List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(appCommunityConfigDto.getModuleId(), null,
+                                TerminalType.MOBILE.getCode(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), ServiceModuleSceneType.CLIENT.getCode());
+                        if (!CollectionUtils.isEmpty(serviceModuleEntries)) {
+                            List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+                                    this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(appCommunityConfigDto.getAppOriginId(),serviceModuleEntries.get(0).getId(),null,null);
+                            if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
+                                appCommunityConfigDto.setDisplayName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                                String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
+                                        serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
+                                appCommunityConfigDto.setIconUrl(url);
+                            }
+                        }
+                        recommendDtos.add(appCommunityConfigDto);
 						appCommunityConfigDto.setRecommendFlag(TrueOrFalseFlag.TRUE.getCode());
 					}
 				}
