@@ -89,7 +89,6 @@ public class FreqVisitorSearcherImpl extends AbstractElasticSearch implements Fr
     }
 
     @Override
-    @Scheduled(cron="0 0 1 * * ?")
     public void syncVisitorsFromDb(Integer namespaceId) {
         this.deleteAll();
         List<VisitorSysVisitor> list = visitorSysVisitorProvider.listFreqVisitor();
@@ -97,6 +96,11 @@ public class FreqVisitorSearcherImpl extends AbstractElasticSearch implements Fr
         for (VisitorSysVisitor visitorSysVisitor : list) {
             feedDoc(visitorSysVisitor);
         }
+    }
+
+    @Scheduled(cron="0 0 1 * * ?")
+    public void syncVisitorsFromDbdaily() {
+        syncVisitorsFromDb(null);
     }
 
     private void feedDoc(VisitorSysVisitor object) {
