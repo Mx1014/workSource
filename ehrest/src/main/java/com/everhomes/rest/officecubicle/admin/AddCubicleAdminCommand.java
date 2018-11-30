@@ -35,7 +35,6 @@ public class AddCubicleAdminCommand {
 	private Long ownerId;
 	private Byte rentFlag;
 	private String description;
-	@NotNull
 	private String coverUri;
 	private Long currentPMId;
 	private Long currentProjectId;
