@@ -114,5 +114,7 @@ public interface OfficeCubicleService {
 
 	void updateOfficeCubicleRefundRule(UpdateOfficeCubicleRefundRuleCommand cmd);
 
+	GetOfficeCubicleRefundRuleResponse getOfficeCubicleRefundRule(GetOfficeCubicleRefundRuleCommand cmd);
+
 
 }

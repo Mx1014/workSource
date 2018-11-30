@@ -35,6 +35,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOfficeCubicleAttachments;
 import com.everhomes.server.schema.tables.EhOfficeCubicleCategories;
 import com.everhomes.server.schema.tables.EhOfficeCubicleChargeUsers;
+import com.everhomes.server.schema.tables.EhOfficeCubicleRefundRule;
 import com.everhomes.server.schema.tables.EhOfficeCubicleRoom;
 import com.everhomes.server.schema.tables.EhOfficeCubicleStation;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleOrdersDao;
@@ -55,6 +56,7 @@ import com.everhomes.server.schema.tables.records.EhOfficeCubicleAttachmentsReco
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleChargeUsersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhOfficeCubicleRefundRuleRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleRentOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleRoomRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleSpacesRecord;
@@ -114,6 +116,20 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
+	public List<OfficeCubicleRefundRule> listRefundRuleBySpaceId(Long spaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_REFUND_RULE);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_REFUND_RULE.SPACE_ID.equal(spaceId);
+		step.where(condition);
+		List<OfficeCubicleRefundRule> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_REFUND_RULE.ID.desc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleRefundRule.class);
+		});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+	
+	@Override
 	public void createSpace(OfficeCubicleSpace space) {
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleSpaces.class));
 		space.setId(id);
@@ -152,6 +168,19 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleAttachments.class, null);
 	}
 
+	@Override
+	public void createRefundRule(OfficeCubicleRefundRule refundRule) {
+		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleRefundRule.class));
+		refundRule.setId(id);
+		refundRule.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleRefundRuleRecord record = ConvertHelper.convert(refundRule, EhOfficeCubicleRefundRuleRecord.class);
+		InsertQuery<EhOfficeCubicleRefundRuleRecord> query = context.insertQuery(Tables.EH_OFFICE_CUBICLE_REFUND_RULE);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleRefundRule.class, null);
+	}
+	
 	@Override
 	public OfficeCubicleSpace getSpaceById(Long id) {
 

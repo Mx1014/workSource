@@ -1033,9 +1033,31 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (refundRule != null){
 			officeCubicleProvider.deleteRefundRule(cmd.getSpaceId());
 		}
-		
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
+		officeCubicleProvider.updateSpace(space);
+		for(OfficeCubicleRefundRuleDTO dto :cmd.getRefundStrategies()){
+			OfficeCubicleRefundRule rule = ConvertHelper.convert(dto,OfficeCubicleRefundRule.class);
+			rule.setRefundStrategy(cmd.getRefundStrategy());
+			rule.setSpaceId(cmd.getSpaceId());
+			rule.setNamespaceId(cmd.getNamespaceId());
+			rule.setOwnerId(cmd.getCommunityId());
+			rule.setOwnerType(cmd.getOwnerType());
+			officeCubicleProvider.createRefundRule(rule);
+		}
 	}
-	
+	@Override
+	public GetOfficeCubicleRefundRuleResponse getOfficeCubicleRefundRule(GetOfficeCubicleRefundRuleCommand cmd){
+		GetOfficeCubicleRefundRuleResponse resp = new GetOfficeCubicleRefundRuleResponse();
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
+		resp.setRefundTip(space.getRefundTip());
+		List<OfficeCubicleRefundRule> rules = officeCubicleProvider.findRefundRule(cmd.getSpaceId());
+		resp.setRefundStrategy(rules.get(0).getRefundStrategy());
+		resp.setRefundStrategies(rules.stream().map(r->{
+			OfficeCubicleRefundRuleDTO dto = ConvertHelper.convert(r,OfficeCubicleRefundRuleDTO.class);
+			return dto;
+			}).collect(Collectors.toList()));
+		return resp;
+	}
 	@Override
 	public List<OfficeOrderDTO> getUserOrders() {
 		List<OfficeOrderDTO> resp = new ArrayList<OfficeOrderDTO>();
@@ -2012,8 +2034,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		GetRoomDetailResponse resp = new GetRoomDetailResponse();
 		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId());
 		resp.setRoom(room.stream().map(r->{
-			RoomDTO dto = new RoomDTO();
-			ConvertHelper.convert(r,RoomDTO.class);
+			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
 			List<OfficeCubicleStation> station = 
 					officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),r.getId(),null,null);
 			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
