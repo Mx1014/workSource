@@ -389,7 +389,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setChargeUserDTO(users);
 		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
 		dto.setRanges(ranges.stream().map(r->ConvertHelper.convert(r,OfficeRangeDTO.class)).collect(Collectors.toList()));
-		
 		return dto;
 	}
 
@@ -428,6 +427,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					this.saveAttachment(dto, space.getId(),(byte)3);
 				});
 			if (cmd.getChargeUserDTO() != null){
+				LOGGER.info("cmd : " + cmd);
 				officeCubicleProvider.deleteChargeUsers(space.getId());
 				for (ChargeUserDTO dto : cmd.getChargeUserDTO()){
 					OfficeCubicleChargeUser user = new OfficeCubicleChargeUser();
@@ -1502,7 +1502,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		station.setStationId(cmd.getStationId());
 		officeCubicleProvider.deleteStation(station);
 	}
-	
 	
 	@Override
 	public void refundOrder(RefundOrderCommand cmd){

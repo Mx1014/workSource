@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType:项目类型</li>
  * <li>spaceId:空间id</li>
  * <li>stationId:工位id</li>
+ * <li>status:(0-未开放，1-未预定，2-已预定)</li>
  * </ul>
  */
 public class GetStationDetailCommand {
@@ -17,7 +18,22 @@ public class GetStationDetailCommand {
 	private String ownerType;
 	private Long spaceId;
 	private Long stationId;
+	private Byte status;
     
+
+
+
+	public Byte getStatus() {
+		return status;
+	}
+
+
+
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
 
 
 
