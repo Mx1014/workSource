@@ -132,6 +132,10 @@ public class WelfareServiceImpl implements WelfareService {
     @Override
     public GetWelfareResponse getWelfare(GetWelfareCommand cmd) {
         Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfareId());
+        if(welfare == null){
+            throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
+                    WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利被删除");
+        }
         return new GetWelfareResponse(processWelfaresDTO(welfare));
     }
     private WelfaresDTO processWelfaresDTO(Welfare r) {
@@ -217,7 +221,7 @@ public class WelfareServiceImpl implements WelfareService {
         this.coordinationProvider.getNamedLock(lockName).enter(() -> {
             if (welfareDTO.getId() != null) {
                 Welfare welfare = welfareProvider.findWelfareById(welfareDTO.getId());
-                if(null == welfare){
+                if(welfare == null){
                 	throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利被删除");
                 }
@@ -255,7 +259,7 @@ public class WelfareServiceImpl implements WelfareService {
 	            welfare.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	//            welfare.setSenderUid(UserContext.currentUserId());
 	        }
-	        if (null == welfare.getId()) {
+	        if (welfare == null.getId()) {
 	            welfareProvider.createWelfare(welfare);
 	        } else {
 	            welfareProvider.updateWelfare(welfare);
@@ -316,7 +320,7 @@ public class WelfareServiceImpl implements WelfareService {
             SendWelfaresResponse response = new SendWelfaresResponse();
             if (welfaresDTO.getId() != null) {
                 Welfare welfare = welfareProvider.findWelfareById(welfaresDTO.getId());
-                if(null == welfare){
+                if(welfare == null){
                 	throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利被删除");
                 }
@@ -471,7 +475,7 @@ public class WelfareServiceImpl implements WelfareService {
             return null;
         }
         Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfareId());
-        if (null == welfare) {
+        if (welfare == null) {
             return null;
         }
         GetUserWelfareResponse response = ConvertHelper.convert(welfare, GetUserWelfareResponse.class);
