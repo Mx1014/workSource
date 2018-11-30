@@ -6534,7 +6534,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), null,
-				locator, pageSize+1,null, siteIds, cmd.getCommunityId());
+				locator, pageSize+1,cmd.getStatus(), siteIds, cmd.getCommunityId());
 		if(null == rentalSites)
 			return response;
 		Long nextPageAnchor = null;
@@ -9097,7 +9097,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		cmd2.setProjectId(cmd.getCommunityId());
 		cmd2.setAppId(cmd.getAppid());
 		OrganizationDTO manageOrganization = organizationService.getAuthOrgByProjectIdAndAppId(cmd2);//管理公司
-		if (resourceType != null && TrueOrFalseFlag.TRUE.getCode().equals(resourceType.getCrossCommuFlag())){
+       if (resourceType != null && TrueOrFalseFlag.TRUE.getCode().equals(resourceType.getCrossCommuFlag()) && !userId.equals(0L)){
 			List<Long> communityIds = new ArrayList<>();
 			if (UserContext.getCurrentNamespaceId().equals(2)) { //标准版
 				List<ServiceModuleAppAuthorization> appAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(),
@@ -9126,22 +9126,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}
 			}
 		}else{
-			ListUserOrganizationsCommand cmd3 = new ListUserOrganizationsCommand();
-			cmd3.setAppId(cmd.getAppid());
-			cmd3.setProjectId(cmd.getCommunityId());
-			cmd3.setUserId(userId);
-			ListUserOrganizationsResponse response1 = organizationService.listUserOrganizations(cmd3);
-			if (response1 != null && response1.getDtos() != null){
-				for (OrganizationDTO dto : response1.getDtos()) {
-					if (dto.getId().equals(cmd.getOrganizationId())){
-						if (TrueOrFalseFlag.TRUE.getCode().equals(dto.getProjectManageFlag()))
-							sceneType = SceneType.PM_ADMIN.getCode();
-						else
-							sceneType = SceneType.ENTERPRISE.getCode();
-						break;
-					}
-				}
-			}
+            sceneType = SceneType.ENTERPRISE.getCode();
+            if (cmd.getOrganizationId().equals(manageOrganization.getId()))
+                sceneType = SceneType.PM_ADMIN.getCode();
 		}
 		response.setAllowRent(TrueOrFalseFlag.TRUE.getCode());
 		if (!SceneType.PM_ADMIN.getCode().equals(sceneType)
@@ -9152,7 +9139,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		//会员等级
 		User user = userProvider.findUserById(userId);
-		if (user.getVipLevelText() != null){
+		if (user!=null && user.getVipLevelText() != null){
 			sceneType = sceneType + "," + user.getVipLevelText();
 		}
 		response.setSceneType(sceneType);
