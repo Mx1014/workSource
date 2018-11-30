@@ -1159,7 +1159,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		List<RentalConfigAttachment> attachments = this.rentalv2Provider.queryRentalConfigAttachmentByOwner(cmd.getResourceType(),
 				EhRentalv2Resources.class.getSimpleName(), cmd.getRentalSiteId(), null);
-		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getRentalSiteId());
+		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getRentalSiteId());
 
 		//删掉除物资 和 推销员以外的内容
 		attachments = attachments.stream().filter(r -> r.getAttachmentType() > AttachmentType.ATTACHMENT.getCode()).collect(Collectors.toList());
@@ -1444,7 +1444,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			//是否有格子被预约
 			List<RentalOrder> rentalOrders = rentalv2Provider.listActiveBillsByInterval(r, startTime, endTime);
 			if (rentalOrders != null && rentalOrders.size()>0) {
-				RentalResource resource = rentalv2Provider.getRentalSiteById(r);
+				RentalResource resource = rentalCommonService.getRentalResource(cmd.getResourceType(), r);
 				SegmentTree segmentTree = new SegmentTree();
 				for (RentalOrder order:rentalOrders)
 					segmentTree.putSegment(order.getStartTime().getTime(),order.getEndTime().getTime(),order.getRentalCount().intValue());
@@ -8737,7 +8737,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public GetResourceUsingInfoResponse getResourceUsingInfo(FindRentalSiteByIdCommand cmd) {
-		RentalResource rentalSite = this.rentalv2Provider.getRentalSiteById(cmd.getId());
+		RentalResource rentalSite = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getId());
 		if (rentalSite == null || rentalSite.getStatus().equals(-1))
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					1001, "资源不存在");
