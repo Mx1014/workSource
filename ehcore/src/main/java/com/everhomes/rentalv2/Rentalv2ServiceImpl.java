@@ -597,7 +597,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					.collect(Collectors.toList()));
 		}
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rule.getResourceType(),
-				ruleType, id);
+				ruleType, id,null,null);
 		if (null != closeDates) {
 			LocalDate today = LocalDate.now();
 			Long firstDay = LocalDateTime.of(today.getYear(), 1, 1, 0, 0).atZone(ZoneId.systemDefault())
@@ -1278,16 +1278,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	private List<RangeDTO> getEnableTimeRanges(RentalResource rentalSite, Long showTimeStart, Long showTimeEnd){
         //根据节假日
         List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalSite.getResourceType(),
-                EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+                EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(),new Date(showTimeStart),new Date(showTimeEnd));
         if (closeDates != null && closeDates.size() > 0) {
-			Set<Long> closeDateSet = closeDates.stream().map(p -> p.getCloseDate().getTime()).collect(Collectors.toSet());
-			LocalDateTime startTime = new java.util.Date(showTimeStart).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-			LocalDateTime endTime = new java.util.Date(showTimeEnd).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-			startTime = LocalDateTime.of(startTime.toLocalDate(), LocalTime.MIN);
-			endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.MIN);
-			if (closeDateSet.contains(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
-				return new ArrayList<>();
-			if (closeDateSet.contains(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
 				return new ArrayList<>();
 		}
         SegmentTree segmentTree = new SegmentTree();
@@ -1313,11 +1305,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
             }
         }
         //至少提前时间
+        Long time = now;
         if (NormalFlag.NEED.getCode() == rule.getRentalEndTimeFlag()) {
-            Long time = now + rule.getRentalEndTime();
-            if (time > showTimeStart) {
-                segmentTree.putSegment(showTimeStart,time,1);
-            }
+            time = now + rule.getRentalEndTime();
+        }
+        if (time > showTimeStart) {
+            segmentTree.putSegment(showTimeStart, time, 1);
         }
         //是否有格子被预约
         List<RentalOrder> rentalOrders = rentalv2Provider.listActiveBillsByInterval(rentalSite.getId(), showTimeStart, showTimeEnd);
@@ -1388,19 +1381,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
         if (cmd.getRentalType()<=3){
             siteIds = siteIds.stream().filter(r-> {
                 List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(cmd.getResourceType(),
-                        EhRentalv2Resources.class.getSimpleName(), r);
+                        EhRentalv2Resources.class.getSimpleName(), r,new Date(cmd.getStartTime()),new Date(cmd.getEndTime()));
                 if (closeDates == null || closeDates.size() == 0)
                     return true;
-                Set<Long> closeDateSet = closeDates.stream().map(p -> p.getCloseDate().getTime()).collect(Collectors.toSet());
-                LocalDateTime startTime = new java.util.Date(cmd.getStartTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                LocalDateTime endTime = new java.util.Date(cmd.getEndTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                startTime = LocalDateTime.of(startTime.toLocalDate(), LocalTime.MIN);
-                endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.MIN);
-                if (closeDateSet.contains(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
                     return false;
-                if (closeDateSet.contains(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
-                    return false;
-                return true;
             }).collect(Collectors.toList());
         }
 
@@ -2063,7 +2047,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		billDTO.setHolidayOpenFlag(rule.getHolidayOpenFlag());
 		billDTO.setHolidayType(rule.getHolidayType());
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalBill.getResourceType(),
-				EhRentalv2Resources.class.getSimpleName(), rentalBill.getRentalResourceId());
+				EhRentalv2Resources.class.getSimpleName(), rentalBill.getRentalResourceId(),null,null);
 		List<Long> defaultDate = new ArrayList<>();
 		if (rule.getHolidayOpenFlag() !=null && rule.getHolidayOpenFlag() == 0){//不开放
 			defaultDate = rule.getHolidayType().equals(RentalHolidayType.NORMAL_WEEKEND.getCode())?normalWeekend:legalHoliday;
@@ -4506,7 +4490,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		} else {
 			//计算有效时长 去掉关闭的天
 			List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(order.getResourceType(),
-					EhRentalv2Resources.class.getSimpleName(), order.getRentalResourceId());
+					EhRentalv2Resources.class.getSimpleName(), order.getRentalResourceId(),null,null);
 			Set<Long> closeTime = closeDates == null ? new HashSet<>() : closeDates.stream().map(r -> r.getCloseDate().getTime()).collect(Collectors.toSet());
 			LocalDateTime startDate = new java.util.Date(order.getStartTime().getTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 			startDate = LocalDateTime.of(startDate.toLocalDate(), LocalTime.MIN);
@@ -8856,7 +8840,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		response.setSourceName(rentalSite.getResourceName());
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalSite.getResourceType(),
-				EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+				EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(),null,null);
 		LocalDate today = LocalDate.now();
 		Long startTime = LocalDateTime.of(today.getYear(),today.getMonth(),today.getDayOfMonth(),0,0).atZone(ZoneId.systemDefault())
 				.toInstant().toEpochMilli();
