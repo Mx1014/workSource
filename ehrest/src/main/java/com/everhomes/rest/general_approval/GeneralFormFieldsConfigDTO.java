@@ -10,6 +10,7 @@ import java.util.List;
  *     <li>formOriginId: 表单原始ID</li>
  *     <li>formVersion: 表单版本</li>
  *     <li>configType：配置类型，默认"flowNode-visible"</li>
+ *     <li>status: 状态</li>
  *     <li>formFields：表单字段 {@link GeneralFormFieldsConfigFieldDTO}</li>
  * </ul>
  * @author huqi
@@ -19,6 +20,7 @@ public class GeneralFormFieldsConfigDTO {
     private Long formOriginId;
     private Long formVersion;
     private String configType;
+    private Byte status;
     private List<GeneralFormFieldsConfigFieldDTO> formFields;
 
     @Override
@@ -56,6 +58,14 @@ public class GeneralFormFieldsConfigDTO {
 
     public void setConfigType(String configType) {
         this.configType = configType;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     public List<GeneralFormFieldsConfigFieldDTO> getFormFields() {
