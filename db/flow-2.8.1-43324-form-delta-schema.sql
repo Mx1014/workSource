@@ -15,7 +15,7 @@ CREATE TABLE `eh_general_form_fields_config` (
   `form_version` bigint(20) NOT NULL DEFAULT '0',
   `config_type` varchar(64) NOT NULL COMMENT '表单节点配置类型',
   `form_fields` text COMMENT 'json 存放表单字段',
-  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: invalid, 1: valid',
+  `status` tinyint(4) NOT NULL COMMENT '0: invalid, 1: config, 2: running',
   `create_time` datetime(3) NOT NULL COMMENT 'record create time',
   `creator_uid` bigint(20) NOT NULL DEFAULT '0',
   `update_time` datetime(3) DEFAULT NULL COMMENT 'record update time',
