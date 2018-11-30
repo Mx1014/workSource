@@ -13,6 +13,9 @@ CREATE TABLE `eh_office_cubicle_station` (
   `description` TEXT COMMENT '描述',
   `cover_uri` VARCHAR(1024) COMMENT '封面图uri',
   `rent_flag` TINYINT COMMENT '是否开放预定 1是 0否',
+  `price` DECIMAL(10,2) COMMENT '价格',
+  `associate_room_id` BIGINT COMMENT '关联办公室id',
+  `status` TINYINT COMMENT '1-未预定，2-已预定',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -31,6 +34,8 @@ CREATE TABLE `eh_office_cubicle_room` (
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
   `description` TEXT COMMENT '描述',
+  `price` DECIMAL(10,2) COMMENT '价格',
+  `status` TINYINT COMMENT '1-未预定，2-已预定',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -55,6 +60,7 @@ CREATE TABLE `eh_office_cubicle_station_rent` (
 
 CREATE TABLE `eh_office_cubicle_rent_orders` (
   `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `order_no` BIGINT,
   `biz_order_no` VARCHAR(128),
   `namespace_id` INTEGER NOT NULL,
   `owner_type`  VARCHAR(255) COMMENT 'owner type: community',
@@ -81,28 +87,55 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
+  `use_detail` VARCHAR(255),
+  `refund_strategy` TINYINT COMMENT '1-custom, 2-full',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_office_cubicle_payee_accounts` (
   `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL,
+  `namespace_id` INTEGER,
   `owner_type` VARCHAR(32) NOT NULL COMMENT 'community 园区或者其他类型',
   `owner_id` BIGINT NOT NULL COMMENT '园区id或者其他id',
-  `space_id` BIGINT NOT NULL COMMENT '空间id',
-  `space_name` VARCHAR(512) NOT NULL COMMENT '空间名称',
-  `payee_user_type` VARCHAR(128) NOT NULL COMMENT '帐号类型，1-个人帐号、2-企业帐号',
-  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 2: active',
-  `creator_uid` BIGINT,
+  `account_id` BIGINT,
+  `merchant_id` BIGINT,
   `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
-  `merchant_id` BIGINT COMMENT '商户ID',
-  `payee_id` BIGINT,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='工位预定收款账户表';
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE eh_office_cubicle_spaces ADD COLUMN space_cover_uri VARCHAR(1024) COMMENT '封面URI';
-ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_uri VARCHAR(1024) COMMENT '短租封面URI';
-ALTER TABLE eh_office_cubicle_spaces ADD COLUMN station_uri VARCHAR(1024) COMMENT '开放式工位URI';
+CREATE TABLE `eh_office_cubicle_charge_users` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) COMMENT 'community 园区或者其他类型',
+  `owner_id` BIGINT COMMENT '园区id或者其他id',
+  `space_id` BIGINT,
+  `charge_uid` BIGINT,
+  `charge_name` VARCHAR(32),
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_office_cubicle_refund_rule` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL COMMENT 'community 园区或者其他类型',
+  `owner_id` BIGINT NOT NULL COMMENT '园区id或者其他id',
+  `space_id` BIGINT,
+  `refund_strategy` TINYINT,
+  `duration_type` TINYINT COMMENT '1: 时长内, 2: 时长外',
+  `duration_unit` TINYINT COMMENT '时长单位，比如 天，小时',
+  `duration` DOUBLE COMMENT '时长',
+  `factor` DOUBLE COMMENT '价格系数',
+  `create_time` DATETIME,
+  `creator_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN open_flag TINYINT COMMENT '是否开启空间，1是，0否';
+ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_nums VARCHAR(32) COMMENT '短租工位数量';
+ALTER TABLE eh_office_cubicle_spaces ADD COLUMN long_rent_price DECIMAL(10,2) COMMENT '长租工位价格';
+ALTER TABLE eh_office_cubicle_spaces ADD COLUMN refund_tip VARCHAR(255) COMMENT '退款提示';
+
+
+ALTER TABLE eh_office_cubicle_attachments ADD COLUMN type TINYINT COMMENT '1,空间，2短租工位，3开放式工位';
