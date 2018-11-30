@@ -42,7 +42,16 @@ public class AddRoomAdminCommand {
 	private Long appId;
 	private Integer namespaceId;
 	private List<AssociateStationDTO> associateStation;
+	private String roomName;
 	
+
+	public String getRoomName() {
+		return roomName;
+	}
+
+	public void setRoomName(String roomName) {
+		this.roomName = roomName;
+	}
 
 	public Long getSpaceId() {
 		return spaceId;

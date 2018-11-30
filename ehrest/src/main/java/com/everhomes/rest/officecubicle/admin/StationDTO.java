@@ -13,7 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>coverUri:办公室封面图</li>
  * <li>description:描述</li>
  * <li>rentFlag:是否开启预定，1开启，0不开启</li>
- * <li>associateRoom:关联办公室id</li>
+ * <li>associateRoomId:关联办公室id</li>
+ * <li>associateRoomName:关联办公室名称</li>
  * </ul>
  */
 public class StationDTO {
@@ -23,7 +24,8 @@ public class StationDTO {
     private Byte rentFlag;
     private String coverUri;
     private String description;
-    private Long associateRoom;
+    private Long associateRoomId;
+    private String associateRoomName;
 
 
 	public Long getStationId() {
@@ -89,13 +91,31 @@ public class StationDTO {
 		this.description = description;
 	}
 
-	public Long getAssociateRoom() {
-		return associateRoom;
+
+
+	public Long getAssociateRoomId() {
+		return associateRoomId;
 	}
 
-	public void setAssociateRoom(Long associateRoom) {
-		this.associateRoom = associateRoom;
+
+
+	public void setAssociateRoomId(Long associateRoomId) {
+		this.associateRoomId = associateRoomId;
 	}
+
+
+
+	public String getAssociateRoomName() {
+		return associateRoomName;
+	}
+
+
+
+	public void setAssociateRoomName(String associateRoomName) {
+		this.associateRoomName = associateRoomName;
+	}
+
+
 
 	@Override
     public String toString() {
