@@ -1154,7 +1154,9 @@ public class AddressProviderImpl implements AddressProvider {
 		query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
 		//不能是未来资产
 		query.addConditions(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0));
-		query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
+		//用户希望同一个园区同一个楼栋的门牌能显示在一起
+		query.addOrderBy(Tables.EH_ADDRESSES.COMMUNITY_ID.asc(),Tables.EH_ADDRESSES.BUILDING_ID.asc(),
+				Tables.EH_ADDRESSES.APARTMENT_NAME.asc());
 
 		if (cmd.getCommunityId() != null) {
 			query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
@@ -1371,9 +1373,11 @@ public class AddressProviderImpl implements AddressProvider {
             dto.setOrientation(r.getValue(Tables.EH_ADDRESSES.ORIENTATION));
             dto.setCommunityId(r.getValue(Tables.EH_ADDRESSES.COMMUNITY_ID));
             dto.setCommunityName(r.getValue(Tables.EH_ADDRESSES.COMMUNITY_NAME));
+            dto.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
             addresses.add(dto);
             return null;
         });
+        Collections.sort(addresses);
         return addresses;
     }
 
