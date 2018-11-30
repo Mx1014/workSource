@@ -1248,6 +1248,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig gotten is null");
         }
         GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(formFieldsConfig, GeneralFormFieldsConfigDTO.class);
+        // 将formFieldsConfig里的formFields从json形式解析成List
         List<GeneralFormFieldsConfigFieldDTO> fieldDTOs = JSONObject.parseArray(formFieldsConfig.getFormFields(), GeneralFormFieldsConfigFieldDTO.class);
         dto.setFormFields(fieldDTOs);
         return dto;
@@ -1262,7 +1263,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "The form is null");
         }
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-        // 将form里的templateText从json形式解析为List<GeneralFormFieldDTO>
+        // 将form里的templateText从json形式解析为List
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
         dto.setFormFields(fieldDTOs);
         return dto;

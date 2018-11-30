@@ -3,6 +3,7 @@ package com.everhomes.general_form;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.general_approval.GeneralFormFieldsConfigStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormFieldsConfigDao;
@@ -56,6 +57,8 @@ public class GeneralFormFieldsConfigProviderImpl implements GeneralFormFieldsCon
 
         SelectQuery<EhGeneralFormFieldsConfigRecord> query = rContext().selectFrom(t).getQuery();
         query.addConditions(t.ID.eq(formFieldsConfigId));
+        // 判断有效状态
+        query.addConditions(t.STATUS.eq(GeneralFormFieldsConfigStatus.VALID.getCode()));
         return query.fetchAnyInto(GeneralFormFieldsConfig.class);
     }
 
