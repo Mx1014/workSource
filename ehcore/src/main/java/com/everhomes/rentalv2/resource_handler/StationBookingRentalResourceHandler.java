@@ -38,7 +38,11 @@ public class StationBookingRentalResourceHandler implements RentalResourceHandle
         resource.setResourceName(space.getName());
         resource.setResourceType(RentalV2ResourceType.VIP_PARKING.getCode());
         resource.setResourceTypeId(type.getId());
-        resource.setResourceCounts(Double.valueOf(space.getShortRentNums()));
+        Integer shortRentNums = 0;
+        if (space.getShortRentNums() != null) {
+        	shortRentNums = Integer.valueOf(space.getShortRentNums());
+        }
+        resource.setResourceCounts(Double.valueOf(shortRentNums));
         resource.setAutoAssign(NormalFlag.NONEED.getCode());
         resource.setMultiUnit(NormalFlag.NONEED.getCode());
         resource.setCommunityId(space.getOwnerId());
