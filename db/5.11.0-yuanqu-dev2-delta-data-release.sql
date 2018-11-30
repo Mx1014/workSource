@@ -1,0 +1,2 @@
+INSERT INTO `eh_locale_templates`( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('sms.default', 94, 'zh_CN', '工会预定成功付款短信', '您已成功预定了${spaceName}短租工位，预定时间：${reserveTime}，订单编号：${orderNo}.如需取消，请在预定开始时间前取消，感谢您的使用。', 0);
+INSERT INTO `eh_locale_templates`( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('sms.default', 95, 'zh_CN', '工会预定成功退款短信', '尊敬的用户，您预定的${spaceName}短租工位已退款成功，订单编号：${orderNo}，订单金额${price}元，退款金额：${refundPrice}元，期待下次为您服务。', 0);
