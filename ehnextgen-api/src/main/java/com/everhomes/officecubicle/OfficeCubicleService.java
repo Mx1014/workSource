@@ -116,5 +116,9 @@ public interface OfficeCubicleService {
 
 	GetOfficeCubicleRefundRuleResponse getOfficeCubicleRefundRule(GetOfficeCubicleRefundRuleCommand cmd);
 
+	GetRoomByStatusResponse getRoomByStatus(GetRoomByStatusCommand cmd);
+
+	GetCubicleByStatusResponse getCubicleByStatus(GetCubicleByStatusCommand cmd);
+
 
 }

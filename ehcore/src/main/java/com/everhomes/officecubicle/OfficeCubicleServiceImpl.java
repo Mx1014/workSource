@@ -2013,7 +2013,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		ListOfficeCubicleStatusResponse resp = new ListOfficeCubicleStatusResponse();
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, null,null,null);
-		if (station == null)
+		if (station.size() == 0)
 			return resp;
 		resp.setCubicleNums(station.size());
 		List<OfficeCubicleStationRent> longRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)1);
@@ -2105,6 +2105,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		return resp;
 	}
 	
+	@Override
+	public GetRoomByStatusResponse getRoomByStatus(GetRoomByStatusCommand cmd){
+		return null;
+	}
+	
+	@Override
+	public GetCubicleByStatusResponse getCubicleByStatus(GetCubicleByStatusCommand cmd){
+		return null;
+	}
 	@Override
 	public SearchCubicleOrdersResponse searchCubicleOrders(SearchCubicleOrdersCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
