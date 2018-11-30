@@ -42,7 +42,7 @@ public class StationBookingRentalResourceHandler implements RentalResourceHandle
         RentalResource resource = new RentalResource();
         resource.setId(space.getId());
         resource.setResourceName(space.getName());
-        resource.setResourceType(RentalV2ResourceType.VIP_PARKING.getCode());
+        resource.setResourceType(RentalV2ResourceType.STATION_BOOKING.getCode());
         resource.setResourceTypeId(type.getId());
         Integer shortRentNums = 0;
         if (space.getShortRentNums() != null) {
