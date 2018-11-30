@@ -43,4 +43,6 @@ public interface ServiceModuleConstants {
     long PRINT_MODULE = 41400L; // 云打印模块
 
     long BANNER_MODULE = 10400L;//广告模块
+    
+    long WELFARE_MODULE = 273000; // 企业福利模块
 }
