@@ -7,12 +7,10 @@ import com.everhomes.rentalv2.RentalCommonServiceImpl;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.portal.HandlerGetAppInstanceConfigCommand;
-import com.everhomes.rest.portal.HandlerGetItemActionDataCommand;
-import com.everhomes.rest.portal.HandlerProcessInstanceConfigCommand;
-import com.everhomes.rest.portal.HandlerPublishCommand;
+import com.everhomes.rest.portal.*;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 
+import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,19 +30,22 @@ public class OfficeCubiclePortalPublishHandler implements PortalPublishHandler {
     private RentalCommonServiceImpl rentalCommonService;
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
-        if(StringUtils.isNotEmpty(instanceConfig)){
-            JSONObject jsonObj = (JSONObject) JSONObject.parse(instanceConfig);
-            Byte currentProjectOnly = jsonObj.getByte("currentProjectOnly");
-            if(null != currentProjectOnly){
-                configurationProvider.setValue(namespaceId,"officecubicle.currentProjectOnly",String.valueOf(currentProjectOnly));
-            }
-            Byte resourceTypeId = jsonObj.getByte("resourceTypeId");
-            if (null == resourceTypeId){
-                RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, appName);
-                jsonObj.put("resourceTypeId", rentalResourceType);
-            }
+        StationBookingInstanceConfig stationBookingInstanceConfig = (StationBookingInstanceConfig) StringHelper.fromJsonString(instanceConfig, StationBookingInstanceConfig.class);
+
+        if (stationBookingInstanceConfig == null)
+            stationBookingInstanceConfig = new StationBookingInstanceConfig();
+
+        Byte currentProjectOnly = stationBookingInstanceConfig.getCurrentProjectOnly();
+        if (null != currentProjectOnly) {
+            configurationProvider.setValue(namespaceId, "officecubicle.currentProjectOnly", String.valueOf(currentProjectOnly));
         }
-        return instanceConfig;
+        Long resourceTypeId = stationBookingInstanceConfig.getResourceTypeId();
+        if (null == resourceTypeId) {
+            RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, appName);
+            stationBookingInstanceConfig.setResourceTypeId(rentalResourceType.getId());
+        }
+
+        return StringHelper.toJsonString(stationBookingInstanceConfig);
     }
     
     private RentalResourceType createRentalResourceType(Integer namespaceId, String name){
