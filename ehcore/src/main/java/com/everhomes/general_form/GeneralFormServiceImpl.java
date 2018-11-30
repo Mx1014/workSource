@@ -1191,8 +1191,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         formFieldsConfig.setOwnerType(form.getOwnerType());
         formFieldsConfig.setModuleId(form.getModuleId());
         formFieldsConfig.setModuleType(form.getModuleType());
-        formFieldsConfig.setProjectId(form.getProjectId());
-        formFieldsConfig.setProjectType(form.getProjectType());
+        formFieldsConfig.setProjectId(cmd.getProjectId() == null ? form.getProjectId() : cmd.getProjectId());
+        formFieldsConfig.setProjectType(cmd.getProjectType() == null ? form.getProjectType() : cmd.getProjectType());
         if(formFieldsConfig.getConfigType() == null || "".equals(formFieldsConfig.getConfigType())){
             formFieldsConfig.setConfigType(GeneralFormConstants.FORM_FIELDS_CONFIG_TYPE);
         }
