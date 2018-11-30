@@ -14,25 +14,16 @@ import com.everhomes.util.StringHelper;
  */
 public class GetStationDetailResponse {
 
-	private List<StationDTO> station;
+	private StationDTO station;
 
-
-
-
-
-	public List<StationDTO> getStation() {
+	public StationDTO getStation() {
 		return station;
 	}
 
 
-
-
-
-	public void setStation(List<StationDTO> station) {
+	public void setStation(StationDTO station) {
 		this.station = station;
 	}
-
-
 
 
 

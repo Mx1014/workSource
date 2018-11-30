@@ -800,7 +800,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 
 	@Override
-	public List<OfficeCubicleStation> getOfficeCubicleStation(Long ownerId, String ownerType,Long spaceId, Long roomId, Byte rentFlag, String keyword,Byte status) {
+	public List<OfficeCubicleStation> getOfficeCubicleStation(Long ownerId, String ownerType,Long spaceId, Long roomId, Byte rentFlag, String keyword,Byte status,Long stationId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleStationRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION);
 		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_ID.eq(ownerId));
@@ -815,6 +815,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.STATION_NAME.like("%" + keyword +"%"));
 		if (status != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.STATUS.eq(status));
+		if (stationId != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.ID.eq(stationId));
 		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleStation.class));
 	}
 

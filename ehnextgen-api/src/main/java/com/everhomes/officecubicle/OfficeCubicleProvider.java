@@ -63,7 +63,7 @@ public interface OfficeCubicleProvider {
 
 	void createCubicleSite(OfficeCubicleStation station);
 
-	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId, Byte rentFlag,String keyword, Byte status);
+	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId, Byte rentFlag,String keyword, Byte status,Long stationId);
 	
 	List<OfficeCubicleRoom> getOfficeCubicleRoom(Long owner, String ownerType, Long spaceId,Byte rentFlag,Byte status);
 	
@@ -123,6 +123,7 @@ public interface OfficeCubicleProvider {
 	void createRefundRule(OfficeCubicleRefundRule refundRule);
 
 	List<OfficeCubicleRefundRule> listRefundRuleBySpaceId(Long spaceId);
+
 
 
 

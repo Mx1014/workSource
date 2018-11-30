@@ -327,10 +327,10 @@ public class OfficeCubicleController extends ControllerBase {
     
     
     /**
-     * <b>URL: /officecubicle/getOfficeCubiclPayeeAccount</b> 
+     * <b>URL: /officecubicle/getOfficeCubiclePayeeAccount</b> 
      * <p>6.获取工位预定收款账户</p>
      */
-    @RequestMapping("getOfficeCubiclPayeeAccount")
+    @RequestMapping("getOfficeCubiclePayeeAccount")
     @RestReturn(ListOfficeCubicleAccountDTO.class)
     public RestResponse getOfficeCubiclPayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd) {
     	ListOfficeCubicleAccountDTO resp = new ListOfficeCubicleAccountDTO();

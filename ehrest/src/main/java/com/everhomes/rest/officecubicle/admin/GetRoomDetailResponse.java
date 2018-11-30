@@ -14,22 +14,16 @@ import com.everhomes.util.StringHelper;
  */
 public class GetRoomDetailResponse {
 
-	private List<RoomDTO> room;
+	private RoomDTO room;
 
-
-	public List<RoomDTO> getRoom() {
+	public RoomDTO getRoom() {
 		return room;
 	}
 
 
-
-
-	public void setRoom(List<RoomDTO> room) {
+	public void setRoom(RoomDTO room) {
 		this.room = room;
 	}
-
-
-
 
 	@Override
     public String toString() {
