@@ -9,10 +9,14 @@ import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.AddCubicleAdminCommand;
 import com.everhomes.rest.officecubicle.admin.AddRoomAdminCommand;
 import com.everhomes.rest.officecubicle.admin.CityDTO;
+import com.everhomes.rest.officecubicle.admin.GetCubicleByStatusCommand;
+import com.everhomes.rest.officecubicle.admin.GetCubicleByStatusResponse;
 import com.everhomes.rest.officecubicle.admin.GetCubicleForOrderCommand;
 import com.everhomes.rest.officecubicle.admin.GetCubicleForOrderResponse;
 import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderCommand;
 import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderResponse;
+import com.everhomes.rest.officecubicle.admin.GetRoomByStatusCommand;
+import com.everhomes.rest.officecubicle.admin.GetRoomByStatusResponse;
 import com.everhomes.rest.officecubicle.admin.GetRoomDetailCommand;
 import com.everhomes.rest.officecubicle.admin.GetRoomDetailResponse;
 import com.everhomes.rest.officecubicle.admin.GetSpaceCommand;
@@ -276,6 +280,21 @@ public class OfficeCubicleController extends ControllerBase {
     
     
     /**
+     * <b>URL: /officecubicle/updateOfficeCubicleRefundRule</b> 
+     * <p>更新工会预定退款规则</p>
+     */
+    @RequestMapping("updateOfficeCubicleRefundRule")
+    public RestResponse updateOfficeCubicleRefundRule(UpdateOfficeCubicleRefundRuleCommand cmd) {
+    	 this.officeCubicleService.updateOfficeCubicleRefundRule(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
      * <b>URL: /officecubicle/createCubicleGeneralOrder</b> 
      * <p>客户端创建订单</p>
      */
@@ -468,6 +487,22 @@ public class OfficeCubicleController extends ControllerBase {
         return response;
     	
     }
+    /**
+     * <b>URL: /officecubicle/getCubicleByStatus</b> 
+     * <p>工位详情</p>
+     */
+    @RequestMapping("getCubicleByStatus")
+    @RestReturn(GetCubicleByStatusResponse.class)
+    public RestResponse getCubicleByStatus(GetCubicleByStatusCommand cmd) {
+
+    	GetCubicleByStatusResponse resp = this.officeCubicleService.getCubicleByStatus(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
     
     /**
      * <b>URL: /officecubicle/getRoomDetail</b> 
@@ -486,6 +521,22 @@ public class OfficeCubicleController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /officecubicle/getRoomByStatus</b> 
+     * <p>办公室详情</p>
+     */
+    @RequestMapping("getRoomByStatus")
+    @RestReturn(GetRoomByStatusResponse.class)
+    public RestResponse getRoomByStatus(GetRoomByStatusCommand cmd) {
+
+    	GetRoomByStatusResponse resp = this.officeCubicleService.getRoomByStatus(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
      * <b>URL: /officecubicle/getStationForRoom</b> 
      * <p>新建办公室根据关键字获取工位</p>
      */
@@ -494,6 +545,23 @@ public class OfficeCubicleController extends ControllerBase {
     public RestResponse getStationForRoom(GetStationForRoomCommand cmd) {
 
     	GetStationForRoomResponse resp = this.officeCubicleService.getStationForRoom(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    
+    /**
+     * <b>URL: /officecubicle/getOfficeCubicleRefundRule</b> 
+     * <p>获取工会预定退款规则</p>
+     */
+    @RequestMapping("getOfficeCubicleRefundRule")
+    @RestReturn(GetOfficeCubicleRefundRuleResponse.class)
+    public RestResponse getOfficeCubicleRefundRule(GetOfficeCubicleRefundRuleCommand cmd) {
+
+    	GetOfficeCubicleRefundRuleResponse resp = this.officeCubicleService.getOfficeCubicleRefundRule(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

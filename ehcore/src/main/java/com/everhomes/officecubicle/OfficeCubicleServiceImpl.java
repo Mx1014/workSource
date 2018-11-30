@@ -2034,12 +2034,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetRoomDetailResponse getRoomDetail(GetRoomDetailCommand cmd){
 		GetRoomDetailResponse resp = new GetRoomDetailResponse();
-		List<OfficeCubicleRoom> room = new ArrayList<OfficeCubicleRoom>();
-		if(cmd.getStatus() == 0){
-			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),cmd.getStatus(),null);
-		} else{
-			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,cmd.getStatus());
-		}
+		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null);
+		
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
 			List<OfficeCubicleStation> station = 
@@ -2091,6 +2087,35 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd){
 		GetStationDetailResponse resp = new GetStationDetailResponse();
+		List<OfficeCubicleStation> station =  officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null,null);
+		resp.setStation(station.stream().map(r->ConvertHelper.convert(r,StationDTO.class)).collect(Collectors.toList()));
+		return resp;
+	}
+	
+	@Override
+	public GetRoomByStatusResponse getRoomByStatus(GetRoomByStatusCommand cmd){
+		GetRoomByStatusResponse resp = new GetRoomByStatusResponse();
+		List<OfficeCubicleRoom> room = new ArrayList<OfficeCubicleRoom>();
+		if(cmd.getStatus() == 0){
+			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),cmd.getStatus(),null);
+		} else{
+			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,cmd.getStatus());
+		}
+		resp.setRoom(room.stream().map(r->{
+			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
+			List<OfficeCubicleStation> station = 
+					officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),r.getId(),null,null,null);
+			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
+			dto.setAssociateStation(associateStaionList);
+			return dto;
+			}).collect(Collectors.toList()));
+		return resp;
+
+	}
+	
+	@Override
+	public GetCubicleByStatusResponse getCubicleByStatus(GetCubicleByStatusCommand cmd){
+		GetCubicleByStatusResponse resp = new GetCubicleByStatusResponse();
 		List<OfficeCubicleStation> station = new ArrayList<OfficeCubicleStation>();
 		if (cmd.getStatus() != null){
 			if (cmd.getStatus() ==0){
@@ -2098,21 +2123,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			} else {
 				station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null,cmd.getStatus());
 			}
-		} else {
-			station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null,null);
 		}
 		resp.setStation(station.stream().map(r->ConvertHelper.convert(r,StationDTO.class)).collect(Collectors.toList()));
 		return resp;
-	}
-	
-	@Override
-	public GetRoomByStatusResponse getRoomByStatus(GetRoomByStatusCommand cmd){
-		return null;
-	}
-	
-	@Override
-	public GetCubicleByStatusResponse getCubicleByStatus(GetCubicleByStatusCommand cmd){
-		return null;
 	}
 	@Override
 	public SearchCubicleOrdersResponse searchCubicleOrders(SearchCubicleOrdersCommand cmd) {
