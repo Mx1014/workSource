@@ -2016,7 +2016,7 @@ public class CommunityServiceImpl implements CommunityService {
                 Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword);
                 if (StringUtils.isNotBlank(cmd.getIdentifierToken())) {
                 	
-                	//modify by momoubin,2018/11/30：修改条件为and，"昵称"和"手机号"为与的条件
+                	//modify by momoubin,2018/11/30：小区用户认证查询条件修改or为and，"昵称"和"手机号"为与的条件
                    condition =  condition.and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%"+cmd.getIdentifierToken()+"%"));
                 }
                 query.addConditions(condition);
