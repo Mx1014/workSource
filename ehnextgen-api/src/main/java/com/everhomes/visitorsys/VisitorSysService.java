@@ -162,4 +162,8 @@ public interface VisitorSysService {
     void syncHKWSUsers();
 
     void HKWSTest(BaseVisitorsysCommand cmd);
+
+    ListFreqVisitorsResponse listFreqVisitors(ListFreqVisitorsCommand cmd);
+
+    void syncFreqVisitors(BaseVisitorsysCommand cmd);
 }

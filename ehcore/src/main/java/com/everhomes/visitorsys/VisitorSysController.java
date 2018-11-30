@@ -1033,4 +1033,38 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 
+	/**
+	 * <b>URL: /visitorsys/listFreqVisitors</b>
+	 * <p>
+	 * 获取常用访客信息
+	 * </p>
+	 */
+	@RequestMapping("listFreqVisitors")
+	@RestReturn(ListFreqVisitorsResponse.class)
+	public RestResponse listFreqVisitors(ListFreqVisitorsCommand cmd) {
+		ListFreqVisitorsResponse baseResponse = visitorSysService.listFreqVisitors(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/syncFreqVisitors</b>
+	 * <p>
+	 * 更新常用访客信息
+	 * </p>
+	 */
+	@RequestMapping("syncFreqVisitors")
+	@RestReturn(String.class)
+	public RestResponse syncFreqVisitors(BaseVisitorsysCommand cmd) {
+		visitorSysService.syncFreqVisitors(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

@@ -56,6 +56,7 @@ import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
+import com.everhomes.search.FreqVisitorSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.VisitorsysSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
@@ -179,6 +180,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private DoorAccessProvider doorAccessProvider;
     @Autowired
     private VisitorSysHKWSUtil HKWSUtil;
+    @Autowired
+    private FreqVisitorSearcher freqVisitorSearcher;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
@@ -1729,12 +1732,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private GetFormResponse getForm(Integer namespaceId,String ownerType,Long ownerId,Long enterpriseId) {
         GetConfigurationCommand command = new GetConfigurationCommand();
         command.setNamespaceId(namespaceId);
-        VisitorsysOwnerType visitorsysOwnerType = checkOwner(ownerType, ownerId);
+//        VisitorsysOwnerType visitorsysOwnerType = checkOwner(ownerType, ownerId);
+        VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(ownerType);
         if(visitorsysOwnerType ==VisitorsysOwnerType.ENTERPRISE){
             command.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
             command.setOwnerId(enterpriseId);
         }else{
-            Long communityId = organizationService.getOrganizationActiveCommunityId(ownerId);
+//            Long communityId = organizationService.getOrganizationActiveCommunityId(ownerId);
+            Long communityId = ownerId;
             command.setOwnerType(VisitorsysOwnerType.COMMUNITY.getCode());
             command.setOwnerId(communityId);
         }
@@ -1777,11 +1782,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         GetConfigurationCommand command = new GetConfigurationCommand();
         command.setNamespaceId(cmd.getNamespaceId());
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-        if(visitorsysOwnerType ==VisitorsysOwnerType.COMMUNITY) {
+        if(visitorsysOwnerType ==VisitorsysOwnerType.ENTERPRISE) {
             command.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
             command.setOwnerId(cmd.getEnterpriseId());
         } else{
-            Long communityId = organizationService.getOrganizationActiveCommunityId(cmd.getOwnerId());
+//            Long communityId = organizationService.getOrganizationActiveCommunityId(cmd.getOwnerId());
+            Long communityId = cmd.getOwnerId();
             command.setOwnerType(VisitorsysOwnerType.COMMUNITY.getCode());
             command.setOwnerId(communityId);
          }
@@ -2947,6 +2953,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         } else if (cmd.getAppId() == 2L) {
             HKWSUtil.delAppointment(bean);
         }
+    }
 
+    @Override
+    public ListFreqVisitorsResponse listFreqVisitors(ListFreqVisitorsCommand cmd) {
+        return freqVisitorSearcher.searchVisitors(cmd);
+    }
+
+    @Override
+    public void syncFreqVisitors(BaseVisitorsysCommand cmd) {
+        freqVisitorSearcher.syncVisitorsFromDb(cmd.getNamespaceId());
     }
 }

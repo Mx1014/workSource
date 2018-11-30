@@ -2,9 +2,7 @@
 package com.everhomes.visitorsys;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import com.everhomes.rest.visitorsys.VisitorsysOwnerType;
 import com.everhomes.rest.visitorsys.VisitorsysSearchFlagType;
@@ -29,6 +27,9 @@ import com.everhomes.server.schema.tables.pojos.EhVisitorSysVisitors;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
+import static org.jooq.impl.DSL.count;
+import static org.jooq.impl.DSL.max;
 
 @Component
 public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider {
@@ -211,6 +212,33 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 				.and(Tables.EH_VISITOR_SYS_VISITORS.VISITOR_TYPE.eq(VisitorsysVisitorType.BE_INVITED.getCode()))
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitor.class));
 		return list;
+	}
+
+	@Override
+	public List<VisitorSysVisitor> listFreqVisitor() {
+//		SELECT
+//				*
+//				FROM
+//		eh_visitor_sys_visitors
+//				WHERE
+//		owner_type = 'community'
+//		AND create_time > DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+//		GROUP BY
+//		visitor_phone,
+//				owner_id
+//		HAVING
+//		COUNT(1) > 1
+//		AND max(create_time);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		cal.add(cal.DATE,-30);
+		Timestamp time = new Timestamp(cal.getTimeInMillis());
+		return getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISITORS)
+				.where(Tables.EH_VISITOR_SYS_VISITORS.OWNER_TYPE.eq("community"))
+				.and(Tables.EH_VISITOR_SYS_VISITORS.CREATE_TIME.ge(time))
+				.groupBy(Tables.EH_VISITOR_SYS_VISITORS.VISITOR_PHONE,Tables.EH_VISITOR_SYS_VISITORS.OWNER_ID)
+				.having(count().gt(1), (Condition) max(Tables.EH_VISITOR_SYS_VISITORS.CREATE_TIME))
+				.fetch().map(r ->ConvertHelper.convert(r,VisitorSysVisitor.class));
 	}
 
 	private EhVisitorSysVisitorsDao getReadWriteDao() {
