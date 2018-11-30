@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -56,7 +57,7 @@ public class VisitorSysHKWSUtil {
         Integer personId = 0;
         List<HKWSUser> users = HKWSUserProvider.findUserByPhone(UserContext.current().getUser().getIdentifierToken());
         if(users == null || users.size() == 0){
-            Long startTime = configProvider.getLongValue("HKWS.user.syncTime", Long.MIN_VALUE);
+            Long startTime = configProvider.getLongValue("HKWS.user.syncTime", 0L);
             syncHKWSUsers(startTime);
             users = HKWSUserProvider.findUserByPhone(UserContext.current().getUser().getIdentifierToken());
             if(users == null || users.size() == 0){
@@ -166,6 +167,12 @@ public class VisitorSysHKWSUtil {
 
         configProvider.setValue("HKWS.user.syncTime",String.valueOf(now));
 
+    }
+
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void syncHKWSUsersdaily(){
+        Long startTime = configProvider.getLongValue("HKWS.user.syncTime", 0L);
+        syncHKWSUsers(startTime);
     }
 
 }

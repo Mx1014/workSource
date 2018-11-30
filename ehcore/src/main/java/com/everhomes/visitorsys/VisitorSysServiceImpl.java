@@ -181,6 +181,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Autowired
     private VisitorSysHKWSUtil HKWSUtil;
     @Autowired
+    private VisitorSysDingFengHuiUtil DFHUtil;
+    @Autowired
     private FreqVisitorSearcher freqVisitorSearcher;
 
     @Override
@@ -740,6 +742,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkDoorGuard(relatedVisitor);
         visitorSysVisitorProvider.createVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        if(namespaceId == 999925){
+//          上海金茂对接
+            HKWSUtil.addAppointment(visitor);
+        } else if (namespaceId == 999951){
+//          鼎峰汇对接
+            DFHUtil.doInvite(visitor);
+        }
 //        createVisitorActions(relatedVisitor);
         sendMessageToAdmin(relatedVisitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         return null;
