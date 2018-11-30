@@ -369,7 +369,7 @@ public class PortalServiceImpl implements PortalService {
 		if(null == serviceModule){
 			LOGGER.error("Unable to find the serviceModule.id = {}", id);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the serviceModule.");
+					"Unable to find the serviceModule.id={}",id);
 		}
 		return serviceModule;
 	}

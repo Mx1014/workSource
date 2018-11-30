@@ -130,10 +130,22 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
                     "activityId is invalid.");
         }
         List<ActivityRoster> rosterList = this.activityProivider.listRosters(cmd.getOwnerId(), ActivityRosterStatus.NORMAL);
-        if (CollectionUtils.isEmpty(rosterList) || rosterList.get(0).getFormId() == null) {
+        if (CollectionUtils.isEmpty(rosterList)) {
             return null;
         }
-        GeneralForm generalForm = this.generalFormProvider.findGeneralFormById(rosterList.get(0).getFormId());
+        Long formId = 0L;
+        for (ActivityRoster activityRoster : rosterList) {
+            if (activityRoster == null) {
+                continue;
+            }
+            if (activityRoster.getFormId() != null) {
+                formId = activityRoster.getFormId();
+            }
+        }
+        if (formId == 0L) {
+            return null;
+        }
+        GeneralForm generalForm = this.generalFormProvider.findGeneralFormById(formId);
         if (generalForm != null) {
             dto = ConvertHelper.convert(generalForm,GeneralFormDTO.class);
             List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(dto.getTemplateText(), GeneralFormFieldDTO.class);
