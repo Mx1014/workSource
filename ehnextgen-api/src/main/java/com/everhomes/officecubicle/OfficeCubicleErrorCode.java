@@ -16,4 +16,5 @@ public interface OfficeCubicleErrorCode {
     int ERROR_REPEATE_ACCOUNT= 10010; //  重复账号
     int PARAMTER_LOSE = 10011;
     int ERROR_REFUND_ERROR = 10012;//退款失败
+    int STATION_NOT_ENOUGH = 10013;//工位数量不足
 }

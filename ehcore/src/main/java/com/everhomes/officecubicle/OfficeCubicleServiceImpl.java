@@ -1611,7 +1611,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Integer rentNums = Integer.valueOf(space.getShortRentNums());
 		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getOrderNo()).enter(()-> {
 			if (rentNums<(stationRent.size()+rentalOrder.getRentalCount().longValue())){
-				
+				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
+				"工位数量不足");
 			} else {
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 				rent.setOrderId(order.getId());
@@ -1905,7 +1906,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		
 		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getId()).enter(()-> {
 			if (stationNums<(stationRent.size()+cmd.getRentCount())){
-				
+				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
+				"工位数量不足");
 			} else {
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 				rent.setOrderId(order.getId());
@@ -1915,7 +1917,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			return null;
 		});
-
+		
+		
 		return null;
 		
 	}
