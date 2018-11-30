@@ -182,6 +182,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private VisitorSysHKWSUtil HKWSUtil;
     @Autowired
     private FreqVisitorSearcher freqVisitorSearcher;
+
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
