@@ -8219,12 +8219,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (record != null) {
 			dto.setInvoiceFlag(bill.getInvoiceFlag());
 			String invoiceUrl = configurationProvider.getValue(0, "home.url", "");//营销系统和core共用一个域名
+			String systemId = configurationProvider.getValue(0,"prmt.system_id","10");
 			if (TrueOrFalseFlag.FALSE.getCode().equals(bill.getInvoiceFlag())) {
-				 invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s#/invoice-application";
+				 invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s&systemId=%s#/invoice-application";
 			} else {
-				invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s#/invoice-detail/2";
+				invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s&systemId=%s#/invoice-detail/2";
 			}
-			invoiceUrl = String.format(invoiceUrl, record.getBizOrderNum());
+			invoiceUrl = String.format(invoiceUrl, record.getBizOrderNum(),systemId);
 			dto.setInvoiceUrl(invoiceUrl);
 		}
 
