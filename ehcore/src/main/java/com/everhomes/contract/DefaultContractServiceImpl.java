@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,6 +28,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +67,9 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.reportForm.ContractReportFormExportHandler;
+import com.everhomes.contract.reportForm.ContractStaticsCommunityHistoryExportHandler;
+import com.everhomes.contract.reportForm.ContractStaticsTotalExportHandler;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.*;
@@ -100,6 +114,7 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.*;
+import com.everhomes.rest.contract.statistic.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncDataTaskType;
@@ -120,6 +135,7 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ContractInstanceConfig;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -145,6 +161,11 @@ import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 public class DefaultContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
@@ -4504,4 +4525,1024 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		return dto;
 	}
 	
+	// 产生合同报表信息,目前只支持月份更新以前的统计信息
+	@Override
+	public void generateReportFormStatics(GetTotalContractStaticsCommand dateStr) {
+		// 开事务
+		dbProvider.execute((TransactionStatus status) -> {
+			// 先删掉这个月的的统计数据
+			String todayDateStr = "";
+			if ("".equals(dateStr.getDateStr()) || dateStr.getDateStr() == null) {
+				todayDateStr = getTodayDateStr();
+			}else {
+				todayDateStr = dateStr.getDateStr();
+			}
+			//String todayDateStr = getTodayDateStr();
+			contractProvider.deleteCommunityDataByDateStr(todayDateStr);
+
+			// 开始遍历，进行数据统计
+			int pageSize = 1000;
+			// 只统计本月的数据，每次统计，会把本月的此次之前的数据清空
+			// 传过来的时间进行格式化时间戳转化
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			SimpleDateFormat sdfMM = new SimpleDateFormat("yyyy-MM");
+			//设置本月第一天
+			Calendar firstCa = Calendar.getInstance();
+			// 设置本月最后
+			Calendar lastCa = Calendar.getInstance();
+			
+			Date userDate = null;
+			try {
+				userDate = sdfMM.parse(todayDateStr);
+			} catch (ParseException e1) {
+
+			}
+			firstCa.setTime(userDate);
+			firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+			// 设置本月第一天
+			//Calendar firstCa = Calendar.getInstance();
+			/*firstCa.add(Calendar.MONTH, 0);
+			firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+			firstCa.set(Calendar.HOUR_OF_DAY, 0);
+			firstCa.set(Calendar.MINUTE, 0);
+			firstCa.set(Calendar.SECOND, 0);
+			firstCa.set(Calendar.MILLISECOND, 0);*/
+			String firststr = sdf.format(firstCa.getTime());
+
+			// 设置本月最后
+			//Calendar lastCa = Calendar.getInstance();
+			lastCa.setTime(userDate);
+			lastCa.set(Calendar.DAY_OF_MONTH, lastCa.getActualMaximum(Calendar.DAY_OF_MONTH));
+			lastCa.set(Calendar.HOUR_OF_DAY, 23);
+			lastCa.set(Calendar.MINUTE, 59);
+			lastCa.set(Calendar.SECOND, 59);
+			String laststr = sdf.format(lastCa.getTime());
+
+			Timestamp firstdateUpdateTime = new Timestamp(System.currentTimeMillis());
+			Timestamp lastdateUpdateTime = new Timestamp(System.currentTimeMillis());
+			try {
+				firstdateUpdateTime = Timestamp.valueOf(firststr);
+				lastdateUpdateTime = Timestamp.valueOf(laststr);
+			} catch (Exception e) {
+				LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error");
+				e.printStackTrace();
+			}
+
+			int totalCount = contractProvider.getTotalContractCount(firstdateUpdateTime, lastdateUpdateTime);
+			int totalPage = 0;
+			if (totalCount % pageSize == 0) {
+				totalPage = totalCount / pageSize;
+			} else {
+				totalPage = totalCount / pageSize + 1;
+			}
+
+			// 园区统计结果集
+			Map<Long, ContractReportformStatisticCommunitys> communityResultMap = new HashMap<>();
+			// 分页遍历开始
+			for (int currentPage = 0; currentPage <= totalPage; currentPage++) {
+				long startTime = System.currentTimeMillis();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("Start PropertyReportFormJob for " + (currentPage + 1) + " time.........");
+				}
+
+				//int startIndex = currentPage * pageSize;
+				// 获取合同列表，根据园区排序
+				ContractReportFormListContractsCommand crfcmd = new ContractReportFormListContractsCommand();
+				crfcmd.setPageSize(pageSize);
+				crfcmd.setPageNumber(new Long((long) currentPage + 1));
+				crfcmd.setDateStr(todayDateStr);
+				ListContractsResponse listContractsResponse = contractSearcher.contractReportFormListContracts(crfcmd);
+				List<ContractDTO> contracts = listContractsResponse.getContracts();
+
+				// 插入上一页统计得到的数据
+				if (currentPage != 0) {
+					// 插入园区信息统计数据
+					if (contracts != null && contracts.size() > 0 && communityResultMap.containsKey(contracts.get(0).getCommunityId())) {
+						ContractReportformStatisticCommunitys remove = communityResultMap.remove(contracts.get(0).getCommunityId());
+						createCommunityStatics(communityResultMap);
+						communityResultMap.put(remove.getCommunityId(), remove);
+					} else {
+						createCommunityStatics(communityResultMap);
+					}
+				}
+
+				// 生成统计数据
+				for (ContractDTO contract : contracts) {
+					// 园区信息统计数据
+					if (communityResultMap.containsKey(contract.getCommunityId())) {
+						ContractReportformStatisticCommunitys communityStatistics = communityResultMap.get(contract.getCommunityId());
+						countContractForCommunity(communityStatistics, contract);
+					} else {
+						Community community = communityProvider.findCommunityById(contract.getCommunityId());
+						if (community != null) {
+							ContractReportformStatisticCommunitys communityStatistics = initCommunityStatistics(contract.getCommunityId(),todayDateStr);
+							communityResultMap.put(contract.getCommunityId(), communityStatistics);
+							countContractForCommunity(communityStatistics, contract);
+						} else {
+							if (LOGGER.isDebugEnabled()) {
+								LOGGER.debug("community is null !!! communityId is " + contract.getCommunityId());
+							}
+						}
+					}
+				}
+
+				long endTime = System.currentTimeMillis();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("End PropertyReportFormJob for " + (currentPage + 1) + " time.........");
+					LOGGER.debug("PropertyReportFormJob progress for " + (currentPage + 1) + " time spend " + (endTime - startTime) + "ms");
+				}
+
+			}
+			return null;
+		});
+
+	}
+
+	private ContractReportformStatisticCommunitys initCommunityStatistics(Long communityId, String todayDateStr) {
+		ContractReportformStatisticCommunitys communityStatistics = new ContractReportformStatisticCommunitys();
+		Community community = communityProvider.findCommunityById(communityId);
+		if (community == null) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("community is null !!! communityId is " + communityId);
+			}
+		}
+		communityStatistics.setNamespaceId(community.getNamespaceId());
+		communityStatistics.setCommunityId(communityId);
+		communityStatistics.setDateStr(todayDateStr);
+		communityStatistics.setDateType(ContractStatisticDateType.YEARMMSTR.getCode());
+		communityStatistics.setRentAmount(BigDecimal.ZERO);
+		communityStatistics.setRentalArea(BigDecimal.ZERO);
+		communityStatistics.setUserContractAmount(BigDecimal.ZERO);
+		communityStatistics.setOrgContractAmount(BigDecimal.ZERO);
+		
+		// 获取该园区所有合同租赁总额
+		communityStatistics.setStatus(ContractStatus.ACTIVE.getCode());
+		return communityStatistics;
+	}
+
+	private void createCommunityStatics(Map<Long, ContractReportformStatisticCommunitys> communityResultMap) {
+		Collection<ContractReportformStatisticCommunitys> values = communityResultMap.values();
+		for (ContractReportformStatisticCommunitys communityStatistics : values) {
+			contractProvider.createCommunityStatics(communityStatistics);
+		}
+		communityResultMap.clear();
+	}
+
+	// 判断合同类型进行统计
+	private void countContractForCommunity(ContractReportformStatisticCommunitys communityStatistics, ContractDTO contract) {
+		// 每个园区园区客户总数
+		communityStatistics.setRentAmount((communityStatistics.getRentAmount() != null ? communityStatistics.getRentAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+		List<BuildingApartmentDTO> buildings = contract.getBuildings();
+		if (buildings != null) {
+			for (BuildingApartmentDTO building : buildings) {
+				communityStatistics.setRentalArea((communityStatistics.getRentalArea() != null ? communityStatistics.getRentalArea() : BigDecimal.ZERO).add(new BigDecimal(Double.toString(building.getChargeArea() != null ? building.getChargeArea() : 0.0))));
+			}
+		}
+		//统计具体费项的金额
+		//List<ContractChargingItemReportformDTO> chargingItemDTO = contractProvider.getContractChargingItemInfoList(contract);
+//		for (ContractChargingItemReportformDTO chargingItem : chargingItemDTO) {
+//			ChargingItemsType chargingItemsType = ChargingItemsType.fromStatus(chargingItem.getChargingItemId());
+//			if (chargingItemsType == null) {
+//				continue;
+//			} else {
+//				switch (chargingItemsType) {
+//				// 租金private BigDecimal amountReceivable;  private BigDecimal amountReceived;
+//				case RENT:
+//				communityStatistics.setChargingItemRentAmount((communityStatistics.getChargingItemRentAmount() != null ? 
+//						communityStatistics.getChargingItemRentAmount() : BigDecimal.ZERO).add(chargingItem.getAmountReceivable() != null ? chargingItem.getAmountReceivable() : BigDecimal.ZERO));
+//				// 物业费
+//				case PROPERTYFEE:
+//				communityStatistics.setChargingItemPropertyfeeAmount((communityStatistics.getChargingItemPropertyfeeAmount() != null ? 
+//						communityStatistics.getChargingItemPropertyfeeAmount() : BigDecimal.ZERO).add(chargingItem.getAmountReceivable() != null ? chargingItem.getAmountReceivable() : BigDecimal.ZERO));
+//				default:
+//					break;
+//				}
+//			}
+//
+//		}
+		communityStatistics.setContractCount((communityStatistics.getContractCount() != null ? communityStatistics.getContractCount() : 0) + 1);
+		communityStatistics.setCustomerCount((communityStatistics.getCustomerCount() != null ? communityStatistics.getCustomerCount() : 0) + 1);
+		communityStatistics.setDepositAmount((communityStatistics.getDepositAmount() != null ? communityStatistics.getDepositAmount() : BigDecimal.ZERO).add(contract.getDeposit() != null ? contract.getDeposit() : BigDecimal.ZERO));
+		ContractType contractType = ContractType.fromStatus(contract.getContractType());
+		if (contractType == null) {
+			communityStatistics.setNewContractCount((communityStatistics.getNewContractCount() != null ? communityStatistics.getNewContractCount() : 0) + 1);
+		} else {
+			switch (contractType) {
+			// 新签合同的
+			case NEW:
+				communityStatistics.setNewContractCount((communityStatistics.getNewContractCount() != null ? communityStatistics.getNewContractCount() : 0) + 1);
+				communityStatistics.setNewContractAmount((communityStatistics.getNewContractAmount() != null ? communityStatistics.getNewContractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				if (buildings != null) {
+				for (BuildingApartmentDTO building : buildings) {
+					communityStatistics.setNewContractArea((communityStatistics.getNewContractArea() != null ? communityStatistics.getNewContractArea() : BigDecimal.ZERO).add(new BigDecimal(Double.toString(building.getChargeArea() != null ? building.getChargeArea() : 0.0))));
+				}
+				}
+				// 判断企业客户个人客户
+				if (contract.getCustomerType() == CustomerType.INDIVIDUAL.getCode()) {
+					communityStatistics.setUserContractCount((communityStatistics.getUserContractCount() != null ? communityStatistics.getUserContractCount() : 0) + 1);
+					communityStatistics.setUserContractAmount((communityStatistics.getUserContractAmount() != null ? communityStatistics.getUserContractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				} else if (contract.getCustomerType() == CustomerType.ENTERPRISE.getCode()) {
+					communityStatistics.setOrgContractCount((communityStatistics.getOrgContractCount() != null ? communityStatistics.getOrgContractCount() : 0) + 1);
+					communityStatistics.setOrgContractAmount((communityStatistics.getOrgContractAmount() != null ? communityStatistics.getOrgContractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				} else {
+
+				}
+				break;
+			// 续约
+			case RENEW:// renewcontract_count
+				communityStatistics.setRenewContractCount((communityStatistics.getRenewContractCount() != null ? communityStatistics.getRenewContractCount() : 0) + 1);
+				communityStatistics.setRenewContractAmount((communityStatistics.getRenewContractAmount() != null ? communityStatistics.getRenewContractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				if (buildings != null) {
+				for (BuildingApartmentDTO building : buildings) {
+					communityStatistics.setRenewContractArea((communityStatistics.getRenewContractArea() != null ? communityStatistics.getRenewContractArea() : BigDecimal.ZERO).add(new BigDecimal(Double.toString(building.getChargeArea() != null ? building.getChargeArea() : 0.0))));
+				}
+				}
+				// 判断企业客户个人客户
+				if (contract.getCustomerType() == CustomerType.INDIVIDUAL.getCode()) {
+					communityStatistics.setUserContractCount((communityStatistics.getUserContractCount() != null ? communityStatistics.getUserContractCount() : 0) + 1);
+					communityStatistics.setUserContractAmount(communityStatistics.getUserContractAmount().add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				} else if (contract.getCustomerType() == CustomerType.ENTERPRISE.getCode()) {
+					communityStatistics.setOrgContractCount((communityStatistics.getOrgContractCount() != null? communityStatistics.getOrgContractCount() : 0) + 1);
+					communityStatistics.setOrgContractAmount((communityStatistics.getOrgContractAmount() != null? communityStatistics.getOrgContractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				} else {
+
+				}
+				break;
+			// 变更
+			case CHANGE:// changecontract_count
+				communityStatistics.setChangeContractCount((communityStatistics.getChangeContractCount() != null ? communityStatistics.getChangeContractCount() : 0) + 1);
+				//communityStatistics.setChangeContractAmount(communityStatistics.getChangeContractAmount().add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				if (buildings != null) {
+				for (BuildingApartmentDTO building : buildings) {
+					communityStatistics.setChangeContractArea((communityStatistics.getChangeContractArea() != null ? communityStatistics.getChangeContractArea() : BigDecimal.ZERO).add(new BigDecimal(Double.toString(building.getChargeArea() != null ? building.getChargeArea() : 0.0))));
+				}
+				}
+				// 判断企业客户个人客户
+				if (contract.getCustomerType() == CustomerType.INDIVIDUAL.getCode()) {
+					communityStatistics.setUserContractCount((communityStatistics.getUserContractCount() != null ? communityStatistics.getUserContractCount() : 0) + 1);
+					communityStatistics.setUserContractAmount(communityStatistics.getUserContractAmount().add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				} else if (contract.getCustomerType() == CustomerType.ENTERPRISE.getCode()) {
+					communityStatistics.setOrgContractCount((communityStatistics.getOrgContractCount() != null ? communityStatistics.getOrgContractCount() : 0) + 1);
+					communityStatistics.setOrgContractAmount((communityStatistics.getOrgContractAmount() != null ? communityStatistics.getOrgContractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				} else {
+
+				}
+				break;
+			// 退约denunciationcontract_count
+			case DENUNCIATION:
+				communityStatistics.setDenunciationContractCount((communityStatistics.getDenunciationContractCount() != null ? communityStatistics.getDenunciationContractCount() : 0) + 1);
+				//退约合同金额
+				//communityStatistics.setDenunciationContractAmount(communityStatistics.getDenunciationContractAmount().add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				if (buildings != null) {
+				for (BuildingApartmentDTO building : buildings) {
+					communityStatistics.setDenunciationContractArea((communityStatistics.getDenunciationContractArea() != null ? communityStatistics.getDenunciationContractArea() : BigDecimal.ZERO).add(new BigDecimal(Double.toString(building.getChargeArea() != null ? building.getChargeArea() : 0.0))));
+				}
+				}
+				// 判断企业客户个人客户
+				if (contract.getCustomerType() == CustomerType.INDIVIDUAL.getCode()) {
+					communityStatistics.setUserContractCount((communityStatistics.getUserContractCount() != null ? communityStatistics.getUserContractCount() : 0) + 1);
+					communityStatistics.setUserContractAmount(communityStatistics.getUserContractAmount().add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				} else if (contract.getCustomerType() == CustomerType.ENTERPRISE.getCode()) {
+					communityStatistics.setOrgContractCount((communityStatistics.getOrgContractCount() != null ? communityStatistics.getOrgContractCount() : 0) + 1);
+					communityStatistics.setOrgContractAmount((communityStatistics.getOrgContractAmount() != null ? communityStatistics.getOrgContractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				} else {
+
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	// 获取月计时间
+	private String getTodayDateStr() {
+		Date currentTime = DateHelper.currentGMTTime();
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+		String todayDateStr = yyyyMM.format(currentTime);
+		return todayDateStr;
+	}
+	
+	@Override
+	public ListCommunityContractReportFormResponse searchContractStaticsList(SearchContractStaticsListCommand cmd) {
+		ListCommunityContractReportFormResponse response = new ListCommunityContractReportFormResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor();
+		if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        
+		Integer pageSize = cmd.getPageSize();
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        
+        if(cmd.getDateType() == null){
+        	cmd.setDateType(ContractStatisticDateType.YEARMMSTR.getCode());
+        }
+        String startTimeStr = "";
+        String endTimeStr = "";
+        String formatDateStr = "";
+        
+        if (!"".equals(cmd.getStartTimeStr()) && !"".equals(cmd.getEndTimeStr()) && cmd.getStartTimeStr() != null && cmd.getEndTimeStr() !=null) {
+        	startTimeStr = cmd.getStartTimeStr();
+        	endTimeStr = cmd.getEndTimeStr();
+		}else {
+	        formatDateStr = cmd.getDateStr();
+		}
+        
+        List<ContractStaticsListDTO> resultList = contractProvider.listCommunityContractStaticsList(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
+        
+        
+        if(resultList.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            resultList.remove(resultList.size()-1);
+        }
+        response.setResultList(resultList);
+		return response;
+	}
+	
+	@Override
+	public ListContractStaticsTimeDimensionResponse contractStaticsListTimeDimension(SearchContractStaticsListCommand cmd) {
+		ListContractStaticsTimeDimensionResponse response = new ListContractStaticsTimeDimensionResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor();
+		if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        
+		Integer pageSize = cmd.getPageSize();
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        
+        if(cmd.getDateType() == null){
+        	cmd.setDateType(ContractStatisticDateType.YEARMMSTR.getCode());
+        }
+        String startTimeStr = "";
+        String endTimeStr = "";
+        String formatDateStr = "";
+        
+        if (!"".equals(cmd.getStartTimeStr()) && !"".equals(cmd.getEndTimeStr()) && cmd.getStartTimeStr() != null && cmd.getEndTimeStr() !=null) {
+        	startTimeStr = cmd.getStartTimeStr();
+        	endTimeStr = cmd.getEndTimeStr();
+		}else {
+	        formatDateStr = cmd.getDateStr();
+	        if ("".equals(formatDateStr) || formatDateStr == null) {
+	        	LOGGER.error("contractStaticsListTimeDimension cmd =", cmd);
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.CONTRACT_STATICS_TIME_DIMENSION_ERROR,
+						"contract statics time dimension is error");
+			}
+		}
+        
+        List<TotalContractStaticsDTO> resultList = contractProvider.listcontractStaticsListTimeDimension(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
+        
+        
+        if(resultList.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            resultList.remove(resultList.size()-1);
+        }
+        response.setResultList(resultList);
+		return response;
+	}
+	
+	//如果是2018这种年份字符串，那就要处理
+	private String formatDateStr(String dateStr){
+		String format = null;
+		if (dateStr == null) {
+			format = getTodayMonthStr();
+		}else if (dateStr.matches("\\d{4}")) {
+			String todayYearStr = getTodayYearStr();
+			if (dateStr.equals(todayYearStr)) {
+				format = getTodayMonthStr();
+			}else {
+				format = dateStr + "-12";
+			}
+			return format;
+		}else if (dateStr.matches("\\d{4}-\\d{2}")) {
+			String todayMonthStr = getTodayMonthStr();
+			if (dateStr.compareTo(todayMonthStr) > 0) {
+				format = todayMonthStr;
+			}else {
+				format = dateStr;
+			}
+			return format;
+		}else {
+			//抛出异常
+		}
+		return format;
+	}
+	
+	private String getTodayMonthStr(){
+		Date currentTime = DateHelper.currentGMTTime();
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+		String todayDateStr = yyyyMM.format(currentTime);
+		return todayDateStr;
+	}
+	private String getTodayYearStr(){
+		Date currentTime = DateHelper.currentGMTTime();
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy");
+		String todayDateStr = yyyyMM.format(currentTime);
+		return todayDateStr;
+	}
+	
+	@Override
+	public TotalContractStaticsDTO getTotalContractStatics(GetTotalContractStaticsCommand cmd){
+        String startTimeStr = cmd.getStartTimeStr();
+        String endTimeStr = cmd.getEndTimeStr();
+        String formatDateStr = cmd.getEndTimeStr();
+        
+        if (!"".equals(cmd.getStartTimeStr()) && !"".equals(cmd.getEndTimeStr()) && cmd.getStartTimeStr() != null && cmd.getEndTimeStr() != null) {
+        	startTimeStr = formatDateStr(startTimeStr);
+        	endTimeStr = formatDateStr(endTimeStr);
+		}else {
+			formatDateStr = cmd.getDateStr();
+		}
+	    
+	    List<Long> communityIds = cmd.getCommunityIds();
+	    TotalContractStaticsDTO result = contractProvider.getTotalContractStatics(cmd.getNamespaceId(),communityIds,formatDateStr,startTimeStr,endTimeStr,cmd.getDateType());
+		return result;
+	}
+	
+	@Override
+	public void exportContractStaticsInfo(GetTotalContractStaticsCommand cmd) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("GetTotalContractStaticsCommand", cmd);
+		String fileName = String.format("项目合同信息汇总表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractReportFormExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Override
+	public OutputStream exportOutputStreamForContractStatics(GetTotalContractStaticsCommand cmd, Long taskId) {
+		OutputStream outputStream = new ByteArrayOutputStream();
+    	//每一条数据
+		SearchContractStaticsListCommand cmd2 = new SearchContractStaticsListCommand();
+		cmd2.setNamespaceId(cmd.getNamespaceId());
+		cmd2.setCommunityIds(cmd.getCommunityIds());
+		cmd2.setDateStr(cmd.getDateStr());
+		cmd2.setStartTimeStr(cmd.getStartTimeStr());
+		cmd2.setEndTimeStr(cmd.getEndTimeStr());
+		cmd2.setDateType(cmd.getDateType());
+		cmd2.setPageAnchor(0L);
+		cmd2.setPageSize(10000);
+		
+		ListCommunityContractReportFormResponse response = searchContractStaticsList(cmd2); 
+        List<ContractStaticsListDTO> dtos = response.getResultList();
+    
+        taskService.updateTaskProcess(taskId, 20);
+		Workbook wb = null;
+		InputStream in;
+		in = this.getClass().getResourceAsStream("/excels/contract/communityContractDetailStatistic.xlsx");
+		
+		try {
+			wb = new XSSFWorkbook(copyInputStream(in));
+		} catch (IOException e) {
+			LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
+		}
+		Sheet sheet = wb.getSheetAt(0);
+		if (null != sheet) {
+			Row defaultRow = sheet.getRow(2);
+			Cell cell = defaultRow.getCell(0);
+			CellStyle style = cell.getCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
+			int size = 0;
+			if(null != dtos){
+				size = dtos.size();
+				taskService.updateTaskProcess(taskId, 30);
+				for(int i = 0;i < size;i++){
+					Row tempRow = sheet.createRow(i + 2);
+					ContractStaticsListDTO dto = dtos.get(i);
+					int orderNum = i + 1;//序号
+					boolean isLastRow = false;
+					fillRowCellCommunityContractStatistic(tempRow, style, isLastRow, orderNum, dto);
+				}
+				taskService.updateTaskProcess(taskId, 70);
+				//最后的一行总计
+				CellStyle totalStyle = getTotalStyle(wb, style);
+				Row tempRow = sheet.createRow(dtos.size() + 2);
+				int orderNum = dtos.size() + 1;//序号
+				boolean isLastRow = true;
+				TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
+				fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
+				taskService.updateTaskProcess(taskId, 80);
+				try {
+					wb.write(outputStream);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return outputStream;
+			}else {
+				throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+			}
+		}
+		return outputStream;
+	}
+	
+	/**
+     * @param tempRow ： Excel的行
+     * @param style 
+     * @param isLastRow ： 是否是最后一行
+     * @param orderNum ： 序号
+     * @param dto
+     */
+    private void fillRowCellCommunityContractStatistic(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, ContractStaticsListDTO dto) {
+    	//序号
+		Cell cell0 = tempRow.createCell(0);
+		cell0.setCellStyle(style);
+		cell0.setCellValue(orderNum);
+			
+		//日期
+		Cell cell2 = tempRow.createCell(1);
+		cell2.setCellStyle(style);
+		cell2.setCellValue(dto.getDateStr());
+		
+		//项目名称
+		Cell cell3 = tempRow.createCell(2);
+		cell3.setCellStyle(style);
+		cell3.setCellValue(dto.getCommunityName());
+		
+		//新签合同总额
+		Cell cell4 = tempRow.createCell(3);
+		cell4.setCellStyle(style);
+		cell4.setCellValue(dto.getNewContractAmount() != null ? dto.getNewContractAmount().toString() : "0");
+		
+		//新签客户总数
+		Cell cell5 = tempRow.createCell(4);
+		cell5.setCellStyle(style);
+		cell5.setCellValue(dto.getCustomerCount() != null ? dto.getCustomerCount().toString() : "0");
+		
+		//新签租赁总面积
+		Cell cell6 = tempRow.createCell(5);
+		cell6.setCellStyle(style);
+		cell6.setCellValue(dto.getNewContractArea() != null ? dto.getNewContractArea().toString() : "0");	
+		
+		//变更合同总数
+		Cell cell7 = tempRow.createCell(6);
+		cell7.setCellStyle(style);
+		cell7.setCellValue(dto.getChangeContractCount() != null ? dto.getChangeContractCount().toString() : "0");
+		
+		//退约合同总数
+		Cell cell8 = tempRow.createCell(7);
+		cell8.setCellStyle(style);
+		cell8.setCellValue(dto.getDenunciationContractCount() != null ? dto.getDenunciationContractCount().toString() : "0");
+		
+		//新增押金总额
+		Cell cell9 = tempRow.createCell(8);
+		cell9.setCellStyle(style);
+		cell9.setCellValue(dto.getDepositAmount() != null ? dto.getDepositAmount().toString() : "0");
+		
+		//企业客户总数
+		Cell cell10 = tempRow.createCell(9);
+		cell10.setCellStyle(style);
+		cell10.setCellValue(dto.getOrgContractCount() != null ? dto.getOrgContractCount().toString() : "0");
+		
+		//个人客户总数
+		Cell cell11 = tempRow.createCell(10);
+		cell11.setCellStyle(style);
+		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
+		
+	}
+	
+	private InputStream copyInputStream(InputStream source) {
+		if(null == source)
+			 return null;
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+		  
+		byte[] buffer = new byte[1024];  
+		int len;  
+		try {
+			while ((len = source.read(buffer)) > -1 ) {  
+			    baos.write(buffer, 0, len);  
+			}
+			baos.flush();  
+		} catch (IOException e) {
+			LOGGER.error("ExportTasks is fail, cmd={}");
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_FLIE_EXPORT_FAIL,
+					"ExportTasks is fail.");
+		}  
+		// 打开一个新的输入流  
+		return new ByteArrayInputStream(baos.toByteArray());
+	}
+	
+	@SuppressWarnings("deprecation")
+	private CellStyle getTotalStyle(Workbook wb, CellStyle style) {
+    	//生成一个字体
+		Font font = wb.createFont();
+		font.setColor(HSSFColor.BLUE.index);//字体颜色
+		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);//字体增粗
+		//把字体应用到当前的样式
+		CellStyle totalStyle = wb.createCellStyle();
+		totalStyle.cloneStyleFrom(style);
+		totalStyle.setFont(font);
+		return totalStyle;
+    }
+	
+    private void fillRowCellTotalCommunityStatistic(Row tempRow, CellStyle style, boolean isLastRow, int orderNum,
+    		TotalContractStaticsDTO dto) {
+		//序号
+		Cell cell0 = tempRow.createCell(0);
+		cell0.setCellStyle(style);
+		cell0.setCellValue("合计");
+			
+		//日期
+		Cell cell2 = tempRow.createCell(1);
+		cell2.setCellStyle(style);
+		cell2.setCellValue("项目总数");
+		
+		//项目总数
+		Cell cell3 = tempRow.createCell(2);
+		cell3.setCellStyle(style);
+		cell3.setCellValue(dto.getCommunityCount() != null ? dto.getCommunityCount().toString() : "0");
+		
+		//新签合同总额
+		Cell cell4 = tempRow.createCell(3);
+		cell4.setCellStyle(style);
+		cell4.setCellValue(dto.getNewContractAmount() != null ? dto.getNewContractAmount().toString() : "0");
+		
+		//新签客户总数
+		Cell cell5 = tempRow.createCell(4);
+		cell5.setCellStyle(style);
+		cell5.setCellValue(dto.getCustomerCount() != null ? dto.getCustomerCount().toString() : "0");
+		
+		//新签租赁总面积
+		Cell cell6 = tempRow.createCell(5);
+		cell6.setCellStyle(style);
+		cell6.setCellValue(dto.getNewContractArea() != null ? dto.getNewContractArea().toString() : "0");	
+		
+		//变更合同总数
+		Cell cell7 = tempRow.createCell(6);
+		cell7.setCellStyle(style);
+		cell7.setCellValue(dto.getChangeContractCount() != null ? dto.getChangeContractCount().toString() : "0");
+		
+		//退约合同总数
+		Cell cell8 = tempRow.createCell(7);
+		cell8.setCellStyle(style);
+		cell8.setCellValue(dto.getDenunciationContractCount() != null ? dto.getDenunciationContractCount().toString() : "0");
+		
+		//新增押金总额
+		Cell cell9 = tempRow.createCell(8);
+		cell9.setCellStyle(style);
+		cell9.setCellValue(dto.getDepositAmount() != null ? dto.getDepositAmount().toString() : "0");
+		
+		//企业客户总数
+		Cell cell10 = tempRow.createCell(9);
+		cell10.setCellStyle(style);
+		cell10.setCellValue(dto.getOrgContractCount() != null ? dto.getOrgContractCount().toString() : "0");
+		
+		//个人客户总数
+		Cell cell11 = tempRow.createCell(10);
+		cell11.setCellStyle(style);
+		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
+	}
+    
+    @Override
+	public void exportContractStaticsCommunityHistory(SearchContractStaticsListCommand cmd) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("GetTotalContractStaticsCommand", cmd);
+		// 所有项目的汇总历史记录 汇总
+		String name = "";
+		if (cmd.getSearchType() == ContractStatisticSearchType.SUMMARYRECORD.getCode()) {
+			name = "所有项目的历史汇总表";
+		}
+		if (cmd.getSearchType() == ContractStatisticSearchType.DETAILRECORD.getCode()) {
+			name = "各项目的历史汇总表";
+		}
+		String fileName = String.format(name, com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractStaticsCommunityHistoryExportHandler.class,
+				params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+    
+    //导出所有项目的历史汇总表
+	@Override
+	public OutputStream exportOutputStreamForContractStaticsTime(SearchContractStaticsListCommand cmd, Long taskId) {
+		OutputStream outputStream = new ByteArrayOutputStream();
+    	//每一条数据
+		ListContractStaticsTimeDimensionResponse contractStaticsList = contractStaticsListTimeDimension(cmd);
+        List<TotalContractStaticsDTO> dtos = contractStaticsList.getResultList();
+    
+        taskService.updateTaskProcess(taskId, 20);
+		Workbook wb = null;
+		InputStream in;
+		in = this.getClass().getResourceAsStream("/excels/contract/communityContractSummaryStatistic.xlsx");
+		try {
+			wb = new XSSFWorkbook(copyInputStream(in));
+		} catch (IOException e) {
+			LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
+		}
+		Sheet sheet = wb.getSheetAt(0);
+		if (null != sheet) {
+			Row defaultRow = sheet.getRow(2);
+			Cell cell = defaultRow.getCell(0);
+			CellStyle style = cell.getCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
+			int size = 0;
+			if(null != dtos){
+				size = dtos.size();
+				taskService.updateTaskProcess(taskId, 30);
+				for(int i = 0;i < size;i++){
+					Row tempRow = sheet.createRow(i + 2);
+					TotalContractStaticsDTO dto = dtos.get(i);
+					int orderNum = i + 1;//序号
+					boolean isLastRow = false;
+					fillRowCellCommunityContractStaticsTime(tempRow, style, isLastRow, orderNum, dto);
+				}
+				taskService.updateTaskProcess(taskId, 80);
+				try {
+					wb.write(outputStream);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return outputStream;
+			}else {
+				throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+			}
+		}
+		return outputStream;
+	}
+	/**
+     * @param tempRow ： Excel的行
+     * @param style 
+     * @param isLastRow ： 是否是最后一行
+     * @param orderNum ： 序号
+     * @param dto
+     */
+    private void fillRowCellCommunityContractStaticsTime(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, TotalContractStaticsDTO dto) {
+    	//序号
+		Cell cell0 = tempRow.createCell(0);
+		cell0.setCellStyle(style);
+		cell0.setCellValue(orderNum);
+			
+		//日期
+		Cell cell2 = tempRow.createCell(1);
+		cell2.setCellStyle(style);
+		cell2.setCellValue(dto.getDateStr());
+		
+		//项目名称
+		Cell cell3 = tempRow.createCell(2);
+		cell3.setCellStyle(style);
+		cell3.setCellValue(dto.getCommunityCount());
+		
+		//新签合同总额
+		Cell cell4 = tempRow.createCell(3);
+		cell4.setCellStyle(style);
+		cell4.setCellValue(dto.getNewContractAmount() != null ? dto.getNewContractAmount().toString() : "0");
+		
+		//新签客户总数
+		Cell cell5 = tempRow.createCell(4);
+		cell5.setCellStyle(style);
+		cell5.setCellValue(dto.getCustomerCount() != null ? dto.getCustomerCount().toString() : "0");
+		
+		//新签租赁总面积
+		Cell cell6 = tempRow.createCell(5);
+		cell6.setCellStyle(style);
+		cell6.setCellValue(dto.getNewContractArea() != null ? dto.getNewContractArea().toString() : "0");	
+		
+		//变更合同总数
+		Cell cell7 = tempRow.createCell(6);
+		cell7.setCellStyle(style);
+		cell7.setCellValue(dto.getChangeContractCount() != null ? dto.getChangeContractCount().toString() : "0");
+		
+		//退约合同总数
+		Cell cell8 = tempRow.createCell(7);
+		cell8.setCellStyle(style);
+		cell8.setCellValue(dto.getDenunciationContractCount() != null ? dto.getDenunciationContractCount().toString() : "0");
+		
+		//新增押金总额
+		Cell cell9 = tempRow.createCell(8);
+		cell9.setCellStyle(style);
+		cell9.setCellValue(dto.getDepositAmount() != null ? dto.getDepositAmount().toString() : "0");
+		
+		//企业客户总数
+		Cell cell10 = tempRow.createCell(9);
+		cell10.setCellStyle(style);
+		cell10.setCellValue(dto.getOrgContractCount() != null ? dto.getOrgContractCount().toString() : "0");
+		
+		//个人客户总数
+		Cell cell11 = tempRow.createCell(10);
+		cell11.setCellStyle(style);
+		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
+		
+	}
+    
+    // 各项目的历史合计 明细
+	@Override
+	public OutputStream exportOutputStreamContractStaticsCommunityTotal(SearchContractStaticsListCommand cmd, Long taskId) {
+		OutputStream outputStream = new ByteArrayOutputStream();
+        // 各项目的历史合计 列表
+		ListContractStaticsTimeDimensionResponse response = contractStaticsListCommunityTotal(cmd); 
+        List<TotalContractStaticsDTO> dtos = response.getResultList();
+    
+        taskService.updateTaskProcess(taskId, 20);
+		Workbook wb = null;
+		InputStream in;
+		in = this.getClass().getResourceAsStream("/excels/contract/communityContractDetailStatistic.xlsx");
+		
+		try {
+			wb = new XSSFWorkbook(copyInputStream(in));
+		} catch (IOException e) {
+			LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
+		}
+		Sheet sheet = wb.getSheetAt(0);
+		if (null != sheet) {
+			Row defaultRow = sheet.getRow(2);
+			Cell cell = defaultRow.getCell(0);
+			CellStyle style = cell.getCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
+			int size = 0;
+			if(null != dtos){
+				size = dtos.size();
+				taskService.updateTaskProcess(taskId, 30);
+				for(int i = 0;i < size;i++){
+					Row tempRow = sheet.createRow(i + 2);
+					TotalContractStaticsDTO dto = dtos.get(i);
+					int orderNum = i + 1;//序号
+					boolean isLastRow = false;
+					fillRowCellCommunityContractStatisticCommunityTotal(tempRow, style, isLastRow, orderNum, dto);
+				}
+				taskService.updateTaskProcess(taskId, 80);
+				try {
+					wb.write(outputStream);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return outputStream;
+			}else {
+				throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+			}
+		}
+		return outputStream;
+	}
+	
+    private void fillRowCellCommunityContractStatisticCommunityTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, TotalContractStaticsDTO dto) {
+    	//序号
+		Cell cell0 = tempRow.createCell(0);
+		cell0.setCellStyle(style);
+		cell0.setCellValue(orderNum);
+			
+		//日期
+		Cell cell2 = tempRow.createCell(1);
+		cell2.setCellStyle(style);
+		cell2.setCellValue(dto.getDateStr());
+		
+		//项目名称
+		Cell cell3 = tempRow.createCell(2);
+		cell3.setCellStyle(style);
+		cell3.setCellValue(dto.getCommunityName());
+		
+		//新签合同总额
+		Cell cell4 = tempRow.createCell(3);
+		cell4.setCellStyle(style);
+		cell4.setCellValue(dto.getNewContractAmount() != null ? dto.getNewContractAmount().toString() : "0");
+		
+		//新签客户总数
+		Cell cell5 = tempRow.createCell(4);
+		cell5.setCellStyle(style);
+		cell5.setCellValue(dto.getCustomerCount() != null ? dto.getCustomerCount().toString() : "0");
+		
+		//新签租赁总面积
+		Cell cell6 = tempRow.createCell(5);
+		cell6.setCellStyle(style);
+		cell6.setCellValue(dto.getNewContractArea() != null ? dto.getNewContractArea().toString() : "0");	
+		
+		//变更合同总数
+		Cell cell7 = tempRow.createCell(6);
+		cell7.setCellStyle(style);
+		cell7.setCellValue(dto.getChangeContractCount() != null ? dto.getChangeContractCount().toString() : "0");
+		
+		//退约合同总数
+		Cell cell8 = tempRow.createCell(7);
+		cell8.setCellStyle(style);
+		cell8.setCellValue(dto.getDenunciationContractCount() != null ? dto.getDenunciationContractCount().toString() : "0");
+		
+		//新增押金总额
+		Cell cell9 = tempRow.createCell(8);
+		cell9.setCellStyle(style);
+		cell9.setCellValue(dto.getDepositAmount() != null ? dto.getDepositAmount().toString() : "0");
+		
+		//企业客户总数
+		Cell cell10 = tempRow.createCell(9);
+		cell10.setCellStyle(style);
+		cell10.setCellValue(dto.getOrgContractCount() != null ? dto.getOrgContractCount().toString() : "0");
+		
+		//个人客户总数
+		Cell cell11 = tempRow.createCell(10);
+		cell11.setCellStyle(style);
+		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
+	}
+	
+	@Override
+	public void exportContractStaticsTotal(GetTotalContractStaticsCommand cmd) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("GetTotalContractStaticsCommand", cmd);
+		String fileName = String.format("项目合同信息总计表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractStaticsTotalExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+	//导出报表的总明细在时间维度
+	@Override
+	public OutputStream exportOutputStreamContractStaticsTotal(GetTotalContractStaticsCommand cmd, Long taskId) {
+		OutputStream outputStream = new ByteArrayOutputStream();
+        List<ContractStaticsListDTO> dtos = new ArrayList<ContractStaticsListDTO>();
+        
+        taskService.updateTaskProcess(taskId, 20);
+		Workbook wb = null;
+		InputStream in;
+		in = this.getClass().getResourceAsStream("/excels/contract/communityContractSummaryStatistic.xlsx");
+		
+		try {
+			wb = new XSSFWorkbook(copyInputStream(in));
+		} catch (IOException e) {
+			LOGGER.error("exportOutputStreamForCommunity copy inputStream error.");
+		}
+		Sheet sheet = wb.getSheetAt(0);
+		if (null != sheet) {
+			Row defaultRow = sheet.getRow(2);
+			Cell cell = defaultRow.getCell(0);
+			CellStyle style = cell.getCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
+			int size = 0;
+			if(null != dtos){
+				size = dtos.size();
+				taskService.updateTaskProcess(taskId, 30);
+				for(int i = 0;i < size;i++){
+					Row tempRow = sheet.createRow(i + 2);
+					ContractStaticsListDTO dto = dtos.get(i);
+					int orderNum = i + 1;//序号
+					boolean isLastRow = false;
+					fillRowCellCommunityContractStatistic(tempRow, style, isLastRow, orderNum, dto);
+				}
+				taskService.updateTaskProcess(taskId, 70);
+				//最后的一行总计
+				CellStyle totalStyle = getTotalStyle(wb, style);
+				Row tempRow = sheet.createRow(dtos.size() + 2);
+				int orderNum = dtos.size() + 1;//序号
+				boolean isLastRow = true;
+				TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
+				fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
+				taskService.updateTaskProcess(taskId, 80);
+				try {
+					wb.write(outputStream);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return outputStream;
+			}else {
+				throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+			}
+		}
+		return outputStream;
+	}
+	
+
+    
+	@Override
+	public ListContractStaticsTimeDimensionResponse contractStaticsListCommunityTotal(SearchContractStaticsListCommand cmd) {
+		ListContractStaticsTimeDimensionResponse response = new ListContractStaticsTimeDimensionResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor();
+		if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        
+		Integer pageSize = cmd.getPageSize();
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        
+        if(cmd.getDateType() == null){
+        	cmd.setDateType(ContractStatisticDateType.YEARMMSTR.getCode());
+        }
+        String startTimeStr = "";
+        String endTimeStr = "";
+        String formatDateStr = "";
+        
+        if (!"".equals(cmd.getStartTimeStr()) && !"".equals(cmd.getEndTimeStr()) && cmd.getStartTimeStr() != null && cmd.getEndTimeStr() !=null) {
+        	startTimeStr = cmd.getStartTimeStr();
+        	endTimeStr = cmd.getEndTimeStr();
+		}else {
+	        formatDateStr = cmd.getDateStr();
+		}
+        
+        List<TotalContractStaticsDTO> resultList = contractProvider.listcontractStaticsListCommunityTotal(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
+        
+        
+        if(resultList.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            resultList.remove(resultList.size()-1);
+        }
+        response.setResultList(resultList);
+		return response;
+	}
 }
