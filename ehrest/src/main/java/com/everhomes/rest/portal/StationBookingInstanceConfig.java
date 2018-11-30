@@ -9,6 +9,7 @@ public class StationBookingInstanceConfig {
 
     private Long resourceTypeId;
     private Byte currentProjectOnly;
+    private String url;
 
     public Long getResourceTypeId() {
         return resourceTypeId;
@@ -24,5 +25,13 @@ public class StationBookingInstanceConfig {
 
     public void setCurrentProjectOnly(Byte currentProjectOnly) {
         this.currentProjectOnly = currentProjectOnly;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
