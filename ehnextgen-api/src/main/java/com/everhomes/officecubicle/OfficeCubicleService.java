@@ -120,5 +120,7 @@ public interface OfficeCubicleService {
 
 	ListOfficeCubicleAccountDTO getOfficeCubiclePayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd);
 
+	GetCubicleForAppResponse getCubicleForApp(GetCubicleForAppCommand cmd);
+
 
 }

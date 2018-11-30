@@ -11,6 +11,8 @@ import com.everhomes.rest.officecubicle.admin.AddRoomAdminCommand;
 import com.everhomes.rest.officecubicle.admin.CityDTO;
 import com.everhomes.rest.officecubicle.admin.GetCubicleByStatusCommand;
 import com.everhomes.rest.officecubicle.admin.GetCubicleByStatusResponse;
+import com.everhomes.rest.officecubicle.admin.GetCubicleForAppCommand;
+import com.everhomes.rest.officecubicle.admin.GetCubicleForAppResponse;
 import com.everhomes.rest.officecubicle.admin.GetCubicleForOrderCommand;
 import com.everhomes.rest.officecubicle.admin.GetCubicleForOrderResponse;
 import com.everhomes.rest.officecubicle.admin.GetOfficeCubicleRentOrderCommand;
@@ -579,6 +581,22 @@ public class OfficeCubicleController extends ControllerBase {
     public RestResponse getStationForRoom(GetCubicleForOrderCommand cmd) {
 
     	GetCubicleForOrderResponse resp = this.officeCubicleService.getCubicleForOrder(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/getCubicleForApp</b> 
+     * <p>客户端获取工位列表</p>
+     */
+    @RequestMapping("getCubicleForApp")
+    @RestReturn(GetCubicleForAppResponse.class)
+    public RestResponse getCubicleForApp(GetCubicleForAppCommand cmd) {
+
+    	GetCubicleForAppResponse resp = this.officeCubicleService.getCubicleForApp(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

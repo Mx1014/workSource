@@ -1,0 +1,81 @@
+package com.everhomes.rest.officecubicle.admin;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.officecubicle.OfficeOrderDTO;
+import com.everhomes.rest.officecubicle.OfficeRentOrderDTO;
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>station:工位详情{@link com.everhomes.rest.officecubicle.admin.StationDTO}</li>
+ * <li>room:办公室详情{@link com.everhomes.rest.officecubicle.admin.RoomDTO}</li>
+ * <li>minStationPrice:开放式工位最小价格</li>
+ * </ul>
+ */
+public class GetCubicleForAppResponse {
+
+	private List<StationDTO> station;
+	private List<RoomDTO> room;
+	private BigDecimal minStationPrice;
+
+
+
+
+	public BigDecimal getMinStationPrice() {
+		return minStationPrice;
+	}
+
+
+
+
+
+	public void setMinStationPrice(BigDecimal minStationPrice) {
+		this.minStationPrice = minStationPrice;
+	}
+
+
+
+
+
+	public List<RoomDTO> getRoom() {
+		return room;
+	}
+
+
+
+
+
+	public void setRoom(List<RoomDTO> room) {
+		this.room = room;
+	}
+
+
+
+
+
+	public List<StationDTO> getStation() {
+		return station;
+	}
+
+
+
+
+
+	public void setStation(List<StationDTO> station) {
+		this.station = station;
+	}
+
+
+
+
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+
+}

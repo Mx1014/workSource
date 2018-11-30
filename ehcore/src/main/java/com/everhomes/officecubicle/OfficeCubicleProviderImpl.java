@@ -822,12 +822,16 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 	
 	@Override
-	public List<OfficeCubicleStationRent> getOfficeCubicleStationRent(Long spaceId, Byte rentType) {
+	public List<OfficeCubicleStationRent> getOfficeCubicleStationRent(Long spaceId, Byte rentType,Byte stationType,Long stationId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleStationRentRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
 		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId));
 		if (rentType!=null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType));
+		if (stationType != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_TYPE.eq(stationType));
+		if (stationId != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_ID.eq(stationId));
 		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleStationRent.class));
 	}
 	

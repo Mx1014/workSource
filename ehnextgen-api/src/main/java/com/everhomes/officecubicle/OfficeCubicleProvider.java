@@ -108,7 +108,7 @@ public interface OfficeCubicleProvider {
 
 	BigDecimal getStationMaxPrice(Long spaceId);
 
-	List<OfficeCubicleStationRent> getOfficeCubicleStationRent(Long spaceId, Byte rentType);
+	List<OfficeCubicleStationRent> getOfficeCubicleStationRent(Long spaceId, Byte rentType,Byte stationType,Long staionId);
 
 	void deleteChargeUsers(Long spaceId);
 
@@ -123,7 +123,6 @@ public interface OfficeCubicleProvider {
 	void createRefundRule(OfficeCubicleRefundRule refundRule);
 
 	List<OfficeCubicleRefundRule> listRefundRuleBySpaceId(Long spaceId);
-
 
 
 

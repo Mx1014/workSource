@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -2021,8 +2022,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (station.size() == 0)
 			return resp;
 		resp.setCubicleNums(station.size());
-		List<OfficeCubicleStationRent> longRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)1);
-		List<OfficeCubicleStationRent> shortRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)0);
+		List<OfficeCubicleStationRent> longRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)1,null,null);
+		List<OfficeCubicleStationRent> shortRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)0,null,null);
 		resp.setShortCubicleIdleNums(shortRentStation.size());
 		resp.setLongCubicleIdleNums(longRentStation.size());
 		List<OfficeCubicleStation> closeStation = 
@@ -2074,7 +2075,28 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}).collect(Collectors.toList()));
 		return resp;
 	}
-	
+	@Override
+	public GetCubicleForAppResponse getCubicleForApp(GetCubicleForAppCommand cmd){
+		GetCubicleForAppResponse resp = new GetCubicleForAppResponse();
+		List<OfficeCubicleStation> station = 
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,null,null);
+		resp.setStation(station.stream().map(r->ConvertHelper.convert(r,StationDTO.class)).collect(Collectors.toList()));
+		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null);
+		resp.setRoom(room.stream().map(r->{
+			RoomDTO dto = new RoomDTO();
+			ConvertHelper.convert(r,RoomDTO.class);
+			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
+			dto.setAssociateStation(associateStaionList);
+			List<OfficeCubicleStationRent> stationRent = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(), null,(byte)0,r.getId());
+	        Calendar c = Calendar.getInstance();
+	        c.setTime(stationRent.get(0).getEndTime());
+	        c.add(Calendar.DAY_OF_MONTH, 1);
+			dto.setRentDate(c.getTime().getTime());
+			return dto;
+			}).collect(Collectors.toList()));
+		resp.setMinStationPrice(officeCubicleProvider.getStationMinPrice(cmd.getSpaceId()));
+		return resp;
+	}
 	private List<AssociateStationDTO> setAssociateStaion(List<OfficeCubicleStation> station){
 		List<AssociateStationDTO> associateStaionList = new ArrayList<AssociateStationDTO>();
 		for (OfficeCubicleStation s :station){
