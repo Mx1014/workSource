@@ -416,4 +416,8 @@ ALTER TABLE `eh_contract_charging_items` ADD COLUMN `one_time_bill_status` TINYI
 -- REMARK: 增加手机号索引
 ALTER TABLE eh_user_identifiers ADD INDEX i_eh_user_idf_token(`identifier_token`);
 
+-- AUTHOR: ljs 20181129
+-- REMARK: 给eh_addresses表添加索引
+ALTER TABLE `eh_addresses` ADD INDEX `i_eh_addr_building_id` (`building_id`) USING BTREE;
+
 -- END
