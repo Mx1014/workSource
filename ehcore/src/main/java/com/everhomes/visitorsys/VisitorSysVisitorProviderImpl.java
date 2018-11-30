@@ -216,19 +216,6 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 
 	@Override
 	public List<VisitorSysVisitor> listFreqVisitor() {
-//		SELECT
-//				*
-//				FROM
-//		eh_visitor_sys_visitors
-//				WHERE
-//		owner_type = 'community'
-//		AND create_time > DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-//		GROUP BY
-//		visitor_phone,
-//				owner_id
-//		HAVING
-//		COUNT(1) > 1
-//		AND max(create_time);
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		cal.add(cal.DATE,-30);
@@ -237,7 +224,7 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 				.where(Tables.EH_VISITOR_SYS_VISITORS.OWNER_TYPE.eq("community"))
 				.and(Tables.EH_VISITOR_SYS_VISITORS.CREATE_TIME.ge(time))
 				.groupBy(Tables.EH_VISITOR_SYS_VISITORS.VISITOR_PHONE,Tables.EH_VISITOR_SYS_VISITORS.OWNER_ID)
-				.having(count().gt(1), (Condition) max(Tables.EH_VISITOR_SYS_VISITORS.CREATE_TIME))
+				.having("COUNT(1) > 1 AND max(create_time)")
 				.fetch().map(r ->ConvertHelper.convert(r,VisitorSysVisitor.class));
 	}
 
