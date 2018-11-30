@@ -69,7 +69,7 @@ public interface OfficeCubicleProvider {
 	
 	List<OfficeCubicleRentOrder> searchCubicleOrders(String ownerType, Long ownerId, Long beginDate, Long endDate,
 			 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,
-			Byte paidType, Byte paidMode, Byte requestType, Byte rentType, Byte orderStatus);
+			String paidType, Byte paidMode, Byte requestType, Byte rentType, Byte orderStatus);
 
 	void createCubicleRoom(OfficeCubicleRoom room);
 

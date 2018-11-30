@@ -40,7 +40,7 @@ public class SearchCubicleOrdersCommand {
 	private Long currentProjectId;
 	private Long appId;
 	private Byte orderStatus;
-	private Byte paidType;
+	private String paidType;
 	private Byte paidMode;
 	private Byte requestType;
 	private Byte rentType;
@@ -179,13 +179,16 @@ public class SearchCubicleOrdersCommand {
 		this.orderStatus = orderStatus;
 	}
 
-	public Byte getPaidType() {
+
+	public String getPaidType() {
 		return paidType;
 	}
 
-	public void setPaidType(Byte paidType) {
+
+	public void setPaidType(String paidType) {
 		this.paidType = paidType;
 	}
+
 
 	public Byte getPaidMode() {
 		return paidMode;

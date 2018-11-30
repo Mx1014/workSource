@@ -74,7 +74,7 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `rental_order_no` BIGINT COMMENT '资源预约订单号',
   `order_status` TINYINT COMMENT '订单状态',
   `request_type` TINYINT COMMENT '订单来源',
-  `paid_type` TINYINT COMMENT '支付方式',
+  `paid_type` VARCHAR(32) COMMENT '支付方式',
   `paid_mode` TINYINT COMMENT '支付类型',
   `price` DECIMAL(10,2) COMMENT '价格',
   `rent_count` BIGINT COMMENT '预定数量',

@@ -344,7 +344,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	
 	@Override
 	public List<OfficeCubicleRentOrder> searchCubicleOrders(String ownerType,Long ownerId,Long beginDate, Long endDate,
-												 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,Byte paidType,
+												 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,String paidType,
 												Byte paidMode, Byte requestType, Byte rentType, Byte orderStatus) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
