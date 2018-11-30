@@ -29,8 +29,14 @@ public interface FieldProvider {
     List<FieldItem> listFieldItems(Long fieldId);
     List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId,Long ownerId, Long categoryId);
     Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds,Long ownerId, Integer namespaceId, Long communityId, Long categoryId,String moduleName);
+
+    Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Long ownerId, Integer namespaceId, Long communityId, Long categoryId);
+
     Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId, Long categoryId, String moduleName);
-    ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId,Long ownerId, Long communityId, Long itemId);
+
+    Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId, Long categoryId);
+
+    ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long ownerId, Long communityId, Long itemId);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId,Long ownerId, String moduleName, String displayName);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long ownerId,Long communityId, String moduleName, Long fieldId, String displayName);
     ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId,Long ownerId,String ownerType, Long communityId, String moduleName, Long fieldId, Byte businessValue);
