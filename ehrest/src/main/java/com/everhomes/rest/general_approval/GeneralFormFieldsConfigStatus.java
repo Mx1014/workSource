@@ -7,9 +7,9 @@ import com.everhomes.util.StringHelper;
  */
 public enum GeneralFormFieldsConfigStatus {
     /**
-     * INVALID(0)-无效，VALID(1)-有效
+     * INVALID(0)-无效，CONFIG(1)-已配置，RUNNING(2)-运行中
      */
-    INVALID((byte)0),VALID((byte)1);
+    INVALID((byte)0), CONFIG((byte)1), RUNNING((byte)2);
 
     private byte code;
 
@@ -23,8 +23,9 @@ public enum GeneralFormFieldsConfigStatus {
 
     public static GeneralFormFieldsConfigStatus fromCode(byte code) {
         for (GeneralFormFieldsConfigStatus v : GeneralFormFieldsConfigStatus.values()) {
-            if (v.getCode() == code)
+            if (v.getCode() == code){
                 return v;
+            }
         }
         return null;
     }

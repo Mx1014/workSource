@@ -20,5 +20,10 @@ public interface GeneralFormFieldsConfigProvider {
      */
     GeneralFormFieldsConfig getFormFieldsConfig(Long formFieldsConfigId);
 
+    /**
+     * 获取有效状态的表单字段配置
+     */
+    GeneralFormFieldsConfig getActiveFormFieldsConfig(Long formFieldsConfigId);
+
 
 }

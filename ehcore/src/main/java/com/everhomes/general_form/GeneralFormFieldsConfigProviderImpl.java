@@ -52,14 +52,23 @@ public class GeneralFormFieldsConfigProviderImpl implements GeneralFormFieldsCon
 
     @Override
     public GeneralFormFieldsConfig getFormFieldsConfig(Long formFieldsConfigId){
+        com.everhomes.server.schema.tables.EhGeneralFormFieldsConfig t = Tables.EH_GENERAL_FORM_FIELDS_CONFIG;
 
+        SelectQuery<EhGeneralFormFieldsConfigRecord> query = rContext().selectFrom(t).getQuery();
+        query.addConditions(t.ID.eq(formFieldsConfigId));
+        return query.fetchAnyInto(GeneralFormFieldsConfig.class);
+    }
+
+    @Override
+    public GeneralFormFieldsConfig getActiveFormFieldsConfig(Long formFieldsConfigId){
         com.everhomes.server.schema.tables.EhGeneralFormFieldsConfig t = Tables.EH_GENERAL_FORM_FIELDS_CONFIG;
 
         SelectQuery<EhGeneralFormFieldsConfigRecord> query = rContext().selectFrom(t).getQuery();
         query.addConditions(t.ID.eq(formFieldsConfigId));
         // 判断有效状态
-        query.addConditions(t.STATUS.eq(GeneralFormFieldsConfigStatus.VALID.getCode()));
+        query.addConditions(t.STATUS.ne(GeneralFormFieldsConfigStatus.INVALID.getCode()));
         return query.fetchAnyInto(GeneralFormFieldsConfig.class);
+
     }
 
     private DSLContext rContext() {

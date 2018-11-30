@@ -1176,7 +1176,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public CreateFormFieldsConfigResponse createFormFieldsConfig(CreateFormFieldsConfigCommand cmd){
-
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(),cmd.getFormVersion());
         if(form == null){
             LOGGER.error("The form using to create formFieldsConfig is null, formOriginId = {}, formVersion = {}",
@@ -1197,7 +1196,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             formFieldsConfig.setConfigType(GeneralFormConstants.FORM_FIELDS_CONFIG_TYPE);
         }
         formFieldsConfig.setFormFields(JSON.toJSONString(cmd.getFormFields()));
-        formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.VALID.getCode());
+        formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.CONFIG.getCode());
         Long formFieldsConfigId = generalFormFieldsConfigProvider.createFormFieldsConfig(formFieldsConfig);
 
         CreateFormFieldsConfigResponse response = new CreateFormFieldsConfigResponse();
@@ -1207,8 +1206,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public UpdateFormFieldsConfigResponse updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd){
-
-        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getFormFieldsConfig(cmd.getFormFieldsConfigId());
+        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getActiveFormFieldsConfig(cmd.getFormFieldsConfigId());
         if(formFieldsConfig == null){
             LOGGER.error("The formFieldsConfig updating is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -1229,7 +1227,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public void deleteFormFieldsConfig(DeleteFormFieldsConfigCommand cmd){
-        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getFormFieldsConfig(cmd.getFormFieldsConfigId());
+        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getActiveFormFieldsConfig(cmd.getFormFieldsConfigId());
         if(formFieldsConfig == null){
             LOGGER.error("The formFieldsConfig deleting is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
