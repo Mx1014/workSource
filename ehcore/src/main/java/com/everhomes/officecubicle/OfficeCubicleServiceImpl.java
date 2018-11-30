@@ -1925,7 +1925,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	
 	
 	@Override
-	public ListOfficeCubicleAccountDTO getOfficeCubiclPayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd) {
+	public ListOfficeCubicleAccountDTO getOfficeCubiclePayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd) {
 		List<OfficeCubiclePayeeAccount> accounts = officeCubiclePayeeAccountProvider
 				.listOfficeCubiclePayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
 		if(accounts==null || accounts.size()==0){

@@ -332,9 +332,9 @@ public class OfficeCubicleController extends ControllerBase {
      */
     @RequestMapping("getOfficeCubiclePayeeAccount")
     @RestReturn(ListOfficeCubicleAccountDTO.class)
-    public RestResponse getOfficeCubiclPayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd) {
+    public RestResponse getOfficeCubiclePayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd) {
     	ListOfficeCubicleAccountDTO resp = new ListOfficeCubicleAccountDTO();
-    	resp = this.officeCubicleService.getOfficeCubiclPayeeAccount(cmd);
+    	resp = this.officeCubicleService.getOfficeCubiclePayeeAccount(cmd);
     	
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);

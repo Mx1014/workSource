@@ -96,8 +96,6 @@ public interface OfficeCubicleService {
 
 	HttpServletResponse exportCubicleOrders(SearchCubicleOrdersCommand cmd, HttpServletResponse response);
 
-	ListOfficeCubicleAccountDTO getOfficeCubiclPayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd);
-
 	ListCitiesByOrgIdAndCommunitIdResponse listCitiesByOrgIdAndCommunitId(ListCitiesByOrgIdAndCommunitIdCommand cmd);
 
 	GetSpaceResponse getSpace(GetSpaceCommand cmd);
@@ -119,6 +117,8 @@ public interface OfficeCubicleService {
 	GetRoomByStatusResponse getRoomByStatus(GetRoomByStatusCommand cmd);
 
 	GetCubicleByStatusResponse getCubicleByStatus(GetCubicleByStatusCommand cmd);
+
+	ListOfficeCubicleAccountDTO getOfficeCubiclePayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd);
 
 
 }
