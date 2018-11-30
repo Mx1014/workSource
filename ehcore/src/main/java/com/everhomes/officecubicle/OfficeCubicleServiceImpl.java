@@ -2010,6 +2010,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		account.setOwnerId(cmd.getOwnerId());
 		account.setOwnerType(cmd.getOwnerType());
 		account.setNamespaceId(cmd.getNamespaceId());
+		account.setMerchantId(cmd.getAccountId());
 		officeCubiclePayeeAccountProvider.createOfficeCubiclePayeeAccount(account);
 	}
 	
