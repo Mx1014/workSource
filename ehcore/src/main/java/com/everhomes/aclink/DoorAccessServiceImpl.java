@@ -5751,7 +5751,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         }
                     }
                     //匹配门禁buildingId和userFloors的
-                    Long buildingId = data.getLong("building");
+                    Long buildingId = data.getLong("buildingId");
                     if(buildingId != null){
                         List<AddressDTO> matchFloors = new ArrayList<>();
                         matchFloors = userFloors.stream()
