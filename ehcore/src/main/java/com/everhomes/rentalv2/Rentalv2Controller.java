@@ -788,7 +788,7 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequireAuthentication(false)
     @RequestMapping("refundNotify")
     @RestReturn(String.class)
-    public RestResponse refundNotify(OrderPaymentNotificationCommand  cmd) {
+    public RestResponse refundNotify(MerchantPaymentNotificationCommand  cmd) {
         this.rentalv2PayService.refundNotify(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
