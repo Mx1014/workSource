@@ -1490,7 +1490,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleStation station = ConvertHelper.convert(cmd, OfficeCubicleStation.class);
-
+			station.setOwnerType(cmd.getOwnerType());
+			station.setOwnerId(cmd.getOwnerId());
+			station.setNamespaceId(cmd.getNamespaceId());
 			officeCubicleProvider.createCubicleSite(station);
 
 			return null;
@@ -1505,7 +1507,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleRoom room = ConvertHelper.convert(cmd, OfficeCubicleRoom.class);
-
+			room.setOwnerType(cmd.getOwnerType());
+			room.setOwnerId(cmd.getOwnerId());
+			room.setNamespaceId(cmd.getNamespaceId());
 			officeCubicleProvider.createCubicleRoom(room);
 
 			return null;
