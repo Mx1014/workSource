@@ -1333,6 +1333,23 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
 					// 26058 已售的状态不变
 					if (!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
+						// 点击保存并发起走这里，置资产状态，修改合同点保存，不会修改资产状态
+						if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+							FindContractCommand command = new FindContractCommand();
+							command.setId(contract.getId());
+							command.setPartyAId(contract.getPartyAId());
+							command.setCommunityId(contract.getCommunityId());
+							command.setNamespaceId(contract.getNamespaceId());
+							command.setCategoryId(contract.getCategoryId());
+							ContractDetailDTO contractDetailDTO = findContract(command);
+							Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
+							
+							if (!possibleEnterContractStatus) {
+								LOGGER.error("possibleEnterContractStatus is false, Apartments is not free");
+								throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
+										"apartments status is not free for contract!");
+							}
+						}
 						addressMapping.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
 						addressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
@@ -1345,17 +1362,30 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		if (map.size() > 0) {
 			List<Long> finalParents = parentAddressIds;
 			map.forEach((id, apartment) -> {
+				// 房源是否可以释放 ，复制合同，关联的房源移除不操作资产状态 false 不释放，true 释放
+				Boolean possibleAddressReleaseStatus = true;
+				// 查询房源状态
+				CommunityAddressMapping otherContractAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(apartment.getAddressId());
+				// 查询房源关联的合同
+				List<ContractBuildingMapping> contractBuildingMappingList = addressProvider.findContractBuildingMappingByAddressId(apartment.getAddressId());
+				// 查询该房源是否关联其他合同，并且不是待租状态
+				for (ContractBuildingMapping contractBuildingMapping : contractBuildingMappingList) {
+					if (!(contractBuildingMapping.getContractId()).equals(apartment.getContractId())
+							&& otherContractAddressMapping.getLivingStatus() != AddressMappingStatus.FREE.getCode()) {
+						possibleAddressReleaseStatus = false;
+					}
+				}
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
 				if (!finalParents.contains(apartment.getAddressId()) && ((contractApplicationScene== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY
 						.equals(ContractApplicationScene.fromStatus(contractApplicationScene)))) {
-					CommunityAddressMapping addressMapping = propertyMgrProvider
-							.findAddressMappingByAddressId(apartment.getAddressId());
+					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
 					// 26058 已售的状态不变
-					if (!AddressMappingStatus.SALED
-							.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
-						addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
-						addressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+					if (!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
+						if (possibleAddressReleaseStatus) {
+							addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+							addressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+						}
 					}
 				}
 			});
@@ -1737,7 +1767,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 		//by --djm issue-35586
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-			if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+			/*if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
 				FindContractCommand command = new FindContractCommand();
 				command.setId(contract.getId());
 				command.setPartyAId(contract.getPartyAId());
@@ -1752,7 +1782,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
 							"apartments status is not free for contract!");
 				}
-			}
+			}*/
 			addToFlowCase(contract, flowcaseContractOwnerType);
 			//添加发起人字段
 			contract.setSponsorUid(UserContext.currentUserId().toString());
