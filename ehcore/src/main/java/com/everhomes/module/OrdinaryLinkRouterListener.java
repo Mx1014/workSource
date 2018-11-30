@@ -33,7 +33,11 @@ public class OrdinaryLinkRouterListener{
             if(entry.getKey() != null && entry.getKey().toString().toLowerCase().equals("url")){
                 queryBuffer.append(entry.getKey());
                 queryBuffer.append("=");
-                queryBuffer.append(getUrl(entry.getValue().toString(),appId));
+                try {
+                    queryBuffer.append(URLEncoder.encode(getUrl(entry.getValue().toString(),appId), "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    LOGGER.error("OrdinaryLinkRouterListener getQueryString URLEncoder.encode fail, queryJson={} ", queryJson);
+                }
                 queryBuffer.append("&");
                 continue;
             }
@@ -57,7 +61,7 @@ public class OrdinaryLinkRouterListener{
     }
 
     private String getUrl(String url, Long appId) {
-        if (!StringUtils.isEmpty(url)) {
+        if (!StringUtils.isEmpty(url) && url.indexOf("appId=")<0) {
             String returnUrl = "";
             if (url.indexOf("?") > 0) {
                 String[] urls = url.split("[?]");
@@ -72,6 +76,6 @@ public class OrdinaryLinkRouterListener{
             }
             return returnUrl;
         }
-        return "";
+        return url;
     }
 }
