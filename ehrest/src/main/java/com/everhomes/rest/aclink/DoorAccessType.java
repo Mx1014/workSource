@@ -61,6 +61,10 @@ public enum DoorAccessType {
             return ACLINK_WANGLONG_DOOR_GROUP;
         case 17:
         	return ACLINK_BUS;
+        	case 18:
+        	    return ACLINK_UCLBRT_DOOR;
+            case 19:
+                return ZLACLINK_WIFI_2;
         }
         
         return null;

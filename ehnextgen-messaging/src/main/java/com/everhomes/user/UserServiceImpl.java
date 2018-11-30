@@ -7586,24 +7586,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             res.setErrorMsg("phones is null");
             return res ;
         }
+        List<UserDTO> userDTOList = this.userProvider.listUserInfoByIdentifierToken(cmd.getNamespaceId(), cmd.getPhones());
         for(String phone : phones){
             FindUsersByPhonesDTO dto = new FindUsersByPhonesDTO() ;
             dto.setPhone(phone);
-            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
-            if (userIdentifier != null) {
-                User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-                if (user != null) {
-                    user.setIdentifierToken(userIdentifier.getIdentifierToken());
-                    UserDTO userDTO = ConvertHelper.convert(user, UserDTO.class);
-                    //查询有结果，保存
+            Byte resultCode = TrueOrFalseCode.FALSE.getCode();
+            for (UserDTO userDTO : userDTOList) {
+                if (phone.equals(userDTO.getIdentifierToken())) {
                     dto.setUserDTO(userDTO);
-                    dto.setResult(TrueOrFalseCode.TRUE.getCode());
-                }else  {
-                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
+                    resultCode = TrueOrFalseCode.TRUE.getCode();
                 }
-            } else if(TrueOrFalseCode.FALSE.getCode().equals(cmd.getClear())){//若是不消除查询失败的数据才返回这些
-                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
             }
+            dto.setResult(resultCode);
             if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
                     || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回
                     && !TrueOrFalseCode.TRUE.getCode().equals(cmd.getClear()))){
@@ -7719,8 +7713,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             if (namespace != null) {
                 //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
                 //所以这里加个判断，是新增还是更新.
-                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(
-                        userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                UserIdentifier existsIdentifier = this.userProvider.findIdentifierById(userIdentifier.getId());
                 if (existsIdentifier != null) {
                     if (existsIdentifier.getUpdateVersion() < userIdentifier.getUpdateVersion()) {
                         this.userProvider.updateIdentifierFromUnite(userIdentifier);

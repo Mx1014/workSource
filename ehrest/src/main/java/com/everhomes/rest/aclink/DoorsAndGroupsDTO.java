@@ -24,8 +24,17 @@ public class DoorsAndGroupsDTO {
 //	private Long groupId;
 
 	private Byte type;
+	private Byte doortype;
 	private String name;
 	private Byte Status;
+
+	public Byte getDoortype() {
+		return doortype;
+	}
+
+	public void setDoortype(Byte doortype) {
+		this.doortype = doortype;
+	}
 
 	public Long getFormId() {
 		return formId;

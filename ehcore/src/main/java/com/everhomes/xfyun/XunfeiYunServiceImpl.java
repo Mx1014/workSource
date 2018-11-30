@@ -22,6 +22,7 @@ import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.launchpadbase.AppDTO;
+import com.everhomes.rest.module.AccessControlType;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.module.ServiceModuleLocationType;
 import com.everhomes.rest.module.ServiceModuleSceneType;
@@ -100,10 +101,12 @@ public class XunfeiYunServiceImpl implements XunfeiYunService{
 		if (RouterTypeEnum.MY_APPLY.getCode().equals(typeEnum.getCode())) {
 			appDto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 			appDto.setRouter("zl://workflow/tasks");
+			appDto.setAccessControlType(AccessControlType.ALL.getCode());
 		} else {
 			appDto.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
 			String homeUrl = configurationProvider.getValue("home.url", "http://core.zuolin.com");
 			appDto.setRouter("zl://browser/i?url="+homeUrl + "/mobile/static/stay_tuned/index.html"); // 敬请期待
+			appDto.setAccessControlType(AccessControlType.ALL.getCode());
 		}
 		
 		RouterDTO rDto = new RouterDTO();
