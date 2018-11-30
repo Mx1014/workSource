@@ -147,6 +147,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
         customer.setId(id);
         customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         customer.setStatus(CommonStatus.ACTIVE.getCode());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -164,6 +165,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
             long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
             customer.setId(id);
             customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setStatus(CommonStatus.ACTIVE.getCode());
         });
 
