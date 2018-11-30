@@ -65,7 +65,7 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId, Byte rentFlag,String keyword, Byte status,Long stationId);
 	
-	List<OfficeCubicleRoom> getOfficeCubicleRoom(Long owner, String ownerType, Long spaceId,Byte rentFlag,Byte status);
+	List<OfficeCubicleRoom> getOfficeCubicleRoom(Long owner, String ownerType, Long spaceId,Byte rentFlag,Byte status, Long roomId);
 	
 	List<OfficeCubicleRentOrder> searchCubicleOrders(String ownerType, Long ownerId, Long beginDate, Long endDate,
 			 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,

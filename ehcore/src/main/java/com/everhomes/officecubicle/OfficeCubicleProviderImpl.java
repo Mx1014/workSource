@@ -836,7 +836,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType,Long spaceId,Byte rentFlag, Byte status) {
+	public List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType,Long spaceId,Byte rentFlag, Byte status, Long roomId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleRoomRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_ROOM);
 		query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.SPACE_ID.eq(spaceId));
@@ -844,6 +844,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.RENT_FLAG.eq(rentFlag));
 		if (status != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.STATUS.eq(status));
+		if (roomId != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.ID.eq(roomId));
 		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleRoom.class));
 	}
 	

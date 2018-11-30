@@ -2047,7 +2047,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetRoomDetailResponse getRoomDetail(GetRoomDetailCommand cmd){
 		GetRoomDetailResponse resp = new GetRoomDetailResponse();
-		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null);
+		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),room.get(0).getId(),null,null,null,null);
 		List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
@@ -2072,7 +2072,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,cmd.getKeyword(),null,null);
 		resp.setStation(station.stream().map(r->ConvertHelper.convert(r,StationDTO.class)).collect(Collectors.toList()));
-		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null);
+		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = new RoomDTO();
 			ConvertHelper.convert(r,RoomDTO.class);
@@ -2088,7 +2088,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,null,null);
 		resp.setStation(station.stream().map(r->ConvertHelper.convert(r,StationDTO.class)).collect(Collectors.toList()));
-		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null);
+		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = new RoomDTO();
 			ConvertHelper.convert(r,RoomDTO.class);
@@ -2119,7 +2119,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd){
 		GetStationDetailResponse resp = new GetStationDetailResponse();
 		List<OfficeCubicleStation> station =  officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null,null,cmd.getStationId());
-		resp.setStation(ConvertHelper.convert(station.get(0),StationDTO.class));
+		StationDTO dto = new StationDTO();
+		dto = ConvertHelper.convert(station.get(0),StationDTO.class);
+		dto.setAssociateRoomId(station.get(0).getAssociateRoomId());
+		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, null,station.get(0).getAssociateRoomId());
+		dto.setAssociateRoomName(room.get(0).getStationName());
+		resp.setStation(dto);
 		return resp;
 	}
 	
@@ -2128,9 +2133,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		GetRoomByStatusResponse resp = new GetRoomByStatusResponse();
 		List<OfficeCubicleRoom> room = new ArrayList<OfficeCubicleRoom>();
 		if(cmd.getStatus() == 0){
-			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),cmd.getStatus(),null);
+			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),cmd.getStatus(),null,null);
 		} else{
-			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,cmd.getStatus());
+			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,cmd.getStatus(),null);
 		}
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
@@ -2138,6 +2143,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),r.getId(),null,null,null,null);
 			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
 			dto.setAssociateStation(associateStaionList);
+			dto.setRoomId(r.getId());
 			return dto;
 			}).collect(Collectors.toList()));
 		return resp;
@@ -2155,7 +2161,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null,cmd.getStatus(),null);
 			}
 		}
-		resp.setStation(station.stream().map(r->ConvertHelper.convert(r,StationDTO.class)).collect(Collectors.toList()));
+		resp.setStation(station.stream().map(r->{
+			StationDTO dto = ConvertHelper.convert(r,StationDTO.class);
+			dto.setStationId(r.getId());
+			return dto;
+			}).collect(Collectors.toList()));
 		return resp;
 	}
 	@Override
@@ -2228,7 +2238,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			BigDecimal stationMinPrice = officeCubicleProvider.getStationMinPrice(r.getId());
 			dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
-			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null);
+			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null);
 			Integer allPositonNums = station.size() + room.size();
 			dto.setAllPositonNums(allPositonNums);
 			return dto;
