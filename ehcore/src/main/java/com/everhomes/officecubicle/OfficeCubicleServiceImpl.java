@@ -1493,6 +1493,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			station.setOwnerType(cmd.getOwnerType());
 			station.setOwnerId(cmd.getOwnerId());
 			station.setNamespaceId(cmd.getNamespaceId());
+			station.setStatus((byte)1);
 			officeCubicleProvider.createCubicleSite(station);
 
 			return null;
@@ -1510,6 +1511,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			room.setOwnerType(cmd.getOwnerType());
 			room.setOwnerId(cmd.getOwnerId());
 			room.setNamespaceId(cmd.getNamespaceId());
+			room.setStatus((byte)1);
 			officeCubicleProvider.createCubicleRoom(room);
 
 			return null;
