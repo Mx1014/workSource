@@ -259,7 +259,7 @@ public class WelfareServiceImpl implements WelfareService {
 	            welfare.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	//            welfare.setSenderUid(UserContext.currentUserId());
 	        }
-	        if (welfare == null.getId()) {
+	        if (welfare.getId() == null) {
 	            welfareProvider.createWelfare(welfare);
 	        } else {
 	            welfareProvider.updateWelfare(welfare);
