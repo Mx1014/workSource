@@ -800,7 +800,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 
 	@Override
-	public List<OfficeCubicleStation> getOfficeCubicleStation(Long ownerId, String ownerType,Long spaceId, Long roomId, Byte rentFlag, String keyword) {
+	public List<OfficeCubicleStation> getOfficeCubicleStation(Long ownerId, String ownerType,Long spaceId, Long roomId, Byte rentFlag, String keyword,Byte status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleStationRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION);
 		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_ID.eq(ownerId));
@@ -813,6 +813,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.eq(rentFlag));
 		if (keyword != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.STATION_NAME.like("%" + keyword +"%"));
+		if (status != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.STATUS.eq(status));
 		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleStation.class));
 	}
 
@@ -828,11 +830,14 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType,Long spaceId) {
+	public List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType,Long spaceId,Byte rentFlag, Byte status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleRoomRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_ROOM);
 		query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.SPACE_ID.eq(spaceId));
-		
+		if (rentFlag != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.RENT_FLAG.eq(rentFlag));
+		if (status != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.STATUS.eq(status));
 		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleRoom.class));
 	}
 	

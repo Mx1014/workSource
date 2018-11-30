@@ -63,9 +63,9 @@ public interface OfficeCubicleProvider {
 
 	void createCubicleSite(OfficeCubicleStation station);
 
-	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId, Byte rentFlag,String keyword);
+	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId, Byte rentFlag,String keyword, Byte status);
 	
-	List<OfficeCubicleRoom> getOfficeCubicleRoom(Long owner, String ownerType, Long spaceId);
+	List<OfficeCubicleRoom> getOfficeCubicleRoom(Long owner, String ownerType, Long spaceId,Byte rentFlag,Byte status);
 	
 	List<OfficeCubicleRentOrder> searchCubicleOrders(String ownerType, Long ownerId, Long beginDate, Long endDate,
 			 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,
@@ -123,4 +123,7 @@ public interface OfficeCubicleProvider {
 	void createRefundRule(OfficeCubicleRefundRule refundRule);
 
 	List<OfficeCubicleRefundRule> listRefundRuleBySpaceId(Long spaceId);
+
+
+
 }
