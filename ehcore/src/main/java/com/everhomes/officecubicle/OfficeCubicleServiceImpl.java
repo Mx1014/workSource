@@ -2079,8 +2079,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setStationId(r.getId());
 			dto.setStationName(r.getStationName());
 			dto.setAssociateRoomId(r.getAssociateRoomId());
-			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, null,r.getAssociateRoomId());
-			dto.setAssociateRoomName(room.get(0).getStationName());
+//			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, null,r.getAssociateRoomId());
+//			dto.setAssociateRoomName(room.get(0).getStationName());
 			return dto;
 			}).collect(Collectors.toList()));
 		return resp;
