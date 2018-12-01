@@ -1626,7 +1626,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (stationRent !=null){
 				rentSize = stationRent.size();
 			}
-			if (rentNums<(rentSize)){
+			if (rentNums<(rentSize+rentalOrder.getRentalCount().longValue())){
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
 				"工位数量不足");
 			} else {
@@ -1642,7 +1642,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
-		List<OfficeCubiclePayeeAccount> payeeAccounts = officeCubiclePayeeAccountProvider.findRepeatOfficeCubiclePayeeAccounts(null, UserContext.getCurrentNamespaceId(),
+		List<OfficeCubiclePayeeAccount> payeeAccounts = officeCubiclePayeeAccountProvider.findRepeatOfficeCubiclePayeeAccounts(null, 11,
 				cmd.getOwnerType(), cmd.getOwnerId(),cmd.getSpaceId());
 		if(payeeAccounts==null || payeeAccounts.size()==0){
 			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_NO_PAYEE_ACCOUNT,
@@ -2183,12 +2183,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (cmd.getStatus() ==0){
 				station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)0,null,null,null);
 			} else {
-				station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)0,null,null,null);
-				if (station.size() > 0){
-					return resp;
-				} else{
-					station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null,cmd.getStatus(),null);
-				}
+				station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,cmd.getStatus(),null);
 			}
 		}
 		resp.setStation(station.stream().map(r->{
