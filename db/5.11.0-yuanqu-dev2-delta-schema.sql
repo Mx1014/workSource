@@ -88,6 +88,7 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `operate_time` DATETIME,
   `use_detail` VARCHAR(255),
   `refund_strategy` TINYINT COMMENT '1-custom, 2-full',
+  `account_name` VARCHAR(64) COMMENT '收款账户名称',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
