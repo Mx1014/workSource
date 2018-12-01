@@ -124,6 +124,8 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleRefundRule> listRefundRuleBySpaceId(Long spaceId);
 
+	OfficeCubicleStation getOfficeCubicleStationById(Long stationId);
+
 
 
 }

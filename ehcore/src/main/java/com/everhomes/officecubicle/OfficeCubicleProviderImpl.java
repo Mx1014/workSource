@@ -817,9 +817,16 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.STATUS.eq(status));
 		if (stationId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.ID.eq(stationId));
-		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleStation.class));
+		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStation.class));
 	}
-
+	
+	@Override
+	public OfficeCubicleStation getOfficeCubicleStationById(Long stationId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOfficeCubicleStationRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION);
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.ID.eq(stationId));
+		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleStation.class);
+	}
 	
 	@Override
 	public List<OfficeCubicleStationRent> getOfficeCubicleStationRent(Long spaceId, Byte rentType,Byte stationType,Long stationId) {
@@ -832,7 +839,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_TYPE.eq(stationType));
 		if (stationId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_ID.eq(stationId));
-		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleStationRent.class));
+		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStationRent.class));
 	}
 	
 	@Override
@@ -846,7 +853,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.STATUS.eq(status));
 		if (roomId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.ID.eq(roomId));
-		return query.fetch().map(r->ConvertHelper.convert(query.fetchAny(), OfficeCubicleRoom.class));
+		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleRoom.class));
 	}
 	
     @Override

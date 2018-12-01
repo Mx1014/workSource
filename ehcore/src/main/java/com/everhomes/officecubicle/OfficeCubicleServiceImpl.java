@@ -1516,7 +1516,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			room.setNamespaceId(cmd.getNamespaceId());
 			room.setStatus((byte)1);
 			officeCubicleProvider.createCubicleRoom(room);
-
+			if(cmd.getAssociateStation()!= null){
+				for(AssociateStationDTO dto :cmd.getAssociateStation()){
+					OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(dto.getStationId());
+					station.setAssociateRoomId(room.getId());
+					officeCubicleProvider.updateCubicle(station);
+				}
+			}
 			return null;
 		});
 	}
@@ -2065,6 +2071,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setAssociateStation(associateStaionList);
 		dto.setRoomId(room.get(0).getId());
 		dto.setRoomName(room.get(0).getStationName());
+		dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
+				UserContext.current().getUser().getId()));
 		resp.setRoom(dto);
 		return resp;
 	}
@@ -2079,8 +2087,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setStationId(r.getId());
 			dto.setStationName(r.getStationName());
 			dto.setAssociateRoomId(r.getAssociateRoomId());
-//			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, null,r.getAssociateRoomId());
-//			dto.setAssociateRoomName(room.get(0).getStationName());
+			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
+					UserContext.current().getUser().getId()));
 			return dto;
 			}).collect(Collectors.toList()));
 		return resp;
@@ -2098,6 +2106,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			ConvertHelper.convert(r,RoomDTO.class);
 			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
 			dto.setAssociateStation(associateStaionList);
+			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
+					UserContext.current().getUser().getId()));
 			return dto;
 			}).collect(Collectors.toList()));
 		return resp;
@@ -2119,6 +2129,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	        c.setTime(stationRent.get(0).getEndTime());
 	        c.add(Calendar.DAY_OF_MONTH, 1);
 			dto.setRentDate(c.getTime().getTime());
+			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
+					UserContext.current().getUser().getId()));
 			return dto;
 			}).collect(Collectors.toList()));
 		resp.setMinStationPrice(officeCubicleProvider.getStationMinPrice(cmd.getSpaceId()));
@@ -2144,6 +2156,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setAssociateRoomId(station.get(0).getAssociateRoomId());
 		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, null,station.get(0).getAssociateRoomId());
 		dto.setAssociateRoomName(room.get(0).getStationName());
+		dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
+				UserContext.current().getUser().getId()));
 		resp.setStation(dto);
 		return resp;
 	}
@@ -2163,6 +2177,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),r.getId(),null,null,null,null);
 			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
 			dto.setAssociateStation(associateStaionList);
+			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
+					UserContext.current().getUser().getId()));
 			dto.setRoomId(r.getId());
 			return dto;
 			}).collect(Collectors.toList()));
@@ -2184,6 +2200,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		resp.setStation(station.stream().map(r->{
 			StationDTO dto = ConvertHelper.convert(r,StationDTO.class);
 			dto.setStationId(r.getId());
+			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
+					UserContext.current().getUser().getId()));
 			return dto;
 			}).collect(Collectors.toList()));
 		return resp;

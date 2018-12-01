@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentFlag:是否开启预定，1开启，0不开启</li>
  * <li>associateRoomId:关联办公室id</li>
  * <li>associateRoomName:关联办公室名称</li>
+ * <li>coverUrl:图片url</li>
  * </ul>
  */
 public class StationDTO {
@@ -26,6 +27,19 @@ public class StationDTO {
     private String description;
     private Long associateRoomId;
     private String associateRoomName;
+    private String coverUrl;
+
+
+	public String getCoverUrl() {
+		return coverUrl;
+	}
+
+
+
+	public void setCoverUrl(String coverUrl) {
+		this.coverUrl = coverUrl;
+	}
+
 
 
 	public Long getStationId() {

@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentFlag:是否开启预定，1开启，0不开启</li>
  * <li>associateStation:关联工位id{@link com.everhomes.rest.officecubicle.admin.AssociateStationDTO}</li>
  * <li>rentDate:可预定日期，如改办公室可预定则为空</li>
+ * <li>coverUrl:封面图url</li>
  * </ul>
  */
 public class RoomDTO {
@@ -27,9 +28,17 @@ public class RoomDTO {
     private Byte rentFlag;
     private List<AssociateStationDTO> associateStation;
     private Long rentDate;
+    private String coverUrl;
     
-    
-    public Long getRentDate() {
+    public String getCoverUrl() {
+		return coverUrl;
+	}
+
+	public void setCoverUrl(String coverUrl) {
+		this.coverUrl = coverUrl;
+	}
+
+	public Long getRentDate() {
 		return rentDate;
 	}
 
