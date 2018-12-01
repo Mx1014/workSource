@@ -2145,7 +2145,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(cmd.getStatus() == 0){
 			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),cmd.getStatus(),null,null);
 		} else{
-			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,cmd.getStatus(),null);
+			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),cmd.getStatus(),null,null);
+			if (room.size()>0){
+				return resp;
+			} else{
+				room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,cmd.getStatus(),null);
+			}
 		}
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
@@ -2168,7 +2173,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (cmd.getStatus() ==0){
 				station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)0,null,null,null);
 			} else {
-				station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null,cmd.getStatus(),null);
+				station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)0,null,null,null);
+				if (station.size() > 0){
+					return resp;
+				} else{
+					station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null,cmd.getStatus(),null);
+				}
 			}
 		}
 		resp.setStation(station.stream().map(r->{
