@@ -829,7 +829,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public OfficeCubicleRoom getOfficeCubicleRoomyId(Long roomId) {
+	public OfficeCubicleRoom getOfficeCubicleRoomById(Long roomId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleRoomRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_ROOM);
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.ID.eq(roomId));

@@ -1529,7 +1529,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	
 	@Override
 	public void deleteRoom(DeleteRoomAdminCommand cmd){
-		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomyId(cmd.getRoomId());
+		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(cmd.getRoomId());
 		officeCubicleProvider.deleteRoom(room);
 	}
     
@@ -2065,14 +2065,14 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetRoomDetailResponse getRoomDetail(GetRoomDetailCommand cmd){
 		GetRoomDetailResponse resp = new GetRoomDetailResponse();
-		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
+		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(cmd.getRoomId());
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),room.get(0).getId(),null,null,null,null);
 		List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
-		RoomDTO dto = ConvertHelper.convert(room.get(0),RoomDTO.class);
+		RoomDTO dto = ConvertHelper.convert(room,RoomDTO.class);
 		dto.setAssociateStation(associateStaionList);
-		dto.setRoomId(room.get(0).getId());
-		dto.setRoomName(room.get(0).getStationName());
+		dto.setRoomId(room.getId());
+		dto.setRoomName(room.getRoomName());
 		dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
 				UserContext.current().getUser().getId()));
 		resp.setRoom(dto);
