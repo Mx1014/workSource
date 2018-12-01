@@ -2053,6 +2053,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
 		RoomDTO dto = ConvertHelper.convert(room.get(0),RoomDTO.class);
 		dto.setAssociateStation(associateStaionList);
+		dto.setRoomId(room.get(0).getId());
+		dto.setRoomName(room.get(0).getStationName());
 		resp.setRoom(dto);
 		return resp;
 	}
@@ -2062,7 +2064,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		GetStationForRoomResponse resp = new GetStationForRoomResponse();
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,cmd.getKeyword(),null,null);
-		resp.setStation(station.stream().map(r->ConvertHelper.convert(r,StationDTO.class)).collect(Collectors.toList()));
+		resp.setStation(station.stream().map(r->{
+			StationDTO dto = ConvertHelper.convert(r,StationDTO.class);
+			dto.setStationId(r.getId());
+			dto.setStationName(r.getStationName());
+			dto.setAssociateRoomId(r.getAssociateRoomId());
+			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, null,r.getAssociateRoomId());
+			dto.setAssociateRoomName(room.get(0).getStationName());
+			return dto;
+			}).collect(Collectors.toList()));
 		return resp;
 	}
 	

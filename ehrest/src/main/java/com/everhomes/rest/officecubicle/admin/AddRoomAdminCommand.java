@@ -27,8 +27,6 @@ import com.everhomes.util.StringHelper;
 public class AddRoomAdminCommand {
 
 	@NotNull
-	private String stationName;
-	@NotNull
 	private BigDecimal price;
 	private Long spaceId;
 	private String ownerType;
@@ -98,14 +96,6 @@ public class AddRoomAdminCommand {
         return StringHelper.toJsonString(this);
     }
 
-
-	public String getStationName() {
-		return stationName;
-	}
-
-	public void setStationName(String stationName) {
-		this.stationName = stationName;
-	}
 
 	public String getDescription() {
 		return description;
