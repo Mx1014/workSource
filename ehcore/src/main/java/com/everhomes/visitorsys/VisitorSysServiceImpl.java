@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.acl.RolePrivilegeService;
@@ -2663,9 +2664,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 //                }
 //            }
 //        }
-        Community community = communityProvider.findCommunityById(visitor.getCommunityId());
+        Community community = null;
+        if(ownerType == VisitorsysOwnerType.COMMUNITY){
+            community = communityProvider.findCommunityById(visitor.getOwnerId());
+        }
+
 //        园区确认预约访客，企业的关联 和 园区登记临时访客，企业关联
-        if(CommunityType.COMMERCIAL.equals(community.getCommunityType())){
+        if(community == null || CommunityType.COMMERCIAL.equals(community.getCommunityType())){
             if ((convert.getId() != null && convert.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) ||
                     convert.getVisitorType().equals(VisitorsysVisitorType.TEMPORARY.getCode())) {
                 if (ownerType == VisitorsysOwnerType.COMMUNITY) {

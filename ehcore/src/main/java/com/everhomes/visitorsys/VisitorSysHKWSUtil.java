@@ -174,5 +174,4 @@ public class VisitorSysHKWSUtil {
         Long startTime = configProvider.getLongValue("HKWS.user.syncTime", 0L);
         syncHKWSUsers(startTime);
     }
-
 }
