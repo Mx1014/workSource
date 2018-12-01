@@ -1529,17 +1529,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	
 	@Override
 	public void deleteRoom(DeleteRoomAdminCommand cmd){
-		OfficeCubicleRoom room = new OfficeCubicleRoom();
-		room.setSpaceId(cmd.getSpaceId());
-		room.setRoomId(cmd.getRoomId());
+		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomyId(cmd.getRoomId());
 		officeCubicleProvider.deleteRoom(room);
 	}
     
 	@Override
 	public void deleteCubicle(DeleteCubicleAdminCommand cmd){
-		OfficeCubicleStation station = new OfficeCubicleStation();
-		station.setSpaceId(cmd.getSpaceId());
-		station.setStationId(cmd.getStationId());
+		OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getStationId());
 		officeCubicleProvider.deleteStation(station);
 	}
 	
@@ -1586,7 +1582,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleRoom room = ConvertHelper.convert(cmd, OfficeCubicleRoom.class);
-
+			if(cmd.getAssociateStation()!= null){
+				for(AssociateStationDTO dto :cmd.getAssociateStation()){
+					OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(dto.getStationId());
+					station.setAssociateRoomId(room.getId());
+					officeCubicleProvider.updateCubicle(station);
+				}
+			}
 			officeCubicleProvider.updateRoom(room);
 
 			return null;

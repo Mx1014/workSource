@@ -126,6 +126,8 @@ public interface OfficeCubicleProvider {
 
 	OfficeCubicleStation getOfficeCubicleStationById(Long stationId);
 
+	OfficeCubicleRoom getOfficeCubicleRoomyId(Long roomId);
+
 
 
 }
