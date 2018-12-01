@@ -49,7 +49,16 @@ public class OfficeRentOrderDTO {
     private Byte requestType;
     private Byte orderStatus;
     private Long orderNo;
+    private String accountName;
 
+
+	public String getAccountName() {
+		return accountName;
+	}
+
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
+	}
 
 	public Long getOrderNo() {
 		return orderNo;

@@ -1656,6 +1656,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_NO_PAYEE_ACCOUNT,
 					"");
 		}
+		order.setAccountName(payeeAccounts.get(0).getAccountName());
 		String extendInfo = "工位预定订单";
 		//根据merchantId获取payeeId
 		GetPayUserByMerchantIdCommand getPayUserByMerchantIdCommand = new GetPayUserByMerchantIdCommand();
