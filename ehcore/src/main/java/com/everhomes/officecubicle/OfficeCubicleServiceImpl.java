@@ -1054,6 +1054,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		resp.setRefundTip(space.getRefundTip());
 		List<OfficeCubicleRefundRule> rules = officeCubicleProvider.findRefundRule(cmd.getSpaceId());
+		if (rules == null){
+			return resp;
+		}
 		resp.setRefundStrategy(rules.get(0).getRefundStrategy());
 		resp.setRefundStrategies(rules.stream().map(r->{
 			OfficeCubicleRefundRuleDTO dto = ConvertHelper.convert(r,OfficeCubicleRefundRuleDTO.class);
@@ -1619,7 +1622,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		Integer rentNums = Integer.valueOf(space.getShortRentNums());
 		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getOrderNo()).enter(()-> {
-			if (rentNums<(stationRent.size()+rentalOrder.getRentalCount().longValue())){
+			int rentSize = 0;
+			if (stationRent !=null){
+				rentSize = stationRent.size();
+			}
+			if (rentNums<(rentSize)){
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
 				"工位数量不足");
 			} else {
