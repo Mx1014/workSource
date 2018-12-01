@@ -99,6 +99,7 @@ CREATE TABLE `eh_office_cubicle_payee_accounts` (
   `owner_id` BIGINT NOT NULL COMMENT '园区id或者其他id',
   `account_id` BIGINT,
   `merchant_id` BIGINT,
+  `account_name` VARCHAR(64) COMMENT '收款账户名称',
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
