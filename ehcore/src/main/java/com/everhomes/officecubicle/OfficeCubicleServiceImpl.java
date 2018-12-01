@@ -1905,8 +1905,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public CreateCubicleOrderBackgroundResponse createCubicleOrderBackground(CreateCubicleOrderBackgroundCommand cmd){
 		List<OfficeCubicleStationRent> stationRent = 
 				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(), cmd.getRentType(), cmd.getStationType());
-		List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getSpaceId(), null,null,null,null,null);
-		Integer stationNums = station.size();
+
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());	
 		OfficeCubicleRentOrder order = ConvertHelper.convert(cmd, OfficeCubicleRentOrder.class);
 		this.dbProvider.execute((TransactionStatus status) -> {
 			officeCubicleProvider.createCubicleRentOrder(order);
@@ -1914,19 +1914,22 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		});
 		
 		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getId()).enter(()-> {
-			if (stationNums<(stationRent.size()+cmd.getRentCount())){
+			int rentSize = 0;
+			if (stationRent !=null){
+				rentSize = stationRent.size();
+			}
+			if (Integer.valueOf(space.getShortRentNums())<(rentSize+cmd.getRentCount())){
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
 				"工位数量不足");
 			} else {
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 				rent.setOrderId(order.getId());
-				for(int i=0;i<= cmd.getRentCount() ;i++){
+				for(int i=0;i< cmd.getRentCount() ;i++){
 					officeCubicleProvider.createCubicleStationRent(rent);
 				}
 			}
 			return null;
 		});
-		
 		
 		return null;
 		

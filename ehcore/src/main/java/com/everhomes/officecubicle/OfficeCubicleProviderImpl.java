@@ -705,7 +705,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		room.setId(id);
 		room.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		room.setCreatorUid(UserContext.currentUserId());
-
+		room.setNamespaceId(UserContext.getCurrentNamespaceId());
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleRoomRecord record = ConvertHelper.convert(room,
 				EhOfficeCubicleRoomRecord.class);
@@ -724,7 +724,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		order.setId(id);
 		order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		order.setCreatorUid(UserContext.currentUserId());
-
+		order.setNamespaceId(UserContext.getCurrentNamespaceId());
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleRentOrdersRecord record = ConvertHelper.convert(order,
 				EhOfficeCubicleRentOrdersRecord.class);
@@ -783,7 +783,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		stationRent.setId(id);
 		stationRent.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		stationRent.setCreatorUid(UserContext.currentUserId());
-
+		stationRent.setNamespaceId(UserContext.getCurrentNamespaceId());
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleStationRentRecord record = ConvertHelper.convert(stationRent,
 				EhOfficeCubicleStationRentRecord.class);
