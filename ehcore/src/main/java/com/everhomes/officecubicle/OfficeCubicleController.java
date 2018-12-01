@@ -29,6 +29,8 @@ import com.everhomes.rest.officecubicle.admin.GetStationForRoomCommand;
 import com.everhomes.rest.officecubicle.admin.GetStationForRoomResponse;
 import com.everhomes.rest.officecubicle.admin.ListOfficeCubicleStatusCommand;
 import com.everhomes.rest.officecubicle.admin.ListOfficeCubicleStatusResponse;
+import com.everhomes.rest.officecubicle.admin.ListSpaceByCityCommand;
+import com.everhomes.rest.officecubicle.admin.ListSpaceByCityResponse;
 import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersCommand;
 import com.everhomes.rest.officecubicle.admin.SearchCubicleOrdersResponse;
 import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
@@ -47,6 +49,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.point.pointpool.PreOrderDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
+import com.everhomes.util.RequireAuthentication;
 
 /**
  * <ul>
@@ -603,6 +607,40 @@ public class OfficeCubicleController extends ControllerBase {
         return response;
     	
     }
+    
+    /**
+     * <b>URL: /officecubicle/listSpaceByCity</b> 
+     * <p>根据城市获取可见空间</p>
+     */
+    @RequestMapping("listSpaceByCity")
+    @RestReturn(ListSpaceByCityResponse.class)
+    public RestResponse listSpaceByCity(ListSpaceByCityCommand cmd) {
+
+    	ListSpaceByCityResponse resp = this.officeCubicleService.listSpaceByCity(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    
+    /**
+     * <b>URL: /officecubicle/payNotify</b>
+     * <p>支付/退款后,支付系统回调</p>
+     */
+    @RequestMapping("payNotify")
+    @RestReturn(value = String.class)
+    @RequireAuthentication(false)
+    public RestResponse payNotify(MerchantPaymentNotificationCommand cmd) {
+
+    	officeCubicleService.payNotify(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     
 }
 

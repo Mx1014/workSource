@@ -1637,12 +1637,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (rentNums<(rentSize+rentalOrder.getRentalCount().longValue())){
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
 				"工位数量不足");
-			} else {
-				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
-				rent.setOrderId(order.getId());
-				for(int i=0;i<= rentalOrder.getRentalCount().longValue() ;i++){
-					officeCubicleProvider.createCubicleStationRent(rent);
-				}
 			}
 			return null;
 		});
@@ -1812,6 +1806,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			smsProvider.addToTupleList(variables, "createTime", order.getCreateTime());
 			smsProvider.addToTupleList(variables, "orderId", order.getId());
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
+			OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
+			rent.setOrderId(order.getId());
+			for(int i=0;i<= order.getRentCount() ;i++){
+				officeCubicleProvider.createCubicleStationRent(rent);
+			}
 		}else if(cmd.getOrderType() == 4){
 			order.setOrderStatus(OfficeCubiceOrderStatus.REFUNDED.getCode());
 			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
