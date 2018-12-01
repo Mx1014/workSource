@@ -2828,7 +2828,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @return
      */
     private String generateInviationLink(Long id) {
-        String invitationLinkTemp = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITATION_LINK,"%s/visitor-appointment/build/invitation.html?visitorToken=%s");
+//        String invitationLinkTemp = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITATION_LINK,"%s/visitor-appointment/build/invitation.html?visitorToken=%s");
+        String invitationLinkTemp = "%s/evh/visitorsys/v?visitorToken=%s";
         String homeUrl = configurationProvider.getValue("home.url","");
         String token = WebTokenGenerator.getInstance().toWebToken(id);
         return String.format(invitationLinkTemp,homeUrl,token);

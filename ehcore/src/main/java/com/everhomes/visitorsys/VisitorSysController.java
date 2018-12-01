@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -10,11 +11,16 @@ import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -25,6 +31,8 @@ public class VisitorSysController extends ControllerBase {
 
 	@Autowired
 	private VisitorSysService visitorSysService;
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 
 	@Override
 	public void initListBinder(WebDataBinder binder) {
@@ -1065,6 +1073,20 @@ public class VisitorSysController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	}
+
+	@RequestMapping("v")
+	@RequireAuthentication(false)
+	public Object doorVisitor(GetInvitationUrlCommand cmd) {
+		HttpHeaders httpHeaders = new HttpHeaders();
+		try {
+			if(cmd.getVisitorToken() != null) {
+				String invitationLinkTemp = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITATION_LINK,"/visitor-appointment/build/invitation.html?visitorToken=");
+				httpHeaders.setLocation(new URI(invitationLinkTemp + cmd.getVisitorToken()));
+			}
+		} catch (URISyntaxException e) {
+		}
+		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 	}
 
 }
