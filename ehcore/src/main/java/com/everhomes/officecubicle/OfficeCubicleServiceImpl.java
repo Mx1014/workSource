@@ -2067,7 +2067,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		GetRoomDetailResponse resp = new GetRoomDetailResponse();
 		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(cmd.getRoomId());
 		List<OfficeCubicleStation> station = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),room.get(0).getId(),null,null,null,null);
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),room.getId(),null,null,null,null);
 		List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
 		RoomDTO dto = ConvertHelper.convert(room,RoomDTO.class);
 		dto.setAssociateStation(associateStaionList);
@@ -2152,12 +2152,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd){
 		GetStationDetailResponse resp = new GetStationDetailResponse();
-		List<OfficeCubicleStation> station =  officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null,null,cmd.getStationId());
+		OfficeCubicleStation station =  officeCubicleProvider.getOfficeCubicleStationById(cmd.getStationId());
 		StationDTO dto = new StationDTO();
-		dto = ConvertHelper.convert(station.get(0),StationDTO.class);
-		dto.setAssociateRoomId(station.get(0).getAssociateRoomId());
-		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, null,station.get(0).getAssociateRoomId());
-		dto.setAssociateRoomName(room.get(0).getStationName());
+		dto = ConvertHelper.convert(station,StationDTO.class);
+		dto.setAssociateRoomId(station.getAssociateRoomId());
+		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(station.getAssociateRoomId());
+		dto.setAssociateRoomName(room.getRoomName());
 		dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
 				UserContext.current().getUser().getId()));
 		resp.setStation(dto);
