@@ -591,7 +591,6 @@ public class OfficeCubicleController extends ControllerBase {
         return response;
     	
     }
-    
     /**
      * <b>URL: /officecubicle/getCubicleForApp</b> 
      * <p>客户端获取工位列表</p>

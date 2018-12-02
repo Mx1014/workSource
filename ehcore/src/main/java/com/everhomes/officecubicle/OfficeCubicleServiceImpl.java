@@ -2128,7 +2128,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		GetCubicleForAppResponse resp = new GetCubicleForAppResponse();
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,null,null);
-		resp.setStation(station.stream().map(r->ConvertHelper.convert(r,StationDTO.class)).collect(Collectors.toList()));
+		resp.setStation(station.stream().map(r->{
+			StationDTO dto = ConvertHelper.convert(r,StationDTO.class);
+			dto.setStationId(r.getId());
+			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
+					UserContext.current().getUser().getId()));
+			return dto;
+			}).collect(Collectors.toList()));
 		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = new RoomDTO();
