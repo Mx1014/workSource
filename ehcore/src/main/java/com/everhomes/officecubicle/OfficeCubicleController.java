@@ -641,6 +641,20 @@ public class OfficeCubicleController extends ControllerBase {
         return response;
     }
 
-    
+    /**
+     * <b>URL: /officecubicle/listCitiesByOrgIdAndCommunitId</b> 
+     * <p>列出城市</p>
+     */
+    @RequestMapping("listCitiesByOrgIdAndCommunitId")
+    @RestReturn(ListCitiesByOrgIdAndCommunitIdResponse.class)
+    public RestResponse listCitiesByOrgIdAndCommunitId(ListCitiesByOrgIdAndCommunitIdCommand cmd) {
+
+    	ListCitiesByOrgIdAndCommunitIdResponse resp = this.officeCubicleService.listCitiesByOrgIdAndCommunitId(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
 }
 

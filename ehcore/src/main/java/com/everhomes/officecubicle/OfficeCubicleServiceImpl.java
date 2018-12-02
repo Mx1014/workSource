@@ -1759,10 +1759,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		for(ProjectDTO dto : resp2.getDtos()){
 			communityIds.add(dto.getProjectId());
 		}
-		List<String> cities = new ArrayList<String>();
-		Map<Long, Community> temp = communityProvider.listCommunitiesByIds(communityIds);
+		List<CityForAppDTO> cities = new ArrayList<CityForAppDTO>();
+		Map<Long, Community> temp = officeCubicleProvider.listCommunitiesByIds(communityIds);
 		temp.values().stream().map(r -> {
-			cities.add(r.getCityName());
+			CityForAppDTO dto = new CityForAppDTO();
+			dto.setCityId(r.getCityId());
+			dto.setCityName(r.getCityName());
+			cities.add(dto);
 			return cities;
 		}).collect(Collectors.toList());
 		resp.setCity(cities);
@@ -2050,7 +2053,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<OfficeCubicleStationRent> longRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)1,null,null);
 		List<OfficeCubicleStationRent> shortRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)0,null,null);
 		resp.setShortCubicleIdleNums(shortRentStation.size());
-		resp.setLongCubicleIdleNums(longRentStation.size());
+		resp.setLongCubicleRentedNums(longRentStation.size());
 		List<OfficeCubicleStation> closeStation = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, (byte)0,null,null,null);
 		resp.setLongRentCloseCubicleNums(closeStation.size());

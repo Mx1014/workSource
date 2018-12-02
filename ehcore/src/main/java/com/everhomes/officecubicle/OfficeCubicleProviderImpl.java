@@ -3,11 +3,15 @@ package com.everhomes.officecubicle;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleChargeUsersDao;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleConfigsDao;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleConfigs;
 import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
@@ -19,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.community.Community;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -52,6 +57,7 @@ import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleStationRent;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceTypes;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
+import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleChargeUsersRecord;
@@ -882,4 +888,20 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
     	
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleStation.class, station.getId());
     }
+    
+    @Override
+    public Map<Long, Community> listCommunitiesByIds(List<Long> ids) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        final Map<Long, Community> communities = new HashMap<>();
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+        query.addConditions(Tables.EH_COMMUNITIES.ID.in(ids));
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addGroupBy(Tables.EH_COMMUNITIES.CITY_NAME);
+        query.fetch().map(r ->{
+            communities.put(r.getId(), ConvertHelper.convert(r, Community.class));
+            return null;
+        });
+        return communities;
+    }
+    
 }

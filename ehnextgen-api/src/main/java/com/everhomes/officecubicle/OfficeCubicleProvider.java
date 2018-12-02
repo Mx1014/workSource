@@ -2,7 +2,9 @@ package com.everhomes.officecubicle;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
+import com.everhomes.community.Community;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleConfigs;
 
@@ -127,6 +129,8 @@ public interface OfficeCubicleProvider {
 	OfficeCubicleStation getOfficeCubicleStationById(Long stationId);
 
 	OfficeCubicleRoom getOfficeCubicleRoomById(Long roomId);
+
+	Map<Long, Community> listCommunitiesByIds(List<Long> ids);
 
 
 

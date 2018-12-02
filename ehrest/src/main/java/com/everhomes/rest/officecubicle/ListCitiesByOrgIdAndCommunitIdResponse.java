@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
 */
 public class ListCitiesByOrgIdAndCommunitIdResponse {
 	private String defaultCity;
-	private List<String> city;
+	private List<CityForAppDTO> city;
 
 	@Override
     public String toString() {
@@ -26,12 +26,14 @@ public class ListCitiesByOrgIdAndCommunitIdResponse {
 		this.defaultCity = defaultCity;
 	}
 
-	public List<String> getCity() {
+	public List<CityForAppDTO> getCity() {
 		return city;
 	}
 
-	public void setCity(List<String> city) {
+	public void setCity(List<CityForAppDTO> city) {
 		this.city = city;
 	}
+
+
 
 }
