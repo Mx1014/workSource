@@ -4702,8 +4702,22 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		communityStatistics.setDateType(ContractStatisticDateType.YEARMMSTR.getCode());
 		communityStatistics.setRentAmount(BigDecimal.ZERO);
 		communityStatistics.setRentalArea(BigDecimal.ZERO);
+		communityStatistics.setUserContractCount(0);
 		communityStatistics.setUserContractAmount(BigDecimal.ZERO);
+		communityStatistics.setOrgContractCount(0);
 		communityStatistics.setOrgContractAmount(BigDecimal.ZERO);
+		communityStatistics.setNewContractCount(0);
+		communityStatistics.setNewContractAmount(BigDecimal.ZERO);
+		communityStatistics.setNewContractArea(BigDecimal.ZERO);
+		communityStatistics.setDenunciationContractCount(0);
+		communityStatistics.setDenunciationContractAmount(BigDecimal.ZERO);
+		communityStatistics.setDenunciationContractArea(BigDecimal.ZERO);
+		communityStatistics.setChangeContractCount(0);
+		communityStatistics.setChangeContractAmount(BigDecimal.ZERO);
+		communityStatistics.setChangeContractArea(BigDecimal.ZERO);
+		communityStatistics.setRenewContractCount(0);
+		communityStatistics.setRenewContractAmount(BigDecimal.ZERO);
+		communityStatistics.setRenewContractArea(BigDecimal.ZERO);
 		
 		// 获取该园区所有合同租赁总额
 		communityStatistics.setStatus(ContractStatus.ACTIVE.getCode());
@@ -4875,15 +4889,18 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
         String endTimeStr = "";
         String formatDateStr = "";
         
+        List<ContractStaticsListDTO> resultList = null;
+        
         if (!"".equals(cmd.getStartTimeStr()) && !"".equals(cmd.getEndTimeStr()) && cmd.getStartTimeStr() != null && cmd.getEndTimeStr() !=null) {
         	startTimeStr = cmd.getStartTimeStr();
         	endTimeStr = cmd.getEndTimeStr();
+            resultList = contractProvider.listSearchContractStaticsTimeDimension(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
 		}else {
 	        formatDateStr = cmd.getDateStr();
+	        resultList = contractProvider.listCommunityContractStaticsList(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
 		}
         
-        List<ContractStaticsListDTO> resultList = contractProvider.listCommunityContractStaticsList(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
-        
+
         
         if(resultList.size() <= pageSize){
             response.setNextPageAnchor(null);
@@ -5139,6 +5156,14 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		cell11.setCellStyle(style);
 		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
 		
+		//续约合同总数
+		Cell cell12 = tempRow.createCell(11);
+		cell12.setCellStyle(style);
+		cell12.setCellValue(dto.getRenewContractCount() != null ? dto.getRenewContractCount().toString() : "0");
+		//续约合同总额
+		Cell cell13 = tempRow.createCell(12);
+		cell13.setCellStyle(style);
+		cell13.setCellValue(dto.getRenewContractAmount() != null ? dto.getRenewContractAmount().toString() : "0");
 	}
 	
 	private InputStream copyInputStream(InputStream source) {
@@ -5231,6 +5256,15 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		Cell cell11 = tempRow.createCell(10);
 		cell11.setCellStyle(style);
 		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
+		
+		//续约合同总数
+		Cell cell12 = tempRow.createCell(11);
+		cell12.setCellStyle(style);
+		cell12.setCellValue(dto.getRenewContractCount() != null ? dto.getRenewContractCount().toString() : "0");
+		//续约合同总额
+		Cell cell13 = tempRow.createCell(12);
+		cell13.setCellStyle(style);
+		cell13.setCellValue(dto.getRenewContractAmount() != null ? dto.getRenewContractAmount().toString() : "0");
 	}
     
     @Override
@@ -5361,6 +5395,15 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		cell11.setCellStyle(style);
 		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
 		
+		//续约合同总数
+		Cell cell12 = tempRow.createCell(11);
+		cell12.setCellStyle(style);
+		cell12.setCellValue(dto.getRenewContractCount() != null ? dto.getRenewContractCount().toString() : "0");
+		//续约合同总额
+		Cell cell13 = tempRow.createCell(12);
+		cell13.setCellStyle(style);
+		cell13.setCellValue(dto.getRenewContractAmount() != null ? dto.getRenewContractAmount().toString() : "0");
+		
 	}
     
     // 各项目的历史合计 明细
@@ -5467,6 +5510,15 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		Cell cell11 = tempRow.createCell(10);
 		cell11.setCellStyle(style);
 		cell11.setCellValue(dto.getUserContractCount() != null ? dto.getUserContractCount().toString() : "0");
+		
+		//续约合同总数
+		Cell cell12 = tempRow.createCell(11);
+		cell12.setCellStyle(style);
+		cell12.setCellValue(dto.getRenewContractCount() != null ? dto.getRenewContractCount().toString() : "0");
+		//续约合同总额
+		Cell cell13 = tempRow.createCell(12);
+		cell13.setCellStyle(style);
+		cell13.setCellValue(dto.getRenewContractAmount() != null ? dto.getRenewContractAmount().toString() : "0");
 	}
 	
 	@Override
@@ -5486,7 +5538,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
         taskService.updateTaskProcess(taskId, 20);
 		Workbook wb = null;
 		InputStream in;
-		in = this.getClass().getResourceAsStream("/excels/contract/communityContractSummaryStatistic.xlsx");
+		in = this.getClass().getResourceAsStream("/excels/contract/contractStatisticTotal.xlsx");
 		
 		try {
 			wb = new XSSFWorkbook(copyInputStream(in));
@@ -5517,7 +5569,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				int orderNum = dtos.size() + 1;//序号
 				boolean isLastRow = true;
 				TotalContractStaticsDTO totalCommunityStatics = getTotalContractStatics(cmd);
-				fillRowCellTotalCommunityStatistic(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
+				fillRowCellContractStatisticTotal(tempRow, totalStyle, isLastRow, orderNum, totalCommunityStatics);
 				taskService.updateTaskProcess(taskId, 80);
 				try {
 					wb.write(outputStream);
@@ -5532,7 +5584,63 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		return outputStream;
 	}
 	
-
+    private void fillRowCellContractStatisticTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, TotalContractStaticsDTO dto) {
+		//序号
+		Cell cell0 = tempRow.createCell(0);
+		cell0.setCellStyle(style);
+		cell0.setCellValue("合计");
+			
+		//日期
+		Cell cell2 = tempRow.createCell(1);
+		cell2.setCellStyle(style);
+		cell2.setCellValue("项目总数");
+		
+		//项目总数
+		Cell cell3 = tempRow.createCell(2);
+		cell3.setCellStyle(style);
+		cell3.setCellValue(dto.getCommunityCount() != null ? dto.getCommunityCount().toString() : "0");
+		
+		//租赁合同总额
+		Cell cell4 = tempRow.createCell(3);
+		cell4.setCellStyle(style);
+		cell4.setCellValue(dto.getRentAmount() != null ? dto.getRentAmount().toString() : "0");
+		
+		//租赁总面积
+		Cell cell5 = tempRow.createCell(4);
+		cell5.setCellStyle(style);
+		cell5.setCellValue(dto.getRentalArea() != null ? dto.getRentalArea().toString() : "0");
+		
+		//在租合同总份数
+		Cell cell6 = tempRow.createCell(5);
+		cell6.setCellStyle(style);
+		cell6.setCellValue(dto.getContractCount() != null ? dto.getContractCount().toString() : "0");	
+		
+		//新签合同总额
+		Cell cell7 = tempRow.createCell(6);
+		cell7.setCellStyle(style);
+		cell7.setCellValue(dto.getNewContractAmount() != null ? dto.getNewContractAmount().toString() : "0");
+		
+		//续约总额
+		Cell cell8 = tempRow.createCell(7);
+		cell8.setCellStyle(style);
+		cell8.setCellValue(dto.getRenewContractAmount() != null ? dto.getRenewContractAmount().toString() : "0");
+		
+		//退约总数
+		Cell cell9 = tempRow.createCell(8);
+		cell9.setCellStyle(style);
+		cell9.setCellValue(dto.getDenunciationContractCount() != null ? dto.getDenunciationContractCount().toString() : "0");
+		
+		//变更
+		Cell cell10 = tempRow.createCell(9);
+		cell10.setCellStyle(style);
+		cell10.setCellValue(dto.getChangeContractCount() != null ? dto.getChangeContractCount().toString() : "0");
+		
+		//押金总额
+		Cell cell11 = tempRow.createCell(10);
+		cell11.setCellStyle(style);
+		cell11.setCellValue(dto.getDepositAmount() != null ? dto.getDepositAmount().toString() : "0");
+		
+	}
     
 	@Override
 	public ListContractStaticsTimeDimensionResponse contractStaticsListCommunityTotal(SearchContractStaticsListCommand cmd) {

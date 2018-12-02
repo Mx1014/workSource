@@ -167,4 +167,6 @@ public interface ContractProvider {
 
 	List<Contract> findAnyStatusContractByAddressId(Long addressId);
 
+	List<ContractStaticsListDTO> listSearchContractStaticsTimeDimension(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr, String endTimeStr, Byte dateType, Integer pageOffSet, Integer pageSize);
+
 }
