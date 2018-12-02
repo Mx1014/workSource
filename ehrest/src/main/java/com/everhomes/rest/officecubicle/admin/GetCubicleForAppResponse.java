@@ -20,7 +20,6 @@ import com.everhomes.util.StringHelper;
  */
 public class GetCubicleForAppResponse {
 
-	private List<StationInfomationDTO> station;
 	private List<RoomDTO> room;
 	private BigDecimal minStationPrice;
     @ItemType(OfficeAttachmentDTO.class)
@@ -87,16 +86,6 @@ public class GetCubicleForAppResponse {
 
 	public void setRoom(List<RoomDTO> room) {
 		this.room = room;
-	}
-
-
-	public List<StationInfomationDTO> getStation() {
-		return station;
-	}
-
-
-	public void setStation(List<StationInfomationDTO> station) {
-		this.station = station;
 	}
 
 	@Override
