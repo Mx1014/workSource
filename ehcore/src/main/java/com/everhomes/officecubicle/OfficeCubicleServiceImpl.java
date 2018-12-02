@@ -1772,7 +1772,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return cities;
 		}).collect(Collectors.toList());
 		resp.setCity(cities);
-		resp.setDefaultCity(community.getCityName());
+		CityForAppDTO dto = new	CityForAppDTO();
+		dto.setCityId(community.getCityId());
+		dto.setCityName(community.getCityName());
+		resp.setDefaultCity(dto);
 		return resp;
 	}
 	@Override
