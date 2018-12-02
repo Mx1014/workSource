@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType</li>
  * <li>cityId：城市id</li>
  * <li>cityName</li>
+ * <li>rentType:1长租，0短租</li>
  * <li>pageAnchor：锚点</li>
  * <li>pageSize：一页大小</li>
  * </ul>
@@ -19,11 +20,27 @@ public class ListSpaceByCityCommand {
 	private String ownerType;
 	private Long cityId;
 	private String cityName;
+	private Byte rentType;
 	private Long pageAnchor;
     
 	private Integer pageSize;
 
 	
+	
+	public Byte getRentType() {
+		return rentType;
+	}
+
+
+
+
+	public void setRentType(Byte rentType) {
+		this.rentType = rentType;
+	}
+
+
+
+
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}

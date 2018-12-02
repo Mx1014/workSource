@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>minUnitPrice：最小价格</li>
  * <li>allPositonNums：所有工位数量</li>
  * <li>address:地址</li>
+ * <li>coverUrl:封面url</li>
+ * <li>rentType:1长租，0短租</li>
  * </ul>
  */
 public class SpaceForAppDTO {
@@ -20,9 +22,39 @@ public class SpaceForAppDTO {
     private BigDecimal minUnitPrice;
     private Integer allPositonNums;
     private String address;
+    private String coverUrl;
+    private Byte rentType;
 
 
-    public Long getSpaceId() {
+    public Byte getRentType() {
+		return rentType;
+	}
+
+
+
+
+	public void setRentType(Byte rentType) {
+		this.rentType = rentType;
+	}
+
+
+
+
+	public String getCoverUrl() {
+		return coverUrl;
+	}
+
+
+
+
+	public void setCoverUrl(String coverUrl) {
+		this.coverUrl = coverUrl;
+	}
+
+
+
+
+	public Long getSpaceId() {
 		return spaceId;
 	}
 
