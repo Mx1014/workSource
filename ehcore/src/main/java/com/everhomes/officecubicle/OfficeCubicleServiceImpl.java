@@ -2274,7 +2274,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<OfficeCubicleSpace> list = 
 				officeCubicleProvider.querySpacesByCityId(
 						cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCityId(), locator, pageSize + 1, getNamespaceId(UserContext.getCurrentNamespaceId()));
-		
+		if (list == null){
+			return resp;
+		}
 		resp.setSpace(list.stream().map(r->{
 			SpaceForAppDTO dto = new SpaceForAppDTO();
 			dto.setAddress(r.getAddress());
