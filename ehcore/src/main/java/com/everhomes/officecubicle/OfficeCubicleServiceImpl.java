@@ -2282,17 +2282,20 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setAddress(r.getAddress());
 			dto.setSpaceId(r.getId());
 			dto.setSpaceName(r.getName());
+			List<OfficeCubicleAttachment> attachments = null;
 			if (cmd.getRentType() ==1){
-			BigDecimal roomMinPrice = officeCubicleProvider.getRoomMinPrice(r.getId());
-			BigDecimal stationMinPrice = officeCubicleProvider.getStationMinPrice(r.getId());
-			dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
+				BigDecimal roomMinPrice = officeCubicleProvider.getRoomMinPrice(r.getId());
+				BigDecimal stationMinPrice = officeCubicleProvider.getStationMinPrice(r.getId());
+				dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
+				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)1);
+			}else{
+				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)2);
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null);
 			Integer allPositonNums = station.size() + room.size();
 			dto.setAllPositonNums(allPositonNums);
-			List<OfficeCubicleAttachment> spaceAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)1);
-			dto.setCoverUrl(this.contentServerService.parserUri(spaceAttachments.get(0).getContentUri(), EntityType.USER.getCode(),
+			dto.setCoverUrl(this.contentServerService.parserUri(attachments.get(0).getContentUri(), EntityType.USER.getCode(),
 					UserContext.current().getUser().getId()));
 			dto.setRentType(cmd.getRentType());
 			return dto;
