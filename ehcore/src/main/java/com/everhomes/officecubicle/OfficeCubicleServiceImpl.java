@@ -414,6 +414,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setCreatorUid(UserContext.current().getUser().getId());
+			Community community = this.communityProvider.findCommunityById(cmd.getOwnerId());
+			space.setCityId(community.getCityId());
+			space.setCityName(community.getCityName());
 			this.officeCubicleProvider.createSpace(space);
 			if (null != cmd.getSpaceAttachments())
 				cmd.getSpaceAttachments().forEach((dto) -> {
