@@ -140,3 +140,5 @@ ALTER TABLE eh_office_cubicle_spaces ADD COLUMN refund_tip VARCHAR(255) COMMENT 
 
 
 ALTER TABLE eh_office_cubicle_attachments ADD COLUMN type TINYINT COMMENT '1,空间，2短租工位，3开放式工位';
+
+ALTER TABLE eh_office_cubicle_orders MODIFY COLUMN employee_number VARCHAR(64) COMMENT '雇员数量';
