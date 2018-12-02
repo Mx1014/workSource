@@ -346,7 +346,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		List<OfficeCubicleAttachment> stationAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(dto.getId(),(byte)3);
 		if (null != stationAttachments){
-			dto.setShortRentAttachments(new ArrayList<OfficeAttachmentDTO>());
+			dto.setStationAttachments(new ArrayList<OfficeAttachmentDTO>());
 			stationAttachments.forEach((attachment) -> {
 			OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
 			attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
@@ -2128,24 +2128,35 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		GetCubicleForAppResponse resp = new GetCubicleForAppResponse();
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,null,null);
-		resp.setStation(station.stream().map(r->{
-			StationDTO dto = ConvertHelper.convert(r,StationDTO.class);
-			dto.setStationId(r.getId());
-			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
+		List<OfficeCubicleAttachment> stationAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(cmd.getSpaceId(),(byte)3);
+		if (null != stationAttachments){
+			resp.setStationAttachments(new ArrayList<OfficeAttachmentDTO>());
+			stationAttachments.forEach((attachment) -> {
+			OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
+			attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
 					UserContext.current().getUser().getId()));
-			return dto;
-			}).collect(Collectors.toList()));
+			resp.getStationAttachments().add(attachmentDTO);
+			});
+		}
+		Integer stationNums = 0;
+		if (station!=null){
+			stationNums = station.size();
+		}
+		resp.setStationNums(stationNums);
 		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
 		resp.setRoom(room.stream().map(r->{
-			RoomDTO dto = new RoomDTO();
-			ConvertHelper.convert(r,RoomDTO.class);
+			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
 			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
 			dto.setAssociateStation(associateStaionList);
 			List<OfficeCubicleStationRent> stationRent = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(), null,(byte)0,r.getId());
-	        Calendar c = Calendar.getInstance();
-	        c.setTime(stationRent.get(0).getEndTime());
-	        c.add(Calendar.DAY_OF_MONTH, 1);
-			dto.setRentDate(c.getTime().getTime());
+			Long rentDate = System.currentTimeMillis();
+			if (stationRent != null){
+		        Calendar c = Calendar.getInstance();
+		        c.setTime(stationRent.get(0).getEndTime());
+		        c.add(Calendar.DAY_OF_MONTH, 1);
+		        rentDate = c.getTime().getTime();
+			}
+			dto.setRentDate(rentDate);
 			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
 					UserContext.current().getUser().getId()));
 			return dto;
