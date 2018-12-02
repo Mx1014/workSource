@@ -37,10 +37,19 @@ public class AddSpaceOrderCommand {
 	private String categoryName;
 	private Long categoryId;
 
-	private Integer employeeNumber;
+	private String employeeNumber;
 	private Byte financingFlag;
 	private Long reserveTime;
+	private String spaceName;
 
+
+	public String getSpaceName() {
+		return spaceName;
+	}
+
+	public void setSpaceName(String spaceName) {
+		this.spaceName = spaceName;
+	}
 
 	public Long getReserveTime() {
 		return reserveTime;
@@ -50,11 +59,13 @@ public class AddSpaceOrderCommand {
 		this.reserveTime = reserveTime;
 	}
 
-	public Integer getEmployeeNumber() {
+
+
+	public String getEmployeeNumber() {
 		return employeeNumber;
 	}
 
-	public void setEmployeeNumber(Integer employeeNumber) {
+	public void setEmployeeNumber(String employeeNumber) {
 		this.employeeNumber = employeeNumber;
 	}
 
