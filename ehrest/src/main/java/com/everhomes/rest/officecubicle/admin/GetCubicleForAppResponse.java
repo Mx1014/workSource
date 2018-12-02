@@ -11,7 +11,6 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>station:工位详情{@link com.everhomes.rest.officecubicle.admin.StationDTO}</li>
  * <li>room:办公室详情{@link com.everhomes.rest.officecubicle.admin.RoomDTO}</li>
  * <li>minStationPrice:开放式工位最小价格</li>
  * <li>stationAttachments:开放式工位图片</li>

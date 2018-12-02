@@ -2144,6 +2144,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		resp.setStationNums(stationNums);
 		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
+		if (room!=null){
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
 			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
@@ -2161,7 +2162,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					UserContext.current().getUser().getId()));
 			return dto;
 			}).collect(Collectors.toList()));
-		resp.setMinStationPrice(officeCubicleProvider.getStationMinPrice(cmd.getSpaceId()));
+		}
+		BigDecimal minStationPrice = officeCubicleProvider.getStationMinPrice(cmd.getSpaceId());
+		if (minStationPrice == null){
+			minStationPrice = new BigDecimal(0);
+		}
+		resp.setMinStationPrice(minStationPrice);
 		return resp;
 	}
 	private List<AssociateStationDTO> setAssociateStaion(List<OfficeCubicleStation> station){
