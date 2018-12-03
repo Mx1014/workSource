@@ -518,14 +518,30 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setOperatorUid(UserContext.current().getUser().getId());
-			space.setShortRentNums(cmd.getShortRentNums());
-			space.setAddress(cmd.getAddress());
-			space.setLatitude(cmd.getLatitude());
-			space.setLongitude(cmd.getLongitude());
-			space.setContactPhone(cmd.getContactPhone());
-			space.setName(cmd.getName());
-			space.setLongRentPrice(cmd.getLongRentPrice());
-			space.setDescription(cmd.getDescription());
+			if (cmd.getShortRentNums()!= null){
+				space.setShortRentNums(cmd.getShortRentNums());
+			}
+			if (cmd.getAddress()!=null){
+				space.setAddress(cmd.getAddress());
+			}
+			if (cmd.getLatitude() > 0){
+				space.setLatitude(cmd.getLatitude());
+			}
+			if (cmd.getLatitude() > 0){
+				space.setLongitude(cmd.getLongitude());
+			}
+			if (cmd.getContactPhone()!=null){
+				space.setContactPhone(cmd.getContactPhone());
+			}
+			if (cmd.getName()!=null){
+				space.setName(cmd.getName());
+			}
+			if (cmd.getLongRentPrice()!=null){
+				space.setLongRentPrice(cmd.getLongRentPrice());
+			}
+			if (cmd.getDescription()!=null){
+				space.setDescription(cmd.getDescription());
+			}
 			this.officeCubicleProvider.updateSpace(space);
 
 			// TODO:删除附件唐彤没有提供

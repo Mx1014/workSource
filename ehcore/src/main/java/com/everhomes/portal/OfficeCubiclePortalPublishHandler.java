@@ -44,7 +44,7 @@ public class OfficeCubiclePortalPublishHandler implements PortalPublishHandler {
             RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, appName);
             stationBookingInstanceConfig.setResourceTypeId(rentalResourceType.getId());
         }
-
+        stationBookingInstanceConfig.setUrl(String.format(stationBookingInstanceConfig.getUrl(),namespaceId));
         return StringHelper.toJsonString(stationBookingInstanceConfig);
     }
     
