@@ -69,6 +69,8 @@ public interface FieldProvider {
 
     Field findFieldById(Long fieldId);
 
+    Field findFieldByItemId(Long itemId);
+
     FieldItem findFieldItemByItemId(Long itemId);
 
     void changeFilterStatus(Integer namespaceId, Long communityId, String moduleName, Long userId, String groupPath);;

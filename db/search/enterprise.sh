@@ -20,7 +20,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterprise" -d '
                         "type": "string", 
                         "analyzer": "pinyin_ngram_analyzer"
                     }, 
-                    "pinyin_prefix": {
+                    "porg/listEnterpriseByCommunityIdinyin_prefix": {
                         "type": "string", 
                         "analyzer": "pinyin_first_letter_analyzer"
                     }
