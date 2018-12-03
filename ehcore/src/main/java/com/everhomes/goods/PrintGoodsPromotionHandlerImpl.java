@@ -3,6 +3,8 @@ package com.everhomes.goods;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +24,14 @@ import com.everhomes.rest.goods.GoodScopeDTO;
 import com.everhomes.rest.goods.GoodTagInfo;
 import com.everhomes.rest.goods.TagDTO;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
+import com.everhomes.yellowPage.YellowPageServiceImpl;
 
 @Component(GoodsPromotionHandler.GOODS_PROMOTION_HANDLER_PREFIX + ServiceModuleConstants.PRINT_MODULE)
 public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandlerImpl{
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(PrintGoodsPromotionHandlerImpl.class);
+	
 	@Autowired
 	private CommunityProvider communityProvider;
 	
@@ -34,6 +40,12 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 	private static String SCOPE = "范围";
 	@Override
 	public GetGoodListResponse getGoodList(GetGoodListCommand cmd) {
+		
+		if (!isValidGoodListCommand(cmd)) {
+			LOGGER.info("not valid good commd :"+(null == cmd ? null : StringHelper.toJsonString(cmd)));
+			return new GetGoodListResponse();
+		}
+		
 		// 打印机所有域空间的商品都是一样的 这里直接使用meiju
 		GoodBizEnum[] goodBizEnums = GoodBizEnum.values();
 		List<GoodTagInfo> goods = new ArrayList<>();
@@ -51,6 +63,23 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 	}	
 	
 	
+	private boolean isValidGoodListCommand(GetGoodListCommand cmd) {
+		
+		if (null == cmd 
+				|| null == cmd.getNamespaceId() 
+				|| null == cmd.getGoodTagInfo() 
+				|| null == cmd.getGoodTagInfo().getTag1Key()
+				|| null == cmd.getGoodTagInfo().getTag2Key()
+				) {
+			
+			return false;
+			
+		}
+		
+		return true;
+	}
+
+
 	@Override
 	public GetServiceGoodResponse getServiceGoodsScopes(GetServiceGoodCommand cmd){
 		GetServiceGoodResponse response = new GetServiceGoodResponse();

@@ -236,7 +236,20 @@ public enum VersionRealmType {
     ANDROID_JINGUTONG("Android_JinGuTong"),
     IOS_JINGUTONG("iOS_JinGuTong"),
     ANDROID_BILINSHE("Android_BiLinShe"),
-    IOS_BILINSHE("iOS_BiLinShe")
+    IOS_BILINSHE("iOS_BiLinShe"),
+
+    ANDROID_MASCENTOR("Android_MasCentor"),
+    IOS_MASCENTOR("iOS_MasCentor"),
+    ANDROID_JINMAO("Android_JinMao"),
+    IOS_JINMAO("iOS_JinMao"),
+    ANDROID_JINHUCENTOR("Android_JinHuCentor"),
+    IOS_JINHUCENTOR("iOS_JinHuCentor"),
+    ANDROID_GUOMAOQUANWX("Android_GuoMaoQuanWx"),
+    IOS_GUOMAOQUANWX("iOS_GuoMaoQuanWx"),
+    ANDROID_GANGWANONEPLUS("Android_GangWanOnePlus"),
+    IOS_GANGWANONEPLUS("iOS_GangWanOnePlus"),
+    ANDROID_HUITONGDASHA("Android_HuiTongDaSha"),
+    IOS_HUITONGDASHA("iOS_HuiTongDaSha")
     ;
 
     private String code;

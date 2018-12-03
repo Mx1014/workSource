@@ -612,6 +612,20 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/flow/getFlowGraphByFlowVersion</b>
+     * <p>获取工作流流程图</p>
+     */
+    @RequestMapping("getFlowGraphByFlowVersion")
+    @RestReturn(value = FlowGraphDTO.class)
+    public RestResponse getFlowGraphByFlowVersion(@Valid FlowIdVersionCommand cmd) {
+        FlowGraphDTO flowGraphDTO = flowService.getFlowGraphByFlowVersion(cmd);
+        RestResponse response = new RestResponse(flowGraphDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/flow/createFlowButton</b>
      * <p>新增按钮</p>
      */
@@ -853,7 +867,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("listFlowModuleApps")
     @RestReturn(value = ListFlowModuleAppsResponse.class)
-    public RestResponse listFlowModuleApps(@Valid ListFlowModuleAppsCommand cmd) {
+    public RestResponse listFlowModuleApps(@Valid SearchFlowCaseCommand cmd) {
         ListFlowModuleAppsResponse resp = flowService.listFlowModuleApps(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -867,7 +881,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("listFlowModuleAppServiceTypes")
     @RestReturn(value = ListFlowModuleAppServiceTypesResponse.class)
-    public RestResponse listFlowModuleAppServiceTypes(@Valid ListFlowModuleAppServiceTypesCommand cmd) {
+    public RestResponse listFlowModuleAppServiceTypes(@Valid SearchFlowCaseCommand cmd) {
         ListFlowModuleAppServiceTypesResponse resp = flowService.listFlowModuleAppServiceTypes(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);

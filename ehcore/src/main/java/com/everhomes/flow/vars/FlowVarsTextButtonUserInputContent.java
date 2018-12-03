@@ -23,6 +23,6 @@ public class FlowVarsTextButtonUserInputContent implements FlowVariableTextResol
         if (subject != null) {
             return subject.getContent();
         }
-        return null;
+        return "";
     }
 }

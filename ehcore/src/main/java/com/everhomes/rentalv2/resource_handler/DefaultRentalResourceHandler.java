@@ -8,6 +8,7 @@ import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -25,6 +26,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author sw on 2018/1/5.
@@ -66,7 +68,7 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
         Integer pageSize = Integer.MAX_VALUE;
         List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
                 cmd.getRentalSiteId(), new CrossShardListingLocator(), cmd.getBillStatus(), cmd.getVendorType(), pageSize, cmd.getStartTime(), cmd.getEndTime(),
-                null, null,cmd.getPayChannel());
+                null, null,cmd.getPayChannel(),cmd.getSource());
         if(null == bills){
             bills = new ArrayList<>();
         }
@@ -91,18 +93,11 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
             dtos.add(dto);
         }
 
-//		URL rootPath = Rentalv2ServiceImpl.class.getResource("/");
-//		String filePath =rootPath.getPath() + downloadDir ;
-//		File file = new File(filePath);
-//		if(!file.exists())
-//			file.mkdirs();
-//		filePath = filePath + "RentalBills"+System.currentTimeMillis()+".xlsx";
         //新建了一个文件
         ByteArrayOutputStream out = createRentalBillsStream(dtos);
 
         DownloadUtils.download(out, response);
 
-//		return download(filePath,response);
     }
 
 
@@ -139,13 +134,16 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
         Row row = sheet.createRow(sheet.getLastRowNum());
         int i =-1 ;
         row.createCell(++i).setCellValue("序号");
-        row.createCell(++i).setCellValue("名称");
-        row.createCell(++i).setCellValue("下单时间");
-        row.createCell(++i).setCellValue("使用详情");
+        row.createCell(++i).setCellValue("订单提交时间");
+        row.createCell(++i).setCellValue("资源名称");
+        row.createCell(++i).setCellValue("预订时间");
         row.createCell(++i).setCellValue("预订人");
-        row.createCell(++i).setCellValue("总价");
+        row.createCell(++i).setCellValue("备注信息");
+        row.createCell(++i).setCellValue("联系方式");
+        row.createCell(++i).setCellValue("订单金额（元）");
         row.createCell(++i).setCellValue("支付类型");
         row.createCell(++i).setCellValue("支付方式");
+        row.createCell(++i).setCellValue("订单来源");
         row.createCell(++i).setCellValue("订单状态");
     }
 
@@ -154,17 +152,31 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
         int i = -1;
         //序号
         row.createCell(++i).setCellValue(row.getRowNum());
-        //名称 - 资源名称
-        row.createCell(++i).setCellValue(dto.getSiteName());
         //下单时间
         if(null!=dto.getReserveTime())
             row.createCell(++i).setCellValue(datetimeSF.get().format(new Timestamp(dto.getReserveTime())));
         else
             row.createCell(++i).setCellValue("");
-        //使用详情
+        //名称 - 资源名称
+        row.createCell(++i).setCellValue(dto.getSiteName());
+
+        //预定时间
         row.createCell(++i).setCellValue(dto.getUseDetail());
         //预约人
         row.createCell(++i).setCellValue(dto.getUserName());
+        //备注信息
+        String content = "";
+        List<BillAttachmentDTO> billAttachments = dto.getBillAttachments();
+        if (billAttachments != null && billAttachments.size() > 0) {
+            Optional<BillAttachmentDTO> any = billAttachments.stream().filter(r -> AttachmentType.TEXT_REMARK.getCode().equals(r.getAttachmentType())).findAny();
+            if (any.isPresent())
+                content = any.get().getContent();
+        }
+
+        row.createCell(++i).setCellValue(content);
+
+        //联系方式
+        row.createCell(++i).setCellValue(dto.getUserPhone());
         //总价
         if(null != dto.getTotalPrice())
             row.createCell(++i).setCellValue(dto.getTotalPrice().toString());
@@ -179,6 +191,11 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
         //支付方式
         if(null != dto.getVendorType())
             row.createCell(++i).setCellValue(VendorType.fromCode(dto.getVendorType()).getDescribe());
+        else
+            row.createCell(++i).setCellValue("");
+        //订单来源
+        if(null != dto.getSource())
+            row.createCell(++i).setCellValue(RentalBillSource.fromCode(dto.getSource()).getDescribe());
         else
             row.createCell(++i).setCellValue("");
         //订单状态

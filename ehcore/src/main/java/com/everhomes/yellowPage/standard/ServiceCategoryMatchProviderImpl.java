@@ -144,7 +144,7 @@ public class ServiceCategoryMatchProviderImpl implements ServiceCategoryMatchPro
 	@Override
 	public void updateMatch(ServiceCategoryMatch match) {
 		
-		match.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		match.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		match.setCreateUid(UserContext.currentUserId());
 		
 		// 使用dao方法
@@ -153,6 +153,7 @@ public class ServiceCategoryMatchProviderImpl implements ServiceCategoryMatchPro
 		// 广播给从数据库
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, CLASS, null);
 	}
+	
 
 	@Override
 	public void updateMatchCategoryName(Long type, Long categoryId, String categoryName) {

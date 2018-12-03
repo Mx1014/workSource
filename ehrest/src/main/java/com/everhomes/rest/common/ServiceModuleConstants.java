@@ -44,4 +44,9 @@ public interface ServiceModuleConstants {
     long PRINT_MODULE = 41400L; // 云打印模块
 
     long BANNER_MODULE = 10400L;//广告模块
+    
+    long HOTLINE_MODULE = 40300;//服务热线
+    long ENTERPRISE_VISITOR_MODULE = 52100;//企业访客
+    long QUALITY_MODULE = 20600;//品质核查
+    
 }

@@ -761,17 +761,9 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                     case 1:
                     case 7:
                     case 9:
-                    case 21:
-                        order.setVendorType(VendorType.WEI_XIN.getCode());
-                        order.setPayChannel(PayChannel.NORMAL_PAY.getCode());
-                        break;
-                    case 29:
-                        order.setPayChannel(PayChannel.ENTERPRISE_PAY_CHARGE.getCode());
-                        break;
-                    default:
-                        order.setVendorType(VendorType.ZHI_FU_BAO.getCode());
-                        order.setPayChannel(PayChannel.NORMAL_PAY.getCode());
-                        break;
+                    case 21: order.setVendorType(VendorType.WEI_XIN.getCode());order.setPayChannel(PayChannel.NORMAL_PAY.getCode());break;
+                    case 29: order.setVendorType(VendorType.ENTERPRISE_WALLET.getCode());order.setPayChannel(PayChannel.ENTERPRISE_PAY_CHARGE.getCode());break;
+                    default: order.setVendorType(VendorType.ZHI_FU_BAO.getCode());order.setPayChannel(PayChannel.NORMAL_PAY.getCode());break;
                 }
 
             order.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -848,12 +840,14 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     }
 
     @Override
-    public void refundNotify(OrderPaymentNotificationCommand cmd) {
+    public void refundNotify(MerchantPaymentNotificationCommand cmd) {
         if (!PayUtil.verifyCallbackSignature(cmd))
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
                     "signature wrong");
 
-            Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
+            Rentalv2OrderRecord  record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
+            if (record == null)
+                 record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
             RentalRefundOrder rentalRefundOrder = this.rentalProvider.getRentalRefundOrderByOrderNo(record.getOrderNo().toString());
             RentalOrder bill = this.rentalProvider.findRentalBillById(rentalRefundOrder.getOrderId());
             rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());

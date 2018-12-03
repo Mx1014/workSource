@@ -77,8 +77,9 @@ public class SiyinPrintPrinterProviderImpl implements SiyinPrintPrinterProvider 
 	}
 	
 	@Override
-	public List<SiyinPrintPrinter> listSiyinPrintPrinter() {
+	public List<SiyinPrintPrinter> listSiyinPrintPrinter(Integer namespaceId) {
 		return getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_PRINTERS)
+				.where(Tables.EH_SIYIN_PRINT_PRINTERS.NAMESPACE_ID.eq(namespaceId))
 				.orderBy(Tables.EH_SIYIN_PRINT_PRINTERS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintPrinter.class));
 	}

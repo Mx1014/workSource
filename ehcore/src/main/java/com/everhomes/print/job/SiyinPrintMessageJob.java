@@ -41,19 +41,18 @@ public class SiyinPrintMessageJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
-            String appName = jobMap.getString("appName");
             SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(jobMap.getLong("orderNo"));
             if (order.getOrderStatus()==PrintOrderStatusType.UNPAID.getCode()){
             	Integer namespaceId = order.getNamespaceId();
             	Long creatorUid = order.getCreatorUid();
-            	sendMessageToUser(appName, namespaceId, creatorUid);
+            	sendMessageToUser(namespaceId, creatorUid);
             }
         }catch (Exception e) {
             LOGGER.error("SiyinPrintMessageJob error", e);
         }
 
     }
-    private void sendMessageToUser(String appName, Integer namespaceId, Long creatorUid) {
+    private void sendMessageToUser(Integer namespaceId, Long creatorUid) {
         String templateScope = SmsTemplateCode.SCOPE;
         String templateLocale = SiyinPrintNotificationTemplateCode.locale;
         int templateId = SmsTemplateCode.PRINT_UNPAID_MESSAGE;

@@ -27,4 +27,6 @@ public interface EnterpriseApprovalErrorCode {
 
     int ERROR_FLOW_CASE_FORM_REQUIRE_SUBMIT = 30002;   // 工作流节点对应的表单包含必填项
 
+    int ERROR_FLOW_STEP_ERROR = 30003;      //  工作流节点任务已处理完成
+
 }

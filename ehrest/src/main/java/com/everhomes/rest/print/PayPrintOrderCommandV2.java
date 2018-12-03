@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.print;
 
+import java.util.Map;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -21,7 +23,10 @@ public class PayPrintOrderCommandV2 {
 	private Long ownerId;
 	private String clientAppName;
 	private Integer namespaceId;
-
+	private Map<String, String> paymentParams;
+	private Integer commitFlag;
+	
+	
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -79,5 +84,21 @@ public class PayPrintOrderCommandV2 {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Map<String, String> getPaymentParams() {
+		return paymentParams;
+	}
+
+	public void setPaymentParams(Map<String, String> paymentParams) {
+		this.paymentParams = paymentParams;
+	}
+
+	public Integer getCommitFlag() {
+		return commitFlag;
+	}
+
+	public void setCommitFlag(Integer commitFlag) {
+		this.commitFlag = commitFlag;
 	}
 }

@@ -231,4 +231,8 @@ public interface ConfigConstants {
     
     //资产报表定时任务
 	public static final String SCHEDULE_PROPERTY_TASK_TIME = "schedule.property.task.time";
+
+
+	//客户端地址模式
+	public static final String CLIENT_ADDRESS_MODE = "client.address.mode";
 }

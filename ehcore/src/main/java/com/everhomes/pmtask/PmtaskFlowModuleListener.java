@@ -774,6 +774,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		cmd.setNamespaceId(namespaceId);
 		cmd.setOrganizationId(flow.getOrganizationId());
 		cmd.setAppId(Long.valueOf(flow.getModuleType()));
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(flow.getOwnerId());
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
 		if(null == response.getRequests()){
@@ -822,7 +824,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
             PmTask task = pmTaskProvider.findTaskByFlowCaseId(flowCaseId);
             Double avgEval = evaluates.stream().collect(Collectors.averagingDouble(FlowEvaluate::getStar));
             BigDecimal avg = BigDecimal.valueOf(avgEval);
-            task.setStar(avg.setScale(1).toString());
+            task.setStar(avg.setScale(1,BigDecimal.ROUND_HALF_UP).toString());
             pmTaskProvider.updateTask(task);
             pmTaskSearch.feedDoc(task);
         }

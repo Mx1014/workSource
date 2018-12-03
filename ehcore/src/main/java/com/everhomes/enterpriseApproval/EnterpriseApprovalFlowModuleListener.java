@@ -244,25 +244,25 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.ASK_FOR_LEAVE_TYPE, "zh_CN", "Type"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(leaveValue.getRestName());
-        entities.add(0, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.START_TIME, "zh_CN", "Start Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(leaveValue.getStartTime());
-        entities.add(1, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.END_TIME, "zh_CN", "End Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(leaveValue.getEndTime());
-        entities.add(2, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.ASK_FOR_LEAVE_TIME, "zh_CN", "Total Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(leaveValue.getDuration(), "天", "小时"));
-        entities.add(3, e);
+        entities.add(e);
     }
 
     private void processBusinessTripField(List<FlowCaseEntity> entities, String jsonVal) {
@@ -271,19 +271,19 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.START_TIME, "zh_CN", "Start Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(tripValue.getStartTime());
-        entities.add(0, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.END_TIME, "zh_CN", "End Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(tripValue.getEndTime());
-        entities.add(1, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.BUSINESS_TIME, "zh_CN", "Total Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(decimalFormat.format(tripValue.getDuration()) + " 天");
-        entities.add(2, e);
+        entities.add(e);
     }
 
     private void processOverTimeField(List<FlowCaseEntity> entities, String jsonVal) {
@@ -292,13 +292,13 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.START_TIME, "zh_CN", "Start Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(overTimeValue.getStartTime());
-        entities.add(0, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.END_TIME, "zh_CN", "End Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(overTimeValue.getEndTime());
-        entities.add(1, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.OVERTIME_TIME, "zh_CN", "Total Time"));
@@ -308,7 +308,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         } else {
             e.setValue(overTimeValue.getDuration() + "天");
         }
-        entities.add(2, e);
+        entities.add(e);
     }
 
     private void processGoOutField(List<FlowCaseEntity> entities, String jsonVal) {
@@ -317,19 +317,19 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.START_TIME, "zh_CN", "Start Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(outValue.getStartTime());
-        entities.add(0, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.END_TIME, "zh_CN", "End Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(outValue.getEndTime());
-        entities.add(1, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.GO_OUT_TIME, "zh_CN", "Total Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(decimalFormat.format(outValue.getDuration()) + " 天");
-        entities.add(2, e);
+        entities.add(e);
     }
 
     private void processAbnormalPunchField(List<FlowCaseEntity> entities, String jsonVal) {
@@ -338,13 +338,13 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.ABNORMAL_PUNCH_DATE, "zh_CN", "Abnormal Date"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(punchValue.getAbnormalDate());
-        entities.add(0, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.ABNORMAL_PUNCH_CLASS, "zh_CN", "Abnormal Class"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(punchValue.getAbnormalItem());
-        entities.add(1, e);
+        entities.add(e);
     }
 
     private void processEmployApplicationField(List<FlowCaseEntity> entities, String jsonVal) {
@@ -353,25 +353,25 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.APPLIER_JOB_POSITION, "zh_CN", "Job Position"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(value.getApplierJobPosition());
-        entities.add(0, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.CHECK_IN_TIME, "zh_CN", "Check In Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(value.getCheckInTime());
-        entities.add(1, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.EMPLOY_TIME, "zh_CN", "Employ Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(value.getEmploymentTime());
-        entities.add(2, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.EMPLOY_REASON, "zh_CN", "Employ Reason"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(value.getEmploymentReason());
-        entities.add(3, e);
+        entities.add(e);
     }
 
     private void processDismissApplicationField(List<FlowCaseEntity> entities, String jsonVal) {
@@ -380,25 +380,25 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.APPLIER_JOB_POSITION, "zh_CN", "Job Position"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(value.getApplierJobPosition());
-        entities.add(0, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.DISMISS_TIME, "zh_CN", "Dismiss Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(value.getDismissTime());
-        entities.add(1, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.DISMISS_REASON, "zh_CN", "Dismiss Reason"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(value.getDismissReason());
-        entities.add(2, e);
+        entities.add(e);
 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.DISMISS_REMARK, "zh_CN", "Dismiss Remark"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(value.getDismissRemark());
-        entities.add(3, e);
+        entities.add(e);
     }
 
     @Override

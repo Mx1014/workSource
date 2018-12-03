@@ -273,6 +273,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         flowService.fixupUserInfoInContext(ctx, userInfo);
         ctx.setOperator(userInfo);
         FlowGraphNoStepEvent event = new FlowGraphNoStepEvent(stepDTO);
+        if (stepDTO.getSubjectId() != null) {
+            FlowSubject subject = flowSubjectProvider.getFlowSubjectById(stepDTO.getSubjectId());
+            event.setSubject(subject);
+        }
         ctx.setCurrentEvent(event);
         ctx.setStepType(FlowStepType.NO_STEP);
 
@@ -611,9 +615,16 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
         ctx.setFlowGraph(flowGraph);
 
-        // 暂缓状态下只允许取消暂缓一个操作
         FlowGraphButton button = flowGraph.getGraphButton(cmd.getButtonId());
-        if (status == FlowCaseStatus.SUSPEND && !FlowStepType.ABORT_SUSPEND_STEP.getCode().equals(button.getFlowButton().getFlowStepType())) {
+        FlowStepType flowStepType = FlowStepType.fromCode(button.getFlowButton().getFlowStepType());
+
+        // 暂缓状态下只允许取消暂缓一个操作
+        if (status == FlowCaseStatus.SUSPEND && flowStepType != FlowStepType.ABORT_SUSPEND_STEP) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_STATUS_MISMATCH_ERROR,
+                    "flow case status mismatch, flowCaseId=" + cmd.getFlowCaseId() + ", status=" + flowCase.getStatus());
+        }
+        // 被取消暂缓的不能再取消暂缓
+        if (flowStepType == FlowStepType.ABORT_SUSPEND_STEP && status != FlowCaseStatus.SUSPEND) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_STATUS_MISMATCH_ERROR,
                     "flow case status mismatch, flowCaseId=" + cmd.getFlowCaseId() + ", status=" + flowCase.getStatus());
         }

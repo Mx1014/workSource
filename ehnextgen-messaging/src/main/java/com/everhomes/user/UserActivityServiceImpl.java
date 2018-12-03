@@ -1086,6 +1086,11 @@ public class UserActivityServiceImpl implements UserActivityService {
         return response;
     }
 
+    @Override
+    public List<VipPriority> listVipPriorityByNamespaceId(Integer namespaceId) {
+        return this.userActivityProvider.listVipPriorityByNamespaceId(namespaceId);
+    }
+
     private BizMyUserCenterCountResponse fetchBizMyUserCenterCount(User user) {
         Map<String, Object> param = new HashMap<>();
         param.put("namespaceId", user.getNamespaceId());

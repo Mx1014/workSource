@@ -365,7 +365,7 @@ public class AssetStandardServiceImpl implements AssetStandardService {
         //只要关联了合同（包括草稿合同）就不能删除标准
     	boolean workFlag = assetProvider.isInWorkChargingStandard(cmd.getNamespaceId(), cmd.getChargingStandardId());
     	if(workFlag){
-    		throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.STANDARD_RELEATE_CONTRACT_CHECK,"if a standard releate contracts cannot delele!");
+    		throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.STANDARD_RELEATE_CONTRACT_CHECK,"if a standard relates contracts,it cannot be deleled!");
         }
     	List<Long> allCommunity = assetService.getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), true);
     	if(cmd.getOwnerId() == null || cmd.getOwnerId() ==-1) {

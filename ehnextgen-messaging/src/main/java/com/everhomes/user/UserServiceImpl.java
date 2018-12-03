@@ -191,7 +191,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.everhomes.rest.ui.user.SceneType.*;
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
+import static com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
@@ -1681,7 +1681,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @Override
     public List<UserLogin> listUserLogins(long uid) {
         if (uid == 0) {
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "uid=0 not found");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "uid=0 not found");
         }
 
         List<UserLogin> logins = new ArrayList<>();
@@ -1763,7 +1763,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 User user = validateUser(userInfo);
                 if (user != null) {
                     LOGGER.info("User service check success, loginToken={}", loginToken);
-                    createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
+                    String deviceIdentifier = null;
+                    String pusherIdentify = null;
+
+                    com.everhomes.rest.user.user.UserLoginDTO loginDTO = sdkUserService.getUserLogin(user.getId(), loginToken.getLoginId());
+                    if (loginDTO != null) {
+                        deviceIdentifier = loginDTO.getDeviceIdentifier();
+                        pusherIdentify = loginDTO.getPusherIdentify();
+                    } else {
+                        LOGGER.warn("Get user login return null, uid={}, loginId={}", user.getId(), loginToken.getLoginId());
+                    }
+
+                    createLogin(userInfo.getNamespaceId(), user, deviceIdentifier, pusherIdentify, loginToken);
                     return true;
                 }
             } else {
@@ -1797,26 +1808,35 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
         //如果core server和统一用户都没有用户，说明真的没有该用户
         // add by yanlong.liang 20180928
-        User user = userProvider.findUserById(userId);
-        if (user == null) {
-            user = ConvertHelper.convert(this.sdkUserService.getUser(userId), User.class);
-            if (user != null) {
-                this.userProvider.createUserFromUnite(user);
-            } else {
-                LOGGER.warn("Sdk user service getUser return null, userId={}", userId);
-            }
-        }
 
-        UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(userId, namespaceId);
-        if (userIdentifier == null) {
-            userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userId), UserIdentifier.class);
-            if (userIdentifier != null) {
-                this.userProvider.createIdentifierFromUnite(userIdentifier);
-            } else {
-                LOGGER.warn("Sdk user service getUserIdentifier return null, userId={}", userId);
+        Tuple<User, Boolean> userTuple = coordinationProvider.getNamedLock(
+                CoordinationLocks.SYNC_USER_MODIFY.getCode() + userId).enter(() -> {
+            User user = userProvider.findUserById(userId);
+            if (user == null) {
+                user = ConvertHelper.convert(this.sdkUserService.getUser(userId), User.class);
+                if (user != null) {
+                    this.userProvider.createUserFromUnite(user);
+                } else {
+                    LOGGER.warn("Sdk user service getUser return null, userId={}", userId);
+                }
             }
-        }
-        return user != null && userIdentifier != null;
+            return user;
+        });
+
+        Tuple<UserIdentifier, Boolean> userIdenTuple = coordinationProvider.getNamedLock(
+                CoordinationLocks.SYNC_USER_IDEN_MODIFY.getCode() + userId).enter(() -> {
+            UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(userId, namespaceId);
+            if (userIdentifier == null) {
+                userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userId), UserIdentifier.class);
+                if (userIdentifier != null) {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                } else {
+                    LOGGER.warn("Sdk user service getUserIdentifier return null, userId={}", userId);
+                }
+            }
+            return userIdentifier;
+        });
+        return userTuple.first() != null && userIdenTuple.first() != null;
     }
 
     private static boolean isVerificationExpired(Timestamp ts) {
@@ -2218,13 +2238,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		//判断手机号的用户与当前用户是否一致
 		if (userIdentifier.getOwnerUid() == null || !userIdentifier.getOwnerUid().equals(UserContext.currentUserId())) {
 			LOGGER.error("phone not match user error");
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
 					"phone not match user error");
 		}
 
 		if (cmd.getRegionCode() != null && userIdentifier.getRegionCode() != null && !cmd.getRegionCode().equals(userIdentifier.getRegionCode())) {
 			LOGGER.error("phone not match user error");
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
 					"phone not match user error");
 		}
 
@@ -3350,7 +3370,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         SceneDTO sceneDto = new SceneDTO();
 
         // 增加场景类型到sceneDTO中，使得客户端不需要使用EntityType来作场景 by lqs 20160510
-        sceneDto.setSceneType(SceneType.FAMILY.getCode());
+        sceneDto.setSceneType(FAMILY.getCode());
 
         sceneDto.setEntityType(UserCurrentEntityType.FAMILY.getCode());
 
@@ -3408,7 +3428,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         String entityContent = StringHelper.toJsonString(familyDto);
         sceneDto.setEntityContent(entityContent);
 
-        SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, familyDto, SceneType.FAMILY);
+        SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, familyDto, FAMILY);
         String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
         sceneDto.setSceneToken(sceneToken);
 
@@ -3589,9 +3609,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        if (!StringUtils.isEmpty(cmd.getSceneToken())) {
-            checkSceneToken(userId, cmd.getSceneToken());
-        }
+//        if (!StringUtils.isEmpty(cmd.getSceneToken())) {
+//            checkSceneToken(userId, cmd.getSceneToken());
+//        }
 
         GetUserRelatedAddressResponse response = new GetUserRelatedAddressResponse();
         List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
@@ -4479,7 +4499,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         // 判断是否是登录 by sfyan 20161009
         if (!this.isLogon()) {
             // 没登录 检查场景是否是游客
-            if (sceneType == SceneType.FAMILY || sceneType == SceneType.PM_ADMIN || sceneType == SceneType.ENTERPRISE || sceneType == SceneType.ENTERPRISE_NOAUTH) {
+            if (sceneType == FAMILY || sceneType == SceneType.PM_ADMIN || sceneType == ENTERPRISE || sceneType == SceneType.ENTERPRISE_NOAUTH) {
                 LOGGER.error("Not logged in.Cannot access this scene. sceneType = {}", sceneType.getCode());
                 throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
                         "Not logged in.Cannot access this scene");
@@ -4815,6 +4835,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                                     log.getOwnerUid(), userIdentifier.getIdentifierToken(),
                                     userIdentifier.getRegionCode(), log.getIdentifierToken(), log.getRegionCode());
                             resetUserIdentifier(currUser, vo);
+                            // 如果该用户有组织成员信息则更新其中的手机号码字段信息
+                            archivesService.updateArchivesEmployeeContact(namespaceId, currUser.getId(), log.getIdentifierToken());
                             return true;
                         });
                     } else {
@@ -5284,9 +5306,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     public SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd) {
         // 1.通过 userId 与 organizationId 去找到 detailId
         // 2.根据 detailId 调用之前的获取信息接口
-        List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+    	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getUserId(), cmd.getOrganizationId());
         GetRelevantContactInfoCommand command = new GetRelevantContactInfoCommand();
-        command.setDetailId(members.get(0).getDetailId());
+        command.setDetailId(detail == null ? null : detail.getId());
         command.setOrganizationId(cmd.getOrganizationId());
         SceneContactV2DTO dto = this.getRelevantContactInfo(command);
         if (dto != null)
@@ -5616,7 +5638,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         //:todo 校验
         if (userId < User.MAX_SYSTEM_USER_ID) {
             LOGGER.error("userId is not legal! userId: {}", userId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "userId is not legal! userId: {}", userId);
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "userId is not legal! userId: {}", userId);
         }
 
         List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
@@ -5625,7 +5647,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             SceneType sceneType = SceneType.PM_ADMIN;
             if (!OrganizationType.isGovAgencyOrganization(orgType)) {
                 if (OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
-                    sceneType = SceneType.ENTERPRISE;
+                    sceneType = ENTERPRISE;
                 } else {
                     sceneType = SceneType.ENTERPRISE_NOAUTH;
                 }
@@ -5648,7 +5670,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             if (!OrganizationType.isGovAgencyOrganization(orgType)) {
                 SceneType sceneType;
                 if (OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
-                    sceneType = SceneType.ENTERPRISE;
+                    sceneType = ENTERPRISE;
                 } else {
                     sceneType = SceneType.ENTERPRISE_NOAUTH;
                 }
@@ -6056,33 +6078,33 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 cmd.getIdentifierToken());
         if (null == identifier) {
             LOGGER.error("invalid operation,can not find verify information");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
                     "invalid params");
         }
 
         // check the expire time
         if (DateHelper.currentGMTTime().getTime() - identifier.getNotifyTime().getTime() > 10 * 60000) {
             LOGGER.error("the verifycode is invalid with timeout");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_VERIFICATION_CODE_EXPIRED, "Invalid token status");
         }
 
         if (namespaceId == null || identifier.getNamespaceId() == null || namespaceId.intValue() != identifier.getNamespaceId().intValue()) {
             LOGGER.error("the namespaceId is invalid");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_INVALID_PARAMS, "Invalid namespaceId");
         }
 
 		//判断手机号的用户与当前用户是否一致
 		if (identifier.getOwnerUid() == null || !identifier.getOwnerUid().equals(UserContext.currentUserId())) {
             LOGGER.error("phone not match user error");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
                     "phone not match user error");
         }
 
 		if (cmd.getRegionCode() != null && identifier.getRegionCode() != null && !cmd.getRegionCode().equals(identifier.getRegionCode())) {
             LOGGER.error("phone not match user error");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
                     "phone not match user error");
         }// find user by uid
 		User user = userProvider.findUserById(identifier.getOwnerUid());
@@ -6096,24 +6118,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		User user = UserContext.current().getUser();
 		if (user == null) {
             LOGGER.error("user not exists");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,
                     "user not exists");
 		}
 		UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(user.getId(),user.getNamespaceId());
 		if (userIdentifier == null) {
             LOGGER.error("userIdentifier not exists");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "userIdentifier not exists");
         }
         if (StringUtils.isBlank(userIdentifier.getVerificationCode()) || !userIdentifier.getVerificationCode().equals(cmd.getVerifyCode())) {
             LOGGER.error("invalid operation,can not find verify information");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
                     "invalid params");
         }
         // check the expire time
         if (DateHelper.currentGMTTime().getTime() - userIdentifier.getNotifyTime().getTime() > 10 * 60000) {
             LOGGER.error("the verifycode is invalid with timeout");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
         }
 		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
@@ -6125,7 +6147,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         if (StringUtils.isEmpty(cmd.getUserToken())) {
             LOGGER.error("userToken is empty");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
         }
 
@@ -6135,13 +6157,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             if (token == null || token.getStartTime() == null || token.getInterval() == null) {
                 LOGGER.error("userToken is invalid");
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                throw errorWith(UserServiceErrorCode.SCOPE,
                         UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
             }
 
             if (System.currentTimeMillis() > token.getStartTime() + token.getInterval()) {
                 LOGGER.error("time expired");
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                throw errorWith(UserServiceErrorCode.SCOPE,
                         UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
             }
 
@@ -6149,7 +6171,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         } catch (Exception ex) {
             LOGGER.error("userToken is invalid");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
         }
 
@@ -6323,7 +6345,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		List<IndexDTO> indexDtos = launchPadService.listIndexDtos(namespaceId, userId);
 
 		resp.setIndexDtos(indexDtos);
-
+		
+		// 客户端地址模式配置, add by momoubin,18/11/09
+		resp.setClientAddressMode(this.configurationProvider.getIntValue(namespaceId, ConfigConstants.CLIENT_ADDRESS_MODE, 0));
+		
         return resp;
     }
 
@@ -6417,7 +6442,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                                 @Override
                                 public void onFailure(Throwable ex) {
                                     LOGGER.error(ex.getMessage());
-                                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                                             "Unable to sync2");
                                 }
                             });
@@ -6429,7 +6454,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     @Override
                     public void onFailure(Throwable ex) {
                         LOGGER.error(ex.getMessage());
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                                 "Unable to sync1");
                     }
                 });
@@ -6540,7 +6565,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", salt)));
             } catch (Exception e) {
                 LOGGER.error("encode password failed");
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
             }
 
             List<User> users = new ArrayList<>();
@@ -6721,15 +6746,15 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 BlockingEventResponse response = (BlockingEventResponse) restResponse.getResponseObject();
                 if (response.getStatus() != BlockingEventStatus.CONTINUTE) {
                     LOGGER.error("waitScanForLogon failure");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
                 }
                 if (!response.getSubject().equals("blockingEventKey." + subjectId)) {
                     LOGGER.error("waitScanForLogon failure");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
                 }
                 if (StringUtils.isEmpty(response.getMessage())) {
                     LOGGER.error("waitScanForLogon failure");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
                 }
 
                 String token = null;
@@ -6771,7 +6796,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 } else {
                     restResponse.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
                     LOGGER.error("waitScanForLogon failure");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
                 }
             }
 
@@ -6872,7 +6897,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 					//根据公司id来查询eh_organization_details表中的信息，拿到公司的简称
 					OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
 					if(organizationDetail != null){
-						dto.setAliasName(organizationDetail.getDisplayName());
+						//add by momoubin,2018/11/28;由于一些企业detail信息的displayName是“”而不是null，导致了传给前端为“”，客户端优先使用aliasName代替name，导致无法显示。
+						dto.setAliasName((StringUtils.isBlank(organizationDetail.getDisplayName()))?null:(organizationDetail.getDisplayName()));
 					}
 					dto.setStatus(member.getStatus());
 					dto.setWorkPlatformFlag(org.getWorkPlatformFlag());
@@ -6989,8 +7015,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                         AddressSiteDTO addressSiteDTO = ConvertHelper.convert(community, AddressSiteDTO.class);
                         addressSiteDTO.setCommunityId(community.getId());
 						addressSiteDTO.setCommunityName(community.getName());
-						addressSiteDTO.setWholeAddressName(community.getProvinceName() + community.getCityName()
-								+ community.getAreaName() + community.getAddress());
+						addressSiteDTO.setWholeAddressName(getNotNullString(community.getProvinceName() , community.getCityName()
+						, community.getAreaName() , community.getAddress()));
 						addressSiteDtos.add(addressSiteDTO);
 					}
 
@@ -7015,7 +7041,21 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		response.setDtos(dtos);
 		return response;
 	}
-
+	
+	/**
+	 * 用于多个可能为null值的参数拼接字符串
+	 * @author momoubin 18/11/15
+	 * */
+	private String getNotNullString(String ... list){
+		StringBuffer stringBuffer = new StringBuffer();
+		for(String string : list){
+			if(!StringUtils.isEmpty(string)){
+				stringBuffer.append(string);				
+			}
+		}
+		return stringBuffer.toString();
+	}
+	
 	private TimeBasedOneTimePasswordGenerator getTotp() throws NoSuchAlgorithmException {
 	    TimeBasedOneTimePasswordGenerator totp = totpLocal.get();
         if(totp == null) {
@@ -7476,7 +7516,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             if(cmd.getOrgId() == null ){
                 LOGGER.error("orgId is null in the  cmd = {}",  cmd);
-                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"orgId is null.");
+                throw errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"orgId is null.");
             }
           Organization org = checkOrganization(cmd.getOrgId());
         //  Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
@@ -7507,7 +7547,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         User user = this.userProvider.findUserById(userId);
         if(user == null){
             LOGGER.error("Unable to find the user , userId= {}",  userId);
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
         }
         user.setVipLevel(vipLevel);
         user.setVipLevelText(vipLevelText);
@@ -7519,7 +7559,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             Organization org = organizationProvider.findOrganizationById(organizationId);
             if(org == null){
                 LOGGER.error("Unable to find the organization.organizationId = {}",  organizationId);
-                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"Unable to find the organization.");
+                throw errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"Unable to find the organization.");
             }
             return org;
         }
@@ -7546,24 +7586,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             res.setErrorMsg("phones is null");
             return res ;
         }
+        List<UserDTO> userDTOList = this.userProvider.listUserInfoByIdentifierToken(cmd.getNamespaceId(), cmd.getPhones());
         for(String phone : phones){
             FindUsersByPhonesDTO dto = new FindUsersByPhonesDTO() ;
             dto.setPhone(phone);
-            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
-            if (userIdentifier != null) {
-                User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-                if (user != null) {
-                    user.setIdentifierToken(userIdentifier.getIdentifierToken());
-                    UserDTO userDTO = ConvertHelper.convert(user, UserDTO.class);
-                    //查询有结果，保存
+            Byte resultCode = TrueOrFalseCode.FALSE.getCode();
+            for (UserDTO userDTO : userDTOList) {
+                if (phone.equals(userDTO.getIdentifierToken())) {
                     dto.setUserDTO(userDTO);
-                    dto.setResult(TrueOrFalseCode.TRUE.getCode());
-                }else  {
-                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
+                    resultCode = TrueOrFalseCode.TRUE.getCode();
                 }
-            } else if(TrueOrFalseCode.FALSE.getCode().equals(cmd.getClear())){//若是不消除查询失败的数据才返回这些
-                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
             }
+            dto.setResult(resultCode);
             if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
                     || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回
                     && !TrueOrFalseCode.TRUE.getCode().equals(cmd.getClear()))){
@@ -7572,126 +7606,20 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
         return res;
     }
-    /*******************统一用户同步数据**********************/
-    @KafkaListener(topics = "user-create-event")
-    public void syncCreateUser(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ user-create-event ] {}", record.value());
-        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(user.getNamespaceId())) {
-                //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
-                //所以这里加个判断，是新增还是更新.
-                User existsUser = this.userProvider.findUserById(user.getId());
-                if (existsUser != null) {
-                    this.userProvider.updateUserFromUnite(user);
-                }else {
-                    this.userProvider.createUserFromUnite(user);
-                }
-            }
-        }else {
-            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
-                User existsUser = this.userProvider.findUserById(user.getId());
-                if (existsUser != null) {
-                    this.userProvider.updateUserFromUnite(user);
-                }else {
-                    this.userProvider.createUserFromUnite(user);
-                }
-            }
-        }
-    }
-
-    @KafkaListener(topics = "user-update-event")
-    // @KafkaListener(topics = "user-update-event")
-    public void syncUpdateUser(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ user-update-event ] {}", record.value());
-        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(user.getNamespaceId())) {
-                this.userProvider.updateUserFromUnite(user);
-            }
-        }else {
-            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
-                this.userProvider.updateUserFromUnite(user);
-            }
-        }
-    }
-
-    @KafkaListener(topics = "user-delete-event")
-    public void syncDeleteUser(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ user-delete-event ] {}", record.value());
-        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(user.getNamespaceId())) {
-                this.userProvider.deleteUser(user);
-            }
-        }else {
-            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
-                this.userProvider.deleteUser(user);
-            }
-        }
-
-    }
-
-    @KafkaListener(topics = "userIdentifier-create-event")
-    public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ userIdentifier-create-event ] {}", record.value());
-        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
-                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
-                if (existsIdentifier != null) {
-                    this.userProvider.updateIdentifierFromUnite(userIdentifier);
-                }else {
-                    this.userProvider.createIdentifierFromUnite(userIdentifier);
-                }
-            }
-        }else {
-            if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
-                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
-                if (existsIdentifier != null) {
-                    this.userProvider.updateIdentifierFromUnite(userIdentifier);
-                }else {
-                    this.userProvider.createIdentifierFromUnite(userIdentifier);
-                }
-            }
-        }
-
-    }
-
-    @KafkaListener(topics = "userIdentifier-update-event")
-    // @KafkaListener(topics = "userIdentifier-update-event")
-    public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ userIdentifier-update-event ] {}", record.value());
-        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
-        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
-        if (namespace != null) {
-            if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
-                this.userProvider.updateIdentifierFromUnite(userIdentifier);
-            }
-        }else {
-            if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
-                this.userProvider.updateIdentifierFromUnite(userIdentifier);
-            }
-        }
-    }
 
 
     /**
-	 * 获取商户跳转URL
+     * 获取商户跳转URL
      * @param cmd
      * @return
      */
     @Override
     public GetPrintMerchantUrlResponse getPrintMerchantUrl(GetPrintMerchantUrlCommand cmd) {
-    	GetPrintMerchantUrlResponse response = new GetPrintMerchantUrlResponse();
+        GetPrintMerchantUrlResponse response = new GetPrintMerchantUrlResponse();
         String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"prmt.merchant.home.url","http://promo-alpha.zuolin.com/prmt");
-		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
-		String infoUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.info.url", "${mercharntHomeUrl}/merchantLogin/logon/login?sourceUrl=${sourceUrl}&systemId=${systemId}");
-		String sourceUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.url", "${mercharntHomeUrl}/merchant/getMerchantDetail?enterpriseId=${enterpriseId}&ns=${namespaceId}");
+        String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
+        String infoUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.info.url", "${mercharntHomeUrl}/merchantLogin/logon/login?sourceUrl=${sourceUrl}&systemId=${systemId}");
+        String sourceUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.url", "${mercharntHomeUrl}/merchant/getMerchantDetail?enterpriseId=${enterpriseId}&ns=${namespaceId}");
 
         Map<String, String> sourceUrlParam= new HashMap<String, String>();
         sourceUrlParam.put("merchantHomeUrl", homeUrl);
@@ -7702,13 +7630,105 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         infoUrlParam.put("merchantHomeUrl", homeUrl);
         infoUrlParam.put("systemId", systemId);
         try {
-        	infoUrlParam.put("sourceUrl", URLEncoder.encode(sourceUrl, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+            infoUrlParam.put("sourceUrl", URLEncoder.encode(sourceUrl, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         response.setInfoUrl(StringHelper.interpolate(infoUrl,infoUrlParam));
         return response;
     }
+
+    /*******************统一用户同步数据**********************/
+    @KafkaListener(topics = "user-create-event")
+    public void syncCreateUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-create-event ] {}", record.value());
+        User user = (User) StringHelper.fromJsonString(record.value(), User.class);
+        modifyUserHandler(user);
+    }
+
+    @KafkaListener(topics = "user-update-event")
+    public void syncUpdateUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-update-event ] {}", record.value());
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        modifyUserHandler(user);
+    }
+
+    private void modifyUserHandler(User user) {
+        coordinationProvider.getNamedLock(CoordinationLocks.SYNC_USER_MODIFY.getCode()+user.getId()).enter(() -> {
+            Namespace namespace = this.namespaceProvider.findNamespaceById(user.getNamespaceId());
+            if (namespace != null) {
+                //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
+                //所以这里加个判断，是新增还是更新.
+                User existsUser = this.userProvider.findUserById(user.getId());
+                if (existsUser != null) {
+                    if (existsUser.getUpdateVersion() < user.getUpdateVersion()) {
+                        this.userProvider.updateUserFromUnite(user);
+                    } else {
+                        LOGGER.warn("Sync modify user updateVersion compare failed, dbVersion={}, eventVersion={}",
+                                existsUser.getUpdateVersion(), user.getUpdateVersion());
+                    }
+                }else {
+                    this.userProvider.createUserFromUnite(user);
+                }
+            }
+            return null;
+        });
+    }
+
+    @KafkaListener(topics = "user-delete-event")
+    public void syncDeleteUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-delete-event ] {}", record.value());
+        User user = (User) StringHelper.fromJsonString(record.value(), User.class);
+        coordinationProvider.getNamedLock(CoordinationLocks.SYNC_USER_MODIFY.getCode()+user.getId()).enter(() -> {
+            Namespace namespace = this.namespaceProvider.findNamespaceById(user.getNamespaceId());
+            if (namespace != null) {
+                User existsUser = this.userProvider.findUserById(user.getId());
+                if (existsUser != null) {
+                    this.userProvider.deleteUser(user);
+                }
+            }
+            return null;
+        });
+    }
+
+    @KafkaListener(topics = "userIdentifier-create-event")
+    public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ userIdentifier-create-event ] {}", record.value());
+        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
+
+        modifyUserIdenHandler(userIdentifier);
+    }
+
+    @KafkaListener(topics = "userIdentifier-update-event")
+    public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ userIdentifier-update-event ] {}", record.value());
+        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
+
+        modifyUserIdenHandler(userIdentifier);
+    }
+
+    private void modifyUserIdenHandler(UserIdentifier userIdentifier) {
+        coordinationProvider.getNamedLock(CoordinationLocks.SYNC_USER_IDEN_MODIFY.getCode() + userIdentifier.getOwnerUid()).enter(() -> {
+            Namespace namespace = this.namespaceProvider.findNamespaceById(userIdentifier.getNamespaceId());
+            if (namespace != null) {
+                //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
+                //所以这里加个判断，是新增还是更新.
+                UserIdentifier existsIdentifier = this.userProvider.findIdentifierById(userIdentifier.getId());
+                if (existsIdentifier != null) {
+                    if (existsIdentifier.getUpdateVersion() < userIdentifier.getUpdateVersion()) {
+                        this.userProvider.updateIdentifierFromUnite(userIdentifier);
+                    } else {
+                        LOGGER.warn("Sync modify user identifier updateVersion compare failed, dbVersion={}, eventVersion={}",
+                                existsIdentifier.getUpdateVersion(), userIdentifier.getUpdateVersion());
+                    }
+                }else {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                }
+            }
+            return null;
+        });
+    }
+
     @KafkaListener(topics = "user-kickoff")
     public void userKickoffMessage(ConsumerRecord<?, String> record) {
         LOGGER.debug("received message [ user-kickoff ] {}", record.value());

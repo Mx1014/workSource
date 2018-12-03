@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>totalAuthAmount:授权有效次数</li>
  * <li>organization: 用户来自于</li>
  * <li>description: 授权描述</li>
+ * <li>notice: 访客来访提示 1 需提示 null 不提示（只在app端）</li>
  * </ul>
  * @author janson
  *
@@ -41,7 +42,17 @@ public class CreateDoorAuthByUser {
     
     private String authMethod;
     private Integer totalAuthAmount;
-    
+
+    private Byte notice;
+
+    public Byte getNotice() {
+        return notice;
+    }
+
+    public void setNotice(Byte notice) {
+        this.notice = notice;
+    }
+
     public Integer getTotalAuthAmount() {
 		return totalAuthAmount;
 	}

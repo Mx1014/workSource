@@ -2196,7 +2196,7 @@ CREATE TABLE `eh_banners` (
   `apply_policy` TINYINT,
   `update_time` DATETIME,
   `target_type` VARCHAR(32) NOT NULL COMMENT 'e.g: NONE, POST_DETAIL, ACTIVITY_DETAIL, APP, URL, ROUTE',
-  `target_data` VARCHAR(1024) COMMENT 'It is different by different target_type',
+  `target_data` TEXT COMMENT 'It is different by different target_type',
   `category_id` BIGINT COMMENT '应用入口ID',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

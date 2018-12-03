@@ -21,7 +21,8 @@ public class RentalRefundEmbeddedHandler implements RefundEmbeddedHandler {
 	private Rentalv2Service rentalService;
 	@Autowired
 	private Rentalv2Provider rentalProvider;
-
+	@Autowired
+	private RentalCommonServiceImpl rentalCommonService;
 	@Autowired
 	private DbProvider dbProvider;
 	@Override
@@ -33,7 +34,8 @@ public class RentalRefundEmbeddedHandler implements RefundEmbeddedHandler {
 			bill.setStatus(SiteBillStatus.REFUNDED.getCode());
 			rentalProvider.updateRentalBill(bill); 
 			rentalProvider.updateRentalRefundOrder(rentalRefundOrder);
-//			rentalService.cancelOrderSendMessage(bill);
+			RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
+			messageHandler.refundOrderSuccessSendMessage(bill);
 			return null;
 		});
 	}

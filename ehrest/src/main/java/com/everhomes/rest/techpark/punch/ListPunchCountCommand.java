@@ -5,6 +5,8 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
  * 
@@ -12,7 +14,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId：查询对象id(如果是全部部门就是总公司id)</li>  
  * <li>includeSubDpt：是否包含子部门:0-不包含 1-包含(默认)</li>  
  * <li>userName：用户名搜索可为空</li>
- * <li>month: 查询月份,比如201608</li> 
+ * <li>departmentIds：部门id列表</li>
+ * <li>month: 查询月份,比如201608</li>
  * <li>startDay: 查询开始时间</li>
  * <li>endDay：查询结束时间</li>
  * <li>monthReportId: 月报id</li>
@@ -35,6 +38,7 @@ public class ListPunchCountCommand {
 	private Byte exceptionStatus;
 
 	private String userName;
+	private List<Long> departmentIds;
 
 	private Long pageAnchor;
 	private Integer pageSize;
@@ -42,10 +46,6 @@ public class ListPunchCountCommand {
 	private Long monthReportId;
 	
 	public ListPunchCountCommand() {
-    } 
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
     }
 	public String getOwnerType() {
 		return ownerType;
@@ -112,7 +112,19 @@ public class ListPunchCountCommand {
 	}
 	public void setMonthReportId(Long monthReportId) {
 		this.monthReportId = monthReportId;
-	}  
-	
-	
+	}
+
+
+	public List<Long> getDepartmentIds() {
+		return departmentIds;
+	}
+
+	public void setDepartmentIds(List<Long> departmentIds) {
+		this.departmentIds = departmentIds;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

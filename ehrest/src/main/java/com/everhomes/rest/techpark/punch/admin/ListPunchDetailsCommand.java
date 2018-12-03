@@ -4,6 +4,8 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
  * 
@@ -34,7 +36,8 @@ public class ListPunchDetailsCommand {
 	private Long ownerId;
 	private Long userId;
 	private Long monthReportId;
-	
+	private List<Long> departmentIds;
+
 	private Byte includeSubDpt;
 	private String userName;
 	private Byte exceptionStatus;
@@ -191,6 +194,13 @@ public class ListPunchDetailsCommand {
 	public void setMonthReportId(Long monthReportId) {
 		this.monthReportId = monthReportId;
 	}
- 
 
+
+	public List<Long> getDepartmentIds() {
+		return departmentIds;
+	}
+
+	public void setDepartmentIds(List<Long> departmentIds) {
+		this.departmentIds = departmentIds;
+	}
 }

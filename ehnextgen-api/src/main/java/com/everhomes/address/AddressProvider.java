@@ -9,6 +9,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
+import com.everhomes.rest.address.ApartmentBriefInfoDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
@@ -185,4 +186,7 @@ public interface AddressProvider {
 	 * @param cityId 城市ID
 	 */
 	void updateAddressOfCityId(Long addressId, Long cityId);
+	List<ApartmentBriefInfoDTO> listApartmentsByMultiStatus(Integer namespaceId, Long communityId, String buildingName,
+			String apartment, List<Byte> livingStatus, Long pageAnchor, int pageSize);
+	List<Address> findActiveAddress(int startIndex, int pageSize);
 }
