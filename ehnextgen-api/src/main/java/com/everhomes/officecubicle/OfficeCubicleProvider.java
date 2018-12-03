@@ -130,8 +130,6 @@ public interface OfficeCubicleProvider {
 
 	Map<Long, Community> listCommunitiesByIds(List<Long> ids);
 
-	void deleteAttachmentsBySpaceId(Long id, Byte type);
-
-
+	void deleteAttachmentsBySpaceId(Long id);
 
 }

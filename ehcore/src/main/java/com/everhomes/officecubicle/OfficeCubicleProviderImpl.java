@@ -166,6 +166,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	public void createAttachments(OfficeCubicleAttachment attachment) {
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleAttachments.class));
 		attachment.setId(id);
+		attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleAttachmentsRecord record = ConvertHelper.convert(attachment, EhOfficeCubicleAttachmentsRecord.class);
 		InsertQuery<EhOfficeCubicleAttachmentsRecord> query = context.insertQuery(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
@@ -404,11 +405,10 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public void deleteAttachmentsBySpaceId(Long id, Byte type) {
+	public void deleteAttachmentsBySpaceId(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhOfficeCubicleAttachmentsRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id);
-		condition.and(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.TYPE.eq(type));
 		step.where(condition);
 		step.execute();
 	}
