@@ -822,12 +822,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			//没有实现接口的模块默认的返回
 			routerInfo.setPath(path);
-			String queryInDefaultWay = null;
-			if (moduleId != null && moduleId == 90100L) {
-			    queryInDefaultWay = this.ordinaryLinkRouterListener.getQueryString(actionData, appId);
-            }else {
-                queryInDefaultWay = routerService.getQueryInDefaultWay(actionData);
-            }
+			String queryInDefaultWay = routerService.getQueryInDefaultWay(actionData);
 			if(queryInDefaultWay != null){
 				query = query  + "&" + queryInDefaultWay;
 			}
