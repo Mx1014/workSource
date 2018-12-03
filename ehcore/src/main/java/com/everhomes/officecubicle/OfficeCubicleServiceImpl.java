@@ -2288,17 +2288,18 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,cmd.getStatus(),null);
 			}
 		}
-		resp.setStation(station.stream().map(r->{
+		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
+		for (OfficeCubicleStation s : station){
 			StationDTO dto = new StationDTO();
-			if (r.getAssociateRoomId()!=null){
-				return dto;
+			if (s.getAssociateRoomId() != null){
+				continue;
 			}
-			dto = ConvertHelper.convert(r,StationDTO.class);
-			dto.setStationId(r.getId());
+			dto = ConvertHelper.convert(s,StationDTO.class);
+			dto.setStationId(s.getId());
 			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
 					UserContext.current().getUser().getId()));
-			return dto;
-			}).collect(Collectors.toList()));
+			stationDTO.add(dto);
+		}
 		return resp;
 	}
 	@Override
