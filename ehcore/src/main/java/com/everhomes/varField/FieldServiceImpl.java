@@ -2181,16 +2181,28 @@ public class FieldServiceImpl implements FieldService {
         List<ScopeFieldItemInfo> items = cmd.getItems();
         if(items != null && items.size() > 0) {
             Long userId = UserContext.currentUserId();
-            Map<Long, ScopeFieldItem> existItems = fieldProvider.listScopeFieldsItems(cmd.getFieldIds(),cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(),items.get(0).getModuleName());
+            Map<Long, ScopeFieldItem> existItems = fieldProvider.listScopeFieldsItems(cmd.getFieldIds(),cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
+
+            List<FieldItem> existItemList = fieldProvider.listFieldItems(cmd.getFieldIds());
             items.forEach(item -> {
+                //如果这个item是新建的则没有item_id，此时在eh_var_field_items表中插入一条新的item，并且status = 3，代表着为非推荐库选项
                 if(item.getItemId() == null) {
                     ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
-                    scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
-                    scopeFieldItem.setCommunityId(cmd.getCommunityId());
+                    FieldItem exist = existItemList.stream().filter(r-> r.getFieldId().equals(item.getFieldId()) && r.getDisplayName().equals(item.getItemDisplayName())).collect(Collectors.toList()).get(0);
+                    if(exist != null){
+                        scopeFieldItem.setItemId(exist.getId());
+                        scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
+                        scopeFieldItem.setCreatorUid(UserContext.currentUserId());
+                        fieldProvider.createScopeFieldItem(scopeFieldItem);
+                    }else{
+                        scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
+                        scopeFieldItem.setCommunityId(cmd.getCommunityId());
 
-                    scopeFieldItem.setCategoryId(cmd.getCategoryId());
+                        scopeFieldItem.setCategoryId(cmd.getCategoryId());
 
-                    insertFieldItems(scopeFieldItem);
+                        insertFieldItems(scopeFieldItem);
+                    }
+
                 } else {
                     ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
                     scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
@@ -2198,6 +2210,7 @@ public class FieldServiceImpl implements FieldService {
 
                     scopeFieldItem.setCategoryId(cmd.getCategoryId());
 
+                    //如果id为空则为scope表中没有创建该item，此时新建item
                     if(scopeFieldItem.getId() == null) {
                         scopeFieldItem.setCreatorUid(userId);
                         fieldProvider.createScopeFieldItem(scopeFieldItem);
@@ -2249,23 +2262,43 @@ public class FieldServiceImpl implements FieldService {
 //            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
 //        }
         FieldItem item = fieldProvider.findFieldItemByItemId(itemId);
+        Field field = fieldProvider.findFieldByItemId(itemId);
         // 三种情况 要求删除的item不显示
         if (item != null) {
-            // check current community has own configuration
-            List<Long> items = fieldProvider.checkCustomerField(namespaceId,null, communityId, item.getModuleName());
-            // community
-            if (items != null && items.size() > 0) {
-                fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId,null, communityId, itemId);
-            } else {
-                //namespace
-                List<Long> fields = fieldProvider.checkCustomerField(namespaceId, ownerId,null, item.getModuleName());
-                if (fields != null && fields.size() > 0) {
-                    fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, ownerId,null, itemId);
+            List<Long> items = fieldProvider.checkCustomerField(namespaceId, null, communityId, item.getModuleName());
+
+            if(field.getMandatoryFlag() != 1) {
+                // check current community has own configuration
+                // community
+                if (items != null && items.size() > 0) {
+                    fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, communityId, itemId);
                 } else {
-                    //global
-                    List<Long> groups = fieldProvider.checkCustomerField(0, null,null, item.getModuleName());
-                    if (groups != null && groups.size() > 0) {
-                        fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null,null, itemId);
+                    //namespace
+                    List<Long> fields = fieldProvider.checkCustomerField(namespaceId, ownerId, null, item.getModuleName());
+                    if (fields != null && fields.size() > 0) {
+                        fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, ownerId, null, itemId);
+                    } else {
+                        //global
+                        List<Long> groups = fieldProvider.checkCustomerField(0, null, null, item.getModuleName());
+                        if (groups != null && groups.size() > 0) {
+                            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, null, itemId);
+                        }
+                    }
+                }
+            }else{
+                if (items != null && items.size() > 0) {
+                    fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, communityId, itemId);
+                    if (null == fieldItem) {
+                        fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, null, itemId);
+                        if (null == fieldItem) {
+                            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, null, itemId);
+                        }
+                    }else {
+                        //global
+                        List<Long> groups = fieldProvider.checkCustomerField(0, null, null, item.getModuleName());
+                        if (groups != null && groups.size() > 0) {
+                            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, null, itemId);
+                        }
                     }
                 }
             }
