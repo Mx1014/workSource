@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.everhomes.rest.promotion.coupon.enterprise.TransferToPersonalDTO;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +44,7 @@ import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.promotion.coupon.controller.EnterpriseDistributionToPersonRestResponse;
 import com.everhomes.rest.promotion.coupon.enterprise.ObtainDetailsExtendDTO;
-import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.promotion.coupon.enterprise.TransferToPersonalDTO;
 import com.everhomes.rest.welfare.DeleteWelfareCommand;
 import com.everhomes.rest.welfare.DraftWelfareCommand;
 import com.everhomes.rest.welfare.DraftWelfareResponse;
@@ -342,12 +340,14 @@ public class WelfareServiceImpl implements WelfareService {
             response.setDismissReceivers(new ArrayList<>());
             if(welfaresDTO.getSenderDetailId() != null) {
                 OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByDetailId(welfaresDTO.getSenderDetailId());
-                if (member == null || archivesService.checkDismiss(member)) {
-                    response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
-                    response.setDismissSenderDetailId(welfaresDTO.getSenderDetailId());
-                    response.setDismissSenderUid(welfaresDTO.getSenderUid());
+//                if (member == null || archivesService.checkDismiss(member)) {
+//                    response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
+//                    response.setDismissSenderDetailId(welfaresDTO.getSenderDetailId());
+//                    response.setDismissSenderUid(welfaresDTO.getSenderUid());
+//                }
+                if(member != null){
+                	welfaresDTO.setSenderUid(member == null ? null : member.getTargetId());
                 }
-                welfaresDTO.setSenderUid(member == null ? null : member.getTargetId());
             }
             List<Long> targetUserIds = new ArrayList<>();
             //校验所有人是否离职
