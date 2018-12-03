@@ -1197,7 +1197,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         formFieldsConfig.setProjectType(cmd.getProjectType() == null ? form.getProjectType() : cmd.getProjectType());
         formFieldsConfig.setConfigVersion(0L);
         if(formFieldsConfig.getConfigType() == null || "".equals(formFieldsConfig.getConfigType())){
-            formFieldsConfig.setConfigType(GeneralFormConstants.FORM_FIELDS_CONFIG_TYPE);
+            formFieldsConfig.setConfigType(GeneralFormFieldsConfigType.FLOW_NODE_VISIBLE.getCode());
         }
         formFieldsConfig.setFormFields(JSON.toJSONString(cmd.getFormFields()));
         formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.CONFIG.getCode());
@@ -1249,7 +1249,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     /**
-     * 将配置状态修改成RUNNING状态，提供给工作流发布新版本时使用
+     * 将配置状态修改成RUNNING状态，此方法提供给工作流发布新版本时使用
      * @param formFieldsConfigId 表单字段配置ID
      * @return 表单字段配置DTO
      */
