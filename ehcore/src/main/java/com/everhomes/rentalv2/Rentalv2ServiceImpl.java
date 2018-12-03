@@ -4465,7 +4465,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
             if (ids.length > 0) {
                 String doorAuthId = "";
                 for (String id : ids)
-                    doorAuthId += createDoorAuth(order.getRentalUid(),order.getUserPhone(),order.getUserName(), order.getAuthStartTime().getTime(),
+                    doorAuthId += createDoorAuth(order.getNamespaceId(),order.getRentalUid(),order.getUserPhone(),order.getUserName(), order.getAuthStartTime().getTime(),
 							order.getAuthEndTime().getTime(), Long.parseLong(id), rentalResource.getCreatorUid()) + ",";
                 order.setDoorAuthId(doorAuthId.substring(0, doorAuthId.length() - 1));
                 rentalv2Provider.updateRentalBill(order);
@@ -4576,7 +4576,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 
-	private Long createDoorAuth(Long userId, String phone,String userName,Long timeBegin, Long timeEnd, Long doorId, Long authUserId) {
+	private Long createDoorAuth(Integer namespaceId,Long userId, String phone,String userName,Long timeBegin, Long timeEnd, Long doorId, Long authUserId) {
 		if (userId != null && userId.equals(0L)) {
 			CreateDoorAuthCommand cmd = new CreateDoorAuthCommand();
 			cmd.setAuthType((byte) 1);//临时授权
@@ -4590,6 +4590,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			return dto.getId();
 		}else{//访客
 			CreateLocalVistorCommand cmd = new CreateLocalVistorCommand();
+			cmd.setNamespaceId(namespaceId);
 			cmd.setPhone(phone);
 			cmd.setUserName(userName);
 			cmd.setDoorId(doorId);
