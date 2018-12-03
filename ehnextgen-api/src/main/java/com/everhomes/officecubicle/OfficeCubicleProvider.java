@@ -38,8 +38,6 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleOrder> queryOrdersByUser(Long userId, Integer currentNamespaceId);
 
-	void deleteAttachmentsBySpaceId(Long id);
-
 	List<OfficeCubicleOrder> listStationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 			int pageSize);
 
@@ -131,6 +129,8 @@ public interface OfficeCubicleProvider {
 	OfficeCubicleRoom getOfficeCubicleRoomById(Long roomId);
 
 	Map<Long, Community> listCommunitiesByIds(List<Long> ids);
+
+	void deleteAttachmentsBySpaceId(Long id, Byte type);
 
 
 

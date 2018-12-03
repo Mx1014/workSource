@@ -248,12 +248,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	
 	@Override
 	public void deleteChargeUsers(Long spaceId) {
-	    dbProvider.execute(r -> {
-	    	//删除原来的设置
-	    	getReadWriteContext().delete(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS)
-			.where(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS.SPACE_ID.eq(spaceId));
-		    return null;
-	    });
+		dbProvider.getDslContext(AccessSpec.readOnly()).delete(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS)
+		.where(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS.SPACE_ID.equal(spaceId)).execute();
 	}
 	
 	@Override
@@ -408,10 +404,11 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public void deleteAttachmentsBySpaceId(Long id) {
+	public void deleteAttachmentsBySpaceId(Long id, Byte type) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhOfficeCubicleAttachmentsRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id);
+		condition.and(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.TYPE.eq(type));
 		step.where(condition);
 		step.execute();
 	}

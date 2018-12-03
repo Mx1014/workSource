@@ -518,6 +518,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setOperatorUid(UserContext.current().getUser().getId());
+			LOGGER.info("CMD:"+cmd.getShortRentNums());
 			if (cmd.getShortRentNums()!= null){
 				space.setShortRentNums(cmd.getShortRentNums());
 			}
@@ -544,19 +545,20 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			this.officeCubicleProvider.updateSpace(space);
 
-			// TODO:删除附件唐彤没有提供
-			this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId());
 			if (null != cmd.getSpaceAttachments()) {
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)1);
 				cmd.getSpaceAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)1);
 				});
 			}
 			if (null != cmd.getShortRentAttachments()) {
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)2);
 				cmd.getShortRentAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)2);
 				});
 			}
 			if (null != cmd.getStationAttachments()) {
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)3);
 				cmd.getStationAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)3);
 				});
@@ -581,9 +583,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					officeCubicleProvider.createChargeUsers(user);
 				}
 			}
-			
-			this.officeCubicleRangeProvider.deleteRangesBySpaceId(space.getId());
-			if (null != cmd.getCategories()) {
+			if (null != cmd.getRanges()) {
+				this.officeCubicleRangeProvider.deleteRangesBySpaceId(space.getId());
 				cmd.getRanges().forEach((dto) -> {
 					this.saveRanges(dto, space.getId(), getNamespaceId(cmd.getNamespaceId()));
 				});
