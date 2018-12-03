@@ -7,9 +7,11 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>formFieldsConfigId：表单字段配置ID</li>
+ *     <li>id：表单字段配置ID</li>
  *     <li>formOriginId: 表单原始ID</li>
  *     <li>formVersion: 表单版本</li>
+ *     <li>configOriginId: 表单字段配置原始ID</li>
+ *     <li>configVersion: 表单字段配置版本</li>
  *     <li>configType：配置类型，默认"flowNode-visible"</li>
  *     <li>status: 状态</li>
  *     <li>formFields：表单字段 {@link GeneralFormFieldsConfigFieldDTO}</li>
@@ -28,6 +30,8 @@ public class GeneralFormFieldsConfigDTO {
     private String projectType;
     private Long formOriginId;
     private Long formVersion;
+    private Long configOriginId;
+    private Long configVersion;
     private String configType;
     private Byte status;
     private Timestamp createTime;
@@ -127,6 +131,22 @@ public class GeneralFormFieldsConfigDTO {
 
     public void setFormVersion(Long formVersion) {
         this.formVersion = formVersion;
+    }
+
+    public Long getConfigOriginId() {
+        return configOriginId;
+    }
+
+    public void setConfigOriginId(Long configOriginId) {
+        this.configOriginId = configOriginId;
+    }
+
+    public Long getConfigVersion() {
+        return configVersion;
+    }
+
+    public void setConfigVersion(Long configVersion) {
+        this.configVersion = configVersion;
     }
 
     public String getConfigType() {

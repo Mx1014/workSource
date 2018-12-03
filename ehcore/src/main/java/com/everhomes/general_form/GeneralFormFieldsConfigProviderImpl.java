@@ -32,7 +32,7 @@ public class GeneralFormFieldsConfigProviderImpl implements GeneralFormFieldsCon
     private SequenceProvider sequenceProvider;
 
     @Override
-    public Long createFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig){
+    public GeneralFormFieldsConfig createFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig){
         long id = this.sequenceProvider.getNextSequence(NameMapper
                         .getSequenceDomainFromTablePojo(EhGeneralFormFieldsConfig.class));
         formFieldsConfig.setId(id);
@@ -40,14 +40,15 @@ public class GeneralFormFieldsConfigProviderImpl implements GeneralFormFieldsCon
         formFieldsConfig.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         rwDao().insert(formFieldsConfig);
-        return id;
+        return formFieldsConfig;
     }
 
     @Override
-    public void updateFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig){
+    public GeneralFormFieldsConfig updateFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig){
         formFieldsConfig.setUpdaterUid(UserContext.current().getUser().getId());
         formFieldsConfig.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         rwDao().update(formFieldsConfig);
+        return formFieldsConfig;
     }
 
     @Override

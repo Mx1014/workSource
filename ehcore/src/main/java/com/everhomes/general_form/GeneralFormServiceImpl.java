@@ -1175,7 +1175,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public CreateFormFieldsConfigResponse createFormFieldsConfig(CreateFormFieldsConfigCommand cmd){
+    public GeneralFormFieldsConfigDTO createFormFieldsConfig(CreateFormFieldsConfigCommand cmd){
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(),cmd.getFormVersion());
         if(form == null){
             LOGGER.error("The form using to create formFieldsConfig is null, formOriginId = {}, formVersion = {}",
@@ -1197,15 +1197,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         }
         formFieldsConfig.setFormFields(JSON.toJSONString(cmd.getFormFields()));
         formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.CONFIG.getCode());
-        Long formFieldsConfigId = generalFormFieldsConfigProvider.createFormFieldsConfig(formFieldsConfig);
+        GeneralFormFieldsConfig result = generalFormFieldsConfigProvider.createFormFieldsConfig(formFieldsConfig);
 
-        CreateFormFieldsConfigResponse response = new CreateFormFieldsConfigResponse();
-        response.setFormFieldsConfigId(formFieldsConfigId);
-        return response;
+        GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(result, GeneralFormFieldsConfigDTO.class);
+        dto.setFormFields(cmd.getFormFields());
+        return dto;
     }
 
     @Override
-    public UpdateFormFieldsConfigResponse updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd){
+    public GeneralFormFieldsConfigDTO updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd){
         GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getActiveFormFieldsConfig(cmd.getFormFieldsConfigId());
         if(formFieldsConfig == null){
             LOGGER.error("The formFieldsConfig updating is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
@@ -1218,11 +1218,11 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             formFieldsConfig.setConfigType(cmd.getConfigType());
         }
         formFieldsConfig.setFormFields(JSON.toJSONString(cmd.getFormFields()));
-        generalFormFieldsConfigProvider.updateFormFieldsConfig(formFieldsConfig);
+        GeneralFormFieldsConfig result = generalFormFieldsConfigProvider.updateFormFieldsConfig(formFieldsConfig);
 
-        UpdateFormFieldsConfigResponse response = new UpdateFormFieldsConfigResponse();
-        response.setFormFieldsConfigId(formFieldsConfig.getId());
-        return response;
+        GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(result, GeneralFormFieldsConfigDTO.class);
+        dto.setFormFields(cmd.getFormFields());
+        return dto;
     }
 
     @Override

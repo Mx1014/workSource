@@ -105,9 +105,9 @@ public interface GeneralFormService {
 	/**
 	 * 工作流节点关联的全局表单字段配置接口
 	 */
-	CreateFormFieldsConfigResponse createFormFieldsConfig(CreateFormFieldsConfigCommand cmd);
+	GeneralFormFieldsConfigDTO createFormFieldsConfig(CreateFormFieldsConfigCommand cmd);
 
-	UpdateFormFieldsConfigResponse updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd);
+	GeneralFormFieldsConfigDTO updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd);
 
 	void deleteFormFieldsConfig(DeleteFormFieldsConfigCommand cmd);
 

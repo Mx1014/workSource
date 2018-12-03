@@ -8,12 +8,12 @@ public interface GeneralFormFieldsConfigProvider {
     /**
      * 新建表单字段配置
      */
-    Long createFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig);
+    GeneralFormFieldsConfig createFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig);
 
     /**
      * 更新表单字段配置
      */
-    void updateFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig);
+    GeneralFormFieldsConfig updateFormFieldsConfig(GeneralFormFieldsConfig formFieldsConfig);
 
     /**
      * 获取表单字段配置

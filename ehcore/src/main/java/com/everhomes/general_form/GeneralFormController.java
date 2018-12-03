@@ -330,12 +330,12 @@ public class GeneralFormController extends ControllerBase {
 	/**
 	 * <b>URL: /general_form/createFormFieldsConfig</b>
 	 * <p>创建工作流节点关联的全局表单字段配置</p>
-	 * @return {@link CreateFormFieldsConfigResponse}
+	 * @return {@link GeneralFormFieldsConfigDTO}
 	 */
 	@RequestMapping("createFormFieldsConfig")
-	@RestReturn(value=CreateFormFieldsConfigResponse.class)
+	@RestReturn(value=GeneralFormFieldsConfigDTO.class)
 	public RestResponse createFormFieldsConfig(CreateFormFieldsConfigCommand cmd){
-		CreateFormFieldsConfigResponse result = generalFormService.createFormFieldsConfig(cmd);
+		GeneralFormFieldsConfigDTO result = generalFormService.createFormFieldsConfig(cmd);
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -345,11 +345,12 @@ public class GeneralFormController extends ControllerBase {
 	/**
 	 * <b>URL: /general_form/updateFormFieldsConfig</b>
 	 * <p>修改工作流节点关联的全局表单字段配置</p>
+	 * @return {@link GeneralFormFieldsConfigDTO}
 	 */
 	@RequestMapping("updateFormFieldsConfig")
-	@RestReturn(value=String.class)
+	@RestReturn(value=GeneralFormFieldsConfigDTO.class)
 	public RestResponse updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd){
-		UpdateFormFieldsConfigResponse result = generalFormService.updateFormFieldsConfig(cmd);
+		GeneralFormFieldsConfigDTO result = generalFormService.updateFormFieldsConfig(cmd);
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
