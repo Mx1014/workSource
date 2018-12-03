@@ -97,8 +97,10 @@ import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoCommand;
 import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoResponse;
 import com.everhomes.rest.rentalv2.PriceRuleType;
+import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceRentalRuleCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.util.*;
@@ -2303,6 +2305,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		response.setOrders(new ArrayList<OfficeRentOrderDTO>());
 		orders.forEach((other) -> {
 			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
+			GetRentalBillCommand cmd2 = new GetRentalBillCommand();
+			cmd2.setBillId(other.getRentalOrderNo());
+			RentalBillDTO rentalDTO = rentalv2Service.getRentalBill(cmd2);
+			dto.setOpenTime(rentalDTO.getOpenTime());
 			response.getOrders().add(dto);
 		});
 
