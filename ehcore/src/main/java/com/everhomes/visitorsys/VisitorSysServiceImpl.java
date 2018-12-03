@@ -1806,7 +1806,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         if(visitorsysOwnerType ==VisitorsysOwnerType.ENTERPRISE) {
             command.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
-            command.setOwnerId(cmd.getEnterpriseId());
+            if(cmd.getEnterpriseId() != null)
+                command.setOwnerId(cmd.getEnterpriseId());
+            else
+                command.setOwnerId(cmd.getOwnerId());
         } else{
 //            Long communityId = organizationService.getOrganizationActiveCommunityId(cmd.getOwnerId());
             Long communityId = cmd.getOwnerId();
