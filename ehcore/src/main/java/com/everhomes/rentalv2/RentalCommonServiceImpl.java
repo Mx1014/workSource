@@ -378,6 +378,8 @@ public class RentalCommonServiceImpl {
     }
 
     private void refundParkingOrderV1(RentalOrder order, Long timestamp, Long refundOrderNo, BigDecimal amount) {
+        if (amount.compareTo(new BigDecimal(0)) == 0)
+            return;
         PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
         String refundApi = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
         String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.appKey", "");
