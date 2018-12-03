@@ -491,6 +491,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setOperatorUid(UserContext.current().getUser().getId());
 			space.setShortRentNums(cmd.getShortRentNums());
+			space.setAddress(cmd.getAddress());
+			space.setLatitude(cmd.getLatitude());
+			space.setLongitude(cmd.getLongitude());
+			space.setContactPhone(cmd.getContactPhone());
+			space.setName(cmd.getName());
+			space.setLongRentPrice(cmd.getLongRentPrice());
+			space.setDescription(cmd.getDescription());
 			this.officeCubicleProvider.updateSpace(space);
 
 			// TODO:删除附件唐彤没有提供
