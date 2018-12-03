@@ -544,14 +544,19 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			this.officeCubicleProvider.updateSpace(space);
 
-			if (null != cmd.getSpaceAttachments() || null != cmd.getShortRentAttachments() ||null != cmd.getStationAttachments()) {
-				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId());
+			if (null != cmd.getSpaceAttachments()) {
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)1);
 				cmd.getSpaceAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)1);
 				});
+			}
+			if (null != cmd.getShortRentAttachments()){
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)2);
 				cmd.getShortRentAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)2);
 				});
+			}
+			if (null != cmd.getStationAttachments()){
 				cmd.getStationAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)3);
 				});
@@ -2090,6 +2095,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		account.setOwnerType(cmd.getOwnerType());
 		account.setNamespaceId(cmd.getNamespaceId());
 		account.setMerchantId(cmd.getAccountId());
+		account.setAccountName(cmd.getAccountName());
 		officeCubiclePayeeAccountProvider.createOfficeCubiclePayeeAccount(account);
 	}
 	

@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>accountId: 收款账户ID</li>
+ * <li>accountName:收款账户名称</li>
  * </ul>
  */
 public class CreateOrUpdateOfficeCubiclePayeeAccountCommand {
@@ -17,6 +18,7 @@ public class CreateOrUpdateOfficeCubiclePayeeAccountCommand {
     private String ownerType;
     private Long ownerId;
     private Long accountId;
+    private String accountName;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -49,6 +51,15 @@ public class CreateOrUpdateOfficeCubiclePayeeAccountCommand {
 
 	public void setAccountId(Long accountId) {
 		this.accountId = accountId;
+	}
+
+	
+	public String getAccountName() {
+		return accountName;
+	}
+
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
 	}
 
 	@Override
