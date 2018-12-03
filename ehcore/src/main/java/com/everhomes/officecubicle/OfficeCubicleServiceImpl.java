@@ -2120,7 +2120,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		resp.setLongRentCloseCubicleNums(closeStationSize);
 		resp.setLongCubicleIdleNums(stationSize-longRentStationSize);
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
-		resp.setShortCubicleRentedNums(Integer.valueOf(space.getShortRentNums())-shortRentStationSize);
+		Integer shortRentNums = 0;
+		if (space.getShortRentNums()!=null){
+			shortRentNums = Integer.valueOf(space.getShortRentNums());
+		}
+		resp.setShortCubicleRentedNums(shortRentNums-shortRentStationSize);
 		Integer rentRates =((shortRentStationSize+longRentStationSize)*100)/stationSize;
 		resp.setRentRates(rentRates);
 		return resp;
@@ -2261,6 +2265,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
 				UserContext.current().getUser().getId()));
+		dto.setStationId(station.getId());
 		resp.setStation(dto);
 		return resp;
 	}
