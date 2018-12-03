@@ -32,6 +32,10 @@ public class AssetErrorCodes {
     
     public static final int GROUP_UNIQUE_BILL_ITEM_CHECK = 10020;
     public static final int STANDARD_RELEATE_CONTRACT_CHECK = 10021;
+    //此账单不存在
+    public static final int BILL_NOT_EXIST = 10022;
+    //该账单不是已出账单
+    public static final int BILL_NOT_SWITCH = 10023;
     
     
 }
