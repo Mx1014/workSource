@@ -138,6 +138,17 @@ public class RentalCommonServiceImpl {
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
+    public void sendMessageToUser(String uids, String content) {
+        try {
+            String[] userIds = uids.split(",");
+            for (String uid : userIds) {
+                sendMessageToUser(Long.valueOf(uid), content);
+            }
+        }catch (Exception e){
+            LOGGER.error("send messages error uids = {} exception = {}", uids,e);
+        }
+    }
+
     public void sendRouterMessageToUser(Long userId, String content, Long orderId, String resourceType) {
         if(null == userId)
             return;
@@ -176,6 +187,17 @@ public class RentalCommonServiceImpl {
 
         String notifyText = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         sendMessageToUser(uid, notifyText);
+    }
+
+    public void sendMessageCode(String uids, Map<String, String> map, int code) {
+        try {
+            String[] userIds = uids.split(",");
+            for (String uid : userIds) {
+                sendMessageCode(Long.valueOf(uid), map, code);
+            }
+        }catch (Exception e){
+            LOGGER.error("send messages error uids = {} exception = {}", uids,e);
+        }
     }
 
     public BigDecimal calculateOverTimeFee(RentalOrder order,BigDecimal amount, long now) {
@@ -260,7 +282,8 @@ public class RentalCommonServiceImpl {
         rentalRefundOrder.setOrderNo(Long.valueOf(order.getOrderNo()));
         rentalRefundOrder.setRefundOrderNo(refundOrderNo);
         rentalRefundOrder.setResourceTypeId(order.getResourceTypeId());
-        rentalRefundOrder.setOnlinePayStyleNo(VendorType.fromCode(order.getVendorType()).getStyleNo());
+        if (StringHelper.hasContent(order.getVendorType()))
+            rentalRefundOrder.setOnlinePayStyleNo(VendorType.fromCode(order.getVendorType()).getStyleNo());
         rentalRefundOrder.setResourceType(order.getResourceType());
 
         rentalRefundOrder.setAmount(orderAmount);
@@ -284,6 +307,8 @@ public class RentalCommonServiceImpl {
     }
 
     private void refundParkingOrderV1(RentalOrder order, Long timestamp, Long refundOrderNo, BigDecimal amount) {
+        if (amount.compareTo(new BigDecimal(0)) == 0)
+            return;
         PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
         String refundApi = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
         String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.appKey", "");

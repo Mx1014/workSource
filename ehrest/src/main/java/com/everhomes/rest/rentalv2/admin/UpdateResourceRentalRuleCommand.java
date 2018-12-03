@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalStartTime: 最多提前预约时间</li>
  * <li>remarkFlag: 备注字段是否必填 0否 1是</li>
  * <li>remark: 备注显示文案</li>
+ * <li>fileFlag: 附件是否必传 0否 1是</li>
  * </ul>
  */
 public class UpdateResourceRentalRuleCommand {
@@ -43,6 +44,7 @@ public class UpdateResourceRentalRuleCommand {
     private Long rentalStartTime;
     private Byte remarkFlag;
     private String remark;
+    private Byte fileFlag;
 
     @Override
     public String toString() {
@@ -151,5 +153,13 @@ public class UpdateResourceRentalRuleCommand {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public Byte getFileFlag() {
+        return fileFlag;
+    }
+
+    public void setFileFlag(Byte fileFlag) {
+        this.fileFlag = fileFlag;
     }
 }

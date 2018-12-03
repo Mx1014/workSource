@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
  *     <li>currentOrganizationId: 用户当前场景下的公司id,推荐传这个值，要不然就无法设置工作流的某些功能</li>
  *     <li>serviceType: 业务类型, 在App上搜索的时候会用到的</li>
  *     <li>routeUri: 路由, 如果在任务列表需要自定义跳转的话,设置此路由,如果不需要就不用设置</li>
+ *     <li>originAppId: 应用 id, 必传字段</li>
  *     <li>additionalFieldDTO: 额外字段,更加特殊的情况需要用到这个,一般不需要 {@link com.everhomes.rest.flow.FlowCaseAdditionalFieldDTO}</li>
  * </ul>
  */
@@ -46,7 +47,9 @@ public class CreateFlowCaseCommand {
     private Long applierOrganizationId;
 
     private String routeUri;
-    private Long subFlowParentId;
+    private Long subFlowParentId; // 内部使用, 创建子流程的时候用到
+
+    private Long originAppId;
 
     @ItemType(FlowCaseAdditionalFieldDTO.class)
     private FlowCaseAdditionalFieldDTO additionalFieldDTO;
@@ -193,6 +196,14 @@ public class CreateFlowCaseCommand {
 
     public void setSubFlowParentId(Long subFlowParentId) {
         this.subFlowParentId = subFlowParentId;
+    }
+
+    public Long getOriginAppId() {
+        return originAppId;
+    }
+
+    public void setOriginAppId(Long originAppId) {
+        this.originAppId = originAppId;
     }
 
     @Override

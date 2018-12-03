@@ -72,6 +72,7 @@ import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -156,7 +157,8 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	private FlowProvider flowProvider;
 	@Autowired
 	private AllianceOperateServiceProvider allianceOperateServiceProvider;
-
+	@Autowired
+	ServiceModuleAppService serviceModuleAppService;
 
 	@Override
 	public void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
@@ -943,5 +945,6 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		
 		return cmd;
 	}
+	
 	
 }

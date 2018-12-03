@@ -2268,7 +2268,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public List<AddressProperties> listAuthorizePrices(Integer namespaceId, Long buildingId, Long communityId, Long pageAnchor, Integer pageSize) {
+	public List<AddressProperties> listAuthorizePrices(Integer namespaceId, Long buildingId, Long communityId, CrossShardListingLocator locator, Integer pageSize) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddressProperties.class));
 		SelectJoinStep<Record> query = context.select(Tables.EH_ADDRESS_PROPERTIES.fields()).from(Tables.EH_ADDRESS_PROPERTIES);
 		Condition cond = Tables.EH_ADDRESS_PROPERTIES.NAMESPACE_ID.eq(namespaceId);
@@ -2276,13 +2276,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.BUILDING_ID.eq(buildingId));
 		cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.COMMUNITY_ID.eq(communityId));
 		
-		if(null != pageAnchor && pageAnchor != 0){
+		/*if(null != pageAnchor && pageAnchor != 0){
 			cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.ID.gt(pageAnchor));
-		}
-		query.orderBy(Tables.EH_ADDRESS_PROPERTIES.CREATE_TIME.desc());
+		}*/
+		if(locator.getAnchor() != null) {
+			cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.ID.gt(locator.getAnchor()));
+        }
+		
+		query.orderBy(Tables.EH_ADDRESS_PROPERTIES.ID.asc());
 		
 		if(null != pageSize)
-			query.limit(pageSize);
+			query.limit(pageSize+1);
 		
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("listCommunityPmOwnersByTel, sql = {}" , query.getSQL());
@@ -2291,6 +2295,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		
 		List<AddressProperties> result = query.where(cond).fetch().
 				map(new DefaultRecordMapper(Tables.EH_ADDRESS_PROPERTIES.recordType(), AddressProperties.class));
+		
+		if(result.size() > 0) {
+            locator.setAnchor(result.get(result.size() -1).getId());
+        }
 
 		return result;
 	}
@@ -2382,6 +2390,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		});
 
 		return result[0];
+	}
+
+	@Override
+	public List<CommunityAddressMapping> findOrganizationAddressMapping(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					  .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+					  .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+					  .fetchInto(CommunityAddressMapping.class);
 	}
 
 

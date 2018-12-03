@@ -2,7 +2,8 @@
 package com.everhomes.assetPayment;
 
 import com.everhomes.junit.CoreServerTestCase;
-import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
+
 import org.junit.Test;
 
 /**

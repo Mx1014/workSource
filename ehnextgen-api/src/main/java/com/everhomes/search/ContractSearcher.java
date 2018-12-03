@@ -2,6 +2,7 @@ package com.everhomes.search;
 
 import com.everhomes.openapi.Contract;
 import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.contract.OpenapiListContractsCommand;
 import com.everhomes.rest.contract.SearchContractCommand;
 
 import java.util.List;
@@ -15,4 +16,6 @@ public interface ContractSearcher {
     void feedDoc(Contract contract);
     void syncFromDb();
     ListContractsResponse queryContracts(SearchContractCommand cmd);
+    ListContractsResponse searchNoOrgIdContracts(SearchContractCommand cmd);
+    ListContractsResponse openapiListContracts(OpenapiListContractsCommand cmd);
 }

@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
+ * <li>source: 来源参考{@link com.everhomes.rest.rentalv2.RentalBillSource}</li>
  * </ul>
  */
 public class ListRentalBillsCommand {
@@ -35,6 +36,7 @@ public class ListRentalBillsCommand {
 	private Byte billStatus;
 	private String payChannel;
 	private Long pageAnchor;
+	private Byte source;
     
 	private Integer pageSize;
 	private Long currentPMId;
@@ -164,5 +166,13 @@ public class ListRentalBillsCommand {
 
 	public void setPayChannel(String payChannel) {
 		this.payChannel = payChannel;
+	}
+
+	public Byte getSource() {
+		return source;
+	}
+
+	public void setSource(Byte source) {
+		this.source = source;
 	}
 }

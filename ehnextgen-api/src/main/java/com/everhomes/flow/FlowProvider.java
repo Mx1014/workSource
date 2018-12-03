@@ -16,6 +16,8 @@ public interface FlowProvider {
 
 	Flow getFlowById(Long id);
 
+	List<Flow> findFlowVersion(Long flowMainId , Integer namespaceId);
+
 	List<Flow> queryFlows(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
@@ -35,4 +37,6 @@ public interface FlowProvider {
 
     List<Flow> listConfigFlowByCond(Integer namespaceId, String moduleType, Long moduleId,
 									String projectType, Long projectId, String ownerType, Long ownerId);
+
+    List<Flow> queryFlowVersions(Long flowMainId , Integer namespaceId);
 }

@@ -41,6 +41,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
@@ -201,11 +203,13 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceAttachmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadItems;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
+import com.everhomes.server.schema.tables.records.EhAllianceServiceCategoryMatchRecord;
 import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAllianceAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.servicehotline.HotlineService;
@@ -253,6 +257,7 @@ import org.jooq.Record;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -405,6 +410,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private FlowProvider flowProvider;
 	@Autowired
 	private CoordinationProvider coordinationProvider;
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
+	@Autowired
+	private NamespaceProvider namespaceProvider;
+	
+	
 	
 	private void populateYellowPage(YellowPage yellowPage) {
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -2147,10 +2158,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 		final String APP_ID = "appId";
 		String jumpConfig = dto.getInstanceConfig();
 		JSONObject json = JSONObject.parseObject(jumpConfig);
-		Long jumpCheckId = json.getLong(APP_ID);
-		if (null == jumpCheckId) {
-			return null;
-		}
+//		Long jumpCheckId = json.getLong(APP_ID);
+//		if (null == jumpCheckId) {
+//			return null;
+//		}
 
 		// 获取url相关配置
 		String skipRoute = json.getString("skipRoute"); // 跳转路由，如zl://browser/i?url=
@@ -2172,32 +2183,32 @@ public class YellowPageServiceImpl implements YellowPageService {
 					continue;
 				}
 
-				// 截取url的参数部分
-				int index = url.indexOf("?");
-				if (index < 0) {
-					continue;
-				}
-
-				// 获取特定参数
-				url = url.substring(index + 1);
-				String[] items = url.split("&");
-				String findStr = APP_ID + "=";
-				for (String item : items) {
-					if (item.startsWith(findStr)) {
-						appId = Long.parseLong(item.substring(findStr.length()));
-					}
-				}
-
-				// 如果未找到，继续
-				if (null == appId) {
-					continue;
-				}
+//				// 截取url的参数部分
+//				int index = url.indexOf("?");
+//				if (index < 0) {
+//					continue;
+//				}
+//
+//				// 获取特定参数
+//				url = url.substring(index + 1);
+//				String[] items = url.split("&");
+//				String findStr = APP_ID + "=";
+//				for (String item : items) {
+//					if (item.startsWith(findStr)) {
+//						appId = Long.parseLong(item.substring(findStr.length()));
+//					}
+//				}
+//
+//				// 如果未找到，继续
+//				if (null == appId) {
+//					continue;
+//				}
 			}
 
 			// 比较两者是否相同
-			if (!jumpCheckId.equals(appId)) {
-				continue;
-			}
+//			if (!jumpCheckId.equals(appId)) {
+//				continue;
+//			}
 
 			Map<String, String> normalParams = new HashMap<>(10);
 			normalParams.put("appId", appId + "");
@@ -2210,7 +2221,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 			// 生成url
 			String finalModuleUrl = generateModuleUrl(skipRoute, prefix, normalParams, encodeParams, suffix);
 
-			dto.setModuleUrl(finalModuleUrl.toString());
+			dto.setModuleUrl(finalModuleUrl);
+			dto.setModuleName(app.getName());
 			List<JumpModuleDTO> dtos = new ArrayList<>(1);
 			dtos.add(dto);
 			return dtos;
@@ -4354,5 +4366,107 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		return configurationProvider.getBooleanValue(namespaceId, "serviceAlliance.offline.flag", false);
 	} 
+	
+	
+	@Override
+	public String recoveryListCategoryDataDisappearBug() {
+		
+        List<Namespace> namespaces = namespaceProvider.listNamespaces();
+        
+        StringBuilder sb = new StringBuilder();
+        
+        for (Namespace namespace : namespaces) {
+    		int update = 0;
+        	
+        	//获取所有list/policy/filterlist/houseKeeper样式的模块
+    		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(namespace.getId(), 40500L, null,
+    				null, null);
+    		for(ServiceModuleApp app : apps) {
+    			if (!isListCategoryModule(app)) {
+    				continue;
+    			}
+    			
+    			update += dealRecovery(app);
+    		}
+    		if (update > 0) {
+    			sb.append(" ns:"+namespace.getId()+" u:"+update);
+    		}
+        }
+		
+		return sb.toString();
+	}
+
+	private int dealRecovery(ServiceModuleApp app) {
+
+		int update = 0;
+		// 获取所有的样式。
+		List<ServiceAllianceCategories> cags = yellowPageProvider.listCategories(null, null, null, null, app.getNamespaceId(),
+				null, Long.parseLong(app.getCustomTag()), null, true);
+
+		for (ServiceAllianceCategories cag : cags) {
+			update++;
+			dbProvider.execute(r -> {
+				// 更新为删除
+				cag.setStatus((byte) 0);
+				yellowPageProvider.updateServiceAllianceCategory(cag);
+
+				// 相应的match做更新
+				String newCagName = getParentCagName(cag);
+				reNewMatchByCategory(cag, newCagName);
+				return null;
+			});
+		}
+		
+		return update;
+
+	}
+
+	private String getParentCagName(ServiceAllianceCategories cag) {
+		
+		if (StringUtils.isEmpty(cag.getPath())) {
+			return cag.getName();
+		}
+		
+		String[] names = cag.getPath().split("/");
+		if (null == names) {
+			return cag.getName();
+		}
+		
+		return names[0];
+	}
+
+	private boolean isListCategoryModule(ServiceModuleApp app) {
+		ServiceAllianceInstanceConfig config = (ServiceAllianceInstanceConfig) StringHelper
+				.fromJsonString(app.getInstanceConfig(), ServiceAllianceInstanceConfig.class);
+		if (null == config) {
+			return false;
+		}
+		
+		String displayType = config.getDisplayType();
+		if ("list".equals(displayType)
+				||  "filterlist".equals(displayType)
+				||  "policydeclare".equals(displayType)
+				||  "housekeeper".equals(displayType)
+			) {
+			return true;
+		}
+
+		return false;
+	}
+	
+	
+	public void reNewMatchByCategory(ServiceAllianceCategories oldCag, String newCagName) {
+		com.everhomes.server.schema.tables.EhAllianceServiceCategoryMatch MATCH = Tables.EH_ALLIANCE_SERVICE_CATEGORY_MATCH;
+		UpdateQuery<EhAllianceServiceCategoryMatchRecord> updateQuery = dbProvider.getDslContext(AccessSpec.readWrite()).updateQuery(MATCH);
+		updateQuery.addValue(MATCH.OWNER_TYPE, oldCag.getOwnerType());
+		updateQuery.addValue(MATCH.OWNER_ID, oldCag.getOwnerId());
+		updateQuery.addValue(MATCH.CATEGORY_ID, oldCag.getParentId());
+		updateQuery.addValue(MATCH.CATEGORY_NAME, newCagName);
+		updateQuery.addConditions(MATCH.TYPE.eq(oldCag.getType()));
+		updateQuery.addConditions(MATCH.NAMESPACE_ID.eq(oldCag.getNamespaceId()));
+		updateQuery.addConditions(MATCH.CATEGORY_ID.eq(oldCag.getId()));
+		updateQuery.execute();
+	}
+	
 
 }

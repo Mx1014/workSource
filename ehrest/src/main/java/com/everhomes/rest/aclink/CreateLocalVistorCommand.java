@@ -31,7 +31,8 @@ public class CreateLocalVistorCommand {
     
     @NotNull
     private Long     doorId;
-    
+    private Byte groupType;
+
     @NotNull
     private Integer namespaceId;
 
@@ -46,6 +47,24 @@ public class CreateLocalVistorCommand {
 	private Byte authRuleType;
 	private Integer totalAuthAmount;
 	private String headImgUri;
+	private Byte notice;
+	private Byte qrType;
+
+	public Byte getQrType() {
+		return qrType;
+	}
+
+	public void setQrType(Byte qrType) {
+		this.qrType = qrType;
+	}
+
+	public Byte getNotice() {
+		return notice;
+	}
+
+	public void setNotice(Byte notice) {
+		this.notice = notice;
+	}
 
 	@ItemType(CreateCustomFieldCommand.class)
 	private List<CreateCustomFieldCommand> list;
@@ -56,6 +75,14 @@ public class CreateLocalVistorCommand {
 
 	public void setList(List<CreateCustomFieldCommand> list) {
 		this.list = list;
+	}
+
+	public Byte getGroupType() {
+		return groupType;
+	}
+
+	public void setGroupType(Byte groupType) {
+		this.groupType = groupType;
 	}
 
 	public String getPhone() {

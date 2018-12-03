@@ -45,7 +45,7 @@ public interface RemindProvider {
 
     Remind getRemindDetail(Integer namespaceId, String ownerType, Long ownerId, Long userId, Long remindId);
 
-    boolean checkRemindShareToUser(Long memberDetailId, Long remindId);
+    boolean checkRemindShareToUser(Long memberDetailId, Long remindId, Long categoryId);
 
     Remind getSubscribeRemind(Integer namespaceId, String ownerType, Long ownerId, Long userId, Long subscribeRemindId);
 
@@ -87,5 +87,7 @@ public interface RemindProvider {
 
 	List<Remind> findUndoRemindsByRemindTimeByPage(Timestamp remindStartTime,
 			Timestamp remindEndTime, int pageSize, int offset);
+
+	void deleteRemindShare(RemindShare share);
 
 }

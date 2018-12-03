@@ -6,25 +6,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.FieldItemDTO;
-import com.everhomes.rest.varField.FieldStatisticDTO;
-import com.everhomes.rest.varField.ImportFieldExcelCommand;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.rest.varField.ListFieldItemCommand;
-import com.everhomes.rest.varField.ListFieldStatisticsCommand;
-import com.everhomes.rest.varField.ListScopeFieldItemCommand;
-import com.everhomes.rest.varField.ListSystemFieldCommand;
-import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
-import com.everhomes.rest.varField.ListSystemFieldItemCommand;
-import com.everhomes.rest.varField.SystemFieldDTO;
-import com.everhomes.rest.varField.SystemFieldGroupDTO;
-import com.everhomes.rest.varField.SystemFieldItemDTO;
-import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
-import com.everhomes.rest.varField.UpdateFieldItemsCommand;
-import com.everhomes.rest.varField.UpdateFieldsCommand;
+import com.everhomes.rest.varField.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -240,6 +222,35 @@ public class FieldController extends ControllerBase {
     public RestResponse importFieldsExcelRe(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
         DynamicImportResponse response = fieldService.importDynamicExcel(cmd,file);
         RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(200);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <p>fieldFilter的保存</p>
+     * <b>URL: /varField/saveFieldScopeFilter</b>
+     */
+    @RequestMapping("saveFieldScopeFilter")
+    @RestReturn(String.class)
+    public RestResponse saveFieldScopeFilter(SaveFieldScopeFilterCommand cmd){
+        fieldService.saveFieldScopeFilter(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(200);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+
+    /**
+     * <p>fieldFilter的查询</p>
+     * <b>URL: /varField/listFieldScopeFilter</b>
+     */
+    @RequestMapping("listFieldScopeFilter")
+    @RestReturn(value = FieldDTO.class, collection = true)
+    public RestResponse listFieldScopeFilter(ListFieldScopeFilterCommand cmd){
+        List<FieldDTO> list = fieldService.listFieldScopeFilter(cmd);
+        RestResponse restResponse = new RestResponse(list);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
         return restResponse;

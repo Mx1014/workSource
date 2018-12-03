@@ -181,6 +181,8 @@ public class InvitedCustomerDTO {
 
     private Long organizationId;
 
+    private Timestamp updateTime;
+
 
     public Long getOrganizationId() {
         return organizationId;
@@ -1347,5 +1349,13 @@ public class InvitedCustomerDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 }

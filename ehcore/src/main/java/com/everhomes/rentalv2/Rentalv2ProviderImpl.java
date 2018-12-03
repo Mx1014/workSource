@@ -16,6 +16,7 @@ import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -898,7 +899,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	@Override
 	public List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId,
 											 ListingLocator locator, Byte billStatus, String vendorType , Integer pageSize,
-											 Long startTime, Long endTime, Byte invoiceFlag,Long userId,String payChannel){
+											 Long startTime, Long endTime, Byte invoiceFlag,Long userId,String payChannel,Byte source){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
 
@@ -928,6 +929,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		if (null != userId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_UID.equal(userId));
+		if (null != source)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.SOURCE.eq(source));
 		if (StringUtils.isNotEmpty(payChannel))
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.PAY_CHANNEL.like(payChannel+"%"));
 		if(null!=locator && locator.getAnchor() != null)
@@ -1803,7 +1806,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalCloseDate> queryRentalCloseDateByOwner(String resourceType, String ownerType,
-			Long ownerId) {
+															 Long ownerId, java.sql.Date startTime, java.sql.Date endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_CLOSE_DATES);
@@ -1813,6 +1816,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerType));
 		condition = condition.and(Tables.EH_RENTALV2_CLOSE_DATES.RESOURCE_TYPE
 				.equal(resourceType));
+		if (null != startTime)
+			condition = condition.and(Tables.EH_RENTALV2_CLOSE_DATES.CLOSE_DATE.ge(startTime));
+		if (null != endTime)
+			condition = condition.and(Tables.EH_RENTALV2_CLOSE_DATES.CLOSE_DATE.lt(endTime));
 		step.where(condition);
 		List<RentalCloseDate> result = step
 				.orderBy(Tables.EH_RENTALV2_CLOSE_DATES.ID.desc()).fetch().map((r) -> {
@@ -2510,20 +2517,104 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.fetchOne();
 		if (record != null) {
 			BigDecimal maxPrice = record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE));
-			BigDecimal minPrice = maxPrice;
+			BigDecimal minPrice = record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.PRICE));
 			BigDecimal maxOrgMemberPrice = record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE));
-			BigDecimal minOrgMemberPrice = maxOrgMemberPrice;
+			BigDecimal minOrgMemberPrice = record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE));
 			BigDecimal maxApprovingUserPrice = record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE));
-			BigDecimal minApprovingUserPrice = maxApprovingUserPrice;
+			BigDecimal minApprovingUserPrice = record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE));
 			return new MaxMinPrice(maxPrice, minPrice, maxOrgMemberPrice, minOrgMemberPrice, maxApprovingUserPrice, minApprovingUserPrice);
 		}
-		return null;
+		return new MaxMinPrice();
+	}
+
+    @Override
+    public MaxMinPrice findMaxMinPriceByClassifycation(String resourceType, String ownerType, List<Long> ownerIds,
+                                                       String sourceType, Long sourceId, Byte userPriceType,String classification) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record2<BigDecimal, BigDecimal>> step = context.select(DSL.max(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.WORKDAY_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.WORKDAY_PRICE))
+                .from(Tables.EH_RENTALV2_PRICE_CLASSIFICATION);
+        Condition condition = Tables.EH_RENTALV2_PRICE_CLASSIFICATION.RESOURCE_TYPE.eq(resourceType);
+        if (StringHelper.hasContent(ownerType))
+        	condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_TYPE.eq(ownerType));
+        if (ownerIds != null && ownerIds.size() > 0)
+        	condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_ID.in(ownerIds));
+		if (StringHelper.hasContent(sourceType))
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.SOURCE_TYPE.eq(sourceType));
+		if (sourceId != null)
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.SOURCE_ID.eq(sourceId));
+		if (userPriceType != null)
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.USER_PRICE_TYPE.eq(userPriceType));
+		if (StringHelper.hasContent(classification))
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.CLASSIFICATION.eq(classification));
+		Record2<BigDecimal, BigDecimal> record = step.where(condition).fetchOne();
+		if (record != null) {
+			BigDecimal maxPrice = record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.WORKDAY_PRICE));
+			BigDecimal minPrice = record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.WORKDAY_PRICE));
+			return new MaxMinPrice(maxPrice, minPrice, null, null, null, null);
+		}
+		return new MaxMinPrice();
+    }
+
+	@Override
+	public List<RentalPriceClassification> listClassification(String resourceType, String ownerType, Long ownerId, String sourceType,
+															  Long sourceId, Byte userPriceType, String classification) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_PRICE_CLASSIFICATION);
+		Condition condition= Tables.EH_RENTALV2_PRICE_CLASSIFICATION.RESOURCE_TYPE.eq(resourceType);
+		if (StringHelper.hasContent(ownerType))
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_TYPE.eq(ownerType));
+		if (ownerId != null)
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_ID.eq(ownerId));
+		if (StringHelper.hasContent(sourceType))
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.SOURCE_TYPE.eq(sourceType));
+		if (sourceId != null)
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.SOURCE_ID.eq(sourceId));
+		if (userPriceType != null)
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.USER_PRICE_TYPE.eq(userPriceType));
+		if (StringHelper.hasContent(classification))
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.CLASSIFICATION.eq(classification));
+
+		return step.where(condition).fetch().map(r->ConvertHelper.convert(r,RentalPriceClassification.class));
+	}
+
+	@Override
+	public void deleteClassificationBySourceId(String resourceType, String sourceType, Long sourceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		context.delete(Tables.EH_RENTALV2_PRICE_CLASSIFICATION)
+				.where(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.SOURCE_ID.eq(sourceId))
+				.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.SOURCE_TYPE.eq(sourceType))
+				.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.RESOURCE_TYPE.eq(resourceType))
+				.execute();
+	}
+
+	@Override
+	public void deleteClassificationByOwnerId(String resourceType, String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		context.delete(Tables.EH_RENTALV2_PRICE_CLASSIFICATION)
+				.where(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.RESOURCE_TYPE.eq(resourceType))
+				.execute();
 	}
 
 	@Override
 	public List<Long> listCellPackageId(String resourceType, Long resourceId, Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.select(Tables.EH_RENTALV2_CELLS.PRICE_PACKAGE_ID).from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
+				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
+				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq(RentalSiteStatus.NORMAL.getCode()))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(new Date(new java.util.Date().getTime())))
+				.fetch().map(r->r.value1());
+	}
+
+	@Override
+	public List<Long> listCellId(String resourceType, Long resourceId, Byte rentalType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_RENTALV2_CELLS.ID).from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
