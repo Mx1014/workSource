@@ -2092,22 +2092,36 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public ListOfficeCubicleStatusResponse listOfficeCubicleStatus(ListOfficeCubicleStatusCommand cmd) {
 		ListOfficeCubicleStatusResponse resp = new ListOfficeCubicleStatusResponse();
+		Integer stationSize = 0;
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, null,null,null,null);
 		if (station.size() == 0)
 			return resp;
+		stationSize = station.size();
 		resp.setCubicleNums(station.size());
 		List<OfficeCubicleStationRent> longRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)1,null,null);
 		List<OfficeCubicleStationRent> shortRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)0,null,null);
-		resp.setShortCubicleIdleNums(shortRentStation.size());
-		resp.setLongCubicleRentedNums(longRentStation.size());
+		Integer shortRentStationSize = 0;
+		Integer longRentStationSize =0;
+		Integer closeStationSize = 0;
+		if (longRentStation != null){
+			longRentStationSize = longRentStation.size();
+		}
+		if (shortRentStation != null){
+			shortRentStationSize = shortRentStation.size();
+		}
+		resp.setShortCubicleIdleNums(shortRentStationSize);
+		resp.setLongCubicleRentedNums(longRentStationSize);
 		List<OfficeCubicleStation> closeStation = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, (byte)0,null,null,null);
-		resp.setLongRentCloseCubicleNums(closeStation.size());
-		resp.setLongCubicleIdleNums(station.size()-longRentStation.size());
+		if (closeStation != null){
+			closeStationSize = closeStation.size();
+		}
+		resp.setLongRentCloseCubicleNums(closeStationSize);
+		resp.setLongCubicleIdleNums(stationSize-longRentStationSize);
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
-		resp.setShortCubicleRentedNums(Integer.valueOf(space.getShortRentNums())-shortRentStation.size());
-		Integer rentRates =((shortRentStation.size()+longRentStation.size())*100)/station.size();
+		resp.setShortCubicleRentedNums(Integer.valueOf(space.getShortRentNums())-shortRentStationSize);
+		Integer rentRates =((shortRentStationSize+longRentStationSize)*100)/stationSize;
 		resp.setRentRates(rentRates);
 		return resp;
 	}
