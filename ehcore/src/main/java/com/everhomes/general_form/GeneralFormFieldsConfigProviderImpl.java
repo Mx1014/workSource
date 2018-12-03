@@ -36,9 +36,11 @@ public class GeneralFormFieldsConfigProviderImpl implements GeneralFormFieldsCon
         long id = this.sequenceProvider.getNextSequence(NameMapper
                         .getSequenceDomainFromTablePojo(EhGeneralFormFieldsConfig.class));
         formFieldsConfig.setId(id);
+        if(formFieldsConfig.getConfigOriginId() == null){
+            formFieldsConfig.setConfigOriginId(id);
+        }
         formFieldsConfig.setCreatorUid(UserContext.current().getUser().getId());
         formFieldsConfig.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
         rwDao().insert(formFieldsConfig);
         return formFieldsConfig;
     }

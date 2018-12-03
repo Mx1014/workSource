@@ -109,6 +109,8 @@ public interface GeneralFormService {
 
 	GeneralFormFieldsConfigDTO updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd);
 
+	GeneralFormFieldsConfigDTO updateFormFieldsConfigStatus(Long formFieldsConfigId);
+
 	void deleteFormFieldsConfig(DeleteFormFieldsConfigCommand cmd);
 
 	GeneralFormFieldsConfigDTO getFormFieldsConfig(GetFormFieldsConfigCommand cmd);
