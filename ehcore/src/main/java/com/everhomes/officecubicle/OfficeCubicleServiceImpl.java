@@ -49,6 +49,7 @@ import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rentalv2.RentalOrder;
 import com.everhomes.rentalv2.RentalOrderHandler;
 import com.everhomes.rentalv2.RentalResource;
+import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2PriceRule;
 import com.everhomes.rentalv2.Rentalv2PriceRuleProvider;
 import com.everhomes.rentalv2.Rentalv2Provider;
@@ -99,8 +100,14 @@ import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoResponse;
 import com.everhomes.rest.rentalv2.PriceRuleType;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
+import com.everhomes.rest.rentalv2.RuleSourceType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourcePriceRuleCommand;
+import com.everhomes.rest.rentalv2.admin.PriceRuleDTO;
+import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.rest.rentalv2.admin.ResourcePriceRuleDTO;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceRentalRuleCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.util.*;
@@ -392,6 +399,25 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setChargeUserDTO(users);
 		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
 		dto.setRanges(ranges.stream().map(r->ConvertHelper.convert(r,OfficeRangeDTO.class)).collect(Collectors.toList()));
+		QueryDefaultRuleAdminCommand cmd = new QueryDefaultRuleAdminCommand();
+        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(other.getNamespaceId(),
+                RentalV2ResourceType.STATION_BOOKING.getCode());
+		cmd.setResourceType(RentalV2ResourceType.STATION_BOOKING.getCode());
+		cmd.setResourceTypeId(type.getId());
+		cmd.setSourceId(other.getId());
+		cmd.setSourceType(RuleSourceType.RESOURCE.getCode());
+		QueryDefaultRuleAdminResponse resp = rentalv2Service.queryDefaultRule(cmd);
+		dto.setHolidayOpenFlag(resp.getHolidayOpenFlag());
+		dto.setHolidayType(resp.getHolidayType());
+		dto.setNeedPay(resp.getNeedPay());
+		
+		for (PriceRuleDTO priceRule :resp.getPriceRules()){
+			if (priceRule.getRentalType() ==1){
+				dto.setDailyPrice(priceRule.getWorkdayPrice().intValue());
+			} else if (priceRule.getRentalType() ==2){
+				dto.setHalfdailyPrice(priceRule.getWorkdayPrice().intValue());
+			}
+		}
 		return dto;
 	}
 
@@ -409,6 +435,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //		if (null == cmd.getCityName())
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid paramter of city error: null id or name");
+		if (null == cmd.getRanges())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			"Invalid paramter of Ranges error: null id or name");
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleSpace space = ConvertHelper.convert(cmd, OfficeCubicleSpace.class);
 			space.setNamespaceId(getNamespaceId(cmd.getNamespaceId()));
@@ -469,9 +498,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//空间管理权限
 		}
-//		if (null == cmd.getManagerUid())
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//					"Invalid paramter of Categories error: null ");
+		if (null == cmd.getChargeUserDTO())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter of ChargeUser error: null ");
 //		if (null == cmd.getCategories())
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid paramter of Categories error: null ");
@@ -485,7 +514,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //		if (null == oldSpace)
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid paramter of space id error: no space found");
-
+		if (null == cmd.getRanges())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			"Invalid paramter of Ranges error: null id or name");
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
 			space.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -2199,7 +2230,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto = ConvertHelper.convert(station,StationDTO.class);
 		dto.setAssociateRoomId(station.getAssociateRoomId());
 		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(station.getAssociateRoomId());
-		dto.setAssociateRoomName(room.getRoomName());
+		if (room != null){
+			dto.setAssociateRoomName(room.getRoomName());
+		}
 		dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
 				UserContext.current().getUser().getId()));
 		resp.setStation(dto);

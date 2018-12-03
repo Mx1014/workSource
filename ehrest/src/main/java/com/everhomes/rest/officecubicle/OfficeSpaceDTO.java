@@ -74,14 +74,23 @@ public class OfficeSpaceDTO {
 	private Byte holidayOpenFlag;
 	private Byte holidayType;
 	private BigDecimal longRentPrice;
-	private BigDecimal dailyPrice;
-	private BigDecimal halfdailyPrice;
+	private Integer dailyPrice;
+	private Integer halfdailyPrice;
 	private Integer stationNums;
 	private Integer shortRentNums;
 	private Byte openFlag;
 	private List<ChargeUserDTO> chargeUserDTO;
+	private Byte needPay;
 	
 	
+	public Byte getNeedPay() {
+		return needPay;
+	}
+
+	public void setNeedPay(Byte needPay) {
+		this.needPay = needPay;
+	}
+
 	public List<ChargeUserDTO> getChargeUserDTO() {
 		return chargeUserDTO;
 	}
@@ -106,19 +115,19 @@ public class OfficeSpaceDTO {
 		this.longRentPrice = longRentPrice;
 	}
 
-	public BigDecimal getDailyPrice() {
+	public Integer getDailyPrice() {
 		return dailyPrice;
 	}
 
-	public void setDailyPrice(BigDecimal dailyPrice) {
+	public void setDailyPrice(Integer dailyPrice) {
 		this.dailyPrice = dailyPrice;
 	}
 
-	public BigDecimal getHalfdailyPrice() {
+	public Integer getHalfdailyPrice() {
 		return halfdailyPrice;
 	}
 
-	public void setHalfdailyPrice(BigDecimal halfdailyPrice) {
+	public void setHalfdailyPrice(Integer halfdailyPrice) {
 		this.halfdailyPrice = halfdailyPrice;
 	}
 
