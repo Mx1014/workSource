@@ -1265,7 +1265,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 					.leftOuterJoin(context.select().from(Tables.EH_DOOR_AUTH)
 							.where(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()))
 							.and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())
-									.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.USER.getCode()))
+									.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.USER.getCode()).or(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.isNull()))
 									.and(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId)))
 							.asTable(Tables.EH_DOOR_AUTH.getName()))
 					.on(Tables.EH_USERS.ID.eq(Tables.EH_DOOR_AUTH.USER_ID))

@@ -840,12 +840,14 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     }
 
     @Override
-    public void refundNotify(OrderPaymentNotificationCommand cmd) {
+    public void refundNotify(MerchantPaymentNotificationCommand cmd) {
         if (!PayUtil.verifyCallbackSignature(cmd))
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
                     "signature wrong");
 
-            Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
+            Rentalv2OrderRecord  record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
+            if (record == null)
+                 record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
             RentalRefundOrder rentalRefundOrder = this.rentalProvider.getRentalRefundOrderByOrderNo(record.getOrderNo().toString());
             RentalOrder bill = this.rentalProvider.findRentalBillById(rentalRefundOrder.getOrderId());
             rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());

@@ -5751,7 +5751,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         }
                     }
                     //匹配门禁buildingId和userFloors的
-                    Long buildingId = data.getLong("building");
+                    Long buildingId = data.getLong("buildingId");
                     if(buildingId != null){
                         List<AddressDTO> matchFloors = new ArrayList<>();
                         matchFloors = userFloors.stream()
@@ -5953,11 +5953,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
 	@Override
 	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd) {
-		User user = UserContext.current().getUser();
+        User user = UserContext.current().getUser();
+        //非门禁组按原方法查找
+        DoorAuth auth = new DoorAuth();
+        if(null == cmd.getGroupType() || cmd.getGroupType() != (byte)2) {
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+            auth = createZuolinQrAuth(user, doorAccess, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+        }
+        if(null != cmd.getGroupType() && cmd.getGroupType() == (byte)2){
+            AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getDoorId());
+            auth = createZuolinGroupQrAuth(user,group, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+        }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        DoorAuthDTO auth = new DoorAuthDTO();
-        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-        auth = createZuolinDeviceQr(ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
         //创建自定义表单记录
         if(null != cmd.getList() && !cmd.getList().isEmpty()){
             for(CreateCustomFieldCommand itemCmd:cmd.getList()){
@@ -5975,24 +5982,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAccessProvider.createAclinkFormValues(value);
             }
         }
-        //访客来访消息提醒
-        if(null!= cmd.getNotice() && cmd.getNotice() == (byte)1){
-            AclinkFormValues notice = new AclinkFormValues();
-            notice.setNamespaceId(namespaceId);
-            notice.setTitleId(0L);
-            notice.setValue("notice");
-            notice.setType(AclinkFormValuesType.VISITOR_NOTICE.getCode());
-            notice.setStatus((byte)1);
-            //表单记录ownerId对应授权Id
-            notice.setOwnerId(auth.getId());
-            notice.setOwnerType((byte)5);
-            notice.setCreatorUid(user.getId());
-            notice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            doorAccessProvider.createAclinkFormValues(notice);
-        }
-//TODO: 还需要吗
-//        DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
-//        dto.setQrString(auth.getQrKey());
+
+        DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+        dto.setQrString(auth.getQrKey());
         if(cmd.getHeadImgUri() != null && !cmd.getHeadImgUri().isEmpty()){
             NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
             SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
@@ -6001,11 +5993,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             createPhotoCmd.setImgUrl(contentServerService.parserUri(createPhotoCmd.getImgUri()));
             createPhotoCmd.setAuthId(auth.getId());
             faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
-            
+
             cmd1.setDoorId(cmd.getDoorId());
             faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
         }
-    	return auth;
+        return dto;
 	}
 
 	/**

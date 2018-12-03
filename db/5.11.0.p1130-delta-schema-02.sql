@@ -1,3 +1,37 @@
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 缺陷 #42416 【中天】更新自然季，合同刷新账单报错。
+ALTER TABLE `eh_contracts` MODIFY COLUMN `rent` decimal(20, 2) NULL DEFAULT NULL COMMENT '租金' AFTER `rent_size`;
+
+-- AUTHOR: 李清岩
+-- REMARK: 门禁v3.0.2 issue-34771
+-- REMARK: 增加门禁组门禁关系表
+CREATE TABLE `eh_aclink_group_doors` (
+	`id` BIGINT  NOT NULL,
+	`namespace_id` INT  DEFAULT NULL COMMENT '域空间id',
+	`owner_id` BIGINT  NOT NULL DEFAULT '0' COMMENT '门禁组所属机构id',
+	`owner_type` TINYINT DEFAULT NULL COMMENT '门禁组所属机构类型 0园区 1公司',
+	`group_id` BIGINT DEFAULT NULL COMMENT '门禁组id',
+	`door_id` BIGINT DEFAULT NULL COMMENT '门禁组所属门禁id',
+	`status` TINYINT NOT NULL DEFAULT '1' COMMENT '状态 0删除 1有效',
+	`creator_uid` BIGINT  DEFAULT NULL COMMENT '创建者id',
+	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`operator_uid` BIGINT  DEFAULT NULL COMMENT '修改者id',
+	`operator_time` datetime DEFAULT NULL COMMENT '修改时间',
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '门禁组门禁关系表';
+
+-- AUTHOR: 李清岩
+-- REMARK: 门禁v3.0.2 issue-34771
+-- REMARK: 门禁iPad自定义logo
+ALTER TABLE `eh_aclink_ipads` ADD COLUMN `logo_uri` VARCHAR(2048) DEFAULT NULL COMMENT 'logo uri' ;
+ALTER TABLE `eh_aclink_ipads` ADD COLUMN `logo_url` VARCHAR(2048) DEFAULT NULL COMMENT 'logo url' ;
+
+-- AUTHOR: 李清岩
+-- REMARK: 门禁v3.0.2 issue-34771
+-- REMARK: 调整eh_door_access列名
+ALTER TABLE `eh_door_access` CHANGE adress_detail address_detail VARCHAR(64);
+
 -- AUTHOR: 杨崇鑫 20181114
 -- REMARK: 物业缴费V7.5（中天-资管与财务EAS系统对接） ： 不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
 ALTER TABLE `eh_payment_bills` ADD COLUMN `third_paid` TINYINT COMMENT '不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付，0：没有任何支付，1：已在EAS支付';
@@ -416,8 +450,5 @@ ALTER TABLE `eh_contract_charging_items` ADD COLUMN `one_time_bill_status` TINYI
 -- REMARK: 增加手机号索引
 ALTER TABLE eh_user_identifiers ADD INDEX i_eh_user_idf_token(`identifier_token`);
 
--- AUTHOR: ljs 20181129
--- REMARK: 给eh_addresses表添加索引
-ALTER TABLE `eh_addresses` ADD INDEX `i_eh_addr_building_id` (`building_id`) USING BTREE;
-
 -- END
+

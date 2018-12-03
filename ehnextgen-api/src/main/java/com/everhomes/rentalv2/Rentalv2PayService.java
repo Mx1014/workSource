@@ -38,5 +38,5 @@ public interface Rentalv2PayService {
 
     void payNotify(MerchantPaymentNotificationCommand cmd);
 
-    void refundNotify(OrderPaymentNotificationCommand cmd);
+    void refundNotify(MerchantPaymentNotificationCommand cmd);
 }
