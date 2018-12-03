@@ -2869,7 +2869,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			coordinationProvider.getNamedLock("Rental_schedule_flag1") //集群运行时只有一台执行定时任务
 					.tryEnter(() -> {
 						LOGGER.info("autoCompleteBills start:");
-						List<RentalOrder> orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.IN_USING.getCode()); //捞出使用中的订单
+						List<RentalOrder> orders = rentalv2Provider.listTargetRentalBills(new Byte[]{SiteBillStatus.IN_USING.getCode()});
 						Long currTime = DateHelper.currentGMTTime().getTime();
 						for (RentalOrder order : orders) {
 							if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
@@ -2927,77 +2927,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					}
 				});
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE  && flag[0]){
-			//把所有状态为success-已预约的捞出来
-			List<RentalOrder>  orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.SUCCESS.getCode());
+			List<RentalOrder>  orders = rentalv2Provider.listTargetRentalBills(new Byte[]{SiteBillStatus.IN_USING.getCode(),
+					SiteBillStatus.SUCCESS.getCode()});
 			for(RentalOrder order : orders ){
-				if (order.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode())) {
-					Long orderReminderTimeLong = order.getReminderTime()!=null?order.getReminderTime().getTime():0L;
-					Long orderEndTimeLong = order.getEndTime()!=null?order.getEndTime().getTime():0L;
-					Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0L;
-					//时间快到发推送
-					if(currTime<orderReminderTimeLong && currTime + 30*60*1000L >= orderReminderTimeLong){
-						Map<String, Object> messageMap = new HashMap<>();
-						messageMap.put("orderId",order.getId());
-						messageMap.put("resourceType",order.getResourceType());
-						scheduleProvider.scheduleSimpleJob(
-								queueName,
-								"RentalNearStartMessageJob" + order.getId(),
-								new java.util.Date(orderReminderTimeLong),
-								RentalNearStartMessageJob.class,
-								messageMap
-						);
-					}
-
-					//结束时间快到发推送
-					if(currTime<orderReminderEndTimeLong && currTime + 30*60*1000L >= orderReminderEndTimeLong){
-						Map<String, Object> messageMap = new HashMap<>();
-						messageMap.put("orderId",order.getId());
-						messageMap.put("resourceType",order.getResourceType());
-						scheduleProvider.scheduleSimpleJob(
-								queueName,
-								"RentalNearEndMessageJob" + order.getId(),
-								new java.util.Date(orderReminderEndTimeLong),
-								RentalNearEndMessageJob.class,
-								messageMap
-						);
-					}
-					//使用中
-					if (currTime >= order.getStartTime().getTime() ) {
-						order.setStatus(SiteBillStatus.IN_USING.getCode());
-						rentalv2Provider.updateRentalBill(order);
-					}
-
-					if(orderEndTimeLong <= currTime){
-						order.setStatus(SiteBillStatus.COMPLETE.getCode());
-						rentalv2Provider.updateRentalBill(order);
-					}
-				}else if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
-					//订单开始 置为使用中的状态
-					if (currTime >= order.getStartTime().getTime() ) {
-						RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
-						orderHandler.autoUpdateOrder(order);
-					}
-					Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0L;
-
-					if(currTime<orderReminderEndTimeLong && currTime + 30*60*1000L >= orderReminderEndTimeLong){
-
-						Map<String, Object> messageMap = new HashMap<>();
-						messageMap.put("orderId",order.getId());
-						messageMap.put("methodName", "endReminderSendMessage");
-						scheduleProvider.scheduleSimpleJob(
-								queueName,
-								"RentalMessageQuartzJob" + order.getId(),
-								new java.util.Date(orderReminderEndTimeLong),
-								RentalMessageQuartzJob.class,
-								messageMap
-						);
-
-					}
-
-				}
+				RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+				orderHandler.nearHalfHourBegin(order);
 			}
 			//超时取消
-			orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.APPROVING.getCode());
+			orders = rentalv2Provider.listTargetRentalBills(new Byte[]{SiteBillStatus.APPROVING.getCode()});
 			for(RentalOrder order : orders ){
 				if (currTime >= order.getStartTime().getTime() ) {
 					onOrderCancel(order,"由于管理员超时未处理，自动中止");

@@ -101,6 +101,8 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         queryRuleCmd.setOwnerId(resource.getCommunityId());
     }
 
+
+
     @Override
     public void exportRentalBills(SearchRentalOrdersCommand cmd, HttpServletResponse response) {
         Integer pageSize = Integer.MAX_VALUE;
