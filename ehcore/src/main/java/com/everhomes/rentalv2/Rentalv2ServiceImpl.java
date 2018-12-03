@@ -6563,6 +6563,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			RentalSiteDTO dto = new RentalSiteDTO();
 			dto.setSiteName(r.getResourceName());
 			dto.setRentalSiteId(r.getId());
+            if (r.getAutoAssign().equals(NormalFlag.NEED.getCode())) {
+                List<RentalResourceNumber> resourceNumbers = this.rentalv2Provider.queryRentalResourceNumbersByOwner(
+                        r.getResourceType(), EhRentalv2Resources.class.getSimpleName(), r.getId());
+                if (null != resourceNumbers) {
+                    dto.setSiteNumbers(new ArrayList<>());
+                    for (RentalResourceNumber number : resourceNumbers) {
+                        SiteNumberDTO dto1 = new SiteNumberDTO();
+                        dto1.setSiteNumber(number.getResourceNumber());
+                        dto1.setSiteNumberGroup(number.getNumberGroup());
+                        dto1.setGroupLockFlag(number.getGroupLockFlag());
+                        dto.getSiteNumbers().add(dto1);
+                    }
+                }
+            }
 			return dto;
 		}).collect(Collectors.toList()));
 		return response;
