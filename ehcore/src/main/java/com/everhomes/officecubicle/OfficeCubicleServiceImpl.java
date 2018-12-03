@@ -490,6 +490,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setOperatorUid(UserContext.current().getUser().getId());
+			space.setShortRentNums(cmd.getShortRentNums());
 			this.officeCubicleProvider.updateSpace(space);
 
 			// TODO:删除附件唐彤没有提供
