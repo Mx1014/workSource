@@ -97,8 +97,10 @@ import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoCommand;
 import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoResponse;
 import com.everhomes.rest.rentalv2.PriceRuleType;
+import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceRentalRuleCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.util.*;
@@ -485,12 +487,19 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //					"Invalid paramter of space id error: no space found");
 
 		this.dbProvider.execute((TransactionStatus status) -> {
-			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
+			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
 			space.setNamespaceId(UserContext.getCurrentNamespaceId());
 			space.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setOperatorUid(UserContext.current().getUser().getId());
 			space.setShortRentNums(cmd.getShortRentNums());
+			space.setAddress(cmd.getAddress());
+			space.setLatitude(cmd.getLatitude());
+			space.setLongitude(cmd.getLongitude());
+			space.setContactPhone(cmd.getContactPhone());
+			space.setName(cmd.getName());
+			space.setLongRentPrice(cmd.getLongRentPrice());
+			space.setDescription(cmd.getDescription());
 			this.officeCubicleProvider.updateSpace(space);
 
 			// TODO:删除附件唐彤没有提供
@@ -2296,6 +2305,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		response.setOrders(new ArrayList<OfficeRentOrderDTO>());
 		orders.forEach((other) -> {
 			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
+			GetRentalBillCommand cmd2 = new GetRentalBillCommand();
+			cmd2.setBillId(other.getRentalOrderNo());
+			RentalBillDTO rentalDTO = rentalv2Service.getRentalBill(cmd2);
+			dto.setOpenTime(rentalDTO.getOpenTime());
 			response.getOrders().add(dto);
 		});
 

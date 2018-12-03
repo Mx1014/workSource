@@ -50,7 +50,16 @@ public class OfficeRentOrderDTO {
     private Byte orderStatus;
     private Long orderNo;
     private String accountName;
+	private String openTime;
 
+
+	public String getOpenTime() {
+		return openTime;
+	}
+
+	public void setOpenTime(String openTime) {
+		this.openTime = openTime;
+	}
 
 	public String getAccountName() {
 		return accountName;
