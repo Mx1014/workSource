@@ -485,7 +485,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //					"Invalid paramter of space id error: no space found");
 
 		this.dbProvider.execute((TransactionStatus status) -> {
-			OfficeCubicleSpace space = ConvertHelper.convert(cmd, OfficeCubicleSpace.class);
+			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 			space.setNamespaceId(UserContext.getCurrentNamespaceId());
 			space.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setStatus(OfficeStatus.NORMAL.getCode());

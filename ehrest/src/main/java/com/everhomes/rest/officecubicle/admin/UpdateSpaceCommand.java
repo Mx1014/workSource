@@ -48,7 +48,7 @@ public class UpdateSpaceCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	private Long id;
+	private Long spaceId;
 	private String name;
 	private Long provinceId;
 	private String provinceName;
@@ -216,16 +216,13 @@ public class UpdateSpaceCommand {
 		this.contactPhone = contactPhone;
 	}
 
-
-	public Long getId() {
-		return id;
+	public Long getSpaceId() {
+		return spaceId;
 	}
 
-
-	public void setId(Long id) {
-		this.id = id;
+	public void setSpaceId(Long spaceId) {
+		this.spaceId = spaceId;
 	}
-
 
 	public Long getManagerUid() {
 		return managerUid;
