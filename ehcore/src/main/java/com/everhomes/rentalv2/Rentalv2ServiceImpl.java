@@ -4577,7 +4577,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 
 	private Long createDoorAuth(Integer namespaceId,Long userId, String phone,String userName,Long timeBegin, Long timeEnd, Long doorId, Long authUserId) {
-		if (userId != null && userId.equals(0L)) {
+		if (userId != null && !userId.equals(0L)) {
 			CreateDoorAuthCommand cmd = new CreateDoorAuthCommand();
 			cmd.setAuthType((byte) 1);//临时授权
 			cmd.setApproveUserId(authUserId);
