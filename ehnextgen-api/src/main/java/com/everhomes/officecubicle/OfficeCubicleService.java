@@ -122,5 +122,7 @@ public interface OfficeCubicleService {
 
 	GetCubicleForAppResponse getCubicleForApp(GetCubicleForAppCommand cmd);
 
+	ListRentOrderForAppResponse listRentOrderForApp(ListRentOrderForAppCommand cmd);
+
 
 }

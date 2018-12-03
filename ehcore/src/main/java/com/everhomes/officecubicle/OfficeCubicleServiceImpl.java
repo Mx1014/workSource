@@ -935,9 +935,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 
 	private void checkAddOrderCmd(AddSpaceOrderCommand cmd) {
-		if (null == cmd.getOrderType())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of OrderType error: null ");
+//		if (null == cmd.getOrderType())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of OrderType error: null ");
 		if (null == cmd.getReserveEnterprise())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of ReserveEnterprise error: null ");
@@ -947,9 +947,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (null == cmd.getReserverName())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of ReserverName error: null ");
-		if (null == cmd.getSize())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of size error: null ");
+//		if (null == cmd.getSize())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of size error: null ");
 	}
 
 	private void checkOwnerTypeOwnerId(String ownerType,Long ownerId){
@@ -2271,6 +2271,36 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		return response;
 	}
+	
+	@Override
+	public ListRentOrderForAppResponse listRentOrderForApp(ListRentOrderForAppCommand cmd) {
+
+		ListRentOrderForAppResponse response = new ListRentOrderForAppResponse();
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+
+		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),null, null,
+				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),null,null,null,cmd.getRentType(), cmd.getOrderStatus());
+		if (null == orders)
+			return response;
+		Long nextPageAnchor = null;
+		if (orders != null && orders.size() > pageSize) {
+			orders.remove(orders.size() - 1);
+			nextPageAnchor = orders.get(orders.size() - 1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setOrders(new ArrayList<OfficeRentOrderDTO>());
+		orders.forEach((other) -> {
+			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
+			response.getOrders().add(dto);
+		});
+
+		return response;
+	}
+	
 	
 	@Override
 	public GetOfficeCubicleRentOrderResponse getOfficeCubicleRentOrder(GetOfficeCubicleRentOrderCommand cmd){
