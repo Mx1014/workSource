@@ -569,8 +569,10 @@ public class WebMenuServiceImpl implements WebMenuService {
 				//模块和场景都一致
 				if(entry.getModuleId().equals(menu.getModuleId()) && entry.getSceneType().equals(menu.getSceneType())){
 					WebMenuDTO menuDto = ConvertHelper.convert(menu, WebMenuDTO.class);
-					ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
-					menuDto.setAppConfig(appDTO);
+                    ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
+                    List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+                            this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(menu.getAppId(),entry.getId(),null,null);
+                    menuDto.setAppConfig(appDTO);
 					menuDtos.add(menuDto);
 				}
 			}
