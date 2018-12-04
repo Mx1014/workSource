@@ -2241,7 +2241,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setAssociateStation(associateStaionList);
 			List<OfficeCubicleStationRent> stationRent = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(), null,(byte)0,r.getId());
 			Long rentDate = System.currentTimeMillis();
-			if (stationRent != null){
+			if (stationRent.size()> 0){
 		        Calendar c = Calendar.getInstance();
 		        c.setTime(stationRent.get(0).getEndTime());
 		        c.add(Calendar.DAY_OF_MONTH, 1);
