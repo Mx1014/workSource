@@ -6975,6 +6975,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
                     cell.getRentalType(),cmd.getResourceType());
 			if (null == dbCell) {
 				this.rentalv2Provider.createRentalSiteRule(cell);
+				Long tmp = cell.getId();
+				cell.setId(cell.getCellId());
+				cell.setCellId(tmp);
 				createCellClassification(cell,cmd.getClassifications());
 			}
 			else {
