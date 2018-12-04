@@ -2184,58 +2184,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}
 			}
 
-			if (rentalBill.getPackageName() != null) { //有套餐的情况下 使用套餐价格
-				Rentalv2PricePackage pricePackage;
-				if (rentalCell.getPricePackageId() == null) {
-					String classification = getClassification(resourcePackages.get(0).getUserPriceType());
-					pricePackage = resourcePackages.get(0);
-					if (classification != null && resourcePackages.get(0).getPriceClassification() != null){
-						for (RentalPriceClassification priceClassification : resourcePackages.get(0).getPriceClassification())
-							if (classification.equals(priceClassification.getClassification()) &&
-									resourcePackages.get(0).getUserPriceType().equals(priceClassification.getUserPriceType())){
-								pricePackage.setPrice(priceClassification.getWorkdayPrice());
-								pricePackage.setInitiatePrice(priceClassification.getInitiatePrice());
-								break;
-							}
-					}
-				} else {
-					String classification = getClassification(resourcePackages.get(0).getUserPriceType());
-					pricePackage = rentalv2PricePackageProvider.listPricePackageByOwner(rs.getResourceType(), PriceRuleType.CELL.getCode(),
-							rentalCell.getPricePackageId(), rentalBill.getRentalType(), rentalBill.getPackageName()).get(0);
-					List<RentalPriceClassification> cla = rentalv2Provider.listClassification(rs.getResourceType(), EhRentalv2PricePackages.class.getSimpleName(),
-							pricePackage.getId(), null, null, null, classification);
-					if (classification != null && cla != null){
-						for (RentalPriceClassification priceClassification : cla)
-							if (classification.equals(priceClassification.getClassification()) &&
-									pricePackage.getUserPriceType().equals(priceClassification.getUserPriceType())){
-								pricePackage.setPrice(priceClassification.getWorkdayPrice());
-								pricePackage.setInitiatePrice(priceClassification.getInitiatePrice());
-								break;
-							}
-					}else{
-                        pricePackage.setPrice(pricePackage.getPrice());
-                        pricePackage.setInitiatePrice(pricePackage.getInitiatePrice());
-                    }
-				}
-				rentalCell.setPrice(pricePackage.getPrice());
-				//设置起步后价格
-				if (pricePackage.getPriceType().equals(RentalPriceType.INITIATE.getCode()) && initiateFlag) {
-					rentalCell.setPrice(pricePackage.getInitiatePrice());
-				}
-
-			} else {
-				String classification = getClassification(priceRule.getUserPriceType());
-				if (classification != null && priceRule.getPriceClassification() != null)
-					for (RentalPriceClassification priceClassification : priceRule.getPriceClassification())
-						if (classification.equals(priceClassification.getClassification()) &&
-								priceRule.getUserPriceType().equals(priceClassification.getUserPriceType())){
-							rentalCell.setPrice(priceClassification.getWorkdayPrice());
-							rentalCell.setInitiatePrice(priceClassification.getInitiatePrice());
-							break;
-						}
-				if (rentalCell.getPriceType().equals(RentalPriceType.INITIATE.getCode()) && initiateFlag) {
-					rentalCell.setPrice(rentalCell.getInitiatePrice());
-				}
+			RentalSiteRulesDTO dto = ConvertHelper.convert(rentalCell, RentalSiteRulesDTO.class);
+			setRentalsiteRulePrice(dto,rentalCell,rentalBill.getPackageName(),priceRule,resourcePackages);
+			//设置起步后价格
+			if (priceRule.getPriceType().equals(RentalPriceType.INITIATE.getCode()) && initiateFlag) {
+				rentalCell.setPrice(dto.getInitiatePrice());
+			}else{
+				rentalCell.setPrice(dto.getPrice());
 			}
 			initiateFlag = true;
 
