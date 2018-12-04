@@ -804,8 +804,10 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	public List<OfficeCubicleStation> getOfficeCubicleStation(Long ownerId, String ownerType,Long spaceId, Long roomId, Byte rentFlag, String keyword,Byte status,Long stationId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleStationRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION);
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_ID.eq(ownerId));
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_TYPE.eq(ownerType));
+		if(ownerId!=null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_ID.eq(ownerId));
+		if(ownerType!=null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_TYPE.eq(ownerType));
 		if (spaceId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.SPACE_ID.eq(spaceId));
 		if (roomId != null)

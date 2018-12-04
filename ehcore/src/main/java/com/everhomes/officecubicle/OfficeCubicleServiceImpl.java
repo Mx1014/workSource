@@ -2217,7 +2217,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public GetCubicleForAppResponse getCubicleForApp(GetCubicleForAppCommand cmd){
 		GetCubicleForAppResponse resp = new GetCubicleForAppResponse();
 		List<OfficeCubicleStation> station = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,null,null);
+				officeCubicleProvider.getOfficeCubicleStation(null, cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,null,null);
 		List<OfficeCubicleAttachment> stationAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(cmd.getSpaceId(),(byte)3);
 		if (null != stationAttachments){
 			resp.setStationAttachments(new ArrayList<OfficeAttachmentDTO>());
