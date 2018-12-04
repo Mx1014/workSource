@@ -2207,10 +2207,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		resp.setStation(stationDTO);
 		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
 		resp.setRoom(room.stream().map(r->{
-			RoomDTO dto = new RoomDTO();
-			ConvertHelper.convert(r,RoomDTO.class);
-			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
-			dto.setAssociateStation(associateStaionList);
+			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
 			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
 					UserContext.current().getUser().getId()));
 			return dto;
