@@ -13,7 +13,7 @@ public interface WorkPlatformAppProvider {
 
     void updateWorkPlatformApp(WorkPlatformApp workPlatformApp);
 
-    List<WorkPlatformApp> listWorkPlatformApp(Long appOriginId, Long scopeId, Integer sortNum);
+    List<WorkPlatformApp> listWorkPlatformApp(Long scopeId, Integer sortNum);
 
     List<WorkPlatformApp> listWorkPlatformApp(Long appOriginId, Long scopeId);
 

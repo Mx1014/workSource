@@ -428,7 +428,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         if (!CollectionUtils.isEmpty(oldApps)) {
             for (WorkPlatformApp oldApp : oldApps) {
                 this.workPlatformAppProvider.deleteWorkPlatformApp(oldApp);
-                List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(oldApp.getAppId(),oldApp.getScopeId(), oldApp.getOrder());
+                List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(oldApp.getScopeId(), oldApp.getOrder());
                 if (!CollectionUtils.isEmpty(list)) {
                     for (WorkPlatformApp app : list) {
                         app.setOrder(app.getOrder()-1);
@@ -1067,7 +1067,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
             if (!CollectionUtils.isEmpty(oldApps)) {
                 for (WorkPlatformApp oldApp : oldApps) {
                     this.workPlatformAppProvider.deleteWorkPlatformApp(oldApp);
-                    List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(oldApp.getAppId(),oldApp.getScopeId(), oldApp.getOrder());
+                    List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(oldApp.getScopeId(), oldApp.getOrder());
                     if (!CollectionUtils.isEmpty(list)) {
                         for (WorkPlatformApp app : list) {
                             app.setOrder(app.getOrder()-1);

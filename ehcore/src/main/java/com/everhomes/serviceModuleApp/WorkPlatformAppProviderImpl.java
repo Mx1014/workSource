@@ -74,12 +74,11 @@ public class WorkPlatformAppProviderImpl implements WorkPlatformAppProvider{
     }
 
     @Override
-    public List<WorkPlatformApp> listWorkPlatformApp(Long appOriginId, Long scopeId, Integer sortNum) {
+    public List<WorkPlatformApp> listWorkPlatformApp(Long scopeId, Integer sortNum) {
         List<WorkPlatformApp> list = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWorkPlatformApps.class));
         SelectJoinStep<Record> step = context.select().from(Tables.EH_WORK_PLATFORM_APPS);
-        Condition condition = Tables.EH_WORK_PLATFORM_APPS.APP_ID.eq(appOriginId)
-                .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId))
+        Condition condition = Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId)
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()))
                 .and(Tables.EH_WORK_PLATFORM_APPS.ORDER.gt(sortNum));
         step.where(condition).orderBy(Tables.EH_WORK_PLATFORM_APPS.ORDER.asc()).fetch().map((r) ->{
