@@ -2012,7 +2012,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (stationRent !=null){
 				rentSize = stationRent.size();
 			}
-			int rentCount = 0;
+			int rentCount = 1;
 			if (cmd.getRentCount()!=null){
 				rentCount = cmd.getRentCount();
 			}
@@ -2022,7 +2022,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			} else {
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 				rent.setOrderId(order.getId());
-				for(int i=0;i< cmd.getRentCount() ;i++){
+				for(int i=0;i< rentCount ;i++){
 					officeCubicleProvider.createCubicleStationRent(rent);
 				}
 			}
