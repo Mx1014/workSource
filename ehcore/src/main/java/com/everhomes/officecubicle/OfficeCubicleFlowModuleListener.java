@@ -109,7 +109,7 @@ public class OfficeCubicleFlowModuleListener implements FlowModuleListener {
             return null;
         List<FlowCaseEntity> list = new ArrayList<FlowCaseEntity>();
 //        OfficeRentType officeRentType = OfficeRentType.fromCode(order.getRentType());
-    	list.add(new FlowCaseEntity("姓名", order.getReserverName() , FlowCaseEntityType.MULTI_LINE.getCode()));
+    	list.add(new FlowCaseEntity("预约人姓名", order.getReserverName() , FlowCaseEntityType.MULTI_LINE.getCode()));
     	list.add(new FlowCaseEntity("手机号码", order.getReserveContactToken(), FlowCaseEntityType.MULTI_LINE.getCode()));
     	list.add(new FlowCaseEntity("公司名称", order.getReserveEnterprise(), FlowCaseEntityType.MULTI_LINE.getCode()));
     	list.add(new FlowCaseEntity("预约空间", order.getSpaceName() , FlowCaseEntityType.MULTI_LINE.getCode()));
