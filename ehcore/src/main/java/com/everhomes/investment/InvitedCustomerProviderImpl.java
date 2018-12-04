@@ -694,7 +694,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         }
 
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_SOURCE.eq(InvitedCustomerType.INVITED_CUSTOMER.getCode()));
-        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.INACTIVE.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
 
         return query.fetchCount();

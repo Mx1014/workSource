@@ -498,7 +498,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         FilterBuilder rfbt = null;
 
         if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
-            RangeFilterBuilder rf1 = new RangeFilterBuilder("trackingTime");
+            RangeFilterBuilder rf1 = new RangeFilterBuilder("lastTrackingTime");
             RangeFilterBuilder rf2 = new RangeFilterBuilder("createTime");
             Long startTime = cmd.getMinTrackingPeriod();
             Long endTime = cmd.getMaxTrackingPeriod();
