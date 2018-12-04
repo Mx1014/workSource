@@ -376,8 +376,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         //安装应用时，同时修改工作台配置顺序 add by yanlong.liang 20181115
         List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(cmd.getOriginId(), cmd.getOrganizationId());
         if (CollectionUtils.isEmpty(list)) {
+            Byte sceneType = null;
+            if (ServiceModuleAppType.COMMUNITY.getCode() == serviceModuleApp.getAppType()) {
+                sceneType = ServiceModuleSceneType.MANAGEMENT.getCode();
+            }
         	List<ServiceModuleAppEntry> serviceModuleAppEntryList = this.serviceModuleEntryProvider.listServiceModuleAppEntries(cmd.getOriginId(),null,
-                    TerminalType.MOBILE.getCode(),null,null);
+                    TerminalType.MOBILE.getCode(),null,sceneType);
         	if (!CollectionUtils.isEmpty(serviceModuleAppEntryList)) {
         	    for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntryList) {
                     Integer maxSort = this.workPlatformAppProvider.getMaxSort(cmd.getOrganizationId());
@@ -1079,8 +1083,13 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         }else {
             List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(orgapp.getAppOriginId(), orgapp.getOrgId());
             if (CollectionUtils.isEmpty(list)) {
+                ServiceModuleApp serviceModuleApp = findReleaseServiceModuleAppByOriginId(orgapp.getAppOriginId());
+                Byte sceneType = null;
+                if (serviceModuleApp != null && ServiceModuleAppType.COMMUNITY.getCode() == serviceModuleApp.getAppType()) {
+                    sceneType = ServiceModuleSceneType.MANAGEMENT.getCode();
+                }
                 List<ServiceModuleAppEntry> serviceModuleAppEntryList = this.serviceModuleEntryProvider.listServiceModuleAppEntries(orgapp.getAppOriginId(),null,
-                        TerminalType.MOBILE.getCode(),null,null);
+                        TerminalType.MOBILE.getCode(),null,sceneType);
                 if (!CollectionUtils.isEmpty(serviceModuleAppEntryList)) {
                     for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntryList) {
                         Integer maxSort = this.workPlatformAppProvider.getMaxSort(orgapp.getOrgId());
