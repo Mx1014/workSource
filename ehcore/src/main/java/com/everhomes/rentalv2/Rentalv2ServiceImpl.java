@@ -5550,7 +5550,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			dto.setOriginalPrice(dbCell.getOriginalPrice());
 			//因为交换过 cellId才是真正的主键id
 			List<RentalPriceClassification> classification = rentalv2Provider.listClassification(rsr.getResourceType(), EhRentalv2Cells.class.getSimpleName(),
-					rsr.getCellId(), null, null, null, null);
+					dbCell.getCellId(), null, null, null, null);
 			dto.setPriceRules(classification.stream().map(r->ConvertHelper.convert(r,RentalPriceClassificationDTO.class))
 					.collect(Collectors.toList()));
 			if (dbCell.getPricePackageId() != null){ //设置单独套餐价格
