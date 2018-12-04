@@ -1103,6 +1103,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		officeCubicleProvider.updateSpace(space);
 		if (cmd.getRefundStrategies()!=null){
+			officeCubicleProvider.deleteRefundRule(cmd.getSpaceId());
 			for(OfficeCubicleRefundRuleDTO dto :cmd.getRefundStrategies()){
 				OfficeCubicleRefundRule rule = ConvertHelper.convert(dto,OfficeCubicleRefundRule.class);
 				rule.setRefundStrategy(cmd.getRefundStrategy());
@@ -2240,6 +2241,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (room!=null){
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
+			dto.setRoomId(r.getId());
 			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
 			dto.setAssociateStation(associateStaionList);
 			List<OfficeCubicleStationRent> stationRent = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(), null,(byte)0,r.getId());
