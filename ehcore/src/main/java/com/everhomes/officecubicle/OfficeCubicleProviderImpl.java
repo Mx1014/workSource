@@ -292,7 +292,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleStationDao dao = new EhOfficeCubicleStationDao(context.configuration());
 		dao.update(station);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleRoom.class, station.getId());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleStation.class, station.getId());
 
 	}
 	

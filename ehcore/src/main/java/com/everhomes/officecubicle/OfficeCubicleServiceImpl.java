@@ -549,6 +549,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (cmd.getDescription()!=null){
 				space.setDescription(cmd.getDescription());
 			}
+			if(cmd.getOpenFlag()!=null){
+				space.setOpenFlag(cmd.getOpenFlag());
+			}
 			this.officeCubicleProvider.updateSpace(space);
 
 			if (null != cmd.getSpaceAttachments()) {
@@ -1099,14 +1102,16 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		officeCubicleProvider.updateSpace(space);
-		for(OfficeCubicleRefundRuleDTO dto :cmd.getRefundStrategies()){
-			OfficeCubicleRefundRule rule = ConvertHelper.convert(dto,OfficeCubicleRefundRule.class);
-			rule.setRefundStrategy(cmd.getRefundStrategy());
-			rule.setSpaceId(cmd.getSpaceId());
-			rule.setNamespaceId(cmd.getNamespaceId());
-			rule.setOwnerId(cmd.getCommunityId());
-			rule.setOwnerType(cmd.getOwnerType());
-			officeCubicleProvider.createRefundRule(rule);
+		if (cmd.getRefundStrategies()!=null){
+			for(OfficeCubicleRefundRuleDTO dto :cmd.getRefundStrategies()){
+				OfficeCubicleRefundRule rule = ConvertHelper.convert(dto,OfficeCubicleRefundRule.class);
+				rule.setRefundStrategy(cmd.getRefundStrategy());
+				rule.setSpaceId(cmd.getSpaceId());
+				rule.setNamespaceId(cmd.getNamespaceId());
+				rule.setOwnerId(cmd.getOwnerId());
+				rule.setOwnerType(cmd.getOwnerType());
+				officeCubicleProvider.createRefundRule(rule);
+			}
 		}
 	}
 	@Override
