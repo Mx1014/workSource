@@ -11,12 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.*;
-import com.everhomes.filedownload.Task;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAptitudeFlag;
-import com.everhomes.server.schema.tables.pojos.EhTasks;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -35,7 +32,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.asset.AppAssetCategory;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;

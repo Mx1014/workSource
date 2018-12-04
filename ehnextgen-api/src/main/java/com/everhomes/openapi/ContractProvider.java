@@ -155,6 +155,8 @@ public interface ContractProvider {
 	void updateContractOperateTask(ContractTaskOperateLog job);
 	ContractTaskOperateLog findContractOperateTaskById(Long id);
 	
+	List<Contract> findAnyStatusContractByAddressId(Long addressId);
+	
 	//合同报表Date firstdateUpdateTime = null;Date lastdateUpdateTime = null;
 	int getTotalContractCount(Timestamp firstdateUpdateTime, Timestamp lastdateUpdateTime);
 	void createCommunityStatics(ContractReportformStatisticCommunitys communityStatistics);
@@ -164,9 +166,6 @@ public interface ContractProvider {
 	TotalContractStaticsDTO getTotalContractStatics(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr,String endTimeStr,  Byte dateType);
 	List<TotalContractStaticsDTO> listcontractStaticsListTimeDimension(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr,String endTimeStr,  Byte dateType, Integer pageOffSet, Integer pageSize);
 	List<TotalContractStaticsDTO> listcontractStaticsListCommunityTotal(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr, String endTimeStr, Byte dateType, Integer pageOffSet, Integer pageSize);
-
-	List<Contract> findAnyStatusContractByAddressId(Long addressId);
-
 	List<ContractStaticsListDTO> listSearchContractStaticsTimeDimension(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr, String endTimeStr, Byte dateType, Integer pageOffSet, Integer pageSize);
 
 }
