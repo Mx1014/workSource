@@ -5662,6 +5662,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				PriceRuleType.RESOURCE.getCode(), rs.getId());
 		List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(rs.getResourceType(),
 				RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId());
+
+        //按小时预订的,给客户端找到每一个时间点
+        List<RentalTimeInterval> timeIntervals = this.rentalv2Provider.queryRentalTimeIntervalByOwner(rs.getResourceType(),
+                EhRentalv2Resources.class.getSimpleName(), rs.getId());
+        List<Long> dayTimes = calculateOrdinateList(timeIntervals);
+
 		for (; start.before(end); start.add(Calendar.DAY_OF_YEAR, 1)) {
 			RentalSiteNumberDayRulesDTO dayDto = new RentalSiteNumberDayRulesDTO();
 			response.getSiteDays().add(dayDto);
@@ -5750,6 +5756,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				dayDto.getSiteNumbers().add(siteNumberRuleDTO);
 			}
 		}
+        Collections.sort(dayTimes);
+        response.setDayTimes(dayTimes);
 		//每日开放时间
 		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		//给出按半天预约的 区间信息
