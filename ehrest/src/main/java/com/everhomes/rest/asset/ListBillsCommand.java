@@ -48,6 +48,8 @@ import com.everhomes.util.StringHelper;
  * <li>communityId:项目ID(左邻的项目id),如何不传，可以跨园区获取数据，否则获取的是该园区下面的数据信息</li>
  * <li>switchList:物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单）</li>
  * <li>contractId:合同ID</li>
+ * <li>sourceTypeList:物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过账单内是否包含服务费用（资源预定、云打印）</li>
+ * <li>isCheckProperty:物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过楼宇资产管理数据的映射关系来判断是否为大小办公的场景</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -84,6 +86,7 @@ public class ListBillsCommand {
     private Long communityId;
     //新增账单来源信息
     private String sourceType;
+    private List<String> sourceTypeList;//物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过账单内是否包含服务费用（资源预定、云打印）
     private Long sourceId;
     private String sourceName;
     private Long consumeUserId;
@@ -93,6 +96,7 @@ public class ListBillsCommand {
     private List<ReSortCmd> sorts;
     private Long updateTime;
     private Long contractId;
+    private Byte isCheckProperty;//物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过楼宇资产管理数据的映射关系来判断是否为大小办公的场景
     
     public Long getCommunityId() {
         return communityId;
@@ -399,6 +403,22 @@ public class ListBillsCommand {
 
 	public void setContractId(Long contractId) {
 		this.contractId = contractId;
+	}
+
+	public List<String> getSourceTypeList() {
+		return sourceTypeList;
+	}
+
+	public void setSourceTypeList(List<String> sourceTypeList) {
+		this.sourceTypeList = sourceTypeList;
+	}
+
+	public Byte getIsCheckProperty() {
+		return isCheckProperty;
+	}
+
+	public void setIsCheckProperty(Byte isCheckProperty) {
+		this.isCheckProperty = isCheckProperty;
 	}
     
 }

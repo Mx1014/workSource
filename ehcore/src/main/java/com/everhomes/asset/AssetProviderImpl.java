@@ -559,10 +559,13 @@ public class AssetProviderImpl implements AssetProvider {
 	                    "This updateTime is error, updateTime={" + cmd.getUpdateTime() + "}");
 			}
         }
+        //物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过账单内是否包含服务费用（资源预定、云打印）
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getSourceTypeList())){
+            query.addConditions(t2.SOURCE_TYPE.in(cmd.getSourceTypeList()));
+        }
         if(!org.springframework.util.StringUtils.isEmpty(cmd.getContractId())) {
         	query.addConditions(t.CONTRACT_ID.eq(cmd.getContractId()));
         }
-
         if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
