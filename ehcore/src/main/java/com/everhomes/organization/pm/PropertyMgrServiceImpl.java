@@ -524,8 +524,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
    	@Autowired
     private ScheduleProvider scheduleProvider;
+   	
     @Autowired
    	private ContractBuildingMappingProvider contractBuildingMappingProvider;
+    
    	@Autowired
    	private PushMessageLogService pushMessageLogService;
 
@@ -8798,7 +8800,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				LOGGER.debug("fixApartmentLivingStatus for "+ (currentPage+1) +" time spends + "+(endTime-startTime)+ "ms");
 			}
 		}
-			
 	}
 	
 }
