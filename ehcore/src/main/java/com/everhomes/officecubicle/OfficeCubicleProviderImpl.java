@@ -362,7 +362,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.BEGIN_TIME.gt(new Timestamp(beginDate)));
 		if (null != endDate)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.END_TIME.lt(new Timestamp(endDate)));
-		if (null != paidType)
+		if (StringUtils.isNotBlank(paidType))
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.PAID_TYPE.eq(paidType));
 		if (null != paidMode)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.PAID_MODE.eq(paidMode));
