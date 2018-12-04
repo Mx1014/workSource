@@ -2900,6 +2900,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 bean.setNamespaceId(UserContext.getCurrentNamespaceId());
             bean.setDefaultDoorAccessFlag(TrueOrFalseFlag.FALSE.getCode());
             visitorSysDoorAccessProvider.createVisitorSysDoorAccess(bean);
+//          如果是第一个置为默认值
+            List<VisitorSysDoorAccess> results1 = visitorSysDoorAccessProvider.listVisitorSysDoorAccess(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),null);
+            if(results1.size() == 1){
+                cmd.setId(bean.getId());
+                setDefaultAccess(cmd);
+            }
         } else {
             VisitorSysDoorAccess bean = visitorSysDoorAccessProvider.findVisitorSysDoorAccess(cmd.getId());
             if(null != cmd.getDefaultAuthDurationType())
