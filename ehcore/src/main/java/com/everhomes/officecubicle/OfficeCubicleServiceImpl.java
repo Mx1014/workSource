@@ -1655,6 +1655,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					officeCubicleProvider.updateCubicle(station);
 				}
 			}
+			room.setId(cmd.getRoomId());
 			officeCubicleProvider.updateRoom(room);
 
 			return null;
@@ -1668,8 +1669,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 
 		this.dbProvider.execute((TransactionStatus status) -> {
-			OfficeCubicleStation station = ConvertHelper.convert(cmd, OfficeCubicleStation.class);
-
+			OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getStationId());
+			station = ConvertHelper.convert(cmd, OfficeCubicleStation.class);
+			station.setId(cmd.getStationId());
 			officeCubicleProvider.updateCubicle(station);
 
 			return null;
