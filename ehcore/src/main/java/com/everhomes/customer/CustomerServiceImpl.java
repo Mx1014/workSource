@@ -5007,6 +5007,7 @@ public class CustomerServiceImpl implements CustomerService {
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
                     "params targetId is null.");
         }
+
     }
 
     @Override
@@ -5019,9 +5020,8 @@ public class CustomerServiceImpl implements CustomerService {
 
             List<CreateOrganizationAdminCommand> list = new ArrayList<>();
 
-            if(cmd2.getNamespaceId() != null || cmd2.getNamespaceId() != 0){
+            if(cmd2.getNamespaceId() != null && cmd2.getNamespaceId() != 0){
                 list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor, cmd2.getNamespaceId());
-
             }else{
                 list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor);
             }
@@ -5033,35 +5033,8 @@ public class CustomerServiceImpl implements CustomerService {
             }
             long roundQueryEndTime = System.currentTimeMillis();
 
-
-
-
-            my:for(CreateOrganizationAdminCommand cmd : list){
+            for(CreateOrganizationAdminCommand cmd : list){
                 cmd.setOwnerId(null);
-
-                /*ListServiceModuleAdministratorsCommand cmd3 = new ListServiceModuleAdministratorsCommand();
-                cmd3.setNamespaceId(cmd.getNamespaceId());
-                cmd3.setOrganizationId(cmd.getOrganizationId());
-                cmd3.setOwnerId(cmd.getOrganizationId());
-                cmd3.setOwnerType("EhOrganizations");
-                cmd3.setActivationFlag((byte)1);
-                cmd3.setPageSize(999999);
-                ListOrganizationContectDTOResponse response = rolePrivilegeService.listOrganizationSystemAdministrators(cmd3);
-                if(response != null){
-                    List<OrganizationContactDTO> orgList = response.getDtos();
-                    LOGGER.debug("query exist admin by namespaceId = {}, communityId = {}, organization = {}, result = {}", cmd3.getNamespaceId(), cmd3.getCommunityId(), cmd3.getOrganizationId(), orgList);
-                    for(OrganizationContactDTO org : orgList){
-                        if(cmd.getContactToken().equals(org.getContactToken())){
-                            LOGGER.debug("the admin is exist, name = {}, token = {}", org.getContactName(), org.getContactToken());
-                            continue my;
-                        }
-                    }
-                }*/
-
-
-
-
-
                 dbProvider.execute((TransactionStatus status) -> {
                     //根据组织id、用户姓名、手机号、超级管理员权限代号、机构管理，超级管理员，拥有 所有权限、来创建超级管理员
                     /*try {
