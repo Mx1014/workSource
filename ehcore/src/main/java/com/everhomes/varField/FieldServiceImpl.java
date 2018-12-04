@@ -2168,7 +2168,7 @@ public class FieldServiceImpl implements FieldService {
         item.setCreatorUid(UserContext.currentUserId());
         item.setStatus(VarFieldStatus.CUSTOMIZATION.getCode());
         fieldProvider.createFieldItem(item);
-
+        List<Long> ids = new ArrayList<>();
 
         scopeFieldItem.setItemId(item.getId());
         scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
