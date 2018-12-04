@@ -294,4 +294,18 @@ public class EnterprisePaymentAuthAdminController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /admin/enterprisepaymentauth/checkPaymentStatusScheduled</b>
+     * <p>手动触发checkPaymentStatusScheduled</p>
+     */
+    @RequestMapping("checkPaymentStatusScheduled")
+    @RestReturn(value = String.class)
+    public RestResponse testPaymentCallback() {
+        enterprisePaymentAuthService.checkPaymentStatusScheduled();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

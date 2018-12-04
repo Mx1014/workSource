@@ -159,4 +159,6 @@ public interface ContractProvider {
 
 	ContractTaskOperateLog findContractOperateTaskById(Long id);
 
+	List<Contract> findAnyStatusContractByAddressId(Long addressId);
+
 }

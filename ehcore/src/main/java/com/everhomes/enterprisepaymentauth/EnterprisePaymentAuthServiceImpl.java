@@ -155,7 +155,7 @@ import java.util.stream.Collectors;
 public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterprisePaymentAuthServiceImpl.class);
-    private static final int FETCH_SIZE = 2;
+    private static final int FETCH_SIZE = 500;
 
     @Autowired
     private TaskService taskService;
@@ -231,6 +231,7 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
     @Override
     public ListEnterprisePaymentAuthOfEmployeesResponse listEnterprisePaymentAuthOfEmployees(ListEnterprisePaymentAuthOfEmployeesCommand cmd) {
         ListEnterprisePaymentAuthOfEmployeesResponse response = new ListEnterprisePaymentAuthOfEmployeesResponse();
+        Map<Long, String> sceneAppMap = getEnterprisePaymentSceneIdNameMap();
         int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
         int pageOffset = (cmd.getPageOffset() != null && cmd.getPageOffset() > 1) ? cmd.getPageOffset() : 1;
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
@@ -253,21 +254,21 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
         List<EnterprisePaymentAuthEmployeePayHistory> employeeHistories = enterprisePaymentAuthEmployeePayHistoryProvider
                 .listEnterprisePaymentAuthEmployeePayHistory(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), MONTH_DF.format(LocalDateTime.now()));
 
-        response.setEmployeeAuths(members.stream().map(r -> convertMember2EmployeePaymentAuthDTO(r, employeeLimits, employeeHistories)).collect(Collectors.toList()));
+        response.setEmployeeAuths(members.stream().map(r -> convertMember2EmployeePaymentAuthDTO(r, employeeLimits, employeeHistories, sceneAppMap)).collect(Collectors.toList()));
         return response;
     }
 
     private EmployeePaymentAuthDTO convertMember2EmployeePaymentAuthDTO(OrganizationMemberDetails detail,
-                                                                        List<EnterprisePaymentAuthEmployeeLimit> employeeLimits, List<EnterprisePaymentAuthEmployeePayHistory> employeeHistories) {
+                                                                        List<EnterprisePaymentAuthEmployeeLimit> employeeLimits, List<EnterprisePaymentAuthEmployeePayHistory> employeeHistories, Map<Long, String> sceneAppMap) {
         EnterprisePaymentAuthEmployeeLimit limit = findEmployeeLimit(employeeLimits, detail.getId());
         EnterprisePaymentAuthEmployeePayHistory history = findEmployeeHistory(employeeHistories, detail.getId());
-        return convertMember2EmployeePaymentAuthDTO(detail, limit, history);
+        return convertMember2EmployeePaymentAuthDTO(detail, limit, history, sceneAppMap);
     }
 
-    private EmployeePaymentAuthDTO convertMember2EmployeePaymentAuthDTO(OrganizationMemberDetails detail, EnterprisePaymentAuthEmployeeLimit limit, EnterprisePaymentAuthEmployeePayHistory history) {
+    private EmployeePaymentAuthDTO convertMember2EmployeePaymentAuthDTO(OrganizationMemberDetails detail, EnterprisePaymentAuthEmployeeLimit limit, EnterprisePaymentAuthEmployeePayHistory history, Map<Long, String> sceneAppMap) {
         EmployeePaymentAuthDTO dto = convertMember2EmployeePaymentAuthDTO(detail);
         if (limit != null) {
-            dto.setSceneString(limit.getPaymentSceneList());
+            dto.setSceneString(processSceneListString(limit.getPaymentSceneList(), sceneAppMap));
         }
         dto.setLimitAmount(limit != null ? limit.getLimitAmount() : BigDecimal.ZERO);
         dto.setUsedAmount(history != null ? history.getUsedAmount() : BigDecimal.ZERO);
@@ -276,6 +277,30 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
             dto.setCurrentMonthRemainAmount(BigDecimal.ZERO);
         }
         return dto;
+    }
+
+    private String processSceneListString(String paymentSceneList, Map<Long, String> sceneAppMap) {
+        if(paymentSceneList == null){
+            return null;
+        }
+        String[] sceneAppIds = paymentSceneList.split(",");
+        String result = "";
+        for(int i = 0 ; i<sceneAppIds.length ; i++) {
+            Long appId = null;
+            try{
+                appId = Long.valueOf(sceneAppIds[i]);
+            }catch (Exception e){
+                LOGGER.error("appId can not parse to Long type id = " + sceneAppIds[i]);
+            }
+            String appName = sceneAppMap.get(appId);
+            if(appName != null) {
+                if (!result.equals("")) {
+                    result = result + "、";
+                }
+                result = result + appName;
+            }
+        }
+        return result;
     }
 
     private EmployeePaymentAuthDTO convertMember2EmployeePaymentAuthDTO(OrganizationMemberDetails detail) {
@@ -497,8 +522,8 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
 		                if (null != cmd.getEmployeePaymentSceneLimits()) {
 		                    for (EmployeePaymentSceneLimitSimpleDTO scene : cmd.getEmployeePaymentSceneLimits()) {
 		                        deleteOriginLimitDetailByScene(originLimitDetails, scene.getSceneAppId());
-		                        employeeLimit.setPaymentSceneList((employeeLimit.getPaymentSceneList().length() < 1 ? employeeLimit.getPaymentSceneList() : employeeLimit.getPaymentSceneList() + "、")
-		                                + scene.getSceneAppName());
+		                        employeeLimit.setPaymentSceneList((employeeLimit.getPaymentSceneList().length() < 1 ? employeeLimit.getPaymentSceneList() : employeeLimit.getPaymentSceneList() + ",")
+		                                + scene.getSceneAppId());
 		                        EnterprisePaymentAuthEmployeeLimitDetail limitDetail = enterprisePaymentAuthEmployeeLimitDetailProvider
 		                                .findEnterprisePaymentAuthEmployeeLimitDetailByDetailId(detail.getNamespaceId(), cmd.getOrganizationId(), r.getDetailId(), scene.getSceneAppId());
 		                        EnterprisePaymentAuthEmployeeLimitChangeLog sceneChangeLog = initChangeLog(detail);
@@ -825,9 +850,11 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
         }
         response.setNextPageOffset(nextPageOffset);
         Map<Long, List<EmployeePaymentLimitChangeLogItemDTO>> groupMap = buildEmployeePaymentLimitChangeLogItemGroupByOperateNo(logDetails);
+        Map<Long, String> userNameMap = new HashMap<>();
         response.setPaymentEmployeeChangeLogs(groupDTOS.stream().map(r -> {
             PaymentAuthOperateLogDTO dto = new PaymentAuthOperateLogDTO();
             dto.setOperatorUid(r.getOperatorUid());
+            setOperatorName(userNameMap, r, cmd.getOrganizationId());
             dto.setOperatorName(r.getOperatorName());
             dto.setOperateTime(r.getOperateTime());
             StringBuilder operateLog = processChangeLog(groupMap, r);
@@ -912,10 +939,7 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         int pageOffset = (cmd.getPageOffset() != null && cmd.getPageOffset() > 1) ? cmd.getPageOffset() : 1;
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if (null != cmd.getNamespaceId()) {
-            namespaceId = cmd.getNamespaceId();
-        }
+        Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
         Long merchantOrderId = null;
         try {
             if (StringUtils.hasText(cmd.getOrderNo())) {
@@ -955,7 +979,7 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
             return response;
         }
         response.setNextPageOffset(nextPageOffset);
-        Map<Long, String> appMap = getEnterprisePaymentSceneIdNameMap();
+        Map<Long, String> appMap = getEnterprisePaymentSceneIdNameMap(namespaceId);
         Map<Long, OrganizationMemberDetails> memberDetailsMap = new HashMap<>();
         response.setPayLogs(payLogs.stream().map(r -> convertPayLogDTO(r, appMap, memberDetailsMap)).collect(Collectors.toList()));
 
@@ -1383,8 +1407,8 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
         }
         for (ServiceModuleAppDTO dto : response.getApps()) {
             //应用对应模块可能找不到
-            if (dto.getModuleName() != null) {
-                map.put(dto.getOriginId(), dto.getModuleName());
+            if (dto.getName() != null) {
+                map.put(dto.getOriginId(), dto.getName());
             }
         }
         return map;
@@ -1436,19 +1460,22 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
     public void autoDeleteEmployeePaymentLimit() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             this.coordinationProvider.getNamedLock(CoordinationLocks.AUTO_DELETE_EMPLOYEE_PAYMENT_AUTH_LIMIT_OPERATE.getCode()).enter(() -> {
+                LOGGER.info("autoDeleteEmployeePaymentLimit begin");
                 String month = MONTH_DF.format(LocalDateTime.now());
                 dbProvider.execute(transactionStatus -> {
                     enterprisePaymentAuthEmployeeLimitProvider.autoDeleteDismissEmployeePaymentAuthLimit(month);
                     enterprisePaymentAuthEmployeeLimitDetailProvider.autoDeleteDismissEmployeePaymentAuthLimitDetail(month);
                     return null;
                 });
+                LOGGER.info("autoDeleteEmployeePaymentLimit end");
                 return null;
             });
         }
     }
 
     @Override
-    @Scheduled(cron = "1 0 0,2,4 * * ?")
+    // 先关闭该定时任务，因为订单支付之前还不清楚支付类型，可能会有问题
+    //    //@Scheduled(cron = "1 0 2 * * ?")
     public void checkPaymentStatusScheduled() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             coordinationProvider.getNamedLock(CoordinationLocks.CHECK_ENTERPRISE_PAYMENT_STATUS.getCode()).tryEnter(() -> {
@@ -1471,30 +1498,31 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
                         try {
                             getPurchaseOrderByIdCommand.setMerchantOrderId(frozenRequest.getMerchantOrderId());
                             PurchaseOrderDTO order = orderService.getPurchaseOrderById(getPurchaseOrderByIdCommand).getResponse();
-                            if (order != null) {
-                                if (PurchaseOrderStatus.COMPLETED.getCode() == order.getOrderStatus() || (PurchaseOrderStatus.NEW_CREATED.getCode() == order.getOrderStatus() && 29 == order.getPaymentType())) {
-                                    confirmCommand.setNamespaceId(frozenRequest.getNamespaceId());
-                                    confirmCommand.setOrganizationId(frozenRequest.getOrganizationId());
-                                    confirmCommand.setUserId(frozenRequest.getUserId());
-                                    confirmCommand.setMerchantOrderId(frozenRequest.getMerchantOrderId());
-                                    confirmCommand.setPaymentType(order.getPaymentType());
-                                    confirmCommand.setPayDateTime(order.getPaymentTime() != null ? order.getPaymentTime().getTime() : order.getCreateTime().getTime());
-                                    confirmCommand.setPayAmount(frozenRequest.getFrozenAmmount().multiply(BIG_DECIMAL_100).longValue());
-                                    confirmCommand.setAppId(frozenRequest.getPaymentSceneAppId());
-                                    confirmCommand.setBizOrderNum(order.getBusinessOrderNumber());
-                                    paymentAuthFrozenConfirm(confirmCommand, false, null);
-                                } else {
-                                    unFrozenCommand.setNamespaceId(frozenRequest.getNamespaceId());
-                                    unFrozenCommand.setOrganizationId(frozenRequest.getOrganizationId());
-                                    unFrozenCommand.setUserId(frozenRequest.getUserId());
-                                    unFrozenCommand.setMerchantOrderId(frozenRequest.getMerchantOrderId());
-                                    unFrozenCommand.setPaymentType(order.getPaymentType());
-                                    unFrozenCommand.setPayAmount(frozenRequest.getFrozenAmmount().multiply(BIG_DECIMAL_100).longValue());
-                                    unFrozenCommand.setAppId(frozenRequest.getPaymentSceneAppId());
-                                    unFrozenCommand.setBizOrderNum(order.getBusinessOrderNumber());
-                                    unFrozenCommand.setRefundFlag((byte) 0);
-                                    paymentAuthUnFrozen(unFrozenCommand, false);
-                                }
+                            // 目前只有企业账单，企业账单是月结方式，因此只要账号记录产生，就扣减支付可用额度
+                            if (order != null && 29 == order.getPaymentType() && PurchaseOrderStatus.COMPLETED.getCode() == order.getOrderStatus()) {
+                                confirmCommand.setNamespaceId(frozenRequest.getNamespaceId());
+                                confirmCommand.setOrganizationId(frozenRequest.getOrganizationId());
+                                confirmCommand.setUserId(frozenRequest.getUserId());
+                                confirmCommand.setMerchantOrderId(frozenRequest.getMerchantOrderId());
+                                confirmCommand.setPaymentType(order.getPaymentType());
+                                confirmCommand.setPayDateTime(order.getCreateTime().getTime());
+                                confirmCommand.setPayAmount(frozenRequest.getFrozenAmmount().multiply(BIG_DECIMAL_100).longValue());
+                                confirmCommand.setAppId(frozenRequest.getPaymentSceneAppId());
+                                confirmCommand.setBizOrderNum(order.getBusinessOrderNumber());
+                                paymentAuthFrozenConfirm(confirmCommand, false, null);
+                                LOGGER.info("paymentAuthFrozenConfirm by job : request_id = {}", frozenRequest.getId());
+                            } else {
+                                unFrozenCommand.setNamespaceId(frozenRequest.getNamespaceId());
+                                unFrozenCommand.setOrganizationId(frozenRequest.getOrganizationId());
+                                unFrozenCommand.setUserId(frozenRequest.getUserId());
+                                unFrozenCommand.setMerchantOrderId(frozenRequest.getMerchantOrderId());
+                                unFrozenCommand.setPaymentType(order.getPaymentType());
+                                unFrozenCommand.setPayAmount(frozenRequest.getFrozenAmmount().multiply(BIG_DECIMAL_100).longValue());
+                                unFrozenCommand.setAppId(frozenRequest.getPaymentSceneAppId());
+                                unFrozenCommand.setBizOrderNum(order.getBusinessOrderNumber());
+                                unFrozenCommand.setRefundFlag((byte) 0);
+                                paymentAuthUnFrozen(unFrozenCommand, false);
+                                LOGGER.info("paymentAuthUnFrozen by job : request_id = {}", frozenRequest.getId());
                             }
                         } catch (Exception e) {
                             // 忽略单个错误，以免影响到其它订单状态的确认
@@ -1652,6 +1680,11 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
         if (FrozenStatus.FROZEN_CONFIRM == FrozenStatus.fromCode(frozenRequest.getStatus())) {
             LOGGER.error("pay status error,cmd = {}", StringHelper.toJsonString(cmd));
             throw RuntimeErrorException.errorWith(EnterprisePaymentAuthConstants.ERROR_SCOPE, EnterprisePaymentAuthConstants.ERROR_INVALID_PARAMETER, "ERROR_INVALID_PARAMETER");
+        }
+        if (FrozenStatus.UN_FROZEN == FrozenStatus.fromCode(frozenRequest.getStatus())) {
+            LOGGER.error("pay status error,refrozen cmd = {}", StringHelper.toJsonString(cmd));
+            enterprisePaymentAuthFrozenRequestProvider.deleteEnterprisePaymentAuthRequest(frozenRequest);
+            return null;
         }
         if (frozenRequest.getFrozenAmmount().compareTo(BigDecimal.valueOf(cmd.getPayAmount()).divide(BIG_DECIMAL_100)) != 0) {
             BigDecimal frozenAmount = frozenRequest.getFrozenAmmount();

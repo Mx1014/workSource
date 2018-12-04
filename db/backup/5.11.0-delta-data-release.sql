@@ -17,7 +17,15 @@
 -- AUTHOR: 黄鹏宇
 -- REMARK: 请在执行release前备份eh_var_field_scopes表
 
+-- AUTHOR: xq.tian 20181129
+-- REMARK: 在 /user/api 界面调用 api /fixUserInfoOnceTime 修复原来的用户数据同步状态
 
+-- AUTHOR: 黄明波
+-- REMARK: /yellowPage/recoveryListCategoryDataDisappearBug 参数ownerId 1802，返回的字符串发我看下。
+
+-- AUTHOR: 唐岑 2018年11月29日21:40:08
+-- REMARK: 注意：执行/pm/fixApartmentLivingStatus接口前，需要备份eh_organization_address_mappings表
+-- REMARK: 升级完成后，需要执行接口/pm/fixApartmentLivingStatus
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -49,7 +57,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('ente
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','4','zh_CN','订单编号;使用人;使用人手机;支付场景;支付时间;支付金额');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','5','zh_CN','企业支付记录');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','6','zh_CN','支付时间:');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','7','zh_CN','企业支付额度');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_payment_auth','7','zh_CN','企业支付');
 
 -- AUTHOR: 吴寒
 -- REMARK: 企业支付授权   支付授权的菜单
@@ -64,7 +72,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '2', 'zh_CN', '未设置安全密码');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '3', 'zh_CN', '安全密码错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '4', 'zh_CN', '验证码错误');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '5', 'zh_CN', '验证码失效');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '5', 'zh_CN', '验证码已过期');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'service_module_security', '6', 'zh_CN', '需要安全验证才能访问');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'enterprise_payment_auth_error', '506', 'zh_CN', '接口参数异常');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'enterprise_payment_auth_error', '100', 'zh_CN', '员工不存在');
@@ -74,8 +82,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- AUTHOR: 张智伟
 -- REMARK: 企业支付授权
-SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_configurations`),1);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id:=@id+1, 'service.module.security.time.out-79880000', '5', '', '0', NULL);
+UPDATE eh_locale_strings SET text='验证码已过期' WHERE scope='user' AND code='10003';
 
 -- AUTHOR: 黄鹏宇
 -- REMARK: fixbug #42303
@@ -140,13 +147,6 @@ VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @mod
 INSERT INTO eh_locale_templates (scope, code, locale, description, text, namespace_id) VALUES ( 'sms.default', '87', 'zh_CN', '服务申请推送', '${applierName}（${applierPhone}）提交了${serviceName}申请，请及时处理', '0');    
 INSERT INTO eh_locale_templates (scope, code, locale, description, text, namespace_id) VALUES ( 'sms.default', '88', 'zh_CN', '服务申请提醒', '你提交的${serviceName}申请正在处理，可在app“我”-“我的申请”中查看处理进度', '0');
 
-SET @id = (SELECT IFNULL(MIN(id),0) from `eh_vip_priority`);
-INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
-VALUES (@id := @id + 1,999929,1,'银卡',10 );
-INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
-VALUES (@id := @id + 1,999929,2,'金卡',20 );
-INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
-VALUES (@id := @id + 1,999929,3,'白金卡',30 );
 
 set @classification_id = 0;
 -- 普通公司用户价格迁移
@@ -175,7 +175,7 @@ INSERT INTO eh_rentalv2_price_classification (id,source_id,source_type,owner_id,
 SELECT @classification_id := @classification_id + 1,owner_id,owner_type,id,'EhRentalv2PricePackages',2,'park_tourist',approving_user_price,approving_user_original_price,approving_user_initiate_price,approving_user_discount_type,approving_user_full_price,approving_user_cut_price,approving_user_discount_ratio,resource_type from eh_rentalv2_price_packages where owner_type != 'cell' ;
 
 update eh_rentalv2_holiday set close_date = '1543593600000,1543680000000,1544198400000,1544284800000,1544803200000,1544889600000,1545408000000,1545494400000,1546012800000,1546099200000,1546617600000,1546704000000,1547222400000,1547308800000,1547827200000,1547913600000,1548432000000,1548518400000,1549036800000,1549123200000,1549641600000,1549728000000,1550246400000,1550332800000,1550851200000,1550937600000,1551456000000,1551542400000,1552060800000,1552147200000,1552665600000,1552752000000,1553270400000,1553356800000,1553875200000,1553961600000,1554480000000,1554566400000,1555084800000,1555171200000,1555689600000,1555776000000,1556294400000,1556380800000,1556899200000,1556985600000,1557504000000,1557590400000,1558108800000,1558195200000,1558713600000,1558800000000,1559318400000,1559404800000,1559923200000,1560009600000,1560528000000,1560614400000,1561132800000,1561219200000,1561737600000,1561824000000,1562342400000,1562428800000,1562947200000,1563033600000,1563552000000,1563638400000,1564156800000,1564243200000,1564761600000,1564848000000,1565366400000,1565452800000,1565971200000,1566057600000,1566576000000,1566662400000,1567180800000,1567267200000,1567785600000,1567872000000,1568390400000,1568476800000,1568995200000,1569081600000,1569600000000,1569686400000,1570204800000,1570291200000,1570809600000,1570896000000,1571414400000,1571500800000,1572019200000,1572105600000,1572624000000,1572710400000,1573228800000,1573315200000,1573833600000,1573920000000,1574438400000,1574524800000,1575043200000,1575129600000,1575648000000,1575734400000,1576252800000,1576339200000,1576857600000,1576944000000,1577462400000,1577548800000' where holiday_type = 1;
-update eh_rentalv2_holiday set close_date = '1543593600000,1543680000000,1544198400000,1544284800000,1544803200000,1544889600000,1545408000000,1545494400000,1546012800000,1546099200000,1546617600000,1546704000000,1547222400000,1547308800000,1547827200000,1547913600000,1548432000000,1548518400000,1549209600000,1549296000000,1549382400000,1549468800000,1549555200000,1549641600000,1549728000000,1550246400000,1550332800000,1550851200000,1550937600000,1551456000000,1551542400000,1552060800000,1552147200000,1552665600000,1552752000000,1553270400000,1553356800000,1553875200000,1553961600000,1554393600000,1554480000000,1554566400000,1555084800000,1555171200000,1555689600000,1555776000000,1556467200000,1556553600000,1556640000000,1556899200000,1556985600000,1557504000000,1557590400000,1558108800000,1558195200000,1558713600000,1558800000000,1559318400000,1559404800000,1559836800000,1559923200000,1560009600000,1560528000000,1560614400000,1561132800000,1561219200000,1561737600000,1561824000000,1562342400000,1562428800000,1562947200000,1563033600000,1563552000000,1563638400000,1564156800000,1564243200000,1564761600000,1564848000000,1565366400000,1565452800000,1565971200000,1566057600000,1566576000000,1566662400000,1567180800000,1567267200000,1567785600000,1567872000000,1568304000000,1568390400000,1568476800000,1568995200000,1569081600000,1569600000000,1569859200000,1569945600000,1570032000000,1570118400000,1570204800000,1570291200000,1570377600000,1570896000000,1571414400000,1571500800000,1572019200000,1572105600000,1572624000000,1572710400000,1573228800000,1573315200000,1573833600000,1573920000000,1574438400000,1574524800000,1575043200000,1575129600000,1575648000000,1575734400000,1576252800000,1576339200000,1576857600000,1576944000000,1577462400000,1577548800000' where holiday_type = 1;
+update eh_rentalv2_holiday set close_date = '1543593600000,1543680000000,1544198400000,1544284800000,1544803200000,1544889600000,1545408000000,1545494400000,1546012800000,1546099200000,1546617600000,1546704000000,1547222400000,1547308800000,1547827200000,1547913600000,1548432000000,1548518400000,1549209600000,1549296000000,1549382400000,1549468800000,1549555200000,1549641600000,1549728000000,1550246400000,1550332800000,1550851200000,1550937600000,1551456000000,1551542400000,1552060800000,1552147200000,1552665600000,1552752000000,1553270400000,1553356800000,1553875200000,1553961600000,1554393600000,1554480000000,1554566400000,1555084800000,1555171200000,1555689600000,1555776000000,1556467200000,1556553600000,1556640000000,1556899200000,1556985600000,1557504000000,1557590400000,1558108800000,1558195200000,1558713600000,1558800000000,1559318400000,1559404800000,1559836800000,1559923200000,1560009600000,1560528000000,1560614400000,1561132800000,1561219200000,1561737600000,1561824000000,1562342400000,1562428800000,1562947200000,1563033600000,1563552000000,1563638400000,1564156800000,1564243200000,1564761600000,1564848000000,1565366400000,1565452800000,1565971200000,1566057600000,1566576000000,1566662400000,1567180800000,1567267200000,1567785600000,1567872000000,1568304000000,1568390400000,1568476800000,1568995200000,1569081600000,1569600000000,1569859200000,1569945600000,1570032000000,1570118400000,1570204800000,1570291200000,1570377600000,1570896000000,1571414400000,1571500800000,1572019200000,1572105600000,1572624000000,1572710400000,1573228800000,1573315200000,1573833600000,1573920000000,1574438400000,1574524800000,1575043200000,1575129600000,1575648000000,1575734400000,1576252800000,1576339200000,1576857600000,1576944000000,1577462400000,1577548800000' where holiday_type = 2;
 update eh_locale_templates set text = '您已成功预约了${resourceName}，预订时间：${useTime}，订单编号：${orderNum}。如日程有变，请在预订开始时间前取消订单，感谢您的使用。${aclink}' where `scope` = 'sms.default' and `code` = 30;
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '92', 'zh_CN','工作流 发起申请', '${userName}（${phone}）预约了${resourceName}，使用时间：${useDetail}${freeGoods}${paidGoods}', '0');
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '91', 'zh_CN', '临近使用','抱歉，由于您未在规定时间内完成支付，您预约的${resourceName}（${useDetail}）已自动取消，订单编号：${orderNum}，期待下次为您服务', '0');
@@ -202,7 +202,7 @@ VALUES ((@locale_templates_id := @locale_templates_id + 1), CONCAT('flow:', @mod
 
 -- AUTHOR:tangcen 2018年11月12日14:31:01
 -- REMARK:修改楼宇资产管理模块配置
-UPDATE eh_service_modules SET instance_config='{\"url\":\"${home.url}/assets-web/build/index.html?hideNavigationBar=1&ehnavigatorstyle=2#/home/#sign_suffix\"}' WHERE id=38000;
+UPDATE eh_service_modules SET instance_config='{\"url\":\"${home.url}/assets-web/build/index.html?hideNavigationBar=1#/home/#sign_suffix\"}' WHERE id=38000;
 
 UPDATE eh_service_modules SET action_type=14 WHERE id=38000;
 
@@ -263,6 +263,33 @@ INSERT INTO eh_flow_variables (id, namespace_id, owner_id, owner_type, module_id
 
 update eh_locale_strings set text='当前流程未经过预设待驳回节点。' where scope='flow' and code='100015';
 
+
+
+-- AUTHOR: 黄明波
+-- REMARK: 修复云打印有误链接
+update eh_service_modules set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' where id = 41400 ;
+
+update eh_service_module_apps set instance_config = replace (instance_config, '#/home#sign_suffix', concat('?namespaceId=', namespace_id, '#/home#sign_suffix')) where module_id = 41400 and  instance_config not like '%?namespaceId=%';
+
+update eh_launch_pad_items set action_data = replace (action_data, '#/home#sign_suffix', concat('?namespaceId=', namespace_id, '#/home#sign_suffix')) where action_data like '%/cloud-print/build/index.html%' and  action_data not like '%?namespaceId=%';
+
+-- 更新不正确的ownerType和ownerId
+update eh_alliance_service_category_match cm, eh_service_alliance_categories ca set cm.owner_type = ca.owner_type, cm.owner_id = ca.owner_id  where cm.namespace_id = ca.namespace_id and cm.category_id = ca.id and cm.`type` = ca.`type`; 
+
+
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费。 给智谷汇的权限
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (21225, 21200, 21225, '保证金一次性产生一笔费用');
+-- AUTHOR: 杨崇鑫
+-- REMARK: 缺陷 #42424 只是临时开给智谷汇这个域空间使用
+set @id=(select ifnull((SELECT max(id) from eh_service_module_include_functions),1));
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `module_id`, `community_id`, `function_id`) VALUES (@id:= @id +1, 999945, 21200, NULL, 21225);
+
+-- AUTHOR: 李清岩
+-- REMARK: 配置我的钥匙模块路由
+UPDATE `eh_service_modules` SET `host`='access-control1' WHERE (`id`='42000');
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
@@ -270,6 +297,12 @@ update eh_locale_strings set text='当前流程未经过预设待驳回节点。
 -- AUTHOR:
 -- REMARK:
 
+-- AUTHOR:黄明波
+-- REMARK:添加打印机域空间id
+update eh_siyin_print_printers set namespace_id = 2 where reader_name = 'TC101154727022';
+update eh_siyin_print_printers set namespace_id = 999969 where reader_name = 'TC101154727294';
+update eh_siyin_print_printers set namespace_id = 11 where reader_name = 'TC101157736913';
+update eh_siyin_print_printers set namespace_id = 999981 where reader_name = 'TC100887870538';
 
 
 
@@ -328,39 +361,40 @@ VALUES ('zhenzhihui.redirect.url', 'http://120.132.117.22:8016/ZHYQ/restservices
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guanzhouyuekongjian
 -- DESCRIPTION: 此SECTION只在广州越空间-999930执行的脚本
+
+-- AUTHOR: 黄明波
+-- REMARK: 商品对接
+update eh_siyin_print_printers set namespace_id = 999930 ;
+
 -- --------------------- SECTION END guanzhouyuekongjian -------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
+
+-- AUTHOR: st.zheng 20181127
+-- REMARK: 会员等级
+SET @id = (SELECT IFNULL(MIN(id),0) from `eh_vip_priority`);
+INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
+VALUES (@id := @id + 1,999929,1,'银卡',10 );
+INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
+VALUES (@id := @id + 1,999929,2,'金卡',20 );
+INSERT INTO eh_vip_priority(id, namespace_id, vip_level, vip_level_text, priority)
+VALUES (@id := @id + 1,999929,3,'白金卡',30 );
+
+-- AUTHOR: 黄明波
+-- REMARK: 商品对接
+update eh_siyin_print_printers set namespace_id = 999929 ;
+
+
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
+
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
 
-
+-- AUTHOR: 黄明波
+-- REMARK: 离线包升级
+update eh_version_urls set target_version = '1.1.0', download_url = replace(download_url, '-1-0-0', '-1-1-0'), info_url =  replace(info_url, '-1-0-0', '-1-1-0'), publish_time = now() where download_url like '%/nar/serviceAlliance/offline/serviceAlliance%';
 
 
 -- --------------------- SECTION END wanzhihui ------------------------------------------
--- --------------------- SECTION BEGIN -------------------------------------------------------
--- ENV: shanghaijinmao
--- DESCRIPTION: 此SECTION只在上海金茂-999925执行的脚本
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.host', 'http://10.1.10.37:80', '接口地址', 999925, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.appkey', '880076901009202', 'appkey', 999925, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.secretKey', '880076901009202', 'secretKey', 999925, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.parkUuid', '06dfa3ed3a5a4309bd087fd2625ea00e', '停车场标识', 999925, NULL, 1);
-
-
-
-
-set @max_lots_id := (select ifnull(max(id),0)  from eh_parking_lots);
-set @namespace_id := 11;
-set @community_id := 240111044332061474;
-set @parking_name := '上海金茂停车场';
-set @parking_vendor := 'HKWS_SHJINMAO';
-INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) 
-
-VALUES ((@max_lots_id := @max_lots_id + 1), 'community', @community_id,  @parking_name,  @parking_vendor, '', 2, 1, now(), @namespace_id, '{"expiredRechargeFlag":0,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee"]');
-
-
-
--- --------------------- SECTION END shanghaijinmao ------------------------------------------

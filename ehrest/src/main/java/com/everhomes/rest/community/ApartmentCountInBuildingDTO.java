@@ -24,6 +24,8 @@ public class ApartmentCountInBuildingDTO {
 	private Integer saledApartmentCount;
 	private Integer unsaleApartmentCount;
 	private Integer defaultApartmentCount;
+	private Integer signedUpCount;
+	private Integer waitingRoomCount;
 	
 	public Integer getTotalApartmentCount() {
 		return totalApartmentCount;
@@ -73,7 +75,18 @@ public class ApartmentCountInBuildingDTO {
 	public void setDefaultApartmentCount(Integer defaultApartmentCount) {
 		this.defaultApartmentCount = defaultApartmentCount;
 	}
-	
+	public Integer getSignedUpCount() {
+		return signedUpCount;
+	}
+	public void setSignedUpCount(Integer signedUpCount) {
+		this.signedUpCount = signedUpCount;
+	}
+	public Integer getWaitingRoomCount() {
+		return waitingRoomCount;
+	}
+	public void setWaitingRoomCount(Integer waitingRoomCount) {
+		this.waitingRoomCount = waitingRoomCount;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

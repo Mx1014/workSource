@@ -6159,14 +6159,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             OrganizationMember member = new OrganizationMember();
             member.setNamespaceId(namespaceId);
-            member.setContactToken(identifier.getIdentifierToken());
-            member.setContactType(identifier.getIdentifierType());
+            member.setContactToken((identifier == null)?null:identifier.getIdentifierToken());
+            member.setContactType((identifier == null)?null:identifier.getIdentifierType());
             member.setContactName(StringUtils.isEmpty(cmd.getContactName()) ? user.getNickName() : cmd.getContactName());
             member.setOrganizationId(cmd.getOrganizationId());
             member.setTargetType(OrganizationMemberTargetType.USER.getCode());
             member.setTargetId(cmd.getTargetId());
             member.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
-            member.setTargetId(identifier.getOwnerUid());
+            member.setTargetId((identifier == null)?(user.getId()):identifier.getOwnerUid());
             member.setGroupType(organization.getGroupType());
             member.setGroupPath(organization.getPath());
             member.setGender(cmd.getGender());

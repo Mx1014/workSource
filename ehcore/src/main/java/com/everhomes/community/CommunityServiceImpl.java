@@ -2015,7 +2015,9 @@ public class CommunityServiceImpl implements CommunityService {
 //                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
                 Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword);
                 if (StringUtils.isNotBlank(cmd.getIdentifierToken())) {
-                   condition =  condition.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%"+cmd.getIdentifierToken()+"%"));
+                	
+                	//modify by momoubin,2018/11/30：小区用户认证查询条件修改or为and，"昵称"和"手机号"为与的条件
+                   condition =  condition.and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%"+cmd.getIdentifierToken()+"%"));
                 }
                 query.addConditions(condition);
             }
@@ -6431,7 +6433,7 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		if (dto.getAreaSize()!=null && dto.getAreaSize()!=0) {
 			if (dto.getFreeArea()!=null) {
-				BigDecimal freeRate = new BigDecimal(dto.getFreeArea()).divide(new BigDecimal(dto.getAreaSize()),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+				BigDecimal freeRate = new BigDecimal(dto.getFreeArea()).divide(new BigDecimal(dto.getAreaSize()),4,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 				dto.setFreeRate(freeRate);
 			}else {
 				dto.setFreeRate(BigDecimal.ZERO);
@@ -6447,6 +6449,8 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setRentApartmentCount(apartmentCountResult.getRentApartmentCount());
 		dto.setSaledApartmentCount(apartmentCountResult.getSaledApartmentCount());
 		dto.setUnsaleApartmentCount(apartmentCountResult.getUnsaleApartmentCount());
+		dto.setSignedUpCount(apartmentCountResult.getSignedUpCount());
+		dto.setWaitingRoomCount(apartmentCountResult.getWaitingRoomCount());
 		
 		return dto;
 	}
@@ -6478,6 +6482,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resultMap.put(AddressMappingStatus.SALED.getCode(), 0);
 		resultMap.put(AddressMappingStatus.UNSALE.getCode(), 0);
 		resultMap.put(AddressMappingStatus.OCCUPIED.getCode(), 0);
+		resultMap.put(AddressMappingStatus.SIGNEDUP.getCode(), 0);
+		resultMap.put(AddressMappingStatus.WAITINGROOM.getCode(), 0);
 		
 		for(Address address : addresses){
 			totalApartmentCount++;
@@ -6497,6 +6503,8 @@ public class CommunityServiceImpl implements CommunityService {
 		result.setSaledApartmentCount(resultMap.get(AddressMappingStatus.SALED.getCode()));
 		result.setUnsaleApartmentCount(resultMap.get(AddressMappingStatus.UNSALE.getCode()));
 		result.setDefaultApartmentCount(resultMap.get(AddressMappingStatus.DEFAULT.getCode()));
+		result.setSignedUpCount(resultMap.get(AddressMappingStatus.SIGNEDUP.getCode()));
+		result.setWaitingRoomCount(resultMap.get(AddressMappingStatus.WAITINGROOM.getCode()));
 		
 		return result;
 	}

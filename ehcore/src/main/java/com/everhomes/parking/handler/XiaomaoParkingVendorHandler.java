@@ -329,7 +329,8 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         }
         long nowTime = getStartTimeMillis();
         Timestamp timestampStart = new Timestamp(nowTime);
-		Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(nowTime, order.getMonthCount().intValue());
+		Timestamp timestampEnd = Utils.getTimestampByAddDistanceMonthV2(nowTime, order.getMonthCount().intValue());
+		
         order.setStartPeriod(timestampStart);
         order.setEndPeriod(timestampEnd);
 

@@ -550,7 +550,12 @@ public class DoorAccessDTO {
 		this.hasQr = hasQr;
 	}
 
-
+    public String getDisplayNameNotEmpty() {
+        if(this.getDisplayName() == null) {
+            return this.getName();
+        }
+        return this.getDisplayName();
+    }
 
 	@Override
     public String toString() {

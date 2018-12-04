@@ -31,7 +31,7 @@ public interface DoorAccessService {
 
     Long deleteDoorAuth(Long doorAuthId);
 
-    Long deleteDoorAccess(Long doorAccessId);
+    Long deleteDoorAccess(AclinkDeleteByIdCommand cmd);
 
     ListAesUserKeyByUserResponse listAesUserKeyByUser(ListAesUserKeyByUserCommand cmd);
 
@@ -84,6 +84,8 @@ public interface DoorAccessService {
     ListDoorAuthResponse searchVisitorDoorAuth(SearchDoorAuthCommand cmd);
 
     void sendMessageToUser(Long uid, Long doorId, Byte doorType);
+    //临时授权访客来访消息提示 add by liqingyan
+    void sendMessageToAuthCreator(Long authId);
 
     void remoteOpenDoor(Long doorId);
 
@@ -291,4 +293,10 @@ public interface DoorAccessService {
     ListSelectDoorsAndGroupsResponse listSelectDoorsAndGroups (ListSelectDoorsAndGroupsCommand cmd);
     //查询门禁关联服务器、摄像头
     SearchDoorServerResponse searchDoorServer (SearchDoorServerCommand cmd);
+    //服务热线
+    QueryServiceHotlineResponse queryServiceHotline (QueryServiceHotlineCommand cmd);
+
+    void updateServiceHotline (UpdateServiceHotlineCommand cmd);
+    //访客来访提示
+    VisitorComingNoticeResponse visitorComingNotice (VisitorComingNoticeCommand cmd);
 }

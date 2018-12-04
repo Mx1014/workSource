@@ -734,6 +734,7 @@ public class FieldServiceImpl implements FieldService {
             command.setNamespaceId(cmd.getNamespaceId());
             command.setFieldId(field.getId());
             command.setOwnerId(cmd.getOwnerId());
+            command.setModuleName(cmd.getModuleName());
             return listFieldItems(command);
         }
         return null;

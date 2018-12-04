@@ -1,10 +1,6 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
--- AUTHOR: xq.tian 20181116
--- REMARK: 替换最新的 contentserver 二进制 #40547 contentserver/release/server/contentserver
-
-
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
@@ -12,8 +8,6 @@
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 
--- AUTHOR: xq.tian  20181116
--- REMARK: 报错提示模板
 
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
@@ -69,20 +63,25 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: nanshanquzhengfu
 -- DESCRIPTION: 此SECTION只在南山区政府-999931执行的脚本
+
 -- --------------------- SECTION END nanshanquzhengfu ----------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guanzhouyuekongjian
 -- DESCRIPTION: 此SECTION只在广州越空间-999930执行的脚本
+
+
 -- --------------------- SECTION END guanzhouyuekongjian -------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
+
+
+
+
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
+
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
-
-
-
 
 -- --------------------- SECTION END wanzhihui ------------------------------------------

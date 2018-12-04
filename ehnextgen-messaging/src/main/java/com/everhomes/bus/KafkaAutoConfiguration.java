@@ -1,8 +1,11 @@
 package com.everhomes.bus;
 
-import org.apache.commons.collections.ExtendedProperties;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.CreateTopicsResult;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,10 +13,14 @@ import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.LoggingProducerListener;
 import org.springframework.kafka.support.ProducerListener;
 
+import java.util.Collection;
+
 @Configuration
 @ConditionalOnClass(KafkaTemplate.class)
 @EnableConfigurationProperties(ExtendKafkaProperties.class)
 public class KafkaAutoConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaAutoConfiguration.class);
 
     private final ExtendKafkaProperties properties;
 
@@ -24,15 +31,26 @@ public class KafkaAutoConfiguration {
     @Bean
     public KafkaTemplate<?, ?> kafkaTemplate(
             ProducerFactory<Object, Object> kafkaProducerFactory,
-            ProducerListener<Object, Object> kafkaProducerListener) {
+            ProducerListener<Object, Object> kafkaProducerListener,
+            Collection<NewTopic> newTopicCollection) {
         KafkaTemplate<Object, Object> kafkaTemplate = new KafkaTemplate<Object, Object>(
                 kafkaProducerFactory);
         if (properties.isEnabled()) {
             kafkaTemplate.setProducerListener(kafkaProducerListener);
             kafkaTemplate.setDefaultTopic(this.properties.getTemplate().getDefaultTopic());
+
+            // 自动创建 topic
+            createTopicIfNeeded(newTopicCollection);
+
             return kafkaTemplate;
         }
         return new NoopKafkaTemplate();
+    }
+
+    private void createTopicIfNeeded(Collection<NewTopic> newTopicCollection) {
+        AdminClient adminClient = AdminClient.create(properties.buildAdminProperties());
+        CreateTopicsResult result = adminClient.createTopics(newTopicCollection);
+        result.values().forEach((s, voidKafkaFuture) -> LOGGER.info("Create kafka topic: [{}]", s));
     }
 
     @Bean
@@ -60,5 +78,10 @@ public class KafkaAutoConfiguration {
             return new DefaultKafkaProducerFactory<Object, Object>(
                     new ExtendKafkaProperties().buildProducerProperties());
         }
+    }
+
+    @Bean
+    public NewTopic systemEventTopic() {
+        return new NewTopic("system-event", 100, (short) 1);
     }
 }

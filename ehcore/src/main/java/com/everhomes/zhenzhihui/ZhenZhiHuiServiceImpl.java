@@ -96,7 +96,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     private static final String charset       = "UTF-8";
 //    private static final String APPENCKEY     = "ece2d40c2badef49";
 //    private static final String SSOServiceURL = "http://w1505m3190.iok.la:56535/ZHYQ/restservices/LEAPAuthorize/attributes/query?TICKET=";
-    private static final Integer ZHENZHIHUI_NAMESPACE_ID = 999931;
+    public static final Integer ZHENZHIHUI_NAMESPACE_ID = 999931;
     private static final Long COMMUNITY_ID  = 240111044332063522L;
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ZhenZhiHuiServiceImpl.class);
 
