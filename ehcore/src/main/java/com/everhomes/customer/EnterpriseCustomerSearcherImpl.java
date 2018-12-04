@@ -177,6 +177,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("trackingUid",customer.getTrackingUid());
             builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
             builder.field("lastTrackingTime" , customer.getLastTrackingTime());
+            builder.field("updateTime" , customer.getUpdateTime());
             builder.field("createTime" , customer.getCreateTime());
             builder.field("propertyType" , customer.getPropertyType());
             builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
@@ -453,7 +454,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
 
 
-
+        if(null != cmd.getUpdateTime()){
+            RangeFilterBuilder rf = new RangeFilterBuilder("updateTime");
+            Long startTime = cmd.getUpdateTime();
+            rf.gte(new Timestamp(startTime));
+            fb = FilterBuilders.andFilter(fb, rf);
+        }
 
 
         //跟进时间、资产类型、资产面积、资产单价增加筛选

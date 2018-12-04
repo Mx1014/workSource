@@ -20,6 +20,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
+import com.everhomes.rest.asset.TestPaymentExpectanciesCommand;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
@@ -363,6 +364,20 @@ public class TestAssetController extends ControllerBase {
 				cmd.getNamespaceId(), cmd.getOwnerId() , cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd(), 
 				cmd.getBuildingNameList());
 		RestResponse restResponse = new RestResponse(dto);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
+	
+	/**
+	 * <b>URL: /test/paymentExpectanciesCalculate</b>
+	 * <p>测试生成账单接口</p>
+	 */
+	@RequestMapping("paymentExpectanciesCalculate")
+	public RestResponse paymentExpectanciesCalculate(TestPaymentExpectanciesCommand cmd) {
+		PaymentExpectanciesCommand paymentExpectanciesCommand = (PaymentExpectanciesCommand) StringHelper.fromJsonString(cmd.getJson(), PaymentExpectanciesCommand.class);
+		assetService.paymentExpectanciesCalculate(paymentExpectanciesCommand);
+		RestResponse restResponse = new RestResponse();
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
 		restResponse.setErrorDescription("OK");
 		return restResponse;

@@ -88,4 +88,6 @@ public interface RemindProvider {
 	List<Remind> findUndoRemindsByRemindTimeByPage(Timestamp remindStartTime,
 			Timestamp remindEndTime, int pageSize, int offset);
 
+	void deleteRemindShare(RemindShare share);
+
 }

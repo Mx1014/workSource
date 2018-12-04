@@ -2517,5 +2517,19 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /pm/fixApartmentLivingStatus</b>
+	 * <p>纠正eh_addresses与eh_organization_address_mapping表之间的对应关系</p>
+	 */
+	@RequestMapping("fixApartmentLivingStatus")
+	@RestReturn(value=String.class)
+	public RestResponse fixApartmentLivingStatus() {
+		propertyMgrService.fixApartmentLivingStatus();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }

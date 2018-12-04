@@ -2392,5 +2392,14 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		return result[0];
 	}
 
+	@Override
+	public List<CommunityAddressMapping> findOrganizationAddressMapping(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					  .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+					  .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+					  .fetchInto(CommunityAddressMapping.class);
+	}
+
 
 }

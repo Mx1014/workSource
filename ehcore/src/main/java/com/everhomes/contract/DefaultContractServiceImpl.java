@@ -79,6 +79,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.portal.PortalService;
+import com.everhomes.quality.QualityConstant;
 import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -95,6 +96,7 @@ import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
 import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
+import com.everhomes.rest.asset.calculate.AssetOneTimeBillStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
@@ -1020,7 +1022,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		command.setContractNum(contract.getContractNumber());
 
 		if(chargingItems != null && chargingItems.size() > 0) {
-			List<FeeRules> feeRules = generateChargingItemsFeeRules(chargingItems);
+			List<FeeRules> feeRules = generateChargingItemsFeeRules(chargingItems, contract);
 			command.setFeesRules(feeRules);
 		}
 
@@ -1126,7 +1128,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 
 
-	protected List<FeeRules> generateChargingItemsFeeRules(List<ContractChargingItemDTO> chargingItems) {
+	protected List<FeeRules> generateChargingItemsFeeRules(List<ContractChargingItemDTO> chargingItems, Contract contract) {
 		Gson gson = new Gson();
 		List<FeeRules> feeRules = new ArrayList<>();
 		chargingItems.forEach(chargingItem -> {
@@ -1168,6 +1170,13 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				});
 			}
 			feeRule.setVariableIdAndValueList(vv);
+			//缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
+            //缺陷 #42424 如果是一次性产生费用，那么只在第一个收费周期产生费用
+            if(AssetOneTimeBillStatus.TRUE.getCode().equals(chargingItem.getOneTimeBillStatus())) {
+            	feeRule.setOneTimeBillStatus(chargingItem.getOneTimeBillStatus());
+            	feeRule.setDateStrBegin(contract.getContractStartDate());
+            	feeRule.setDateStrEnd(contract.getContractEndDate());
+            }
 			feeRules.add(feeRule);
 		});
 
@@ -1307,6 +1316,23 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
 					// 26058 已售的状态不变
 					if (!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
+						// 点击保存并发起走这里，置资产状态，修改合同点保存，不会修改资产状态
+						if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+							FindContractCommand command = new FindContractCommand();
+							command.setId(contract.getId());
+							command.setPartyAId(contract.getPartyAId());
+							command.setCommunityId(contract.getCommunityId());
+							command.setNamespaceId(contract.getNamespaceId());
+							command.setCategoryId(contract.getCategoryId());
+							ContractDetailDTO contractDetailDTO = findContract(command);
+							Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
+							
+							if (!possibleEnterContractStatus) {
+								LOGGER.error("possibleEnterContractStatus is false, Apartments is not free");
+								throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
+										"apartments status is not free for contract!");
+							}
+						}
 						addressMapping.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
 						addressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
@@ -1319,17 +1345,30 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		if (map.size() > 0) {
 			List<Long> finalParents = parentAddressIds;
 			map.forEach((id, apartment) -> {
+				// 房源是否可以释放 ，复制合同，关联的房源移除不操作资产状态 false 不释放，true 释放
+				Boolean possibleAddressReleaseStatus = true;
+				// 查询房源状态
+				CommunityAddressMapping otherContractAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(apartment.getAddressId());
+				// 查询房源关联的合同
+				List<ContractBuildingMapping> contractBuildingMappingList = addressProvider.findContractBuildingMappingByAddressId(apartment.getAddressId());
+				// 查询该房源是否关联其他合同，并且不是待租状态
+				for (ContractBuildingMapping contractBuildingMapping : contractBuildingMappingList) {
+					if (!(contractBuildingMapping.getContractId()).equals(apartment.getContractId())
+							&& otherContractAddressMapping.getLivingStatus() != AddressMappingStatus.FREE.getCode()) {
+						possibleAddressReleaseStatus = false;
+					}
+				}
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
 				if (!finalParents.contains(apartment.getAddressId()) && ((contractApplicationScene== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY
 						.equals(ContractApplicationScene.fromStatus(contractApplicationScene)))) {
-					CommunityAddressMapping addressMapping = propertyMgrProvider
-							.findAddressMappingByAddressId(apartment.getAddressId());
+					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
 					// 26058 已售的状态不变
-					if (!AddressMappingStatus.SALED
-							.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
-						addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
-						addressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+					if (!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
+						if (possibleAddressReleaseStatus) {
+							addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+							addressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+						}
 					}
 				}
 			});
@@ -1711,7 +1750,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 		//by --djm issue-35586
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-			if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+			/*if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
 				FindContractCommand command = new FindContractCommand();
 				command.setId(contract.getId());
 				command.setPartyAId(contract.getPartyAId());
@@ -1726,7 +1765,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
 							"apartments status is not free for contract!");
 				}
-			}
+			}*/
 			addToFlowCase(contract, flowcaseContractOwnerType);
 			//添加发起人字段
 			contract.setSponsorUid(UserContext.currentUserId().toString());
@@ -4295,7 +4334,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		}
 		if (apartmentsNoRent.length() > 0) {
 			apartmentsNoRents = (apartmentsNoRent.toString()).substring(0,
-					(apartmentsNoRent.toString()).length() - 1) + "合同关联房源已出租";
+					(apartmentsNoRent.toString()).length() - 1) + "合同关联的房源不是待租状态的房源，该房源不可用";
 		}
 
 		Date FinishTime = new Date();
@@ -4322,7 +4361,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		Boolean possibleEnterContractStatus = false;
 		// 1、 循环签合同的房源，查看这些房源是否支持签合同
 		for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
-			// 查询当前房源状态
 			// 根据房源id查询该房源的状态信息
 			// 1、查询该房源是否签过合同，获取合同的签署有效期，如果不再本合同的范围内可以签署合同
 			// 查房源签署过的合同
@@ -4350,8 +4388,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			} else {
 				possibleEnterContractStatus = true;
 			}
-			// 查询房源是否为待租状态
-
+			// 查询当前房源状态,这里暂时这样改只有待租房源才能签合同，后面可以签未来合同，不能这样判断，而是判断时间段的状态
+			// issue-43523(签约合同关联房源201，走到待发起状态，手动修改房源状态为已预订、待签约等（非待出租），在域空间一键审批为正常合同)
+			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(apartment.getAddressId());
+			if (communityAddressMapping.getLivingStatus() != AddressMappingStatus.FREE.getCode()) {
+				return false;
+			}
 		}
 		return possibleEnterContractStatus;
 	}
@@ -4379,6 +4421,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 	@Override
 	public void copyContract(InitializationCommand cmd) {
+		// 校验复制权限
+		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_COPY, cmd.getOrgId(), cmd.getCommunityId());
+		
 		// 1.查询合同列表,支持批量复制
 		if (cmd.getContractIds() == null) {
 			return;

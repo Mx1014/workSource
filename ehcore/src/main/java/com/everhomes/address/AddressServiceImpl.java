@@ -957,7 +957,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         //表eh_addresses和表eh_organization_addresses进行联查
         SelectQuery<Record> query = context.select().from(Tables.EH_ADDRESSES).getQuery();
-        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
+        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID),Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
         query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%"+cmd.getKeyword()+"%"));

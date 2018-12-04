@@ -550,4 +550,6 @@ public interface PropertyMgrService {
 
 	ListApartmentsByMultiStatusResponse listApartmentsByMultiStatus(ListApartmentsByMultiStatusCommand cmd);
 
+	void fixApartmentLivingStatus();
+
 }

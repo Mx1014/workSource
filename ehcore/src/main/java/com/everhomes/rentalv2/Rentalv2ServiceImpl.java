@@ -597,7 +597,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					.collect(Collectors.toList()));
 		}
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rule.getResourceType(),
-				ruleType, id);
+				ruleType, id,null,null);
 		if (null != closeDates) {
 			LocalDate today = LocalDate.now();
 			Long firstDay = LocalDateTime.of(today.getYear(), 1, 1, 0, 0).atZone(ZoneId.systemDefault())
@@ -1278,16 +1278,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	private List<RangeDTO> getEnableTimeRanges(RentalResource rentalSite, Long showTimeStart, Long showTimeEnd){
         //根据节假日
         List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalSite.getResourceType(),
-                EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+                EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(),new Date(showTimeStart),new Date(showTimeEnd));
         if (closeDates != null && closeDates.size() > 0) {
-			Set<Long> closeDateSet = closeDates.stream().map(p -> p.getCloseDate().getTime()).collect(Collectors.toSet());
-			LocalDateTime startTime = new java.util.Date(showTimeStart).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-			LocalDateTime endTime = new java.util.Date(showTimeEnd).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-			startTime = LocalDateTime.of(startTime.toLocalDate(), LocalTime.MIN);
-			endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.MIN);
-			if (closeDateSet.contains(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
-				return new ArrayList<>();
-			if (closeDateSet.contains(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
 				return new ArrayList<>();
 		}
         SegmentTree segmentTree = new SegmentTree();
@@ -1313,11 +1305,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
             }
         }
         //至少提前时间
+        Long time = now;
         if (NormalFlag.NEED.getCode() == rule.getRentalEndTimeFlag()) {
-            Long time = now + rule.getRentalEndTime();
-            if (time > showTimeStart) {
-                segmentTree.putSegment(showTimeStart,time,1);
-            }
+            time = now + rule.getRentalEndTime();
+        }
+        if (time > showTimeStart) {
+            segmentTree.putSegment(showTimeStart, time, 1);
         }
         //是否有格子被预约
         List<RentalOrder> rentalOrders = rentalv2Provider.listActiveBillsByInterval(rentalSite.getId(), showTimeStart, showTimeEnd);
@@ -1388,19 +1381,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
         if (cmd.getRentalType()<=3){
             siteIds = siteIds.stream().filter(r-> {
                 List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(cmd.getResourceType(),
-                        EhRentalv2Resources.class.getSimpleName(), r);
+                        EhRentalv2Resources.class.getSimpleName(), r,new Date(cmd.getStartTime()),new Date(cmd.getEndTime()));
                 if (closeDates == null || closeDates.size() == 0)
                     return true;
-                Set<Long> closeDateSet = closeDates.stream().map(p -> p.getCloseDate().getTime()).collect(Collectors.toSet());
-                LocalDateTime startTime = new java.util.Date(cmd.getStartTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                LocalDateTime endTime = new java.util.Date(cmd.getEndTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                startTime = LocalDateTime.of(startTime.toLocalDate(), LocalTime.MIN);
-                endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.MIN);
-                if (closeDateSet.contains(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
                     return false;
-                if (closeDateSet.contains(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
-                    return false;
-                return true;
             }).collect(Collectors.toList());
         }
 
@@ -2063,7 +2047,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		billDTO.setHolidayOpenFlag(rule.getHolidayOpenFlag());
 		billDTO.setHolidayType(rule.getHolidayType());
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalBill.getResourceType(),
-				EhRentalv2Resources.class.getSimpleName(), rentalBill.getRentalResourceId());
+				EhRentalv2Resources.class.getSimpleName(), rentalBill.getRentalResourceId(),null,null);
 		List<Long> defaultDate = new ArrayList<>();
 		if (rule.getHolidayOpenFlag() !=null && rule.getHolidayOpenFlag() == 0){//不开放
 			defaultDate = rule.getHolidayType().equals(RentalHolidayType.NORMAL_WEEKEND.getCode())?normalWeekend:legalHoliday;
@@ -2278,6 +2262,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 								priceRule.setDiscountRatio(priceClassification.getDiscountRatio());
 								break;
 							}
+					}else{
+						priceRule.setDiscountType(pricePackage.getDiscountType());
+						priceRule.setFullPrice(pricePackage.getFullPrice());
+						priceRule.setCutPrice(pricePackage.getCutPrice());
+						priceRule.setDiscountRatio(pricePackage.getDiscountRatio());
 					}
 				}
 			}
@@ -2358,7 +2347,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 			if (rentalCell.getRentalType() == RentalType.HOUR.getCode()) {
 				startTime = new Timestamp(rentalCell.getBeginTime().getTime());
-				reminderTime = new Timestamp(rentalCell.getBeginTime().getTime() - 30 * 60 * 1000L);
+				reminderTime = new Timestamp(rentalCell.getBeginTime().getTime() - 15 * 60 * 1000L);
 				endTime = rentalCell.getEndTime();
 				reminderEndTime = new Timestamp(endTime.getTime() - 15 * 60 * 1000L);
 				authStartTime = new Timestamp(startTime.getTime() - 60 * 60 * 1000L);
@@ -2946,7 +2935,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						messageMap.put("orderId",order.getId());
 						messageMap.put("resourceType",order.getResourceType());
 						scheduleProvider.scheduleSimpleJob(
-								queueName,
+								"RentalNearStartMessageJob" + order.getId(),
 								"RentalNearStartMessageJob" + order.getId(),
 								new java.util.Date(orderReminderTimeLong),
 								RentalNearStartMessageJob.class,
@@ -2960,7 +2949,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						messageMap.put("orderId",order.getId());
 						messageMap.put("resourceType",order.getResourceType());
 						scheduleProvider.scheduleSimpleJob(
-								queueName,
+								"RentalNearStartMessageJob" + order.getId(),
 								"RentalNearEndMessageJob" + order.getId(),
 								new java.util.Date(orderReminderEndTimeLong),
 								RentalNearEndMessageJob.class,
@@ -2991,7 +2980,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						messageMap.put("orderId",order.getId());
 						messageMap.put("methodName", "endReminderSendMessage");
 						scheduleProvider.scheduleSimpleJob(
-								queueName,
+								"RentalMessageQuartzJob" + order.getId(),
 								"RentalMessageQuartzJob" + order.getId(),
 								new java.util.Date(orderReminderEndTimeLong),
 								RentalMessageQuartzJob.class,
@@ -3014,15 +3003,31 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public void test(GetRentalOrderDetailCommand cmd) {
-		Map<String, Object> messageMap = new HashMap<>();
-		messageMap.put("orderId", cmd.getOrderId());
-		scheduleProvider.scheduleSimpleJob(
-				queueName,
-				"cancelBill" + cmd.getOrderId(),
-				new java.util.Date(new java.util.Date().getTime() + 30 * 1000),
-				RentalCancelOrderJob.class,
-				messageMap
-		);
+		RentalOrder order = this.rentalv2Provider.findRentalBillById(cmd.getOrderId());
+			Map<String, Object> messageMap = new HashMap<>();
+			messageMap.put("orderId",order.getId());
+			messageMap.put("resourceType",order.getResourceType());
+			scheduleProvider.scheduleSimpleJob(
+					"RentalNearStartMessageJob" + order.getId(),
+					"RentalNearStartMessageJob" + order.getId(),
+					new java.util.Date(order.getReminderTime().getTime()),
+					RentalNearStartMessageJob.class,
+					messageMap
+			);
+
+
+		//结束时间快到发推送
+			messageMap = new HashMap<>();
+			messageMap.put("orderId",order.getId());
+			messageMap.put("resourceType",order.getResourceType());
+			scheduleProvider.scheduleSimpleJob(
+					"RentalNearEndMessageJob" + order.getId(),
+					"RentalNearEndMessageJob" + order.getId(),
+					new java.util.Date(order.getReminderEndTime().getTime()),
+					RentalNearEndMessageJob.class,
+					messageMap
+			);
+
 	}
 
 	@Override
@@ -3916,10 +3921,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			//如果是预约成功，则要判断是否退款，否则将订单置为已取消
 			if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
 				if (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()
-						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)) {
+						&& (order.getPayTotalMoney().compareTo(new BigDecimal(0)) > 0)) {
 
 					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
-					if (orderAmount.compareTo(new BigDecimal(0)) == 1) {
+					if (orderAmount.compareTo(new BigDecimal(0)) > 0) {
 						if (PayMode.ONLINE_PAY.getCode() == (order.getPayMode()) || PayMode.APPROVE_ONLINE_PAY.getCode() == (order.getPayMode())) {
 							rentalCommonService.refundOrder(order, timestamp, orderAmount);
 							//更新bill状态
@@ -3930,13 +3935,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 							order.setRefundAmount(orderAmount);
 							order.setStatus(SiteBillStatus.REFUNDING.getCode());//线下支付人工退款
 						}
-					} else //退款金额过小
+					} else {//退款金额过小
+						if (PayMode.ONLINE_PAY.getCode() == (order.getPayMode()) || PayMode.APPROVE_ONLINE_PAY.getCode() == (order.getPayMode()))
+							rentalCommonService.refundOrder(order, timestamp, orderAmount);//可能有卡券
 						order.setStatus(SiteBillStatus.FAIL.getCode());
 						messageHandler.cancelOrderWithoutRefund(order);
-				} else
+					}
+				} else {
 					//如果不需要退款，直接状态为已取消
 					order.setStatus(SiteBillStatus.FAIL.getCode());
-				    messageHandler.cancelOrderWithoutPaySendMessage(order);
+					if (order.getPaidMoney().compareTo(new BigDecimal(0)) > 0)
+						messageHandler.cancelOrderWithoutRefund(order);
+					else
+						messageHandler.cancelOrderWithoutPaySendMessage(order);
+				}
 			} else if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode()) ||
 					order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
 				//如果不需要退款，直接状态为已取消
@@ -4478,7 +4490,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		} else {
 			//计算有效时长 去掉关闭的天
 			List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(order.getResourceType(),
-					EhRentalv2Resources.class.getSimpleName(), order.getRentalResourceId());
+					EhRentalv2Resources.class.getSimpleName(), order.getRentalResourceId(),null,null);
 			Set<Long> closeTime = closeDates == null ? new HashSet<>() : closeDates.stream().map(r -> r.getCloseDate().getTime()).collect(Collectors.toSet());
 			LocalDateTime startDate = new java.util.Date(order.getStartTime().getTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 			startDate = LocalDateTime.of(startDate.toLocalDate(), LocalTime.MIN);
@@ -5495,7 +5507,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		dto.setSitePackages(sitePackages);
 
 		//如果单元格单独设置价格
-		RentalCell dbCell = rentalv2Provider.getRentalCellById(rsr.getId(),rsr.getRentalResourceId(),priceRule.getRentalType(),rsr.getResourceType());
+		RentalCell dbCell = rentalv2Provider.getRentalCellById(rsr.getId(),rsr.getRentalResourceId(),priceRule.getRentalType(),priceRule.getResourceType());
 		if (dbCell != null){
 			dto.setUserPriceType(dbCell.getUserPriceType());
 			dto.setPrice(dbCell.getPrice());
@@ -5544,7 +5556,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						break;
 					}
 			}
-		}
+		}else if (packageName != null) {
+				dto.setPrice(dto.getSitePackages().get(0).getPrice());
+				dto.setOriginalPrice(dto.getSitePackages().get(0).getOriginalPrice());
+				dto.setInitiatePrice(dto.getSitePackages().get(0).getInitiatePrice());
+			}
 	}
 
 
@@ -6507,7 +6523,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), null,
-				locator, pageSize+1,null, siteIds, cmd.getCommunityId());
+				locator, pageSize+1,cmd.getStatus(), siteIds, cmd.getCommunityId());
 		if(null == rentalSites)
 			return response;
 		Long nextPageAnchor = null;
@@ -8187,12 +8203,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (record != null) {
 			dto.setInvoiceFlag(bill.getInvoiceFlag());
 			String invoiceUrl = configurationProvider.getValue(0, "home.url", "");//营销系统和core共用一个域名
+			String systemId = configurationProvider.getValue(0,"prmt.system_id","10");
 			if (TrueOrFalseFlag.FALSE.getCode().equals(bill.getInvoiceFlag())) {
-				 invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s#/invoice-application";
+				 invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s&systemId=%s#/invoice-application";
 			} else {
-				invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s#/invoice-detail/2";
+				invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s&systemId=%s#/invoice-detail/2";
 			}
-			invoiceUrl = String.format(invoiceUrl, record.getBizOrderNum());
+			invoiceUrl = String.format(invoiceUrl, record.getBizOrderNum(),systemId);
 			dto.setInvoiceUrl(invoiceUrl);
 		}
 
@@ -8823,7 +8840,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		response.setSourceName(rentalSite.getResourceName());
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalSite.getResourceType(),
-				EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+				EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(),null,null);
 		LocalDate today = LocalDate.now();
 		Long startTime = LocalDateTime.of(today.getYear(),today.getMonth(),today.getDayOfMonth(),0,0).atZone(ZoneId.systemDefault())
 				.toInstant().toEpochMilli();

@@ -551,5 +551,7 @@ public interface PropertyMgrProvider {
 
 	CommunityPmOwner findOrganizationOwnerByContactExtraTels(String contactToken, Integer namespaceId);
 
+	List<CommunityAddressMapping> findOrganizationAddressMapping(Long addressId);
+
 
 }

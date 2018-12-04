@@ -148,6 +148,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
     @Autowired
 	private LaunchPadConfigProvider launchPadConfigProvider;
 
+    @Autowired
+    private OrdinaryLinkRouterListener ordinaryLinkRouterListener;
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
 

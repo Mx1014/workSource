@@ -6,9 +6,9 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/pmowner" -d '
 {
     "pmowner": {
         "properties": {
-            "contactToken":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
-            "contactName":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
-            "contactExtraTels":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25"},
+            "contactToken":{"type":"string","index":"not_analyzed"},
+            "contactName":{"type":"string","index":"not_analyzed"},
+            "contactExtraTels":{"type":"string","index":"not_analyzed"},
             "communityId":{"type":"string","index": "not_analyzed"},
             "createTime":{"type":"date"},
             "id":{"type":"long"},

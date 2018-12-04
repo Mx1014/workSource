@@ -2784,13 +2784,14 @@ public class FlowServiceImpl implements FlowService {
         flowCase.setApplierOrganizationId(flowCaseCmd.getCurrentOrganizationId());
         flowCase.setStartNodeId(snapshotFlow.getStartNode());
         flowCase.setEndNodeId(snapshotFlow.getEndNode());
-        flowCase.setOriginAppId(0L);
 
         // 应用 id 的设置
-        if (flowCaseCmd.getOriginAppId() == null) {
+        if (flowCase.getOriginAppId() == null) {
             AppContext appContext = UserContext.current().getAppContext();
             if (appContext != null && appContext.getAppId() != null) {
                 flowCase.setOriginAppId(appContext.getAppId());
+            } else {
+                flowCase.setOriginAppId(0L);
             }
         }
 
@@ -4383,14 +4384,20 @@ public class FlowServiceImpl implements FlowService {
         List<FlowSMSTemplateDTO> dtos = new ArrayList<>();
         resp.setDtos(dtos);
 
-        List<LocaleTemplate> templates = localeTemplateProvider.listLocaleTemplatesByScope(locator, cmd.getNamespaceId(), scope, locale, cmd.getKeyword(), count);
+        List<LocaleTemplate> templates = localeTemplateProvider.listLocaleTemplatesByScope(
+                locator, cmd.getNamespaceId(), scope, locale, cmd.getKeyword(), count);
+        if (templates == null || templates.size() == 0) {
+            locator.setAnchor(cmd.getAnchor());
+            templates = localeTemplateProvider.listLocaleTemplatesByScope(
+                    locator, Namespace.DEFAULT_NAMESPACE, scope, locale, cmd.getKeyword(), count);
+        }
+
         resp.setNextPageAnchor(locator.getAnchor());
         if (templates != null) {
             templates.forEach(t -> {
                 dtos.add(ConvertHelper.convert(t, FlowSMSTemplateDTO.class));
             });
         }
-
         return resp;
     }
 

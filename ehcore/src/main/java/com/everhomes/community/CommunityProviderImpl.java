@@ -2180,7 +2180,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 		
 		SelectQuery<Record> selectQuery = context.selectQuery();
 		selectQuery.addFrom(Tables.EH_BUILDINGS);
-		selectQuery.addSelect(Tables.EH_BUILDINGS.ID,Tables.EH_BUILDINGS.NAME,Tables.EH_BUILDINGS.COMMUNITY_ID);
+		selectQuery.addSelect(Tables.EH_BUILDINGS.ID,Tables.EH_BUILDINGS.NAME,
+				Tables.EH_BUILDINGS.COMMUNITY_ID,Tables.EH_BUILDINGS.BUILDING_NUMBER);
 		
 		if (namespaceId != null) {
 			selectQuery.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));

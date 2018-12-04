@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -12,7 +14,10 @@ import java.util.*;
 import java.util.Comparator;
 
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Tab;
 import com.everhomes.sequence.SequenceProvider;
@@ -58,6 +63,12 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 
     @Autowired
     private AclinkServerProvider aclinkServerProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private CommunityProvider communityprovider;
 
     @Override
     public Long createDoorAccess(DoorAccess obj) {
@@ -527,6 +538,28 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         }
         return objs;
     }
+
+    @Override
+    public List<NamespaceDTO> listDoorAccessNamespaces(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.schema.tables.EhNamespaces t = com.everhomes.schema.Tables.EH_NAMESPACES;
+        com.everhomes.server.schema.tables.EhDoorAccess t1 = Tables.EH_DOOR_ACCESS;
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(t);
+        query.addConditions(t.ID.in(context.select(t1.NAMESPACE_ID).from(t1).where(t1.STATUS.eq((byte)1))));
+        List<NamespaceDTO> dtos = query.fetch().map((r) -> {
+            NamespaceDTO dto = new NamespaceDTO();
+            dto.setId(r.getValue(t.ID));
+            dto.setName(r.getValue(t.NAME));
+            return dto;
+        });
+//        SelectConditionStep<Record2<Integer,String>> result = context.select(t.ID,
+//                t.NAME)
+//                .from(t)
+//                .where(t.ID.in(context.select(t1.NAMESPACE_ID).from(t1).where(t1.STATUS.eq((byte)1))));
+        return dtos;
+    }
+
     @Override
     public DoorAccess findDoorAccessById(Long id){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -547,6 +580,8 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_ACLINK_FORM_VALUES);
         query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_ID.eq(id));
+        //临时授权自定义字段
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.TYPE.eq(AclinkFormValuesType.CUSTOM_FIELD.getCode()));
         query.addConditions(Tables.EH_ACLINK_FORM_VALUES.STATUS.eq((byte)1));
         query.addOrderBy(Tables.EH_ACLINK_FORM_VALUES.ID.desc());
         List<AclinkFormValuesDTO> values = query.fetch().map((r) -> {
@@ -692,13 +727,25 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             query.fetch().map((r) -> {
             	DoorAccessDTO dto =ConvertHelper.convert(r, DoorAccessDTO.class);
             	dto.setGroupId(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID));
+            	dto.setDisplayName(dto.getDisplayNameNotEmpty());
             	//园区门禁门牌号
-                if(dto.getOwnerType() == (byte)1){
-                    dto.getCommunityName();
+                if(dto.getOwnerType() == (byte)1 && dto.getOwnerId() != null){
+                    Community com = new Community();
+                    com = communityprovider.findCommunityById(dto.getOwnerId());
+                    if(null != com && com.getId() != null) {
+                        dto.setCommunityName(com.getName());
+                    }
                     if(null != dto.getAddressDetail() && dto.getAddressDetail().length()>0){
                         String[] str = dto.getAddressDetail().split("_");
                         dto.setBuildingName(str[0]);
                         dto.setFloorName(str[1]);
+                    }
+                }
+                if(dto.getOwnerType() == (byte)0 && dto.getOwnerId() != null){
+                    Organization org = new Organization();
+                    org = organizationProvider.findOrganizationById(dto.getOwnerId());
+                    if(null != org && org.getId() != null){
+                        dto.setOrganizationName(org.getName());
                     }
                 }
 
@@ -1130,7 +1177,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_ACLINK_FORM_VALUES.TYPE.eq(type));
-        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.STATUS.eq((byte)1));
+//        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.STATUS.eq((byte)1));
         query.addLimit(1);
         AclinkFormValues value = new AclinkFormValues();
         value = query.fetchOneInto(AclinkFormValues.class);
