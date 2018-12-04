@@ -359,7 +359,7 @@ public class WelfareServiceImpl implements WelfareService {
                     response.getDismissReceivers().add(receiverDTO);
                 }
                 receiverDTO.setReceiverUid(receiverDetail != null ? receiverDetail.getTargetId() : null);
-                targetUserIds.add(receiverDetail.getTargetId());
+                targetUserIds.add(receiverDTO.getReceiverUid());
             }
             if (WelfareCheckStatus.SUCESS != WelfareCheckStatus.fromCode(response.getCheckStatus())) {
                 return response;
