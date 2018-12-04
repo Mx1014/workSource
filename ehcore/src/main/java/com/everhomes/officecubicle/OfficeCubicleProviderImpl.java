@@ -255,12 +255,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	
 	@Override
 	public void deleteRefundRule(Long spaceId) {
-	    dbProvider.execute(r -> {
-	    	//删除原来的设置
-	    	getReadWriteContext().delete(Tables.EH_OFFICE_CUBICLE_REFUND_RULE)
-			.where(Tables.EH_OFFICE_CUBICLE_REFUND_RULE.SPACE_ID.eq(spaceId));
-		    return null;
-	    });
+		dbProvider.getDslContext(AccessSpec.readOnly()).delete(Tables.EH_OFFICE_CUBICLE_REFUND_RULE)
+		.where(Tables.EH_OFFICE_CUBICLE_REFUND_RULE.SPACE_ID.equal(spaceId)).execute();
 	}
 	
 	@Override
