@@ -8,10 +8,8 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipayLogger;
-import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.request.AlipaySystemOauthTokenRequest;
 import com.alipay.api.request.AlipayUserInfoShareRequest;
-import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.atomikos.util.FastDateFormat;
@@ -72,7 +70,6 @@ import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
-import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.openapi.FamilyAddressDTO;
@@ -92,9 +89,6 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
-import com.google.gson.JsonArray;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
-import com.sun.xml.bind.v2.TODO;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -118,9 +112,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -7121,8 +7112,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	
 
 	@Override
-	public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd) {
-		GetUserKeyInfoRespnose rsp = new GetUserKeyInfoRespnose();
+	public GetUserKeyInfoResponse getUserKeyInfo(GetUserKeyInfoCommand cmd) {
+		GetUserKeyInfoResponse rsp = new GetUserKeyInfoResponse();
 		User user = UserContext.current().getUser();
 		
 		rsp.setIsSupportRemote(DoorAuthStatus.INVALID.getCode());
@@ -7167,13 +7158,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				}
                 //服务热线
                 AclinkFormValues hotline = new AclinkFormValues();
-                HashMap<String, String> extraAction =  new HashMap<>();
+                List<AclinkKeyExtraActionsDTO> extraActions = new ArrayList<>();
+                AclinkKeyExtraActionsDTO extraAction = new AclinkKeyExtraActionsDTO();
                 hotline = doorAccessProvider.findAclinkFormValues(doorAccess.getOwnerId(),doorAccess.getOwnerType(), AclinkFormValuesType.HOTLINE.getCode());
                 if(null != hotline && hotline.getStatus() == (byte)1){
-                    extraAction.put("hotline", hotline.getValue() );
-                    rsp.setExtraActions(extraAction);
+                    extraAction.setExtraActionTitle("服务热线");
+                    extraAction.setExtraActionType(AclinkExtraActionsItemType.HOTLINE.getCode());
+                    extraAction.setExtraActionContent(hotline.getValue());
+                    extraActions.add(extraAction);
                 }
-
+                rsp.setExtraActions(extraActions);
 				rsp.setAuthId(auth.getId());
 				rsp.setIsSupportQR(doorAccess.getHasQr());
 				rsp.setIsSupportFaceOpen(doorAccess.getLocalServerId() != null && doorAccess.getLocalServerId() > 0

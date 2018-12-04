@@ -33,7 +33,6 @@ import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkLogCreateCommand;
 import com.everhomes.rest.aclink.AclinkLogListResponse;
-import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenByHardwareIdCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
@@ -963,7 +962,7 @@ public class AclinkController extends ControllerBase {
      * @return
      */
     @RequestMapping("getUserKeyInfo")
-    @RestReturn(value=GetUserKeyInfoRespnose.class)
+    @RestReturn(value= GetUserKeyInfoResponse.class)
     public RestResponse getUserKeyInfo(GetUserKeyInfoCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.getUserKeyInfo(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -253,7 +253,7 @@ public interface DoorAccessService {
 
     public ListUserAuthResponse listUserKeys(ListAesUserKeyByUserCommand cmd);
 
-    public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd);
+    public GetUserKeyInfoResponse getUserKeyInfo(GetUserKeyInfoCommand cmd);
 
     public ListAccessGroupRelResponse listDoorGroupRel(ListDoorAccessGroupCommand cmd);
 
