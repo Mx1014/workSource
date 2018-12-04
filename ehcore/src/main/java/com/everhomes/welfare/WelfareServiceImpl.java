@@ -29,6 +29,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
@@ -58,6 +59,7 @@ import com.everhomes.rest.welfare.ListWelfaresCommand;
 import com.everhomes.rest.welfare.ListWelfaresResponse;
 import com.everhomes.rest.welfare.SendWelfareCommand;
 import com.everhomes.rest.welfare.SendWelfaresResponse;
+import com.everhomes.rest.welfare.UpdateWelfareStatusCommand;
 import com.everhomes.rest.welfare.WelfareCheckStatus;
 import com.everhomes.rest.welfare.WelfareCouponDTO;
 import com.everhomes.rest.welfare.WelfareReceiverDTO;
@@ -223,7 +225,7 @@ public class WelfareServiceImpl implements WelfareService {
                 	throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利被删除");
                 }
-                if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
+                if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus()) || WelfareStatus.FAILED == WelfareStatus.fromCode(welfare.getStatus())) {
                     throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能保存草稿");
                 }
@@ -253,7 +255,7 @@ public class WelfareServiceImpl implements WelfareService {
             if(welfare.getCreatorName() == null)
                 welfare.setCreatorName(uName);
 	        welfare.setOperatorName(uName);
-	        if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
+	        if (WelfareStatus.SENDING == WelfareStatus.fromCode(welfare.getStatus())) {
 	            welfare.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	//            welfare.setSenderUid(UserContext.currentUserId());
 	        }
@@ -322,7 +324,7 @@ public class WelfareServiceImpl implements WelfareService {
                 	throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利被删除");
                 }
-                if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
+                if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus()) || WelfareStatus.FAILED == WelfareStatus.fromCode(welfare.getStatus())) {
                     throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能发送");
                 }
@@ -334,7 +336,7 @@ public class WelfareServiceImpl implements WelfareService {
             if (welfaresDTO.getId() != null) {
                 isDarft = true;
             }
-            welfaresDTO.setStatus(WelfareStatus.SENDED.getCode());
+            welfaresDTO.setStatus(WelfareStatus.SENDING.getCode());
             //校验在职离职
             response.setCheckStatus(WelfareCheckStatus.SUCESS.getCode());
             response.setDismissReceivers(new ArrayList<>());
@@ -399,11 +401,16 @@ public class WelfareServiceImpl implements WelfareService {
     }
 
     private EnterpriseDistributionToPersonRestResponse sendCouponsToUsers(WelfaresDTO welfaresDTO, SendWelfaresResponse response, List<Long> targetUserIds, Long organizationId) throws Exception {
-        //卡券
+        //卡券    	
         TransferToPersonalDTO cmd1 = new TransferToPersonalDTO();
+        Organization org = organizationProvider.findOrganizationById(organizationId);
+        if(org != null){
+        	cmd1.setOrganizationName(org.getName());
+        }
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         cmd1.setOrganizationId(organizationId);
         cmd1.setTargetUserList(targetUserIds);
+        cmd1.setTaskId(welfaresDTO.getId());
         List<ObtainDetailsExtendDTO> obtainsList = welfaresDTO.getCoupons().stream()
                 .map(r->{
                     ObtainDetailsExtendDTO dto = new ObtainDetailsExtendDTO();
@@ -525,7 +532,7 @@ public class WelfareServiceImpl implements WelfareService {
                     WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利不存在");
         }
         checkOperatorPrivilege(welfare.getOrganizationId(), cmd.getAppId());
-        if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
+        if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus()) || WelfareStatus.FAILED == WelfareStatus.fromCode(welfare.getStatus())) {
             throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                     WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能删除");
         }
@@ -562,4 +569,20 @@ public class WelfareServiceImpl implements WelfareService {
         return response;
 	}
 
+	@Override
+	public void updateWelfareStatus(UpdateWelfareStatusCommand cmd) {
+        Welfare welfare = welfareProvider.findWelfareById(cmd.getTaskId());
+        if (welfare == null) {
+            throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
+                    WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利不存在");
+        }
+        if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus()) || WelfareStatus.FAILED == WelfareStatus.fromCode(welfare.getStatus())) {
+            throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
+                    WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能修改");
+        }
+        if(cmd.getStatus() != null){
+        	welfare.setStatus(cmd.getStatus());
+        }
+        welfareProvider.updateWelfare(welfare);
+	}
 }

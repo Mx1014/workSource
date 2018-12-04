@@ -39,7 +39,7 @@ public class WelfareController extends ControllerBase {
 	public RestResponse getWelfare(GetWelfareCommand cmd){
 		return new RestResponse(welfareService.getWelfare(cmd));
 	}
-
+	
 	/**
 	 * <p>保存草稿</p>
 	 * <b>URL: /welfare/draftWelfare</b>
@@ -89,5 +89,16 @@ public class WelfareController extends ControllerBase {
 	@RestReturn(ListUserWelfaresResponse.class)
 	public RestResponse listUserWelfares(ListUserWelfaresCommand cmd){
 		return new RestResponse(welfareService.listUserWelfares(cmd));
+	}
+
+	/**
+	 * <p>营销系统调用: 更新发送福利状态</p>
+	 * <b>URL: /welfare/updateWelfareStatus</b>
+	 */
+	@RequestMapping("updateWelfareStatus")
+	@RestReturn(String.class)
+	public RestResponse updateWelfareStatus(UpdateWelfareStatusCommand cmd){
+		welfareService.updateWelfareStatus(cmd);
+		return new RestResponse();
 	}
 }

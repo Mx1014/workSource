@@ -21,7 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>imgUrl: 图片url 只读项展示用</li>
  * <li>imgName: 图片名称 只读项展示用</li>
  * <li>imgSize: 图片大小(字节) 只读项展示用</li>
- * <li>status: 状态:0-草稿 1-已发送 只读项</li>
+ * <li>status: 状态:0-草稿 1-发送中 2-已发送 3-发送失败</li>
  * <li>sendTime: 发送时间 只读项</li>
  * <li>creatorName: 创建者 只读项</li>
  * <li>creatorUid: 创建者uId 只读项</li>

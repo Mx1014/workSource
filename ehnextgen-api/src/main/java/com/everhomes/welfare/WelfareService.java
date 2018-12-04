@@ -20,4 +20,6 @@ public interface WelfareService {
 	ListUserWelfaresResponse listUserWelfares(ListUserWelfaresCommand cmd);
 
 	SendWelfaresResponse sendWelfare(SendWelfareCommand cmd, HttpServletRequest request);
+
+	void updateWelfareStatus(UpdateWelfareStatusCommand cmd);
 }
