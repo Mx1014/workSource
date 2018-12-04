@@ -902,7 +902,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		row.createCell(++i).setCellValue(dto.getReserverName());
 
 		// 联系电话
-		row.createCell(++i).setCellValue(dto.getReserveContactToken());
+		row.createCell(++i).setCellValue(dto.getReserverContactToken());
 
 	}
 	

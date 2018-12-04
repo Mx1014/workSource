@@ -38,9 +38,9 @@ public class OfficeRentOrderDTO {
     private Byte rentType;
     private Long reserveTime;
     private String reserverName;
-    private String reserveContactToken;
-    private Long reserveEnterpriseId;
-    private String reserveEnterpriseName;
+    private String reserverContactToken;
+    private Long reserverEnterpriseId;
+    private String reserverEnterpriseName;
     private String userDetail;
     private Long createTime;
     private BigDecimal price;
@@ -194,29 +194,28 @@ public class OfficeRentOrderDTO {
 		this.reserverName = reserverName;
 	}
 
-	public String getReserveContactToken() {
-		return reserveContactToken;
+	public String getReserverContactToken() {
+		return reserverContactToken;
 	}
 
-	public void setReserveContactToken(String reserveContactToken) {
-		this.reserveContactToken = reserveContactToken;
+	public void setReserverContactToken(String reserverContactToken) {
+		this.reserverContactToken = reserverContactToken;
 	}
 
-
-	public Long getReserveEnterpriseId() {
-		return reserveEnterpriseId;
+	public Long getReserverEnterpriseId() {
+		return reserverEnterpriseId;
 	}
 
-	public void setReserveEnterpriseId(Long reserveEnterpriseId) {
-		this.reserveEnterpriseId = reserveEnterpriseId;
+	public void setReserverEnterpriseId(Long reserverEnterpriseId) {
+		this.reserverEnterpriseId = reserverEnterpriseId;
 	}
 
-	public String getReserveEnterpriseName() {
-		return reserveEnterpriseName;
+	public String getReserverEnterpriseName() {
+		return reserverEnterpriseName;
 	}
 
-	public void setReserveEnterpriseName(String reserveEnterpriseName) {
-		this.reserveEnterpriseName = reserveEnterpriseName;
+	public void setReserverEnterpriseName(String reserverEnterpriseName) {
+		this.reserverEnterpriseName = reserverEnterpriseName;
 	}
 
 	public Long getId() {
