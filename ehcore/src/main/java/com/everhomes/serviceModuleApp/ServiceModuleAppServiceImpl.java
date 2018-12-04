@@ -382,7 +382,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         	    for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntryList) {
                     Integer maxSort = this.workPlatformAppProvider.getMaxSort(cmd.getOrganizationId());
                     WorkPlatformApp workPlatformApp = new WorkPlatformApp();
-                    workPlatformApp.setOrder(maxSort);
+                    workPlatformApp.setOrder(maxSort+1);
                     workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
                     workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
                     workPlatformApp.setScopeId(cmd.getOrganizationId());
