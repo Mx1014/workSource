@@ -120,10 +120,9 @@ public class WorkPlatformAppProviderImpl implements WorkPlatformAppProvider{
     }
 
     @Override
-    public Integer getMaxSort(Long appOriginId, Long scopeId) {
+    public Integer getMaxSort(Long scopeId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWorkPlatformApps.class));
-        Condition condition = Tables.EH_WORK_PLATFORM_APPS.APP_ID.eq(appOriginId)
-                .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId))
+        Condition condition = Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId)
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()));
          return context.select(DSL.max(Tables.EH_WORK_PLATFORM_APPS.ORDER)).from(Tables.EH_WORK_PLATFORM_APPS).where(condition).fetchOneInto(Integer.class);
     }

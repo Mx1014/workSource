@@ -18,7 +18,7 @@ public interface WorkPlatformAppProvider {
     List<WorkPlatformApp> listWorkPlatformApp(Long appOriginId, Long scopeId);
 
     List<WorkPlatformApp> listWorkPlatformAppByScopeId(Long scopeId);
-    Integer getMaxSort(Long appOriginId, Long scopeId);
+    Integer getMaxSort(Long scopeId);
 
     WorkPlatformApp findWorkPlatformById(Long id);
 }

@@ -375,15 +375,22 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
         //安装应用时，同时修改工作台配置顺序 add by yanlong.liang 20181115
         List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(cmd.getOriginId(), cmd.getOrganizationId());
-        if (!CollectionUtils.isEmpty(list)) {
-            Integer maxSort = this.workPlatformAppProvider.getMaxSort(cmd.getOriginId(), cmd.getOrganizationId());
-            WorkPlatformApp workPlatformApp = new WorkPlatformApp();
-            workPlatformApp.setOrder(maxSort);
-            workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
-            workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
-            workPlatformApp.setScopeId(cmd.getOrganizationId());
-            workPlatformApp.setAppId(cmd.getOriginId());
-            this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+        if (CollectionUtils.isEmpty(list)) {
+        	List<ServiceModuleAppEntry> serviceModuleAppEntryList = this.serviceModuleEntryProvider.listServiceModuleAppEntries(cmd.getOriginId(),null,
+                    TerminalType.MOBILE.getCode(),null,null);
+        	if (!CollectionUtils.isEmpty(serviceModuleAppEntryList)) {
+        	    for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntryList) {
+                    Integer maxSort = this.workPlatformAppProvider.getMaxSort(cmd.getOrganizationId());
+                    WorkPlatformApp workPlatformApp = new WorkPlatformApp();
+                    workPlatformApp.setOrder(maxSort);
+                    workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                    workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+                    workPlatformApp.setScopeId(cmd.getOrganizationId());
+                    workPlatformApp.setAppId(cmd.getOriginId());
+                    workPlatformApp.setEntryId(serviceModuleAppEntry.getId());
+                    this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+                }
+            }
         }
 		return dto;
 	}
@@ -1072,16 +1079,22 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         }else {
             List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(orgapp.getAppOriginId(), orgapp.getOrgId());
             if (CollectionUtils.isEmpty(list)) {
-                return;
+                List<ServiceModuleAppEntry> serviceModuleAppEntryList = this.serviceModuleEntryProvider.listServiceModuleAppEntries(orgapp.getAppOriginId(),null,
+                        TerminalType.MOBILE.getCode(),null,null);
+                if (!CollectionUtils.isEmpty(serviceModuleAppEntryList)) {
+                    for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntryList) {
+                        Integer maxSort = this.workPlatformAppProvider.getMaxSort(orgapp.getOrgId());
+                        WorkPlatformApp workPlatformApp = new WorkPlatformApp();
+                        workPlatformApp.setOrder(maxSort);
+                        workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                        workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+                        workPlatformApp.setScopeId(orgapp.getOrgId());
+                        workPlatformApp.setAppId(orgapp.getAppOriginId());
+                        workPlatformApp.setEntryId(serviceModuleAppEntry.getId());
+                        this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+                    }
+                }
             }
-            Integer maxSort = this.workPlatformAppProvider.getMaxSort(orgapp.getAppOriginId(), orgapp.getOrgId());
-            WorkPlatformApp workPlatformApp = new WorkPlatformApp();
-            workPlatformApp.setOrder(maxSort);
-            workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
-            workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
-            workPlatformApp.setScopeId(orgapp.getOrgId());
-            workPlatformApp.setAppId(orgapp.getAppOriginId());
-            this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
         }
 	}
 
@@ -1902,19 +1915,19 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		for (AppCategory appCategory: appCategories) {
 
             //OA应用  管理端
-            List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+            List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
                     ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
             if (!CollectionUtils.isEmpty(oaApp)) {
                 pareApp(list,oaApp,appCategory,locationType,sceneType,orgId);
             }
             //OA应用 用户端
-            oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+            oaApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
                     ServiceModuleAppType.OA.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
             if (!CollectionUtils.isEmpty(oaApp)) {
                 pareApp(list,oaApp,appCategory,locationType,ServiceModuleSceneType.CLIENT.getCode(),orgId);
             }
 			//园区应用
-            List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+            List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
                     ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
             if (!CollectionUtils.isEmpty(communityApp)) {
                 pareApp(list,communityApp,appCategory,locationType,sceneType,orgId);
