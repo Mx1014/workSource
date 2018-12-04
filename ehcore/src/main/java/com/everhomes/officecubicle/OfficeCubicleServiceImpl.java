@@ -1046,8 +1046,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		sb.append("\n公司名称:");
 		sb.append(order.getReserveEnterprise());
 		sb.append("\n您可以登陆管理后台查看详情");
-		sendMessageToUser(order.getManagerUid(), sb.toString());
-		// 小红点
+		List<OfficeCubicleChargeUser> chargeUser = officeCubicleProvider.findChargeUserBySpaceId(space.getId());
+		for(OfficeCubicleChargeUser dto :chargeUser){
+			sendMessageToUser(dto.getChargeUid(), sb.toString());
+		}
 	}
 
 	private OfficeCubicleOrder generateOfficeCubicleOrders(AddSpaceOrderCommand cmd,OfficeCubicleSpace space, Long flowCaseId) {
@@ -1657,6 +1659,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				}
 			}
 			room.setId(cmd.getRoomId());
+			room.setStatus((byte)1);
 			officeCubicleProvider.updateRoom(room);
 
 			return null;
@@ -1673,6 +1676,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getStationId());
 			station = ConvertHelper.convert(cmd, OfficeCubicleStation.class);
 			station.setId(cmd.getStationId());
+			station.setStatus((byte)1);
 			officeCubicleProvider.updateCubicle(station);
 
 			return null;

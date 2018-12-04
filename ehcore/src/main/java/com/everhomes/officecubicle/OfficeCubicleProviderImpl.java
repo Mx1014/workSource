@@ -277,6 +277,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleRoomDao dao = new EhOfficeCubicleRoomDao(context.configuration());
+		room.setOperatorUid(UserContext.currentUserId());
+		room.setOperateTime(new Timestamp(System.currentTimeMillis()));
 		dao.update(room);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleRoom.class, room.getId());
 
@@ -287,6 +289,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleStationDao dao = new EhOfficeCubicleStationDao(context.configuration());
+		station.setOperatorUid(UserContext.currentUserId());
+		station.setOperateTime(new Timestamp(System.currentTimeMillis()));
 		dao.update(station);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleStation.class, station.getId());
 
