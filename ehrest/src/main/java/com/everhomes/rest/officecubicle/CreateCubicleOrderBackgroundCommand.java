@@ -1,6 +1,7 @@
 package com.everhomes.rest.officecubicle;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -41,16 +42,23 @@ public class CreateCubicleOrderBackgroundCommand {
 	private Byte stationType;
 	private String ownerType;
 	private Long ownerId;
-	private Long stationId;
+	private List<Long> stationId;
+	private List<Long> roomId;
 
-	
-	
-	public Long getStationId() {
+	public List<Long> getStationId() {
 		return stationId;
 	}
 
-	public void setStationId(Long stationId) {
+	public void setStationId(List<Long> stationId) {
 		this.stationId = stationId;
+	}
+
+	public List<Long> getRoomId() {
+		return roomId;
+	}
+
+	public void setRoomId(List<Long> roomId) {
+		this.roomId = roomId;
 	}
 
 	public String getOwnerType() {
