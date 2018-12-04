@@ -557,6 +557,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				});
 			}
 			if (null != cmd.getStationAttachments()){
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)3);
 				cmd.getStationAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)3);
 				});
