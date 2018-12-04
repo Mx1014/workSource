@@ -481,7 +481,14 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //			});
 
 			cmd.getRanges().forEach(dto->saveRanges(dto,space.getId(),getNamespaceId(cmd.getNamespaceId())));
-
+			QueryDefaultRuleAdminCommand cmd2 = new QueryDefaultRuleAdminCommand();
+	        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(space.getNamespaceId(),
+	                RentalV2ResourceType.STATION_BOOKING.getCode());
+			cmd2.setResourceType(RentalV2ResourceType.STATION_BOOKING.getCode());
+			cmd2.setResourceTypeId(type.getId());
+			cmd2.setSourceId(space.getId());
+			cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
+			rentalv2Service.queryDefaultRule(cmd2);
 			return null;
 		});
 	}
@@ -2438,6 +2445,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (cmd.getRentType() ==1){
 				BigDecimal roomMinPrice = officeCubicleProvider.getRoomMinPrice(r.getId());
 				BigDecimal stationMinPrice = officeCubicleProvider.getStationMinPrice(r.getId());
+				if (roomMinPrice == null){
+					roomMinPrice =  new BigDecimal(0);
+				}
+				if (stationMinPrice == null){
+					stationMinPrice =  new BigDecimal(0);
+				}
 				dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)1);
 			}else{
@@ -2445,7 +2458,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null);
-			Integer allPositonNums = station.size() + room.size();
+			Integer stationSize = 0;
+			Integer roomSize = 0;
+			if (station !=null){
+				stationSize =station.size();
+			}
+			if (room!=null){
+				roomSize = room.size();
+			}
+			Integer allPositonNums = stationSize + roomSize;
 			dto.setAllPositonNums(allPositonNums);
 			dto.setCoverUrl(this.contentServerService.parserUri(attachments.get(0).getContentUri(), EntityType.USER.getCode(),
 					UserContext.current().getUser().getId()));

@@ -20,3 +20,4 @@ INSERT INTO `eh_locale_strings`(`id`,`scope`, `code`, `locale`, `text`) VALUES (
 
 
 UPDATE eh_service_modules SET instance_config = '{"url":"${home.url}/station-booking-web/build/index.html?ns=%s#/home#sign_suffix","currentProjectOnly":0}' WHERE id = 40200;
+UPDATE eh_service_modules SET `host` = 'station-booking-web' WHERE module_id = 40200;
