@@ -11,6 +11,7 @@ CREATE TABLE `eh_welfares` (
   `img_uri` VARCHAR(1024) COMMENT '附图uri',
   `status` TINYINT COMMENT '0-草稿 1-发送',
   `welfare_type` TINYINT COMMENT '1.0暂时只支持发放一种福利,福利主表加入福利类型 0-卡券 1-积分',
+  `is_delete` TINYINT DEFAULT 0 COMMENT '0-没删除 1-删除',
   `send_time` DATETIME DEFAULT NULL, 
   `coupon_orders` TEXT COMMENT '卡券系统的交易id 列表',
   `point_orders` TEXT COMMENT '卡券系统的交易id 列表',
