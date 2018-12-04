@@ -1,6 +1,8 @@
 package com.everhomes.aclink;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.ListingLocator;
@@ -21,7 +23,9 @@ import org.springframework.stereotype.Component;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhAclinkLogsDao;
+import com.everhomes.server.schema.tables.daos.EhDoorAuthLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhAclinkLogs;
+import com.everhomes.server.schema.tables.pojos.EhDoorAuthLogs;
 import com.everhomes.server.schema.tables.records.EhAclinkLogsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -119,7 +123,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
     public List<AclinkLog> queryAclinkLogsByTime(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkLogs.class));
         SelectQuery<EhAclinkLogsRecord> query = context.selectQuery(Tables.EH_ACLINK_LOGS);
-        query.addFrom(Tables.EH_ACLINK_LOGS);
+//        query.addFrom(Tables.EH_ACLINK_LOGS);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
@@ -347,5 +351,21 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
     }
+
+	@Override
+	public void createAclinkLogBatch(List<AclinkLog> logs) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhAclinkLogsDao dao = new EhAclinkLogsDao(context.configuration());
+		List<EhAclinkLogs> list = new ArrayList<>();
+		long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAclinkLogs.class), logs.size());
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		for(AclinkLog log : logs){
+			log.setId(id++);
+			log.setCreateTime(now);
+			list.add(ConvertHelper.convert(log, EhAclinkLogs.class));
+		}
+		dao.insert(list);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhAclinkLogs.class, null);
+	}
 
 }

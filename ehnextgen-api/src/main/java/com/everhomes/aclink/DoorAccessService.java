@@ -93,10 +93,6 @@ public interface DoorAccessService {
 
     GetShortMessageResponse getShortMessages(GetShortMessageCommand cmd);
 
-    AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmd);
-
-    AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd);
-
     //20180914 add by liqingyan
     CheckMobilePrivilegeResponse checkMobilePrivilege(CheckMobilePrivilegeCommand cmd);
 
@@ -125,16 +121,6 @@ public interface DoorAccessService {
     void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
 
     void exportTempAuthXls(SearchDoorAuthCommand cmd, HttpServletResponse httpResponse);
-
-    //add by liqingyan
-    void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse);
-
-    //add by liqingyan
-    DoorStatisticResponse doorStatistic(DoorStatisticCommand cmd);
-
-    DoorStatisticByTimeResponse doorStatisticByTime(DoorStatisticByTimeCommand cmd);
-
-    TempStatisticByTimeResponse tempStatisticByTime(TempStatisticByTimeCommand cmd);
 
     String checkAllDoorAuthList();
 
@@ -266,7 +252,6 @@ public interface DoorAccessService {
 
     void invalidVistorAuths(InvalidVistorAuthsCommand cmd);
 
-    OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd);
     //门禁v3.0.2 临时授权优先门禁 add by liqingyan
     void createTempAuthPriority (CreateTempAuthPriorityCommand cmd);
 
