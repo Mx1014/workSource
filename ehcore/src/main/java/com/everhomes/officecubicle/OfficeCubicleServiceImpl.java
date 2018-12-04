@@ -2002,6 +2002,21 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());	
 		OfficeCubicleRentOrder order = ConvertHelper.convert(cmd, OfficeCubicleRentOrder.class);
+		order.setBeginTime(new Timestamp(cmd.getBeginTime()));
+		order.setEndTime(new Timestamp(cmd.getEndTime()));
+		order.setRentType(cmd.getRentType());
+		order.setOrderStatus(OfficeCubiceOrderStatus.PAID.getCode());
+		order.setOwnerId(cmd.getOwnerId());
+		order.setOwnerType(cmd.getOwnerType());
+		if (cmd.getRentCount()!=null){
+			order.setRentCount(cmd.getRentCount().longValue());
+		}
+		order.setRequestType(OfficeCubicleRequestType.BACKGROUND.getCode());
+		order.setReservercontacttoken(cmd.getReserverContactToken());
+		order.setReserverenterpriseid(cmd.getReserverEnterpriseId());
+		order.setReserverenterprisename(cmd.getReserverEnterpriseName());
+		order.setReservername(cmd.getReserverName());
+		order.setSpaceId(cmd.getSpaceId());
 		this.dbProvider.execute((TransactionStatus status) -> {
 			officeCubicleProvider.createCubicleRentOrder(order);
 			return null;
