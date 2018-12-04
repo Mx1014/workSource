@@ -9,7 +9,7 @@ import java.util.List;
  *     <li>formFieldsConfigId: 表单字段配置ID</li>
  *     <li>formOriginId: 表单原始ID</li>
  *     <li>formVersion: 表单版本</li>
- *     <li>configType：配置类型，默认"flowNode-visible"</li>
+ *     <li>configType：配置类型，默认"flowNode-visible" {@link GeneralFormFieldsConfigType}</li>
  *     <li>formFields：表单字段 {@link GeneralFormFieldsConfigFieldDTO}</li>
  * </ul>
  * @author huqi
