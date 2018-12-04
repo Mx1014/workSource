@@ -3164,10 +3164,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		//设置退款人姓名 联系方式
-
 		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(),bill.getRentalResourceId());
-		if (rs.getOfflinePayeeUid()!=null){
-			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
+		Long offlinePayeeUid = rs.getOfflinePayeeUid();
+		Long orgId = rs.getOrganizationId();
+		if (StringHelper.hasContent(bill.getCustomObject())){//订单有指定退款联系人
+			RentalUseInfoDTO useInfoDTO = JSONObject.parseObject(bill.getCustomObject(), RentalUseInfoDTO.class);
+			offlinePayeeUid = useInfoDTO.getRefundContractUid();
+			orgId = useInfoDTO.getRefundContractOrgId();
+		}
+		if (offlinePayeeUid!=null){
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(offlinePayeeUid, orgId);
 			if(null!=member){
 				dto.setOfflinePayName(member.getContactName());
 				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getTargetId(), IdentifierType.MOBILE.getCode());
