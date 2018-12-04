@@ -393,7 +393,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		for(OfficeCubicleChargeUser user : chargeUsers){
 			ChargeUserDTO chargeUserDTO = new ChargeUserDTO();
 			chargeUserDTO.setChargeName(user.getChargeName());
-			chargeUserDTO.setChargeUId(user.getChargeUid());
+			chargeUserDTO.setChargeUid(user.getChargeUid());
 			users.add(chargeUserDTO);
 		}
 		dto.setChargeUserDTO(users);
@@ -467,7 +467,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				for (ChargeUserDTO dto : cmd.getChargeUserDTO()){
 					OfficeCubicleChargeUser user = new OfficeCubicleChargeUser();
 					user.setChargeName(dto.getChargeName());
-					user.setChargeUid(dto.getChargeUId());
+					user.setChargeUid(dto.getChargeUid());
 					user.setSpaceId(space.getId());
 					user.setNamespaceId(cmd.getNamespaceId());
 					user.setOwnerId(cmd.getOwnerId());
@@ -584,7 +584,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				for (ChargeUserDTO dto : cmd.getChargeUserDTO()){
 					OfficeCubicleChargeUser user = new OfficeCubicleChargeUser();
 					user.setChargeName(dto.getChargeName());
-					user.setChargeUid(dto.getChargeUId());
+					user.setChargeUid(dto.getChargeUid());
 					user.setSpaceId(space.getId());
 					user.setNamespaceId(cmd.getNamespaceId());
 					user.setOwnerId(cmd.getOwnerId());
@@ -2012,7 +2012,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (stationRent !=null){
 				rentSize = stationRent.size();
 			}
-			if (Integer.valueOf(space.getShortRentNums())<(rentSize+cmd.getRentCount())){
+			int rentCount = 0;
+			if (cmd.getRentCount()!=null){
+				rentCount = cmd.getRentCount();
+			}
+			if (Integer.valueOf(space.getShortRentNums())<(rentSize+rentCount)){
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
 				"工位数量不足");
 			} else {
@@ -2140,7 +2144,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (shortRentStation != null){
 			shortRentStationSize = shortRentStation.size();
 		}
-		resp.setShortCubicleIdleNums(shortRentStationSize);
+		resp.setShortCubicleIdleNums(stationSize-shortRentStationSize);
 		resp.setLongCubicleRentedNums(longRentStationSize);
 		List<OfficeCubicleStation> closeStation = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, (byte)0,null,null,null);
