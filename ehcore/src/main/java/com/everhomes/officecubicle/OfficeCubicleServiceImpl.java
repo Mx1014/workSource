@@ -1652,7 +1652,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if(cmd.getAssociateStation()!= null){
 				for(AssociateStationDTO dto :cmd.getAssociateStation()){
 					OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(dto.getStationId());
-					station.setAssociateRoomId(room.getId());
+					station.setAssociateRoomId(cmd.getRoomId());
 					officeCubicleProvider.updateCubicle(station);
 				}
 			}
