@@ -1,16 +1,18 @@
 package com.everhomes.investment;
 
+import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.investment.*;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 public interface InvitedCustomerService {
@@ -45,5 +47,70 @@ public interface InvitedCustomerService {
     void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd);
 
     String signCustomerDataToThird(SignCustomerDataToThirdCommand cmd);
+
+    //========================统计相关代码========================
+    List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsDaily(GetAllCommunityCustomerStatisticsDailyCommand cmd);
+
+    List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsMonthly(GetAllCommunityCustomerStatisticsMonthlyCommand cmd);
+
+    GetCustomerStatisticResponse getCustomerStatisticsDaily(GetCustomerStatisticsCommand cmd);
+
+    GetCustomerStatisticResponse getCustomerStatisticsDailyTotal(GetCustomerStatisticsCommand cmd);
+
+    GetCustomerStatisticResponse getCustomerStatisticsMonthly(GetCustomerStatisticsCommand cmd);
+
+    GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsCommand cmd);
+
+    StatisticDataDTO getCustomerStatisticsTotal(GetCustomerStatisticsCommand cmd);
+
+    GetCustomerStatisticResponse getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd);
+
+    void initCustomerStatusToDB();
+
+    void recordCustomerLevelChange(Long oldLevelItemId, Long newLevelItemId, Integer namespaceId, Long communityId, Long customerId, Timestamp changeDate);
+
+    void changeCustomerLevel(EnterpriseCustomer customer, Long levelItemId);
+
+    void changeCustomerLevelByCustomerId(Long customerId, Long levelItemId);
+
+    void createCustomerLevelByCustomerId(Long customerId, Long newLevelItemId);
+
+    List<StatisticDataDTO> startCustomerStatisticTotal(StatisticTime time);
+
+    List<StatisticDataDTO> startCustomerStatistic(StatisticTime time);
+
+    StatisticTime getBeforeForStatistic(Date date, int type);
+
+    void statisticCustomerTotal(Date date);
+
+    void statisticCustomerAll(Date date);
+
+    StatisticTime getNowForStatistic(Date date, int type);
+
+    void statisticCustomerDailyTotal(Date date);
+
+    void statisticCustomerDaily(Date date);
+
+    void statisticCustomerMonthlyTotal(Date date);
+
+    void statisticCustomerMonthly(Date date);
+
+    void testCustomerStatistic(TestCreateCustomerStatisticCommand cmd);
+
+    java.sql.Date getDateByTimestamp(Timestamp time);
+
+    GetCustomerStatisticNowResponse queryCustomerStatisticMonthlyNow(GetCustomerStatisticNowCommand cmd);
+
+    CustomerStatisticsDTO queryCustomerStatisticMonthlyTotalNow(GetCustomerStatisticsCommand cmd);
+
+    GetCustomerStatisticNowResponse queryCustomerStatisticDailyNow(GetCustomerStatisticNowCommand cmd);
+
+    CustomerStatisticsDTO queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsCommand cmd);
+
+    CustomerStatisticsDTO queryCustomerStatisticTotal(GetCustomerStatisticsCommand cmd);
+
+    void exportCustomerStatistic(ExportCustomerStatisticsCommand cmd);
+
+    OutputStream exportOutputStreamCustomerStatistic(ExportCustomerStatisticsCommand cmd, Long taskId, Byte exportType);
 
 }

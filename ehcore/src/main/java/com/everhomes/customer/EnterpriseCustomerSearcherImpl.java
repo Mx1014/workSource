@@ -67,6 +67,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -159,6 +160,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
 
+            //EnterpriseCustomer customerTemp = enterpriseCustomerProvider.findById(customer.getId());
             builder.field("id", customer.getId());
             builder.field("ownerId", customer.getOwnerId());
             builder.field("communityId", customer.getCommunityId());
@@ -176,6 +178,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
             builder.field("lastTrackingTime" , customer.getLastTrackingTime());
             builder.field("updateTime" , customer.getUpdateTime());
+            builder.field("createTime" , customer.getCreateTime());
             builder.field("propertyType" , customer.getPropertyType());
             builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
             builder.field("propertyArea" , customer.getPropertyArea());
@@ -220,6 +223,17 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                     }
                 });
                 builder.field("customerContactName", StringUtils.join(customerContactName, "|"));
+            }
+            List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId(),InvitedCustomerType.INVITED_CUSTOMER.getCode());
+            if(trackings != null && trackings.size() > 0){
+                List<Timestamp> trackingTime = new ArrayList<>();
+
+                trackings.forEach(r -> {
+                    if(r.getTrackingTime() != null){
+                        trackingTime.add(r.getTrackingTime());
+                    }
+                });
+                builder.field("trackingTime", trackingTime);
             }
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
@@ -449,12 +463,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
 
         //跟进时间、资产类型、资产面积、资产单价增加筛选
-        if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
+        /*if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
         	RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
         	Long startTime = getTomorrowLastTimestamp(cmd.getLastTrackingTime());
         	rf.gte(startTime);
         	fb = FilterBuilders.andFilter(fb, rf); 
-        }
+        }*/
 
         if(cmd.getTrackerUids() != null && cmd.getTrackerUids().size()>0){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackerUid", cmd.getTrackingUids()));
@@ -481,26 +495,51 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         	
         }
 
+        FilterBuilder rfbt = null;
+
         if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
+            RangeFilterBuilder rf1 = new RangeFilterBuilder("trackingTime");
+            RangeFilterBuilder rf2 = new RangeFilterBuilder("createTime");
+            Long startTime = cmd.getMinTrackingPeriod();
+            Long endTime = cmd.getMaxTrackingPeriod();
+            if(null != startTime){
+                rf1.gte(new Timestamp(startTime));
+                rf2.gte(new Timestamp(startTime));
+            }
+            if(null != endTime){
+                rf1.lte(new Timestamp(endTime));
+                rf2.lte(new Timestamp(endTime));
+            }
+            rfbt = FilterBuilders.orFilter(rf1, rf2);
+            fb = FilterBuilders.andFilter(fb, rfbt);
+
+        }
+
+        /*if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
             if(null != cmd.getMinTrackingPeriod() && null != cmd.getMaxTrackingPeriod()){
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+                RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
                 Long startTime = cmd.getMinTrackingPeriod();
                 Long endTime = cmd.getMaxTrackingPeriod();
                 rf.gte(new Timestamp(startTime));
                 rf.lte(new Timestamp(endTime));
-                fb = FilterBuilders.andFilter(fb, rf);
+                rfbt2 = FilterBuilders.orFilter(fb, rf);
             }else if(null != cmd.getMinTrackingPeriod() && null == cmd.getMaxTrackingPeriod()){
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+                RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
                 Long startTime = cmd.getMinTrackingPeriod();
                 rf.gte(startTime);
-                fb = FilterBuilders.andFilter(fb, rf);
+                rfbt2 = FilterBuilders.andFilter(fb, rf);
             }else{
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+                RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
                 Long endTime = cmd.getMaxTrackingPeriod();
                 rf.lte(endTime);
-                fb = FilterBuilders.andFilter(fb, rf);
+                rfbt2 = FilterBuilders.andFilter(fb, rf);
             }
-        }
+            rfbt1 = FilterBuilders.orFilter(rfbt1, rfbt2);
+            fb = FilterBuilders.andFilter(fb, rfbt1);
+        }*/
+
+
+
 
         if(null != cmd.getRequirementMinArea() || null != cmd.getRequirementMaxArea()){
             if(null != cmd.getRequirementMinArea() && null != cmd.getRequirementMaxArea()){

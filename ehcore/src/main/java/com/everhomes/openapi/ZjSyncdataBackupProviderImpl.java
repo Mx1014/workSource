@@ -13,6 +13,7 @@ import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
 import com.everhomes.server.schema.tables.records.EhZjSyncdataBackupRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -83,7 +84,9 @@ public class ZjSyncdataBackupProviderImpl implements ZjSyncdataBackupProvider {
         SelectQuery<EhZjSyncdataBackupRecord> query = context.selectQuery(Tables.EH_ZJ_SYNCDATA_BACKUP);
 
         query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.UPDATE_COMMUNITY.eq(communityIdentifier));
+        if(StringUtils.isNotBlank(communityIdentifier)) {
+            query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.UPDATE_COMMUNITY.eq(communityIdentifier));
+        }
         query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.DATA_TYPE.eq(dataType));
         query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
