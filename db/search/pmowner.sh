@@ -1,4 +1,4 @@
-m/searchOrganizationOwnersELASTIC=elasticsearch:9200
+ELASTIC=elasticsearch:9200
 INDEX=everhomesv3
 
 curl -XDELETE http://$ELASTIC/$INDEX/_mapping/pmowner
