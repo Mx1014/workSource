@@ -2259,8 +2259,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				officeCubicleProvider.getOfficeCubicleStationRentByTime(cmd.getSpaceId(), (byte)1, (byte)0, cmd.getBeginTime(),cmd.getEndTime());
 		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
+		int i = 0;
+		int j = 0;
 		for (OfficeCubicleStation s :station){
-			int i =0;
 			for (OfficeCubicleStationRent rs:rentStation){
 				if (rs.getStationId() == s.getId()){
 					station.remove(i);
@@ -2269,13 +2270,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			i++;
 		}
 		for (OfficeCubicleRoom r :room){
-			int i =0;
 			for (OfficeCubicleStationRent rs:rentRoom){
 				if (rs.getStationId() == r.getId()){
-					station.remove(i);
+					station.remove(j);
 				}
 			}
-			i++;
+			j++;
 		}
 		for (OfficeCubicleStation s : station){
 			StationDTO dto = new StationDTO();
