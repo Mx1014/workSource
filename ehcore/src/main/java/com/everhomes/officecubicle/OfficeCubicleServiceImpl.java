@@ -1102,8 +1102,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (refundRule != null){
 			officeCubicleProvider.deleteRefundRule(cmd.getSpaceId());
 		}
-		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
-		officeCubicleProvider.updateSpace(space);
 		if (cmd.getRefundStrategies()!=null){
 			officeCubicleProvider.deleteRefundRule(cmd.getSpaceId());
 			for(OfficeCubicleRefundRuleDTO dto :cmd.getRefundStrategies()){
@@ -2264,9 +2262,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
 		List<OfficeCubicleStation> rentStation = 
-				officeCubicleProvider.getOfficeCubicleStationByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime());
-		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null);
-		List<OfficeCubicleRoom> rentRoom = officeCubicleProvider.getOfficeCubicleRoomByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime());
+				officeCubicleProvider.getOfficeCubicleStationByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),cmd.getKeyword());
+		List<OfficeCubicleRoom> room = 
+				officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,cmd.getKeyword());
+		List<OfficeCubicleRoom> rentRoom = 
+				officeCubicleProvider.getOfficeCubicleRoomByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),cmd.getKeyword());
 		station.addAll(rentStation);
 		room.addAll(rentRoom);
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
@@ -2307,7 +2307,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			stationNums = station.size();
 		}
 		resp.setStationNums(stationNums);
-		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,null,null);
+		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,null,null,null);
 		if (room!=null){
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
@@ -2371,9 +2371,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		GetRoomByStatusResponse resp = new GetRoomByStatusResponse();
 		List<OfficeCubicleRoom> room = new ArrayList<OfficeCubicleRoom>();
 		if(cmd.getStatus() == 0){
-			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),cmd.getStatus(),null,null);
+			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),cmd.getStatus(),null,null,null);
 		} else{
-			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,cmd.getStatus(),null);
+			room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,cmd.getStatus(),null,null);
 		}
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
@@ -2538,7 +2538,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)2);
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
-			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null);
+			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null,null);
 			Integer stationSize = 0;
 			Integer roomSize = 0;
 			if (station !=null){

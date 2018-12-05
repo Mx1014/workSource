@@ -826,17 +826,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public List<OfficeCubicleStation> getOfficeCubicleStationByTime(Long spaceId, Byte rentFlag,Long beginDate,Long endDate) {
+	public List<OfficeCubicleStation> getOfficeCubicleStationByTime(Long spaceId, Byte rentFlag,Long beginDate,Long endDate,String keyword) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-//		SelectQuery<EhOfficeCubicleStationRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION);
-//		if (spaceId != null)
-//			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.SPACE_ID.eq(spaceId));
-//		if (rentFlag != null)
-//			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.eq(rentFlag));
-//		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.BEGIN_TIME.gt(new Timestamp(endDate)));
-//		query.addConditions(Operator.OR,Tables.EH_OFFICE_CUBICLE_STATION.END_TIME.lt(new Timestamp(beginDate)));
-//		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStation.class));
-//		
         com.everhomes.server.schema.tables.EhOfficeCubicleStation t = Tables.EH_OFFICE_CUBICLE_STATION;
 
         Condition beginTime = t.EH_OFFICE_CUBICLE_STATION.BEGIN_TIME.gt(new Timestamp(endDate));
@@ -846,12 +837,13 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
                 .where(t.SPACE_ID.eq(spaceId))
                 .and(t.RENT_FLAG.eq(rentFlag))
                 .and(t.STATUS.eq((byte)2))
+                .and(t.STATION_NAME.like("%"+keyword+"%"))
                 .and(beginTime.or(endTime))
                 .fetchInto(OfficeCubicleStation.class);
 	}
 	
 	@Override
-	public List<OfficeCubicleRoom> getOfficeCubicleRoomByTime(Long spaceId, Byte rentFlag,Long beginDate,Long endDate) {
+	public List<OfficeCubicleRoom> getOfficeCubicleRoomByTime(Long spaceId, Byte rentFlag,Long beginDate,Long endDate,String keyword) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 //		
         com.everhomes.server.schema.tables.EhOfficeCubicleRoom t = Tables.EH_OFFICE_CUBICLE_ROOM;
@@ -863,6 +855,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
                 .where(t.SPACE_ID.eq(spaceId))
                 .and(t.RENT_FLAG.eq(rentFlag))
                 .and(t.STATUS.eq((byte)2))
+                .and(t.ROOM_NAME.like("%"+keyword+"%"))
                 .and(beginTime.or(endTime))
                 .fetchInto(OfficeCubicleRoom.class);
 	}
@@ -917,7 +910,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType,Long spaceId,Byte rentFlag, Byte status, Long roomId) {
+	public List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType,Long spaceId,Byte rentFlag, Byte status, Long roomId,String keyword) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleRoomRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_ROOM);
 		query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.SPACE_ID.eq(spaceId));
@@ -927,6 +920,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.STATUS.eq(status));
 		if (roomId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.ID.eq(roomId));
+		if (keyword !=null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.ROOM_NAME.like("%" + keyword +"%"));
 		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleRoom.class));
 	}
 	
