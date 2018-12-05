@@ -9112,7 +9112,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					}
 				}
 			}
-		}else{
+		}else if (cmd.getOrganizationId() != null){
             sceneType = SceneType.ENTERPRISE.getCode();
             if (cmd.getOrganizationId().equals(manageOrganization.getId()))
                 sceneType = SceneType.PM_ADMIN.getCode();
