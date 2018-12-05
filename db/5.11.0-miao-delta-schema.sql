@@ -133,7 +133,15 @@ CREATE TABLE `eh_office_cubicle_refund_rule` (
   `factor` DOUBLE COMMENT '价格系数',
   `create_time` DATETIME,
   `creator_uid` BIGINT,
-  `refund_tip` VARCHAR(255),
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_office_cubicle_refund_tips` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `space_id` BIGINT,
+  `refund_strategy` TINYINT,
+  `tips` VARCHAR(255),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
