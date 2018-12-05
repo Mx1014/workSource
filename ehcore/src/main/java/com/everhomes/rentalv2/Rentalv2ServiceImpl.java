@@ -1306,7 +1306,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
             }
         }
         //至少提前时间
-        Long time = now;if (NormalFlag.NEED.getCode() == rule.getRentalEndTimeFlag()) {
+        Long time = now;
+        if (NormalFlag.NEED.getCode() == rule.getRentalEndTimeFlag()) {
 			time = now + rule.getRentalEndTime();
 			if (time > showTimeStart) {
 				segmentTree.putSegment(showTimeStart, time, 1);
