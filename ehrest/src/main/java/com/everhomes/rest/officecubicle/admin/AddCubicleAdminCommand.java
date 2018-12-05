@@ -41,7 +41,16 @@ public class AddCubicleAdminCommand {
 	private Long appId;
 	private Integer namespaceId;
 	private Long associateRoom;
+	private Long stationId;
 	
+
+	public Long getStationId() {
+		return stationId;
+	}
+
+	public void setStationId(Long stationId) {
+		this.stationId = stationId;
+	}
 
 	public Long getSpaceId() {
 		return spaceId;

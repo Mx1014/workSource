@@ -17,3 +17,7 @@ INSERT INTO `eh_locale_strings`(`id`,`scope`, `code`, `locale`, `text`) VALUES (
 INSERT INTO `eh_locale_strings`(`id`,`scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'officecubicle', '10011', 'zh_CN', '参数错误');
 INSERT INTO `eh_locale_strings`(`id`,`scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'officecubicle', '10012', 'zh_CN', '退款失败');
 INSERT INTO `eh_locale_strings`(`id`,`scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'officecubicle', '10013', 'zh_CN', '工位数量不足');
+
+
+UPDATE eh_service_modules SET instance_config = '{"url":"${home.url}/station-booking-web/build/index.html?ns=%s#/home#sign_suffix","currentProjectOnly":0}' WHERE id = 40200;
+UPDATE eh_service_modules SET `host` = 'station-booking-web' WHERE module_id = 40200;

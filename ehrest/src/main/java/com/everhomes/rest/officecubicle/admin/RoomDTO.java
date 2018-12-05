@@ -30,7 +30,9 @@ public class RoomDTO {
     private Long rentDate;
     private String coverUrl;
     
-    public String getCoverUrl() {
+    
+
+	public String getCoverUrl() {
 		return coverUrl;
 	}
 

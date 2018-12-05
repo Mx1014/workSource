@@ -16,6 +16,8 @@ CREATE TABLE `eh_office_cubicle_station` (
   `price` DECIMAL(10,2) COMMENT '价格',
   `associate_room_id` BIGINT COMMENT '关联办公室id',
   `status` TINYINT COMMENT '1-未预定，2-已预定',
+  `begin_time` DATETIME COMMENT '预定开始时间',
+  `end_time` DATETIME COMMENT '预定结束时间',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -35,6 +37,8 @@ CREATE TABLE `eh_office_cubicle_room` (
   `description` TEXT COMMENT '描述',
   `price` DECIMAL(10,2) COMMENT '价格',
   `status` TINYINT COMMENT '1-未预定，2-已预定',
+  `begin_time` DATETIME COMMENT '预定开始时间',
+  `end_time` DATETIME COMMENT '预定结束时间',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -78,10 +82,10 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `price` DECIMAL(10,2) COMMENT '价格',
   `rent_count` BIGINT COMMENT '预定数量',
   `remark` TEXT COMMENT '备注',
-  `reserverName` VARCHAR(32) COMMENT '预定人姓名',
-  `reserverEnterpriseName` VARCHAR(64) COMMENT '预定人公司名称',
-  `reserverEnterpriseId` BIGINT COMMENT '预定人公司ID',
-  `reserverContactToken` BIGINT COMMENT '预定人联系方式',
+  `reserver_name` VARCHAR(32) COMMENT '预定人姓名',
+  `reserver_enterprise_name` VARCHAR(64) COMMENT '预定人公司名称',
+  `reserver_enterprise_Id` BIGINT COMMENT '预定人公司ID',
+  `reserver_contact_token` VARCHAR(64) COMMENT '预定人联系方式',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,

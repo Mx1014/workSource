@@ -166,6 +166,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	public void createAttachments(OfficeCubicleAttachment attachment) {
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleAttachments.class));
 		attachment.setId(id);
+		attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleAttachmentsRecord record = ConvertHelper.convert(attachment, EhOfficeCubicleAttachmentsRecord.class);
 		InsertQuery<EhOfficeCubicleAttachmentsRecord> query = context.insertQuery(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
@@ -248,22 +249,14 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	
 	@Override
 	public void deleteChargeUsers(Long spaceId) {
-	    dbProvider.execute(r -> {
-	    	//删除原来的设置
-	    	getReadWriteContext().delete(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS)
-			.where(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS.SPACE_ID.eq(spaceId));
-		    return null;
-	    });
+		dbProvider.getDslContext(AccessSpec.readOnly()).delete(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS)
+		.where(Tables.EH_OFFICE_CUBICLE_CHARGE_USERS.SPACE_ID.equal(spaceId)).execute();
 	}
 	
 	@Override
 	public void deleteRefundRule(Long spaceId) {
-	    dbProvider.execute(r -> {
-	    	//删除原来的设置
-	    	getReadWriteContext().delete(Tables.EH_OFFICE_CUBICLE_REFUND_RULE)
-			.where(Tables.EH_OFFICE_CUBICLE_REFUND_RULE.SPACE_ID.eq(spaceId));
-		    return null;
-	    });
+		dbProvider.getDslContext(AccessSpec.readOnly()).delete(Tables.EH_OFFICE_CUBICLE_REFUND_RULE)
+		.where(Tables.EH_OFFICE_CUBICLE_REFUND_RULE.SPACE_ID.equal(spaceId)).execute();
 	}
 	
 	@Override
@@ -284,6 +277,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleRoomDao dao = new EhOfficeCubicleRoomDao(context.configuration());
+		room.setOperatorUid(UserContext.currentUserId());
+		room.setOperateTime(new Timestamp(System.currentTimeMillis()));
 		dao.update(room);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleRoom.class, room.getId());
 
@@ -294,8 +289,10 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleStationDao dao = new EhOfficeCubicleStationDao(context.configuration());
+		station.setOperatorUid(UserContext.currentUserId());
+		station.setOperateTime(new Timestamp(System.currentTimeMillis()));
 		dao.update(station);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleRoom.class, station.getId());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleStation.class, station.getId());
 
 	}
 	
@@ -365,7 +362,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.BEGIN_TIME.gt(new Timestamp(beginDate)));
 		if (null != endDate)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.END_TIME.lt(new Timestamp(endDate)));
-		if (null != paidType)
+		if (StringUtils.isNotBlank(paidType))
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.PAID_TYPE.eq(paidType));
 		if (null != paidMode)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.PAID_MODE.eq(paidMode));
@@ -408,12 +405,10 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public void deleteAttachmentsBySpaceId(Long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		DeleteWhereStep<EhOfficeCubicleAttachmentsRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id);
-		step.where(condition);
-		step.execute();
+	public void deleteAttachmentsBySpaceId(Long id,Byte type) {
+		dbProvider.getDslContext(AccessSpec.readOnly()).delete(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS)
+		.where(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id))
+		.and(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.TYPE.equal(type)).execute();
 	}
 
 	@Override
@@ -809,8 +804,10 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	public List<OfficeCubicleStation> getOfficeCubicleStation(Long ownerId, String ownerType,Long spaceId, Long roomId, Byte rentFlag, String keyword,Byte status,Long stationId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleStationRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION);
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_ID.eq(ownerId));
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_TYPE.eq(ownerType));
+		if(ownerId!=null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_ID.eq(ownerId));
+		if(ownerType!=null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.OWNER_TYPE.eq(ownerType));
 		if (spaceId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.SPACE_ID.eq(spaceId));
 		if (roomId != null)
@@ -854,6 +851,22 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_TYPE.eq(stationType));
 		if (stationId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_ID.eq(stationId));
+		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStationRent.class));
+	}
+	
+	@Override
+	public List<OfficeCubicleStationRent> getOfficeCubicleStationRentByTime(Long spaceId, Byte rentType,Byte stationType,Long beginDate, Long endDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOfficeCubicleStationRentRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId));
+		if (rentType!=null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType));
+		if (stationType != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_TYPE.eq(stationType));
+		if (beginDate != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.lt(new Timestamp(beginDate)));
+		if (endDate != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.lt(new Timestamp(endDate)));
 		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStationRent.class));
 	}
 	

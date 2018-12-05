@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 归属的类型</li>
- * <li>communityId: 归属的ID，如小区ID</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>spaceId: 空间ID</li>
  * <li>refundStrategy: 退款策略{@link com.everhomes.rest.rentalv2.admin.RentalOrderStrategy}</li>
  * <li>refundStrategies:退款策略{@link com.everhomes.rest.officecubicle.OfficeCubicleRefundRuleDTO}</li>
@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
 public class UpdateOfficeCubicleRefundRuleCommand {
     private Integer namespaceId;
     private String ownerType;
-    private Long communityId;
+    private Long ownerId;
     private Long spaceId;
     private Byte refundStrategy;
     private String refundTip;
@@ -42,15 +42,15 @@ public class UpdateOfficeCubicleRefundRuleCommand {
         this.ownerType = ownerType;
     }
 
-    public Long getCommunityId() {
-        return communityId;
-    }
+    public Long getOwnerId() {
+		return ownerId;
+	}
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
 
-    public Long getSpaceId() {
+	public Long getSpaceId() {
 		return spaceId;
 	}
 

@@ -5,12 +5,12 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>chargeUId: 负责人ID</li>
+ * <li>chargeUid: 负责人ID</li>
  * <li>chargeName: 负责人姓名</li>
  * </ul>
  */
 public class ChargeUserDTO {
-    private Long chargeUId;
+    private Long chargeUid;
     private String chargeName;
 
 
@@ -20,14 +20,20 @@ public class ChargeUserDTO {
     }
 
 
-	public Long getChargeUId() {
-		return chargeUId;
+	public Long getChargeUid() {
+		return chargeUid;
 	}
 
 
-	public void setChargeUId(Long chargeUId) {
-		this.chargeUId = chargeUId;
+
+
+
+	public void setChargeUid(Long chargeUid) {
+		this.chargeUid = chargeUid;
 	}
+
+
+
 
 
 	public String getChargeName() {
