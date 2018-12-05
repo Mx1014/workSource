@@ -35,5 +35,6 @@ public interface ContractErrorCode {
 
     //合同报表模块
     int CONTRACT_STATICS_TIME_DIMENSION_ERROR = 30001;//合同报表查询时间错误
+    int CONTRACT_STATICS_COMMUNITYS_ERROR = 30002;//合同报表查询园区错误
 
 }

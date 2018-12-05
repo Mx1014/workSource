@@ -4765,7 +4765,10 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 //		}
 		communityStatistics.setContractCount((communityStatistics.getContractCount() != null ? communityStatistics.getContractCount() : 0) + 1);
 		communityStatistics.setCustomerCount((communityStatistics.getCustomerCount() != null ? communityStatistics.getCustomerCount() : 0) + 1);
-		communityStatistics.setDepositAmount((communityStatistics.getDepositAmount() != null ? communityStatistics.getDepositAmount() : BigDecimal.ZERO).add(contract.getDeposit() != null ? contract.getDeposit() : BigDecimal.ZERO));
+		//只统计正常合同押金
+		if (contract.getStatus() == ContractStatus.ACTIVE.getCode()) {
+			communityStatistics.setDepositAmount((communityStatistics.getDepositAmount() != null ? communityStatistics.getDepositAmount() : BigDecimal.ZERO).add(contract.getDeposit() != null ? contract.getDeposit() : BigDecimal.ZERO));
+		}
 		ContractType contractType = ContractType.fromStatus(contract.getContractType());
 		if (contractType == null) {
 			communityStatistics.setNewContractCount((communityStatistics.getNewContractCount() != null ? communityStatistics.getNewContractCount() : 0) + 1);
@@ -4868,6 +4871,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	
 	@Override
 	public ListCommunityContractReportFormResponse searchContractStaticsList(SearchContractStaticsListCommand cmd) {
+		if (cmd.getCommunityIds() == null || "".equals(cmd.getCommunityIds()) || cmd.getCommunityIds().size()<1) {
+        	LOGGER.error("communitys cmd =", cmd);
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.CONTRACT_STATICS_COMMUNITYS_ERROR,
+					"contract_statics_communitys_error is error");
+		}
+		
 		ListCommunityContractReportFormResponse response = new ListCommunityContractReportFormResponse();
 		
 		Long pageAnchor = cmd.getPageAnchor();
@@ -4896,6 +4905,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
             resultList = contractProvider.listSearchContractStaticsTimeDimension(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
 		}else {
 	        formatDateStr = cmd.getDateStr();
+	        if ("".equals(formatDateStr) || formatDateStr == null) {
+	        	LOGGER.error("contractStaticsListTimeDimension cmd =", cmd);
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.CONTRACT_STATICS_TIME_DIMENSION_ERROR,
+						"contract statics time dimension is error");
+			}
 	        resultList = contractProvider.listCommunityContractStaticsList(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
 		}
         
@@ -4913,6 +4927,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	
 	@Override
 	public ListContractStaticsTimeDimensionResponse contractStaticsListTimeDimension(SearchContractStaticsListCommand cmd) {
+		if (cmd.getCommunityIds() == null || "".equals(cmd.getCommunityIds()) || cmd.getCommunityIds().size()<1) {
+        	LOGGER.error("communitys cmd =", cmd);
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.CONTRACT_STATICS_COMMUNITYS_ERROR,
+					"contract_statics_communitys_error is error");
+		}
 		ListContractStaticsTimeDimensionResponse response = new ListContractStaticsTimeDimensionResponse();
 		
 		Long pageAnchor = cmd.getPageAnchor();
@@ -5000,6 +5019,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	
 	@Override
 	public TotalContractStaticsDTO getTotalContractStatics(GetTotalContractStaticsCommand cmd){
+		if (cmd.getCommunityIds() == null || "".equals(cmd.getCommunityIds()) || cmd.getCommunityIds().size()<1) {
+        	LOGGER.error("communitys cmd =", cmd);
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.CONTRACT_STATICS_COMMUNITYS_ERROR,
+					"contract_statics_communitys_error is error");
+		}
         String startTimeStr = cmd.getStartTimeStr();
         String endTimeStr = cmd.getEndTimeStr();
         String formatDateStr = cmd.getEndTimeStr();
@@ -5643,6 +5667,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
     
 	@Override
 	public ListContractStaticsTimeDimensionResponse contractStaticsListCommunityTotal(SearchContractStaticsListCommand cmd) {
+		if (cmd.getCommunityIds() == null || "".equals(cmd.getCommunityIds()) || cmd.getCommunityIds().size()<1) {
+        	LOGGER.error("communitys cmd =", cmd);
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.CONTRACT_STATICS_COMMUNITYS_ERROR,
+					"contract_statics_communitys_error is error");
+		}
 		ListContractStaticsTimeDimensionResponse response = new ListContractStaticsTimeDimensionResponse();
 		
 		Long pageAnchor = cmd.getPageAnchor();
@@ -5668,6 +5697,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
         	endTimeStr = cmd.getEndTimeStr();
 		}else {
 	        formatDateStr = cmd.getDateStr();
+	        if ("".equals(formatDateStr) || formatDateStr == null) {
+	        	LOGGER.error("contractStaticsListTimeDimension cmd =", cmd);
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.CONTRACT_STATICS_TIME_DIMENSION_ERROR,
+						"contract statics time dimension is error");
+			}
 		}
         
         List<TotalContractStaticsDTO> resultList = contractProvider.listcontractStaticsListCommunityTotal(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,startTimeStr,endTimeStr,cmd.getDateType(),pageOffSet,pageSize);
