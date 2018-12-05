@@ -2539,6 +2539,15 @@ public class AssetProviderImpl implements AssetProvider {
     		.where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
             .execute();
     }
+    
+    public void deleteBillItemByBillId(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //删除费项（置状态）
+        context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+    		.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+    		.where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+            .execute();
+    }
 
     @Override
     public void deletExemptionItem(Long exemptionItemId) {
