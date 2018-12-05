@@ -1,19 +1,4 @@
-#
-# Core service configuration
-#
-logging.path: ./
-logging.file: ehcore.log
-logging.level.: INFO
-
-#spring.view.prefix: /WEB-INF/jsp/
-#spring.view.suffix: .jsp
-
-#
-# Server configuration
-#
-
-#server.address:
-#server.port:
+# # Core service configuration # logging.path: ./ logging.file: ehcore.log logging.level.: INFO #spring.view.prefix: /WEB-INF/jsp/ #spring.view.suffix: .jsp # # Server configuration # #server.address: #server.port:
 #server.sessionTimeout:
 
 #server.port: 8443
@@ -55,7 +40,7 @@ endpoint.mappings: true
 management.security.enabled: false
 management.security.role: SUPERUSER
 management.context-path: /manage
-management.port: 8082
+management.port: 8080
 
 spring.jmx.enabled: true
 endpoints.jmx.domain: ehcore
@@ -76,44 +61,48 @@ messaging.routing.block.size: 1000
 #
 # iOS cert
 #
-apns.certname: apns-product
+apns.certname: apns-develop
 
 forum.postbox.size: 1000
 forum.flush.interval: 3000
 
-javadoc.root: http://localhost:8080/apidocs
+javadoc.root: http://alpha.lab.everhomes.com/evh/static/apidocs
 javadoc.location: file:///Users/kelveny/archive/ehng/apidocs/
 web.location: /resources/
 
 #
 # Redis configuration
 #
-redis.bus.host: redis-server
+redis.bus.host:  10.1.120.64
 redis.bus.port: 6380
-redis.store.master.host: redis-server
+redis.store.master.host:  10.1.120.64
 redis.store.master.port: 6380
 
 #
 # Database configuration
 #
-db.driver: com.mysql.jdbc.Driver
-db.master: jdbc:mysql://root:123456@db-master:13302/ehcore?characterEncoding=UTF-8&encrypted=0
-db.conn.pool: 8
-db.conn.borrow.timeout: 60
-db.jta: false
-db.tx.timeout: 600
-        
+
+db:
+    driver: com.mysql.jdbc.Driver
+    master: jdbc:mysql://root:123456@10.1.120.99:13364/ehcore?characterEncoding=UTF-8&encrypted=0
+    conn:
+        pool: 100
+        borrow:
+            timeout: 60
+    jta: false
+    tx:
+        timeout: 600
+
 #
 # ElasticSearch configuration
 #
 elastic:    
-    index: everhomesv31x
+    index: everhomesv3
     nodes:
-        hosts: elasticsearch
-        cluster.name: elasticsearch10
+        hosts:  10.1.120.64
         ports: 9300
         httpports: 9200
-
+cluster.name: elasticsearch64
 #
 # for API code generation
 #
@@ -124,46 +113,41 @@ objc.header.ext: .h
 objc.source.ext: .m
 objc.response.base: EvhRestResponseBase
 
+biz.serverUrl: http://biz-beta.zuolin.com/zl-ec
+biz.appKey: 39628d1c-0646-4ff6-9691-2c327b03f9c4
+biz.secretKey: PSsIB9nZm3ENS3stei8oAvGa2afRW7wT+UxBn9li4C7JCfjCtHYJY6x76XDtUCUcXOUhkPYK9V/5r03pD2rquQ==
+
+#cluster.name: elasticsearch39
+
 class.name.prefix: Evh
 
-source.jars: ${EVH_HOME}/ehrest/target/ehrest-3.4.0-SNAPSHOT.jar
-source.excludes: com.everhomes.rest.rpc.*, com.everhomes.rest.RestResponse, com.everhomes.rest.RestResponseBase, com.everhomes.rest.RestVersion
-destination.dir: ${EVH_IOS_HOME}/ehrest-respios/src/main/ios/API-objects
+
+source.jars: ${EVH_HOME}/ehrest/target/ehrest-0.0.1-SNAPSHOT.jar
+source.excludes: com.everhomes.rpc.*, com.everhomes.rest.RestResponse, com.everhomes.rest.RestResponseBase, com.everhomes.rest.RestVersion
+destination.dir: ${EVH_IOS_HOME}/API-objects/
 destination.dir.java: ${EVH_HOME}/ehrest-response/src/main/java/
 
-src.path: E:/workspace/ehnextgen
-
+src.path: /data1/ehserver/server/core 
 equipment.ip: 127.0.0.1
 
 #A1234567890Z为测试账号
 ems.sys.account: A1234567890Z
-ems.sys.password: e10adc3949ba59abbe56e057f20f883e
+ems.sys.password: Test123456
 
 schedule.running.flag: 1
 
 
-# current core id
-core.server.id: 1
-# core server list
-core.server.list: 1,2
+#nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth2client.handler.RestCallTemplate, com.everhomes.flow.NashornApiService, com.everhomes.flow.NashornConfigService
 
-# 允许在 nashorn 中通过 Java.type 访问的类
 nashorn.class.includes:
   java.lang.*, java.util.*, java.io.*,
   com.everhomes.oauth2client.handler.RestCallTemplate,
   com.everhomes.scriptengine.nashorn.NashornApiService,
   com.everhomes.flow.FlowNashornConfigService
 
-# pay-sdk需要配置响应的环境变量才能正常使用。我们的实现方式是用spring的@value注释注入yml项目配置文件中的内容。
-#pay.appKey: 6caa8584-c723-4b7b-9aec-071b4e31418f
-#pay.secretKey: zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==
-#pay.payHomeUrl: http://payv2-alpha.zuolin.com/pay
-#pay.localServerUrl: http://ycx-pay-test.zuolin.com/evh
-
-# kafka
 spring.kafka:
-  enabled: true # 如果是自己的环境不需要 Kafka, 则把这个值配置为 false
-  bootstrap-servers: localhost:9092
+  enabled: false 
+  bootstrap-servers:  10.1.120.64:19092 # kafka的ip:port
   properties:
     request.timeout.ms: 20000
   producer:
@@ -181,15 +165,16 @@ spring.kafka:
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 spring:
-  application:
-    name: ehcore
+    application:
+        name: ehcore
 
 server:
   port: 8080
-
 eurekacli:
-  enabled: false
-  service-url: ${EUREKA_SERVICE_URL}
+    enabled: false
+    service-url: http:// 10.1.120.64:8880/eureka/ # 注册中心链接
+    instance-id: ${server.address}:${spring.application.name}:${server.port}
+    leaseRenewalIntervalInSeconds: 10
+    leaseExpirationDurationInSeconds: 30
 
-# 配置 xssFilter 的开关
-xss.enabled: true
+

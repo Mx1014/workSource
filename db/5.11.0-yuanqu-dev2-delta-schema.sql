@@ -133,6 +133,7 @@ CREATE TABLE `eh_office_cubicle_refund_rule` (
   `factor` DOUBLE COMMENT '价格系数',
   `create_time` DATETIME,
   `creator_uid` BIGINT,
+  `refund_tip` VARCHAR(255),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -140,7 +141,6 @@ CREATE TABLE `eh_office_cubicle_refund_rule` (
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN open_flag TINYINT COMMENT '是否开启空间，1是，0否';
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_nums VARCHAR(32) COMMENT '短租工位数量';
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN long_rent_price DECIMAL(10,2) COMMENT '长租工位价格';
-ALTER TABLE eh_office_cubicle_spaces ADD COLUMN refund_tip VARCHAR(255) COMMENT '退款提示';
 
 
 ALTER TABLE eh_office_cubicle_attachments ADD COLUMN type TINYINT COMMENT '1,空间，2短租工位，3开放式工位';
