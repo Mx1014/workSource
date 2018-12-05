@@ -31,8 +31,10 @@ import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.bill.NotifyThirdSignCommand;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.contract.CMBill;
 import com.everhomes.rest.contract.CMContractUnit;
@@ -325,6 +327,8 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
     	sourceTypeList.add(AssetSourceType.RENTAL_MODULE);
     	sourceTypeList.add(AssetSourceType.PRINT_MODULE);
     	cmd.setSourceTypeList(sourceTypeList);
+    	//物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+    	cmd.setThirdSign(AssetNotifyThirdSign.CORRECT.getCode());
     	LOGGER.info("AssetBillServiceImpl listOpenBills convertCmd={}", cmd);
         ListBillsResponse response = new ListBillsResponse();
         Long pageAnchor = cmd.getPageAnchor();
@@ -409,5 +413,12 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 			
 		}
 	}
+	
+	/**
+     * 物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+    */
+    public void notifyThirdSign(NotifyThirdSignCommand cmd)  {
+    	assetBillProvider.notifyThirdSign(cmd.getBillIdList());
+    }
 
 }

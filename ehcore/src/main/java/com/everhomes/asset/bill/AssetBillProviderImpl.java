@@ -22,6 +22,7 @@ import com.everhomes.rest.asset.AssetSubtractionType;
 import com.everhomes.rest.asset.BillGroupDTO;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
@@ -257,6 +258,15 @@ public class AssetBillProviderImpl implements AssetBillProvider {
 	            .execute();
             return null;
         });
+	}
+
+	public void notifyThirdSign(List<Long> billIdList) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.THIRD_SIGN, AssetNotifyThirdSign.ERROR.getCode()) //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+                .where(t.ID.in(billIdList))
+                .execute();
 	}
 
 

@@ -50,6 +50,7 @@ import com.everhomes.util.StringHelper;
  * <li>contractId:合同ID</li>
  * <li>sourceTypeList:物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过账单内是否包含服务费用（资源预定、云打印）</li>
  * <li>isCheckProperty:物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过楼宇资产管理数据的映射关系来判断是否为大小办公的场景</li>
+ * <li>thirdSign: 物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过账单内是否包含服务费用（资源预定、云打印）</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -97,6 +98,7 @@ public class ListBillsCommand {
     private Long updateTime;
     private Long contractId;
     private Byte isCheckProperty;//物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过楼宇资产管理数据的映射关系来判断是否为大小办公的场景
+    private Byte thirdSign;//物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
     
     public Long getCommunityId() {
         return communityId;
@@ -419,6 +421,14 @@ public class ListBillsCommand {
 
 	public void setIsCheckProperty(Byte isCheckProperty) {
 		this.isCheckProperty = isCheckProperty;
+	}
+
+	public Byte getThirdSign() {
+		return thirdSign;
+	}
+
+	public void setThirdSign(Byte thirdSign) {
+		this.thirdSign = thirdSign;
 	}
     
 }
