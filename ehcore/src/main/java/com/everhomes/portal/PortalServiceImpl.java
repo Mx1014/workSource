@@ -542,10 +542,10 @@ public class PortalServiceImpl implements PortalService {
             @Override
             public int compare(ServiceModuleEntryDTO o1, ServiceModuleEntryDTO o2) {
                 if (!o1.getTerminalType().equals(o2.getTerminalType())) {
-                    return o1.getTerminalType().compareTo(o2.getTerminalType());
+                    return o2.getTerminalType().compareTo(o1.getTerminalType());
                 }
                 if (!o1.getSceneType().equals(o2.getSceneType())) {
-                    return o2.getSceneType().compareTo(o1.getSceneType());
+                    return o1.getSceneType().compareTo(o2.getSceneType());
                 }
                 return 0;
             }
@@ -557,10 +557,10 @@ public class PortalServiceImpl implements PortalService {
             @Override
             public int compare(AppEntryDTO o1, AppEntryDTO o2) {
                 if (!o1.getTerminalType().equals(o2.getTerminalType())) {
-                    return o1.getTerminalType().compareTo(o2.getTerminalType());
+                    return o2.getTerminalType().compareTo(o1.getTerminalType());
                 }
                 if (!o1.getSceneType().equals(o2.getSceneType())) {
-                    return o2.getSceneType().compareTo(o1.getSceneType());
+                    return o1.getSceneType().compareTo(o2.getSceneType());
                 }
                 return 0;
             }
