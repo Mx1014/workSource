@@ -479,6 +479,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             if (itemsMap != null && itemsMap.size() > 0) {
 
                 statistics = invitedCustomerProvider.getInvitedCustomerStatistics(isAdmin, cmd.getKeyword(), cmd.getRequirementMinArea(), cmd.getRequirementMaxArea(), itemsMap.keySet(), itemsMap, (locator, query) -> {
+                    query.addJoin(Tables.EH_CUSTOMER_TRACKINGS, Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(Tables.EH_ENTERPRISE_CUSTOMERS.ID));
                     query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
                     query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(cmd.getCommunityId()));
                     if (cmd.getCorpIndustryItemId() != null) {
@@ -491,15 +492,16 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CUSTOMER_SOURCE.eq(cmd.getCustomerSource()));
                     }
                     if (cmd.getMinTrackingPeriod() != null) {
-                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod())).or(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod()))));
+                        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod())).or(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod()))));
                     }
                     if (cmd.getMaxTrackingPeriod() != null) {
-                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())).or(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod()))));
+                        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())).or(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod()))));
                     }
 
                     return query;
                 });
             }
+
             // add transfer Rate  infos
             addExtendInfo(statistics);
             response.setStatistics(statistics);
