@@ -541,6 +541,9 @@ public class PortalServiceImpl implements PortalService {
 	    Collections.sort(list, new Comparator<ServiceModuleEntryDTO>() {
             @Override
             public int compare(ServiceModuleEntryDTO o1, ServiceModuleEntryDTO o2) {
+                if (o1 == null || o2 == null) {
+                    return -1;
+                }
                 if (!o1.getTerminalType().equals(o2.getTerminalType())) {
                     return o2.getTerminalType().compareTo(o1.getTerminalType());
                 }
@@ -556,6 +559,9 @@ public class PortalServiceImpl implements PortalService {
         Collections.sort(list, new Comparator<AppEntryDTO>() {
             @Override
             public int compare(AppEntryDTO o1, AppEntryDTO o2) {
+                if (o1 == null || o2 == null) {
+                    return -1;
+                }
                 if (!o1.getTerminalType().equals(o2.getTerminalType())) {
                     return o2.getTerminalType().compareTo(o1.getTerminalType());
                 }
