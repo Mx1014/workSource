@@ -544,8 +544,14 @@ public class PortalServiceImpl implements PortalService {
                 if (o1 == null || o2 == null) {
                     return -1;
                 }
+                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
+                    return -1;
+                }
                 if (!o1.getTerminalType().equals(o2.getTerminalType())) {
                     return o2.getTerminalType().compareTo(o1.getTerminalType());
+                }
+                if (o1.getSceneType() == null || o2.getSceneType() == null) {
+                    return -1;
                 }
                 if (!o1.getSceneType().equals(o2.getSceneType())) {
                     return o1.getSceneType().compareTo(o2.getSceneType());
@@ -562,8 +568,14 @@ public class PortalServiceImpl implements PortalService {
                 if (o1 == null || o2 == null) {
                     return -1;
                 }
+                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
+                    return -1;
+                }
                 if (!o1.getTerminalType().equals(o2.getTerminalType())) {
                     return o2.getTerminalType().compareTo(o1.getTerminalType());
+                }
+                if (o1.getSceneType() == null || o2.getSceneType() == null) {
+                    return -1;
                 }
                 if (!o1.getSceneType().equals(o2.getSceneType())) {
                     return o1.getSceneType().compareTo(o2.getSceneType());
