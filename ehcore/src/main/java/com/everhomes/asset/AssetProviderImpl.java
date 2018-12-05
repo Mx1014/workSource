@@ -663,17 +663,14 @@ public class AssetProviderImpl implements AssetProvider {
         if(status!=null && status == 1){
             query.addOrderBy(t.STATUS);
         }
-        
         //瑞安CM对接，如果企业关联的是瑞安那边系统中的资产，则需要将这部分产生的账单查出来
-        //TODO 需要添加判断条件，判断是否增加此条件
-        if (true) {
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getIsCheckProperty())) {
 			query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES,JoinType.LEFT_OUTER_JOIN,t.TARGET_ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID));
 			query.addJoin(Tables.EH_ADDRESSES,JoinType.LEFT_OUTER_JOIN,Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID));
 			query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq("ruian_cm"));
 			query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()));
 			query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
 		}
-        
         query.addOrderBy(t.DATE_STR_BEGIN.desc());
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {

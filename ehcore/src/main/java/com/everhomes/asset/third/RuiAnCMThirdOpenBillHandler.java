@@ -31,6 +31,7 @@ import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.bill.AssetIsCheckProperty;
 import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
@@ -312,6 +313,9 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 	
 	/**
 	 * 物业缴费V7.4(瑞安项目-资产管理对接CM系统)
+	 * 同步判断规则：
+		1）通过第一章节楼宇资产管理数据的映射关系来判断是否为大小办公的场景；
+		2）通过账单内是否包含服务费用（资源预定、云打印）；
 	 */
 	public ListBillsResponse listOpenBills(ListBillsCommand cmd) {
     	LOGGER.info("AssetBillServiceImpl listOpenBills sourceCmd={}", cmd);
@@ -322,6 +326,8 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
     	List<Byte> switchList = new ArrayList<Byte>();
     	switchList.add(new Byte("1"));
     	cmd.setSwitchList(switchList);
+    	//通过楼宇资产管理数据的映射关系来判断是否为大小办公的场景
+    	cmd.setIsCheckProperty(AssetIsCheckProperty.CHECK.getCode());
     	//物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过账单内是否包含服务费用（资源预定、云打印）
     	List<String> sourceTypeList = new ArrayList<String>();
     	sourceTypeList.add(AssetSourceType.RENTAL_MODULE);
