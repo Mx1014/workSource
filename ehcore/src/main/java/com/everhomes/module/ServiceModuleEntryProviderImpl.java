@@ -249,4 +249,40 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleAppEntries.class, id);
     }
 
+    @Override
+    public void batchCreateAppEntry(List<ServiceModuleAppEntry> serviceModuleAppEntries) {
+        List<EhServiceModuleAppEntries> list = new ArrayList<>();
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppEntries.class));
+        for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntries) {
+            serviceModuleAppEntry.setId(id);
+            id++;
+            list.add(ConvertHelper.convert(serviceModuleAppEntries, EhServiceModuleAppEntries.class));
+        }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntries.class));
+        EhServiceModuleAppEntriesDao dao = new EhServiceModuleAppEntriesDao(context.configuration());
+        dao.insert(list);
+    }
+
+    @Override
+    public void batchDeleteAppEntry(List<ServiceModuleAppEntry> serviceModuleAppEntries) {
+        List<EhServiceModuleAppEntries> list = new ArrayList<>();
+        for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntries) {
+            list.add(ConvertHelper.convert(serviceModuleAppEntry, EhServiceModuleAppEntries.class));
+        }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntries.class));
+        EhServiceModuleAppEntriesDao dao = new EhServiceModuleAppEntriesDao(context.configuration());
+        dao.delete(list);
+    }
+
+    @Override
+    public void batchUpdateAppEntry(List<ServiceModuleAppEntry> serviceModuleAppEntries) {
+        List<EhServiceModuleAppEntries> list = new ArrayList<>();
+        for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntries) {
+            list.add(ConvertHelper.convert(serviceModuleAppEntry, EhServiceModuleAppEntries.class));
+        }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntries.class));
+        EhServiceModuleAppEntriesDao dao = new EhServiceModuleAppEntriesDao(context.configuration());
+        dao.update(list);
+    }
+
 }

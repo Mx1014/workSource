@@ -706,7 +706,7 @@ public class PortalServiceImpl implements PortalService {
 		return ConvertHelper.convert(portalLayout, PortalLayoutDTO.class);
 	}
 
-	@Override
+    @Override
 	public void deletePortalLayout(DeletePortalLayoutCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
@@ -1842,75 +1842,34 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
-	private void publishAppEntries(ServiceModuleApp app) {
-	    List<ServiceModuleAppEntry> appEntries = this.serviceModuleEntryProvider.listServiceModuleAppEntries(app.getOriginId(),null,
-                TerminalType.MOBILE.getCode(),null,null);
-
-        List<ServiceModuleEntry> moduleEntries = this.serviceModuleEntryProvider.listServiceModuleEntries(app.getModuleId(),null,
-                TerminalType.MOBILE.getCode(),null,null);
-        if (appEntries.size() > moduleEntries.size()) {
-            if (CollectionUtils.isEmpty(moduleEntries)) {
-                for (ServiceModuleAppEntry appEntry : appEntries) {
-                    this.serviceModuleEntryProvider.deleteAppEntry(appEntry.getId());
-                }
-            }else {
-                ServiceModuleEntry moduleEntry = moduleEntries.get(0);
-                for (ServiceModuleAppEntry appEntry : appEntries) {
-                    if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
-                        appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
-                        appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
-                        appEntry.setEntryName(moduleEntry.getEntryName());
-                        appEntry.setIconUri(moduleEntry.getIconUri());
-                        this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
-                    }else {
-                        this.serviceModuleEntryProvider.deleteAppEntry(appEntry.getId());
-                    }
-                }
-
-            }
-
-        }else if (appEntries.size() < moduleEntries.size()) {
-            if (CollectionUtils.isEmpty(appEntries)) {
-                for (ServiceModuleEntry moduleEntry : moduleEntries) {
-                    ServiceModuleAppEntry appEntry = ConvertHelper.convert(moduleEntry, ServiceModuleAppEntry.class);
-                    appEntry.setAppId(app.getOriginId());
-                    appEntry.setAppName(app.getName());
-                    appEntry.setId(null);
-                    this.serviceModuleEntryProvider.createAppEntry(appEntry);
-                }
-            }else {
-                ServiceModuleAppEntry appEntry = appEntries.get(0);
-                for (ServiceModuleEntry moduleEntry : moduleEntries) {
-                    if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
-                        appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
-                        appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
-                        appEntry.setEntryName(moduleEntry.getEntryName());
-                        appEntry.setIconUri(moduleEntry.getIconUri());
-                        this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
-                    }else {
-                        ServiceModuleAppEntry newAppEntry = ConvertHelper.convert(moduleEntry, ServiceModuleAppEntry.class);
-                        newAppEntry.setAppId(app.getOriginId());
-                        newAppEntry.setAppName(app.getName());
-                        newAppEntry.setId(null);
-                        this.serviceModuleEntryProvider.createAppEntry(newAppEntry);
-                    }
-                }
-            }
-        }else {
-        	if (!CollectionUtils.isEmpty(appEntries) && !CollectionUtils.isEmpty(moduleEntries)) {
-        	    for (ServiceModuleAppEntry appEntry : appEntries) {
-                    for (ServiceModuleEntry moduleEntry : moduleEntries) {
-                        if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
-                            appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
-                            appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
-                            appEntry.setEntryName(moduleEntry.getEntryName());
-                            appEntry.setIconUri(moduleEntry.getIconUri());
-                            this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
+    @Override
+    public void initAppEntryData() {
+        List<NamespaceInfoDTO> namespaceInfoDTOS = this.namespacesService.listNamespace();
+        List<ServiceModuleAppEntry> list = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(namespaceInfoDTOS)) {
+            for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
+                PortalVersion version = findReleaseVersion(namespaceInfoDTO.getId());
+                if (version != null) {
+                    List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(), version.getId(), null);
+                    if (!CollectionUtils.isEmpty(apps)) {
+                        for (ServiceModuleApp app : apps) {
+                            List<ServiceModuleEntry> moduleEntries = this.serviceModuleEntryProvider.listServiceModuleEntries(app.getModuleId(),null,
+                                    TerminalType.MOBILE.getCode(),null,null);
+                            if (!CollectionUtils.isEmpty(moduleEntries)) {
+                                for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                                    ServiceModuleAppEntry appEntry = ConvertHelper.convert(moduleEntry, ServiceModuleAppEntry.class);
+                                    appEntry.setAppId(app.getOriginId());
+                                    appEntry.setAppName(app.getName());
+                                    appEntry.setId(null);
+                                    list.add(appEntry);
+                                }
+                            }
                         }
                     }
                 }
             }
-		}
+        }
+        this.serviceModuleEntryProvider.batchCreateAppEntry(list);
     }
 
 	/**
@@ -2003,8 +1962,6 @@ public class PortalServiceImpl implements PortalService {
 				app.setCustomTag(customTag);
 				serviceModuleAppProvider.updateServiceModuleApp(app);
 			}
-			//发布应用入口信息 add by yanlong.liang 20181122
-            publishAppEntries(app);
 		}
 
 		/**

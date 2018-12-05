@@ -36,4 +36,10 @@ public interface ServiceModuleEntryProvider {
     ServiceModuleAppEntry findAppEntryById(Long id);
 
     void udpateAppEntry(ServiceModuleAppEntry serviceModuleAppEntry);
+
+    void batchCreateAppEntry(List<ServiceModuleAppEntry> serviceModuleAppEntries);
+
+    void batchDeleteAppEntry(List<ServiceModuleAppEntry> serviceModuleAppEntries);
+
+    void batchUpdateAppEntry(List<ServiceModuleAppEntry> serviceModuleAppEntries);
 }

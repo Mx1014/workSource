@@ -700,4 +700,18 @@ public class PortalController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <p>初始化应用入口数据</p>
+	 * <b>URL: /portal/initAppEntryData</b>
+	 */
+	@RequestMapping("initAppEntryData")
+	@RestReturn(String.class)
+	public RestResponse initAppEntryData(){
+		portalService.initAppEntryData();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }
