@@ -463,7 +463,7 @@ public class WelfareServiceImpl implements WelfareService {
         RouterMetaObject metaObject = new RouterMetaObject();
         OfficialActionData data = new OfficialActionData();
         data.setUrl(url);
-        metaObject.setUrl(RouterBuilder.build(Router.BROWSER_I, data, "福利详情"));
+        metaObject.setUrl(RouterBuilder.build(Router.BROWSER_I, data, "详情"));
         
         Map<String, String> meta = new HashMap<>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
