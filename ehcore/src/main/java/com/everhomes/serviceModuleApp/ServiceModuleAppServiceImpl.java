@@ -1690,7 +1690,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
             if (!CollectionUtils.isEmpty(communityApp)) {
                 appDtos.addAll(toAppDtosForWorkPlatform(orgId, sceneType, communityApp));
 			}
-
+			//根据后台工作台排序对应用进行排序
+            appDtos = sortAppDTO(appDtos,orgId);
             dto.setAppDtos(appDtos);
 
             categoryDtos.add(dto);
@@ -1710,6 +1711,20 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	    return response;
     }
 
+    private List<AppDTO> sortAppDTO(List<AppDTO> appDTOS, Long orgId) {
+        List<AppDTO> appDTOs = new ArrayList<>();
+        List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(orgId);
+        if (!CollectionUtils.isEmpty(workPlatformApps)) {
+            for (WorkPlatformApp workPlatformApp : workPlatformApps) {
+                for (AppDTO appDTO : appDTOS) {
+                    if (appDTO.getAppId().equals(workPlatformApp.getAppId()) && appDTO.getEntryId().equals(workPlatformApp.getEntryId())) {
+                        appDTOs.add(appDTO);
+                    }
+                }
+            }
+        }
+        return appDTOs;
+    }
     private List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
 		List<AppDTO> appDtos = new ArrayList<>() ;
 		if(userCommunityApps != null && userCommunityApps.size() > 0){
