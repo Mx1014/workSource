@@ -655,7 +655,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     	List<GroupMember> groupMembers = new ArrayList<GroupMember>();
         if(!StringUtils.isEmpty(cmd.getKeyword())){
-            users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
+            //users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
+            //广州越空间，keyword按用户昵称，电话或真实姓名查找
+            users = userProvider.listUsers(locator, pageSize, new ListingQueryBuilderCallback(){
+                @Override
+                public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                    Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + cmd.getKeyword()+ "%");
+                    cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeyword() + "%"));
+                    cond = cond.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getKeyword() + "%"));
+                    cond = cond.and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+                    query.addConditions(cond);
+                    return query;
+                }
+            });
         }else if(null != cmd.getOrganizationId()){
             users = doorAuthProvider.listDoorAuthByOrganizationId(cmd.getOrganizationId(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize);
         } else if(null != cmd.getCommunityId() && !StringUtils.isEmpty(cmd.getBuildingName())) {
