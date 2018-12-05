@@ -1,40 +1,54 @@
-ALTER TABLE eh_meeting_reservations ADD COLUMN  `meeting_manager_user_id` BIGINT COMMENT '»áÒé»áÎñÈËuser_id' AFTER `meeting_sponsor_name`;
-ALTER TABLE eh_meeting_reservations ADD COLUMN  `meeting_manager_detail_id` BIGINT COMMENT '»áÒé»áÎñÈËdetail_id' AFTER `meeting_manager_user_id`;
-ALTER TABLE eh_meeting_reservations ADD COLUMN  `meeting_manager_name` VARCHAR(64) COMMENT '»áÒé»áÎñÈËµÄĞÕÃû' AFTER `meeting_manager_detail_id`;
+ALTER TABLE eh_meeting_reservations ADD COLUMN  `meeting_manager_user_id` BIGINT COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½user_id' AFTER `meeting_sponsor_name`;
+ALTER TABLE eh_meeting_reservations ADD COLUMN  `meeting_manager_detail_id` BIGINT COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½detail_id' AFTER `meeting_manager_user_id`;
+ALTER TABLE eh_meeting_reservations ADD COLUMN  `meeting_manager_name` VARCHAR(64) COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½' AFTER `meeting_manager_detail_id`;
 
 CREATE TABLE `eh_meeting_templates` (
-    `id` BIGINT NOT NULL COMMENT 'Ö÷¼ü',
-    `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'Óò¿Õ¼äID',
-    `organization_id` BIGINT NOT NULL COMMENT '×Ü¹«Ë¾ID',
-    `user_id` BIGINT NOT NULL COMMENT 'Ä£°åËùÓĞÈËuid',
-    `detail_id` BIGINT NOT NULL COMMENT 'Ä£°åËùÓĞÈËdetailId',
-    `subject` VARCHAR(256) COMMENT '»áÒéÖ÷ÌâÄ£°å',
-    `content` TEXT COMMENT '»áÒéÏêÏ¸ÄÚÈİÄ£°å',
-    `meeting_manager_user_id` BIGINT COMMENT '»áÒé»áÎñÈËuser_id',
-    `meeting_manager_detail_id` BIGINT COMMENT '»áÒé»áÎñÈËdetail_id',
-    `meeting_manager_name` VARCHAR(64) COMMENT '»áÒé»áÎñÈËµÄĞÕÃû',
-    `attachment_flag` TINYINT DEFAULT 0 COMMENT 'ÊÇ·ñÓĞ¸½¼ş 1-ÊÇ 0-·ñ',
-    `creator_uid` BIGINT NOT NULL COMMENT '¼ÇÂ¼´´½¨ÈËuserId',
-    `create_time` DATETIME NOT NULL COMMENT '¼ÇÂ¼´´½¨Ê±¼ä',
-    `operate_time` DATETIME COMMENT '¼ÇÂ¼¸üĞÂÊ±¼ä',
-    `operator_uid` BIGINT COMMENT '¼ÇÂ¼¸üĞÂÈËuserId',
+    `id` BIGINT NOT NULL COMMENT 'ï¿½ï¿½ï¿½ï¿½',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'ï¿½ï¿½Õ¼ï¿½ID',
+    `organization_id` BIGINT NOT NULL COMMENT 'ï¿½Ü¹ï¿½Ë¾ID',
+    `user_id` BIGINT NOT NULL COMMENT 'Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½uid',
+    `detail_id` BIGINT NOT NULL COMMENT 'Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½detailId',
+    `subject` VARCHAR(256) COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½',
+    `content` TEXT COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½',
+    `meeting_manager_user_id` BIGINT COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½user_id',
+    `meeting_manager_detail_id` BIGINT COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½detail_id',
+    `meeting_manager_name` VARCHAR(64) COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½',
+    `attachment_flag` TINYINT DEFAULT 0 COMMENT 'ï¿½Ç·ï¿½ï¿½Ğ¸ï¿½ï¿½ï¿½ 1-ï¿½ï¿½ 0-ï¿½ï¿½',
+    `creator_uid` BIGINT NOT NULL COMMENT 'ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½userId',
+    `create_time` DATETIME NOT NULL COMMENT 'ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½',
+    `operate_time` DATETIME COMMENT 'ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½',
+    `operator_uid` BIGINT COMMENT 'ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½userId',
     PRIMARY KEY (`id`),
     KEY `i_eh_namespace_organization_user_id` (`namespace_id` , `organization_id` , `user_id`)
-)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='»áÒéÔ¤Ô¼Ä£°å';
+)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='ï¿½ï¿½ï¿½ï¿½Ô¤Ô¼Ä£ï¿½ï¿½';
 
 
 CREATE TABLE `eh_meeting_invitation_templates` (
   `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'Óò¿Õ¼äID',
-  `organization_id` BIGINT NOT NULL COMMENT '×Ü¹«Ë¾ID',
-  `meeting_template_id` BIGINT NOT NULL COMMENT '»áÒéÔ¤Ô¼Ä£°åµÄid',
-  `source_type` VARCHAR(45) NOT NULL COMMENT '»ú¹¹»òÕß¸öÈË£ºORGANIZATION OR MEMBER_DETAIL',
-  `source_id` BIGINT NOT NULL COMMENT '»ú¹¹id»òÔ±¹¤detail_id',
-  `source_name` VARCHAR(64) NOT NULL COMMENT '»ú¹¹Ãû³Æ»òÕßÔ±¹¤µÄĞÕÃû',
-  `creator_uid` BIGINT NOT NULL COMMENT '¼ÇÂ¼´´½¨ÈËuserId',
-  `create_time` DATETIME NOT NULL COMMENT '¼ÇÂ¼´´½¨Ê±¼ä',
-  `operate_time` DATETIME COMMENT '¼ÇÂ¼¸üĞÂÊ±¼ä',
-  `operator_uid` BIGINT COMMENT '¼ÇÂ¼¸üĞÂÈËuserId',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'ï¿½ï¿½Õ¼ï¿½ID',
+  `organization_id` BIGINT NOT NULL COMMENT 'ï¿½Ü¹ï¿½Ë¾ID',
+  `meeting_template_id` BIGINT NOT NULL COMMENT 'ï¿½ï¿½ï¿½ï¿½Ô¤Ô¼Ä£ï¿½ï¿½ï¿½id',
+  `source_type` VARCHAR(45) NOT NULL COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¸ï¿½ï¿½Ë£ï¿½ORGANIZATION OR MEMBER_DETAIL',
+  `source_id` BIGINT NOT NULL COMMENT 'ï¿½ï¿½ï¿½ï¿½idï¿½ï¿½Ô±ï¿½ï¿½detail_id',
+  `source_name` VARCHAR(64) NOT NULL COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ»ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½',
+  `creator_uid` BIGINT NOT NULL COMMENT 'ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½userId',
+  `create_time` DATETIME NOT NULL COMMENT 'ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½',
+  `operate_time` DATETIME COMMENT 'ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½',
+  `operator_uid` BIGINT COMMENT 'ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½userId',
   PRIMARY KEY (`id`),
   KEY `i_eh_meeting_template_id` (`meeting_template_id`)
-) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='»áÒéÔ¤Ô¼²ÎÓëÈËÄ£°å';
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='ï¿½ï¿½ï¿½ï¿½Ô¤Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½';
+
+-- AUTHOR:tangcen
+-- REMARK:èµ„äº§ç®¡ç†V3.6 æˆ¿æºæ—¥å¿—è¡¨ 2018å¹´12æœˆ5æ—¥
+CREATE TABLE `eh_address_events` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL,
+  `address_id` bigint(20) NOT NULL COMMENT 'æˆ¿æºid',
+  `operator_uid` bigint(20) COMMENT 'æ“ä½œäººid',
+  `operate_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ“ä½œæ—¶é—´',
+  `operate_type` tinyint(4) COMMENT 'æ“ä½œç±»å‹ï¼ˆ1ï¼šå¢åŠ ï¼Œ2ï¼šåˆ é™¤ï¼Œ3ï¼šä¿®æ”¹ï¼‰',
+  `content` text COMMENT 'æ—¥å¿—å†…å®¹',
+  `status` tinyint(4) COMMENT 'çŠ¶æ€ï¼ˆ0ï¼šæ— æ•ˆï¼Œ1ï¼šå¾…ç¡®è®¤ï¼Œ2ï¼šç”Ÿæ•ˆï¼‰',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='æˆ¿æºæ—¥å¿—è¡¨';
