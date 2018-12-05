@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>denomination: 卡券面额</li>
  * <li>subType: 购物卡类别:1-小时 2-金额 3-次数</li>
  * <li>serviceSupplyName: 适用地点</li>
+ * <li>serviceRange: 适用范围</li>
  * <li>consumptionLimit: 满多少可用 非必填</li>
  * <li>amount: Integer 发放数量 多少张/人 必填</li>
  * <li>validDateType: 有效期计算类型 1-开始与截止时间、2-领券当天起N天、3-领券隔天起N天</li>
@@ -27,6 +28,7 @@ public class WelfareCouponDTO {
 	private String denomination;
 	private String subType;
 	private String serviceSupplyName;
+	private String serviceRange;
 	private String consumptionLimit;
     private Byte validDateType;
     private Long validDate;
@@ -95,6 +97,14 @@ public class WelfareCouponDTO {
 
 	public void setServiceSupplyName(String serviceSupplyName) {
 		this.serviceSupplyName = serviceSupplyName;
+	}
+
+	public String getServiceRange() {
+		return serviceRange;
+	}
+
+	public void setServiceRange(String serviceRange) {
+		this.serviceRange = serviceRange;
 	}
 
 	public String getConsumptionLimit() {
