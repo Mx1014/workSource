@@ -20,6 +20,8 @@ import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.asset.PaymentBillItems;
 import com.everhomes.asset.PaymentBills;
 import com.everhomes.asset.bill.AssetBillProvider;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.openapi.Contract;
@@ -29,10 +31,6 @@ import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
-import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractDTO;
-import com.everhomes.rest.asset.bill.DeleteContractBillFlag;
-import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
@@ -41,6 +39,7 @@ import com.everhomes.rest.contract.CMContractUnit;
 import com.everhomes.rest.contract.CMDataObject;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.contract.NamespaceContractType;
+import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
@@ -71,6 +70,9 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
     
     @Autowired
     private AssetBillProvider assetBillProvider;
+    
+    @Autowired
+    private EnterpriseCustomerProvider enterpriseCustomerProvider;
 	
 	/**
 	 * 同步瑞安CM的账单数据到左邻的数据库表中
@@ -347,6 +349,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
             list.remove(list.size() - 1);
         }
         for(ListBillsDTO dto : list) {
+        	setAccountIdByOrgId(dto);//根据企业Id获取CM的accountid
         	setBillInvalidParamNull(dto);//屏蔽账单无效参数
         }
         //每次同步都要打印下billId，方便对接过程中出现问题好进行定位
@@ -390,6 +393,21 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 		dto.setIsReadOnly(null);
 		dto.setNoticeTelList(null);
 		dto.setConsumeUserId(null);
+	}
+	
+	/**
+	 * 根据企业Id获取CM的accountid
+	 */
+	private void setAccountIdByOrgId(ListBillsDTO dto) {
+		try {
+			EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findByOrganizationIdAndType(
+					Long.parseLong(dto.getTargetId()), NamespaceCustomerType.CM.getCode());
+			if(enterpriseCustomer != null) {
+				dto.setAccountId(enterpriseCustomer.getNamespaceCustomerToken());
+			}
+		} catch (Exception e) {
+			
+		}
 	}
 
 }

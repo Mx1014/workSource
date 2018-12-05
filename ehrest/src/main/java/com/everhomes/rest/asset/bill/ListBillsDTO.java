@@ -46,6 +46,7 @@ import java.util.List;
  * <li>canModify:0：不可编辑；1：可编辑</li>
  * <li>isReadOnly:只读状态：0：非只读；1：只读</li>
  * <li>billItemDTOList:账单组收费项目的集合，参考{@link com.everhomes.rest.asset.BillItemDTO}</li>
+ * <li>accountId:物业缴费V7.4(瑞安项目-资产管理对接CM系统) : CM的客户ID</li>
  *</ul>
  */
 public class ListBillsDTO {
@@ -97,6 +98,7 @@ public class ListBillsDTO {
     private List<String> noticeTelList;
     @ItemType(BillItemDTO.class)
     private List<BillItemDTO> billItemDTOList;
+    private String accountId;//物业缴费V7.4(瑞安项目-资产管理对接CM系统) : CM的客户ID
 
     public List<String> getNoticeTelList() {
 		return noticeTelList;
@@ -408,6 +410,14 @@ public class ListBillsDTO {
 
 	public void setTaxAmount(BigDecimal taxAmount) {
 		this.taxAmount = taxAmount;
+	}
+
+	public String getAccountId() {
+		return accountId;
+	}
+
+	public void setAccountId(String accountId) {
+		this.accountId = accountId;
 	}
 
 }
