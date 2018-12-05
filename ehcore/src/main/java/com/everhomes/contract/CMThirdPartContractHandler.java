@@ -4,6 +4,9 @@ package com.everhomes.contract;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.third.RuiAnCMThirdOpenBillHandler;
+import com.everhomes.asset.third.ThirdOpenBillHandler;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -246,7 +249,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
         //同步CM数据到物业账单表
         try{
-            assetService.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
+            //assetService.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
+        	RuiAnCMThirdOpenBillHandler handler = PlatformContext.getComponent(ThirdOpenBillHandler.THIRDOPENBILL_PREFIX + NAMESPACE_ID);
+            handler.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
         }catch(Exception e){
             LOGGER.error("sync data from RuiAnCM is fail cause Bill " ,e);
             //将同步锁置为失效，此时可以再次创建任务
