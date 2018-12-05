@@ -731,7 +731,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                             continue;
                         }
                         for (ServiceModuleApp app : tempApps) {
-                            if (app.getOriginId().equals(workPlatformApp.getAppId())) {
+                            if (app.getOriginId().equals(workPlatformApp.getAppId()) && app.getEntryId().equals(workPlatformApp.getEntryId())) {
                                 apps.add(app);
                             }
                         }
