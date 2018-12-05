@@ -150,4 +150,6 @@ public interface YellowPageService {
 	String buildEntryUrl(Integer namespaceId, ServiceAllianceInstanceConfig config, String pageRealDisplayType);
 
 	String recoveryListCategoryDataDisappearBug();
+
+	String transferFlowCaseVals();
 }
