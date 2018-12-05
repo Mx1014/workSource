@@ -50,6 +50,7 @@ CREATE TABLE `eh_welfare_coupons` (
   `denomination` VARCHAR(128) COMMENT '卡券面额',
   `sub_type` VARCHAR(128) COMMENT '购物卡类别，目前仅用于购物卡， 1-小时卡、2-金额卡、3-次数卡',
   `service_supply_name` VARCHAR(128) COMMENT '适用地点',
+  `service_range` VARCHAR(128) COMMENT '适用范围',
   `consumption_limit` VARCHAR(128) COMMENT '满多少可以用',
   `valid_date_type` TINYINT COMMENT '截止日期类型',
   `valid_date` DATE COMMENT '截止日期',
