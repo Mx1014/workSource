@@ -1978,8 +1978,19 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 dto.setVisibleFlag(workPlatformApp.getVisibleFlag());
                 dto.setSortNum(workPlatformApp.getOrder());
             }else {
+                Integer maxSort = this.workPlatformAppProvider.getMaxSort(orgId);
+                WorkPlatformApp newWorkPlatformApp = new WorkPlatformApp();
+                newWorkPlatformApp.setOrder(maxSort+1);
+                newWorkPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                newWorkPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+                newWorkPlatformApp.setScopeId(orgId);
+                newWorkPlatformApp.setAppId(app.getOriginId());
+                newWorkPlatformApp.setEntryId(app.getEntryId());
+                this.workPlatformAppProvider.createWorkPlatformApp(newWorkPlatformApp);
+
+                dto.setId(newWorkPlatformApp.getId());
                 dto.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
-                dto.setSortNum(i+1);
+                dto.setSortNum(newWorkPlatformApp.getOrder());
             }
             list.add(dto);
         }
