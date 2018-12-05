@@ -33,6 +33,8 @@ import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.AssetIsCheckProperty;
 import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
+import com.everhomes.rest.asset.bill.AssetPaymentBillConfirmFlag;
+import com.everhomes.rest.asset.bill.AssetPaymentType;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.NotifyThirdSignCommand;
@@ -143,19 +145,40 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 							//所有数据以生产方为准
 							if(cmBill.getBillType() != null && cmBill.getBillType().equals("服务费账单")) {
 								//CM把我方的服务账单又同步回来
-								//
-								//(2)若用户线下一次性全部支付，财务在CM中直接记录结果，正常同步状态给APP。未同步之前，APP端一直显示为“未支付”。
 								//(3) 若用户线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
 								try{
 									PaymentBills zuolinServiceBill = assetProvider.findBillById(Long.parseLong(cmBill.getBillID()));
 									if(zuolinServiceBill != null) {
-										Long billId = zuolinServiceBill.getId();
-										//(1)若用户在APP一次性全部支付，此时在APP端显示的支付状态是“已支付，待确认”。当财务看到了支付结果，在CM中确认收入以后，CM的账单状态变成“已支付”。下一次同步数据时，APP同步显示为 “已确认”。
 										if(cmBill.getStatus() != null && cmBill.getStatus().equals("已缴账单")) {
-											
+											if(zuolinServiceBill.getStatus().equals(AssetPaymentBillStatus.UNPAID.getCode())) {
+												//(2)若用户线下一次性全部支付，财务在CM中直接记录结果，正常同步状态给APP。未同步之前，APP端一直显示为“未支付”。
+												zuolinServiceBill.setThirdPaid(AssetPaymentBillStatus.PAID.getCode());//已在第三方支付
+												zuolinServiceBill.setPaymentType(AssetPaymentType.CMPAID.getCode());//支付方式置为：CM线下支付
+												zuolinServiceBill.setStatus(AssetPaymentBillStatus.PAID.getCode());//已支付
+												zuolinServiceBill.setConfirmFlag(AssetPaymentBillConfirmFlag.CONFIRM.getCode());//已确认
+												zuolinServiceBill.setAmountOwed(BigDecimal.ZERO);//待收置为0
+												zuolinServiceBill.setAmountReceived(zuolinServiceBill.getAmountReceivable());//已收置为应收的金额
+											}else {
+												//(1)若用户在APP一次性全部支付，此时在APP端显示的支付状态是“已支付，待确认”。当财务看到了支付结果，在CM中确认收入以后，CM的账单状态变成“已支付”。下一次同步数据时，APP同步显示为 “已确认”。
+												zuolinServiceBill.setStatus(AssetPaymentBillStatus.PAID.getCode());//已支付
+												zuolinServiceBill.setConfirmFlag(AssetPaymentBillConfirmFlag.CONFIRM.getCode());//已确认
+											}
 										}else {
-											
+											//(3) 若用户线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
+											BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
+											BigDecimal amountReceived = BigDecimal.ZERO;//已收含税
+											try{
+												amountOwed = new BigDecimal(cmBill.getBalanceAmt());
+									        }catch (Exception e){
+									            LOGGER.error(e.toString());
+									        }
+											//已收=账单金额（应收）-账单欠款金额（待收）
+											amountReceived = zuolinServiceBill.getAmountReceivable().subtract(amountOwed);
+											zuolinServiceBill.setAmountOwed(amountOwed);
+											zuolinServiceBill.setAmountReceived(amountReceived);
+											zuolinServiceBill.setThirdPaid(AssetPaymentBillStatus.PAID.getCode());//已在第三方支付
 										}
+										assetProvider.updateCMBill(zuolinServiceBill);
 									}else {
 										LOGGER.error("The bill is not zuolinServiceBill, billId = {}", cmBill.getBillID());
 									}
