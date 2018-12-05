@@ -28,6 +28,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
 import com.everhomes.rest.acl.ListServiceModuleEntriesCommand;
 import com.everhomes.rest.acl.ListServiceModuleEntriesResponse;
+import com.everhomes.rest.acl.ServiceModuleEntryDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.*;
 import com.everhomes.rest.community.CommunityDoc;
@@ -501,6 +502,7 @@ public class PortalServiceImpl implements PortalService {
 		ListServiceModuleEntriesCommand cmd = new ListServiceModuleEntriesCommand();
 		cmd.setModuleId(moduleApp.getModuleId());
 		ListServiceModuleEntriesResponse response = serviceModuleService.listServiceModuleEntries(cmd);
+		sortModuleEntryDto(response.getDtos());
 		dto.setServiceModuleEntryDtos(response.getDtos());
 
 
@@ -530,9 +532,40 @@ public class PortalServiceImpl implements PortalService {
 		}else {
 			dto.setAppEntrySettingFlag(TrueOrFalseFlag.FALSE.getCode());
 		}
+		sortAppEntryDto(appEntryDTOS);
 		dto.setServiceModuleSelfEntryDtos(appEntryDTOS);
 		return dto;
 	}
+
+	private void sortModuleEntryDto(List<ServiceModuleEntryDTO> list) {
+	    Collections.sort(list, new Comparator<ServiceModuleEntryDTO>() {
+            @Override
+            public int compare(ServiceModuleEntryDTO o1, ServiceModuleEntryDTO o2) {
+                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
+                    return o1.getTerminalType().compareTo(o2.getTerminalType());
+                }
+                if (!o1.getSceneType().equals(o2.getSceneType())) {
+                    return o2.getSceneType().compareTo(o1.getSceneType());
+                }
+                return 0;
+            }
+        });
+    }
+
+    private void sortAppEntryDto(List<AppEntryDTO> list) {
+        Collections.sort(list, new Comparator<AppEntryDTO>() {
+            @Override
+            public int compare(AppEntryDTO o1, AppEntryDTO o2) {
+                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
+                    return o1.getTerminalType().compareTo(o2.getTerminalType());
+                }
+                if (!o1.getSceneType().equals(o2.getSceneType())) {
+                    return o2.getSceneType().compareTo(o1.getSceneType());
+                }
+                return 0;
+            }
+        });
+    }
 
 	private PortalLayoutDTO processPortalLayoutDTO(PortalLayout portalLayout){
 		PortalLayoutDTO dto = ConvertHelper.convert(portalLayout, PortalLayoutDTO.class);

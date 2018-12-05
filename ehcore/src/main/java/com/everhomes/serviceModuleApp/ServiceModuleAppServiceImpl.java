@@ -895,7 +895,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		Byte routerLocationType = null;
 		Byte routerSceneType = null;
 		if(app.getEntryId() != null){
-			ServiceModuleAppEntry entry = serviceModuleEntryProvider.findAppEntryById(app.getEntryId());
+			List<ServiceModuleEntry> entrys = serviceModuleEntryProvider.listServiceModuleEntries(Arrays.asList(app.getModuleId()),
+                    ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(),ServiceModuleSceneType.CLIENT.getCode());
+			ServiceModuleEntry entry = null;
+			if (!CollectionUtils.isEmpty(entrys)) {
+			    entry = entrys.get(0);
+            }
 			if(entry != null){
 				routerLocationType = entry.getLocationType();
 				routerSceneType = entry.getSceneType();
@@ -903,7 +908,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			//优先使用entryIcon
 			if(entry != null && !StringUtils.isEmpty(entry.getIconUri())){
                 List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
-                        this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(entry.getAppId(),entry.getId(),null,null);
+                        this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(),entry.getId(),null,null);
                 if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
                     appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
                     String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),

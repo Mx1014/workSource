@@ -571,17 +571,13 @@ public class WebMenuServiceImpl implements WebMenuService {
 				if(entry.getModuleId().equals(menu.getModuleId()) && entry.getSceneType().equals(menu.getSceneType())){
 					WebMenuDTO menuDto = ConvertHelper.convert(menu, WebMenuDTO.class);
                     ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
-                    List<ServiceModuleAppEntry> serviceModuleAppEntries = this.serviceModuleEntryProvider.listServiceModuleAppEntries(menu.getAppId(),
-                            entry.getAppCategoryId(),entry.getTerminalType(),entry.getLocationType(),entry.getSceneType());
-                    if (!CollectionUtils.isEmpty(serviceModuleAppEntries)) {
-                        List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
-                                this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(menu.getAppId(),serviceModuleAppEntries.get(0).getId(),null,null);
-                        if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
-                            menuDto.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
-                            appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
-                        }
-                    }
-                    menuDto.setAppConfig(appDTO);
+					List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+							this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(menu.getAppId(),entry.getId(),null,null);
+					if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
+						menuDto.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+						appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+					}
+					menuDto.setAppConfig(appDTO);
 					menuDtos.add(menuDto);
 				}
 			}
