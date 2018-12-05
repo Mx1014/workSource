@@ -543,8 +543,8 @@ public class WelfareServiceImpl implements WelfareService {
             throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                     WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能删除");
         }
-        welfareReceiverProvider.deleteWelfareReceivers(cmd.getWelfareId());
-        welfareCouponProvider.deleteWelfareCoupons(cmd.getWelfareId());
+//        welfareReceiverProvider.deleteWelfareReceivers(cmd.getWelfareId());
+//        welfareCouponProvider.deleteWelfareCoupons(cmd.getWelfareId());
         welfareProvider.deleteWelfare(cmd.getWelfareId());
     }
 
