@@ -6930,17 +6930,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
                     cell.getRentalType(),cmd.getResourceType());
 			if (null == dbCell) {
 				this.rentalv2Provider.createRentalSiteRule(cell);
-				Long tmp = cell.getId();
-				cell.setId(cell.getCellId());
-				cell.setCellId(tmp);
 				createCellClassification(cell,cmd.getClassifications());
 			}
 			else {
 				this.rentalv2Provider.updateRentalSiteRule(cell);
 				this.rentalv2Provider.deleteClassificationByOwnerId(cell.getResourceType(),EhRentalv2Cells.class.getSimpleName(),dbCell.getCellId());
-				Long tmp = cell.getId();
-				cell.setId(cell.getCellId());
-				cell.setCellId(tmp);
 				createCellClassification(cell,cmd.getClassifications());
 			}
 		}
