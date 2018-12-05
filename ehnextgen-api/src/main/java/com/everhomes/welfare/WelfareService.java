@@ -21,5 +21,5 @@ public interface WelfareService {
 
 	SendWelfaresResponse sendWelfare(SendWelfareCommand cmd, HttpServletRequest request);
 
-	void updateWelfareStatus(UpdateWelfareStatusCommand cmd);
+	void updateWelfareStatus(UpdateWelfareStatusCommand cmd, HttpServletRequest request);
 }

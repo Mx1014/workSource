@@ -97,8 +97,8 @@ public class WelfareController extends ControllerBase {
 	 */
 	@RequestMapping("updateWelfareStatus")
 	@RestReturn(String.class)
-	public RestResponse updateWelfareStatus(UpdateWelfareStatusCommand cmd){
-		welfareService.updateWelfareStatus(cmd);
+	public RestResponse updateWelfareStatus(UpdateWelfareStatusCommand cmd, HttpServletRequest request){
+		welfareService.updateWelfareStatus(cmd, request);
 		return new RestResponse();
 	}
 }

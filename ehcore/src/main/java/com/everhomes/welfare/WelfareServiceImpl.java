@@ -308,8 +308,10 @@ public class WelfareServiceImpl implements WelfareService {
 	}
 
 	private String getWelfareZLUrl(Welfare welfare, HttpServletRequest request) {
-
-        String homeUrl = request.getHeader("Host");
+		String homeUrl = "";
+		if(null != request){
+			homeUrl = request.getHeader("Host");
+		}
         return "http://"+homeUrl+"/enterprise-welfare/build/index.html?organizationId="+welfare.getOrganizationId()+"&namespaceId="+UserContext.getCurrentNamespaceId()
         		+"&id="+welfare.getId()+"#/detail#sign_suffix";
     }
@@ -400,8 +402,8 @@ public class WelfareServiceImpl implements WelfareService {
                 }
                 return response;
             }
-            //发消息
-            welfaresDTO.getReceivers().forEach(r -> sendPayslipMessage(welfare, r.getReceiverUid(), request));
+            //发消息改为更新的时候发消息:
+            
             return response;
         }).first();
 
@@ -577,13 +579,13 @@ public class WelfareServiceImpl implements WelfareService {
 	}
 
 	@Override
-	public void updateWelfareStatus(UpdateWelfareStatusCommand cmd) {
+	public void updateWelfareStatus(UpdateWelfareStatusCommand cmd, HttpServletRequest request) {
 		Welfare welfare = welfareProvider.findWelfareById(cmd.getTaskId());
         
-		updateWelfareStatus(welfare, cmd.getStatus());
+		updateWelfareStatus(welfare, cmd.getStatus(), request);
 	}
 
-	private void updateWelfareStatus(Welfare welfare, Byte status) {
+	private void updateWelfareStatus(Welfare welfare, Byte status, HttpServletRequest request) {
 		if (welfare == null || Byte.valueOf((byte)1).equals(welfare.getIsDelete())) {
             throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                     WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利不存在");
@@ -593,21 +595,32 @@ public class WelfareServiceImpl implements WelfareService {
                     WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能修改");
         }
         if(status != null){
-        	welfare.setStatus(status);
+        	if(!status.equals(welfare.getStatus())){
+        		welfare.setStatus(status);
+        		welfareProvider.updateWelfare(welfare);
+
+        		//状态变为正常,发消息:
+        		if(WelfareStatus.SENDED == WelfareStatus.fromCode(status)){
+        			List<WelfareReceiver> receivers = welfareReceiverProvider.listWelfareReceiver(welfare.getId());
+        			receivers.forEach(r -> sendPayslipMessage(welfare, r.getReceiverUid(), request));
+        		}
+        	}
         }
-        welfareProvider.updateWelfare(welfare);
+        
 	}
 	
+	//
 	private void checkWelfareStatus(Welfare welfare){
-		if(WelfareStatus.SENDING == WelfareStatus.fromCode(welfare.getStatus())){
-			//TODO: 营销系统提供status查询接口
-			TaskStatusParamDTO cmd1 = new TaskStatusParamDTO();
-			cmd1.setTaskId(welfare.getId());
-			EnterpriseGetTaskStatusRestResponse resp = generalOrderService.getTaskStatus(cmd1);
-			Byte status = resp.getResponse() == null? null : resp.getResponse().getResultStatus();
-			if(status != null){
-				updateWelfareStatus(welfare, status);
-			}
-		}
+		//TODO:营销系统没弄好,弄好之后再打开这段注释掉的代码
+//		if(WelfareStatus.SENDING == WelfareStatus.fromCode(welfare.getStatus())){
+//			//营销系统提供status查询接口
+//			TaskStatusParamDTO cmd1 = new TaskStatusParamDTO();
+//			cmd1.setTaskId(welfare.getId());
+//			EnterpriseGetTaskStatusRestResponse resp = generalOrderService.getTaskStatus(cmd1);
+//			Byte status = resp.getResponse() == null? null : resp.getResponse().getResultStatus();
+//			if(status != null){
+//				updateWelfareStatus(welfare, status);
+//			}
+//		}
 	}
 }
