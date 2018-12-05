@@ -5,8 +5,11 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.server.schema.tables.pojos.EhCustomerStatisticsTotal;
 
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,4 +77,63 @@ public interface InvitedCustomerProvider {
     void deleteCustomerTrackersByCustomerId(Long customerId);
 
     void updateToEnterpriseCustomerByCustomerId(Long customerId, Long phoneNumber, String contactName);
+
+    List<EnterpriseCustomer> getInitCustomerStatus(Integer pageSize, Long nextAnchor);
+
+    void createCustomerLevelChangeRecord(CustomerLevelChangeRecord record);
+
+    List<CustomerLevelChangeRecord> listCustomerLevelChangeRecord(Integer namespaceId, Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
+
+    Integer countCustomerLevelLossChangeRecord(Integer namespaceId, Long communityId, Timestamp queryStartDate, Timestamp queryEndDate, Long levelItemId);
+
+    Integer countCustomerNumByCreateDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
+
+    Integer countTrackingNumByTrackingDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
+
+    void createCustomerStatisticsDaily(CustomerStatisticDaily daily);
+
+    void createCustomerStatisticsDailyTotal(CustomerStatisticDailyTotal dailyTotal);
+
+    CustomerStatisticDaily getCustomerStatisticsDaily(Integer namespaceId, Long communityId, Date date);
+
+    List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Integer offset);
+
+    void createCustomerStatisticsMonthly(CustomerStatisticMonthly monthly);
+
+    void createCustomerStatisticsMonthlyTotal(CustomerStatisticMonthlyTotal monthlyTotal);
+
+    CustomerStatisticMonthly getCustomerStatisticsMonthly(Integer namespaceId, Long communityId, Date date);
+
+    List<CustomerStatisticMonthly> listCustomerStatisticMonthly(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Integer offset);
+
+    List<CustomerStatisticDailyTotal> listCustomerStatisticDailyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Integer offset);
+
+    List<CustomerStatisticMonthlyTotal> listCustomerStatisticMonthlyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Integer offset);
+
+    void createCustomerStatisticTotal(CustomerStatisticTotal total);
+
+    CustomerStatisticTotal getCustomerStatisticsTotal(Integer namespaceId, Long organizationId, Date date);
+
+    void deleteCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate);
+
+    void deleteCustomerStatisticDailyTotal(Integer namespaceId, Long organizationId, Date startDate);
+
+    void deleteCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+
+    void deleteCustomerStatisticDailyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate);
+
+    void deleteCustomerStatisticMonthly(Integer namespaceId, Long communityId, Date startDate);
+
+    void deleteCustomerStatisticMonthlyTotal(Integer namespaceId, Long organizationId, Date startDate);
+
+    void deleteCustomerStatisticMonthly(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+
+    void deleteCustomerStatisticMonthlyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate);
+
+    void deleteCustomerStatisticTotal(Integer namespaceId, Long organizationId, Date startDate);
+
+
+    CustomerStatisticTotal getCustomerStatisticTotal(Integer namespaceId, Long communityId, Date date);
+
+
 }
