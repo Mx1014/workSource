@@ -10,6 +10,8 @@ import com.everhomes.rest.parking.handler.haikangweishi.HkwsThirdResponse;
 import com.everhomes.rest.visitorsys.VisitorsysConstant;
 import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.visitorsys.hkws.HKWSDataSet;
 import org.apache.commons.lang.StringUtils;
@@ -38,16 +40,19 @@ public class VisitorSysHKWSUtil {
     private final String DELETE_APPOINTMENT = "/openapi/service/rvs/reserve/deleteAppointment";
 
     @Autowired
-    HaiKangWeiShiJinMaoVendorHandler HKWSHandler;
+    private HaiKangWeiShiJinMaoVendorHandler HKWSHandler;
 
     @Autowired
-    HKWSUserProvider HKWSUserProvider;
+    private HKWSUserProvider HKWSUserProvider;
 
     @Autowired
-    ConfigurationProvider configProvider;
+    private ConfigurationProvider configProvider;
 
     @Autowired
-    VisitorSysThirdMappingProvider thirdMappingProvider;
+    private VisitorSysThirdMappingProvider thirdMappingProvider;
+
+    @Autowired
+    private UserProvider userProvider;
 
     public HkwsThirdResponse addAppointment(VisitorSysVisitor visitor){
         JSONObject params = new JSONObject();
@@ -55,7 +60,9 @@ public class VisitorSysHKWSUtil {
         params.put("visitorName",visitor.getVisitorName());
 
         Integer personId = 0;
-        List<HKWSUser> users = HKWSUserProvider.findUserByPhone(UserContext.current().getUser().getIdentifierToken());
+
+        UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.current().getUser().getId(),UserContext.getCurrentNamespaceId());
+        List<HKWSUser> users = HKWSUserProvider.findUserByPhone(userIdentifier.getIdentifierToken());
         if(users == null || users.size() == 0){
             Long startTime = configProvider.getLongValue("HKWS.user.syncTime", 0L);
             syncHKWSUsers(startTime);
@@ -63,8 +70,8 @@ public class VisitorSysHKWSUtil {
             if(users == null || users.size() == 0){
                 throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_NOT_EXIST,"third user not exist");
             }
-            personId = users.get(0).getPersonId();
         }
+        personId = users.get(0).getPersonId();
         params.put("personId",personId);
         params.put("gender","1");
         params.put("phoneNo",visitor.getVisitorPhone());

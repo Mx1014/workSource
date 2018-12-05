@@ -744,12 +744,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysVisitorProvider.createVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-        if(namespaceId == 999925){
+        VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
+        if(visitorType == VisitorsysVisitorType.BE_INVITED) {
+            if(namespaceId == 999925){
 //          上海金茂对接
-            HKWSUtil.addAppointment(visitor);
-        } else if (namespaceId == 999951){
+                HKWSUtil.addAppointment(visitor);
+            } else if (namespaceId == 999951){
 //          鼎峰汇对接
-            DFHUtil.doInvite(visitor);
+                DFHUtil.doInvite(visitor);
+            }
         }
 //        createVisitorActions(relatedVisitor);
         sendMessageToAdmin(relatedVisitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
