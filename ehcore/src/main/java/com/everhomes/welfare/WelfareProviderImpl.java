@@ -81,7 +81,7 @@ public class WelfareProviderImpl implements WelfareProvider {
 	@Override
 	public void deleteWelfare(Long welfareId) {
 		EhWelfares welfare = getReadWriteDao().findById(welfareId);
-		welfare.setStatus((byte) 1);
+		welfare.setIsDelete((byte) 1);
 		getReadWriteDao().update(welfare);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWelfares.class, welfareId);
 
