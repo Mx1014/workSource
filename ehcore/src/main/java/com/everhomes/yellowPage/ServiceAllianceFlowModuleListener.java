@@ -1,5 +1,7 @@
 package com.everhomes.yellowPage;
 
+import static com.everhomes.yellowPage.YellowPageUtils.throwError;
+
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -10,6 +12,10 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmtask.PmTask;
+import com.everhomes.pmtask.PmTaskCategory;
+import com.everhomes.pmtask.PmTaskHandle;
+import com.everhomes.pmtask.PmTaskLog;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
@@ -17,7 +23,8 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
-
+import com.everhomes.rest.pmtask.PmTaskFlowStatus;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -25,6 +32,7 @@ import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
@@ -61,6 +69,7 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
@@ -75,7 +84,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	
 	private final String ALLIANCE_TEMPLATE_TYPE = "flowCase";
 	private final String ALLIANCE_WORK_FLOW_STATUS_FIELD_NAME = "workflowStatus";
-	private final String FORM_VAL_SOURCE_TYPE_NAME = EhFlowCases.class.getSimpleName();
+	public static final String FORM_VAL_SOURCE_TYPE_NAME = EhFlowCases.class.getSimpleName();
 	private static List<String> DEFAULT_FIELDS = new ArrayList<>();
 
 	@Autowired
@@ -125,6 +134,9 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
 	@Autowired
 	ClickStatDetailProvider detailProvider;
+	
+	@Autowired
+	private SmsProvider smsProvider;
 
 	@Override
 	public FlowModuleInfo initModule() {
@@ -162,10 +174,13 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			return;
 		}
 		
-		ServiceCategoryMatch match = allianceStandardService.findServiceCategoryMatch(yellowPage.getOwnerType(),
-				yellowPage.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
+		ConfigCommand configCmd = allianceStandardService.reNewConfigCommand(yellowPage.getOwnerType(),
+				yellowPage.getOwnerId(), yellowPage.getParentId());
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(configCmd.getOwnerType(),
+				configCmd.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
 		if (null != match) {
-			flowCase.setTitle(match.getCategoryName());
+			yellowPage.setCategoryId(match.getCategoryId());
+			yellowPage.setServiceType(match.getCategoryName());
 		}
 		
 		StringBuffer contentBuffer = new StringBuffer();
@@ -230,7 +245,12 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		request.setJumpType(2L);
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
 		request.setCreatorName(user.getNickName());
-		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
+		try {
+			request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
+		} catch (Exception e) {
+			LOGGER.error("err: org:"+organizationVal.getFieldValue());
+		}
+		
 		request.setCreatorMobile(identifier.getIdentifierToken());
 		request.setOwnerType(sa.getOwnerType());
 		request.setOwnerId(sa.getOwnerId());
@@ -254,7 +274,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			request.setCreatorOrganization(companyName);
 		}
 			
-		record.setServiceOrganization(sa.getName());
+		record.setServiceOrganization(sa.getName()); //这里储存服务名称，如有修改，需同步修改listUiServiceRecords
 		record.setNamespaceId(flowCase.getNamespaceId());
 		record.setServiceAllianceId(request.getServiceAllianceId());
 		saapplicationRecordProvider.createServiceAllianceApplicationRecord(record);
@@ -417,37 +437,6 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-//		syncRequest(ctx);
-	}
-	
-	private void syncRequest(FlowCaseState ctx) {
-		 // 更新状态
-       FlowCase flowCase = ctx.getFlowCase();
-       Byte status = flowCase.getStatus();
-
-       if (status != null) {
-   		ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
-   		List<GeneralFormVal> lists = generalFormValProvider.queryGeneralFormVals(FORM_VAL_SOURCE_TYPE_NAME, flowCase.getId());
-	    List<PostApprovalFormItem> values = lists.stream().map(r -> {
-	         PostApprovalFormItem value = new PostApprovalFormItem();
-	         value.setFieldName(r.getFieldName());
-	         value.setFieldType(r.getFieldType());
-	         value.setFieldValue(r.getFieldValue());
-	         return value;
-	    }).collect(Collectors.toList());
-	    PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
-   		Long yellowPageId = 0L;
-   		ServiceAlliances  yellowPage = null;
-   		if(null != sourceVal){
-   			yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-   			yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
-   			request.setServiceAllianceId(yellowPageId);
-   			request.setType(yellowPage.getParentId());
-   			
-   		}
-   		syncRequest(values, request, flowCase,yellowPage,status);
-       }
-	
 	}
 	
 	@Override
@@ -480,6 +469,15 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		if (null == yellowPage) {
 			LOGGER.error("flowCaseInfo:"+flowCase.toString());
 			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FLOW_CASE_SERVICE_NOT_FOUND, "service not found");
+		}
+		
+		ConfigCommand configCmd = allianceStandardService.reNewConfigCommand(yellowPage.getOwnerType(),
+				yellowPage.getOwnerId(), yellowPage.getParentId());
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(configCmd.getOwnerType(),
+				configCmd.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
+		if (null != match) {
+			yellowPage.setCategoryId(match.getCategoryId());
+			yellowPage.setServiceType(match.getCategoryName());
 		}
 		
 		entities.add(new FlowCaseEntity("服务名称", yellowPage.getName(), FlowCaseEntityType.MULTI_LINE.getCode()));
@@ -547,8 +545,17 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
 			List<Tuple<String, Object>> variables) {
-		// TODO Auto-generated method stub
-		
+		FlowCase flowCase = ctx.getFlowCase();
+
+		ServiceAlliances serviceAlliance = yellowPageProvider.findServiceAllianceById(flowCase.getReferId(), null,
+				null);
+		if (SmsTemplateCode.SERVICE_ALLIANCE_NEW_APPLY_TO_MANAGE == templateId) {
+			smsProvider.addToTupleList(variables, "applierName", flowCase.getApplierName());
+			smsProvider.addToTupleList(variables, "applierPhone", flowCase.getApplierPhone());
+			smsProvider.addToTupleList(variables, "serviceName", serviceAlliance.getName());
+		} else if (SmsTemplateCode.SERVICE_ALLIANCE_NEW_APPLY_TO_USER == templateId) {
+			smsProvider.addToTupleList(variables, "serviceName", serviceAlliance.getName());
+		}
 	}
 	
 	/**   
@@ -643,7 +650,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		}
 
 		Byte enableProvider = (byte) 0;
-		ServiceAllianceCategories sc = allianceStandardService.queryHomePageCategoryByScene(flowCase.getReferId(), flowCase.getOwnerId());
+		ServiceAllianceCategories sc = allianceStandardService.queryHomePageCategoryByScene(flowCase.getOwnerId(), flowCase.getProjectId());
 		if (null != sc && null != sc.getEnableProvider()) {
 			enableProvider = sc.getEnableProvider();
 		}
@@ -728,7 +735,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
     protected List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         List<FlowCaseEntity> entities = new ArrayList<>();
-        if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) {
+        if (flowCase.getReferType().equals(FlowReferType.SERVICE_ALLIANCE.getCode())) {
             List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(FORM_VAL_SOURCE_TYPE_NAME, flowCase.getId());
             GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
                     vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
@@ -792,4 +799,5 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
             }
         }
     }
+    
 }

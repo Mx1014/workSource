@@ -35,9 +35,6 @@ import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
 import com.everhomes.rest.asset.ListBillItemsResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListBillsCommandForEnt;
-import com.everhomes.rest.asset.ListBillsDTO;
-import com.everhomes.rest.asset.ListBillsResponse;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.asset.ListPaymentBillResp;
 import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
@@ -53,6 +50,8 @@ import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderCommand;
@@ -286,5 +285,12 @@ public abstract class AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
 	}
-	
+
+	public List<ListBillsDTO> listOpenBills(ListBillsResponse response, ListBillsCommand cmd) {
+		LOGGER.error("Insufficient privilege, handler listOpenBills");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
+
+
 }

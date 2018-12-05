@@ -55,6 +55,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
 import com.everhomes.rest.promotion.merchant.GetPayUserByMerchantIdCommand;
@@ -379,6 +380,10 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 			if(requestType == ParkingSourceRequestType.BACKGROUND){
 				dto.setFlowMode(r.getFlowMode());
+			}
+			
+			if (isReachMonthCardRequestMaxNum(r.getOwnerType(), r.getOwnerId(), r.getId())) {
+				dto.setMonthCardMaxRequestFlag(TrueOrFalseFlag.TRUE.getCode());
 			}
 
 			return dto;
@@ -747,7 +752,8 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	private Object createGeneralOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType, ActivityRosterPayVersionFlag version) {
-		checkPlateNumber(cmd.getPlateNumber());
+		String plateNumber = cmd.getPlateNumber().trim();
+		checkPlateNumber(plateNumber);
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
@@ -769,7 +775,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
 		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
 		parkingRechargeOrder.setParkingLotId(parkingLot.getId());
-		parkingRechargeOrder.setPlateNumber(cmd.getPlateNumber());
+		parkingRechargeOrder.setPlateNumber(plateNumber);
 		parkingRechargeOrder.setPlateOwnerName(null != cmd.getPlateOwnerName()?cmd.getPlateOwnerName():user.getNickName());
 		parkingRechargeOrder.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
 
@@ -790,7 +796,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setPaidVersion(version.getCode());
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
-			ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
+			ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, plateNumber);
 
 			if (null == dto || null == dto.getPrice()) {
 				LOGGER.error("Parking request temp fee failed, cmd={}", cmd);
@@ -869,13 +875,15 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(order.getRechargeType());
 		String returnUrl = null;
 		ParkingBusinessType bussinessType = null;
+		String extendInfo = null;
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			bussinessType = ParkingBusinessType.MONTH_RECHARGE;
 			returnUrl = String.format(configProvider.getValue("parking.recharge.return.url","zl://parking/monthCardRechargeStatus?orderId=%s"), String.valueOf(order.getId()));
-
+			extendInfo = parkingLot.getName()+"（月卡车：" + order.getPlateNumber() + "）";
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
-			returnUrl = String.format(configProvider.getValue("parking.tempfee.return.url","zl://parking/tempFeeStatus?orderId=%s"), String.valueOf(order.getId()));			
+			returnUrl = String.format(configProvider.getValue("parking.tempfee.return.url","zl://parking/tempFeeStatus?orderId=%s"), String.valueOf(order.getId()));	
+			extendInfo = parkingLot.getName()+"（月卡车：" + order.getPlateNumber() + "）";
 		}
 		
 		try {
@@ -918,6 +926,7 @@ public class ParkingServiceImpl implements ParkingService {
         baseInfo.setGoodsDetail(buildGoodsDetails(parkingLot, order, bussinessType));
         baseInfo.setReturnUrl(returnUrl);
         baseInfo.setOrganizationId(organizationId);
+        baseInfo.setExtendInfo(extendInfo);
         
 		CreateMerchantOrderResponse generalOrderResp = getParkingGeneralOrderHandler().createOrder(baseInfo);
         order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
@@ -945,7 +954,7 @@ public class ParkingServiceImpl implements ParkingService {
 		GoodDTO good = new GoodDTO();
 		good.setNamespace("NS");
 		good.setTag1(order.getOwnerId() + "");
-		good.setTag2(parkingLot.getName());
+		good.setTag2(String.valueOf(parkingLot.getId()));
 		Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
 		if (null != community) {
 			good.setServeApplyName(community.getName()); //
@@ -1013,9 +1022,8 @@ public class ParkingServiceImpl implements ParkingService {
 			goodsDetail.add(e);
 			
 			e = new OrderDescriptionEntity();
-			String delayDate = sdf.format(order.getDelayTime());
-			e.setKey("查询时间");
-			e.setValue(delayDate);
+			e.setKey("停车时长");
+			e.setValue(String.valueOf(order.getParkingTime()));
 			goodsDetail.add(e);
 		}
 		
@@ -2053,13 +2061,14 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(GetParkingTempFeeCommand cmd) {
-		checkPlateNumber(cmd.getPlateNumber());
+		String plateNumber = cmd.getPlateNumber().trim();
+		checkPlateNumber(plateNumber);
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
 		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
 
-		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
+		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, plateNumber);
 
 		if (null != parkingLot.getTempFeeDiscountFlag()) {
 			if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
@@ -2092,7 +2101,7 @@ public class ParkingServiceImpl implements ParkingService {
 				Timestamp endDate = new Timestamp(now);
 
 				ParkingRechargeOrder order = parkingProvider.getParkingRechargeTempOrder(cmd.getOwnerType(), cmd.getOwnerId(),
-						cmd.getParkingLotId(), cmd.getPlateNumber(), startDate, endDate);
+						cmd.getParkingLotId(), plateNumber, startDate, endDate);
 
 				if (null != order) {
 					//如果已缴费，显示剩余离场时间
@@ -3557,6 +3566,7 @@ public class ParkingServiceImpl implements ParkingService {
 			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
 			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
 			newPayeeAccount.setMerchantId(oldPayeeAccount.getMerchantId());
+			newPayeeAccount.setPayeeId(oldPayeeAccount.getMerchantId());
 			parkingBusinessPayeeAccountProvider.updateParkingBusinessPayeeAccount(newPayeeAccount);
 		}else{
 			//ParkingBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ParkingBusinessPayeeAccount.class);
@@ -3570,6 +3580,7 @@ public class ParkingServiceImpl implements ParkingService {
 			newPayeeAccount.setParkingLotName(cmd.getParkingLotName());
 			newPayeeAccount.setPayeeUserType(cmd.getPayeeUserType());
 			newPayeeAccount.setStatus((byte)2);
+			newPayeeAccount.setPayeeId(cmd.getPayeeId());
 			
 			parkingBusinessPayeeAccountProvider.createParkingBusinessPayeeAccount(newPayeeAccount);
 		}
@@ -4048,33 +4059,41 @@ public class ParkingServiceImpl implements ParkingService {
 		//微信通知开关
 		if (!configProvider.getBooleanValue(UserContext.getCurrentNamespaceId(),"parking.wechatNotify",false))
 			return;
-		if (!(ParkingRechargeOrderStatus.UNPAID.getCode() == order.getStatus()))
-			return;
-		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + order.getBizOrderNo()).enter(()-> {
-			ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
-			String vendorName = lot.getVendorName();
-			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-			if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.WECHAT_JS_PAY.getCode())
-				order.setPaidType(VendorType.WEI_XIN.getCode());
-			 else if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.ALI_JS_PAY.getCode())
-				order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
-			if (handler.notifyParkingRechargeOrderPayment(order)) {
-				order.setStatus(ParkingRechargeOrderStatus.RECHARGED_NOTCALL.getCode());
-				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-				parkingProvider.updateParkingRechargeOrder(order);
-				LOGGER.info("Notify parking recharge by wechat success, cmd={}, order={}", cmd, order);
-			}else{
-				//充值失败
-				order.setStatus(ParkingRechargeOrderStatus.FAILED_NOTCALL.getCode());
-				//充值失败时，将返回的错误信息记录下来
-				if (StringUtils.isBlank(order.getErrorDescription())) {
-					String locale = Locale.SIMPLIFIED_CHINESE.toString();
-					String scope = ParkingErrorCode.SCOPE;
-					String code = String.valueOf(ParkingErrorCode.ERROR_RECHARGE_ORDER);
-					String defaultText = localeService.getLocalizedString(scope, code, locale, "");
-					order.setErrorDescription(defaultText);
+//		if (!(ParkingRechargeOrderStatus.UNPAID.getCode() == order.getStatus()))
+//			return;
+		String lockId = null;
+		if (order.getGeneralOrderId() != null){
+			lockId = String.valueOf(order.getGeneralOrderId());
+		}else{
+			lockId = order.getBizOrderNo();
+		}
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + lockId).enter(()-> {
+			if (ParkingRechargeOrderStatus.UNPAID.getCode() == order.getStatus()){
+				ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
+				String vendorName = lot.getVendorName();
+				ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+				if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.WECHAT_JS_PAY.getCode())
+					order.setPaidType(VendorType.WEI_XIN.getCode());
+				 else if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.ALI_JS_PAY.getCode())
+					order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
+				if (handler.notifyParkingRechargeOrderPayment(order)) {
+					order.setStatus(ParkingRechargeOrderStatus.RECHARGED_NOTCALL.getCode());
+					order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+					parkingProvider.updateParkingRechargeOrder(order);
+					LOGGER.info("Notify parking recharge by wechat success, cmd={}, order={}", cmd, order);
+				}else{
+					//充值失败
+					order.setStatus(ParkingRechargeOrderStatus.FAILED_NOTCALL.getCode());
+					//充值失败时，将返回的错误信息记录下来
+					if (StringUtils.isBlank(order.getErrorDescription())) {
+						String locale = Locale.SIMPLIFIED_CHINESE.toString();
+						String scope = ParkingErrorCode.SCOPE;
+						String code = String.valueOf(ParkingErrorCode.ERROR_RECHARGE_ORDER);
+						String defaultText = localeService.getLocalizedString(scope, code, locale, "");
+						order.setErrorDescription(defaultText);
+					}
+					parkingProvider.updateParkingRechargeOrder(order);
 				}
-				parkingProvider.updateParkingRechargeOrder(order);
 			}
 			return null;
 		});
@@ -4082,7 +4101,7 @@ public class ParkingServiceImpl implements ParkingService {
 	
 	@Override
 	public GetInvoiceUrlResponse getInvoiceUrl (GetInvoiceUrlCommand cmd){
-		String homeurl = configProvider.getValue("home.url", "");
+		String homeurl = configProvider.getValue("invoice.home.url", "");
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
 		String bizOrderNo = order.getBizOrderNo();
 		GetInvoiceUrlResponse response = new GetInvoiceUrlResponse();
@@ -4096,5 +4115,28 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		response.setInvoiceUrl(invoiceUrl);
 		return response;
+	}
+	
+	boolean isReachMonthCardRequestMaxNum(String ownerType, Long ownerId, Long parkingLotId) {
+		
+		Long userId = UserContext.currentUserId();
+		if (null == userId) {
+			return false;
+		}
+
+		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(ownerType,
+				ownerId, parkingLotId, null);
+
+		List<ParkingCardRequest> requestList = parkingProvider.listParkingCardRequests(userId, ownerType,
+				ownerId, parkingLotId, null, null,
+				ParkingCardRequestStatus.INACTIVE.getCode(), null, null, null);
+
+		int requestListSize = requestList.size();
+		if(null != parkingFlow && parkingFlow.getMaxRequestNumFlag() == ParkingConfigFlag.SUPPORT.getCode()
+				&& requestListSize >= parkingFlow.getMaxRequestNum()){
+			return true;
+		}
+		
+		return false;
 	}
 }

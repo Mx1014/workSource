@@ -134,6 +134,16 @@ public class OrganizationMemberDTO {
     //  组织架构4.6 公司唯一标识
     private String account;
 
+    private String deptName;
+
+    public String getDeptName() {
+        return deptName;
+    }
+
+    public void setDeptName(String deptName) {
+        this.deptName = deptName;
+    }
+
     public Byte getOperateType() {
         return operateType;
     }

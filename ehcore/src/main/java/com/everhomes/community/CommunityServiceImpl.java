@@ -83,6 +83,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.ApartmentCountInBuildingDTO;
 import com.everhomes.rest.community.ApartmentExportDataDTO;
 import com.everhomes.rest.community.ApartmentInfoDTO;
 import com.everhomes.rest.community.BuildingAdminStatus;
@@ -93,6 +94,7 @@ import com.everhomes.rest.community.BuildingInfoDTO;
 import com.everhomes.rest.community.BuildingOrderDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
 import com.everhomes.rest.community.BuildingStatisticsDTO;
+import com.everhomes.rest.community.BuildingStatisticsForAppDTO;
 import com.everhomes.rest.community.BuildingStatus;
 import com.everhomes.rest.community.CaculateBuildingAreaCommand;
 import com.everhomes.rest.community.CaculateCommunityAreaCommand;
@@ -134,6 +136,8 @@ import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.community.ListBuildingsByKeywordsCommand;
 import com.everhomes.rest.community.ListBuildingsByKeywordsResponse;
+import com.everhomes.rest.community.ListBuildingsForAppCommand;
+import com.everhomes.rest.community.ListBuildingsForAppResponse;
 import com.everhomes.rest.community.ListChildProjectCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
@@ -211,6 +215,7 @@ import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -230,6 +235,12 @@ import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.openapi.ListAddressesForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListAddressesForThirdPartyResponse;
+import com.everhomes.rest.openapi.ListBuildingsForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListBuildingsForThirdPartyResponse;
+import com.everhomes.rest.openapi.ListCommunitiesForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListCommunitiesForThirdPartyResponse;
 import com.everhomes.rest.organization.AuditAuth;
 import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.ExecutiveFlag;
@@ -292,6 +303,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -322,6 +334,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -2010,7 +2023,9 @@ public class CommunityServiceImpl implements CommunityService {
 //                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
                 Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword);
                 if (StringUtils.isNotBlank(cmd.getIdentifierToken())) {
-                   condition =  condition.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%"+cmd.getIdentifierToken()+"%"));
+                	
+                	//modify by momoubin,2018/11/30：小区用户认证查询条件修改or为and，"昵称"和"手机号"为与的条件
+                   condition =  condition.and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%"+cmd.getIdentifierToken()+"%"));
                 }
                 query.addConditions(condition);
             }
@@ -5355,8 +5370,9 @@ public class CommunityServiceImpl implements CommunityService {
 		List<CommunityGeoPoint> pointList;
 
 
-
-		for(int i = 12; i > 3; i--){
+//TODO 5的范围太小，但是改成3的话，会把大量的数据查询出来。因为0域空间有大量的Community和CommunityGeoPoint数据。
+		//TODO findCommunityGeoPointByGeoHash接口应该带上namespaceId，内部和eh_communities连表查询。并且规定不能查询0域空间。
+		for(int i = 12; i > 5; i--){
 			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
 			if(pointList != null && pointList.size() > 0){
 				for(CommunityGeoPoint point: pointList){
@@ -5864,7 +5880,16 @@ public class CommunityServiceImpl implements CommunityService {
 		if(dto.getTotalRent()!=null){
 			dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
 		}
-
+		
+		if (dto.getAreaSize()!=null && dto.getAreaSize()!=0) {
+			if (dto.getFreeArea()!=null) {
+				BigDecimal freeRate = new BigDecimal(dto.getFreeArea()).divide(new BigDecimal(dto.getAreaSize()),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+				dto.setFreeRate(freeRate);
+			}else {
+				dto.setFreeRate(BigDecimal.ZERO);
+			}
+		}
+		
 		return dto;
 	}
 
@@ -6009,10 +6034,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
 
-		//用于存储已经计算过的合同id
-//		List<Long> contractIds = new ArrayList<>();
-
-
 		List<Long> filterAddressIdList = new ArrayList<>();
 		for (Address address : addresses) {
 			filterAddressIdList.add(address.getId());
@@ -6031,27 +6052,6 @@ public class CommunityServiceImpl implements CommunityService {
 			ApartmentInfoDTO dto = convertToApartmentInfoDTO(address,livingStatus);
 			apartments.add(dto);
 			caculateTotalApartmentStatistic(result,dto);
-//			List<Contract> contracts = contractProvider.findContractByAddressId(address.getId());
-//			if (contracts != null && contracts.size() > 0){
-//				for (Contract contract : contracts) {
-//					if (!contractIds.contains(contract.getId())) {
-//						contractIds.add(contract.getId());
-//						totalRent += (contract.getRent()!=null ? contract.getRent().doubleValue() : 0);
-//						relatedContractNumber++;
-//					}
-//				}
-//				totalRent = doubleRoundHalfUp(totalRent,2);
-//			}
-//			if (address.getRentArea() != null && address.getRentArea() > 0) {
-//				areaAveragePrice = doubleRoundHalfUp(totalRent/address.getRentArea(),2);
-//	    	}
-			//按在租实时均价筛选
-//			if (cmd.getAreaAveragePriceFrom() != null && areaAveragePrice < cmd.getAreaAveragePriceFrom().doubleValue()) {
-//				continue;
-//			}
-//			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
-//				continue;
-//			}
 		}
 		//在租合同数
 		int totalRelatedContractNumber = 0;
@@ -6061,38 +6061,12 @@ public class CommunityServiceImpl implements CommunityService {
 		double totalRent = 0;
 		totalRent = contractProvider.getTotalRentByAddressIds(filterAddressIdList);
 		result.setTotalRent(totalRent);
-
-
-		//分页,每次多拿一个数据，决定要不要设置NextPageAnchor
-//		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
-//		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
-//		long pageAnchor = cmd.getPageAnchor()!= null ? cmd.getPageAnchor() : 0;
-//		int size = 0;
-//		for (ApartmentInfoDTO apartmentInfoDTO : apartments) {
-//			if (apartmentInfoDTO.getAddressId() > pageAnchor) {
-//				apartmentsForOnePage.add(apartmentInfoDTO);
-//				size ++;
-//				if (size > pageSize) {
-//					break;
-//				}
-//			}
-//		}
-//		if (apartmentsForOnePage != null && apartmentsForOnePage.size() > 0) {
-//			if (size > pageSize) {
-//				apartmentsForOnePage.remove(apartmentsForOnePage.size()-1);
-//				result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
-//			}
-//			result.setApartments(apartmentsForOnePage);
-//		}
 		result.setApartments(apartments);
 		result.setTotalAreaSize(doubleRoundHalfUp(result.getTotalAreaSize(),2));
 		result.setTotalRentArea(doubleRoundHalfUp(result.getTotalRentArea(),2));
 		result.setTotalFreeArea(doubleRoundHalfUp(result.getTotalFreeArea(),2));
 		result.setTotalChargeArea(doubleRoundHalfUp(result.getTotalChargeArea(),2));
 		result.setTotalRent(doubleRoundHalfUp(result.getTotalRent(),2));
-//		if (result.getTotalRentArea()!=null && result.getTotalRentArea().doubleValue() > 0) {
-//			result.setTotalAreaAveragePrice(doubleRoundHalfUp(result.getTotalRent()/result.getTotalRentArea(),2));
-//		}
 		return result;
 	}
 
@@ -6444,15 +6418,271 @@ public class CommunityServiceImpl implements CommunityService {
 		return dto;
 	}
 	
+
 	private void assetManagementPrivilegeCheck(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ASSET_MANAGEMENT, null, null, null, communityId);
+	}
+	
+	@Override
+	public BuildingStatisticsForAppDTO getBuildingStatisticsForApp(GetBuildingStatisticsCommand cmd) {
+		if(cmd.getBuildingId() == null){
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
+					"Invalid buildingId parameter");
+		}
+		
+		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
+		if (building == null || building.getStatus()==BuildingAdminStatus.INACTIVE.getCode()) {
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BUILDING_NOT_EXIST,
+					"building not exist.");
+		}
+
+		BuildingStatisticsForAppDTO dto = ConvertHelper.convert(building, BuildingStatisticsForAppDTO.class);
+		dto.setBuildingId(building.getId());
+		dto.setBuildingName(building.getName());
+
+		if (dto.getAreaSize()!=null) {
+			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+		}
+		if(dto.getRentArea()!=null){
+			dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+		}
+		if(dto.getFreeArea()!=null){
+			dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+		}
+		if(dto.getChargeArea()!=null){
+			dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+		}
+		
+		if (dto.getAreaSize()!=null && dto.getAreaSize()!=0) {
+			if (dto.getFreeArea()!=null) {
+				BigDecimal freeRate = new BigDecimal(dto.getFreeArea()).divide(new BigDecimal(dto.getAreaSize()),4,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+				dto.setFreeRate(freeRate);
+			}else {
+				dto.setFreeRate(BigDecimal.ZERO);
+			}
+		}
+		
+		ApartmentCountInBuildingDTO apartmentCountResult = countApartmentInBuilding(cmd.getBuildingId());
+		dto.setTotalApartmentCount(apartmentCountResult.getTotalApartmentCount());
+		dto.setDefaultApartmentCount(apartmentCountResult.getDefaultApartmentCount());
+		dto.setFreeApartmentCount(apartmentCountResult.getFreeApartmentCount());
+		dto.setLivingApartmentCount(apartmentCountResult.getLivingApartmentCount());
+		dto.setOccupiedApartmentCount(apartmentCountResult.getOccupiedApartmentCount());
+		dto.setRentApartmentCount(apartmentCountResult.getRentApartmentCount());
+		dto.setSaledApartmentCount(apartmentCountResult.getSaledApartmentCount());
+		dto.setUnsaleApartmentCount(apartmentCountResult.getUnsaleApartmentCount());
+		dto.setSignedUpCount(apartmentCountResult.getSignedUpCount());
+		dto.setWaitingRoomCount(apartmentCountResult.getWaitingRoomCount());
+		
+		return dto;
+	}
+	
+	@Override
+	public ApartmentCountInBuildingDTO countApartmentInBuilding(Long buildingId){
+		if(buildingId == null){
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
+					"Invalid buildingId parameter");
+		}
+		Building building = communityProvider.findBuildingById(buildingId);
+		if (building == null || building.getStatus()==BuildingAdminStatus.INACTIVE.getCode()) {
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BUILDING_NOT_EXIST,
+					"building not exist.");
+		}
+		
+		ApartmentCountInBuildingDTO result = new ApartmentCountInBuildingDTO();
+		
+		List<Address> addresses = addressProvider.findActiveApartmentsByBuildingId(buildingId);
+		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
+		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
+		
+		Map<Byte, Integer> resultMap = new HashMap<>();
+		Integer totalApartmentCount = 0;
+		resultMap.put(AddressMappingStatus.DEFAULT.getCode(), 0);
+		resultMap.put(AddressMappingStatus.LIVING.getCode(), 0);
+		resultMap.put(AddressMappingStatus.RENT.getCode(), 0);
+		resultMap.put(AddressMappingStatus.FREE.getCode(), 0);
+		resultMap.put(AddressMappingStatus.SALED.getCode(), 0);
+		resultMap.put(AddressMappingStatus.UNSALE.getCode(), 0);
+		resultMap.put(AddressMappingStatus.OCCUPIED.getCode(), 0);
+		resultMap.put(AddressMappingStatus.SIGNEDUP.getCode(), 0);
+		resultMap.put(AddressMappingStatus.WAITINGROOM.getCode(), 0);
+		
+		for(Address address : addresses){
+			totalApartmentCount++;
+			CommunityAddressMapping communityAddressMapping = communityAddressMappingMap.get(address.getId());
+			if (communityAddressMapping != null) {
+				resultMap.put(communityAddressMapping.getLivingStatus(), resultMap.get(communityAddressMapping.getLivingStatus()) + 1);
+			}else {
+				resultMap.put(AddressMappingStatus.LIVING.getCode(), resultMap.get(AddressMappingStatus.LIVING.getCode()) + 1);
+			}
+		}
+		
+		result.setTotalApartmentCount(totalApartmentCount);
+		result.setFreeApartmentCount(resultMap.get(AddressMappingStatus.FREE.getCode()));
+		result.setLivingApartmentCount(resultMap.get(AddressMappingStatus.LIVING.getCode()));
+		result.setOccupiedApartmentCount(resultMap.get(AddressMappingStatus.OCCUPIED.getCode()));
+		result.setRentApartmentCount(resultMap.get(AddressMappingStatus.RENT.getCode()));
+		result.setSaledApartmentCount(resultMap.get(AddressMappingStatus.SALED.getCode()));
+		result.setUnsaleApartmentCount(resultMap.get(AddressMappingStatus.UNSALE.getCode()));
+		result.setDefaultApartmentCount(resultMap.get(AddressMappingStatus.DEFAULT.getCode()));
+		result.setSignedUpCount(resultMap.get(AddressMappingStatus.SIGNEDUP.getCode()));
+		result.setWaitingRoomCount(resultMap.get(AddressMappingStatus.WAITINGROOM.getCode()));
+		
+		return result;
 	}
 
 
 	@Override
+	public ListBuildingsForAppResponse listBuildingsForApp(ListBuildingsForAppCommand cmd) {
+		if(cmd.getCommunityId() == null){
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
+					"Invalid communityId parameter");
+		}
+		
+		ListBuildingsForAppResponse response = new ListBuildingsForAppResponse();
+		List<BuildingStatisticsForAppDTO> results = new ArrayList<>();
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize+1 ,cmd.getCommunityId(), null, null);
+		
+		Long nextPageAnchor = null;
+        if(buildings.size() > pageSize) {
+        	buildings.remove(buildings.size() - 1);
+            nextPageAnchor = buildings.get(buildings.size() - 1).getDefaultOrder();
+        }
+		response.setNextPageAnchor(nextPageAnchor);
+		
+		for (Building building : buildings) {
+			GetBuildingStatisticsCommand cmd2 = new GetBuildingStatisticsCommand();
+			cmd2.setBuildingId(building.getId());
+			BuildingStatisticsForAppDTO dto = getBuildingStatisticsForApp(cmd2);
+			
+			dto.setPosterUri(building.getPosterUri());
+			Long userId = UserContext.currentUserId();
+			if (dto.getPosterUri() != null) {
+				dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
+			}
+			
+			results.add(dto);
+		}
+		response.setResults(results);
+		
+		return response;
+	} 
+
+
+	@Override
+	public ListCommunitiesForThirdPartyResponse listCommunitiesForThirdParty(ListCommunitiesForThirdPartyCommand cmd) {
+		ListCommunitiesForThirdPartyResponse response = new ListCommunitiesForThirdPartyResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
+		Integer pageSize = cmd.getPageSize();
+		if (pageSize == null) {
+			pageSize = 10;
+		}else if (pageSize > 1000) {
+			pageSize = 1000;
+		}
+		
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.CommunityDTO> results = communityProvider.listCommunitiesForThirdParty(currentNamespaceId,cmd.getCommunityId(),pageAnchor,pageSize+1,timestamp);
+		
+		if (results!=null && results.size() > pageSize) {
+			results.remove(results.size()-1);
+			Long nextPageAnchor = pageAnchor + pageSize.longValue();
+			response.setNextPageAnchor(nextPageAnchor);
+		}
+		
+		response.setResults(results);
+		
+		return response;
+	}
+
+
+	@Override
+
 	public ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file) {
 		// TODO Auto-generated method stub
 		return null;
+	}	
+	
+	public ListBuildingsForThirdPartyResponse listBuildingsForThirdParty(ListBuildingsForThirdPartyCommand cmd) {
+		ListBuildingsForThirdPartyResponse response = new ListBuildingsForThirdPartyResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
+		Integer pageSize = cmd.getPageSize();
+		if (pageSize == null) {
+			pageSize = 10;
+		}else if (pageSize > 1000) {
+			pageSize = 1000;
+		}
+		
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.BuildingDTO> results = communityProvider.listBuildingsForThirdParty(currentNamespaceId,cmd.getCommunityId(),pageAnchor,pageSize+1,timestamp);
+		
+		if (results!=null && results.size() > pageSize) {
+			results.remove(results.size()-1);
+			Long nextPageAnchor = pageAnchor + pageSize.longValue();
+			response.setNextPageAnchor(nextPageAnchor);
+		}
+		
+		for (com.everhomes.rest.openapi.BuildingDTO buildingDTO : results) {
+			if (buildingDTO.getCommunityId() != null) {
+				Community community = communityProvider.findCommunityById(buildingDTO.getCommunityId());
+				if (community != null) {
+					buildingDTO.setCommunityName(community.getName());
+				}
+			}
+		}
+		
+		response.setResults(results);
+		
+		return response;
+	}
+
+	@Override
+	public ListAddressesForThirdPartyResponse listAddressesForThirdParty(ListAddressesForThirdPartyCommand cmd) {
+		ListAddressesForThirdPartyResponse response = new ListAddressesForThirdPartyResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
+		Integer pageSize = cmd.getPageSize();
+		if (pageSize == null) {
+			pageSize = 10;
+		}else if (pageSize > 1000) {
+			pageSize = 1000;
+		}
+		
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.ApartmentDTO> results = communityProvider.listAddressesForThirdParty(currentNamespaceId,cmd.getCommunityId(),cmd.getBuildingId(),pageAnchor,pageSize+1,timestamp);
+		
+		if (results!=null && results.size() > pageSize) {
+			results.remove(results.size()-1);
+			Long nextPageAnchor = pageAnchor + pageSize.longValue();
+			response.setNextPageAnchor(nextPageAnchor);
+		}
+		
+		response.setResults(results);
+		
+		return response;
 	}
 
 }

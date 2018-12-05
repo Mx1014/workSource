@@ -100,6 +100,7 @@ public class SearchEnterpriseCustomerCommand {
 
     private Long taskId;
 
+    private Long updateTime;
 
     private Long admissionItemId;
 
@@ -123,6 +124,23 @@ public class SearchEnterpriseCustomerCommand {
 
     private String trackerName;
 
+    private Byte mobileFlag;
+
+    public Long getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Long updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public Byte getMobileFlag() {
+        return mobileFlag;
+    }
+
+    public void setMobileFlag(Byte mobileFlag) {
+        this.mobileFlag = mobileFlag;
+    }
 
     public Long getMinTrackingPeriod() {
         return minTrackingPeriod;

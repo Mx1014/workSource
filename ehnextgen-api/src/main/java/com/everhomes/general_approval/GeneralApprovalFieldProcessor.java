@@ -29,6 +29,8 @@ public interface GeneralApprovalFieldProcessor {
 
     boolean sinceVersion510();
 
+    void processMultiSelectField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal);
+
 }
 
 

@@ -6,6 +6,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.pmkexing.PmKeXingBillService;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.contract.NamespaceContractType;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.*;

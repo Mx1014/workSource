@@ -1,8 +1,10 @@
 package com.everhomes.rest.rentalv2.admin;
 
+import com.everhomes.rest.rentalv2.RentalPriceClassificationDTO;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -11,24 +13,10 @@ import java.math.BigDecimal;
  * <li>price: 园区客户价格</li>
  * <li>initiatePrice: 园区客户起步后价格</li>
  * <li>originalPrice: 原价-如果打折则有（园区客户）</li>
- * <li>orgMemberPrice: 集团内部价格</li>
- * <li>orgMemberInitiatePrice: 集团内部起步后价格</li>
- * <li>orgMemberOriginalPrice: 原价-如果打折则有(企业内部价)</li>
- * <li>approvingUserPrice: 外部客户价格</li>
- * <li>approvingUserInitiatePrice: 外部客户起步后价格</li>
- * <li>approvingUserOriginalPrice: 原价-如果打折则有（外部客户价）</li>
  * <li>discountType: 折扣类型，0不打折，1满减，2满天减，3比例折扣，参考{@link com.everhomes.rest.rentalv2.admin.DiscountType}</li>
  * <li>fullPrice: 满</li>
  * <li>cutPrice: 减</li>
  * <li>discountRatio: 折扣比例</li>
- * <li>orgMemberDiscountType: 集团内部折扣类型，0不打折，1满减，2满天减，3比例折扣，参考{@link com.everhomes.rest.rentalv2.admin.DiscountType}</li>
- * <li>orgMemberFullPrice: 集团内部满</li>
- * <li>orgMemberCutPrice: 集团内部减</li>
- * <li>orgMemberDiscountRatio: 集团内部折扣比例</li>
- * <li>approvingUserDiscountType: 外部客户折扣类型，0不打折，1满减，2满天减，3比例折扣，参考{@link com.everhomes.rest.rentalv2.admin.DiscountType}</li>
- * <li>approvingUserFullPrice: 外部客户满</li>
- * <li>approvingUserCutPrice: 外部客户减</li>
- * <li>approvingUserDiscountRatio: 外部客户折扣比例</li>
  * </ul>
  */
 public class PricePackageDTO {
@@ -39,27 +27,14 @@ public class PricePackageDTO {
     private BigDecimal price;
     private BigDecimal initiatePrice;
     private java.math.BigDecimal originalPrice;
-    private BigDecimal orgMemberPrice;
-    private BigDecimal orgMemberInitiatePrice;
-    private BigDecimal orgMemberOriginalPrice;
-    private BigDecimal approvingUserPrice;
-    private BigDecimal approvingUserInitiatePrice;
-    private BigDecimal approvingUserOriginalPrice;
     private Byte discountType;
     private BigDecimal fullPrice;
     private BigDecimal cutPrice;
     private Double discountRatio;
-    private Byte  orgMemberDiscountType;
-    private BigDecimal  orgMemberFullPrice;
-    private BigDecimal  orgMemberCutPrice;
-    private Double  orgMemberDiscountRatio;
-    private Byte approvingUserDiscountType;
-    private BigDecimal approvingUserFullPrice;
-    private BigDecimal approvingUserCutPrice;
-    private Double approvingUserDiscountRatio;
     private Long cellBeginId;
     private Long cellEndId;
     private Byte userPriceType;
+    private List<RentalPriceClassificationDTO> classifications;
 
     public Byte getUserPriceType() {
         return userPriceType;
@@ -149,85 +124,6 @@ public class PricePackageDTO {
         this.price = price;
     }
 
-    public BigDecimal getOrgMemberPrice() {
-        return orgMemberPrice;
-    }
-
-    public void setOrgMemberPrice(BigDecimal orgMemberPrice) {
-        this.orgMemberPrice = orgMemberPrice;
-    }
-
-    public BigDecimal getApprovingUserPrice() {
-        return approvingUserPrice;
-    }
-
-    public void setApprovingUserPrice(BigDecimal approvingUserPrice) {
-        this.approvingUserPrice = approvingUserPrice;
-    }
-
-    public Byte getOrgMemberDiscountType() {
-        return orgMemberDiscountType;
-    }
-
-    public void setOrgMemberDiscountType(Byte orgMemberDiscountType) {
-        this.orgMemberDiscountType = orgMemberDiscountType;
-    }
-
-    public BigDecimal getOrgMemberFullPrice() {
-        return orgMemberFullPrice;
-    }
-
-    public void setOrgMemberFullPrice(BigDecimal orgMemberFullPrice) {
-        this.orgMemberFullPrice = orgMemberFullPrice;
-    }
-
-    public BigDecimal getOrgMemberCutPrice() {
-        return orgMemberCutPrice;
-    }
-
-    public void setOrgMemberCutPrice(BigDecimal orgMemberCutPrice) {
-        this.orgMemberCutPrice = orgMemberCutPrice;
-    }
-
-    public Double getOrgMemberDiscountRatio() {
-        return orgMemberDiscountRatio;
-    }
-
-    public void setOrgMemberDiscountRatio(Double orgMemberDiscountRatio) {
-        this.orgMemberDiscountRatio = orgMemberDiscountRatio;
-    }
-
-    public Byte getApprovingUserDiscountType() {
-        return approvingUserDiscountType;
-    }
-
-    public void setApprovingUserDiscountType(Byte approvingUserDiscountType) {
-        this.approvingUserDiscountType = approvingUserDiscountType;
-    }
-
-    public BigDecimal getApprovingUserFullPrice() {
-        return approvingUserFullPrice;
-    }
-
-    public void setApprovingUserFullPrice(BigDecimal approvingUserFullPrice) {
-        this.approvingUserFullPrice = approvingUserFullPrice;
-    }
-
-    public BigDecimal getApprovingUserCutPrice() {
-        return approvingUserCutPrice;
-    }
-
-    public void setApprovingUserCutPrice(BigDecimal approvingUserCutPrice) {
-        this.approvingUserCutPrice = approvingUserCutPrice;
-    }
-
-    public Double getApprovingUserDiscountRatio() {
-        return approvingUserDiscountRatio;
-    }
-
-    public void setApprovingUserDiscountRatio(Double approvingUserDiscountRatio) {
-        this.approvingUserDiscountRatio = approvingUserDiscountRatio;
-    }
 
     public BigDecimal getOriginalPrice() {
         return originalPrice;
@@ -235,22 +131,6 @@ public class PricePackageDTO {
 
     public void setOriginalPrice(BigDecimal originalPrice) {
         this.originalPrice = originalPrice;
-    }
-
-    public BigDecimal getOrgMemberOriginalPrice() {
-        return orgMemberOriginalPrice;
-    }
-
-    public void setOrgMemberOriginalPrice(BigDecimal orgMemberOriginalPrice) {
-        this.orgMemberOriginalPrice = orgMemberOriginalPrice;
-    }
-
-    public BigDecimal getApprovingUserOriginalPrice() {
-        return approvingUserOriginalPrice;
-    }
-
-    public void setApprovingUserOriginalPrice(BigDecimal approvingUserOriginalPrice) {
-        this.approvingUserOriginalPrice = approvingUserOriginalPrice;
     }
 
     public Byte getPriceType() {
@@ -269,20 +149,12 @@ public class PricePackageDTO {
         this.initiatePrice = initiatePrice;
     }
 
-    public BigDecimal getOrgMemberInitiatePrice() {
-        return orgMemberInitiatePrice;
+    public List<RentalPriceClassificationDTO> getClassifications() {
+        return classifications;
     }
 
-    public void setOrgMemberInitiatePrice(BigDecimal orgMemberInitiatePrice) {
-        this.orgMemberInitiatePrice = orgMemberInitiatePrice;
-    }
-
-    public BigDecimal getApprovingUserInitiatePrice() {
-        return approvingUserInitiatePrice;
-    }
-
-    public void setApprovingUserInitiatePrice(BigDecimal approvingUserInitiatePrice) {
-        this.approvingUserInitiatePrice = approvingUserInitiatePrice;
+    public void setClassifications(List<RentalPriceClassificationDTO> classifications) {
+        this.classifications = classifications;
     }
 
     @Override

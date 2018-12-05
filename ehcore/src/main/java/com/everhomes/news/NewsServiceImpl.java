@@ -99,6 +99,8 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.UserLikeType;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.search.SearchProvider;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
@@ -113,6 +115,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.yellowPage.AllianceConfigState;
 
 @Component
 public class NewsServiceImpl implements NewsService {
@@ -924,7 +927,7 @@ public class NewsServiceImpl implements NewsService {
 			}
 		}
 
-		if (CollectionUtils.isEmpty(authProjectIds)) {
+		if (!CollectionUtils.isEmpty(authProjectIds)) {
 			String authIdList = Joiner.on(",").join(authProjectIds);
 			must.add(JSONObject.parse("{\"terms\":{\"ownerId\":[" + authIdList + "]}}"));
 		}
@@ -1060,8 +1063,7 @@ public class NewsServiceImpl implements NewsService {
 		List<Long> communityIds = newsProvider.listNewsCommunities(newsId);
 		response.setCommunityIds(communityIds.stream().map(r -> r.toString()).collect(Collectors.toList()));
 		response.setPublishTime(news.getPublishTime().getTime());
-		List<NewsTag> parentTags = newsProvider.listNewsTag(news.getNamespaceId(),null,null, null, 0l, null, null,
-				news.getCategoryId());
+		List<NewsTag> parentTags = getParentTags(news.getOwnerType(), news.getOwnerId(), news.getCategoryId());
 		List<NewsTagDTO> newsTags = parentTags.stream().map(r -> ConvertHelper.convert(r, NewsTagDTO.class))
 				.collect(Collectors.toList());
 		List<NewsTagVals> newsTagVals = newsProvider.listNewsTagVals(newsId);
@@ -2617,7 +2619,7 @@ public class NewsServiceImpl implements NewsService {
 		return newsProvider.listParentTags(NewsOwnerType.COMMUNITY.getCode(), projectId, categoryId);
 	}
 
-	private List<NewsTag> getParentTags(String ownerType, Long ownerId, Long organizationId, Long categoryId) {
+	private List<NewsTag> getParentTags(String ownerType, Long ownerId, Long categoryId) {
 
 		List<NewsTag> tags = newsProvider.listParentTags(ownerType, ownerId, categoryId);
 		if (!CollectionUtils.isEmpty(tags)) {
@@ -2625,7 +2627,7 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		if (NewsOwnerType.COMMUNITY.getCode().equals(ownerType)) {
-			return newsProvider.listParentTags(NewsOwnerType.ORGANIZATION.getCode(), organizationId, categoryId);
+			return newsProvider.listParentTags(NewsOwnerType.ORGANIZATION.getCode(), getOrgIdByTypeAndProjectId(categoryId, ownerId), categoryId);
 		}
 
 		return null;
@@ -2656,6 +2658,31 @@ public class NewsServiceImpl implements NewsService {
 		 
 		return appContext.getCommunityId();
 	}
+	
+	public Long getOrgIdByTypeAndProjectId(Long categoryId, Long projectId) {
+
+		// 根据type获取相应的appId
+		ServiceModuleApp targetApp = getModuleAppByCategoryId(UserContext.getCurrentNamespaceId(), categoryId);
+		if (null == targetApp) {
+			return null;
+		}
+
+		// 获取到管理公司
+		GetAuthOrgByProjectIdAndAppIdCommand cmd = new GetAuthOrgByProjectIdAndAppIdCommand();
+		cmd.setAppId(targetApp.getOriginId());
+		cmd.setProjectId(projectId);
+		OrganizationDTO orgDto = organizationService.getAuthOrgByProjectIdAndAppId(cmd);
+
+		return null == orgDto ? null : orgDto.getId();
+	}
+	
+	private ServiceModuleApp getModuleAppByCategoryId(Integer namespaceId, Long categoryId) {
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+		Long versionId = releaseVersion == null ? null : releaseVersion.getId();
+		return serviceModuleAppProvider.findServiceModuleApp(namespaceId, versionId, NEWS_MODULE_ID, "" + categoryId);
+	}
+	
+	
 
 
 }

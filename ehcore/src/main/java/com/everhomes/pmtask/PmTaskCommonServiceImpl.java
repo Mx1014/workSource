@@ -325,7 +325,7 @@ class PmTaskCommonServiceImpl {
         //查询服务类型
         PmTaskCategory category = pmTaskProvider.findCategoryById(task.getCategoryId());
         PmTaskCategory taskCategory = checkCategory(task.getTaskCategoryId());
-        if(null != category)
+        if(null != category && category.getId() != 0L)
             dto.setCategoryName(category.getName());
         dto.setTaskCategoryName(taskCategory.getName());
 

@@ -930,7 +930,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				dto.setBuildingName(building.getName());
 				dto.setCommunityId(building.getCommunityId());
 				Community community = communityProvider.findCommunityById(building.getCommunityId());
-				dto.setCommunityName(community.getName());
+				if (null != community) {
+					dto.setCommunityName(community.getName());
+				}
 			}
 		}else {
 			dto.setCommunityName("其他");

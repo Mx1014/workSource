@@ -20,6 +20,7 @@ public interface ServiceModuleConstants {
     long ENTERPRISE_CUSTOMER_MODULE = 21100L;
     long CONTRACT_MODULE = 21200L; // 合同管理模块
     long ENERGY_MODULE = 49100L;
+    long GOOD_MOVE = 49200L;
     long PAYMENT_APPLICATION_MODULE = 21300L;
     long ORGANIZATION_MODULE = 33000L;
     long LEASE_PROJECT_MODULE = 40100L;
@@ -45,4 +46,9 @@ public interface ServiceModuleConstants {
     long BANNER_MODULE = 10400L;//广告模块
     
     long ASSET_MANAGEMENT = 38000;//楼宇资产管理模块
+
+    long HOTLINE_MODULE = 40300;//服务热线
+    long ENTERPRISE_VISITOR_MODULE = 52100;//企业访客
+    long QUALITY_MODULE = 20600;//品质核查
+    
 }

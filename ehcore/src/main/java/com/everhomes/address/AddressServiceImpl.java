@@ -965,10 +965,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         //表eh_addresses和表eh_organization_addresses进行联查
         SelectQuery<Record> query = context.select().from(Tables.EH_ADDRESSES).getQuery();
-        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
+        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID),Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
         query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%"+cmd.getKeyword()+"%"));
+        //issue-42749:租客管理模块楼宇信息跟实际楼宇数据不一致,其他有楼宇查询的地方全部都是这样的情况,其余模块将已删除的房源也查出来了
+        query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0));
         if(cmd.getBuildingName() != null){
             query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.eq(cmd.getBuildingName()));
         }
@@ -3188,11 +3191,13 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 			address.setIsFutureApartment((byte) 1);
 			address.setNamespaceId(targetAddress.getNamespaceId());
 			address.setCommunityId(targetAddress.getCommunityId());
+			address.setCommunityName(targetAddress.getCommunityName());
 			address.setCityName(targetAddress.getCityName());
 			address.setCityId(targetAddress.getCityId());
 			address.setAreaId(targetAddress.getAreaId());
 			address.setAreaName(targetAddress.getAreaName());
 			address.setApartmentFloor(targetAddress.getApartmentFloor());
+			address.setBuildingId(targetAddress.getBuildingId());
 			address.setBuildingName(targetAddress.getBuildingName());
 			address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
 

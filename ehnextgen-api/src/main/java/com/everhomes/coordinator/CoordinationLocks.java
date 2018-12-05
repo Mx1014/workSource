@@ -29,6 +29,9 @@ public enum CoordinationLocks {
 
     UPDATE_ACTIVITY("activity.update"),
     UPDATE_ACTIVITY_ROSTER("activity.update.roster"),
+
+    POLL_VOTE("poll.vote"),
+
     CREATE_NEW_ORG("org.create"),
     UPDATE_APPROVAL_CATEGORY("update_approval_category"),
     INIT_APPROVAL_CATEGORY("init_approval_category"),
@@ -36,6 +39,7 @@ public enum CoordinationLocks {
     UPDATE_APPROVAL_FLOW("update_approval_flow"),
     UPDATE_APPROVAL_REQUEST("update_approval_request"),
 
+    UPDATE_ENTERPRISE_PAYMENT_AUTHS("update.enterprise.payment.auth"),
     UPDATE_APPROVAL_TARGET_RULE("update_approval_target_rule"),
     STAT_SETTLEMENT("stat.settlement"),
     STAT_TERMINAL("stat.terminal"),
@@ -162,7 +166,19 @@ public enum CoordinationLocks {
 
     ANNOUNCEMENT_CREATE_NOTICE_USER("announcement_create_notice_user"),
 	
-	STATISTIC_BILL_BY_COMMUNITY("statistic_bill_by_community");//issue-38508 根据项目+月份统计缴费报表
+    SERVICE_ALLIANCE_FAQ_TYPES("service_alliance_faq_types"),
+    SERVICE_ALLIANCE_FAQ_ORDERS("service_alliance_faq_orders"),
+    SERVICE_ALLIANCE_OPERATE_ORDERS("service_alliance_operate_orders"),
+    
+	STATISTIC_BILL_BY_COMMUNITY("statistic_bill_by_community"),//issue-38508 根据项目+月份统计缴费报表
+
+    AUTO_DELETE_EMPLOYEE_PAYMENT_AUTH_LIMIT_OPERATE("auto_delete_employee_payment_limit"),
+    ENTERPRISE_PAYMENT_AUTH_PAY_AMOUNT_LOCK("enterprise_payment_auth_pay_amount_lock"),
+    ENTERPRISE_PAYMENT_AUTH_FROZEN("enterprise_payment_auth_frozen"),
+    CHECK_ENTERPRISE_PAYMENT_STATUS("check_enterprise_payment_status"),
+
+    SYNC_USER_MODIFY("sync_user_modify"),
+    SYNC_USER_IDEN_MODIFY("sync_user_iden_modify");
 
     private String code;
 

@@ -13,6 +13,9 @@ import java.util.List;
  * <li>meetingSponsorUserId: 发起人的userId</li>
  * <li>meetingSponsorDetailId: 会议发起人detailId</li>
  * <li>meetingSponsorName: 会议发起人姓名</li>
+ * <li>meetingManagerUserId: 会务人的userId</li>
+ * <li>meetingManagerDetailId: 会议会务人detailId</li>
+ * <li>meetingManagerName: 会议会务人姓名</li>
  * <li>meetingDate: 会议日期，不包含时分秒</li>
  * <li>beginTime: 会议开始时间(毫秒数)，不包含日期，如8:00等于8*3600*1000</li>
  * <li>endTime: 会议结束时间(毫秒数)，不包含日期，如8:30等于8*3600*1000+30*60*1000</li>
@@ -33,6 +36,9 @@ public class MeetingRecordDetailInfoDTO {
     private Long meetingSponsorUserId;
     private Long meetingSponsorDetailId;
     private String meetingSponsorName;
+    private Long meetingManagerUserId;
+    private Long meetingManagerDetailId;
+    private String meetingManagerName;
     private Long meetingDate;
     private Long beginTime;
     private Long endTime;
@@ -164,6 +170,30 @@ public class MeetingRecordDetailInfoDTO {
 
     public void setMeetingSponsorName(String meetingSponsorName) {
         this.meetingSponsorName = meetingSponsorName;
+    }
+
+    public Long getMeetingManagerUserId() {
+        return meetingManagerUserId;
+    }
+
+    public void setMeetingManagerUserId(Long meetingManagerUserId) {
+        this.meetingManagerUserId = meetingManagerUserId;
+    }
+
+    public Long getMeetingManagerDetailId() {
+        return meetingManagerDetailId;
+    }
+
+    public void setMeetingManagerDetailId(Long meetingManagerDetailId) {
+        this.meetingManagerDetailId = meetingManagerDetailId;
+    }
+
+    public String getMeetingManagerName() {
+        return meetingManagerName;
+    }
+
+    public void setMeetingManagerName(String meetingManagerName) {
+        this.meetingManagerName = meetingManagerName;
     }
 
     public Integer getRecordWordLimit() {

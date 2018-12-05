@@ -33,6 +33,7 @@ import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import org.apache.commons.collections.CollectionUtils;
@@ -104,7 +105,10 @@ public class UserProviderImpl implements UserProvider {
     private EnterpriseContactProvider ecProvider;
 
     @Autowired
-    private KafkaTemplate kafkaTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    @Autowired
+    private SdkUserService sdkUserService;
     
     public UserProviderImpl() {
     }
@@ -112,17 +116,18 @@ public class UserProviderImpl implements UserProvider {
     @Override
     public void createUser(User user) {
         // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
-        long id = this.dbProvider.allocPojoRecordId(EhUsers.class);
+        long id = sdkUserService.getSequence(Tables.EH_USERS.getName(), 1L);
         //long id = this.shardingProvider.allocShardableContentId(EhUsers.class).second();
         user.setId(id);
         if(user.getAccountName() == null) {
-            long accountSeq = this.sequenceProvider.getNextSequence("usr");
+            long accountSeq = sdkUserService.getSequence("usr-account", 1L);
             user.setAccountName(String.valueOf(accountSeq));
         }
         if(user.getUuid() == null)
             user.setUuid(UUID.randomUUID().toString());
         user.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         user.setUpdateTime(user.getCreateTime());
+        user.incrementVersion();
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, id));
         EhUsersDao dao = new EhUsersDao(context.configuration());
@@ -130,7 +135,6 @@ public class UserProviderImpl implements UserProvider {
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUsers.class, null);
         kafkaTemplate.send("user-create-core-event", 0, String.valueOf(0), StringHelper.toJsonString(user));
-
     }
 
     @Override
@@ -140,7 +144,20 @@ public class UserProviderImpl implements UserProvider {
         dao.insert(user);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUsers.class, null);
+    }
 
+    @Caching(evict={@CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid")})
+    @Override
+    public void createIdentifierFromUnite(UserIdentifier userIdentifier) {
+        assert(userIdentifier.getOwnerUid() != null);
+
+        // identifier record will be saved in the same shard as its owner users
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid()));
+
+        EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
+        dao.insert(userIdentifier);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserIdentifiers.class, null);
     }
 
     @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),
@@ -152,6 +169,8 @@ public class UserProviderImpl implements UserProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId().longValue()));
         EhUsersDao dao = new EhUsersDao(context.configuration());
         user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        user.incrementVersion();
+
         dao.update(user);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
@@ -159,13 +178,12 @@ public class UserProviderImpl implements UserProvider {
 
     }
 
-    @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),
-            @CacheEvict(value="User-Acount", key="#user.accountName")})
+    @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),  @CacheEvict(value="User-Acount", key="#user.accountName")})
     @Override
     public void updateUserFromUnite(User user) {
         assert(user.getId() != null);
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId().longValue()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId()));
         EhUsersDao dao = new EhUsersDao(context.configuration());
         user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(user);
@@ -173,8 +191,25 @@ public class UserProviderImpl implements UserProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
     }
 
+    @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
+            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
+            @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}"),
+            @CacheEvict(value="UserIdentifier-NamespaceAndToken", key="{#userIdentifier.namespaceId, #userIdentifier.identifierToken}" )})
+    @Override
+    public void updateIdentifierFromUnite(UserIdentifier userIdentifier) {
+        assert(userIdentifier.getId() != null);
+        assert(userIdentifier.getOwnerUid() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid()));
+        EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
+        dao.update(userIdentifier);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());
+    }
+
     @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),
-            @CacheEvict(value="User-Account", key="#user.accountName"),
+            @CacheEvict(value="User-Acount", key="#user.accountName"),
             @CacheEvict(value="UserIdentifier-List", key="#user.id")})
     @Override
     public void deleteUser(User user) {
@@ -347,7 +382,7 @@ public class UserProviderImpl implements UserProvider {
         
         // identifier record will be saved in the same shard as its owner users
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid().longValue()));
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserIdentifiers.class));
+        long id = sdkUserService.getSequence(Tables.EH_USER_IDENTIFIERS.getName(), 1L);
         
         userIdentifier.setId(id);
         Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
@@ -356,6 +391,9 @@ public class UserProviderImpl implements UserProvider {
         if (!StringUtils.isEmpty(userIdentifier.getIdentifierToken())) {
             userIdentifier.setIdentifierToken(userIdentifier.getIdentifierToken().trim());
         }
+
+        userIdentifier.incrementVersion();
+
         EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
         dao.insert(userIdentifier);
         
@@ -364,24 +402,11 @@ public class UserProviderImpl implements UserProvider {
 
     }
 
-    @Caching(evict={@CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid")})
-    @Override
-    public void createIdentifierFromUnite(UserIdentifier userIdentifier) {
-        assert(userIdentifier.getOwnerUid() != null);
-
-        // identifier record will be saved in the same shard as its owner users
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid().longValue()));
-
-        EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
-        dao.insert(userIdentifier);
-
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserIdentifiers.class, null);
-    }
-
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
             @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
-            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}"),
+            @CacheEvict(value="UserIdentifier-NamespaceAndToken", key="{#userIdentifier.namespaceId, #userIdentifier.identifierToken}" )})
     @Override
     public void updateIdentifier(UserIdentifier userIdentifier) {
         assert(userIdentifier.getId() != null);
@@ -389,6 +414,8 @@ public class UserProviderImpl implements UserProvider {
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid().longValue()));
         EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
+        userIdentifier.incrementVersion();
+
         dao.update(userIdentifier);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());
@@ -399,23 +426,8 @@ public class UserProviderImpl implements UserProvider {
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
             @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
-            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
-    @Override
-    public void updateIdentifierFromUnite(UserIdentifier userIdentifier) {
-        assert(userIdentifier.getId() != null);
-        assert(userIdentifier.getOwnerUid() != null);
-
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid().longValue()));
-        EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
-        dao.update(userIdentifier);
-
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());
-    }
-
-    @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
-            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
-            @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
-            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}"),
+            @CacheEvict(value="UserIdentifier-NamespaceAndToken", key="{#userIdentifier.namespaceId, #userIdentifier.identifierToken}" )})
     @Override
     public void deleteIdentifier(UserIdentifier userIdentifier) {
         assert(userIdentifier.getId() != null);
@@ -656,6 +668,7 @@ public class UserProviderImpl implements UserProvider {
      * @param identifierToken
      * @return
      */
+    @Cacheable(value = "UserIdentifier-NamespaceAndToken", key="{#namespaceId, #identifierToken}", unless="#result == null")
     @Override
     public UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken) {
         final List<UserIdentifier> result = new ArrayList<>();
@@ -2125,6 +2138,29 @@ public class UserProviderImpl implements UserProvider {
         return user;
     }
 
+    @Override
+    public List<UserDTO> listUserInfoByIdentifierToken(Integer namespaceId, List<String> identifierTokens) {
+        List<UserDTO> userDTOList = new ArrayList<>();
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //表eh_users和表eh_user_identifiers进行联查
+        SelectQuery<Record> query = context.select().from(Tables.EH_USERS).getQuery();
+        query.addJoin(Tables.EH_USER_IDENTIFIERS,JoinType.JOIN,Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+        //添加查询条件
+        query.addConditions(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.in(identifierTokens));
+        query.fetch().map( r ->{
+            UserDTO user = new UserDTO();
+            user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+            user.setAccountName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
+            user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            user.setId(r.getValue(Tables.EH_USERS.ID));
+            userDTOList.add(user);
+            return null;
+        });
+        return userDTOList;
+    }
+
     /**
      * 查询该手机号是否已经进行注册
      * @param contactToken
@@ -2132,13 +2168,12 @@ public class UserProviderImpl implements UserProvider {
      */
     @Override
     public UserIdentifier getUserByToken(String contactToken,Integer namespaceId){
-        //获取上下文
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        //2.查询Eh_user_identifiers表
-        UserIdentifier userIdentifier = context.select().from(Tables.EH_USER_IDENTIFIERS)
-        .where(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(contactToken))
-                .and(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId)).fetchOneInto(UserIdentifier.class);
-        return userIdentifier;
+        return context.select()
+                .from(Tables.EH_USER_IDENTIFIERS)
+                .where(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(contactToken))
+                .and(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                .fetchAnyInto(UserIdentifier.class);
     }
 
     /**

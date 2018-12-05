@@ -25,17 +25,26 @@ public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
 
 	@Override
 	public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
-		return instanceConfig;
+		return getNewInstanceConfig(instanceConfig, namespaceId);
 	} 
-
-	@Override
-	public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
+	
+	private String getNewInstanceConfig(String instanceConfig, Integer namespaceId) {
+		int index = instanceConfig.indexOf("namespaceId=");
+		if (index < 0) {
+			instanceConfig = instanceConfig.replaceAll("#/home#sign_suffix", "?namespaceId="+namespaceId+"#/home#sign_suffix");
+		}
+		
 		return instanceConfig;
 	}
 
 	@Override
+	public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
+		return getNewInstanceConfig(instanceConfig, namespaceId);
+	}
+
+	@Override
 	public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
-		return instanceConfig;
+		return getNewInstanceConfig(instanceConfig, namespaceId);
 	}
 
 	@Override
@@ -43,21 +52,5 @@ public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
 		return actionData;
 	}
 	
-	private void saveChargeConfig(Integer namespaceId, SiyinPrintInstanceConfig config) {
-		if (null == config.getChargeAppToken() || null == config.getBillGroupToken()
-				|| null == config.getChargeItemTorken()) {
-			return;
-		}
-
-		AssetModuleAppMapping cmd = new AssetModuleAppMapping();
-		cmd.setNamespaceId(namespaceId);
-		cmd.setSourceType(AssetSourceTypeEnum.PRINT_MODULE.getSourceType());
-		cmd.setSourceId(ServiceModuleConstants.PRINT_MODULE);
-		cmd.setAssetCategoryId(config.getChargeAppToken());
-		cmd.setBillGroupId(config.getBillGroupToken());
-		cmd.setChargingItemId(config.getChargeItemTorken());
-		//assetService.createOrUpdateAssetMapping(cmd);
-		LOGGER.info("saveChargeConfig:"+cmd.toString());
-	}
 
 }

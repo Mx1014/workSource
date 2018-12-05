@@ -21,6 +21,7 @@ import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentEventsResponse;
+import com.everhomes.rest.address.ListApartmentsByMultiStatusResponse;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
@@ -2499,6 +2500,50 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse hasApartmentManagementPrivilege(ApartmentManagementPrivilegeCommand cmd) {
 		ApartmentManagementPrivilegeDTO dto = propertyMgrService.hasApartmentManagementPrivilege(cmd);
 		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}	
+	
+	/**
+	 * <b>URL: /pm/listApartmentsForApp</b>
+	 * <p>获取楼宇下的所有房源  for app端</p>
+	 * @param cmd
+	 * @return
+	 */
+	@RequestMapping("listApartmentsForApp")
+	@RestReturn(value = ListApartmentsForAppResponse.class)
+	public RestResponse listApartmentsForApp(ListApartmentsForAppCommand cmd) {
+		ListApartmentsForAppResponse res =  propertyMgrService.listApartmentsForApp(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/listApartmentsByMultiStatus</b>
+	 * <p>支持同时查询多个状态的房源列表</p>
+	 */
+	@RequestMapping("listApartmentsByMultiStatus")
+	@RestReturn(value=ListApartmentsByMultiStatusResponse.class)
+	public RestResponse listApartmentsByMultiStatus(ListApartmentsByMultiStatusCommand cmd) {
+		ListApartmentsByMultiStatusResponse results =  propertyMgrService.listApartmentsByMultiStatus(cmd);
+		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/fixApartmentLivingStatus</b>
+	 * <p>纠正eh_addresses与eh_organization_address_mapping表之间的对应关系</p>
+	 */
+	@RequestMapping("fixApartmentLivingStatus")
+	@RestReturn(value=String.class)
+	public RestResponse fixApartmentLivingStatus() {
+		propertyMgrService.fixApartmentLivingStatus();
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

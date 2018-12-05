@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>unsaleCount: 待售总数</li>
  * <li>occupiedCount: 被占用总数</li>
  * <li>defaultCount: 其他未知总数</li>
+ * <li>signedUpCount: 待签约总数</li>
+ * <li>waitingRoomCount: 待接房总数</li>
  * </ul>
  */
 public class PropAptStatisticDTO {
@@ -30,6 +32,24 @@ public class PropAptStatisticDTO {
 	private Integer hasOwnerCount;
 	private Integer noOwnerCount;
 	private Integer occupiedCount;
+	private Integer signedUpCount;
+	private Integer waitingRoomCount;
+
+	public Integer getSignedUpCount() {
+		return signedUpCount;
+	}
+
+	public void setSignedUpCount(Integer signedUpCount) {
+		this.signedUpCount = signedUpCount;
+	}
+
+	public Integer getWaitingRoomCount() {
+		return waitingRoomCount;
+	}
+
+	public void setWaitingRoomCount(Integer waitingRoomCount) {
+		this.waitingRoomCount = waitingRoomCount;
+	}
 
 	public Integer getOccupiedCount() {
 		return occupiedCount;

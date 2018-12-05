@@ -24,6 +24,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
+import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.rest.officecubicle.OfficeOrderStatus;
 import com.everhomes.rest.officecubicle.OfficeStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -50,6 +51,13 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	@Autowired
 	private SequenceProvider sequenceProvider;
 
+	private DSLContext getReadOnlyContext() {
+		return getContext(AccessSpec.readOnly());
+	}
+
+	private DSLContext getContext(AccessSpec accessSpec) {
+		return dbProvider.getDslContext(accessSpec);
+	}
 	@Override
 	public List<OfficeCubicleCategory> queryCategoriesBySpaceId(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -196,6 +204,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		return null;
 	}
 
+	
+	
 	@Override
 	public void createOrder(OfficeCubicleOrder order) {
 

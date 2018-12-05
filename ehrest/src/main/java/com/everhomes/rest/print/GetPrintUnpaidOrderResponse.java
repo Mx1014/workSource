@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>existFlag : 是否存在未支付订单,存在(0),不存在(1), 参考 {@link com.everhomes.rest.print.PrintLogonStatusType} </li>
  * <li>orderId : 订单id </li>
  * <li>totalFee : 订单支付金额 </li>
+ * <li>orderNo : 业务订单号 </li>
  * </ul>
  *
  *  @author:dengs 2017年6月16日
@@ -18,6 +19,7 @@ import com.everhomes.util.StringHelper;
 public class GetPrintUnpaidOrderResponse {
 	private Byte existFlag;
 	private Long orderId;
+	private Long orderNo;
 	private BigDecimal totalFee;
 	
 	public BigDecimal getTotalFee() {
@@ -55,4 +57,13 @@ public class GetPrintUnpaidOrderResponse {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+
+	public Long getOrderNo() {
+		return orderNo;
+	}
+
+	public void setOrderNo(Long orderNo) {
+		this.orderNo = orderNo;
+	}
+
 }

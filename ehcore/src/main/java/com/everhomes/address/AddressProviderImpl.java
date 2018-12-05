@@ -498,8 +498,7 @@ public class AddressProviderImpl implements AddressProvider {
             query.addJoin(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS
                     , Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID));
             query.addConditions(Tables.EH_ADDRESSES.LIVING_STATUS.eq(livingStatus)
-                 .or(Tables.EH_ADDRESSES.LIVING_STATUS.isNull()
-                 .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus))));
+                 .or(Tables.EH_ADDRESSES.LIVING_STATUS.isNull().and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus))));
             //数据重复问题，by-djm
             query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID));
         }
@@ -773,6 +772,7 @@ public class AddressProviderImpl implements AddressProvider {
 		context.select()
 				.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq((byte)2))
 				.fetch()
 				.map(r->{
 					ContractBuildingMapping convert = ConvertHelper.convert(r, ContractBuildingMapping.class);
@@ -1159,7 +1159,9 @@ public class AddressProviderImpl implements AddressProvider {
 		query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
 		//不能是未来资产
 		query.addConditions(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0));
-		query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
+		//用户希望同一个园区同一个楼栋的门牌能显示在一起
+		query.addOrderBy(Tables.EH_ADDRESSES.COMMUNITY_ID.asc(),Tables.EH_ADDRESSES.BUILDING_ID.asc(),
+				Tables.EH_ADDRESSES.APARTMENT_NAME.asc());
 
 		if (cmd.getCommunityId() != null) {
 			query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
@@ -1386,5 +1388,75 @@ public class AddressProviderImpl implements AddressProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhAddressEventsDao dao = new EhAddressEventsDao(context.configuration());
 		dao.update(event);
+	}
+
+	public List<ApartmentBriefInfoDTO> listApartmentsByMultiStatus(Integer namespaceId, Long communityId,
+			String buildingName, String apartment, List<Byte> livingStatus, Long pageAnchor, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<ApartmentBriefInfoDTO> addresses = new ArrayList<>();
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ADDRESSES);
+        
+        query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.equal((byte)0));
+        
+        if(StringUtils.isNotBlank(buildingName)) {
+            query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName));
+        }
+        if(StringUtils.isNotBlank(apartment)) {
+            query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + apartment + "%"));
+        }
+        //按状态筛选
+        if(livingStatus != null && livingStatus.size()>0) {
+            query.addJoin(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS
+                    , Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID));
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.in(livingStatus));
+        }
+
+        query.addOrderBy(Tables.EH_ADDRESSES.BUILDING_ID.asc());
+        query.addLimit(pageAnchor.intValue(), pageSize);
+        
+        query.fetch().map((r) -> {
+        	ApartmentBriefInfoDTO dto = new ApartmentBriefInfoDTO();
+            dto.setId(r.getValue(Tables.EH_ADDRESSES.ID));
+            dto.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+            dto.setAreaSize(r.getValue(Tables.EH_ADDRESSES.AREA_SIZE));
+            dto.setLivingStatus(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS));
+            dto.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+            dto.setOrientation(r.getValue(Tables.EH_ADDRESSES.ORIENTATION));
+            dto.setCommunityId(r.getValue(Tables.EH_ADDRESSES.COMMUNITY_ID));
+            dto.setCommunityName(r.getValue(Tables.EH_ADDRESSES.COMMUNITY_NAME));
+            dto.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
+            addresses.add(dto);
+            return null;
+        });
+        Collections.sort(addresses);
+        return addresses;
+    }
+
+	@Override
+	public List<Address> findActiveAddress(int startIndex, int pageSize) {
+		List<Address> result = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhAddresses a = Tables.EH_ADDRESSES;
+		context.select(a.ID,a.COMMUNITY_ID,a.ADDRESS)
+			   .from(a)
+			   .where(a.NAMESPACE_ID.ne(0))
+			   .and(a.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
+			   .and(a.IS_FUTURE_APARTMENT.eq((byte)0))
+			   .orderBy(a.COMMUNITY_ID,a.BUILDING_ID)
+			   .limit(startIndex, pageSize)
+			   .fetch()
+			   .forEach(r->{
+				   Address address = new Address();
+				   address.setId(r.getValue(a.ID));
+				   address.setCommunityId(r.getValue(a.COMMUNITY_ID));
+				   address.setAddress(r.getValue(a.ADDRESS));
+				   result.add(address);
+			   });
+		return result;
 	}
 }

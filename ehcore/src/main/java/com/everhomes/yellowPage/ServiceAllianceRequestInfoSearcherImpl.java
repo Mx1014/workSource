@@ -53,6 +53,8 @@ import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
@@ -145,13 +147,14 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	private GeneralFormProvider generalFormProvider;
 
     @Autowired
-    protected GeneralApprovalProvider generalApprovalProvider;
-
-    @Autowired
     private UserProvider userProvider;
     
     @Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
+    
+    @Autowired
+	private GeneralFormValProvider generalFormValProvider;
+    
 
 	private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
@@ -660,9 +663,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 						LOGGER.error("{}", e);
 						continue forLoop;
 					}
-
-					GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(
-							requestInfo.getFlowCaseId(), GeneralFormDataSourceType.USER_NAME.getCode());
+					GeneralFormVal val = generalFormValProvider.getGeneralFormValBySourceIdAndName(
+							requestInfo.getFlowCaseId(), ServiceAllianceFlowModuleListener.FORM_VAL_SOURCE_TYPE_NAME,
+							GeneralFormDataSourceType.USER_NAME.getCode());
 					if (val != null) {
 						GeneralForm form = this.generalFormProvider
 								.getActiveGeneralFormByOriginIdAndVersion(val.getFormOriginId(), val.getFormVersion());

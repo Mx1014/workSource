@@ -11,4 +11,6 @@ public interface PaymentAuthsProvider {
 	List<EnterprisePaymentAuths> getPaymentAuths(Integer namespaceId, Long orgId);
 
 	void createEnterprisePaymentAuths(List<EnterprisePaymentAuths> enterpriesAuths, Long appId, Long orgId);
+
+	void deleteEnterprisePaymentAuths(Long appId, Long orgId);
 }

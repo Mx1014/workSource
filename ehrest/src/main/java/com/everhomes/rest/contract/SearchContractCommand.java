@@ -1,5 +1,7 @@
 package com.everhomes.rest.contract;
 
+import java.util.List;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -18,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 合同类型多入口</li>
  * <li>taskId : 查询导入错误信息用，输入sync产生的taskId</li>
  * <li>depositStatus: 押金状态(0 未缴，1 已缴)</li>
+ * <li>contractOperate: 合同操作状态(1 一键初始化， 一键免批)参考{@link com.everhomes.rest.contract.ContractOperateStatus}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/17.
  */
@@ -40,8 +43,17 @@ public class SearchContractCommand {
     private Long taskId;
     private Byte depositStatus;
     private Long pageNumber;
+    private Byte contractOperate;
 
-    public Long getPageNumber() {
+	public Byte getContractOperate() {
+		return contractOperate;
+	}
+
+	public void setContractOperate(Byte contractOperate) {
+		this.contractOperate = contractOperate;
+	}
+
+	public Long getPageNumber() {
 		return pageNumber;
 	}
 
