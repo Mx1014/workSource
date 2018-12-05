@@ -573,11 +573,10 @@ public class WebMenuServiceImpl implements WebMenuService {
                     ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
 					List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
 							this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(menu.getAppId(),entry.getId(),null,null);
-					if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
-					    if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
-                            menuDto.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
-                            appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
-                        }
+					if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList) &&
+                            TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                        menuDto.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                        appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
 					}else if (!StringUtils.isEmpty(entry.getEntryName())) {
 						menuDto.setName(entry.getEntryName());
 						appDTO.setName(entry.getEntryName());
