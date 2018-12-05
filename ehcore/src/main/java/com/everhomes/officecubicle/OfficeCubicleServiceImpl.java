@@ -2260,9 +2260,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetCubicleForOrderResponse getCubicleForOrder (GetCubicleForOrderCommand cmd){
 		GetCubicleForOrderResponse resp = new GetCubicleForOrderResponse();
+		List<OfficeCubicleStation> stations = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStationByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime());
 		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
+		stations.addAll(station);
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
 		for (OfficeCubicleStation s : station){
 			StationDTO dto = new StationDTO();
