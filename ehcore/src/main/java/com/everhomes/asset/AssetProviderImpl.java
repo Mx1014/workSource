@@ -19,6 +19,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
@@ -26,6 +27,7 @@ import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
 import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.rest.contract.ContractTemplateStatus;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -526,8 +528,11 @@ public class AssetProviderImpl implements AssetProvider {
         		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
         		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY,
         		t.TAX_AMOUNT);
-        query.addFrom(t, t2);
-        query.addConditions(t.ID.eq(t2.BILL_ID));
+//        query.addFrom(t, t2);
+//        query.addConditions(t.ID.eq(t2.BILL_ID));
+        query.addFrom(t);
+        query.addJoin(t2, t.ID.eq(t2.BILL_ID));
+        		
         query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
         if(!org.springframework.util.StringUtils.isEmpty(ownerType)) {
         	query.addConditions(t.OWNER_TYPE.eq(ownerType));
@@ -658,6 +663,14 @@ public class AssetProviderImpl implements AssetProvider {
         if(status!=null && status == 1){
             query.addOrderBy(t.STATUS);
         }
+        //瑞安CM对接，如果企业关联的是瑞安那边系统中的资产，则需要将这部分产生的账单查出来
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getIsCheckProperty())) {
+			query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES,JoinType.LEFT_OUTER_JOIN,t.TARGET_ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID));
+			query.addJoin(Tables.EH_ADDRESSES,JoinType.LEFT_OUTER_JOIN,Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID));
+			query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq("ruian_cm"));
+			query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()));
+			query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
+		}
         query.addOrderBy(t.DATE_STR_BEGIN.desc());
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
@@ -2524,6 +2537,15 @@ public class AssetProviderImpl implements AssetProvider {
         context.update(Tables.EH_PAYMENT_BILL_ITEMS)
     		.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
     		.where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+            .execute();
+    }
+    
+    public void deleteBillItemByBillId(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //删除费项（置状态）
+        context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+    		.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+    		.where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
             .execute();
     }
 

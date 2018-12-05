@@ -31,7 +31,10 @@ import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.bill.AssetIsCheckProperty;
 import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
+import com.everhomes.rest.asset.bill.AssetPaymentBillConfirmFlag;
+import com.everhomes.rest.asset.bill.AssetPaymentType;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.NotifyThirdSignCommand;
@@ -92,9 +95,12 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 //						if(community != null) {
 //							communityId = community.getId();
 //						}
-						//2、获取左邻客户ID
+						//2、获取左邻企业ID
 						Long targetId = null;
-						targetId = cmDataObject.getCustomerId();
+						EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmDataObject.getCustomerId());
+						if(customer != null) {
+							targetId = customer.getOrganizationId();
+						}
 						//3、获取左邻楼栋单元地址ID
 						Long addressId = null;
 						if(cmDataObject.getContractUnit() != null && cmDataObject.getContractUnit().size() != 0) {
@@ -136,164 +142,222 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 				        }
 						List<CMBill> cmBills = cmDataObject.getBill();
 						for(CMBill cmBill : cmBills) {
-							BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
-							BigDecimal amountOwedWithoutTax = BigDecimal.ZERO;//待收(不含税 元)
-							BigDecimal amountReceivable = BigDecimal.ZERO;//应收含税
-							BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;//应收不含税
-							BigDecimal amountReceived = BigDecimal.ZERO;//待收含税
-							BigDecimal amountReceivedWithoutTax = BigDecimal.ZERO;//待收不含税
-							BigDecimal taxAmount = BigDecimal.ZERO;//税额
-							try{
-								amountOwed = new BigDecimal(cmBill.getBalanceAmt());
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-							try{
-								amountOwedWithoutTax = new BigDecimal(cmBill.getBalanceAmt());
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-							try{
-								amountReceivable = new BigDecimal(cmBill.getDocumentAmt());
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-							try{
-								amountReceivableWithoutTax = new BigDecimal(cmBill.getChargeAmt());
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-							//已收=账单金额（应收）-账单欠款金额（待收）
-							amountReceived = amountReceivable.subtract(amountOwed);
-							amountReceivedWithoutTax = amountReceived;
-							try{
-								taxAmount = new BigDecimal(cmBill.getTaxAmt());
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-
-							PaymentBills paymentBills = new PaymentBills();
-							paymentBills.setNamespaceId(namespaceId);
-							paymentBills.setOwnerId(communityId);
-							paymentBills.setOwnerType("community");
-							paymentBills.setCategoryId(categoryId);
-							//通过园区ID获取到对应的默认账单组ID
-							PaymentBillGroup group = assetProvider.getBillGroup(namespaceId, communityId, null, null, null, (byte)1);
-							paymentBills.setBillGroupId(group.getId());
-							paymentBills.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
-							paymentBills.setTargetId(targetId);
-							if(cmDataObject.getContractHeader() != null) {
-								paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
-							}
-							paymentBills.setContractId(contractId);
-							paymentBills.setContractNum(contractNum);
-							paymentBills.setDateStrBegin(cmBill.getStartDate());
-							paymentBills.setDateStrEnd(cmBill.getEndDate());
-							String dateStr = "";
-							SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
-							try{
-					            // 如果传递了计费开始时间
-					            if(cmBill.getStartDate() != null){
-					            	dateStr = yyyyMM.format(yyyyMM.parse(cmBill.getStartDate()));//账期取的是账单开始时间的yyyy-MM
-					            }
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-							paymentBills.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
-							if(cmBill.getStatus() != null) {
-								if(cmBill.getStatus().equals("已出账单")) {//已出未缴
-									paymentBills.setSwitch((byte) 1);
-									paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
-								}else if(cmBill.getStatus().equals("已缴账单")){//已出已缴
-									paymentBills.setSwitch((byte) 1);
-									paymentBills.setStatus(AssetPaymentBillStatus.PAID.getCode());
-								}else {//未出未缴
-									paymentBills.setSwitch((byte) 0);
-									paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
-								}
+							//所有数据以生产方为准
+							if(cmBill.getBillType() != null && cmBill.getBillType().equals("服务费账单")) {
+								//CM把我方的服务账单又同步回来
+								//(3) 若用户线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
+								try{
+									PaymentBills zuolinServiceBill = assetProvider.findBillById(Long.parseLong(cmBill.getBillID()));
+									if(zuolinServiceBill != null) {
+										if(cmBill.getStatus() != null && cmBill.getStatus().equals("已缴账单")) {
+											if(zuolinServiceBill.getStatus().equals(AssetPaymentBillStatus.UNPAID.getCode())) {
+												//(2)若用户线下一次性全部支付，财务在CM中直接记录结果，正常同步状态给APP。未同步之前，APP端一直显示为“未支付”。
+												zuolinServiceBill.setThirdPaid(AssetPaymentBillStatus.PAID.getCode());//已在第三方支付
+												zuolinServiceBill.setPaymentType(AssetPaymentType.CMPAID.getCode());//支付方式置为：CM线下支付
+												zuolinServiceBill.setStatus(AssetPaymentBillStatus.PAID.getCode());//已支付
+												zuolinServiceBill.setConfirmFlag(AssetPaymentBillConfirmFlag.CONFIRM.getCode());//已确认
+												zuolinServiceBill.setAmountOwed(BigDecimal.ZERO);//待收置为0
+												zuolinServiceBill.setAmountReceived(zuolinServiceBill.getAmountReceivable());//已收置为应收的金额
+											}else {
+												//(1)若用户在APP一次性全部支付，此时在APP端显示的支付状态是“已支付，待确认”。当财务看到了支付结果，在CM中确认收入以后，CM的账单状态变成“已支付”。下一次同步数据时，APP同步显示为 “已确认”。
+												zuolinServiceBill.setStatus(AssetPaymentBillStatus.PAID.getCode());//已支付
+												zuolinServiceBill.setConfirmFlag(AssetPaymentBillConfirmFlag.CONFIRM.getCode());//已确认
+											}
+										}else {
+											//(3) 若用户线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
+											BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
+											BigDecimal amountReceived = BigDecimal.ZERO;//已收含税
+											try{
+												amountOwed = new BigDecimal(cmBill.getBalanceAmt());
+									        }catch (Exception e){
+									            LOGGER.error(e.toString());
+									        }
+											//已收=账单金额（应收）-账单欠款金额（待收）
+											amountReceived = zuolinServiceBill.getAmountReceivable().subtract(amountOwed);
+											zuolinServiceBill.setAmountOwed(amountOwed);
+											zuolinServiceBill.setAmountReceived(amountReceived);
+											//如果服务费账单已收大于0，那么说明已在CM线下支付过
+											if(amountReceived.compareTo(BigDecimal.ZERO) > 0) {
+												zuolinServiceBill.setThirdPaid(AssetPaymentBillStatus.PAID.getCode());//已在第三方支付
+											}
+										}
+										assetProvider.updateCMBill(zuolinServiceBill);
+									}else {
+										LOGGER.error("The bill is not zuolinServiceBill, billId = {}", cmBill.getBillID());
+									}
+						        }catch (Exception e){
+						            LOGGER.error(e.toString());
+						        }
 							}else {
-								paymentBills.setSwitch((byte) 0);//默认为未出
-								paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());//默认为未缴
-							}
-							paymentBills.setAmountReceivable(amountReceivable);
-							paymentBills.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
-							paymentBills.setAmountReceived(amountReceived);
-							paymentBills.setAmountReceivedWithoutTax(amountReceivedWithoutTax);
-							paymentBills.setAmountOwed(amountOwed);
-							paymentBills.setAmountOwedWithoutTax(amountOwedWithoutTax);
-							paymentBills.setTaxAmount(taxAmount);
-							paymentBills.setAddressId(addressId);
-							//物业缴费V6.6（对接统一账单） 账单要增加来源
-							paymentBills.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
-							LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CM_CREATE_CODE, "zh_CN");
-							paymentBills.setSourceName(localeString.getText());
-				            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
-							paymentBills.setCanDelete((byte)0);
-							paymentBills.setCanModify((byte)0);
-				            //物业缴费V6.0 账单、费项表增加是否删除状态字段
-							paymentBills.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
-				            //瑞安CM对接 账单、费项表增加是否是只读字段
-							paymentBills.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
-							//瑞安CM对接 账单表增加第三方唯一标识字段
-							paymentBills.setThirdBillId(cmBill.getBillScheduleID());
-							paymentBills.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+								//来源于CM的租金账单场景
+								if(cmBill.getStatus().equals("已作废")) {
+									PaymentBills existCmBill = assetProvider.getCMBillByThirdBillId(namespaceId, communityId, cmBill.getBillID());
+									if(existCmBill != null) {
+										//如果账单的唯一标识存在，那么删除该已作废账单
+										Long billId = existCmBill.getId();
+										assetProvider.deleteBill(billId);
+										assetProvider.deleteBillItemByBillId(billId);
+									}
+								}else {
+									BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
+									BigDecimal amountOwedWithoutTax = BigDecimal.ZERO;//待收(不含税 元)
+									BigDecimal amountReceivable = BigDecimal.ZERO;//应收含税
+									BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;//应收不含税
+									BigDecimal amountReceived = BigDecimal.ZERO;//待收含税
+									BigDecimal amountReceivedWithoutTax = BigDecimal.ZERO;//待收不含税
+									BigDecimal taxAmount = BigDecimal.ZERO;//税额
+									try{
+										amountOwed = new BigDecimal(cmBill.getBalanceAmt());
+							        }catch (Exception e){
+							            LOGGER.error(e.toString());
+							        }
+									try{
+										amountOwedWithoutTax = new BigDecimal(cmBill.getBalanceAmt());
+							        }catch (Exception e){
+							            LOGGER.error(e.toString());
+							        }
+									try{
+										amountReceivable = new BigDecimal(cmBill.getDocumentAmt());
+							        }catch (Exception e){
+							            LOGGER.error(e.toString());
+							        }
+									try{
+										amountReceivableWithoutTax = new BigDecimal(cmBill.getChargeAmt());
+							        }catch (Exception e){
+							            LOGGER.error(e.toString());
+							        }
+									//已收=账单金额（应收）-账单欠款金额（待收）
+									amountReceived = amountReceivable.subtract(amountOwed);
+									amountReceivedWithoutTax = amountReceived;
+									try{
+										taxAmount = new BigDecimal(cmBill.getTaxAmt());
+							        }catch (Exception e){
+							            LOGGER.error(e.toString());
+							        }
 
-							PaymentBillItems items = new PaymentBillItems();
-							items.setNamespaceId(namespaceId);
-							items.setOwnerId(communityId);
-							items.setOwnerType("community");
-							items.setCategoryId(categoryId);
-							items.setBillGroupId(group.getId());
-							items.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
-							items.setTargetId(targetId);
-							if(cmDataObject.getContractHeader() != null) {
-								items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
-							}
-							items.setContractId(contractId);
-							items.setContractNum(contractNum);
-							items.setDateStrBegin(cmBill.getStartDate());
-							items.setDateStrEnd(cmBill.getEndDate());
-							items.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
-							items.setChargingItemName(cmBill.getBillItemName());
-							items.setAmountReceivable(amountReceivable);
-							items.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
-							items.setAmountReceived(amountReceived);
-							items.setAmountReceivedWithoutTax(amountReceivedWithoutTax);
-							items.setAmountOwed(amountOwed);
-							items.setAmountOwedWithoutTax(amountOwedWithoutTax);
-							items.setTaxAmount(taxAmount);
-							items.setAddressId(addressId);
-							//物业缴费V6.6（对接统一账单） 账单要增加来源
-							items.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
-							items.setSourceName(localeString.getText());
-				            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
-							items.setCanDelete((byte)0);
-							items.setCanModify((byte)0);
-				            //物业缴费V6.0 账单、费项表增加是否删除状态字段
-							items.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
-				            //瑞安CM对接 账单、费项表增加是否是只读字段
-							items.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
-							items.setStatus(paymentBills.getStatus());
-							items.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+									PaymentBills paymentBills = new PaymentBills();
+									paymentBills.setNamespaceId(namespaceId);
+									paymentBills.setOwnerId(communityId);
+									paymentBills.setOwnerType("community");
+									paymentBills.setCategoryId(categoryId);
+									//通过园区ID获取到对应的默认账单组ID
+									PaymentBillGroup group = assetProvider.getBillGroup(namespaceId, communityId, null, null, null, (byte)1);
+									paymentBills.setBillGroupId(group.getId());
+									paymentBills.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
+									paymentBills.setTargetId(targetId);
+									if(cmDataObject.getContractHeader() != null) {
+										paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
+									}
+									paymentBills.setContractId(contractId);
+									paymentBills.setContractNum(contractNum);
+									paymentBills.setDateStrBegin(cmBill.getStartDate());
+									paymentBills.setDateStrEnd(cmBill.getEndDate());
+									String dateStr = "";
+									SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+									try{
+							            // 如果传递了计费开始时间
+							            if(cmBill.getStartDate() != null){
+							            	dateStr = yyyyMM.format(yyyyMM.parse(cmBill.getStartDate()));//账期取的是账单开始时间的yyyy-MM
+							            }
+							        }catch (Exception e){
+							            LOGGER.error(e.toString());
+							        }
+									paymentBills.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
+									if(cmBill.getStatus() != null) {
+										if(cmBill.getStatus().equals("已出账单")) {//已出未缴
+											paymentBills.setSwitch((byte) 1);
+											paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
+										}else if(cmBill.getStatus().equals("已缴账单")){//已出已缴
+											paymentBills.setSwitch((byte) 1);
+											paymentBills.setStatus(AssetPaymentBillStatus.PAID.getCode());
+										}else {//未出未缴
+											paymentBills.setSwitch((byte) 0);
+											paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
+										}
+									}else {
+										paymentBills.setSwitch((byte) 0);//默认为未出
+										paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());//默认为未缴
+									}
+									paymentBills.setAmountReceivable(amountReceivable);
+									paymentBills.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+									paymentBills.setAmountReceived(amountReceived);
+									paymentBills.setAmountReceivedWithoutTax(amountReceivedWithoutTax);
+									paymentBills.setAmountOwed(amountOwed);
+									paymentBills.setAmountOwedWithoutTax(amountOwedWithoutTax);
+									paymentBills.setTaxAmount(taxAmount);
+									paymentBills.setAddressId(addressId);
+									//物业缴费V6.6（对接统一账单） 账单要增加来源
+									paymentBills.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
+									LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CM_CREATE_CODE, "zh_CN");
+									paymentBills.setSourceName(localeString.getText());
+						            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+									paymentBills.setCanDelete((byte)0);
+									paymentBills.setCanModify((byte)0);
+						            //物业缴费V6.0 账单、费项表增加是否删除状态字段
+									paymentBills.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+						            //瑞安CM对接 账单、费项表增加是否是只读字段
+									paymentBills.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
+									//瑞安CM对接 账单表增加第三方唯一标识字段
+									paymentBills.setThirdBillId(cmBill.getBillID());
+									paymentBills.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
-							PaymentBills existCmBill = assetProvider.getCMBillByThirdBillId(namespaceId, communityId, cmBill.getBillScheduleID());
-							if(existCmBill != null) {
-								//如果账单的唯一标识存在，那么是更新
-								Long billId = existCmBill.getId();
-								paymentBills.setId(billId);
-								assetProvider.updateCMBill(paymentBills);
-								PaymentBillItems existCmBillItem = assetProvider.getCMBillItemByBillId(billId);
-								if(existCmBillItem != null) {
-									items.setId(existCmBillItem.getId());
-									assetProvider.updateCMBillItem(items);
+									PaymentBillItems items = new PaymentBillItems();
+									items.setNamespaceId(namespaceId);
+									items.setOwnerId(communityId);
+									items.setOwnerType("community");
+									items.setCategoryId(categoryId);
+									items.setBillGroupId(group.getId());
+									items.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
+									items.setTargetId(targetId);
+									if(cmDataObject.getContractHeader() != null) {
+										items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
+									}
+									items.setContractId(contractId);
+									items.setContractNum(contractNum);
+									items.setDateStrBegin(cmBill.getStartDate());
+									items.setDateStrEnd(cmBill.getEndDate());
+									items.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
+									items.setChargingItemName(cmBill.getBillItemName());
+									items.setAmountReceivable(amountReceivable);
+									items.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+									items.setAmountReceived(amountReceived);
+									items.setAmountReceivedWithoutTax(amountReceivedWithoutTax);
+									items.setAmountOwed(amountOwed);
+									items.setAmountOwedWithoutTax(amountOwedWithoutTax);
+									items.setTaxAmount(taxAmount);
+									items.setAddressId(addressId);
+									//物业缴费V6.6（对接统一账单） 账单要增加来源
+									items.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
+									items.setSourceName(localeString.getText());
+						            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+									items.setCanDelete((byte)0);
+									items.setCanModify((byte)0);
+						            //物业缴费V6.0 账单、费项表增加是否删除状态字段
+									items.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+						            //瑞安CM对接 账单、费项表增加是否是只读字段
+									items.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
+									items.setStatus(paymentBills.getStatus());
+									items.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+									PaymentBills existCmBill = assetProvider.getCMBillByThirdBillId(namespaceId, communityId, cmBill.getBillID());
+									if(existCmBill != null) {
+										//如果账单的唯一标识存在，那么是更新
+										Long billId = existCmBill.getId();
+										paymentBills.setId(billId);
+										assetProvider.updateCMBill(paymentBills);
+										PaymentBillItems existCmBillItem = assetProvider.getCMBillItemByBillId(billId);
+										if(existCmBillItem != null) {
+											items.setId(existCmBillItem.getId());
+											assetProvider.updateCMBillItem(items);
+										}
+									}else {
+										//如果账单的唯一标识不存在，那么是新增
+										Long billId = assetProvider.createCMBill(paymentBills);//创建账单并返回账单ID
+										items.setBillId(billId);
+										assetProvider.createCMBillItem(items);
+									}
 								}
-							}else {
-								//如果账单的唯一标识不存在，那么是新增
-								Long billId = assetProvider.createCMBill(paymentBills);//创建账单并返回账单ID
-								items.setBillId(billId);
-								assetProvider.createCMBillItem(items);
 							}
-
 						}
 					}
 				}
@@ -312,6 +376,9 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 	
 	/**
 	 * 物业缴费V7.4(瑞安项目-资产管理对接CM系统)
+	 * 同步判断规则：
+		1）通过第一章节楼宇资产管理数据的映射关系来判断是否为大小办公的场景；
+		2）通过账单内是否包含服务费用（资源预定、云打印）；
 	 */
 	public ListBillsResponse listOpenBills(ListBillsCommand cmd) {
     	LOGGER.info("AssetBillServiceImpl listOpenBills sourceCmd={}", cmd);
@@ -322,6 +389,8 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
     	List<Byte> switchList = new ArrayList<Byte>();
     	switchList.add(new Byte("1"));
     	cmd.setSwitchList(switchList);
+    	//通过楼宇资产管理数据的映射关系来判断是否为大小办公的场景
+    	cmd.setIsCheckProperty(AssetIsCheckProperty.CHECK.getCode());
     	//物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过账单内是否包含服务费用（资源预定、云打印）
     	List<String> sourceTypeList = new ArrayList<String>();
     	sourceTypeList.add(AssetSourceType.RENTAL_MODULE);
