@@ -39,6 +39,7 @@ public class WelfareProviderImpl implements WelfareProvider {
 	public void createWelfare(Welfare welfare) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWelfares.class));
 		welfare.setId(id);
+		welfare.setStatus((byte) 0);
 		welfare.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		welfare.setCreatorUid(UserContext.currentUserId());
 		welfare.setUpdateTime(welfare.getCreateTime());
@@ -65,7 +66,8 @@ public class WelfareProviderImpl implements WelfareProvider {
 	@Override
 	public List<Welfare> listWelfare(Long ownerId, Integer offset, Integer pageSize) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_WELFARES)
-				.where(Tables.EH_WELFARES.ORGANIZATION_ID.eq(ownerId));
+				.where(Tables.EH_WELFARES.ORGANIZATION_ID.eq(ownerId))
+				.and(Tables.EH_WELFARES.IS_DELETE.eq((byte) 0));
 		if (null != pageSize && null != offset) {
 			step.limit(offset,pageSize);
 		}
@@ -78,7 +80,9 @@ public class WelfareProviderImpl implements WelfareProvider {
 
 	@Override
 	public void deleteWelfare(Long welfareId) {
-		getReadWriteDao().deleteById(welfareId);
+		EhWelfares welfare = getReadWriteDao().findById(welfareId);
+		welfare.setStatus((byte) 1);
+		getReadWriteDao().update(welfare);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWelfares.class, welfareId);
 
 	}
@@ -110,7 +114,7 @@ public class WelfareProviderImpl implements WelfareProvider {
 	@Override
 	public List<Welfare> listWelfareByIds(List<Long> welfaeIds) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_WELFARES)
-				.where(Tables.EH_WELFARES.ID.in(welfaeIds));
+				.where(Tables.EH_WELFARES.ID.in(welfaeIds)).and(Tables.EH_WELFARES.IS_DELETE.eq((byte) 0));
 		Result<Record> records = step.orderBy(Tables.EH_WELFARES.SEND_TIME.desc()).fetch();
 		if(null == records){
 			return null;
