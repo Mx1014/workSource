@@ -27,6 +27,12 @@ SELECT 'meetingMessage' AS scope,100010 AS code,'zh_CN' AS locale,'您已被指�
 )r LEFT JOIN eh_locale_strings s ON r.scope=s.scope AND r.code=s.code AND r.locale=s.locale
 WHERE s.id IS NULL;
 
+-- AUTHOR:  谢旭双
+-- REMARK: 修改会议预定消息内容
+UPDATE eh_locale_strings SET text = REPLACE(text,'您','你') WHERE scope='meetingErrorCode';
+UPDATE eh_locale_templates SET text = REPLACE(text,'您','你'),description=REPLACE(description,'您','你')  WHERE scope='meetingMessage';
+
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
