@@ -176,7 +176,10 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 											amountReceived = zuolinServiceBill.getAmountReceivable().subtract(amountOwed);
 											zuolinServiceBill.setAmountOwed(amountOwed);
 											zuolinServiceBill.setAmountReceived(amountReceived);
-											zuolinServiceBill.setThirdPaid(AssetPaymentBillStatus.PAID.getCode());//已在第三方支付
+											//如果服务费账单已收大于0，那么说明已在CM线下支付过
+											if(amountReceived.compareTo(BigDecimal.ZERO) > 0) {
+												zuolinServiceBill.setThirdPaid(AssetPaymentBillStatus.PAID.getCode());//已在第三方支付
+											}
 										}
 										assetProvider.updateCMBill(zuolinServiceBill);
 									}else {
