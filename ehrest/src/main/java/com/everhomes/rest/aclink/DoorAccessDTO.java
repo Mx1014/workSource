@@ -83,10 +83,53 @@ public class DoorAccessDTO {
     private Integer maxCount;
     private Byte useCustomAuthConfig;
     private Integer defualtInvalidDuration;
+    private String organizationName;
+    private String addressDetail;
+    private String communityName;
+    private String buildingName;
+    private String floorName;
 
+    public String getOrganizationName() {
+        return organizationName;
+    }
 
+    public void setOrganizationName(String organizationName) {
+        this.organizationName = organizationName;
+    }
 
-	public Byte getUseCustomAuthConfig() {
+    public String getAddressDetail() {
+        return addressDetail;
+    }
+
+    public void setAddressDetail(String addressDetail) {
+        this.addressDetail = addressDetail;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getFloorName() {
+        return floorName;
+    }
+
+    public void setFloorName(String floorName) {
+        this.floorName = floorName;
+    }
+
+    public Byte getUseCustomAuthConfig() {
 		return useCustomAuthConfig;
 	}
 
@@ -507,7 +550,12 @@ public class DoorAccessDTO {
 		this.hasQr = hasQr;
 	}
 
-
+    public String getDisplayNameNotEmpty() {
+        if(this.getDisplayName() == null) {
+            return this.getName();
+        }
+        return this.getDisplayName();
+    }
 
 	@Override
     public String toString() {

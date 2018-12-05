@@ -64,4 +64,10 @@ public interface FieldProvider {
     Field findFieldById(Long fieldId);
 
     FieldItem findFieldItemByItemId(Long itemId);
+
+    void changeFilterStatus(Integer namespaceId, Long communityId, String moduleName, Long userId, String groupPath);;
+
+    void createFieldScopeFilter(VarFieldScopeFilter filter);
+
+    List<VarFieldScopeFilter> listFieldScopeFilter(Integer namespaceId, Long communityId, String moduleName, Long userId, String groupPath);
 }

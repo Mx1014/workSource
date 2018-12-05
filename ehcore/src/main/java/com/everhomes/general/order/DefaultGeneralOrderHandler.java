@@ -151,7 +151,11 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 		String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 		String backUrl = homeUrl + contextPath + info.getCallBackUrl();
 		preOrderCommand.setCallbackUrl(backUrl);
-		preOrderCommand.setExtendInfo(getOrderTypeEnum().getMsg());
+		if (info.getExtendInfo() != null){
+			preOrderCommand.setExtendInfo(info.getExtendInfo());
+		} else {
+			preOrderCommand.setExtendInfo(getOrderTypeEnum().getMsg());
+		}
 		preOrderCommand.setGoodsName(info.getOrderTitle());
 		preOrderCommand.setGoodsDescription(getOrderTypeEnum().getMsg());
 		preOrderCommand.setSourceType(info.getPaySourceType());

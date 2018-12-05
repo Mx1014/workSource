@@ -17,46 +17,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.customer.SyncDataTaskService;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.contract.AddContractTemplateCommand;
-import com.everhomes.rest.contract.CheckAdminCommand;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.ContractEventDTO;
-import com.everhomes.rest.contract.ContractParamDTO;
-import com.everhomes.rest.contract.CreateContractCommand;
-import com.everhomes.rest.contract.DeleteContractCommand;
-import com.everhomes.rest.contract.DeleteContractTemplateCommand;
-import com.everhomes.rest.contract.DenunciationContractCommand;
-import com.everhomes.rest.contract.EnterpriseContractCommand;
-import com.everhomes.rest.contract.EnterpriseContractDTO;
-import com.everhomes.rest.contract.DurationParamDTO;
-import com.everhomes.rest.contract.EntryContractCommand;
-import com.everhomes.rest.contract.FindContractCommand;
-import com.everhomes.rest.contract.GenerateContractNumberCommand;
-import com.everhomes.rest.contract.GetContractParamCommand;
-import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
-import com.everhomes.rest.contract.GetDurationParamCommand;
-import com.everhomes.rest.contract.ListApartmentContractsCommand;
-import com.everhomes.rest.contract.ListContractEventsCommand;
-import com.everhomes.rest.contract.ListContractTemplatesResponse;
-import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
-import com.everhomes.rest.contract.ListContractsBySupplierCommand;
-import com.everhomes.rest.contract.ListContractsBySupplierResponse;
-import com.everhomes.rest.contract.ListContractsCommand;
-import com.everhomes.rest.contract.ListContractsResponse;
-import com.everhomes.rest.contract.ListCustomerContractsCommand;
-import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
-import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
-import com.everhomes.rest.contract.PrintPreviewPrivilegeCommand;
-import com.everhomes.rest.contract.ReviewContractCommand;
-import com.everhomes.rest.contract.SearchContractCommand;
-import com.everhomes.rest.contract.SetContractParamCommand;
-import com.everhomes.rest.contract.SetPrintContractTemplateCommand;
-import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
-import com.everhomes.rest.contract.UpdateContractCommand;
-import com.everhomes.rest.contract.UpdateContractTemplateCommand;
-import com.everhomes.rest.contract.listContractTemplateCommand;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -73,6 +35,9 @@ public class ContractController extends ControllerBase {
 
 	@Autowired
 	private SyncDataTaskService syncDataTaskService;
+	
+	@Autowired
+	protected ContractProvider contractProvider;
 	
 	/**
 	 * <p>1.合同列表</p>
@@ -113,6 +78,23 @@ public class ContractController extends ControllerBase {
 		}
 		cmd.setPaymentFlag((byte)0);
 		return new RestResponse(contractSearcher.queryContracts(cmd));
+	}
+	
+	/**
+	 * <p>搜索合同没有OrgId</p>
+	 * <b>URL: /contract/searchNoOrgIdContracts</b>
+	 */
+	@RequestMapping("searchNoOrgIdContracts")
+	@RestReturn(ListContractsResponse.class)
+	public RestResponse searchNoOrgIdContracts(SearchContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		if (namespaceId == 999971) {
+			ContractService contractService = getContractService(namespaceId);
+			ListContractsCommand command = ConvertHelper.convert(cmd, ListContractsCommand.class);
+			return new RestResponse(contractService.listContracts(command));
+		}
+		cmd.setPaymentFlag((byte)0);
+		return new RestResponse(contractSearcher.searchNoOrgIdContracts(cmd));
 	}
 
 	/**
@@ -609,5 +591,90 @@ public class ContractController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /contract/getApartmentRentalContract</b>
+	 * <p>获取房源相关联的租赁合同，会占资源的那一种合同</p>
+	 */
+	@RequestMapping("getApartmentRentalContract")
+	@RestReturn(value = ContractDTO.class, collection = true)
+	public RestResponse getApartmentRentalContract(ListApartmentContractsCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		List<ContractDTO> results = contractService.getApartmentRentalContract(cmd);
+		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
+	/**	
+	 * <p>合同更新/根据合同id,自动刷新合同账单</p>
+	 * <b>URL: /contract/autoGeneratingBill</b>
+	 */
+	@RequestMapping("autoGeneratingBill")
+	@RestReturn(String.class)
+	public RestResponse autoGeneratingBill(AutoGeneratingBillCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.autoGeneratingBill(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>合同初始化/选择合同列表合同进行初始化</p>
+	 * <b>URL: /contract/initializationContract</b>
+	 */
+	@RequestMapping("initializationContract")
+	@RestReturn(String.class)
+	public RestResponse initializationContract(InitializationCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		ContractTaskOperateLog contractTaskOperateLog = contractService.initializationContract(cmd);
+		RestResponse response = new RestResponse(contractTaskOperateLog);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>合同免批/选择合同列表合同进行合同免批</p>
+	 * <b>URL: /contract/exemptionContract</b>
+	 */
+	@RequestMapping("exemptionContract")
+	@RestReturn(String.class)
+	public RestResponse exemptionContract(InitializationCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		ContractTaskOperateLog contractTaskOperateLog = contractService.exemptionContract(cmd);
+		RestResponse response = new RestResponse(contractTaskOperateLog);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>合同复制/支持批量复制合同</p>
+	 * <b>URL: /contract/copyContract</b>
+	 */
+	@RequestMapping("copyContract")
+	@RestReturn(String.class)
+	public RestResponse copyContract(InitializationCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.copyContract(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>合同初始化进度条/进度条查询</p>
+	 * <b>URL: /contract/searchProgressContract</b>
+	 */
+	@RequestMapping("searchProgressContract")
+	@RestReturn(SearchProgressDTO.class)
+	public RestResponse searcIinitializationContract(SearchProgressCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		SearchProgressDTO result = contractService.findContractOperateTaskById(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

@@ -14,6 +14,7 @@ import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -71,4 +72,9 @@ public class BeeKangLiVendorHandler extends BeeVendorHandler{
         public String getParkingVendorName() {
         	return ParkingLotVendor.BEE_KANGLI.getCode();
         }
+        
+		@Override
+		public long getMonthlyRechargeStartTime(Long endTime) {
+			return endTime;
+		}
 }

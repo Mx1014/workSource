@@ -32,6 +32,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
@@ -49,6 +50,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
@@ -211,6 +213,20 @@ public class ArchivesServiceImpl implements ArchivesService {
         logCommand.setEmployeeType(EmployeeType.FULLTIME.getCode());
         logCommand.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
         addCheckInLogs(detailId, logCommand);
+
+        //记录添加log
+        OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
+        orgLog.setOrganizationId(memberDTO.getOrganizationId());
+        orgLog.setContactName(memberDTO.getContactName());
+        orgLog.setContactToken(memberDTO.getContactToken());
+        orgLog.setUserId(memberDTO.getTargetId());
+        orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        orgLog.setOperationType(OperationType.JOIN.getCode());
+        orgLog.setRequestType(RequestType.USER.getCode());
+        orgLog.setOperatorUid(UserContext.current().getUser().getId());
+        orgLog.setContactDescription(memberDTO.getContactDescription());
+        this.organizationProvider.createOrganizationMemberLog(orgLog);
+
         return dto;
     }
 
@@ -642,7 +658,19 @@ public class ArchivesServiceImpl implements ArchivesService {
             return null;
         });
     }
-
+    
+    /**
+     * 给用户设置新的手机号
+     * @param namespaceId : 域空间id
+     * @param userId : 用户id
+     * @param newContactToken : 新手机号
+     * */
+    @Override
+    public void updateArchivesEmployeeContact(Integer namespaceId, Long userId, String newContactToken){
+    	organizationProvider.updateOrganizationMemberDetailsContactToken(namespaceId, userId, newContactToken);
+    	organizationProvider.updateOrganizationMembersContactToken(namespaceId, userId, newContactToken);
+    }
+    
     @Override
     public void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd) {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
@@ -1597,21 +1625,15 @@ public class ArchivesServiceImpl implements ArchivesService {
     }*/
 
     @Override
-    public List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback) {
+    public List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, List<Long> departmentIds, ListingQueryBuilderCallback queryBuilderCallback) {
         List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), organizationId, (locator1, query) -> {
             queryBuilderCallback.buildCondition(locator, query);
-            if (departmentId != null) {
-                Organization department = organizationProvider.findOrganizationById(departmentId);
-
-    			List<String> groupTypes = new ArrayList<>();
-    			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-    			groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-    			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-                List<Organization> subDeparts = organizationProvider.listOrganizationByGroupTypesAndPath(department.getPath() + "%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+            if (CollectionUtils.isNotEmpty(departmentIds)) {
                 List<Long> subDptIds = new ArrayList<>();
-                subDeparts.forEach(r -> {
-                	subDptIds.add(r.getId());
-                });
+                for (Long departmentId : departmentIds) {
+                    addSubDptIds(departmentId, subDptIds);
+                }
+
                 List<Long> workGroups = organizationProvider.listOrganizationPersonnelDetailIdsByDepartmentIds(subDptIds);
                 List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentIds(subDptIds);
                 Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
@@ -1626,6 +1648,11 @@ public class ArchivesServiceImpl implements ArchivesService {
         });
 
         //  get the department name.
+        if (processEmployee(employees)) return employees;
+        return new ArrayList<>();
+    }
+
+    private boolean processEmployee(List<OrganizationMemberDetails> employees) {
         if (employees != null && employees.size() > 0) {
             for (OrganizationMemberDetails employee : employees) {
                 if (employee.getEmployeeStatus().equals(EmployeeStatus.DISMISSAL.getCode())) {
@@ -1635,8 +1662,45 @@ public class ArchivesServiceImpl implements ArchivesService {
                 } else
                     employee.setDepartmentName(convertToOrgNames(getEmployeeDepartment(employee.getId())));
             }
-            return employees;
+            return true;
         }
+        return false;
+    }
+
+    @Override
+    public void addSubDptIds(Long departmentId, List<Long> subDptIds) {
+        Organization department = organizationProvider.findOrganizationById(departmentId);
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        List<Organization> subDeparts = organizationProvider.listOrganizationByGroupTypesAndPath(department.getPath() + "%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+        subDeparts.forEach(r -> {
+            subDptIds.add(r.getId());
+        });
+    }
+
+    @Override
+    public List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback) {
+        List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), organizationId, (locator1, query) -> {
+            queryBuilderCallback.buildCondition(locator, query);
+            if (departmentId != null) {
+                List<Long> subDptIds = new ArrayList<>();
+                addSubDptIds(departmentId, subDptIds);
+                List<Long> workGroups = organizationProvider.listOrganizationPersonnelDetailIdsByDepartmentIds(subDptIds);
+                List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentIds(subDptIds);
+                Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
+                Condition con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
+                if (workGroups != null)
+                    con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(workGroups);
+                if (dismissGroups != null)
+                    con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(dismissGroups);
+                query.addConditions(con1.or(con2));
+            }
+            return query;
+        });
+
+        if (processEmployee(employees)) return employees;
         return new ArrayList<>();
     }
 

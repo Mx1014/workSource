@@ -7,8 +7,10 @@ import com.everhomes.community.Community;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.organization.pm.AddressEvent;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
+import com.everhomes.rest.address.ApartmentBriefInfoDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
@@ -169,4 +171,30 @@ public interface AddressProvider {
 	int getTotalApartmentCount();
 
 	List<ApartmentReportFormDTO> findActiveApartments(int startIndex, int pageSize);
+	
+	/**
+	 * 分页获取地址信息中城市ID不在eh_regions表里的数据，这些数据都是有问题的，需要修复；
+	 * @param namespaceId 域空间ID
+	 * @param pageAnchor 分页锚点
+	 * @param pageSize 每页数量
+	 * @return 地址数据
+	 */
+	List<Address> listAddressesOfInvalidCity(Integer namespaceId, Long pageAnchor, Integer pageSize);
+	
+	/**
+	 * 更新地址信息中的城市ID，为了减少干扰，只更换城市ID
+	 * @param addressId 地址ID
+	 * @param cityId 城市ID
+	 */
+	void updateAddressOfCityId(Long addressId, Long cityId);
+
+	void createAddressEvent(AddressEvent event);
+	void deleteAddressEventByAddressId(Long addressId);
+	List<AddressEvent> listAddressEvents(Long addressId, Integer pageSize, Long pageAnchor);
+	AddressEvent findAddressEventByAddressIdAndOperateTime(Long addressId, Timestamp updateTime);
+	void updateAddressEvent(AddressEvent event);
+
+	List<ApartmentBriefInfoDTO> listApartmentsByMultiStatus(Integer namespaceId, Long communityId, String buildingName,
+			String apartment, List<Byte> livingStatus, Long pageAnchor, int pageSize);
+	List<Address> findActiveAddress(int startIndex, int pageSize);
 }

@@ -59,4 +59,5 @@ public interface OfficeCubicleProvider {
 	void updateConfig(OfficeCubicleConfig bean);
 
 	OfficeCubicleConfig findConfigByOwnerId(String ownerType,Long ownerId);
+
 }

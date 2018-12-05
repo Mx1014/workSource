@@ -28,8 +28,6 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.asset.PaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.BuildingProvider;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
@@ -67,6 +65,8 @@ import com.everhomes.paySDK.pojo.PayOrderDTO;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.portal.PortalService;
+import com.everhomes.portal.PortalVersion;
+import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.acl.ProjectDTO;
@@ -83,6 +83,7 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.module.ServiceModuleType;
 import com.everhomes.rest.organization.*;
 
 import com.everhomes.rest.family.FamilyDTO;
@@ -112,6 +113,9 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
@@ -135,6 +139,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.aspectj.lang.annotation.Around;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -197,8 +202,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private PmTaskProvider pmTaskProvider;
 	@Autowired
     private ConfigurationProvider configProvider;
-//	@Autowired
-//	private CategoryProvider categoryProvider;
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
@@ -236,8 +239,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private CommunityService communityService;
 	@Autowired
-	private UserService userService;
-	@Autowired
 	private AddressService addressService;
 	@Autowired
 	private FlowEvaluateProvider flowEvaluateProvider;
@@ -253,6 +254,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private FlowEventLogProvider flowEventLogProvider;
 	@Autowired
 	protected GeneralOrderService orderService;
+	@Autowired
+	private PortalVersionProvider portalVersionProvider;
+	@Autowired
+	private ServiceModuleAppProvider serviceModuleAppProvider;
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
 
 
 	@Value("${server.contextPath:}")
@@ -288,13 +295,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//TODO:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		&& null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+		if(namespaceId == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 			handle = PmTaskHandle.EBEI;
-		} else {
-//			用appId实现多应用,去除taskcategoryId
-			cmd.setTaskCategoryId(null);
 		}
+
+//		用appId实现多应用,去除taskcategoryId
+//		cmd.setTaskCategoryId(null);
 
 		//检查多入口应用权限
 		if (!handle.equals(PmTaskHandle.EBEI)) {
@@ -328,8 +337,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 
 		//TODO:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		 && null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+		if(namespaceId == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 			handle = PmTaskHandle.EBEI;
 		}
 
@@ -737,8 +748,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//Todo:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		 && null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+		if(namespaceId == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 			handle = PmTaskHandle.EBEI;
 		}
 		
@@ -887,8 +900,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		//Todo:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		 && null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+		if(namespaceId == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 			handle = PmTaskHandle.EBEI;
 		}
 
@@ -1020,8 +1035,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//为科兴与一碑对接
-		if (namespaceId == 999983 &&
-				(this.isEbeiCategory(cmd.getTaskCategoryId()) || this.isEbeiCategory(cmd.getParentId()))) {
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+		if(namespaceId == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 			handle = PmTaskHandle.EBEI;
 		}
 
@@ -1076,8 +1091,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 					Row tempRow = sheet.createRow(i + 4);
 					PmTaskDTO task = list.get(i);
 					PmTaskCategory category = null;
-					if(UserContext.getCurrentNamespaceId() == 999983 && null != cmd.getTaskCategoryId() &&
-							cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+					//为科兴与一碑对接
+					ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+					if(UserContext.getCurrentNamespaceId() == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 						category = createEbeiCategory();
 					} else {
 						category = checkCategory(task.getTaskCategoryId());
@@ -2365,6 +2381,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
 			List<OrganizationDTO> organizations = new ArrayList<>();
 			if(organizationList != null && organizationList.size() > 0) {
+				System.out.println(communityId);
 				organizationList.forEach(f -> {
 					if(OrganizationMemberStatus.ACTIVE.equals(OrganizationMemberStatus.fromCode(f.getMemberStatus()))) {
 						if(f.getCommunityId() != null && f.getCommunityId().equals(communityId))
@@ -2402,13 +2419,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 					List<OrgAddressDTO> addresses = new ArrayList<OrgAddressDTO>();
 					organizationAddresses.stream().map( r -> {
 						Address address = addressProvider.findAddressById(r.getAddressId());
-						OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
-						if(dto != null) {
-							dto.setOrganizationId(o.getId());
-							dto.setDisplayName(o.getName());
-							dto.setAddressId(address.getId());
-							dto.setCommunityName(o.getCommunityName());
-							addresses.add(dto);
+						if(address != null && address.getCommunityId() != null && address.getCommunityId().equals(communityId)){
+							OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
+							if(dto != null) {
+								dto.setOrganizationId(o.getId());
+								dto.setDisplayName(o.getName());
+								dto.setAddressId(address.getId());
+								dto.setCommunityName(o.getCommunityName());
+								addresses.add(dto);
+							}
 						}
 						return null;
 					}).collect(Collectors.toList());
@@ -3041,6 +3060,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 					case UNPROCESSED: break;
 					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();break;
 					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
+					case CLOSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
                     case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break; //已关闭
                     case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
 					case CANCELED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
@@ -3175,8 +3195,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 				bean.setOwnerId(elem.getKey());
 				bean.setOwnerName(null != community ? community.getName() : "");
 				//为科兴与一碑对接
-				if(cmd.getNamespaceId() == 999983 && null != cmd.getAppId() &&
-						cmd.getAppId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+				ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+				if(cmd.getNamespaceId() == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 					bean.setType("物业报修");
 				}else{
 					PmTaskCategory category = pmTaskProvider.findCategoryById(elem1.getKey());
@@ -3316,7 +3336,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public List<PmTaskEvalStatDTO> getEvalStat(GetEvalStatCommand cmd) {
 		List<PmTaskEvalStatDTO> dtos = new ArrayList<>();
 //		取当前项目启用工作流
-		Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(),20100L,cmd.getModuleType(),cmd.getOwnerId(),cmd.getOwnerType());
+		Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(),20100L,String.valueOf(cmd.getAppId()),cmd.getOwnerId(),cmd.getOwnerType());
 		if(null == flow || !flow.getAllowFlowCaseEndEvaluate().equals((byte) 1)){
 //			不设置评价返回空列表
 			return dtos;
@@ -4404,8 +4424,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		cmd1.setOwnerId(cmd.getOwnerId());
 		cmd1.setStartDate(cmd.getDateStart());
 		cmd1.setEndDate(cmd.getDateEnd());
-		cmd1.setTaskCategoryId(cmd.getAppId());
-		cmd1.setAppId(cmd.getOriginId());
+//		cmd1.setTaskCategoryId(cmd.getAppId());
+		cmd1.setAppId(cmd.getAppId());
 		cmd1.setCurrentPMId(cmd.getCurrentPMId());
 		cmd1.setCurrentProjectId(cmd.getOwnerId());
 		cmd1.setPageSize(99999);

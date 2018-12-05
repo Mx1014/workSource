@@ -26,9 +26,9 @@ public enum SmartCardType {
             return null;
         
         switch(code.byteValue()) {
-        case 0 :
-            return SMART_CARD_PAY;
         case 1 :
+            return SMART_CARD_PAY;
+        case 2 :
             return SMART_CARD_ACLINK;
         }
         

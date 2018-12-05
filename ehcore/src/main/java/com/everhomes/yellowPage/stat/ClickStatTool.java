@@ -8,7 +8,7 @@ import java.util.Map;
 import org.elasticsearch.common.lang3.StringUtils;
 
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.rest.yellowPage.IdNameDTO;
+import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.rest.yellowPage.stat.ServiceAndTypeNameDTO;
 import com.everhomes.util.StringHelper;
 import com.everhomes.yellowPage.ServiceAlliances;
@@ -38,9 +38,9 @@ public class ClickStatTool {
 		this.currentType = type;
 
 		// 获取所有服务类型名称
-		List<IdNameDTO> serviceTypeDtos = getYellowPageProvider().listServiceTypeNames(type);
+		List<IdNameInfoDTO> serviceTypeDtos = getYellowPageProvider().listServiceTypeNames(type);
 
-		for (IdNameDTO dto1 : serviceTypeDtos) {
+		for (IdNameInfoDTO dto1 : serviceTypeDtos) {
 			serviceTypeNames.put(dto1.getId(), dto1.getName());
 		}
 
@@ -84,20 +84,20 @@ public class ClickStatTool {
 		return serviceTypeNames.get(serviceTypeId);
 	}
 
-	public IdNameDTO getTypeByServiceId(Long serviceId) {
+	public IdNameInfoDTO getTypeByServiceId(Long serviceId) {
 		Long serviceTypeId = serviceAndTypeRelationMap.get(serviceId);
 		if (null == serviceTypeId) {
 			return null;
 		}
 
-		IdNameDTO dto = new IdNameDTO();
+		IdNameInfoDTO dto = new IdNameInfoDTO();
 		dto.setId(serviceTypeId);
 		dto.setName(serviceTypeNames.get(serviceTypeId));
 		return dto;
 	}
 
 	public String getTypeNameByServiceId(Long serviceId) {
-		IdNameDTO dto = getTypeByServiceId(serviceId);
+		IdNameInfoDTO dto = getTypeByServiceId(serviceId);
 		return null == dto ? null : dto.getName();
 	}
 

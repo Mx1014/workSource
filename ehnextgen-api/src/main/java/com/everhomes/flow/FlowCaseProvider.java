@@ -2,6 +2,8 @@ package com.everhomes.flow;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.FlowModuleAppDTO;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 
 import java.sql.Timestamp;
@@ -47,7 +49,15 @@ public interface FlowCaseProvider {
 
     Integer countAdminFlowCases(SearchFlowCaseCommand cmd);
 
-    List<FlowCase> listFlowCaseGroupByServiceTypes(Integer namespaceId);
+    List<FlowCase> listFlowCaseGroupByServiceTypes(Integer namespaceId, SearchFlowCaseCommand cmd);
 
     FlowCase getFlowCaseBySubFlowParentId(Long parentId);
+
+    List<FlowModuleAppDTO> listApplierApps(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd);
+
+    List<FlowServiceTypeDTO> listApplierServiceTypes(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd);
+
+    List<FlowModuleAppDTO> listAdminApps(Integer namespaceId, SearchFlowCaseCommand cmd);
+
+    List<FlowServiceTypeDTO> listAdminServiceTypes(Integer namespaceId, SearchFlowCaseCommand cmd);
 }

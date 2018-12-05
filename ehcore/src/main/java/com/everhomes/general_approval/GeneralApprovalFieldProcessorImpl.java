@@ -11,19 +11,10 @@ import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
-import com.everhomes.rest.general_approval.PostApprovalFormContactValue;
-import com.everhomes.rest.general_approval.PostApprovalFormFileDTO;
-import com.everhomes.rest.general_approval.PostApprovalFormFileValue;
-import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
-import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.Version;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -54,6 +45,18 @@ public class GeneralApprovalFieldProcessorImpl implements GeneralApprovalFieldPr
     public void processDropBoxField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(JSON.parseObject(jsonVal == null ? "{\"text\":\"\"}" : jsonVal, PostApprovalFormTextValue.class).getText());
+        entities.add(e);
+    }
+
+    @Override
+    public void processMultiSelectField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        PostApprovalFormMultiSelectValue multiSelectValue = JSON.parseObject(jsonVal == null ? "{}" : jsonVal, PostApprovalFormMultiSelectValue.class);
+        String val = "";
+        if(multiSelectValue!= null){
+            val = StringUtils.join(multiSelectValue.getSelected(),"、");
+        }
+        e.setValue(val);
         entities.add(e);
     }
 
@@ -306,13 +309,13 @@ public class GeneralApprovalFieldProcessorImpl implements GeneralApprovalFieldPr
             if ("0.0.0".equals(UserContext.current().getVersion())) {
                 return true;
             }
-            // 等客户端开发后打卡注释
-//            Version appVersion = Version.fromVersionString(UserContext.current().getVersion());
-//
-//            if (Version.encodeValue(appVersion.getMajor(), appVersion.getMinor(), appVersion.getRevision()) >=
-//                    Version.encodeValue(5, 11, 0)) {
-//                return true;
-//            }
+
+            Version appVersion = Version.fromVersionString(UserContext.current().getVersion());
+
+            if (Version.encodeValue(appVersion.getMajor(), appVersion.getMinor(), appVersion.getRevision()) >=
+                    Version.encodeValue(5, 11, 0)) {
+                return true;
+            }
         }
         return false;
     }

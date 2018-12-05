@@ -333,4 +333,10 @@ public class SZWContractHandler implements ContractService{
 
 	}
 
+	@Override
+	public List<ContractDTO> getApartmentRentalContract(ListApartmentContractsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

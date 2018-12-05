@@ -2,11 +2,13 @@ package com.everhomes.customer;
 
 import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.acl.RolePrivilegeServiceImpl;
 import com.everhomes.activity.ActivityCategories;
 import com.everhomes.activity.ActivityProivider;
 import com.everhomes.activity.ActivityService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -26,6 +28,7 @@ import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentService;
 import com.everhomes.filedownload.TaskService;
+import com.everhomes.investment.InvitedCustomerService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -53,10 +56,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.requisition.RequisitionService;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
@@ -193,6 +193,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
+
+    @Autowired
+    private InvitedCustomerService invitedCustomerService;
+
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
 
@@ -270,6 +274,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private RequisitionService requisitionService;
+
+    @Autowired
+    private ArchivesService archivesService;
 
     private static final String queueDelay = "trackingPlanTaskDelays";
     private static final String queueNoDelay = "trackingPlanTaskNoDelays";
@@ -520,6 +527,9 @@ public class CustomerServiceImpl implements CustomerService {
                 enterpriseCustomerProvider.createCustomerAttachements(attachment);
             });
         }
+        if(customer.getLevelItemId() != null){
+            invitedCustomerService.createCustomerLevelByCustomerId(customer.getId(), customer.getLevelItemId());
+        }
 
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
@@ -571,6 +581,8 @@ public class CustomerServiceImpl implements CustomerService {
         if(customer.getAptitudeFlagItemId() == null){
             customer.setAptitudeFlagItemId((long)CustomerAptitudeFlag.NOAPTITUDE.getCode());
         }
+        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
 //        customer.setSourceId(cmd.getSourceItemId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         //创建或更新customer的bannerUri
@@ -590,6 +602,9 @@ public class CustomerServiceImpl implements CustomerService {
         //add potential data transfer to customer
         if (cmd.getSourceId() != null) {
             saveCustomerTransferEvent(UserContext.currentUserId(), customer, cmd.getSourceId(), cmd.getDeviceType());
+        }
+        if(customer.getLevelItemId() != null){
+            invitedCustomerService.createCustomerLevelByCustomerId(customer.getId(), customer.getLevelItemId());
         }
         syncPotentialTalentToCustomer(customer.getId(),cmd.getSourceId());
         enterpriseCustomerSearcher.feedDoc(customer);
@@ -1072,6 +1087,10 @@ public class CustomerServiceImpl implements CustomerService {
         if (updateCustomer.getTrackingUid() == null) {
             updateCustomer.setTrackingName(null);
         }
+        if(updateCustomer.getLevelItemId() != null){
+            invitedCustomerService.changeCustomerLevelByCustomerId(updateCustomer.getId(), updateCustomer.getLevelItemId());
+        }
+
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);
 
@@ -1257,6 +1276,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         customer.setStatus(CommonStatus.INACTIVE.getCode());
+        invitedCustomerService.changeCustomerLevelByCustomerId(customer.getId(), CustomerLevelType.DELETE_CUSTOMER.getCode());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -3616,10 +3636,11 @@ public class CustomerServiceImpl implements CustomerService {
             if (customerTrackings != null && customerTrackings.size() > 0) {
                 customer.setLastTrackingTime(customerTrackings.get(0).getTrackingTime());
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-//                enterpriseCustomerSearcher.feedDoc(customer);
+                enterpriseCustomerSearcher.feedDoc(customer);
             }else {
                 customer.setLastTrackingTime(null);
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+                enterpriseCustomerSearcher.feedDoc(customer);
             }
         }
     }
@@ -4143,8 +4164,16 @@ public class CustomerServiceImpl implements CustomerService {
                 Organization organization =  organizationProvider.findOrganizationById(r.getOrganizationId());
                 if(organization!=null){
                     r.setDepartmentName(organization.getName());
+                    Long detailId = organizationProvider.findOrganizationMemberDetailsByTargetId(r.getTargetId()).getId();
+                    Map<Long, String> dptMap = archivesService.getEmployeeDepartment(detailId);
+                    if (null != dptMap) {
+                        String depName = archivesService.convertToOrgNames(dptMap);
+                        r.setDeptName(depName);
+                    }
+
                 } else {
                     r.setDepartmentName("");
+                    r.setDeptName("");
                 }
             });
         }
@@ -4290,13 +4319,24 @@ public class CustomerServiceImpl implements CustomerService {
             cmd.setOrganizationId(customer.getOrganizationId() == null ? 0 : customer.getOrganizationId());
 //            result = rolePrivilegeService.listOrganizationAdministrators(cmd);
             // 标准版修改成此种概念
-            ListOrganizationContectDTOResponse organizationAdmins = rolePrivilegeService.listOrganizationSystemAdministrators(cmd);
-            result = organizationAdmins == null ? null : organizationAdmins.getDtos();
-            //复制organization管理员到企业客户管理中来
-            if (result != null && result.size() > 0) {
-                result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(),customer.getNamespaceId()));
-                customer.setAdminFlag(AdminFlag.YES.getCode());
-                enterpriseCustomerSearcher.feedDoc(customer);
+            if(cmd.getOrganizationId() != null && cmd.getOrganizationId() != 0) {
+                OrganizationContactDTO organizationAdmin = rolePrivilegeService.listOrganizationTopAdministrator(cmd);
+                if(organizationAdmin != null){
+                    result = new ArrayList<>();
+                    result.add(organizationAdmin);
+                    result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(),customer.getNamespaceId()));
+                    customer.setAdminFlag(AdminFlag.YES.getCode());
+                    enterpriseCustomerSearcher.feedDoc(customer);
+                }
+            } else if(result == null || result.size() < 1){
+                ListOrganizationContectDTOResponse organizationAdmins = rolePrivilegeService.listOrganizationSystemAdministrators(cmd);
+                result = organizationAdmins == null ? null : organizationAdmins.getDtos();
+                //复制organization管理员到企业客户管理中来
+                if (result != null && result.size() > 0) {
+                    result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(), customer.getNamespaceId()));
+                    customer.setAdminFlag(AdminFlag.YES.getCode());
+                    enterpriseCustomerSearcher.feedDoc(customer);
+                }
             }
         } else {
             result = customerAdminContacts;
@@ -4970,5 +5010,58 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
     }
+
+    @Override
+    public void transNewAdmin(TransNewAdminCommand cmd2){
+        Long nextPageAnchor = 0l;
+        boolean breakFlag = true;
+        int totalCount = 0;
+        long roundStartTime = System.currentTimeMillis();
+        while(breakFlag){
+
+            List<CreateOrganizationAdminCommand> list = new ArrayList<>();
+
+            if(cmd2.getNamespaceId() != null && cmd2.getNamespaceId() != 0){
+                list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor, cmd2.getNamespaceId());
+            }else{
+                list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor);
+            }
+            nextPageAnchor = list.get(list.size()-1).getOwnerId();
+            if(list.size() < 101){
+                breakFlag = false;
+            }else{
+                list.remove(list.size()-1);
+            }
+            long roundQueryEndTime = System.currentTimeMillis();
+
+            for(CreateOrganizationAdminCommand cmd : list){
+                cmd.setOwnerId(null);
+                dbProvider.execute((TransactionStatus status) -> {
+                    //根据组织id、用户姓名、手机号、超级管理员权限代号、机构管理，超级管理员，拥有 所有权限、来创建超级管理员
+                    /*try {
+                        rolePrivilegeService.createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
+                                PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, RoleConstants.PM_SUPER_ADMIN, false, false);
+                    }catch(Exception e){
+                        LOGGER.warn(e.getMessage());
+                    }*/
+                    cmd.setOwnerType("EhOrganizations");
+                    cmd.setOwnerId(cmd.getOrganizationId());
+                    rolePrivilegeService.deleteOrganizationAdministratorsForOnes(ConvertHelper.convert(cmd, DeleteOrganizationAdminCommand.class));
+                    rolePrivilegeService.createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
+                            PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN, true, false);
+                    return null;
+                });
+            }
+
+            totalCount += list.size();
+            if(LOGGER.isInfoEnabled()) {
+                long roundEndTime = System.currentTimeMillis();
+                LOGGER.info("Replace organization admin, namespaceId={}, totalCount={}, pageAnchor={}, queryElapse={}, elapse={}",
+                        cmd2.getNamespaceId(), totalCount, nextPageAnchor, (roundEndTime - roundQueryEndTime), (roundEndTime - roundStartTime));
+                roundStartTime  = roundEndTime;
+            }
+        }
+    }
+
 
 }

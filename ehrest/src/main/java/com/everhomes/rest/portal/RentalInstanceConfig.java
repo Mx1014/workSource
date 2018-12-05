@@ -7,12 +7,13 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>resourceTypeId: 资源id</li>
- * <li>pageType: 样式</li>
+ * <li>pageType: 样式{@link com.everhomes.rest.rentalv2.RentalPageType} </li>
  * <li>payMode: 支付模式 0 :线上支付 1 :线下支付 2 :审批线上支付/li>
  * <li>identify: 资源类型的分类 {@link com.everhomes.rest.rentalv2.RentalV2ResourceType}</li>
  * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>invoiceEntryFlag: 发票入口开关</li>
  * <li>limitCommunityFlag:是否仅本项目可见 </li>
+ * <li>crossCommuFlag:是否支持跨项目 </li>
  * </ul>
  */
 public class RentalInstanceConfig {
@@ -30,6 +31,8 @@ public class RentalInstanceConfig {
 	private Byte invoiceEntryFlag;
 
     private Byte limitCommunityFlag;
+
+    private Byte crossCommuFlag;
 
     public Long getResourceTypeId() {
 		return resourceTypeId;
@@ -85,6 +88,14 @@ public class RentalInstanceConfig {
 
 	public void setLimitCommunityFlag(Byte limitCommunityFlag) {
 		this.limitCommunityFlag = limitCommunityFlag;
+	}
+
+	public Byte getCrossCommuFlag() {
+		return crossCommuFlag;
+	}
+
+	public void setCrossCommuFlag(Byte crossCommuFlag) {
+		this.crossCommuFlag = crossCommuFlag;
 	}
 
 	@Override

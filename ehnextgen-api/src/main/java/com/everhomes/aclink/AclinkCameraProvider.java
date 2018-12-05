@@ -21,6 +21,8 @@ public interface AclinkCameraProvider {
 
 	AclinkCamera findCameraById(Long id);
 
+	List<AclinkCameraDTO> findCameraByDoorId(Long doorId);
+
 	void updateLocalCamera(AclinkCamera camera);
 
 	void deleteLocalCamera(Long id);

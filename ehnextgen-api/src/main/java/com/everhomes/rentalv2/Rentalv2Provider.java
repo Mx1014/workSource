@@ -1,6 +1,7 @@
 package com.everhomes.rentalv2;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
@@ -64,7 +65,7 @@ public interface Rentalv2Provider {
 
 	List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
-			Byte invoiceFlag,Long userId,String payChannel);
+			Byte invoiceFlag,Long userId,String payChannel,Byte source);
 	List<RentalOrder> listRentalBillsByUserOrgId(Long organizationId ,ListingLocator locator, Integer pageSize );
 	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime);
 
@@ -106,7 +107,7 @@ public interface Rentalv2Provider {
 	List<RentalTimeInterval> queryRentalTimeIntervalByOwner(String resourceType, String ownerType,
 			Long ownerId);
 
-	List<RentalCloseDate> queryRentalCloseDateByOwner(String resourceType, String ownerType, Long ownerId);
+	List<RentalCloseDate> queryRentalCloseDateByOwner(String resourceType, String ownerType, Long ownerId, Date startTime, Date endTime);
 
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String resourceType, String ownerType, Long ownerId,Byte attachmentType);
 
@@ -203,6 +204,16 @@ public interface Rentalv2Provider {
 
 	MaxMinPrice findMaxMinPrice(String resourceType,Long ownerId, Byte rentalType);
 
+	MaxMinPrice findMaxMinPriceByClassifycation(String resourceType,String ownerType,List<Long> ownerIds,
+												String sourceType,Long sourceId,Byte userPriceType,String classification);
+
+	List<RentalPriceClassification> listClassification(String resourceType,String ownerType,Long ownerId,
+													   String sourceType,Long sourceId,Byte userPriceType,String classification);
+
+	void deleteClassificationBySourceId(String resourceType,String sourceType,Long sourceId);
+
+	void deleteClassificationByOwnerId(String resourceType,String ownerType,Long ownerId);
+
 	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
 			List<Rentalv2PriceRule> priceRules);
 
@@ -211,6 +222,8 @@ public interface Rentalv2Provider {
 	RentalResourceType findRentalResourceTypeById(Long resourceTypeId);
 
 	List<Long> listCellPackageId (String resourceType, Long ownerId, Byte rentalType);
+
+	List<Long> listCellId (String resourceType, Long ownerId, Byte rentalType);
 
 	void createRentalOrderRule(RentalOrderRule rule);
 
@@ -254,5 +267,15 @@ public interface Rentalv2Provider {
 
 	List<RentalRefundTip> listRefundTips(String resourceType, String sourceType, Long sourceId,Byte refundStrategy);
 
+	List<RentalStructure> listRentalStructures(String sourceType,Long sourceId,String resourceType,Byte isSurport,ListingLocator locator, Integer pageSize);
 
+	List<RentalStructureTemplate> listRentalStructureTemplates();
+
+	RentalStructure getRentalStructureById(Long id);
+
+	void createRentalStructure(RentalStructure rentalStructure);
+
+	void updateRentalStructure(RentalStructure rentalStructure);
+
+	RentalOrder getUserClosestBill(Long userId,Long resourceTypeId);
 }

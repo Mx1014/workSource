@@ -1,6 +1,7 @@
 package com.everhomes.rentalv2.job;
 
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.rentalv2.RentalCommonServiceImpl;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -26,31 +27,19 @@ public class RentalMessageJob extends QuartzJobBean {
 
     @Autowired
     private MessagingService messagingService;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
-            Long userId = jobMap.getLong("userId");
+            String userIds = jobMap.getString("userIds");
             String content = jobMap.getString("content");
-            sendMessageToUser(userId,content);
+            rentalCommonService.sendMessageToUser(userIds,content);
 
         }catch (Exception e) {
             LOGGER.error("RentalMessageJob error", e);
         }
-
-    }
-    private void sendMessageToUser(Long userId, String content) {
-        MessageDTO messageDto = new MessageDTO();
-        messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(content);
-        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-
-        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 }

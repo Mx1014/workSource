@@ -7,22 +7,27 @@ import com.everhomes.util.StringHelper;
  * <li>identifierTokenList:目标用户的手机号列表，英文字符';'分割</li>
  * <li>routeName:路线名称</li>
  * <li>nextStation:下一站名称</li>
- * <li>appkey: (必填)appkey</li>
- * <li>appsecret: 应用密钥AppSecret</li>
+ * <li>appKey: (必填)appKey</li>
+ * <li>secretKey : 应用密钥secretKey </li>
  * <li>messageType: 1：登车提醒；2：下车提醒；</li>
+ * <li>timestamp:时间戳，使用 1970-01-01 00:00:00 开始到现在的毫秒数；</li>
+ * <li>nonce:随机数</li>
+ * <li>signature:请求签名，鉴别是否被篡改</li>
  * </ul>
  * 
  * @author moubinmo
  *
  */
-
 public class ThirdPartPushMessageCommand {
 	private String identifierTokenList;
-	private String appkey;
-	private String appsecret;
+	private String appKey;
+	private String secretKey;
 	private String routeName;
 	private String nextStation;
 	private Integer msgType;
+	private Long timestamp;
+	private Integer nonce;
+	private String signature;
 	
 	public String getIdentifierTokenList() {
 		return identifierTokenList;
@@ -30,6 +35,22 @@ public class ThirdPartPushMessageCommand {
 
 	public void setIdentifierTokenList(String identifierTokenList) {
 		this.identifierTokenList = identifierTokenList;
+	}
+
+	public String getAppKey() {
+		return appKey;
+	}
+
+	public void setAppKey(String appKey) {
+		this.appKey = appKey;
+	}
+
+	public String getSecretKey() {
+		return secretKey;
+	}
+
+	public void setSecretKey(String secretKey) {
+		this.secretKey = secretKey;
 	}
 
 	public String getRouteName() {
@@ -56,20 +77,28 @@ public class ThirdPartPushMessageCommand {
 		this.msgType = msgType;
 	}
 
-	public String getAppkey() {
-		return appkey;
+	public Long getTimestamp() {
+		return timestamp;
 	}
 
-	public void setAppkey(String appkey) {
-		this.appkey = appkey;
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
 	}
 
-	public String getAppsecret() {
-		return appsecret;
+	public Integer getNonce() {
+		return nonce;
 	}
 
-	public void setAppsecret(String appsecret) {
-		this.appsecret = appsecret;
+	public void setNonce(Integer nonce) {
+		this.nonce = nonce;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public void setSignature(String signature) {
+		this.signature = signature;
 	}
 
 	@Override

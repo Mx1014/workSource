@@ -3,6 +3,7 @@ package com.everhomes.yellowPage;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.common.PrivilegeType;
+import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.yellowPage.*;
 import com.everhomes.rest.yellowPage.stat.ClickStatDTO;
 import com.everhomes.rest.yellowPage.stat.ClickTypeDTO;
@@ -134,4 +135,21 @@ public interface YellowPageService {
 
 	ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd);
 
+	String buildAllianceUrl(Integer namespaceId, ServiceAllianceInstanceConfig config, String pageRealDisplayType);
+	
+	ListOperateServicesResponse listOperateServices(ListOperateServicesCommand cmd);
+
+	void updateOperateServices(UpdateOperateServicesCommand cmd);
+
+	void updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd);
+
+	String processDetailUrl(Long serviceId, String serviceName, String ownerType, Long ownerId);
+
+	boolean isAllianceOffLine(Integer namespaceId);
+
+	String buildEntryUrl(Integer namespaceId, ServiceAllianceInstanceConfig config, String pageRealDisplayType);
+
+	String recoveryListCategoryDataDisappearBug();
+
+	String transferFlowCaseVals();
 }

@@ -3,11 +3,12 @@ package com.everhomes.rest.rentalv2;
 /**
  * 定价类型
  * 1 统一
- * 1 按用户类型
+ * 2 按用户类型
+ * 3 按会员等级
  */
 public enum RentalUserPriceType {
 
-    UNIFICATION((byte)1),USER_TYPE((byte)2);
+    UNIFICATION((byte)1),USER_TYPE((byte)2),VIP_TYPE((byte)3);
     private byte code;
     private RentalUserPriceType(byte code) {
         this.code = code;

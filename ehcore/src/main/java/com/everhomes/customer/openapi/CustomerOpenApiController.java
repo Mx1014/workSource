@@ -11,12 +11,13 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.openapi.CommunityResponse;
-import com.everhomes.rest.customer.openapi.DeleteEnterpriseCommand;
-import com.everhomes.rest.customer.openapi.ListBuildingResponse;
-import com.everhomes.rest.customer.openapi.OpenApiUpdateCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.openapi.*;
 import com.everhomes.rest.organization.pm.PropFamilyDTO;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.SignatureHelper;
 import org.jooq.tools.StringUtils;
@@ -27,9 +28,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/openapi/asset")
@@ -94,7 +97,30 @@ public class CustomerOpenApiController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    /**
+     * <b>URL: /asset/listEnterprises</b>
+     * <p>查看客户列表</p>
+     */
+    @RequestMapping("listEnterprises")
+    @RestReturn(value = SearchEnterpriseCustomerResponse.class)
+    @RequireAuthentication(value = true)
+    public RestResponse listEnterprises(SearchEnterpriseCustomerCommand cmd) {
+        Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+        cmd.setNamespaceId(namespaceId);
+        SearchEnterpriseCustomerResponse customers = enterpriseCustomerSearcher.queryEnterpriseCustomersForOpenAPI(cmd);
 
+        List<EnterpriseDTO> dtos = new ArrayList<>();
+        customers.getDtos().forEach(r ->{
+            dtos.add(ConvertHelper.convert(r,EnterpriseDTO.class));
+        });
+        ListEnterpriseResponse responseDTO = new ListEnterpriseResponse();
+        responseDTO.setResponse(dtos);
+        responseDTO.setNextPageAnchor(customers.getNextPageAnchor());
+        RestResponse response = new RestResponse(responseDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /asset/createEnterprise</b>

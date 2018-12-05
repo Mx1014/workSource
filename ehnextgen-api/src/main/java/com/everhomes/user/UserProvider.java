@@ -191,6 +191,13 @@ public interface UserProvider {
     UserDTO findUserInfoByUserId(Long userId);
 
     /**
+     * 根据手机号查询用户信息
+     * @param namespaceId
+     * @param identifierTokens
+     * @return
+     */
+    List<UserDTO> listUserInfoByIdentifierToken(Integer namespaceId, List<String> identifierTokens);
+    /**
      * 查询该手机号是否已经进行注册
      * @param contactToken
      * @return

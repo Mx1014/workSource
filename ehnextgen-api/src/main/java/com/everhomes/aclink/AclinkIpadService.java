@@ -2,12 +2,7 @@
 package com.everhomes.aclink;
 
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.aclink.CreateLocalIpadCommand;
-import com.everhomes.rest.aclink.CreateLocalIpadResponse;
-import com.everhomes.rest.aclink.ListAclinkServersResponse;
-import com.everhomes.rest.aclink.ListLocalIpadCommand;
-import com.everhomes.rest.aclink.ListLocalIpadResponse;
-import com.everhomes.rest.aclink.UpdateLocalIpadCommand;
+import com.everhomes.rest.aclink.*;
 
 public interface AclinkIpadService {
 
@@ -16,6 +11,8 @@ public interface AclinkIpadService {
 	CreateLocalIpadResponse createLocalIpad(CreateLocalIpadCommand cmd);
 
 	void updateLocalIpad(UpdateLocalIpadCommand cmd);
+
+	void updateIpadLogo(UpdateIpadLogoCommand cmd);
 
 	void deleteLocalIpad(Long id);
 

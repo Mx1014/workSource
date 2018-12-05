@@ -231,7 +231,7 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
             dto.setEndPeriod(rechargeEndTimestamp.getTime());
             dto.setMonthCount(new BigDecimal(2));
             dto.setRateName(parkingLot.getExpiredRechargeMonthCount()+configProvider.getValue("parking.default.rateName","个月"));
-    		dto.setPrice(new BigDecimal(configProvider.getValue("parking.test.prices.month","1")));
+    		dto.setPrice(targetRateDTO.getPrice());
         }
         return dto;
     }

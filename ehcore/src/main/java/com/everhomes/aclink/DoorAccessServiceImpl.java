@@ -1,6 +1,57 @@
 // @formatter:off
 package com.everhomes.aclink;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URLEncoder;
+import java.security.Security;
+import java.sql.Timestamp;
+import java.text.Format;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -8,10 +59,8 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipayLogger;
-import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.request.AlipaySystemOauthTokenRequest;
 import com.alipay.api.request.AlipayUserInfoShareRequest;
-import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.atomikos.util.FastDateFormat;
@@ -66,12 +115,12 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
-import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.openapi.FamilyAddressDTO;
@@ -91,8 +140,6 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
-import com.google.gson.JsonArray;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -116,9 +163,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -168,12 +212,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     private AclinkProvider aclinkProvider;
     
     @Autowired
-    private AesServerKeyProvider aesServerKeyProvider;
-    
-    @Autowired
-    private AclinkMessageSequence aclinkMessageSequence;
-    
-    @Autowired
     private AesUserKeyProvider aesUserKeyProvider;
     
     @Autowired
@@ -187,9 +225,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private UserService userService;
-    
-    @Autowired
-    private ConfigurationProvider  configProvider;
     
     @Autowired
     private MessagingService messagingService;
@@ -280,9 +315,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private AclinkIpadService aclinkIpadService;
+
+    @Autowired
+    private AclinkIpadProvider aclinkIpadProvider;
     
     @Autowired
     private AclinkCameraService aclinkCameraService;
+
+    @Autowired
+    private AclinkCameraProvider aclinkCameraProvider;
     
     @Autowired
     private BusinessService businessService;
@@ -292,7 +333,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     @Autowired
     private ConfigurationProvider configurationProvider;
-
+    
+    @Autowired
+    private AclinkMessageSequence aclinkMessageSequence;
+    
     AlipayClient alipayClient;
     
     final Pattern npattern = Pattern.compile("\\d+");
@@ -418,7 +462,62 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
-    
+
+    @Override
+    public void sendMessageToAuthCreator(Long authId){
+        DoorAuth auth = doorAuthProvider.getDoorAuthById(authId);
+        AclinkFormValues notice = new AclinkFormValues();
+        notice = doorAccessProvider.findAclinkFormValues(auth.getId(), (byte)5, AclinkFormValuesType.VISITOR_NOTICE.getCode());
+
+        if(notice == null || notice.getStatus() == (byte)0){
+            return;
+        }
+            User creator = userProvider.findUserById(auth.getApproveUserId());
+            String visitorName = auth.getNickname();
+            DoorAccess door = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+
+            if(creator == null || visitorName == null || door == null){
+                return;
+            }
+            sendMessageToAuthCreator(creator, visitorName, door);
+        }
+        private void sendMessageToAuthCreator(User creator, String visitorName,DoorAccess door){
+        String locale = creator.getLocale();
+        Map<String, Object> map = new HashMap<String, Object>();
+//        String visitorName = visitor.getNickName();
+//        if(visitorName == null || visitorName.isEmpty()) {
+//            visitorName = visitor.getAccountName();
+//        }
+        map.put("visitorName", visitorName);
+
+        map.put("doorName", door.getDisplayNameNotEmpty());
+
+        String scope = AclinkNotificationTemplateCode.SCOPE;
+        int code = AclinkNotificationTemplateCode.ACLINK_VISITOR_COMING;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//          String notifyTextForApplicant = "ceshi";
+        Map<String, String> meta =  new HashMap<String, String>();
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "门禁进入提醒");
+        sendMessageToAuthCreator(creator.getId(),notifyTextForApplicant,meta);
+    }
+
+    private void sendMessageToAuthCreator(Long creatorId, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), creatorId.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_ACLINK);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+        }
+        LOGGER.debug("messageDTO : {}", messageDto);
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                creatorId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+
     @Override
     public void sendMessageToUser(Long uid, Long doorId, Byte doorType) {
         User user = userProvider.findUserById(uid);
@@ -478,12 +577,23 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         locator.setAnchor(cmd.getPageAnchor());
 //        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListDoorAccessResponse resp = new ListDoorAccessResponse();
-        
-        List<DoorAccessDTO> dtos = doorAccessProvider.searchDoorAccessDTO(locator, cmd);
+        List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
+        //查找得到管理授权门禁 add by liqingyan
+        List<AclinkManagementDTO> managements = doorAccessProvider.searchAclinkManagementByManager(cmd.getOwnerId(),cmd.getOwnerType());
+        List<Long> doorIds = new ArrayList<>();
+        if(null != managements && !managements.isEmpty()){
+            for(AclinkManagementDTO management: managements){
+                if(null != management && management.getDoorId() != null){
+                    doorIds.add(management.getDoorId());
+                }
+            }
+        }
+        dtos = doorAccessProvider.searchDoorAccessDTO(locator, cmd, doorIds);
         if(dtos == null || dtos.size() == 0){
             resp.setDoors(dtos);
         	return resp;
         }
+        //TODO:只拥有管理权限的门禁添加人显示下放管理权限者的名字
         for(DoorAccessDTO dto : dtos) {
             Long rv = getDoorAccessLastTick(ConvertHelper.convert(dto, DoorAccess.class));
             
@@ -553,14 +663,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         ListDoorAccessResponse resp = new ListDoorAccessResponse();
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         DoorAccessOwnerType typ = DoorAccessOwnerType.fromCode(cmd.getOwnerType()); 
         resp.setDoors(this.listDoorAccessByOwnerId(locator, cmd.getOwnerId(), typ, count));
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
     
-    @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
     public AclinkUserResponse listAclinkUsers(ListAclinkUserCommand cmd) {
         //添加权限 add by liqingyan
 //        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
@@ -569,7 +680,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041111L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
@@ -589,7 +700,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     	List<GroupMember> groupMembers = new ArrayList<GroupMember>();
         if(!StringUtils.isEmpty(cmd.getKeyword())){
-            users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
+            //users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
+            //广州越空间，keyword按用户昵称，电话或真实姓名查找
+            users = userProvider.listUsers(locator, pageSize, new ListingQueryBuilderCallback(){
+                @Override
+                public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                    Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + cmd.getKeyword()+ "%");
+                    cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeyword() + "%"));
+                    cond = cond.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getKeyword() + "%"));
+                    cond = cond.and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+                    query.addConditions(cond);
+                    return query;
+                }
+            });
         }else if(null != cmd.getOrganizationId()){
             users = doorAuthProvider.listDoorAuthByOrganizationId(cmd.getOrganizationId(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize);
         } else if(null != cmd.getCommunityId() && !StringUtils.isEmpty(cmd.getBuildingName())) {
@@ -610,12 +733,25 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         List<AclinkUserDTO> userDTOs = new ArrayList<>();
 
+		HashSet h = new HashSet();   
         for (User user: users) {
+        	//userProvider.listUserByNamespace,根据关键字同一用户会查出来多次,简单去重,暂不考虑分页  by liuyilin 20181107
+        	if(h.contains(user.getId())){
+        		continue;
+        	}
+        	h.add(user.getId());
             List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
             AclinkUserDTO dto = ConvertHelper.convert(user, AclinkUserDTO.class);
             dto.setRegisterTime(user.getCreateTime().getTime());
             if(null != organizationDTOs && organizationDTOs.size() > 0){
                 OrganizationSimpleDTO organization =  organizationDTOs.get(0);
+                if(cmd.getOrganizationId() != null){
+                	try{
+                		organization = organizationDTOs.stream().filter(r -> cmd.getOrganizationId().equals(r.getId())).findFirst().get();
+                	}catch (Exception e) {
+						LOGGER.warn(String.format("user{%d} has no org with cmdOrganizationId{%d}", user.getId(),cmd.getOrganizationId()));
+					}
+                }
                 dto.setUserName(organization.getContactName());
                 dto.setCompany(organization.getName());
                 dto.setCompanyId(organization.getId());
@@ -713,11 +849,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
     }
-//add by liqingyan 日志导出
+
     @Override
-    public void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse){
+    public void exportTempAuthXls(SearchDoorAuthCommand cmd, HttpServletResponse httpResponse){
         ByteArrayOutputStream output = null;
-        XSSFWorkbook wb = this.createLogsXSSFWorkbook(cmd);
+        XSSFWorkbook wb = this.createTempAuthXSSFWorkbook(cmd);
         try {
             output = new ByteArrayOutputStream();
             wb.write(output);
@@ -733,7 +869,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
     }
-
 
 
     /**
@@ -861,23 +996,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         return wb;
     }
-//add by liqingyan 待翻译
+    
     /**
-     * 创建导出日志excel
+     * 创建导出授权记录excel
      * @param cmd
      * @return
      */
-    private XSSFWorkbook createLogsXSSFWorkbook(AclinkQueryLogCommand cmd){
-        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-
+    private XSSFWorkbook createTempAuthXSSFWorkbook(SearchDoorAuthCommand cmd){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         XSSFWorkbook wb = new XSSFWorkbook();
-        String sheetName = "门禁日志列表";
+        String sheetName = "临时授权列表";
         XSSFSheet sheet = wb.createSheet(sheetName);
         XSSFCellStyle style = wb.createCellStyle();// 样式对象
         Font font = wb.createFont();
         font.setFontHeightInPoints((short)20);
         font.setFontName("Courier New");
-
         style.setFont(font);
 
         XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
@@ -889,32 +1022,32 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         XSSFRow row1 = sheet.createRow(rowNum ++);
         row1.setRowStyle(style);
         int cellN = 0;
-        row1.createCell(cellN ++).setCellValue("姓名");
-        row1.createCell(cellN ++).setCellValue("手机号码");
-        row1.createCell(cellN ++).setCellValue("门禁名称");
-        row1.createCell(cellN ++).setCellValue("授权类型");
-        row1.createCell(cellN ++).setCellValue("开门方式");
-        row1.createCell(cellN ++).setCellValue("开门时间");
 
+        row1.createCell(cellN ++).setCellValue("被授权人");
+        row1.createCell(cellN ++).setCellValue("手机号码");
+        row1.createCell(cellN ++).setCellValue("授权门禁");
+        row1.createCell(cellN ++).setCellValue("创建时间");
+        row1.createCell(cellN ++).setCellValue("创建者");
+        row1.createCell(cellN ++).setCellValue("授权状态");
         cmd.setPageSize(1000);
         while (true){
-            AclinkQueryLogResponse userRes = this.queryLogs(cmd);
-            for (AclinkLogDTO user: userRes.getDtos()) {
+            ListDoorAuthResponse resp = this.listTempAuth(cmd);
+            for (DoorAuthDTO auth: resp.getDtos()) {
                 cellN = 0;
                 XSSFRow row = sheet.createRow(rowNum ++);
                 row.setRowStyle(style);
-                row.createCell(cellN ++).setCellValue(user.getUserName());
-                row.createCell(cellN ++).setCellValue(user.getUserIdentifier());
-                row.createCell(cellN ++).setCellValue(user.getDoorName());
-                row.createCell(cellN ++).setCellValue(user.getAuthType() > 0 ? "常规授权" : "临时授权");
-                row.createCell(cellN ++).setCellValue(user.getEventType().equals(0L) ? "蓝牙开门": equals(1L)? "二维码开门": equals(2L)? "远程开门":equals(3L)? "人脸开门":"");
-                row.createCell(cellN ++).setCellValue(DateUtil.dateToStr(new Date(user.getLogTime()), DateUtil.DATE_TIME_LINE));
+                row.createCell(cellN ++).setCellValue(auth.getUserName());
+                row.createCell(cellN ++).setCellValue(auth.getPhone());
+                row.createCell(cellN ++).setCellValue(auth.getDoorName());
+                row.createCell(cellN ++).setCellValue(DateUtil.dateToStr(auth.getCreateTime(), DateUtil.DATE_TIME));
+                row.createCell(cellN ++).setCellValue(auth.getApproveUserName());
+                row.createCell(cellN ++).setCellValue(auth.getStatus().equals((byte)1) ? "有效":"已失效");
             }
 
-            if(null == userRes.getNextPageAnchor()){
+            if(null == resp.getNextPageAnchor()){
                 break;
             }
-            cmd.setPageAnchor(userRes.getNextPageAnchor());
+            cmd.setPageAnchor(resp.getNextPageAnchor());
         }
 
         return wb;
@@ -968,7 +1101,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListDoorAuthLogResponse listDoorAuthLogs(ListDoorAuthLogCommand cmd){
         ListDoorAuthLogResponse res = new ListDoorAuthLogResponse();
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<DoorAuthLogDTO> dtos = new ArrayList<>();
@@ -1067,6 +1200,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
 
         DoorAuth doorAuth = ConvertHelper.convert(cmd, DoorAuth.class);
+        doorAuth.setNamespaceId(UserContext.getCurrentNamespaceId());
         DoorAuthDTO rlt = null;
         
         if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
@@ -1128,10 +1262,28 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     }
                     
                     if(custom.getPhones() != null && custom.getPhones().size() > 0) {
-                        doorAuth.setPhone(custom.getPhones().get(0));    
+                        doorAuth.setPhone(custom.getPhones().get(0));   
+                        doorAuth.setNickname(getRealName(ConvertHelper.convert(custom, User.class)));
                         }
                     
-                    doorAuthProvider.createDoorAuth(doorAuth);
+                    Long authId = doorAuthProvider.createDoorAuth(doorAuth);
+                    //访客来访消息提醒
+                    User user = UserContext.current().getUser();
+                    Integer namespaceId = UserContext.getCurrentNamespaceId();
+                    if(null!= cmd.getNotice() && cmd.getNotice() == (byte)1){
+                        AclinkFormValues notice = new AclinkFormValues();
+                        notice.setNamespaceId(namespaceId);
+                        notice.setTitleId(0L);
+                        notice.setValue("notice");
+                        notice.setType(AclinkFormValuesType.VISITOR_NOTICE.getCode());
+                        notice.setStatus((byte)1);
+                        //表单记录ownerId对应授权Id
+                        notice.setOwnerId(authId);
+                        notice.setOwnerType((byte)5);
+                        notice.setCreatorUid(user.getId());
+                        notice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        doorAccessProvider.createAclinkFormValues(notice);
+                    }
                     //by liuyilin 20180502 同步信息到内网服务器
                     if(doorAcc.getLocalServerId() != null){
                     	SyncLocalPhotoByUserIdCommand syncCmd = new SyncLocalPhotoByUserIdCommand();
@@ -1165,6 +1317,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAuth.setDriver(DoorAccessDriverType.LINGLING.getCode());  
             } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
         			doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
+            } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_UCLBRT_DOOR.getCode())) {
+        		doorAuth.setDriver(DoorAccessDriverType.UCLBRT.getCode());
             } else {
                 doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
             }
@@ -1319,22 +1473,34 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     
     @Override
-    public Long deleteDoorAccess(Long doorAccessId) {
+    public Long deleteDoorAccess(AclinkDeleteByIdCommand cmd) {
         DoorAccess doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
             @Override
             public DoorAccess doInTransaction(TransactionStatus arg0) {
-                DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(doorAccessId);
+                DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(cmd.getId());
                 
                 //delete childs
-                List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccessId, 20);
+                List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(cmd.getId(), 20);
                 if(childs != null && childs.size() > 0) {
                     for(DoorAccess dc : childs) {
+                        //若有管理授权则不能删除
+                        List<AclinkManagementDTO> management = new ArrayList<>();
+                        management = doorAccessProvider.searchAclinkManagementByDoorId(dc.getId());
+                        if(null == management || management.isEmpty()){
+                            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_MANAGER_EXIST, "Manager exist");
+                        }
                         dc.setStatus(DoorAccessStatus.INVALID.getCode());
                         doorAccessProvider.updateDoorAccess(doorAcc);
                     }
                 }
                 
                 if(doorAcc != null) {
+                    //若有管理授权则不能删除
+                    List<AclinkManagementDTO> management = new ArrayList<>();
+                    management = doorAccessProvider.searchAclinkManagementByDoorId(doorAcc.getId());
+                    if(null != management && !management.isEmpty()){
+                        throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_MANAGER_EXIST, "Manager exist");
+                    }
                     doorAcc.setStatus(DoorAccessStatus.INVALID.getCode());
                     doorAccessProvider.updateDoorAccess(doorAcc);
                     return doorAcc;
@@ -1561,9 +1727,23 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAcc.setDisplayName(cmd.getDisplayName());
                 doorAcc.setNamespaceId(UserContext.getCurrentNamespaceId());
                 //激活时设置默认值 by liuyilin 20181101
-                //TODO 门禁3.0实现默认配置后,拿默认配置
+                //拿默认配置 by liqingyan 20181112
+
                 doorAcc.setEnableDuration(DoorAuthStatus.VALID.getCode());
-                doorAcc.setMaxDuration(60);
+                AclinkFormValues maxDuration = new AclinkFormValues();
+                maxDuration = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_DURATION.getCode());
+                AclinkFormValues maxCount = new AclinkFormValues();
+                maxCount = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_COUNT.getCode());
+                if(null != maxDuration && !maxDuration.getValue().isEmpty()){
+                    doorAcc.setMaxDuration(Integer.parseInt(maxDuration.getValue()));
+                }else {
+                    doorAcc.setMaxDuration(60);
+                }
+                if(null != maxCount && !maxCount.getValue().isEmpty()){
+                    doorAcc.setMaxCount(Integer.parseInt(maxCount.getValue()));
+                }else {
+                    doorAcc.setMaxCount(4);
+                }
                 doorAccessProvider.createDoorAccess(doorAcc);
                 
                 OwnerDoor ownerDoor = new OwnerDoor();
@@ -1666,6 +1846,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     doorAuth.setValidFromMs(System.currentTimeMillis() -  60*1000);
                     doorAuth.setValidEndMs(System.currentTimeMillis()+ getQrTimeout());
                     doorAuth.setUserId(user.getId());
+                    doorAuth.setPhone(user.getIdentifierToken());
                     doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
                     UserIdentifier ui = userProvider.findIdentifierById(user.getId());
                     if(ui != null) {
@@ -1690,7 +1871,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         aesUserKey.setKeyType(AesUserKeyType.TEMP.getCode());
                             }
                     aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
-                    aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), doorAuth.getValidEndMs()));
+                    aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getId(), aesUserKey.getKeyId(), doorAuth.getValidEndMs()));
                     aesUserKeyProvider.createAesUserKey(aesUserKey);
                     
                     //create device name command
@@ -1884,8 +2065,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     	ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
     	User user = UserContext.current().getUser();
 		
-    	ListAuthsByLevelandLocationCommand qryCmd = getLevelQryCmdByUser(user);
-		qryCmd.setDriver(DoorAccessDriverType.ZUOLIN.getCode());        
+//    	ListAuthsByLevelandLocationCommand qryCmd = getLevelQryCmdByUser(user);
+//		qryCmd.setDriver(DoorAccessDriverType.ZUOLIN.getCode());        
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         //避免现网客户端反复取数据,锚点传0就取全部,不返回下一页锚点,待下一版客户端修复后删掉即可  by liuyilin 20180608
@@ -1897,7 +2078,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         //1.临时授权也要用蓝牙
         //2.listAesUserKey这个接口只用支持DoorAccessDriverType是左邻的门禁
         //by liuyilin 20180906
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, qryCmd, cmd.getPageSize() != null && cmd.getPageSize() >0 ?cmd.getPageSize() + 1 : 0));
+//        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, qryCmd, cmd.getPageSize() != null && cmd.getPageSize() >0 ?cmd.getPageSize() + 1 : 0));
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuths(locator, user.getId(), null, null, 0));
+
         //TODO when the key is invalid, MUST invalid it and generate a command.
         List<AesUserKey> aesUserKeys = new ArrayList<AesUserKey>();
         for(DoorAuth auth : auths) {
@@ -2077,12 +2260,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		
 		aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
 		aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
-    	aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), aesUserKey.getExpireTimeMs()));
+    	aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getId(), aesUserKey.getKeyId(), aesUserKey.getExpireTimeMs()));
     	return aesUserKey;
     }
     
     private AesUserKey generateAesUserKey(User user, DoorAuth doorAuth) {
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
+        if(doorAccess == null){
+        	LOGGER.info(doorAuth.toString());
+        	return null;
+        }
         if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
             //The door is delete, set it to invalid
             doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
@@ -2124,7 +2311,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     
                     aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
                     aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
-                    aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), userId, aesUserKey.getKeyId(), aesUserKey.getExpireTimeMs()));
+                    aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getId(), aesUserKey.getKeyId(), aesUserKey.getExpireTimeMs()));
                     aesUserKeyProvider.createAesUserKey(aesUserKey);
                     }
                 return aesUserKey;
@@ -2209,7 +2396,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListDoorAuthResponse resp = new ListDoorAuthResponse();
         
         List<DoorAuth> auths = doorAuthProvider.queryDoorAuthByApproveId(locator, user.getId(), count);
@@ -2247,7 +2434,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public ListDoorAuthResponse searchDoorAuth(SearchDoorAuthCommand cmd) {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListDoorAuthResponse resp = new ListDoorAuthResponse();
         
         List<DoorAuth> auths = doorAuthProvider.searchDoorAuthByAdmin(locator, cmd.getDoorId(), cmd.getKeyword(), cmd.getStatus(), count);
@@ -2273,7 +2460,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public ListDoorAuthResponse searchVisitorDoorAuth(SearchDoorAuthCommand cmd) {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListDoorAuthResponse resp = new ListDoorAuthResponse();
         
         List<DoorAuth> auths = doorAuthProvider.searchVisitorDoorAuthByAdmin(locator, cmd, count);
@@ -2308,14 +2495,23 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public ListDoorAuthResponse listTempAuth (SearchDoorAuthCommand cmd) {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListDoorAuthResponse resp = new ListDoorAuthResponse();
         List<DoorAuth> auths = doorAuthProvider.searchTempAuthByAdmin(locator, cmd, count);
         List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
         long now = DateHelper.currentGMTTime().getTime();
         for(DoorAuth auth : auths) {
-            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+            if(null == cmd.getGroupType()|| cmd.getGroupType()==(byte)1){
+                DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+                dto.setHardwareId(doorAccess.getHardwareId());
+                dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
+            }
+            if(null != cmd.getGroupType() && cmd.getGroupType()==(byte)2){
+                AclinkGroup group = doorAccessProvider.findAclinkGroupById(auth.getDoorId());
+                dto.setDoorName(group.getName());
+
+            }
             //查询人脸识别照片
             FaceRecognitionPhoto photo = faceRecognitionPhotoProvider.findPhotoByAuthId(auth.getId());
             if(photo != null) {
@@ -2327,19 +2523,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
             //查询自定义表单
             List<AclinkFormValuesDTO> values = doorAccessProvider.findAclinkFormValuesByAuthId(auth.getId());
-            dto.setValues(values);
             List<AclinkFormTitlesDTO> titles = new ArrayList<AclinkFormTitlesDTO>();
             if(null != values && !values.isEmpty()){
                 for(AclinkFormValuesDTO value:values){
                     if(value.getTitleId() != null){
                         AclinkFormTitles title = doorAccessProvider.findAclinkFormTitlesById(value.getTitleId());
+                        value.setTitleName(title.getName());
                         titles.add(ConvertHelper.convert(title, AclinkFormTitlesDTO.class));
                     }
                 }
             }
+            dto.setValues(values);
+//            dto.setTitles(titles);
             dto.setGoFloor(auth.getCurrStorey());
-            dto.setHardwareId(doorAccess.getHardwareId());
-            dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
             dto.setPhone(auth.getPhone());
             dto.setOrganization(auth.getOrganization());
             User u = userProvider.findUserById(auth.getApproveUserId());
@@ -2426,7 +2622,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public DoorAccess onDoorAccessConnecting(AclinkConnectingCommand cmd) {
         DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByUuid(cmd.getUuid());
         if(doorAccess == null) {
-            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+//            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        	LOGGER.error(String.format("can not find door with uuid{%s}", cmd.getUuid()));
+        	return null;
         }
         
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
@@ -2539,25 +2737,25 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         	cmd.setNamespaceId(UserContext.getCurrentNamespaceId(null));
         }
         
-        dto.setQrDriver(this.configProvider.getValue(cmd.getNamespaceId(), AclinkConstant.ACLINK_DRIVER_TYPE, DoorAccessDriverType.ZUOLIN.getCode()));
-        dto.setQrDriverExt(this.configProvider.getValue(cmd.getNamespaceId(), AclinkConstant.ACLINK_QR_DRIVER_EXT, DoorAccessDriverType.ZUOLIN.getCode()));
+        dto.setQrDriver(this.configurationProvider.getValue(cmd.getNamespaceId(), AclinkConstant.ACLINK_DRIVER_TYPE, DoorAccessDriverType.ZUOLIN.getCode()));
+        dto.setQrDriverExt(this.configurationProvider.getValue(cmd.getNamespaceId(), AclinkConstant.ACLINK_QR_DRIVER_EXT, DoorAccessDriverType.ZUOLIN.getCode()));
         dto.setSmartDriver(DoorAccessDriverType.ZUOLIN.getCode());
         
         return dto;
     }
     
     private DoorAccessDriverType getQrDriverType(Integer namespaceId) {
-        String t = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_DRIVER_TYPE, DoorAccessDriverType.ZUOLIN.getCode());
+        String t = this.configurationProvider.getValue(namespaceId, AclinkConstant.ACLINK_DRIVER_TYPE, DoorAccessDriverType.ZUOLIN.getCode());
         return DoorAccessDriverType.fromCode(t);
     }
     
     private DoorAccessDriverType getQrDriverExt(Integer namespaceId) {
-        String t = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_QR_DRIVER_EXT, DoorAccessDriverType.ZUOLIN.getCode());
+        String t = this.configurationProvider.getValue(namespaceId, AclinkConstant.ACLINK_QR_DRIVER_EXT, DoorAccessDriverType.ZUOLIN.getCode());
         return DoorAccessDriverType.fromCode(t);
     }
     
     private DoorAccessDriverType getQrDriverZuolinInner(Integer namespaceId) {
-        String t = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_QR_DRIVER_ZUOLIN_INNER, DoorAccessDriverType.ZUOLIN.getCode());
+        String t = this.configurationProvider.getValue(namespaceId, AclinkConstant.ACLINK_QR_DRIVER_ZUOLIN_INNER, DoorAccessDriverType.ZUOLIN.getCode());
         return DoorAccessDriverType.fromCode(t);
     }
     
@@ -2798,7 +2996,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setDoorOwnerId(doorAccess.getOwnerId());
         qr.setDoorOwnerType(doorAccess.getOwnerType());
         
-        Long qrImageTimeout = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 1*60);
+        Long qrImageTimeout = this.configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 1*60);
         qr.setQrImageTimeout(qrImageTimeout*1000l);
         
         qr.setQrCodeKey(aesUserKey.getSecret());
@@ -2820,7 +3018,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setDoorGroupId(doorAccess.getId());
         qr.setDoorName(doorAccess.getName());
         qr.setDoorDisplayName(doorAccess.getDisplayNameNotEmpty());
-        qr.setExpireTimeMs(auth.getKeyValidTime());
+		qr.setExpireTimeMs(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) ? 0 : auth.getValidEndMs());	
         qr.setId(auth.getId());
         qr.setQrDriver(DoorAccessDriverType.UCLBRT.getCode());
         qr.setDoorOwnerId(doorAccess.getOwnerId());
@@ -2829,7 +3027,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(null !=ca){
         	UclbrtParamsDTO paramsDTO = JSON.parseObject(ca.getUclbrtParams(), UclbrtParamsDTO.class); 
         	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
-        	qr.setQrCodeKey(uclbrtHttpClient.getQrCode(paramsDTO, userIdentifier.getIdentifierToken()));
+        	qr.setQrCodeKey(uclbrtHttpClient.getQrCode(paramsDTO, auth.getPhone(), qr.getExpireTimeMs()));
         	if(null != qr.getQrCodeKey()){
         		qrKeys.add(qr);
         	}
@@ -2892,11 +3090,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ListDoorAccessQRKeyResponse resp = new ListDoorAccessQRKeyResponse();
         List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
         resp.setKeys(qrKeys);
-        resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
+        resp.setQrIntro(this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
 
         Long t2 = DateHelper.currentGMTTime().getTime();
         LOGGER.info("auths 获取 "+(t2-t1));
         for(DoorAuth auth : auths) {
+//            TODO: 按门禁组授权查找门禁
+//            if(auth.getGroupType() != (byte)2){
+//                return resp;
+//            }
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
                 //The door is delete, set it to invalid
@@ -2905,64 +3107,60 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 continue;
             }
             
-            //没有二维码读头的门禁不返回二维码,by liuyilin 20180529
-            if(doorAccess.getHasQr() != (byte) 1){
-            	continue;
-            }
-            
-            
-            if(auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
-            	//Forever + true of rightOpen
-                if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
-                    continue;
-                }
-                //这个时间才是有效的二维码超时时间， dto 里面的时间是为了兼容过去的 app 版本。
-            	resp.setQrTimeout(this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_TIMEOUTS, 4*24*60));
-                doLinglingQRKey(user, doorAccess, auth, qrKeys);
-            } else if(DoorAccessDriverType.UCLBRT == DoorAccessDriverType.fromCode(auth.getDriver())){
-            	//锁管家是由app远程请求获取二维码的,这里给他组装存在aclinks表里的参数就行
-            	//added by wh
-            	Long t3 = DateHelper.currentGMTTime().getTime();
-                if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
-                    continue;
-                }
-                doUclbrtQRKey(user, doorAccess, auth, qrKeys);
+            			// 没有二维码读头或者没开门权限的门禁不返回二维码,by liuyilin 20180529
+			if (!(doorAccess.getHasQr().equals((byte) 1) && auth.getRightOpen().equals((byte) 1))) {
+				continue;
+			}
 
-                Long t4 = DateHelper.currentGMTTime().getTime();
+			if (!auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+				Long now = DateHelper.currentGMTTime().getTime();
+				if (auth.getValidEndMs() < now) {
+					// 已经失效，删除它
+					auth.setStatus(DoorAuthStatus.INVALID.getCode());
+					doorAuthProvider.updateDoorAuth(auth);
+					continue;
+				}
 
-                LOGGER.info("拿一个uclbrt 的二维码"+(t4-t3));
-            } else if(auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())){
-            	//Forever + true of rightOpen
-                if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
-                    continue;
-                }
-                
-            	doHuarunQRKey(user, doorAccess, auth, qrKeys);
-            } else {
-            	
-            	//rightOpen and more
-            	if(!auth.getRightOpen().equals((byte)1)) {
-            		continue;
-            		}
-            	if(!auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
-            		Long now = DateHelper.currentGMTTime().getTime();
-            		if(auth.getValidEndMs() < now) {
-            			//已经失效，删除它
-                    auth.setStatus(DoorAuthStatus.INVALID.getCode());
-                    doorAuthProvider.updateDoorAuth(auth);
-                    continue;
-                    }
-            		
-            		if(auth.getValidFromMs() > now) {
-            			continue;
-            		}
-            	}
-            	resp.setQrTimeout(this.getQrTimeout()/1000l);
-//            	resp.setQrIntro("http://xxxx.com");
-                doZuolinQRKey(generate, user, doorAccess, auth, qrKeys);
-                }
-           
-            }
+				// 未到时间不显示
+				if (auth.getValidFromMs() > now) {
+					continue;
+				}
+			}
+
+			if (auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
+				// Forever + true of rightOpen
+				if (!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())	&& auth.getRightOpen().equals((byte) 1))) {
+					continue;
+				}
+				// 这个时间才是有效的二维码超时时间， dto 里面的时间是为了兼容过去的 app 版本。
+				resp.setQrTimeout(this.configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(),	AclinkConstant.ACLINK_QR_TIMEOUTS, 4 * 24 * 60));
+				doLinglingQRKey(user, doorAccess, auth, qrKeys);
+			} else if (auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())) {
+				// Forever + true of rightOpen
+				if (!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())	&& auth.getRightOpen().equals((byte) 1))) {
+					continue;
+				}
+
+				doHuarunQRKey(user, doorAccess, auth, qrKeys);
+			} else if (DoorAccessDriverType.UCLBRT == DoorAccessDriverType.fromCode(auth.getDriver())) {
+				// 锁管家是由app远程请求获取二维码的,这里给他组装存在aclinks表里的参数就行
+				// added by wh
+				Long t3 = DateHelper.currentGMTTime().getTime();
+				if (!auth.getRightOpen().equals((byte) 1)) {
+					continue;
+				}
+				doUclbrtQRKey(user, doorAccess, auth, qrKeys);
+
+				Long t4 = DateHelper.currentGMTTime().getTime();
+
+				LOGGER.info("拿一个uclbrt 的二维码" + (t4 - t3));
+			} else {
+				//左邻门禁
+				resp.setQrTimeout(this.getQrTimeout() / 1000l);
+				doZuolinQRKey(generate, user, doorAccess, auth, qrKeys);
+			}
+
+		}
         LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0)); 
         if (resp.getKeys() == null || resp.getKeys().size() ==0 ){
         	LOGGER.info(String.format("user{%d} has no valid auth,phone:%d",user.getId(),user.getIdentityNumberTag()));
@@ -3335,24 +3533,123 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     private DoorAuthDTO createZuolinDeviceQr(CreateDoorVisitorCommand cmd) {
         User user = UserContext.current().getUser();
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-        DoorAuth auth = createZuolinQrAuth(user, doorAccess, cmd);
+        DoorAuth auth = new DoorAuth();
+        //门禁3.0区分门禁、门禁组
+        if(null == cmd.getGroupType() || cmd.getGroupType() != (byte)2) {
+            auth = createZuolinQrAuth(user, doorAccess, cmd);
+        }
+        if(null != cmd.getGroupType() && cmd.getGroupType() == (byte)2){
+            AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getDoorId());
+            auth = createZuolinGroupQrAuth(user,group, cmd);
+        }
         String nickName = getRealName(user);
-        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
 
         LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
         		SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
 
-        if(lt != null && lt.getDescription().indexOf("{link}") >= 0) {
+        if(lt != null && lt.getText().indexOf("{link}") >= 0) {
         	smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
         }
 
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
         String templateLocale = user.getLocale();
         smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
-
+        //访客来访消息提醒
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if(null!= cmd.getNotice() && cmd.getNotice() == (byte)1){
+            AclinkFormValues notice = new AclinkFormValues();
+            notice.setNamespaceId(namespaceId);
+            notice.setTitleId(0L);
+            notice.setValue("notice");
+            notice.setType(AclinkFormValuesType.VISITOR_NOTICE.getCode());
+            notice.setStatus((byte)1);
+            //表单记录ownerId对应授权Id
+            notice.setOwnerId(auth.getId());
+            notice.setOwnerType((byte)5);
+            notice.setCreatorUid(user.getId());
+            notice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            doorAccessProvider.createAclinkFormValues(notice);
+        }
         return ConvertHelper.convert(auth, DoorAuthDTO.class);
+    }
+
+    private DoorAuth createZuolinGroupQrAuth(User user, AclinkGroup group, CreateDoorVisitorCommand cmd){
+        if(null == group && group.getStatus() != 1){
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+        }
+        String uuid = UUID.randomUUID().toString();
+        uuid = uuid.replace("-", "");
+        uuid = uuid.substring(0, 5);
+
+        DoorAuth auth = new DoorAuth();
+        auth.setApplyUserName(cmd.getUserName());
+        auth.setApproveUserId(user.getId());
+        auth.setAuthType(DoorAuthType.ZUOLIN_VISITOR.getCode());
+        auth.setDescription(cmd.getDescription());
+        auth.setDoorId(cmd.getDoorId());
+        auth.setGroupType(cmd.getGroupType());
+        auth.setDriver(this.getQrDriverZuolinInner(cmd.getNamespaceId()).getCode());
+        auth.setOrganization(cmd.getOrganization());
+        auth.setPhone(cmd.getPhone());
+        auth.setNickname(cmd.getUserName());
+        auth.setLinglingUuid(uuid);
+        auth.setCurrStorey(cmd.getDoorNumber());
+        auth.setRightOpen((byte) 1);
+        invalidVistorAuth(cmd.getDoorId(), cmd.getPhone(), cmd.getGroupType());
+        if (cmd.getAuthRuleType() != null && cmd.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())) {
+            //TODO 访客授权,将以前的授权失效
+
+            auth.setAuthRuleType(cmd.getAuthRuleType());
+            auth.setTotalAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
+            auth.setValidAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
+            auth.setValidFromMs(cmd.getValidFromMs() == null ? System.currentTimeMillis() : cmd.getValidFromMs());
+            auth.setKeyValidTime(cmd.getValidFromMs() == null ? System.currentTimeMillis() : cmd.getValidFromMs());
+            if(cmd.getValidEndMs() == null){
+                auth.setValidEndMs(auth.getValidFromMs() + KEY_TICK_7_DAY);
+            }else{
+                auth.setValidEndMs(cmd.getValidEndMs());
+            }
+            auth.setRightRemote((byte) 1);
+        } else {
+            auth.setAuthRuleType(DoorAuthRuleType.DURATION.getCode());
+            if (cmd.getValidFromMs() == null) {
+                auth.setValidFromMs(System.currentTimeMillis());
+            } else {
+                auth.setValidFromMs(cmd.getValidFromMs());
+            }
+
+            if (cmd.getValidEndMs() == null) {
+                auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+                auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+            } else {
+                auth.setKeyValidTime(cmd.getValidEndMs());
+                auth.setValidEndMs(cmd.getValidEndMs());
+            }
+        }
+        auth.setUserId(0l);
+        auth.setOwnerType(group.getOwnerType());
+        auth.setOwnerId(group.getOwnerId());
+        auth.setStatus(DoorAuthStatus.VALID.getCode());
+        auth.setAuthMethod(cmd.getAuthMethod());
+        doorAuthProvider.createDoorAuth(auth);
+//      TODO:根据门禁组修改
+//        AesUserKey aesUserKey = generateAesUserKey(user, auth);
+//        if(aesUserKey == null) {
+//            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "DoorAccess user key error");
+//        }
+//        auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
+//        String resultStr;
+//        if(auth.getAuthRuleType() != null && auth.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())){
+//            resultStr = createZuolinQrByCount(auth.getId());
+//        }else{
+//            resultStr = createZuolinQrV1(aesUserKey.getSecret());
+//        }
+//        auth.setQrKey(resultStr);
+        doorAuthProvider.updateDoorAuth(auth);
+        return auth;
     }
 
     private DoorAuth createZuolinQrAuth(User user, DoorAccess doorAccess, CreateDoorVisitorCommand cmd){
@@ -3376,18 +3673,25 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setAuthType(DoorAuthType.ZUOLIN_VISITOR.getCode());
         auth.setDescription(cmd.getDescription());
         auth.setDoorId(cmd.getDoorId());
-        auth.setDriver(this.getQrDriverZuolinInner(cmd.getNamespaceId()).getCode());
+        auth.setGroupType(cmd.getGroupType());
+        //二维码类型(0 静态 zuolin；1 动态 zuolin_v2
+        if(null != cmd.getQrType() && cmd.getQrType() == (byte)0) {
+            auth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
+            }
+        else if(null != cmd.getQrType() && cmd.getQrType() == (byte)1){
+            auth.setDriver(DoorAccessDriverType.ZUOLIN_V2.getCode());
+        }else{
+            auth.setDriver(this.getQrDriverZuolinInner(cmd.getNamespaceId()).getCode());
+        }
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
         auth.setLinglingUuid(uuid);
         auth.setCurrStorey(cmd.getDoorNumber());
         auth.setRightOpen((byte) 1);
-        
+        invalidVistorAuth(cmd.getDoorId(), cmd.getPhone(),cmd.getGroupType());
         //按次开门只适用于左邻门禁 by liuyilin 20180509
 		if (cmd.getAuthRuleType() != null && cmd.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())) {
-			//TODO 访客授权,将以前的授权失效
-			invalidVistorAuth(cmd.getDoorId(), cmd.getPhone());
 			auth.setAuthRuleType(cmd.getAuthRuleType());
 			auth.setTotalAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
 			auth.setValidAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
@@ -3500,7 +3804,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         doorAuthProvider.createDoorAuth(auth);
         
         String nickName = getRealName(user);
-        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
         
@@ -3590,7 +3894,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         doorAuthProvider.updateDoorAuth(auth);
         
         String nickName = getRealName(user);
-        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
         
@@ -3720,7 +4024,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         AclinkLinglingQrCodeRequest qrRequest = new AclinkLinglingQrCodeRequest();
-        qrRequest.setEffecNumber(this.configProvider.getLongValue(AclinkConstant.ACLINK_VISITOR_CNT, 6));
+        qrRequest.setEffecNumber(this.configurationProvider.getLongValue(AclinkConstant.ACLINK_VISITOR_CNT, 6));
         qrRequest.setEndTime(24*60l);
         qrRequest.setStartTime(Long.toString(System.currentTimeMillis() - 5000));
         
@@ -3757,7 +4061,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             nickName = user.getAccountName();
         }
         
-        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
@@ -3791,7 +4095,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(aesUserKey == null) {
                     return null;
                     }
-                Long qrImageTimeout = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 10*60l);
+                Long qrImageTimeout = this.configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 10*60l);
                 byte[] qrArr = Base64.decodeBase64(aesUserKey.getSecret());
                 return AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), qrImageTimeout*1000l);
             }
@@ -3823,7 +4127,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setOrganization(auth.getOrganization());
         resp.setUserName(auth.getNickname());
         resp.setValidEndMs(auth.getValidEndMs());
-        resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
+        resp.setQrIntro(this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
         resp.setValidFromMs(auth.getValidFromMs());
         resp.setValidAuthAmount(auth.getValidAuthAmount());
         
@@ -3873,11 +4177,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 qrLen -= 2;
                 byte[] qrArr = new byte[qrLen];
                 System.arraycopy(origin, 6, qrArr, 0, qrLen);
-                Long qrImageTimeout = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 10*60l);
+                Long qrImageTimeout = this.configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 10*60l);
                 resp.setQr(AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), qrImageTimeout*1000l));
             }
         }
-        
+        //服务热线
+        AclinkFormValues hotline = new AclinkFormValues();
+        hotline = doorAccessProvider.findAclinkFormValues(auth.getOwnerId(),auth.getOwnerType(), AclinkFormValuesType.HOTLINE.getCode());
+        if(null != hotline && hotline.getStatus()==(byte)1){
+            resp.setHotline(hotline.getValue());
+        }
         return resp;
     }
     
@@ -3890,6 +4199,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         return getVisitorByAuth(auth);
     }
+    
+    /**
+     * 根据授权id获取二维码url
+     */
+	@Override
+	public String getVisitorUrlById(GetVisitorCommand cmd) {
+        DoorAuth auth = doorAuthProvider.getDoorAuthById(Long.valueOf(cmd.getId()));
+        if(auth == null || (auth.getLinglingUuid() == null && auth.getAuthType() == 0)) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "tempAuth not found");
+        }else{
+        	//TODO driverType暂不处理;doorAccessType暂时只考虑zuolin by liuyilin 20181026
+            String uuid = UUID.randomUUID().toString();
+            uuid = uuid.replace("-", "");
+            uuid = uuid.substring(0, 5);
+        	auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
+        	doorAuthProvider.updateDoorAuth(auth);
+        }
+//        https://core.zuolin.com/evh/aclink/v?id=${id} homeUrl+"/evh"
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
+        return String.format("%s/evh/aclink/v?id=%s",homeUrl,auth.getLinglingUuid());
+	}
     
     @Override
     public GetVisitorResponse getVisitorPhone(GetVisitorCommand cmd) {
@@ -3922,7 +4252,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         //https://core.zuolin.com/evh/aclink/phv?id=10ae5-15016
-        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
         String url = homeUrl + "/evh/aclink/phv?phvid=" + cmd.getId() + "#sign_suffix";
         
         resp.setCreateTime(auth.getCreateTime().getTime());
@@ -4190,8 +4520,17 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		}
 
 		byte[] secret = Base64.decodeBase64(aesUserKey.getSecret());
-		LOGGER.error(StringHelper.toHexString(secret));
+		LOGGER.info(StringHelper.toHexString(secret));
+		//旧门禁无法识别0xA指令,拼成0x8 by liuyilin 20181126
 		byte[] bPayload = CmdUtil.openDoorCmd(secret);
+		
+		Aclink aclink = aclinkProvider.getAclinkByDoorId(doorAccess.getId());
+		if(aclink == null){
+			LOGGER.info(String.format("can not find aclink with doorId:%d",doorAccess.getId()));
+		}else if(!StringUtils.isEmpty(aclink.getFirwareVer()) && !aclink.getFirwareVer().equals("1")){
+			bPayload = CmdUtil.remoteOpenCmd(secret);
+		}
+//		byte[] bPayload = CmdUtil.faceOpenCmd(secret);
 
 		byte[] bSeq = DataUtil.intToByteArray(0);
 		byte[] bLen = DataUtil.intToByteArray(bPayload.length + 6);
@@ -4339,7 +4678,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         
-        String msg = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_VISITOR_SHORTS, "");
+        String msg = this.configurationProvider.getValue(namespaceId, AclinkConstant.ACLINK_VISITOR_SHORTS, "");
         String[] msgs = msg.split("\\|");
         for(String m : msgs) {
             resp.getMessages().add(m);
@@ -4347,209 +4686,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         return resp;
     }
-    
-    @Override
-    public AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmds) {
-        AclinkLogListResponse resp = new AclinkLogListResponse();
-        resp.setDtos(new ArrayList<AclinkLogDTO>());
-        for(int i = 0; i < cmds.getItems().size(); i++) {
-            AclinkLogItem cmd = cmds.getItems().get(i);
-            AclinkLog aclinkLog = ConvertHelper.convert(cmd, AclinkLog.class);
-            
-            try {
-                DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
-                if(cmd.getUserId() == null) {
-                    cmd.setUserId(doorAuth.getUserId());
-                } 
-                Long userId = cmd.getUserId();
-                if(userId == null || userId.equals(0l)) {
-                	//保安授权方式
-                	userId = UserContext.current().getUser().getId();
-                	aclinkLog.setUserName(doorAuth.getNickname());
-                	aclinkLog.setUserIdentifier(doorAuth.getPhone());
-                	aclinkLog.setUserId(userId);
-                } else {
-                	UserInfo user = userService.getUserInfo(cmd.getUserId());
-                	if(user.getPhones() != null && user.getPhones().size() > 0) {
-                           aclinkLog.setUserIdentifier(user.getPhones().get(0));    
-                       }
-                	aclinkLog.setUserName(user.getNickName());
-                }
-                
-                DoorAccess door = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
-                
-                aclinkLog.setDoorName(door.getDisplayNameNotEmpty());
-                
-                aclinkLog.setHardwareId(door.getHardwareId());
-                aclinkLog.setOwnerId(door.getOwnerId());
-                aclinkLog.setOwnerType(door.getOwnerType());
-                aclinkLog.setDoorType(door.getDoorType());
-             
-                
-                aclinkLogProvider.createAclinkLog(aclinkLog);
-                AclinkLogDTO dto = ConvertHelper.convert(aclinkLog, AclinkLogDTO.class);
-                if(dto != null) {
-                    resp.getDtos().add(dto);
-                }
-            } catch(Exception ex) {
-                LOGGER.error("aclinklog error i=" + i, ex);
-            }
-        }
-        
-        return resp;
-        
-    }
-    
-    @Override
-    public AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd) {
-        //添加权限 by liqingyan
-//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041122L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-//        }
-        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041112L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-        }
-        AclinkQueryLogResponse resp = new AclinkQueryLogResponse();
-        resp.setDtos(new ArrayList<AclinkLogDTO>());
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        ListingLocator locator = new ListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-        List<AclinkLogDTO> objs = aclinkLogProvider.queryAclinkLogDTOsByTime(locator, count, new ListingQueryBuilderCallback() {
 
-            @Override
-            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                    SelectQuery<? extends Record> query) {
-                if(cmd.getOwnerType() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_TYPE.eq(cmd.getOwnerType()));
-                }
-                if(cmd.getOwnerId() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_ID.eq(cmd.getOwnerId()));
-                }
-                if(cmd.getEventType() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.eq(cmd.getEventType()));
-                }
-                if(cmd.getKeyword() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.USER_IDENTIFIER.like(cmd.getKeyword() + "%")
-                            .or(Tables.EH_ACLINK_LOGS.USER_NAME.like(cmd.getKeyword()+"%")));
-                }
-                if(cmd.getDoorId() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.DOOR_ID.eq(cmd.getDoorId()));
-                }
-                //时间比较
-                if(cmd.getStartTime() != null && cmd.getEndTime() != null ) {
-                    cmd.setStartTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getStartTime()),"yyyy-MM-dd").getTime());
-                    cmd.setEndTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEndTime()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
-                    query.addConditions(Tables.EH_ACLINK_LOGS.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
-                }
-                return query;
-            }
-            
-        });
-        resp.setDtos(objs);
-        resp.setNextPageAnchor(locator.getAnchor());
-        return resp;
-    }
-    
-    @Override
-    public OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd){
-    	AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
-		if (appNamespaceMapping == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"not exist app namespace mapping");
-		}
-		Integer namespaceId = appNamespaceMapping.getNamespaceId();
-
-    	OpenQueryLogResponse resp = new OpenQueryLogResponse();
-        resp.setDtos(new ArrayList<AclinkLogDTO>());
-        if(CollectionUtils.isEmpty(cmd.getMacAddresses())){
-			return resp;
-		}
-
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        ListingLocator locator = new ListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-        List<AclinkLog> objs = aclinkLogProvider.queryAclinkLogsByTime(locator, count, new ListingQueryBuilderCallback() {
-            @Override
-            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                    SelectQuery<? extends Record> query) {
-                if(cmd.getOwnerType() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_TYPE.eq(cmd.getOwnerType()));
-                }
-                if(cmd.getOwnerId() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_ID.eq(cmd.getOwnerId()));
-                }
-                if(cmd.getEventType() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.eq(cmd.getEventType()));
-                }
-                if(cmd.getKeyword() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.USER_IDENTIFIER.like(cmd.getKeyword() + "%")
-                            .or(Tables.EH_ACLINK_LOGS.USER_NAME.like(cmd.getKeyword()+"%")));
-                }
-                query.addConditions(Tables.EH_ACLINK_LOGS.HARDWARE_ID.in(cmd.getMacAddresses()));
-                query.addConditions(Tables.EH_ACLINK_LOGS.NAMESPACE_ID.eq(namespaceId));
-                return query;
-            }
-
-        });
-
-        for(AclinkLog obj : objs) {
-            AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
-            resp.getDtos().add(dto);
-        }
-        resp.setNextPageAnchor(locator.getAnchor());
-        return resp;
-    }
-    
-     //add by liqingyan
-    @Override
-    public DoorStatisticResponse doorStatistic (DoorStatisticCommand cmd){
-        //添加权限
-//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041123L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-//        }
-        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041113L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-        }
-        DoorStatisticResponse resp = new DoorStatisticResponse();
-        resp.setDtos(new DoorStatisticDTO());
-        DoorStatisticDTO objs =aclinkLogProvider.queryDoorStatistic(cmd);
-        resp.setDtos(objs);
-        return resp;
-    }
-
-    //add by liqingyan
-    @Override
-    public DoorStatisticByTimeResponse doorStatisticByTime (DoorStatisticByTimeCommand cmd){
-        //添加权限
-//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041123L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-//        }
-        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041113L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-        }
-        DoorStatisticByTimeResponse resp = new DoorStatisticByTimeResponse();
-        resp.setDtos(new ArrayList<DoorStatisticByTimeDTO>());
-        List<DoorStatisticByTimeDTO> objs = aclinkLogProvider.queryDoorStatisticByTime(cmd);
-        resp.setDtos(objs);
-        return resp;
-    }
-
-    //add by liqingyan
-    @Override
-    public TempStatisticByTimeResponse tempStatisticByTime (TempStatisticByTimeCommand cmd){
-        //添加权限
-//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041123L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-//        }
-        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041113L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-        }
-        TempStatisticByTimeResponse resp = new TempStatisticByTimeResponse();
-        resp.setDtos(new ArrayList<TempStatisticByTimeDTO>());
-        List<TempStatisticByTimeDTO> objs = aclinkLogProvider.queryTempStatisticByTime(cmd);
-        resp.setDtos(objs);
-        return resp;
-    } 
       
     @Override
     public DoorAuth getLinglingDoorAuthByUuid(String uuid) {
@@ -4594,7 +4731,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ListQRUserPermissionResponse resp = new ListQRUserPermissionResponse();
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         List<DoorUserPermissionDTO> dtos = doorUserPermissionProvider.listDoorUserPermissions(cmd.getNamespaceId()
                 , cmd.getOwnerId()
                 , cmd.getOwnerType()
@@ -4682,7 +4819,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     
     private long getQrTimeout() {
-    	long tick = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_USERKEY_TIMEOUTS, KEY_TICK_ONE_DAY/1000l);
+    	long tick = this.configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_USERKEY_TIMEOUTS, KEY_TICK_ONE_DAY/1000l);
     	tick = tick * 1000l;
     	if(tick < KEY_TICK_15_MINUTE) {
     		tick = KEY_TICK_15_MINUTE;
@@ -4791,7 +4928,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	private void newUserAutoAuth(Long identifierId) {
 		UserIdentifier identifier = userProvider.findIdentifierById(identifierId);
 		if(identifier.getClaimStatus().equals(IdentifierClaimStatus.CLAIMED.getCode())) {
-			String mac = this.configProvider.getValue(identifier.getNamespaceId(), AclinkConstant.ACLINK_NEW_USER_AUTO_AUTH, "");
+			String mac = this.configurationProvider.getValue(identifier.getNamespaceId(), AclinkConstant.ACLINK_NEW_USER_AUTO_AUTH, "");
 			if(mac == null || mac.isEmpty()) {
 				if(LOGGER.isInfoEnabled()) {
 					LOGGER.info("identifier not found, mac=" + mac + " claimed=" + identifier);	
@@ -4869,7 +5006,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         joinCompanyAutoAuthLevel(namespaceId, orgId, userId);
 
-		String info = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_JOIN_COMPANY_AUTO_AUTH, "");
+		String info = this.configurationProvider.getValue(namespaceId, AclinkConstant.ACLINK_JOIN_COMPANY_AUTO_AUTH, "");
 		if(info == null || info.isEmpty()) {
 			if(LOGGER.isInfoEnabled()) {
 				LOGGER.info("join company info not found, info=" + info + " orgId=" + orgId + " userId=" + userId);	
@@ -4979,7 +5116,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public void doAlipayRedirect(HttpServletRequest request, HttpServletResponse response) {
         String redirectUrl = "https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id="+AclinkConstant.ALI_APP_ID+"&scope=auth_user&state="+request.getParameter("state")+"&redirect_uri=";
-        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
         try {
             redirectUrl += URLEncoder.encode(homeUrl + "/mobile/static/qr_access/qrAliCode.html?", "utf-8");
         } catch (UnsupportedEncodingException e) {
@@ -5183,7 +5320,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListDoorAuthLevelResponse listDoorAuthLevel(ListDoorAuthLevelCommand cmd) {
         //update count if the count is null
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         cmd.setPageSize(count);
         
         ListDoorAuthLevelResponse resp = null;
@@ -5262,53 +5399,61 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			}
 		}else if(cmdNumber == 0xf){
 			AclinkLogItem logItem = new AclinkLogItem();
-			Long userId = DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 10, 14));
-			// logItem.setKeyId(keyId);
-			// logItem.setNamespaceId(namespaceId);
-			logItem.setUserId(userId);
+			Long authId = DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 10, 14));
+			logItem.setNamespaceId(door.getNamespaceId());
+			DoorAuth auth = doorAuthProvider.getDoorAuthById(authId);
+			if(auth == null){
+				LOGGER.warn(String.format("excute aclink{%d} log error, authId{%d}, try setting userId with authId", door.getId(), authId));
+				try {
+					auth = doorAuthProvider.queryDoorAuth(new CrossShardListingLocator(), 0, new ListingQueryBuilderCallback() {
+						@Override
+						public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+							query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(door.getId()));
+							query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(authId));
+							query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.notIn(0L,1L));
+							return query;
+						}
+					}).get(0);
+				} catch (Exception e) {
+					LOGGER.warn("auth not found!");
+					return ;
+				}
+			}
+			//keyId没有回传,目前自己查没有意义,默认0 by liuyilin 20181112
+//			logItem.setKeyId(keyId);
+			logItem.setUserId(auth.getUserId());
 			logItem.setDoorId(door.getId());
 			logItem.setLogTime(DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 15, 19)) * 1000);
 			switch (msgArr[14]) {
 			case 0x1:
-				logItem.setEventType(3L);
-				break;
+				logItem.setEventType(AclinkLogEventType.BUTTON_OPEN.getCode());//3
+				//物理按键开门,日志不保存
+				return;
 			case 0x2:
-				logItem.setEventType(0L);
-				break;
+				logItem.setEventType(AclinkLogEventType.PHONE_BLE_OPEN.getCode());//0
+				//蓝牙开门,日志由app传,此处不保存
+				return;
 			case 0x3:
-				logItem.setEventType(1L);
+				logItem.setEventType(AclinkLogEventType.PHONE_QR_OPEN.getCode());//1
 				break;
 			case 0x4:
-				logItem.setEventType(2L);
+				logItem.setEventType(AclinkLogEventType.PHONE_REMOTE_OPEN.getCode());//2
 				break;
 			default:
 				break;
 			}
 
 			AclinkLog aclinkLog = ConvertHelper.convert(logItem, AclinkLog.class);
-
-			UserInfo user = userService.getUserSnapshotInfo(logItem.getUserId());
-			if (logItem.getUserId() > 1 && user != null) {
-				if (user.getPhones() != null && user.getPhones().size() > 0) {
-					aclinkLog.setUserIdentifier(userService.getUserIdentifier(logItem.getUserId()).getIdentifierToken());
-				}
-				aclinkLog.setUserName(user.getNickName());
-
-				// TODO 已失效授权的会查不出,日志整体流程会在3.0之后修改 by liuyilin 20181102
-				DoorAuth auth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(door.getId(), userId, null);
-				if (auth != null) {
-					aclinkLog.setAuthId(auth.getId());
-				}
-			} else {
-				aclinkLog.setUserName("访客");
-			}
-
+			aclinkLog.setAuthId(auth.getId());
+			aclinkLog.setUserIdentifier(auth.getPhone());
+			aclinkLog.setUserName(auth.getNickname());
 			aclinkLog.setDoorName(door.getDisplayNameNotEmpty());
 			aclinkLog.setHardwareId(door.getHardwareId());
 			aclinkLog.setOwnerId(door.getOwnerId());
 			aclinkLog.setOwnerType(door.getOwnerType());
 			aclinkLog.setDoorType(door.getDoorType());
 			aclinkLogProvider.createAclinkLog(aclinkLog);
+			sendMessageToAuthCreator(auth.getId());
 		}
 	}
 
@@ -5318,8 +5463,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         User user = UserContext.current().getUser();
 //      获取用户公司楼层
         List<OrganizationDTO> orgs = organizationService.listUserRelateOrganizations(cmd.getNamespaceId(), user.getId(), OrganizationGroupType.ENTERPRISE);
+        List<OrganizationDTO> distinctOrgs= new ArrayList<OrganizationDTO>();
+        Set<Long> set=new HashSet<Long>();
+        for (OrganizationDTO org : orgs) {
+            if (org == null) {
+                continue;
+            }
+            Long orgId = org.getId();
+            if (orgId != null) {
+                if (set.add(orgId)) {
+                    distinctOrgs.add(org);
+                }
+            }
+        }
+        set.clear();
         List<AddressDTO> userFloors = new ArrayList<>();
-        for(OrganizationDTO dto : orgs) {
+        for(OrganizationDTO dto : distinctOrgs) {
             List<OrganizationAddress> addrs = organizationProvider.findOrganizationAddressByOrganizationId(dto.getId());
             for(OrganizationAddress addr  : addrs) {
                 Address addr2 = addressProvider.findAddressById(addr.getAddressId());
@@ -5337,13 +5496,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
 //      分别返回旺龙门禁组，梯控组
             boolean doorType = true;
-            if( cmd.getDoorType() != null){
-                doorType = access.getDoorType().equals(cmd.getDoorType());
+            if(access != null){
+                if(cmd.getDoorType() != null){
+                    doorType = access.getDoorType().equals(cmd.getDoorType());
+                }
+                else{
+                    doorType = access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode()) || access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_DOOR_GROUP.getCode());
+                }
             }
-            else{
-                doorType = access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode()) || access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_DOOR_GROUP.getCode());
-            }
-            if(null != access && doorType){
+            if(access != null && doorType){
                 DoorAccessGroupDTO group = new DoorAccessGroupDTO();
                 groups.add(group);
                 group.setId(access.getId());
@@ -5364,7 +5525,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     }).collect(Collectors.toList()));
                 }
                 List<AddressDTO> floors = new ArrayList<>();
-                floors.addAll(userFloors);
                 if(org.apache.commons.lang.StringUtils.isNotEmpty(access.getFloorId())){
                     JSONObject data = JSON.parseObject(access.getFloorId());
                     JSONArray jsonfloors = data.getJSONArray("floors");
@@ -5374,6 +5534,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                             floors.add(ConvertHelper.convert(ApartmentFloorHandler(addressProvider.findAddressById(Long.valueOf(floorId))),AddressDTO.class));
                         }
                     }
+                    //匹配门禁buildingId和userFloors的
+                    Long buildingId = data.getLong("buildingId");
+                    if(buildingId != null){
+                        List<AddressDTO> matchFloors = new ArrayList<>();
+                        matchFloors = userFloors.stream()
+                                .filter((AddressDTO add) -> buildingId.equals(add.getBuildingId()))
+                                .collect(Collectors.toList());
+                        floors.addAll(matchFloors);
+                    }
                     if (null != floors & floors.size() > 0) {
                         group.setFloors(floors.stream().distinct().map(r -> {
                             FloorDTO dto = new FloorDTO();
@@ -5381,7 +5550,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                             //楼层名改为BuildingName
                             dto.setFloorName(r.getBuildingName());
                             return dto;
-                        }).collect(Collectors.toList()));
+                        }).distinct().collect(Collectors.toList()));//去重
                     }
                 }
             }
@@ -5568,9 +5737,17 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
 	@Override
 	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd) {
-		User user = UserContext.current().getUser();
-        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-        DoorAuth auth = createZuolinQrAuth(user, doorAccess, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+        User user = UserContext.current().getUser();
+        //非门禁组按原方法查找
+        DoorAuth auth = new DoorAuth();
+        if(null == cmd.getGroupType() || cmd.getGroupType() != (byte)2) {
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+            auth = createZuolinQrAuth(user, doorAccess, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+        }
+        if(null != cmd.getGroupType() && cmd.getGroupType() == (byte)2){
+            AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getDoorId());
+            auth = createZuolinGroupQrAuth(user,group, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+        }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //创建自定义表单记录
         if(null != cmd.getList() && !cmd.getList().isEmpty()){
@@ -5600,11 +5777,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             createPhotoCmd.setImgUrl(contentServerService.parserUri(createPhotoCmd.getImgUri()));
             createPhotoCmd.setAuthId(auth.getId());
             faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
-            
+
             cmd1.setDoorId(cmd.getDoorId());
             faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
         }
-    	return dto;
+        return dto;
 	}
 
 	/**
@@ -5612,8 +5789,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	 * doorId为门禁组id
 	 */
 	@Override
-	public int invalidVistorAuth(Long doorId, String phone) {
-		List<DoorAuth> listAuth = doorAuthProvider.listValidDoorAuthByVisitorPhone(doorId, phone);
+	public int invalidVistorAuth(Long doorId, String phone,Byte groupType) {
+		List<DoorAuth> listAuth = doorAuthProvider.listValidDoorAuthByVisitorPhone(doorId, phone, groupType);
 		if(listAuth != null && listAuth.size() > 0){
 			for(DoorAuth auth : listAuth){
 				auth.setStatus(DoorAuthStatus.INVALID.getCode());
@@ -5649,7 +5826,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		for(DoorAccess doorAccess : doorAccesses){
 			for(OpenAuthDTO dto : cmd.getAuthList()){
 				if(!StringUtils.isEmpty(dto.getPhone())){
-					invalidVistorAuth(doorAccess.getId(), dto.getPhone());
+					invalidVistorAuth(doorAccess.getId(), dto.getPhone(),null);
 				}
 			}
 		}
@@ -5707,9 +5884,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListDoorAccessEhResponse listDoorAccessEh(ListDoorAccessEhCommand cmd) {
         ListDoorAccessEhResponse resp = new ListDoorAccessEhResponse();
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
+        List<NamespaceDTO> namespaces = new ArrayList<NamespaceDTO>();
+        namespaces = doorAccessProvider.listDoorAccessNamespaces();
+        resp.setNamespaces(namespaces);
         List<DoorAccessNewDTO> dtos = doorAccessProvider.listDoorAccessEh(locator, count, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -5752,7 +5932,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public ListDoorTypeResponse listDoorType  (ListDoorTypeCommand cmd){
-	    int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+	    int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         Long anchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(anchor);
@@ -5771,7 +5951,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     @Override
     public ListFirmwareResponse listFirmware (ListFirmwareCommand cmd){
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         Long anchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(anchor);
@@ -5808,10 +5988,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public void changeDoorName(ChangeDoorNameCommand cmd){
         DoorAccess doorAccess = doorAccessProvider.findDoorAccessById(cmd.getDoorId());
+        if(null == doorAccess){
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "door is not found");
+        }
         doorAccess.setDisplayName(cmd.getName());
         doorAccess.setAddress(cmd.getDoorAddress());
         doorAccess.setDescription(cmd.getDoorDescription());
-        doorAccessProvider.updateDoorAccessNew(doorAccess);
+        doorAccessProvider.updateDoorAccess(doorAccess);
     }
     @Override
     public void addDoorManagement(AddDoorManagementCommand cmd){
@@ -5834,7 +6017,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListDoorManagementResponse listDoorManagement(ListDoorManagementCommand cmd){
         ListDoorManagementResponse resp = new ListDoorManagementResponse();
-	    List<AclinkManagementDTO> doors = doorAccessProvider.searchAclinkManagement(cmd.getDoorId());
+	    List<AclinkManagementDTO> doors = doorAccessProvider.searchAclinkManagementByDoorId(cmd.getDoorId());
 	    resp.setDoors(doors);
 	    return resp;
     }
@@ -5878,7 +6061,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     @Override
     public ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd){
-	    int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+	    int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         Long pageAnchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(pageAnchor);
@@ -5931,7 +6114,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public Long deleteDoorAccessEh(Long doorAccessId) {
         DoorAccess doorAccess = doorAccessProvider.findDoorAccessById(doorAccessId);
         doorAccess.setStatus((byte) 2);
-        doorAccessProvider.updateDoorAccessNew(doorAccess);
+        doorAccessProvider.updateDoorAccess(doorAccess);
         return doorAccess.getId();
     }
 
@@ -5954,6 +6137,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     //add bu liqingyan 添加临时授权
     @Override
     public DoorAuthDTO createTempAuth(CreateTempAuthCommand cmd){
+	    //检查该用户是否已存在临时授权
+        if(null == cmd.getConfirm() || cmd.getConfirm() != (byte)1){
+            List<DoorAuth> auth = doorAuthProvider.listValidDoorAuthByVisitorPhone(cmd.getDoorId(),cmd.getPhone(),cmd.getGroupType());
+            if(null != auth && !auth.isEmpty()){
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "Auth exist");
+            }
+        }
 	    CreateLocalVistorCommand itemCmd = ConvertHelper.convert(cmd,CreateLocalVistorCommand.class);
 	    itemCmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
         if(itemCmd.getValidEndMs() == null) {
@@ -5994,7 +6184,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			for(DoorAccessDTO da : das){
 				listMac.add(da.getHardwareId());
 			}
-			rsp.setListMac(listMac);
+			rsp.setMacAddress(listMac);
 		}
 		return rsp;
 	}
@@ -6006,11 +6196,34 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
 		}
 		List<AclinkAppUserKeyDTO> userKeys = new ArrayList<AclinkAppUserKeyDTO>();
-		for(Long userId: cmd.getUserIds()){
+		
+		List<DoorAuth> auths = doorAuthProvider.queryDoorAuth(new CrossShardListingLocator(), 0, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_AUTH.ID.in(cmd.getAuthId()));
+                return query;
+            }
+        });
+		if(auths == null || auths.size() != cmd.getAuthId().size()){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "valiad auth not found");
+		}
+		
+		long now = DateHelper.currentGMTTime().getTime();
+		for(DoorAuth auth: auths){
+			if (DoorAuthStatus.VALID.getCode() != auth.getStatus()
+					|| (!da.getId().equals(auth.getDoorId()) && !da.getGroupid().equals(auth.getDoorId()))
+					|| DoorAuthStatus.VALID.getCode() != auth.getRightOpen()
+					|| (DoorAuthType.FOREVER.getCode() != auth.getAuthType()
+							&& (now < auth.getValidFromMs() || now > auth.getValidEndMs()))) {
+				throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, String.format("auth with id {%d} id invalid", auth.getId()));
+			}
 			AclinkAppUserKeyDTO userKey =new AclinkAppUserKeyDTO();
-			userKey.setKeySecret(AclinkUtils.packAesUserKey(da.getAesIv(), userId, 0, System.currentTimeMillis() + KEY_TICK_7_DAY));
-			userKey.setMac(cmd.getMacAddress());
-			userKey.setUserId(userId);
+			userKey.setKeySecret(AclinkUtils.packAesUserKey(da.getAesIv(), auth.getId(), 0,
+					DoorAuthType.FOREVER.getCode() == auth.getAuthType() ? System.currentTimeMillis() + KEY_TICK_7_DAY
+							: auth.getValidEndMs()));
+			userKey.setMacAddress(cmd.getMacAddress());
+			userKey.setAuthId(auth.getId());
 			userKeys.add(userKey);
 		}
 		GetZLAesUserKeyResponse rsp = new GetZLAesUserKeyResponse();
@@ -6139,6 +6352,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         DoorAuth auth = createZuolinQrAuth(user, doorAccess, cmd2);
         rsp.setMacAddress(cmd.getMacAddress());
         rsp.setQrCode(auth.getQrKey());
+        rsp.setAuthId(auth.getId());
+        rsp.setKeySecret(generateAesUserKey(user, auth).getSecret());
+        rsp.setPhone(auth.getPhone());
+        rsp.setUserName(auth.getNickname());
 		return rsp;
 	}
 
@@ -6258,7 +6475,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		ListFormalAuthResponse rsp = new ListFormalAuthResponse();
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+		cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
 		
 		List<AclinkAuthDTO> authDtos = doorAuthProvider.listFormalAuth(locator,cmd.getPageSize(),cmd);
 		
@@ -6561,16 +6778,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 	con = con.or(Tables.EH_DOOR_ACCESS.OWNER_ID.in(communityIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
                 }
                 if(buildingIds.size() > 0) {
-                	//公共门禁的ADRESS_DETAIL是楼栋或楼栋+楼层
-                	con = con.or(Tables.EH_DOOR_ACCESS.ADRESS_DETAIL.in(buildingIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
+                	//公共门禁的ADDRESS_DETAIL是楼栋或楼栋+楼层
+                	con = con.or(Tables.EH_DOOR_ACCESS.ADDRESS_DETAIL.in(buildingIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
                 }
                 if(floorIds.size() > 0) {
-                	//公共门禁的ADRESS_DETAIL是楼栋或楼栋_楼层
-                	con = con.or(Tables.EH_DOOR_ACCESS.ADRESS_DETAIL.in(floorIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
+                	//公共门禁的ADDRESS_DETAIL是楼栋或楼栋_楼层
+                	con = con.or(Tables.EH_DOOR_ACCESS.ADDRESS_DETAIL.in(floorIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
                 }
                 if(addressIds.size() > 0) {
-                	//企业门禁的ADRESS_DETAIL是办公地点
-                	con = con.or(Tables.EH_DOOR_ACCESS.ADRESS_DETAIL.in(addressIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.ENTERPRISE.getCode())));
+                	//企业门禁的ADDRESS_DETAIL是办公地点
+                	con = con.or(Tables.EH_DOOR_ACCESS.ADDRESS_DETAIL.in(addressIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.ENTERPRISE.getCode())));
                 }
                 return query;
             }
@@ -6593,10 +6810,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 							&& doorAcc.getOwnerType().equals(DoorAccessOwnerType.COMMUNITY.getCode()))
 						|| ((authCmd.getType().equals(AuthGroupType.BUILDING.getCode())
 							|| authCmd.getType().equals(AuthGroupType.FLOOR.getCode()))
-							&& authCmd.getId().equals(doorAcc.getAdressDetail())
+							&& authCmd.getId().equals(doorAcc.getAddressDetail())
 							&& doorAcc.getOwnerType().equals(DoorAccessOwnerType.COMMUNITY.getCode()))
 						|| (authCmd.getType().equals(AuthGroupType.ADDRESS.getCode())
-							&& authCmd.getId().equals(doorAcc.getAdressDetail())
+							&& authCmd.getId().equals(doorAcc.getAddressDetail())
 							&& doorAcc.getOwnerType().equals(DoorAccessOwnerType.ENTERPRISE.getCode()))) {
 						
 						//生成单个用户正式授权列表
@@ -6715,13 +6932,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	
 
 	@Override
-	public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd) {
-		GetUserKeyInfoRespnose rsp = new GetUserKeyInfoRespnose();
+	public GetUserKeyInfoResponse getUserKeyInfo(GetUserKeyInfoCommand cmd) {
+		GetUserKeyInfoResponse rsp = new GetUserKeyInfoResponse();
 		User user = UserContext.current().getUser();
 		
 		rsp.setIsSupportRemote(DoorAuthStatus.INVALID.getCode());
 		rsp.setIsSupportTempAuth(DoorAuthStatus.INVALID.getCode());
-		
+
 		if(cmd.getDoorId() == null && cmd.getAuthId() != null){
 			DoorAuth auth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
 			//校验用户
@@ -6759,7 +6976,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				}else{
 					throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, String.format("door.id {%d} not found",cmd.getDoorId()));
 				}
-
+                //服务热线
+                AclinkFormValues hotline = new AclinkFormValues();
+                List<AclinkKeyExtraActionsDTO> extraActions = new ArrayList<>();
+                AclinkKeyExtraActionsDTO extraAction = new AclinkKeyExtraActionsDTO();
+                hotline = doorAccessProvider.findAclinkFormValues(doorAccess.getOwnerId(),doorAccess.getOwnerType(), AclinkFormValuesType.HOTLINE.getCode());
+                if(null != hotline && hotline.getStatus() == (byte)1){
+                    extraAction.setExtraActionTitle("服务热线");
+                    extraAction.setExtraActionType(AclinkExtraActionsItemType.HOTLINE.getCode());
+                    extraAction.setExtraActionContent(hotline.getValue());
+                    extraActions.add(extraAction);
+                }
+                rsp.setExtraActions(extraActions);
 				rsp.setAuthId(auth.getId());
 				rsp.setIsSupportQR(doorAccess.getHasQr());
 				rsp.setIsSupportFaceOpen(doorAccess.getLocalServerId() != null && doorAccess.getLocalServerId() > 0
@@ -6815,7 +7043,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		if(cmd.getPageAnchor() != null){
 			locator.setAnchor(cmd.getPageAnchor());
 		}
-		Integer count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		Integer count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<DoorAccessGroupRelDTO> groupRels = doorAccessProvider.listDoorGroupRel(locator,count,cmd);
 		rsp.setGroupRels(groupRels);
 		if(locator.getAnchor() != null){
@@ -6831,7 +7059,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(cmd.getPageAnchor() != null){
             locator.setAnchor(cmd.getPageAnchor());
         }
-        Integer count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Integer count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         List<AclinkGroupDTO> groups = doorAccessProvider.listAclinkGroup(locator, count, cmd);
         resp.setGroup(groups);
         if(locator.getAnchor() != null){
@@ -6841,20 +7069,155 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
     @Override
+    public ListGroupDoorsResponse listGroupDoors(ListGroupDoorsCommand cmd){
+	    ListGroupDoorsResponse resp = new ListGroupDoorsResponse();
+        List<DoorAccessLiteDTO> doors = new ArrayList<>();
+        doors = doorAccessProvider.listGroupDoors(cmd.getGroupId());
+        resp.setDoors(doors);
+        return resp;
+    }
+
+    @Override
     public void deleteDoorGroupRel (DeleteDoorGroupRelCommand cmd){
-	    DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-	    if(null != door && door.getGroupid() == cmd.getGroupId()){
-	        door.setGroupid(0L);
-	        doorAccessProvider.updateDoorAccess(door);
+        User user = UserContext.current().getUser();
+	    AclinkGroupDoors door = new AclinkGroupDoors();
+	    door = doorAccessProvider.getGroupDoorsByDoorId(cmd.getGroupId(), cmd.getDoorId());
+	    if(null != door && door.getGroupId() == cmd.getGroupId()){
+	        door.setStatus((byte)0);
+	        door.setOperatorUid(user.getId());
+	        door.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        doorAccessProvider.updateGroupDoors(door);
         }
+//	    旧方案不用
+//	    DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+//	    if(null != door && door.getGroupid() == cmd.getGroupId()){
+//	        door.setGroupid(0L);
+//	        doorAccessProvider.updateDoorAccess(door);
+//        }
     }
 
     @Override
     public ListSelectDoorsResponse listSelectDoors(ListSelectDoorsCommand cmd){
-        ListSelectDoorsResponse resp = new ListSelectDoorsResponse();
-	    List<DoorAccessNewDTO> doors = new ArrayList<DoorAccessNewDTO>();
-	    doors = doorAccessProvider.listSelectDoors(cmd);
-	    resp.setDoors(doors);
+        //列出所有管理门禁
+	    ListDoorAccessResponse listResp =  new ListDoorAccessResponse();
+        QueryDoorAccessAdminCommand queryCmd = new QueryDoorAccessAdminCommand();
+        queryCmd.setOwnerType(cmd.getOwnerType());
+        queryCmd.setOwnerId(cmd.getOwnerId());
+        queryCmd.setPageSize(9999);
+        listResp = this.searchDoorAccessByAdmin(queryCmd);
+        //列出所有加入门禁组门禁
+        List<AclinkGroupDoors> groupDoors = new ArrayList<AclinkGroupDoors>();
+        groupDoors = doorAccessProvider.getGroupDoorsByOwnerId(cmd.getOwnerId(), cmd.getOwnerType());
+        //将加入门禁组门禁status置0，旧门禁置0
+        if(null != groupDoors && groupDoors.size()>0){
+            List<Long> groupDoorsId = new ArrayList<Long>();
+            for(AclinkGroupDoors door:groupDoors){
+                groupDoorsId.add(door.getDoorId());
+            }
+            if(null != listResp.getDoors() && listResp.getDoors().size()>0){
+                for(DoorAccessDTO dto :listResp.getDoors()){
+                    if(groupDoorsId.contains(dto.getId()) || dto.getDoorType() < 19){
+                        dto.setStatus((byte)0);
+                    }
+                }
+            }
+        }
+
+	    ListSelectDoorsResponse resp = new ListSelectDoorsResponse();
+	    resp.setDoors(listResp.getDoors());
+	    return resp;
+    }
+
+    @Override
+    public ListSelectDoorsAndGroupsResponse listSelectDoorsAndGroups (ListSelectDoorsAndGroupsCommand cmd){
+        //列出所有管理门禁
+	    ListDoorAccessResponse doorResp =  new ListDoorAccessResponse();
+        QueryDoorAccessAdminCommand doorCmd = new QueryDoorAccessAdminCommand();
+        doorCmd.setOwnerType(cmd.getOwnerType());
+        doorCmd.setOwnerId(cmd.getOwnerId());
+        doorCmd.setPageSize(9999);
+        doorResp = this.searchDoorAccessByAdmin(doorCmd);
+        //列出所有门禁组
+        ListDoorGroupCommand groupCmd = new ListDoorGroupCommand();
+        groupCmd.setOwnerId(cmd.getOwnerId());
+        groupCmd.setOwnerType(cmd.getOwnerType());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        Integer count = 9999;
+        List<AclinkGroupDTO> groups = new ArrayList<AclinkGroupDTO>();
+        groups = doorAccessProvider.listAclinkGroup(locator, count, groupCmd);
+        //合并门禁及门禁组
+        List<DoorsAndGroupsDTO> dtos = new ArrayList<DoorsAndGroupsDTO>();
+        if(null != groups && groups.size()>0){
+            for(AclinkGroupDTO group :groups){
+                DoorsAndGroupsDTO dto = new DoorsAndGroupsDTO();
+                dto.setId(group.getGroupId());//门禁组加下划线
+                dto.setType((byte)2); //门禁组
+                dto.setName(group.getGroupName());
+                dto.setStatus(group.getStatus());
+                dtos.add(dto);
+            }
+        }
+        if(null != doorResp.getDoors() && doorResp.getDoors().size()>0){
+            for(DoorAccessDTO door: doorResp.getDoors()){
+                DoorsAndGroupsDTO dto = new DoorsAndGroupsDTO();
+                dto.setId(door.getId());
+                dto.setType((byte)1); //门禁
+                dto.setDoortype(door.getDoorType());
+                dto.setName(door.getDisplayName());
+                dto.setStatus(door.getStatus());
+                dtos.add(dto);
+            }
+        }
+        //根据关键字模糊搜索
+        List<DoorsAndGroupsDTO> searchDto = new ArrayList<>();
+        if(null != cmd.getKeyWord() && cmd.getKeyWord().length()>0){
+            for(DoorsAndGroupsDTO dto :dtos){
+                if(dto.getName().contains(cmd.getKeyWord())){
+                    searchDto.add(dto);
+                }
+//                else{
+//                    dtos.remove(dto);
+//                }
+            }
+        }else{
+            searchDto.addAll(dtos);
+        }
+        ListSelectDoorsAndGroupsResponse resp = new ListSelectDoorsAndGroupsResponse();
+        resp.setDoors(searchDto);
+        return resp;
+    }
+
+    @Override
+    public ListTempAuthPriorityResponse listTempAuthPriority (ListTempAuthPriorityCommand cmd){
+	    List<DoorsAndGroupsDTO> doors = new ArrayList<DoorsAndGroupsDTO>();
+	    doors = doorAccessProvider.searchTempAuthPriority(cmd);
+        ListTempAuthPriorityResponse resp = new ListTempAuthPriorityResponse();
+        resp.setDoors(doors);
+	    return resp;
+    }
+
+    @Override
+    public DeleteTempAuthPriorityResponse deleteTempAuthPriority(DeleteTempAuthPriorityCommand cmd){
+	    User user = UserContext.current().getUser();
+        DeleteTempAuthPriorityResponse resp = new DeleteTempAuthPriorityResponse();
+        List<AclinkFormValuesDTO> dtos = new ArrayList<>();
+        if(null !=cmd.getId() && !cmd.getId().isEmpty()){
+	        for(Long id:cmd.getId()){
+	            if(null != id){
+                    AclinkFormValues value = new AclinkFormValues();
+                    value = doorAccessProvider.findAclinkFormValuesById(id);
+                    if (null != value && value.getId() != null){
+                        value.setStatus((byte)0);
+                        value.setOperatorUid(user.getId());
+                        value.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        AclinkFormValuesDTO dto = new AclinkFormValuesDTO();
+                        dto = doorAccessProvider.updateAclinkFormValues(value);
+                        dtos.add(dto);
+                    }
+                }
+            }
+        }
+        resp.setDoors(dtos);
 	    return resp;
     }
 
@@ -7051,20 +7414,61 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public void updateDoorGroup(UpdateDoorAccessGroupCommand cmd){
 	    AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getGroupId());
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 	    if(cmd.getGroupName() != null && cmd.getGroupName().length() > 0){
 	        group.setName(cmd.getGroupName());
         }
-        if(cmd.getStatus() != null){
+        if(null != cmd.getStatus()){
             group.setStatus(cmd.getStatus());
-            doorAccessProvider.deleteAllDoorGroupRel(cmd.getGroupId());
+            //删除所有下属门禁
+             if(cmd.getStatus().equals((byte)0)){
+                List<AclinkGroupDoors> doors = doorAccessProvider.getGroupDoorsByGroupId(group.getId());
+                if(null != doors && !doors.isEmpty()){
+                    for(AclinkGroupDoors door: doors){
+                        door.setStatus((byte)0);
+                        door.setOperatorUid(user.getId());
+                        door.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        doorAccessProvider.updateGroupDoors(door);
+                    }
+                }
+            }
         }
-        User user = UserContext.current().getUser();
         group.setOperatorUid(user.getId());
         group.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//        旧门禁-门禁组关系方案
+//        if(null != cmd.getDoorIds() && !cmd.getDoorIds().isEmpty()){
+//            for(Long id :cmd.getDoorIds()){
+//                if(null != id){
+//                    doorAccessProvider.createDoorGroupRel(cmd.getGroupId(),id);
+//                }
+//            }
+//        }
+        //将门禁加入门禁组
         if(null != cmd.getDoorIds() && !cmd.getDoorIds().isEmpty()){
-            for(Long id :cmd.getDoorIds()){
-                if(null != id){
-                    doorAccessProvider.createDoorGroupRel(cmd.getGroupId(),id);
+            for(Long doorId :cmd.getDoorIds()){
+                if(null != doorId){
+                    AclinkGroupDoors formerDoor = doorAccessProvider.getGroupDoorsByDoorId(cmd.getGroupId(),doorId);
+                    if(null == formerDoor || null == formerDoor.getDoorId()){
+                        //新建门禁关系
+                        AclinkGroupDoors door = new AclinkGroupDoors();
+                        door.setNamespaceId(namespaceId);
+                        door.setOwnerId(group.getOwnerId());
+                        door.setOwnerType(group.getOwnerType());
+                        door.setStatus((byte)1);
+                        door.setGroupId(group.getId());
+                        door.setDoorId(doorId);
+                        door.setCreatorUid(user.getId());
+                        door.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        doorAccessProvider.createGroupDoors(door);
+                    }else {
+                        //更新门禁关系
+                        formerDoor.setStatus((byte)1);
+                        formerDoor.setOperatorUid(user.getId());
+                        formerDoor.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        doorAccessProvider.updateGroupDoors(formerDoor);
+                    }
+
                 }
             }
         }
@@ -7076,23 +7480,113 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public void createTempAuthPriority (CreateTempAuthPriorityCommand cmd){
         User user = UserContext.current().getUser();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if(null != cmd.getDoorIds() && !cmd.getDoorIds().isEmpty()){
-            for(Long doorId:cmd.getDoorIds()) {
-                if(null != doorId){
+        if(null != cmd.getDoors() && !cmd.getDoors().isEmpty()){
+            for(DoorsAndGroupsDTO dto:cmd.getDoors()){
+                if(null != dto.getId()){
                     AclinkFormValues value = new AclinkFormValues();
                     value.setNamespaceId(namespaceId);
                     value.setOwnerId(cmd.getOwnerId());
                     value.setOwnerType(cmd.getOwnerType());
-                    value.setType(AclinkFormValuesType.AUTH_PRIORITY.getCode());
+                    if(dto.getType() == 1){ //门禁
+                        value.setType(AclinkFormValuesType.AUTH_PRIORITY_DOOR.getCode());
+                        value.setValue(dto.getId().toString());
+                    }
+                    else if(dto.getType() == 2) { //门禁组
+                        value.setType(AclinkFormValuesType.AUTH_PRIORITY_GROUP.getCode());
+                        value.setValue(dto.getId().toString());
+                    }else continue;
                     value.setStatus((byte)1);
                     value.setTitleId(0L);
-                    value.setValue(String.valueOf(doorId));
+//                    value.setValue(String.valueOf(dto.getId()));
                     value.setCreatorUid(user.getId());
                     value.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     doorAccessProvider.createAclinkFormValues(value);
                 }else continue;
+                }
+            }
+
+//        旧方案不用
+//        if(null != cmd.getDoorIds() && !cmd.getDoorIds().isEmpty()){
+//            for(Long doorId:cmd.getDoorIds()) {
+//                if(null != doorId){
+//                    AclinkFormValues value = new AclinkFormValues();
+//                    value.setNamespaceId(namespaceId);
+//                    value.setOwnerId(cmd.getOwnerId());
+//                    value.setOwnerType(cmd.getOwnerType());
+//                    value.setType(AclinkFormValuesType.AUTH_PRIORITY.getCode());
+//                    value.setStatus((byte)1);
+//                    value.setTitleId(0L);
+//                    value.setValue(String.valueOf(doorId));
+//                    value.setCreatorUid(user.getId());
+//                    value.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                    doorAccessProvider.createAclinkFormValues(value);
+//                }else continue;
+//            }
+//        }
+    }
+
+    @Override
+    public void createTempAuthDefaultRule(CreateTempAuthDefaultRuleCommand cmd){
+	    User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        AclinkFormValues maxDuration = new AclinkFormValues();
+        maxDuration = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_DURATION.getCode());
+        AclinkFormValues maxCount = new AclinkFormValues();
+        maxCount = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_COUNT.getCode());
+        if(null != cmd.getMaxDuration() && cmd.getMaxDuration().length()>0){
+            if(null != maxDuration && maxDuration.getValue().length()>0){
+                maxDuration.setValue(cmd.getMaxDuration());
+                maxDuration.setOperatorUid(user.getId());
+                maxDuration.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.updateAclinkFormValues(maxDuration);
+            }
+            else{
+                AclinkFormValues newMaxDuration = new AclinkFormValues();
+                newMaxDuration.setNamespaceId(namespaceId);
+                newMaxDuration.setOwnerId(cmd.getOwnerId());
+                newMaxDuration.setOwnerType(cmd.getOwnerType());
+                newMaxDuration.setType(AclinkFormValuesType.DEFAULT_MAX_DURATION.getCode());
+                newMaxDuration.setValue(cmd.getMaxDuration());
+                newMaxDuration.setStatus((byte)1);
+                newMaxDuration.setTitleId(0L);
+                newMaxDuration.setCreatorUid(user.getId());
+                newMaxDuration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.createAclinkFormValues(newMaxDuration);
             }
         }
+        if(null != cmd.getMaxCount() && cmd.getMaxCount().length()>0){
+            if(null != maxCount && maxCount.getValue().length()>0){
+                maxCount.setValue(cmd.getMaxCount());
+                maxCount.setOperatorUid(user.getId());
+                maxCount.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.updateAclinkFormValues(maxCount);
+            }
+            else{
+                AclinkFormValues newMaxCount = new AclinkFormValues();
+                newMaxCount.setNamespaceId(namespaceId);
+                newMaxCount.setOwnerId(cmd.getOwnerId());
+                newMaxCount.setOwnerType(cmd.getOwnerType());
+                newMaxCount.setType(AclinkFormValuesType.DEFAULT_MAX_COUNT.getCode());
+                newMaxCount.setValue(cmd.getMaxCount());
+                newMaxCount.setStatus((byte)1);
+                newMaxCount.setTitleId(0L);
+                newMaxCount.setCreatorUid(user.getId());
+                newMaxCount.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.createAclinkFormValues(newMaxCount);
+            }
+        }
+    }
+
+    @Override
+    public ListTempAuthDefaultRuleResponse listTempAuthDefaultRule (ListTempAuthDefaultRuleCommand cmd){
+        AclinkFormValues maxDuration = new AclinkFormValues();
+        maxDuration = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_DURATION.getCode());
+        AclinkFormValues maxCount = new AclinkFormValues();
+        maxCount = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_COUNT.getCode());
+        ListTempAuthDefaultRuleResponse resp = new ListTempAuthDefaultRuleResponse();
+        resp.setMaxDuration(ConvertHelper.convert(maxDuration,AclinkFormValuesDTO.class));
+        resp.setMaxCount(ConvertHelper.convert(maxCount,AclinkFormValuesDTO.class));
+        return resp;
     }
 
     @Override
@@ -7221,6 +7715,99 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		rsp.setMsg("success");
 		return rsp;
 	}
+
+	@Override
+    public SearchDoorServerResponse searchDoorServer (SearchDoorServerCommand cmd){
+	    SearchDoorServerResponse resp = new SearchDoorServerResponse();
+        DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if(null != door && door.getLocalServerId() != null){
+            AclinkServerDTO server = new AclinkServerDTO();
+            server = aclinkServerService.findLocalServerById(door.getLocalServerId());
+            resp.setServer(server);
+            List<AclinkCameraDTO> camera = new ArrayList<>();
+            camera = aclinkCameraProvider.findCameraByDoorId(door.getId());
+            resp.setCameras(camera);
+            List<AclinkIPadDTO> Ipad = new ArrayList<>();
+            Ipad = aclinkIpadProvider.findIpadByDoorId(door.getId());
+            resp.setIpad(Ipad);
+        }
+        return resp;
+    }
+
+    @Override
+    public QueryServiceHotlineResponse queryServiceHotline (QueryServiceHotlineCommand cmd){
+        QueryServiceHotlineResponse resp = new QueryServiceHotlineResponse();
+	    AclinkFormValues hotline = new AclinkFormValues();
+        hotline = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(), AclinkFormValuesType.HOTLINE.getCode());
+        resp.setPhone(ConvertHelper.convert(hotline, AclinkFormValuesDTO.class));
+        return resp;
+    }
+
+    @Override
+    public void updateServiceHotline (UpdateServiceHotlineCommand cmd){
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    AclinkFormValues hotline = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(), AclinkFormValuesType.HOTLINE.getCode());
+        if(null == hotline || null == hotline.getId()){
+            AclinkFormValues phone = new AclinkFormValues();
+            phone.setNamespaceId(namespaceId);
+            phone.setTitleId(0L);
+            phone.setValue(cmd.getPhone());
+            phone.setType(AclinkFormValuesType.HOTLINE.getCode());
+            phone.setStatus(cmd.getStatus());
+            phone.setOwnerId(cmd.getOwnerId());
+            phone.setOwnerType(cmd.getOwnerType());
+            phone.setCreatorUid(user.getId());
+            phone.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            doorAccessProvider.createAclinkFormValues(phone);
+        }
+        else if(null != hotline && hotline.getId() != null){
+            hotline.setStatus(cmd.getStatus());
+            if(null != cmd.getPhone() && cmd.getPhone().length()>0){
+                hotline.setValue(cmd.getPhone());
+            }
+            hotline.setOperatorUid(user.getId());
+            hotline.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            doorAccessProvider.updateAclinkFormValues(hotline);
+        }
+	}
+
+	@Override
+    public VisitorComingNoticeResponse visitorComingNotice (VisitorComingNoticeCommand cmd){
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        VisitorComingNoticeResponse resp = new VisitorComingNoticeResponse();
+	    AclinkFormValues notice = new AclinkFormValues();
+	    notice = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.VISITOR_NOTICE.getCode());
+	    if(null == cmd.getStatus()){
+	        resp.setNotice(ConvertHelper.convert(notice, AclinkFormValuesDTO.class));
+        }
+        else{
+            if(null == notice || null == notice.getId()){
+                AclinkFormValues newNotice = new AclinkFormValues();
+                newNotice.setNamespaceId(namespaceId);
+                newNotice.setTitleId(0L);
+                newNotice.setValue(cmd.getStatus()==(byte)0 ? cmd.getStatus()==(byte)1 ? "close":"open":"");
+                newNotice.setType(AclinkFormValuesType.VISITOR_NOTICE.getCode());
+                newNotice.setStatus(cmd.getStatus());
+                newNotice.setOwnerId(cmd.getOwnerId());
+                newNotice.setOwnerType(cmd.getOwnerType());
+                newNotice.setCreatorUid(user.getId());
+                newNotice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.createAclinkFormValues(newNotice);
+                resp.setNotice(ConvertHelper.convert(newNotice, AclinkFormValuesDTO.class));
+            }
+            else if(null != notice && notice.getId() != null){
+                notice.setValue(cmd.getStatus()==(byte)0 ? "close":cmd.getStatus()==(byte)1 ? "open":"");
+                notice.setStatus(cmd.getStatus());
+                notice.setOperatorUid(user.getId());
+                notice.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.updateAclinkFormValues(notice);
+                resp.setNotice(ConvertHelper.convert(notice, AclinkFormValuesDTO.class));
+            }
+        }
+        return resp;
+    }
 }
 
 

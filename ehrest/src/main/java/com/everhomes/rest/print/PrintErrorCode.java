@@ -23,6 +23,7 @@ public class PrintErrorCode {
 	
 	public static final int ERROR_PAYEE_ACCOUNT_NOT_CONFIG= 11000;//收款账户未设置
 	public static final int ERROR_MERCHANT_ID_NOT_FOUND= 11001;//该商户id不存在
+	public static final int ERROR_GET_PAYEE_INFO_BY_MERCHANT_ID= 11002;//根据商户查询支付id不存在
 	
 
 	//eh_locale_strings

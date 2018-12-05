@@ -83,6 +83,10 @@ public interface ArchivesService {
 
     ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType);
 
+    List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, List<Long> departmentIds, ListingQueryBuilderCallback queryBuilderCallback);
+
+    void addSubDptIds(Long departmentId, List<Long> subDptIds);
+
     List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback);
 
     void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd);
@@ -106,4 +110,6 @@ public interface ArchivesService {
     /* 同步数据接口 end */
 
 	ArchivesContactDTO getArchivesContact(GetArchivesContactCommand cmd);
+
+	void updateArchivesEmployeeContact(Integer namespaceId, Long userId, String newContactToken);
 }

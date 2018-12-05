@@ -50,12 +50,9 @@ import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 import com.everhomes.rest.yellowPage.AllianceTagDTO;
 import com.everhomes.rest.yellowPage.AllianceTagGroupDTO;
-import com.everhomes.rest.yellowPage.GetFormListCommand;
-import com.everhomes.rest.yellowPage.GetFormListResponse;
-import com.everhomes.rest.yellowPage.GetWorkFlowListCommand;
-import com.everhomes.rest.yellowPage.GetWorkFlowListResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentType;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
@@ -67,6 +64,7 @@ import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.standard.SelfDefinedState;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
+import com.everhomes.server.schema.tables.records.EhAllianceOperateServicesRecord;
 import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
 import com.everhomes.server.schema.tables.records.EhFlowsRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalValsRecord;
@@ -74,6 +72,7 @@ import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -82,6 +81,8 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.yellowPage.AllianceConfigState;
 import com.everhomes.yellowPage.AllianceConfigStateProvider;
+import com.everhomes.yellowPage.AllianceOperateService;
+import com.everhomes.yellowPage.AllianceOperateServiceProvider;
 import com.everhomes.yellowPage.AllianceStandardService;
 import com.everhomes.yellowPage.AllianceTagProvider;
 import com.everhomes.yellowPage.ServiceAllianceAttachment;
@@ -89,6 +90,10 @@ import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.ServiceAlliances;
 import com.everhomes.yellowPage.YellowPageProvider;
 import com.everhomes.yellowPage.YellowPageService;
+import com.everhomes.yellowPage.faq.AllianceFAQ;
+import com.everhomes.yellowPage.faq.AllianceFAQProvider;
+import com.everhomes.yellowPage.faq.AllianceFAQServiceCustomer;
+import com.everhomes.yellowPage.faq.AllianceFAQType;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateCommand;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateResponse;
 import com.everhomes.organization.Organization;
@@ -128,7 +133,6 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	
 	@Autowired
 	private ServiceCategoryMatchProvider serviceCategoryMatchProvider;
-	
 	@Autowired
 	private GeneralApprovalProvider generalApprovalProvider;
 	@Autowired
@@ -144,22 +148,17 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	@Autowired
 	private LaunchPadProvider launchPadItemProvider;
 	@Autowired
+	private AllianceFAQProvider allianceFAQProvider;
+	@Autowired
 	private UserProvider userProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	@Autowired
 	private FlowProvider flowProvider;
-
-	
-	@Override
-	public GetFormListResponse getFormList(GetFormListCommand cmd) {
-		return null;
-	}
-
-	@Override
-	public GetWorkFlowListResponse getWorkFlowList(GetWorkFlowListCommand cmd) {
-		return null;
-	}
+	@Autowired
+	private AllianceOperateServiceProvider allianceOperateServiceProvider;
+	@Autowired
+	ServiceModuleAppService serviceModuleAppService;
 
 	@Override
 	public void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
@@ -196,12 +195,29 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			// 删除tag
 			deleteProjectTags(type,projectId);
 			
+			// 删除faq
+			deleteFAQConfig(type,projectId);
+			
 			// 更新配置状态
 			updateAllianceConfigState(state, type, projectId, SelfDefinedState.DISABLE.getCode());
 			
 			return null;
 		});
 
+	}
+
+	private void deleteFAQConfig(Long type, Long projectId) {
+		
+		AllianceCommonCommand cmd = new AllianceCommonCommand();
+		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		cmd.setOwnerId(projectId);
+		cmd.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+		cmd.setType(type);
+		
+		allianceFAQProvider.deleteFAQTypes(cmd);
+		allianceFAQProvider.deleteFAQs(cmd,null);
+		allianceOperateServiceProvider.deleteOperateServices(cmd);
+		allianceFAQProvider.deleteFAQOnlineService(cmd);
 	}
 
 	private void deleteProjectTags(Long type, Long projectId) {
@@ -219,15 +235,62 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			updateAllianceConfigState(state, type, projectId, SelfDefinedState.ENABLE.getCode());
 			copyCategorysConfigToProject(type, projectId, organizationId);
 			copyAllianceTagsToProject(type, projectId, organizationId);
-			copyAllianceCategoryMathToProject(type, projectId, organizationId);
+			copyFaqConfigToProject(type, projectId, organizationId);
 			return null;
 		});
 	}
 
-	private void copyAllianceCategoryMathToProject(Long type, Long projectId, Long organizationId) {
+
+	private void copyFaqConfigToProject(Long type, Long projectId, Long organizationId) {
 		
+		AllianceCommonCommand cmd = new AllianceCommonCommand();
+		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		cmd.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+		cmd.setOwnerId(organizationId);
+		cmd.setType(type);
 		
+		Map<Long, AllianceFAQType> map = new HashMap<>();
 		
+		//faq type
+		List<AllianceFAQType> faqTypes = allianceFAQProvider.listFAQTypes(cmd, null, null);
+		for(AllianceFAQType faqType : faqTypes) {
+			faqType.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+			faqType.setOwnerId(projectId);
+			Long oldFaqTypeId = faqType.getId();
+			allianceFAQProvider.createFAQType(faqType);
+			map.put(oldFaqTypeId, faqType);
+		}
+		
+		//faq
+		List<AllianceFAQ> faqs = allianceFAQProvider.listAllFAQs(cmd);
+		AllianceFAQType fType = null;
+		for(AllianceFAQ faq : faqs) {
+			fType = map.get(faq.getTypeId());
+			if (null == fType) {
+				continue;
+			}
+			faq.setTypeId(fType.getId());
+			faq.setTypeName(fType.getName());
+			faq.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+			faq.setOwnerId(projectId);
+			faq.setSolveTimes(0);
+			faq.setUnSolveTimes(0);
+			allianceFAQProvider.createFAQ(faq);
+		}
+		
+		//operate_services
+//		List<AllianceOperateService> operateServices = allianceFAQProvider.listOperateServices(cmd);
+//		for (AllianceOperateService operateService : operateServices) {
+//			operateService.set
+//		}
+		
+//		service_customers
+		AllianceFAQServiceCustomer onlineService = allianceFAQProvider.getFAQOnlineService(cmd);
+		if (null != onlineService) {
+			onlineService.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+			onlineService.setOwnerId(projectId);
+			allianceFAQProvider.createFAQOnlineService(onlineService);
+		}
 	}
 
 	private void updateAllianceConfigState(AllianceConfigState state,  Long type, Long projectId, byte status) {
@@ -534,7 +597,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	}
 
 	@Override
-	public ServiceCategoryMatch findServiceCategoryMatch(String ownerType, Long ownerId, Long type, Long serviceId) {
+	public ServiceCategoryMatch findServiceCategory(String ownerType, Long ownerId, Long type, Long serviceId) {
 		return serviceCategoryMatchProvider.findMatch(ownerType, ownerId, type, serviceId);
 	}
 	
@@ -543,8 +606,6 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		serviceCategoryMatchProvider.updateMatchCategoryName(type, categoryId, categoryName);
 	}
 	
-	
-
 	@Override
 	public String transferMainAllianceOwnerType() {
 		
@@ -557,7 +618,6 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		
 		return totalUpdate.toString();
 	}
-	
 	
 	
 	@Override
@@ -685,6 +745,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 					GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approvalId);
 					if (null != approval) {
 						sa.setFormId(approval.getFormOriginId());
+						sa.setStringTag5(""+approval.getId());
 						formCount++;
 						flow = getFlowByApprovalId(approval.getId());
 					}
@@ -884,5 +945,6 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		
 		return cmd;
 	}
+	
 	
 }

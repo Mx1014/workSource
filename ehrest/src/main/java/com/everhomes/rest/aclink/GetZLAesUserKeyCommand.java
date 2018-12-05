@@ -3,31 +3,39 @@ package com.everhomes.rest.aclink;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 
- * <li>userIds: 用户id列表</li>
- * <li>MacAddress: 门禁设备MAC地址</li>
+ * <li>authId: 授权id列表表</li>
+ * <li>macAddress: 门禁设备MAC地址</li>
  * </ul>
  *
  */
 public class GetZLAesUserKeyCommand {
-	private List<Long> userIds;
-	private String MacAddress;
-	public List<Long> getUserIds() {
-		return userIds;
+	@NotNull
+	private List<Long> authId;
+	@NotNull
+	private String macAddress;
+    public List<Long> getAuthId() {
+		return authId;
 	}
-	public void setUserIds(List<Long> userIds) {
-		this.userIds = userIds;
+
+	public void setAuthId(List<Long> authId) {
+		this.authId = authId;
 	}
+
 	public String getMacAddress() {
-		return MacAddress;
+		return macAddress;
 	}
+
 	public void setMacAddress(String macAddress) {
-		MacAddress = macAddress;
+		this.macAddress = macAddress;
 	}
-    @Override
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

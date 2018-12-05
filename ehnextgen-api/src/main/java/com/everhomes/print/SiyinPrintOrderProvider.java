@@ -27,7 +27,7 @@ public interface SiyinPrintOrderProvider {
 	
 	SiyinPrintOrder findSiyinPrintOrderByGeneralOrderId(String GeneralOrderId);
 
-	SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long id, Byte jobType, String ownerType, Long ownerId, String printerName);
+	SiyinPrintOrder findUnlockedOrderByUserId(Long id, Byte jobType, String ownerType, Long ownerId, String printerName);
 
 	List<SiyinPrintOrder> listSiyinPrintOrderByOwners(List<Object> ownerTypeList,
 			List<Object> ownerIdList, Timestamp startTime,

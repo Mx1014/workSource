@@ -148,6 +148,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
     @Autowired
 	private LaunchPadConfigProvider launchPadConfigProvider;
 
+    @Autowired
+    private OrdinaryLinkRouterListener ordinaryLinkRouterListener;
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
 
@@ -1350,7 +1352,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		return response;
 	}
 
-	private List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
+	@Override
+	public List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
 		List<AppDTO> appDtos = new ArrayList<>() ;
 		if(userCommunityApps != null && userCommunityApps.size() > 0){
 			for (ServiceModuleApp app: userCommunityApps){

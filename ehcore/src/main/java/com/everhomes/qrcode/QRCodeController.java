@@ -53,6 +53,21 @@ public class QRCodeController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /qrcode/newQRCodeForActivity</b>
+     * <p>创建活动的签到二维码</p>
+     */
+    @RequestMapping("newQRCodeForActivity")
+    @RestReturn(value=QRCodeDTO.class)
+    public RestResponse newQRCodeForActivity(@Valid NewQRCodeCommand cmd) {
+        QRCodeDTO qrcodeDto = this.qrcodeService.createQRCodeForActivity(cmd);
+
+        RestResponse response = new RestResponse(qrcodeDto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /qrcode/getQRCodeInfo</b>

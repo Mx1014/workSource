@@ -1178,4 +1178,12 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         EhUserActivitiesDao dao = new EhUserActivitiesDao(context.configuration());
         dao.delete(activity);
     }
+
+    @Override
+    public List<VipPriority> listVipPriorityByNamespaceId(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_VIP_PRIORITY)
+                .where(Tables.EH_VIP_PRIORITY.NAMESPACE_ID.eq(namespaceId))
+                .fetchInto(VipPriority.class);
+    }
 }

@@ -15,8 +15,6 @@ import java.io.Serializable;
  */
 public class FlowServiceTypeDTO implements Serializable {
 
-
-
     private Long id;
     private Long moduleId;
     private Long organizationId;

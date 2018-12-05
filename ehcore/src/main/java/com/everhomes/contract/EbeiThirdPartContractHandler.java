@@ -613,10 +613,10 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                     if(address != null) {
                         CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
                         if(addressMapping != null) {
-                            addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+                            addressMapping.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
                             propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
                         } else {
-                            address.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+                            address.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
                             addressProvider.updateAddress(address);
                         }
 
@@ -637,7 +637,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                     propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
                 } else {
                     Address address = addressProvider.findAddressById(apartment.getAddressId());
-                    address.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+                    address.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
                     addressProvider.updateAddress(address);
                 }
 
