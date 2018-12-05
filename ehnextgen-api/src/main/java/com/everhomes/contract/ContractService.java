@@ -81,5 +81,8 @@ public interface ContractService {
 	default void copyContract(InitializationCommand cmd){};
 	default SearchProgressDTO findContractOperateTaskById(SearchProgressCommand cmd){return null;};
 	default void autoGeneratingBill(AutoGeneratingBillCommand cmd){};
+	
+	// 合同模板
+	default void generateContractDocuments(GenerateContractDocumentsCommand cmd){};
 
 }

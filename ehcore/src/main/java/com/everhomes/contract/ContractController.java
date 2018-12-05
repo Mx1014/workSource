@@ -717,8 +717,26 @@ public class ContractController extends ControllerBase {
 	}
 	
 	/**
-	 * <p>合同更新/根据合同id,自动刷新合同账单</p>
-	 * <b>URL: /contract/autoGeneratingBill</b>
+	 * <p>合同模板/生成合同文档，把模板里面的key翻译成对应value</p>
+	 * <b>URL: /contract/generateContractDocuments</b>
+	 */
+	@RequestMapping("generateContractDocuments")
+	@RestReturn(String.class)
+	public RestResponse generateContractDocuments(GenerateContractDocumentsCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		contractService.generateContractDocuments(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
+	}
+	
+	/**
+	 * <p>合同模板/查看生成的合同文档</p>
+	 * <b>URL: /contract/viewContractDocuments</b>
 	 */
 	/*@RequestMapping("autoGeneratingBill")
 	@RestReturn(String.class)
