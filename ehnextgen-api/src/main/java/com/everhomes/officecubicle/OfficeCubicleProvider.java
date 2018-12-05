@@ -135,4 +135,7 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleStationRent> getOfficeCubicleStationRentByTime(Long spaceId, Byte rentType, Byte stationType,
 			Long beginDate, Long endDate);
 
+	List<OfficeCubicleStation> getOfficeCubicleStationByTime(Long spaceId, Byte rentFlag, Long beginDate,
+			Long endDate);
+
 }

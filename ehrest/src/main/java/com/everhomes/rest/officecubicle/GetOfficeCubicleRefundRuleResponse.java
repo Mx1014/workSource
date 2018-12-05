@@ -18,47 +18,21 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class GetOfficeCubicleRefundRuleResponse {
-    private Integer namespaceId;
-    private String ownerType;
-    private Long communityId;
-    private Long spaceId;
     private Byte refundStrategy;
-    private String refundTip;
+    private List<OfficeCubicleRefundTipDTO> refundTip;
     private List<OfficeCubicleRefundRuleDTO> refundStrategies;
+    private Integer refundPrice;
     
-    public Integer getNamespaceId() {
-        return namespaceId;
-    }
 
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
-    }
-
-    public String getOwnerType() {
-        return ownerType;
-    }
-
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
-    }
-
-    public Long getCommunityId() {
-        return communityId;
-    }
-
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
-
-    public Long getSpaceId() {
-		return spaceId;
+    public Integer getRefundPrice() {
+		return refundPrice;
 	}
 
-	public void setSpaceId(Long spaceId) {
-		this.spaceId = spaceId;
+	public void setRefundPrice(Integer refundPrice) {
+		this.refundPrice = refundPrice;
 	}
 
-    public Byte getRefundStrategy() {
+	public Byte getRefundStrategy() {
 		return refundStrategy;
 	}
 
@@ -66,11 +40,11 @@ public class GetOfficeCubicleRefundRuleResponse {
 		this.refundStrategy = refundStrategy;
 	}
 
-	public String getRefundTip() {
+	public List<OfficeCubicleRefundTipDTO> getRefundTip() {
 		return refundTip;
 	}
 
-	public void setRefundTip(String refundTip) {
+	public void setRefundTip(List<OfficeCubicleRefundTipDTO> refundTip) {
 		this.refundTip = refundTip;
 	}
 

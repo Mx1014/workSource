@@ -2,6 +2,7 @@ package com.everhomes.rest.officecubicle;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
@@ -27,6 +28,7 @@ import com.everhomes.util.StringHelper;
  * <li>orderStatus：订单状态{@link com.everhomes.rest.officecubicle.OfficeCubiceOrderStatus}</li>
  * <li>paidType:支付方式,10001-支付宝，10002-微信 {@link com.everhomes.rest.organization.VendorType}</li>
  * <li>paidMode:支付类型 {@link com.everhomes.rest.general.order.GorderPayType}</li>
+ * <li>rentStation:预定长租工位名称</li>
  * </ul>
  */
 public class OfficeRentOrderDTO {
@@ -51,7 +53,16 @@ public class OfficeRentOrderDTO {
     private Long orderNo;
     private String accountName;
 	private String openTime;
+	private List<String> rentStation;
 
+
+	public List<String> getRentStation() {
+		return rentStation;
+	}
+
+	public void setRentStation(List<String> rentStation) {
+		this.rentStation = rentStation;
+	}
 
 	public String getOpenTime() {
 		return openTime;

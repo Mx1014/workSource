@@ -23,7 +23,7 @@ public class UpdateOfficeCubicleRefundRuleCommand {
     private Long ownerId;
     private Long spaceId;
     private Byte refundStrategy;
-    private String refundTip;
+    private List<OfficeCubicleRefundTipDTO> refundTip;
     private List<OfficeCubicleRefundRuleDTO> refundStrategies;
     
     public Integer getNamespaceId() {
@@ -66,11 +66,11 @@ public class UpdateOfficeCubicleRefundRuleCommand {
 		this.refundStrategy = refundStrategy;
 	}
 
-	public String getRefundTip() {
+	public List<OfficeCubicleRefundTipDTO> getRefundTip() {
 		return refundTip;
 	}
 
-	public void setRefundTip(String refundTip) {
+	public void setRefundTip(List<OfficeCubicleRefundTipDTO> refundTip) {
 		this.refundTip = refundTip;
 	}
 

@@ -125,4 +125,5 @@ public interface OfficeCubicleService {
 	ListRentOrderForAppResponse listRentOrderForApp(ListRentOrderForAppCommand cmd);
 
 
+
 }
