@@ -17,6 +17,9 @@ import java.util.List;
  * <li>meetingSponsorUserId: 发起人的userId</li>
  * <li>meetingSponsorDetailId: 会议发起人detailId</li>
  * <li>meetingSponsorName: 会议发起人姓名</li>
+ * <li>meetingManagerUserId: 会务人的userId</li>
+ * <li>meetingManagerDetailId: 会议会务人detailId</li>
+ * <li>meetingManagerName: 会议会务人姓名</li>
  * <li>invitationUserCount: 邀请的参会人数</li>
  * <li>meetingDate: 会议日期的时间戳，不包含时分秒</li>
  * <li>expectBeginTime: 会议预定开始时间戳(毫秒数)，仅包含时分秒，如8:30等于8*3600*1000+30*60*1000</li>
@@ -32,6 +35,7 @@ import java.util.List;
  * <li>memberNamesSummary: 参会人名单</li>
  * <li>recordWordLimit: 会议纪要最大可输入字数</li>
  * <li>meetingInvitationDTOS: 参会人列表，参考{@link com.everhomes.rest.meeting.MeetingInvitationDTO}</li>
+ * <li>manager: 会务人头像信息</li>
  * <li>meetingRecordDetailInfoDTO: 会议纪要</li>
  * <li>meetingAttachments: 会议附件，参考{@link com.everhomes.rest.meeting.MeetingAttachmentDTO}</li>
  * </ul>
@@ -47,6 +51,9 @@ public class MeetingReservationDetailDTO {
     private Long meetingSponsorUserId;
     private Long meetingSponsorDetailId;
     private String meetingSponsorName;
+    private Long meetingManagerUserId;
+    private Long meetingManagerDetailId;
+    private String meetingManagerName;
     private Long meetingRecorderUserId;
     private Long meetingRecorderDetailId;
     private String meetingRecorderName;
@@ -65,6 +72,7 @@ public class MeetingReservationDetailDTO {
     private String memberNamesSummary;
     private Integer recordWordLimit;
     private List<MeetingInvitationDTO> meetingInvitationDTOS;
+    private MeetingInvitationDTO manager;
     private MeetingRecordDetailInfoDTO meetingRecordDetailInfoDTO;
     private List<MeetingAttachmentDTO> meetingAttachments;
 
@@ -130,6 +138,30 @@ public class MeetingReservationDetailDTO {
 
     public void setMeetingSponsorName(String meetingSponsorName) {
         this.meetingSponsorName = meetingSponsorName;
+    }
+
+    public Long getMeetingManagerUserId() {
+        return meetingManagerUserId;
+    }
+
+    public void setMeetingManagerUserId(Long meetingManagerUserId) {
+        this.meetingManagerUserId = meetingManagerUserId;
+    }
+
+    public Long getMeetingManagerDetailId() {
+        return meetingManagerDetailId;
+    }
+
+    public void setMeetingManagerDetailId(Long meetingManagerDetailId) {
+        this.meetingManagerDetailId = meetingManagerDetailId;
+    }
+
+    public String getMeetingManagerName() {
+        return meetingManagerName;
+    }
+
+    public void setMeetingManagerName(String meetingManagerName) {
+        this.meetingManagerName = meetingManagerName;
     }
 
     public Long getMeetingRecorderDetailId() {
@@ -300,16 +332,25 @@ public class MeetingReservationDetailDTO {
         this.recordWordLimit = recordWordLimit;
     }
 
+    public MeetingInvitationDTO getManager() {
+        return manager;
+    }
+
+    public void setManager(MeetingInvitationDTO manager) {
+        this.manager = manager;
+    }
+
+    public List<MeetingAttachmentDTO> getMeetingAttachments() {
+        return meetingAttachments;
+    }
+
+    public void setMeetingAttachments(List<MeetingAttachmentDTO> meetingAttachments) {
+        this.meetingAttachments = meetingAttachments;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-	public List<MeetingAttachmentDTO> getMeetingAttachments() {
-		return meetingAttachments;
-	}
-
-	public void setMeetingAttachments(List<MeetingAttachmentDTO> meetingAttachments) {
-		this.meetingAttachments = meetingAttachments;
-	}
 }

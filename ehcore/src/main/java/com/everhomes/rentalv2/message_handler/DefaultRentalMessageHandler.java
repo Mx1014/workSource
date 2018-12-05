@@ -58,9 +58,6 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
             return;
         //给负责人推送
         StringBuilder managerContent = new StringBuilder();
-        User user = userProvider.findUserById(rentalBill.getRentalUid()) ;
-        if (null == user )
-            return;
         managerContent.append(rentalBill.getUserName()).append("（").append(rentalBill.getUserPhone()).append("）");
         managerContent.append("取消预约");
         managerContent.append(rentalBill.getResourceName()).append("（").append(rentalBill.getUseDetail()).append("）");
@@ -70,9 +67,6 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
     @Override
     public void addOrderSendMessage(RentalOrder rentalBill) {
-        User user = this.userProvider.findUserById(rentalBill.getRentalUid()) ;
-        if (null == user )
-            return;
 
         RentalResource rs = rentalCommonService.getRentalResource(rentalBill.getResourceType(), rentalBill.getRentalResourceId());
 
@@ -209,7 +203,8 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         Map<String, String> map = new HashMap<>();
         map.put("useDetail", rentalBill.getUseDetail());
         map.put("resourceName", rentalBill.getResourceName());
-        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+        if (!rentalBill.getRentalUid().equals(0L))
+            rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
                 RentalNotificationTemplateCode.RENTAL_CANCEL_NOT_PAY);
     }
 
@@ -220,7 +215,8 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         map.put("useDetail", rentalBill.getUseDetail());
         map.put("resourceName",rentalBill.getResourceName());
         map.put("totalAmount", rentalBill.getPayTotalMoney().toString());
-        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+        if (!rentalBill.getRentalUid().equals(0L))
+         rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
                 RentalNotificationTemplateCode.RENTAL_CANCEL_ORDER_NO_REFUND);
 
         //发短信
@@ -243,7 +239,8 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         map.put("refundAmount", rentalBill.getRefundAmount().toString());
         map.put("totalAmount", rentalBill.getPayTotalMoney().toString());
         map.put("resourceName", rentalBill.getResourceName());
-        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+        if (!rentalBill.getRentalUid().equals(0L))
+             rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
                 RentalNotificationTemplateCode.RENTAL_CANCEL_ORDER);
 
         //发短信
@@ -264,7 +261,8 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         Map<String, String> map = new HashMap<>();
         map.put("useDetail", rentalBill.getUseDetail());
         map.put("resourceName", rentalBill.getResourceName());
-        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+        if (!rentalBill.getRentalUid().equals(0L))
+             rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
                 RentalNotificationTemplateCode.RENTAL_BEGIN_NOTIFY);
 
         //用户发短信
@@ -292,7 +290,8 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         Map<String, String> map = new HashMap<>();
         map.put("useDetail", rentalBill.getUseDetail());
         map.put("resourceName", rentalBill.getResourceName());
-        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+        if (!rentalBill.getRentalUid().equals(0L))
+             rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
                 RentalNotificationTemplateCode.RENTAL_END_NOTIFY_HOUR_USER);
 
         //用户发短信
@@ -351,7 +350,8 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         map.put("totalAmount", rentalBill.getPayTotalMoney().toString());
         map.put("refundAmount", rentalBill.getRefundAmount().toString());
         map.put("resourceName", rentalBill.getResourceName());
-        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+        if (!rentalBill.getRentalUid().equals(0L))
+            rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
                 RentalNotificationTemplateCode.RENTAL_CANCEL_ORDER_REFUND);
         //发短信
         String templateScope = SmsTemplateCode.SCOPE;

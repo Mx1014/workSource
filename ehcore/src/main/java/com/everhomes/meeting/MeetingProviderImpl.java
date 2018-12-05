@@ -10,34 +10,37 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.meeting.MeetingGeneralFlag;
 import com.everhomes.rest.meeting.MeetingMemberSourceType;
 import com.everhomes.rest.meeting.MeetingRoomStatus;
+import com.everhomes.rest.meeting.QueryMyMeetingTemplateCondition;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhMeetingAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhMeetingInvitationTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhMeetingInvitationsDao;
 import com.everhomes.server.schema.tables.daos.EhMeetingRecordsDao;
 import com.everhomes.server.schema.tables.daos.EhMeetingReservationsDao;
 import com.everhomes.server.schema.tables.daos.EhMeetingRoomsDao;
+import com.everhomes.server.schema.tables.daos.EhMeetingTemplatesDao;
 import com.everhomes.server.schema.tables.pojos.EhMeetingAttachments;
+import com.everhomes.server.schema.tables.pojos.EhMeetingInvitationTemplates;
 import com.everhomes.server.schema.tables.pojos.EhMeetingInvitations;
 import com.everhomes.server.schema.tables.pojos.EhMeetingRecords;
 import com.everhomes.server.schema.tables.pojos.EhMeetingReservations;
 import com.everhomes.server.schema.tables.pojos.EhMeetingRooms;
+import com.everhomes.server.schema.tables.pojos.EhMeetingTemplates;
+import com.everhomes.server.schema.tables.records.EhMeetingAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhMeetingInvitationTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhMeetingInvitationsRecord;
 import com.everhomes.server.schema.tables.records.EhMeetingRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhMeetingReservationsRecord;
 import com.everhomes.server.schema.tables.records.EhMeetingRoomsRecord;
+import com.everhomes.server.schema.tables.records.EhMeetingTemplatesRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-
-
-
-
-
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.JoinType;
+import org.jooq.DeleteQuery;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
@@ -47,10 +50,6 @@ import org.jooq.UpdateQuery;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-
-
-
 
 import java.sql.Date;
 import java.sql.Time;
@@ -63,7 +62,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;import java.util.stream.Collectors;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Repository
@@ -409,30 +409,35 @@ public class MeetingProviderImpl implements MeetingProvider {
     @Override
     public List<MeetingReservation> findMeetingReservationsByDetailId(QueryMyMeetingsCondition condition) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhMeetingReservationsRecord> query = context.selectQuery(Tables.EH_MEETING_RESERVATIONS);
-        query.addJoin(Tables.EH_MEETING_INVITATIONS, JoinType.JOIN, Tables.EH_MEETING_RESERVATIONS.ID.eq(Tables.EH_MEETING_INVITATIONS.MEETING_RESERVATION_ID));
-        query.addConditions(Tables.EH_MEETING_RESERVATIONS.NAMESPACE_ID.eq(condition.getNamespaceId()));
-        query.addConditions(Tables.EH_MEETING_RESERVATIONS.ORGANIZATION_ID.eq(condition.getOrganizationId()));
-        query.addConditions(Tables.EH_MEETING_INVITATIONS.SOURCE_TYPE.eq(MeetingMemberSourceType.MEMBER_DETAIL.getCode()));
-        query.addConditions(Tables.EH_MEETING_INVITATIONS.SOURCE_ID.eq(condition.getDetailId()));
-        query.addConditions(Tables.EH_MEETING_INVITATIONS.ROLE_TYPE.eq(MeetingInvitationRoleType.ATTENDEE.getCode()));
-        query.addConditions(Tables.EH_MEETING_RESERVATIONS.STATUS.eq(MeetingReservationStatus.NORMAL.getCode()));
-        query.setDistinct(Boolean.TRUE);
-        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-        if (condition.isEndFlag()) {
-            query.addConditions(Tables.EH_MEETING_RESERVATIONS.EXPECT_END_TIME.lt(now)
-                    .or(Tables.EH_MEETING_RESERVATIONS.ACT_END_TIME.isNotNull()));
-            query.addOrderBy(Tables.EH_MEETING_RESERVATIONS.EXPECT_BEGIN_TIME.asc(), Tables.EH_MEETING_RESERVATIONS.CREATE_TIME.asc());
-        } else {
-            query.addConditions(Tables.EH_MEETING_RESERVATIONS.EXPECT_END_TIME.ge(now)
-                    .and(Tables.EH_MEETING_RESERVATIONS.ACT_END_TIME.isNull()));
-            query.addOrderBy(Tables.EH_MEETING_RESERVATIONS.EXPECT_BEGIN_TIME.asc(), Tables.EH_MEETING_RESERVATIONS.CREATE_TIME.asc());
+        SelectJoinStep<Record> query = context.selectDistinct(Tables.EH_MEETING_RESERVATIONS.fields()).from(Tables.EH_MEETING_RESERVATIONS).join(Tables.EH_MEETING_INVITATIONS).on(Tables.EH_MEETING_RESERVATIONS.ID.eq(Tables.EH_MEETING_INVITATIONS.MEETING_RESERVATION_ID));
+        Condition queryCondition = Tables.EH_MEETING_RESERVATIONS.NAMESPACE_ID.eq(condition.getNamespaceId());
+        queryCondition = queryCondition.and(Tables.EH_MEETING_RESERVATIONS.ORGANIZATION_ID.eq(condition.getOrganizationId()));
+        queryCondition = queryCondition.and(Tables.EH_MEETING_INVITATIONS.SOURCE_TYPE.eq(MeetingMemberSourceType.MEMBER_DETAIL.getCode()));
+        queryCondition = queryCondition.and(Tables.EH_MEETING_INVITATIONS.SOURCE_ID.eq(condition.getDetailId()));
+        queryCondition = queryCondition.and(Tables.EH_MEETING_INVITATIONS.ROLE_TYPE.in(MeetingInvitationRoleType.ATTENDEE.getCode(), MeetingInvitationRoleType.MEETING_MANAGER.getCode()));
+        queryCondition = queryCondition.and(Tables.EH_MEETING_RESERVATIONS.STATUS.eq(MeetingReservationStatus.NORMAL.getCode()));
+        if (condition.getBetweenFromDate() != null) {
+            queryCondition = queryCondition.and(Tables.EH_MEETING_RESERVATIONS.MEETING_DATE.ge(condition.getBetweenFromDate()));
+        }
+        if (condition.getBetweenToDate() != null) {
+            queryCondition = queryCondition.and(Tables.EH_MEETING_RESERVATIONS.MEETING_DATE.le(condition.getBetweenToDate()));
         }
 
-        if (condition.getOffset() != null && condition.getPageSize() != null) {
-            query.addLimit(condition.getOffset(), condition.getPageSize());
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        if (condition.isEndFlag()) {
+            queryCondition = queryCondition.and(Tables.EH_MEETING_RESERVATIONS.EXPECT_END_TIME.lt(now)
+                    .or(Tables.EH_MEETING_RESERVATIONS.ACT_END_TIME.isNotNull()));
+            query.orderBy(Tables.EH_MEETING_RESERVATIONS.EXPECT_BEGIN_TIME.asc(), Tables.EH_MEETING_RESERVATIONS.CREATE_TIME.asc());
+        } else {
+            queryCondition = queryCondition.and(Tables.EH_MEETING_RESERVATIONS.EXPECT_END_TIME.ge(now)
+                    .and(Tables.EH_MEETING_RESERVATIONS.ACT_END_TIME.isNull()));
+            query.orderBy(Tables.EH_MEETING_RESERVATIONS.EXPECT_BEGIN_TIME.asc(), Tables.EH_MEETING_RESERVATIONS.CREATE_TIME.asc());
         }
-        List<MeetingReservation> results = query.fetch().map(new DefaultRecordMapper<>(Tables.EH_MEETING_RESERVATIONS.recordType(), MeetingReservation.class));
+        query.where(queryCondition);
+        if (condition.getOffset() != null && condition.getPageSize() != null) {
+            query.limit(condition.getOffset(), condition.getPageSize());
+        }
+        List<MeetingReservation> results = query.fetch().map(new DefaultRecordMapper(Tables.EH_MEETING_RESERVATIONS.recordType(), MeetingReservation.class));
         if (results == null || results.isEmpty()) {
             return Collections.emptyList();
         }
@@ -440,12 +445,14 @@ public class MeetingProviderImpl implements MeetingProvider {
     }
 
     @Override
-    public List<EhMeetingInvitations> findMeetingInvitationsByMeetingId(Long meetingReservationId, String roleType) {
+    public List<EhMeetingInvitations> findMeetingInvitationsByMeetingId(Long meetingReservationId, String... roleTypes) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhMeetingInvitationsRecord> query = context.selectQuery(Tables.EH_MEETING_INVITATIONS);
         query.addConditions(Tables.EH_MEETING_INVITATIONS.MEETING_RESERVATION_ID.eq(meetingReservationId));
-        if (roleType != null) {
-            query.addConditions(Tables.EH_MEETING_INVITATIONS.ROLE_TYPE.eq(roleType));
+        if (roleTypes != null && roleTypes.length > 0) {
+            query.addConditions(Tables.EH_MEETING_INVITATIONS.ROLE_TYPE.in(roleTypes));
+        } else {
+            return new ArrayList<>();
         }
 
         Result<EhMeetingInvitationsRecord> results = query.fetch();
@@ -486,6 +493,15 @@ public class MeetingProviderImpl implements MeetingProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhMeetingInvitations.class));
         EhMeetingInvitationsDao dao = new EhMeetingInvitationsDao(context.configuration());
         dao.insert(meetingInvitations);
+    }
+
+    @Override
+    public void batchDeleteMeetingInvitationsByMeetingId(Long meetingReservationId, String... roleTypes) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhMeetingInvitationsRecord> deleteQuery = context.deleteQuery(Tables.EH_MEETING_INVITATIONS);
+        deleteQuery.addConditions(Tables.EH_MEETING_INVITATIONS.MEETING_RESERVATION_ID.eq(meetingReservationId));
+        deleteQuery.addConditions(Tables.EH_MEETING_INVITATIONS.ROLE_TYPE.in(roleTypes));
+        deleteQuery.execute();
     }
 
     @Override
@@ -580,7 +596,7 @@ public class MeetingProviderImpl implements MeetingProvider {
     }
 
 	@Override
-	public List<MeetingAttachment> listMeetingAttachements(Long ownerId, String ownerType) {
+	public List<MeetingAttachment> listMeetingAttachments(Long ownerId, String ownerType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectConditionStep<Record> query = context.select().from(Tables.EH_MEETING_ATTACHMENTS)
@@ -625,4 +641,147 @@ public class MeetingProviderImpl implements MeetingProvider {
         EhMeetingAttachmentsDao dao = new EhMeetingAttachmentsDao(context.configuration());
 		dao.insert(attachments);
 	}
+
+    @Override
+    public void deleteMeetingAttachmentsByOwnerId(Integer namespaceId, String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhMeetingAttachments.class));
+        DeleteQuery<EhMeetingAttachmentsRecord> deleteQuery = context.deleteQuery(Tables.EH_MEETING_ATTACHMENTS);
+        deleteQuery.addConditions(Tables.EH_MEETING_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId));
+        deleteQuery.addConditions(Tables.EH_MEETING_ATTACHMENTS.OWNER_TYPE.eq(ownerType));
+        deleteQuery.addConditions(Tables.EH_MEETING_ATTACHMENTS.OWNER_ID.eq(ownerId));
+        deleteQuery.execute();
+    }
+
+    @Override
+    public MeetingTemplate findMeetingTemplateById(Long id, Integer namespaceId, Long organizationId, Long userId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhMeetingTemplatesRecord> query = context.selectQuery(Tables.EH_MEETING_TEMPLATES);
+        query.addConditions(Tables.EH_MEETING_TEMPLATES.ID.eq(id));
+        query.addConditions(Tables.EH_MEETING_TEMPLATES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_MEETING_TEMPLATES.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_MEETING_TEMPLATES.USER_ID.eq(userId));
+        query.addLimit(1);
+
+        EhMeetingTemplatesRecord record = query.fetchOne();
+        return ConvertHelper.convert(record, MeetingTemplate.class);
+    }
+
+    @Override
+    public Long createMeetingTemplate(MeetingTemplate template) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhMeetingTemplates.class));
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhMeetingTemplates.class));
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        template.setId(id);
+        template.setCreatorUid(UserContext.currentUserId());
+        template.setCreateTime(now);
+        template.setOperatorUid(UserContext.currentUserId());
+        template.setOperateTime(now);
+
+        EhMeetingTemplatesDao dao = new EhMeetingTemplatesDao(context.configuration());
+        dao.insert(template);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhMeetingTemplates.class, null);
+        return id;
+    }
+
+    @Override
+    public Long updateMeetingTemplate(MeetingTemplate template) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhMeetingTemplates.class));
+
+        template.setOperatorUid(UserContext.currentUserId());
+        template.setOperateTime(new Timestamp(System.currentTimeMillis()));
+
+        EhMeetingTemplatesDao dao = new EhMeetingTemplatesDao(context.configuration());
+        dao.update(template);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhMeetingTemplates.class, template.getId());
+        return template.getId();
+    }
+
+    @Override
+    public void deleteMeetingTemplate(MeetingTemplate template) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhMeetingTemplates.class));
+
+        EhMeetingTemplatesDao dao = new EhMeetingTemplatesDao(context.configuration());
+        dao.delete(template);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhMeetingTemplates.class, template.getId());
+    }
+
+    @Override
+    public List<MeetingTemplate> findMeetingTemplates(QueryMyMeetingTemplateCondition condition) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhMeetingTemplatesRecord> query = context.selectQuery(Tables.EH_MEETING_TEMPLATES);
+        query.addConditions(Tables.EH_MEETING_TEMPLATES.NAMESPACE_ID.eq(condition.getNamespaceId()));
+        query.addConditions(Tables.EH_MEETING_TEMPLATES.ORGANIZATION_ID.eq(condition.getOrganizationId()));
+        query.addConditions(Tables.EH_MEETING_TEMPLATES.USER_ID.eq(condition.getUserId()));
+        query.addOrderBy(Tables.EH_MEETING_TEMPLATES.CREATE_TIME.desc());
+        if (condition.getOffset() != null && condition.getPageSize() != null) {
+            query.addLimit(condition.getOffset(), condition.getPageSize());
+        }
+        List<MeetingTemplate> results = query.fetch().map(new DefaultRecordMapper(Tables.EH_MEETING_TEMPLATES.recordType(), MeetingTemplate.class));
+        if (results == null || results.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return results;
+    }
+
+    @Override
+    public List<MeetingInvitationTemplate> findMeetingInvitationTemplates(Integer namespaceId, Long organizationId, Long meetingTemplateId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhMeetingInvitationTemplatesRecord> query = context.selectQuery(Tables.EH_MEETING_INVITATION_TEMPLATES);
+        query.addConditions(Tables.EH_MEETING_INVITATION_TEMPLATES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_MEETING_INVITATION_TEMPLATES.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_MEETING_INVITATION_TEMPLATES.MEETING_TEMPLATE_ID.eq(meetingTemplateId));
+
+        List<MeetingInvitationTemplate> results = query.fetch().map(new DefaultRecordMapper(Tables.EH_MEETING_INVITATION_TEMPLATES.recordType(), MeetingInvitationTemplate.class));
+        if (results == null || results.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return results;
+    }
+
+    @Override
+    public void deleteMeetingInvitationTemplates(Integer namespaceId, Long organizationId, Long meetingTemplateId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhMeetingInvitationTemplates.class));
+        DeleteQuery<EhMeetingInvitationTemplatesRecord> query = context.deleteQuery(Tables.EH_MEETING_INVITATION_TEMPLATES);
+        query.addConditions(Tables.EH_MEETING_INVITATION_TEMPLATES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_MEETING_INVITATION_TEMPLATES.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_MEETING_INVITATION_TEMPLATES.MEETING_TEMPLATE_ID.eq(meetingTemplateId));
+        query.execute();
+    }
+
+    @Override
+    public void batchCreateMeetingInvitationTemplate(List<MeetingInvitationTemplate> invitationTemplates) {
+        if (CollectionUtils.isEmpty(invitationTemplates)) {
+            return;
+        }
+        long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhMeetingInvitationTemplates.class), invitationTemplates.size());
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        List<EhMeetingInvitationTemplates> ehMeetingInvitationTemplates = new ArrayList<>();
+        for (MeetingInvitationTemplate template : invitationTemplates) {
+            EhMeetingInvitationTemplates ehMeetingInvitationTemplate = ConvertHelper.convert(template, EhMeetingInvitationTemplates.class);
+            ehMeetingInvitationTemplate.setId(id++);
+            ehMeetingInvitationTemplate.setCreatorUid(UserContext.currentUserId());
+            ehMeetingInvitationTemplate.setCreateTime(now);
+            ehMeetingInvitationTemplate.setOperatorUid(UserContext.currentUserId());
+            ehMeetingInvitationTemplate.setOperateTime(now);
+            ehMeetingInvitationTemplates.add(ehMeetingInvitationTemplate);
+        }
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhMeetingInvitationTemplates.class));
+        EhMeetingInvitationTemplatesDao dao = new EhMeetingInvitationTemplatesDao(context.configuration());
+        dao.insert(ehMeetingInvitationTemplates);
+    }
+
+    @Override
+    public void batchDeleteMeetingInvitationTemplate(List<MeetingInvitationTemplate> invitationTemplates) {
+        if (CollectionUtils.isEmpty(invitationTemplates)) {
+            return;
+        }
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhMeetingInvitationTemplates.class));
+        EhMeetingInvitationTemplatesDao dao = new EhMeetingInvitationTemplatesDao(context.configuration());
+        dao.delete(invitationTemplates.stream().map(r -> {
+            return ConvertHelper.convert(r, EhMeetingInvitationTemplates.class);
+        }).collect(Collectors.toList()));
+    }
 }

@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.investment.InvitedCustomerService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
@@ -308,6 +309,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	
 	@Autowired
 	private AssetBillService assetBillService;
+
+	@Autowired
+	private InvitedCustomerService invitedCustomerService;
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -2095,6 +2099,10 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
 				enterpriseCustomer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
 				enterpriseCustomer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+				//2018年11月15日 黄鹏宇 统计客户状态变更
+				if(enterpriseCustomer.getLevelItemId() != null){
+					invitedCustomerService.changeCustomerLevelByCustomerId(enterpriseCustomer.getId(), enterpriseCustomer.getLevelItemId());
+				}
 				enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
 				enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
 			}
