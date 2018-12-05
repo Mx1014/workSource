@@ -855,6 +855,22 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
+	public List<OfficeCubicleStationRent> getOfficeCubicleStationRentByTime(Long spaceId, Byte rentType,Byte stationType,Long beginDate, Long endDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOfficeCubicleStationRentRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId));
+		if (rentType!=null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType));
+		if (stationType != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_TYPE.eq(stationType));
+		if (beginDate != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.gt(new Timestamp(beginDate)));
+		if (endDate != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.lt(new Timestamp(endDate)));
+		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStationRent.class));
+	}
+	
+	@Override
 	public List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType,Long spaceId,Byte rentFlag, Byte status, Long roomId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleRoomRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_ROOM);

@@ -132,4 +132,7 @@ public interface OfficeCubicleProvider {
 
 	void deleteAttachmentsBySpaceId(Long id, Byte type);
 
+	List<OfficeCubicleStationRent> getOfficeCubicleStationRentByTime(Long spaceId, Byte rentType, Byte stationType,
+			Long beginDate, Long endDate);
+
 }
