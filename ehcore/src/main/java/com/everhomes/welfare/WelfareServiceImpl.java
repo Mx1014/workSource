@@ -44,7 +44,9 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.promotion.coupon.controller.EnterpriseDistributionToPersonRestResponse;
+import com.everhomes.rest.promotion.coupon.controller.EnterpriseGetTaskStatusRestResponse;
 import com.everhomes.rest.promotion.coupon.enterprise.ObtainDetailsExtendDTO;
+import com.everhomes.rest.promotion.coupon.enterprise.TaskStatusParamDTO;
 import com.everhomes.rest.promotion.coupon.enterprise.TransferToPersonalDTO;
 import com.everhomes.rest.welfare.DeleteWelfareCommand;
 import com.everhomes.rest.welfare.DraftWelfareCommand;
@@ -65,6 +67,7 @@ import com.everhomes.rest.welfare.WelfareCouponDTO;
 import com.everhomes.rest.welfare.WelfareReceiverDTO;
 import com.everhomes.rest.welfare.WelfareStatus;
 import com.everhomes.rest.welfare.WelfaresDTO;
+import com.everhomes.sms.plugins.YunZhiXunSmsHandler.YzxSmsResult.Resp;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -139,6 +142,7 @@ public class WelfareServiceImpl implements WelfareService {
         return new GetWelfareResponse(processWelfaresDTO(welfare));
     }
     private WelfaresDTO processWelfaresDTO(Welfare r) {
+    	checkWelfareStatus(r);
     	return processWelfaresDTO(r, true);
     }
 
@@ -572,8 +576,13 @@ public class WelfareServiceImpl implements WelfareService {
 
 	@Override
 	public void updateWelfareStatus(UpdateWelfareStatusCommand cmd) {
-        Welfare welfare = welfareProvider.findWelfareById(cmd.getTaskId());
-        if (welfare == null) {
+		Welfare welfare = welfareProvider.findWelfareById(cmd.getTaskId());
+        
+		updateWelfareStatus(welfare, cmd.getStatus());
+	}
+
+	private void updateWelfareStatus(Welfare welfare, Byte status) {
+		if (welfare == null) {
             throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                     WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利不存在");
         }
@@ -581,9 +590,22 @@ public class WelfareServiceImpl implements WelfareService {
             throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                     WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能修改");
         }
-        if(cmd.getStatus() != null){
-        	welfare.setStatus(cmd.getStatus());
+        if(status != null){
+        	welfare.setStatus(status);
         }
         welfareProvider.updateWelfare(welfare);
+	}
+	
+	private void checkWelfareStatus(Welfare welfare){
+		if(WelfareStatus.SENDING == WelfareStatus.fromCode(welfare.getStatus())){
+			//TODO: 营销系统提供status查询接口
+			TaskStatusParamDTO cmd1 = new TaskStatusParamDTO();
+			cmd1.setTaskId(welfare.getId());
+			EnterpriseGetTaskStatusRestResponse resp = generalOrderService.getTaskStatus(cmd1);
+			Byte status = resp.getResponse() == null? null : resp.getResponse().getResultStatus();
+			if(status != null){
+				updateWelfareStatus(welfare, status);
+			}
+		}
 	}
 }
