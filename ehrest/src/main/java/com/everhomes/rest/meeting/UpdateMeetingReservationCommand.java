@@ -13,6 +13,7 @@ import java.util.List;
  * <li>systemMessageFlag: 0-关闭系统消息通知 1-开启系统消息通知，参考{@link com.everhomes.rest.meeting.MeetingGeneralFlag}</li>
  * <li>emailMessageFlag: 0-关闭邮箱通知 1-开启邮箱通知，参考{@link com.everhomes.rest.meeting.MeetingGeneralFlag}</li>
  * <li>meetingInvitations: 会议邀请参会人，参考{@link com.everhomes.rest.meeting.MeetingInvitationDTO}</li>
+ * <li>meetingManagerDetailId: 会务人</li>
  * <li>meetingAttachments: 会议附件，参考{@link com.everhomes.rest.meeting.MeetingAttachmentDTO}</li>
  * <li>meetingRoomId: 会议室ID，必填</li>
  * <li>meetingDate: 会议日期时间戳，不包含时分秒,必填</li>
@@ -32,6 +33,7 @@ public class UpdateMeetingReservationCommand {
     private Byte systemMessageFlag;
     private Byte emailMessageFlag;
     private List<MeetingInvitationDTO> meetingInvitations;
+    private Long meetingManagerDetailId;
     private List<MeetingAttachmentDTO> meetingAttachments;
     public Long getMeetingReservationId() {
         return meetingReservationId;
@@ -121,16 +123,25 @@ public class UpdateMeetingReservationCommand {
         this.endTime = endTime;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    public Long getMeetingManagerDetailId() {
+        return meetingManagerDetailId;
     }
 
-	public List<MeetingAttachmentDTO> getMeetingAttachments() {
+    public void setMeetingManagerDetailId(Long meetingManagerDetailId) {
+        this.meetingManagerDetailId = meetingManagerDetailId;
+    }
+
+    public List<MeetingAttachmentDTO> getMeetingAttachments() {
 		return meetingAttachments;
 	}
 
 	public void setMeetingAttachments(List<MeetingAttachmentDTO> meetingAttachments) {
 		this.meetingAttachments = meetingAttachments;
 	}
+
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

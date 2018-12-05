@@ -92,7 +92,7 @@ public class AclinkUtils {
         return Base64.encodeBase64String(binaryData);
     }
     
-    public static String packAesUserKey(String aesServerKey, Long userId, Integer keyId, Long expireTime) {
+    public static String packAesUserKey(String aesServerKey, Long authId, Integer keyId, Long expireTime) {
         try {
             byte[] serverKey = Base64.decodeBase64(aesServerKey);
             SecretKeySpec skeySpec = new SecretKeySpec(serverKey, "AES");
@@ -103,7 +103,7 @@ public class AclinkUtils {
             
             int curTime = (int) Math.ceil((expireTime.longValue() / 1000));
             byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
-            byte[] uidBytes = DataUtil.intToByteArray(userId.intValue());
+            byte[] uidBytes = DataUtil.intToByteArray(authId.intValue());
             byte[] uidPadding = {7, 9, 8};
             System.arraycopy(curTimeBytes, 0, data, 0, curTimeBytes.length);
             System.arraycopy(uidBytes, 0, data, 4, uidBytes.length);
