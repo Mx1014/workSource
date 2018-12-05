@@ -552,7 +552,7 @@ INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12117,'investment_pro
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12118,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12119,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12077,'investment_promotion','enterprise_customer');
-INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',48,'investment_promotion','enterpris e_customer');
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',48,'investment_promotion','enterprise_customer');
 
 
 UPDATE eh_var_fields SET field_param = '{\"fieldParamType\": \"unRenameSelect\", \"length\": 32}' WHERE id = 5;
