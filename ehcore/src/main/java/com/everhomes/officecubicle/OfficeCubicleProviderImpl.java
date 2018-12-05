@@ -845,7 +845,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
         return context.select().from(t)
                 .where(t.SPACE_ID.eq(spaceId))
                 .and(t.RENT_FLAG.eq(rentFlag))
-//                .and(beginTime.or(endTime))
+                .and(beginTime.or(endTime))
                 .fetchInto(OfficeCubicleStation.class);
 	}
 	

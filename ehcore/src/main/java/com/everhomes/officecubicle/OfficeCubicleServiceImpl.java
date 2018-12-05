@@ -2260,13 +2260,17 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetCubicleForOrderResponse getCubicleForOrder (GetCubicleForOrderCommand cmd){
 		GetCubicleForOrderResponse resp = new GetCubicleForOrderResponse();
+		
 		List<OfficeCubicleStation> stations = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
+		Timestamp t = new Timestamp(cmd.getBeginTime());
+		Timestamp d = new Timestamp(cmd.getEndTime());
+
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStationByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime());
 		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
 		stations.addAll(station);
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
-		for (OfficeCubicleStation s : station){
+		for (OfficeCubicleStation s : stations){
 			StationDTO dto = new StationDTO();
 			if (s.getAssociateRoomId() != null){
 				continue;
@@ -2303,7 +2307,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			stationNums = station.size();
 		}
 		resp.setStationNums(stationNums);
-		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
+		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),(byte)1,null,null);
 		if (room!=null){
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
