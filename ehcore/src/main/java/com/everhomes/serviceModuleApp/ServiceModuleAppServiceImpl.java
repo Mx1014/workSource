@@ -385,14 +385,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         	if (!CollectionUtils.isEmpty(serviceModuleAppEntryList)) {
         	    for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntryList) {
                     Integer maxSort = this.workPlatformAppProvider.getMaxSort(cmd.getOrganizationId());
-                    WorkPlatformApp workPlatformApp = new WorkPlatformApp();
-                    workPlatformApp.setOrder(maxSort+1);
-                    workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
-                    workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
-                    workPlatformApp.setScopeId(cmd.getOrganizationId());
-                    workPlatformApp.setAppId(cmd.getOriginId());
-                    workPlatformApp.setEntryId(serviceModuleAppEntry.getId());
-                    this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+                    if (maxSort != null) {
+                        WorkPlatformApp workPlatformApp = new WorkPlatformApp();
+                        workPlatformApp.setOrder(maxSort+1);
+                        workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                        workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+                        workPlatformApp.setScopeId(cmd.getOrganizationId());
+                        workPlatformApp.setAppId(cmd.getOriginId());
+                        workPlatformApp.setEntryId(serviceModuleAppEntry.getId());
+                        this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+                    }
                 }
             }
         }
@@ -1101,14 +1103,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 if (!CollectionUtils.isEmpty(serviceModuleAppEntryList)) {
                     for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntryList) {
                         Integer maxSort = this.workPlatformAppProvider.getMaxSort(orgapp.getOrgId());
-                        WorkPlatformApp workPlatformApp = new WorkPlatformApp();
-                        workPlatformApp.setOrder(maxSort+1);
-                        workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
-                        workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
-                        workPlatformApp.setScopeId(orgapp.getOrgId());
-                        workPlatformApp.setAppId(orgapp.getAppOriginId());
-                        workPlatformApp.setEntryId(serviceModuleAppEntry.getId());
-                        this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+                        if (maxSort != null) {
+                            WorkPlatformApp workPlatformApp = new WorkPlatformApp();
+                            workPlatformApp.setOrder(maxSort+1);
+                            workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                            workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+                            workPlatformApp.setScopeId(orgapp.getOrgId());
+                            workPlatformApp.setAppId(orgapp.getAppOriginId());
+                            workPlatformApp.setEntryId(serviceModuleAppEntry.getId());
+                            this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+                        }
                     }
                 }
             }
