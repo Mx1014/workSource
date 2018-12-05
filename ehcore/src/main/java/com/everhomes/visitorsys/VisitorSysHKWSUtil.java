@@ -78,7 +78,12 @@ public class VisitorSysHKWSUtil {
         params.put("personNum","" + 1 + visitor.getFollowUpNumbers());
 
         Timestamp time = visitor.getPlannedVisitTime();
-        DateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        Timestamp now = new Timestamp(System.currentTimeMillis() - 50000L);
+        if (time.before(now)){
+            time.setTime(now.getTime() + 300000L);
+        }
+//        DateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        DateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         DateFormat edFormat = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
         String st = sdFormat.format(time);
         String et = edFormat.format(time);
