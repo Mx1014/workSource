@@ -41,4 +41,6 @@ public interface CustomerErrorCode {
     int ERROR_CUSTOMER_PRIVILGE_ERROR = 10033;  //线索客户操作权限不足
     int ERROR_CUSTOMER_ADDRESS_NOT_EXIST = 10034;  //openApi address 不存在
     int ERROR_CUSTOMER_HAS_REQUISITION = 10035; //客户存在请示单
+    int ERROR_CUSTOMER_STATISTIC_DELETE_DATE = 10036;  //删除客户统计的时候日期不能为空
+    int ERROR_FLIE_EXPORT_FAIL = 10037; //删除
 }

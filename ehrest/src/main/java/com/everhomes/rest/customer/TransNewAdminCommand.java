@@ -12,4 +12,3 @@ public class TransNewAdminCommand {
         this.namespaceId = namespaceId;
     }
 }
-
