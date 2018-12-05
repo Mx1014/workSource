@@ -15,11 +15,14 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
 import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
@@ -97,6 +100,9 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private AssetGroupProvider assetGroupProvider;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
 //    @Override
 //    public void creatAssetBill(AssetBill bill) {
@@ -520,11 +526,13 @@ public class AssetProviderImpl implements AssetProvider {
                 t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
                 t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
         		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
-        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY);
+        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY,
+        		t.TAX_AMOUNT);
 //        query.addFrom(t, t2);
 //        query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addFrom(t);
         query.addJoin(t2, t.ID.eq(t2.BILL_ID));
+        		
         query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
         if(!org.springframework.util.StringUtils.isEmpty(ownerType)) {
         	query.addConditions(t.OWNER_TYPE.eq(ownerType));
@@ -563,10 +571,17 @@ public class AssetProviderImpl implements AssetProvider {
 	                    "This updateTime is error, updateTime={" + cmd.getUpdateTime() + "}");
 			}
         }
+        //物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过账单内是否包含服务费用（资源预定、云打印）
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getSourceTypeList())){
+            query.addConditions(t2.SOURCE_TYPE.in(cmd.getSourceTypeList()));
+        }
+        //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getThirdSign())){
+            query.addConditions(t.THIRD_SIGN.eq(cmd.getThirdSign()).or(t.THIRD_SIGN.isNull()));
+        }
         if(!org.springframework.util.StringUtils.isEmpty(cmd.getContractId())) {
         	query.addConditions(t.CONTRACT_ID.eq(cmd.getContractId()));
         }
-
         if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
@@ -669,6 +684,7 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
             dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
             dto.setAmountReceived(r.getValue(t.AMOUNT_RECEIVED));
+            dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));
             if(!org.springframework.util.StringUtils.isEmpty(billGroupName)) {
                 dto.setBillGroupName(billGroupName);
             }else{
@@ -681,12 +697,16 @@ public class AssetProviderImpl implements AssetProvider {
             if (r.getValue(t.NOTICETEL) != null) {
             	dto.setNoticeTelList(Arrays.asList((r.getValue(t.NOTICETEL)).split(",")));
 			}
-
             dto.setNoticeTimes(r.getValue(t.NOTICE_TIMES));
             dto.setDateStr(r.getValue(t.DATE_STR));
-            dto.setTargetName(r.getValue(t.TARGET_NAME));
             dto.setTargetId(r.getValue(t.TARGET_ID, String.class));
+            dto.setTargetName(r.getValue(t.TARGET_NAME));
             dto.setTargetType(r.getValue(t.TARGET_TYPE));
+            //如果企业客户类型下+客户名称是空+客户ID不为空，那么需根据客户ID找到客户名称
+            if(dto.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode()) && dto.getTargetName() == null && dto.getTargetId() != null) {
+            	Organization organization = organizationProvider.findOrganizationById(r.getValue(t.TARGET_ID));
+            	dto.setTargetName(organization.getName());
+            }
             dto.setOwnerId(r.getValue(t.OWNER_ID, String.class));
             dto.setOwnerType(r.getValue(t.OWNER_TYPE));
             dto.setContractNum(r.getValue(t.CONTRACT_NUM));

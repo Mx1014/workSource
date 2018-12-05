@@ -22,6 +22,7 @@ import com.everhomes.rest.asset.AssetSubtractionType;
 import com.everhomes.rest.asset.BillGroupDTO;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
@@ -239,6 +240,32 @@ public class AssetBillProviderImpl implements AssetBillProvider {
                 .set(t.THIRD_PAID, AssetPaymentBillStatus.PAID.getCode()) //总体原则：不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
                 .where(t.ID.eq(billId))
                 .and(t.NAMESPACE_ID.eq(currentNamespaceId))
+                .execute();
+	}
+	
+	public void deleteBillFromContract(Integer namespaceId, List<Long> contractIdList) {
+		this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            context.update(Tables.EH_PAYMENT_BILLS)
+            		.set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+                    .where(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_PAYMENT_BILLS.CONTRACT_ID.in(contractIdList))
+                    .execute();
+            context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+            	.set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+	    		.where(Tables.EH_PAYMENT_BILL_ITEMS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_BILL_ITEMS.CONTRACT_ID.in(contractIdList))
+	            .execute();
+            return null;
+        });
+	}
+
+	public void notifyThirdSign(List<Long> billIdList) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.THIRD_SIGN, AssetNotifyThirdSign.ERROR.getCode()) //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+                .where(t.ID.in(billIdList))
                 .execute();
 	}
 

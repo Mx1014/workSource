@@ -14,6 +14,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetService;
 import com.everhomes.asset.schedule.AssetSchedule;
 import com.everhomes.asset.statistic.AssetStatisticService;
+import com.everhomes.asset.third.RuiAnCMThirdOpenBillHandler;
+import com.everhomes.asset.third.ThirdOpenBillHandler;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -278,7 +281,8 @@ public class TestAssetController extends ControllerBase {
         
         List<CMSyncObject> cmSyncObjectList = new ArrayList<CMSyncObject>();
         cmSyncObjectList.add(cmSyncObject);
-		assetService.syncRuiAnCMBillToZuolin(cmSyncObjectList, 999929, 3L);
+        RuiAnCMThirdOpenBillHandler handler = PlatformContext.getComponent(ThirdOpenBillHandler.THIRDOPENBILL_PREFIX + 999929);
+        handler.syncRuiAnCMBillToZuolin(cmSyncObjectList, 999929, 3L);
 		RestResponse restResponse = new RestResponse();
 		restResponse.setErrorDescription("OK");
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
