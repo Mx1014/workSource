@@ -2054,21 +2054,25 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 						officeCubicleProvider.createCubicleStationRent(rent);
 					}
 				} else {
-					for (Long s :cmd.getStationId()){
-						rent.setStationId(s);
-						rent.setStationType((byte)1);
-						officeCubicleProvider.createCubicleStationRent(rent);
-						OfficeCubicleStation station =officeCubicleProvider.getOfficeCubicleStationById(s);
-						station.setStatus((byte)2);
-						officeCubicleProvider.updateCubicle(station);
+					if(cmd.getStationId()!=null){
+						for (Long s :cmd.getStationId()){
+							rent.setStationId(s);
+							rent.setStationType((byte)1);
+							officeCubicleProvider.createCubicleStationRent(rent);
+							OfficeCubicleStation station =officeCubicleProvider.getOfficeCubicleStationById(s);
+							station.setStatus((byte)2);
+							officeCubicleProvider.updateCubicle(station);
+						}
 					}
-					for (Long r :cmd.getRoomId()){
-						rent.setStationId(r);
-						rent.setStationType((byte)0);
-						officeCubicleProvider.createCubicleStationRent(rent);
-						OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(r);
-						room.setStatus((byte)2);
-						officeCubicleProvider.updateRoom(room);
+					if (cmd.getRoomId()!=null){
+						for (Long r :cmd.getRoomId()){
+							rent.setStationId(r);
+							rent.setStationType((byte)0);
+							officeCubicleProvider.createCubicleStationRent(rent);
+							OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(r);
+							room.setStatus((byte)2);
+							officeCubicleProvider.updateRoom(room);
+						}
 					}
 				}
 			}
