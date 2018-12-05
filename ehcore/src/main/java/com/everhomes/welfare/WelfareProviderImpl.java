@@ -67,7 +67,7 @@ public class WelfareProviderImpl implements WelfareProvider {
 	public List<Welfare> listWelfare(Long ownerId, Integer offset, Integer pageSize) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_WELFARES)
 				.where(Tables.EH_WELFARES.ORGANIZATION_ID.eq(ownerId))
-				.and(Tables.EH_WELFARES.IS_DELETE.eq((byte) 0));
+				.and(Tables.EH_WELFARES.IS_DELETE.ne((byte) 1));
 		if (null != pageSize && null != offset) {
 			step.limit(offset,pageSize);
 		}
@@ -114,7 +114,8 @@ public class WelfareProviderImpl implements WelfareProvider {
 	@Override
 	public List<Welfare> listWelfareByIds(List<Long> welfaeIds) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_WELFARES)
-				.where(Tables.EH_WELFARES.ID.in(welfaeIds)).and(Tables.EH_WELFARES.IS_DELETE.eq((byte) 0));
+				.where(Tables.EH_WELFARES.ID.in(welfaeIds))
+				.and(Tables.EH_WELFARES.IS_DELETE.ne((byte) 1));
 		Result<Record> records = step.orderBy(Tables.EH_WELFARES.SEND_TIME.desc()).fetch();
 		if(null == records){
 			return null;
