@@ -1,4 +1,4 @@
-
+﻿
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
@@ -26,6 +26,11 @@ SELECT 'meetingMessage' AS scope,100009 AS code,'zh_CN' AS locale,'您已不是�
 SELECT 'meetingMessage' AS scope,100010 AS code,'zh_CN' AS locale,'您已被指定为会务人' AS text
 )r LEFT JOIN eh_locale_strings s ON r.scope=s.scope AND r.code=s.code AND r.locale=s.locale
 WHERE s.id IS NULL;
+
+
+-- AUTHOR:吴寒
+-- REMARK:支付授权module修改
+UPDATE  eh_service_modules SET client_handler_type = 2, HOST = NULL WHERE id= 79880000 ;
 
 -- AUTHOR: tangcen 2018年12月5日
 -- REMARK: 添加房源招商的权限
