@@ -377,7 +377,7 @@ public class WelfareServiceImpl implements WelfareService {
             }
             //校验没问题保存福利
             Welfare welfare = saveWelfare(welfaresDTO);
-
+            welfaresDTO.setId(welfare.getId());
             try{
                 //调用发送接口
                 if (CollectionUtils.isNotEmpty(welfaresDTO.getCoupons())) {
