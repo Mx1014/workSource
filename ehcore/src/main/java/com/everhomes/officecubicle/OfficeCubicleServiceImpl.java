@@ -2261,16 +2261,16 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public GetCubicleForOrderResponse getCubicleForOrder (GetCubicleForOrderCommand cmd){
 		GetCubicleForOrderResponse resp = new GetCubicleForOrderResponse();
 		
-		List<OfficeCubicleStation> stations = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
-		Timestamp t = new Timestamp(cmd.getBeginTime());
-		Timestamp d = new Timestamp(cmd.getEndTime());
-
 		List<OfficeCubicleStation> station = 
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
+		List<OfficeCubicleStation> rentStation = 
 				officeCubicleProvider.getOfficeCubicleStationByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime());
-		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,null,null);
-		stations.addAll(station);
+		List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null);
+		List<OfficeCubicleRoom> rentRoom = officeCubicleProvider.getOfficeCubicleRoomByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime());
+		station.addAll(rentStation);
+		room.addAll(rentRoom);
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
-		for (OfficeCubicleStation s : stations){
+		for (OfficeCubicleStation s : station){
 			StationDTO dto = new StationDTO();
 			if (s.getAssociateRoomId() != null){
 				continue;

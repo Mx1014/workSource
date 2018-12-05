@@ -845,9 +845,28 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
         return context.select().from(t)
                 .where(t.SPACE_ID.eq(spaceId))
                 .and(t.RENT_FLAG.eq(rentFlag))
+                .and(t.STATUS.eq((byte)2))
                 .and(beginTime.or(endTime))
                 .fetchInto(OfficeCubicleStation.class);
 	}
+	
+	@Override
+	public List<OfficeCubicleRoom> getOfficeCubicleRoomByTime(Long spaceId, Byte rentFlag,Long beginDate,Long endDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//		
+        com.everhomes.server.schema.tables.EhOfficeCubicleRoom t = Tables.EH_OFFICE_CUBICLE_ROOM;
+
+        Condition beginTime = t.EH_OFFICE_CUBICLE_ROOM.BEGIN_TIME.gt(new Timestamp(endDate));
+        Condition endTime = t.EH_OFFICE_CUBICLE_ROOM.END_TIME.lt(new Timestamp(beginDate));
+
+        return context.select().from(t)
+                .where(t.SPACE_ID.eq(spaceId))
+                .and(t.RENT_FLAG.eq(rentFlag))
+                .and(t.STATUS.eq((byte)2))
+                .and(beginTime.or(endTime))
+                .fetchInto(OfficeCubicleRoom.class);
+	}
+	
 	
 	@Override
 	public OfficeCubicleStation getOfficeCubicleStationById(Long stationId) {

@@ -138,4 +138,6 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleStation> getOfficeCubicleStationByTime(Long spaceId, Byte rentFlag, Long beginDate,
 			Long endDate);
 
+	List<OfficeCubicleRoom> getOfficeCubicleRoomByTime(Long spaceId, Byte rentFlag, Long beginDate, Long endDate);
+
 }
