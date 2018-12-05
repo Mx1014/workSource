@@ -19,7 +19,7 @@ import com.everhomes.asset.AssetSourceNameCodes;
 import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.asset.PaymentBillItems;
 import com.everhomes.asset.PaymentBills;
-import com.everhomes.asset.assetUtils;
+import com.everhomes.asset.bill.AssetBillProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.openapi.Contract;
@@ -29,11 +29,14 @@ import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
+import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractDTO;
+import com.everhomes.rest.asset.bill.DeleteContractBillFlag;
+import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.contract.CMBill;
-import com.everhomes.rest.contract.CMContractHeader;
 import com.everhomes.rest.contract.CMContractUnit;
 import com.everhomes.rest.contract.CMDataObject;
 import com.everhomes.rest.contract.CMSyncObject;
@@ -65,6 +68,9 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
     
     @Autowired
     private ContractProvider contractProvider;
+    
+    @Autowired
+    private AssetBillProvider assetBillProvider;
 	
 	/**
 	 * 同步瑞安CM的账单数据到左邻的数据库表中
@@ -75,7 +81,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 				List<CMDataObject> data = cmSyncObject.getData();
 				if(data != null) {
 					for(CMDataObject cmDataObject : data) {
-						CMContractHeader contractHeader = cmDataObject.getContractHeader();
+						//CMContractHeader contractHeader = cmDataObject.getContractHeader();
 						//1、根据propertyId获取左邻communityId
 						Long communityId = null;
 //						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());
@@ -289,6 +295,15 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 				}
 			}
 		}
+	}
+	
+	/**
+	 * 物业缴费V7.4(瑞安项目-资产管理对接CM系统)
+	 * 根据合同ID删除对应账单
+	 * 所以数据以生产方的为准，不用管是否已支付，客户会确保对已支付的进行退款操作
+	 */
+	public void batchDeleteBillFromContract(Integer namespaceId, List<Long> contractIdList) {
+	    assetBillProvider.deleteBillFromContract(namespaceId, contractIdList);
 	}
 	
 	/**

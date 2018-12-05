@@ -24,4 +24,6 @@ public interface AssetBillProvider {
 			Integer paymentType);
 	List<PaymentBills> findCannotDeleteBill(List<Long> billIdList);
 	
+	void deleteBillFromContract(Integer namespaceId, List<Long> contractIdList);
+	
 }

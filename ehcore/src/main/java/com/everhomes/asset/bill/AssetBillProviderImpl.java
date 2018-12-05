@@ -241,6 +241,23 @@ public class AssetBillProviderImpl implements AssetBillProvider {
                 .and(t.NAMESPACE_ID.eq(currentNamespaceId))
                 .execute();
 	}
+	
+	public void deleteBillFromContract(Integer namespaceId, List<Long> contractIdList) {
+		this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            context.update(Tables.EH_PAYMENT_BILLS)
+            		.set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+                    .where(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_PAYMENT_BILLS.CONTRACT_ID.in(contractIdList))
+                    .execute();
+            context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+            	.set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+	    		.where(Tables.EH_PAYMENT_BILL_ITEMS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_BILL_ITEMS.CONTRACT_ID.in(contractIdList))
+	            .execute();
+            return null;
+        });
+	}
 
 
 }
