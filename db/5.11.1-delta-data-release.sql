@@ -249,6 +249,10 @@ SET @id = (SELECT MAX(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '30001', 'zh_CN', '请输入正确的查询时间');
 INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '30002', 'zh_CN', '请输入查询项目');
 
+-- AUTHOR:  张智伟
+-- REMARK: issue-43865 web端参数传错，数据修复
+UPDATE eh_meeting_invitations SET source_type='MEMBER_DETAIL' WHERE source_type='source_user';
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
