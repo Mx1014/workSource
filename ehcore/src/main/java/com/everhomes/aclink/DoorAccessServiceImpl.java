@@ -5453,6 +5453,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			aclinkLog.setOwnerType(door.getOwnerType());
 			aclinkLog.setDoorType(door.getDoorType());
 			aclinkLogProvider.createAclinkLog(aclinkLog);
+			sendMessageToAuthCreator(auth.getId());
 		}
 	}
 
