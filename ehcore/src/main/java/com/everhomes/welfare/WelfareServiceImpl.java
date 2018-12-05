@@ -580,7 +580,7 @@ public class WelfareServiceImpl implements WelfareService {
 
 	@Override
 	public void updateWelfareStatus(UpdateWelfareStatusCommand cmd, HttpServletRequest request) {
-		Welfare welfare = welfareProvider.findWelfareById(cmd.getTaskId());
+		Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfareId());
         
 		updateWelfareStatus(welfare, cmd.getStatus(), request);
 	}
