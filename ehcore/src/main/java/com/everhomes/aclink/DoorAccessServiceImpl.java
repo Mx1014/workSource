@@ -2617,7 +2617,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public DoorAccess onDoorAccessConnecting(AclinkConnectingCommand cmd) {
         DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByUuid(cmd.getUuid());
         if(doorAccess == null) {
-            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+//            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        	LOGGER.error(String.format("can not find door with uuid{%s}", cmd.getUuid()));
+        	return null;
         }
         
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
