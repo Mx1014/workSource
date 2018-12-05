@@ -2032,7 +2032,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (cmd.getRentCount()!=null){
 				rentCount = cmd.getRentCount();
 			} else {
-				rentCount = cmd.getStationId().size()+cmd.getRoomId().size();
+				Integer stationSize =0;
+				Integer roomIdSize = 0;
+				if(cmd.getStationId()!=null){
+					stationSize = cmd.getStationId().size();
+				}
+				if (cmd.getRoomId()!=null){
+					roomIdSize = cmd.getRoomId().size();
+				}
+				rentCount = stationSize+roomIdSize;
 			}
 			if (Integer.valueOf(space.getShortRentNums())<(rentSize+rentCount)){
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
