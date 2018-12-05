@@ -464,7 +464,7 @@ public class WelfareServiceImpl implements WelfareService {
         
         Map<String, String> meta = new HashMap<>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, welfare.getSubject());
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "福利详情");
         meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
         message.setMeta(meta);
 
