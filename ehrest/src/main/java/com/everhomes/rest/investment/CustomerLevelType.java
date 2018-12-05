@@ -3,22 +3,23 @@ package com.everhomes.rest.investment;
 import com.everhomes.util.StringHelper;
 
 public enum CustomerLevelType {
-    FIRST_CUSTOMER((byte)3),POTENTIAL_CUSTOMER((byte)4),INTENTIONAL_CUSTOMER((byte)5),
-    REGISTERED_CUSTOMER((byte)6),LOSS_CUSTOMER((byte)7);
+    FIRST_CUSTOMER(3L),POTENTIAL_CUSTOMER(4L),INTENTIONAL_CUSTOMER(5L),
+    REGISTERED_CUSTOMER(6L), HISTORY_CUSTOMER(7L), LOSS_CUSTOMER(5003L),
+    DELETE_CUSTOMER(9999L);
 
-    private byte code;
+    private Long code;
 
-    private CustomerLevelType(byte code) {
+    private CustomerLevelType(Long code) {
         this.code = code;
     }
 
-    public byte getCode() {
+    public Long getCode() {
         return code;
     }
 
-    public static CustomerLevelType fromCode(byte code) {
+    public static CustomerLevelType fromCode(Long code) {
         for (CustomerLevelType v : CustomerLevelType.values()) {
-            if (v.getCode() == code)
+            if (v.getCode().equals(code))
                 return v;
         }
         return null;

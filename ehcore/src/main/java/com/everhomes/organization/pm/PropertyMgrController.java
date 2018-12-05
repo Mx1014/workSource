@@ -20,6 +20,7 @@ import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
+import com.everhomes.rest.address.ListApartmentEventsResponse;
 import com.everhomes.rest.address.ListApartmentsByMultiStatusResponse;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
@@ -159,6 +160,7 @@ import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
 import com.hp.hpl.sparta.xpath.TrueExpr;
@@ -1174,7 +1176,6 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse listApartments(@Valid ListApartmentsCommand cmd) {
 		ListApartmentsResponse results =  propertyMgrService.listApartments(cmd);
 		RestResponse response = new RestResponse(results);
-		
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -2318,20 +2319,20 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 	
-//	//展示房源日志：pm/listApartmentEvents（新增接口）(5.8.0未实现)
-//	/**
-//	 * <p>展示房源日志</p>
-//	 * <b>URL: /pm/listApartmentEvents</b>
-//	 */
-//	@RequestMapping("listApartmentEvents")
-//	@RestReturn(value = ApartmentEventDTO.class, collection = true)
-//	public RestResponse listApartmentEvents(ListApartmentEventsCommand cmd){
-//	    List<ApartmentEventDTO> result = propertyMgrService.listApartmentEvents(cmd);
-//		RestResponse response = new RestResponse(result);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	//展示房源日志：pm/listApartmentEvents
+	/**
+	 * <p>展示房源日志</p>
+	 * <b>URL: /pm/listApartmentEvents</b>
+	 */
+	@RequestMapping("listApartmentEvents")
+	@RestReturn(value = ListApartmentEventsResponse.class)
+	public RestResponse listApartmentEvents(ListApartmentEventsCommand cmd){
+		ListApartmentEventsResponse result = propertyMgrService.listApartmentEventsV2(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /pm/setAuthorizePrice</b>
@@ -2487,6 +2488,22 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /pm/hasApartmentManagementPrivilege</b>
+	 * <p>判断用户是否具有房源管理的权限</p>
+	 * @param cmd
+	 * @return
+	 */
+	@RequestMapping("hasApartmentManagementPrivilege")
+	@RestReturn(value = ApartmentManagementPrivilegeDTO.class)
+	public RestResponse hasApartmentManagementPrivilege(ApartmentManagementPrivilegeCommand cmd) {
+		ApartmentManagementPrivilegeDTO dto = propertyMgrService.hasApartmentManagementPrivilege(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}	
 	
 	/**
 	 * <b>URL: /pm/listApartmentsForApp</b>

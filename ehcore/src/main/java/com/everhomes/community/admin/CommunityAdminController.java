@@ -744,7 +744,7 @@ public class CommunityAdminController extends ControllerBase {
      */
     @RequestMapping("importBuildingData")
     @RestReturn(value=ImportFileTaskDTO.class)
-    public RestResponse importBuildingData(@RequestParam("communityId") Long communityId, @RequestParam(value = "attachment") MultipartFile[] files){
+    public RestResponse importBuildingData(ImportBuildingDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){
@@ -753,7 +753,7 @@ public class CommunityAdminController extends ControllerBase {
 					"files is null");
 		}
 //		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
-        RestResponse response = new RestResponse(communityService.importBuildingData(communityId, files[0]));
+        RestResponse response = new RestResponse(communityService.importBuildingData(cmd, files[0]));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

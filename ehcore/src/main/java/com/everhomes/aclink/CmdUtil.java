@@ -159,7 +159,36 @@ public class CmdUtil {
     public static byte[] updateTime(byte[] curServerKey, byte ver) {
         byte cmd = 0x5;
         int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
-        int expireTime = curTime + 50*6*EXPIRE_TIME;//50 years
+        int expireTime = curTime + 5*6*EXPIRE_TIME;//5 years 
+        byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
+        byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
+        byte[] dataArr = new byte[extTimeBytes.length + curTimeBytes.length];
+        System.arraycopy(extTimeBytes, 0, dataArr, 0, extTimeBytes.length);
+        System.arraycopy(curTimeBytes, 0, dataArr, extTimeBytes.length, curTimeBytes.length);
+        try {
+            dataArr = addPaddingTo16Bytes(dataArr);
+            byte[] chk = DataUtil.shortToByteArray(CmdUtil.getCheckSum(dataArr, 14));
+            dataArr[14] = chk[0];
+            dataArr[15] = chk[1];
+            
+            LOGGER.info("updateTime dataArr = " + StringHelper.toHexString(dataArr));
+            
+            byte[] aeskeyEncryptResult = AESUtil.encrypt(dataArr, curServerKey);
+            byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];
+            resultArr[0] = cmd;
+            resultArr[1] = ver;
+            System.arraycopy(aeskeyEncryptResult, 0, resultArr, 2, aeskeyEncryptResult.length);
+            return resultArr;
+//            return aeskeyEncryptResult;
+        } catch (Exception e) {
+        }
+        return null;
+    }
+    
+    public static byte[] updateTime(byte[] curServerKey, byte ver, int curTime) {
+        byte cmd = 0x5;
+//        int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
+        int expireTime = curTime + 5*6*EXPIRE_TIME;//5 years
         byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
         byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
         byte[] dataArr = new byte[extTimeBytes.length + curTimeBytes.length];
@@ -291,6 +320,42 @@ public class CmdUtil {
     
     public static byte[] openDoorCmd(byte[] aesUserKey) {
         byte cmd = 0x8;
+        byte ver = 0x0;
+        try {
+            if (null != aesUserKey) {
+                byte[] serverkeyEncryptPaddingResult = addPaddingTo16Bytes(aesUserKey);
+                byte[] resultArr = new byte[2 + serverkeyEncryptPaddingResult.length];
+                resultArr[0] = cmd;
+                resultArr[1] = ver;
+                System.arraycopy(serverkeyEncryptPaddingResult, 0, resultArr, 2, serverkeyEncryptPaddingResult.length);
+                return resultArr;
+            }
+        } catch (Exception e) {
+            LOGGER.error("openDoorCmd error", e);
+        }
+        return null;
+    }
+    
+    public static byte[] remoteOpenCmd(byte[] aesUserKey) {
+        byte cmd = 0xA;
+        byte ver = 0x0;
+        try {
+            if (null != aesUserKey) {
+                byte[] serverkeyEncryptPaddingResult = addPaddingTo16Bytes(aesUserKey);
+                byte[] resultArr = new byte[2 + serverkeyEncryptPaddingResult.length];
+                resultArr[0] = cmd;
+                resultArr[1] = ver;
+                System.arraycopy(serverkeyEncryptPaddingResult, 0, resultArr, 2, serverkeyEncryptPaddingResult.length);
+                return resultArr;
+            }
+        } catch (Exception e) {
+            LOGGER.error("openDoorCmd error", e);
+        }
+        return null;
+    }
+    
+    public static byte[] faceOpenCmd(byte[] aesUserKey) {
+        byte cmd = 0x11;
         byte ver = 0x0;
         try {
             if (null != aesUserKey) {

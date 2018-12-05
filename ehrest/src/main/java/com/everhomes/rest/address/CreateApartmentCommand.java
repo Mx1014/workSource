@@ -7,7 +7,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>communityId: 园区id</li>
+ * <li>namespaceId: 域空间id，用于权限校验</li>
+ * <li>organizationId: 管理公司id，用于权限校验</li>
+ * <li>communityId: 园区id，用于权限校验</li>
  * <li>buildingName: 楼栋名称</li>
  * <li>apartmentName: 门牌名称</li>
  * <li>status: 状态，参考{@link com.everhomes.rest.organization.pm.AddressMappingStatus}</li>
@@ -27,6 +29,9 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateApartmentCommand {
+	
+	private Integer namespaceId;
+	private Long organizationId;
 	private Long communityId;
 	private String buildingName;
 	private String apartmentName;
@@ -44,6 +49,22 @@ public class CreateApartmentCommand {
 	private String apartmentFloor;
 	private BigDecimal apartmentRent;
 	private Byte apartmentRentType;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 
 	public BigDecimal getApartmentRent() {
 		return apartmentRent;

@@ -4,15 +4,35 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * 	   <li>namespaceId: 域空间id，用于权限校验</li>
+ *     <li>organizationId: 管理公司id，用于权限校验</li>
  *     <li>communityId: 项目编号</li>
  *     <li>name: 楼栋名称</li>
  * </ul>
  */
 public class ImportAddressCommand {
+	
+	private Integer namespaceId;
+	private Long organizationId;
 	private Long communityId;
 	private Long buildingId;
-
     private String name;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 
 	public Long getBuildingId() {
 		return buildingId;
