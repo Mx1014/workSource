@@ -6348,7 +6348,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		
 		// 客户端地址模式配置, add by momoubin,18/11/09
 		resp.setClientAddressMode(this.configurationProvider.getIntValue(namespaceId, ConfigConstants.CLIENT_ADDRESS_MODE, 0));
-		
+		resp.setAuthPopupConfig(Byte.valueOf(this.configurationProvider.getValue(namespaceId, "authPopupConfig", "1")));
         return resp;
     }
 
