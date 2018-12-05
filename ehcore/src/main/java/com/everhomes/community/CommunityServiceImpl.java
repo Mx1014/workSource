@@ -1968,6 +1968,20 @@ public class CommunityServiceImpl implements CommunityService {
 				return o2.getApproveTime().compareTo(o1.getApproveTime());
 			}
 		});
+		
+		//小区待认证数据的排序，创建时间降序
+		if(cmd.getMemberStatus().equals(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode())){
+			Collections.sort(memberDTOList,new Comparator<GroupMemberDTO>(){
+				@Override
+				public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+					if(o1.getCreateTime() == null || o2.getCreateTime() == null)
+						return -1;
+					return o2.getCreateTime().compareTo(o1.getCreateTime());
+				}
+				
+			});
+		}
+		
 		CommunityAuthUserAddressResponse res = new CommunityAuthUserAddressResponse();
 		res.setDtos(memberDTOList);
 		res.setNextPageAnchor(locator.getAnchor());
