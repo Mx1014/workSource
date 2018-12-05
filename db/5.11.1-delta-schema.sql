@@ -222,3 +222,7 @@ CREATE TABLE `eh_contract_statistic_communities` (
 	`update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '项目合同报表结果集（项目-月份）';
+
+-- AUTHOR: 莫谋斌
+-- REMARK: eh_communities增加字段；
+ALTER TABLE eh_communities ADD COLUMN background_img_url VARCHAR DEFAULT '' COMMENT '小区或园区项目的图片链接';
