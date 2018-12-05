@@ -12,6 +12,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.filedownload.TaskService;
@@ -45,6 +46,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -61,6 +63,9 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -479,7 +484,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             if (itemsMap != null && itemsMap.size() > 0) {
 
                 statistics = invitedCustomerProvider.getInvitedCustomerStatistics(isAdmin, cmd.getKeyword(), cmd.getRequirementMinArea(), cmd.getRequirementMaxArea(), itemsMap.keySet(), itemsMap, (locator, query) -> {
-                    query.addJoin(Tables.EH_CUSTOMER_TRACKINGS, Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(Tables.EH_ENTERPRISE_CUSTOMERS.ID));
+
                     query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
                     query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(cmd.getCommunityId()));
                     if (cmd.getCorpIndustryItemId() != null) {
@@ -491,11 +496,27 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                     if (cmd.getCustomerSource() != null) {
                         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CUSTOMER_SOURCE.eq(cmd.getCustomerSource()));
                     }
+                    Condition rangeCreateTime = null;
+                    Condition rangeLastTime = null;
                     if (cmd.getMinTrackingPeriod() != null) {
-                        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod())).or(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod()))));
+                        rangeCreateTime = Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod()));
+                        rangeLastTime = Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod()));
                     }
                     if (cmd.getMaxTrackingPeriod() != null) {
-                        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())).or(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod()))));
+                        if(rangeCreateTime != null){
+                            rangeCreateTime = rangeCreateTime.and(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())));
+                        }else{
+                            rangeCreateTime = Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod()));
+                        }
+
+                        if(rangeLastTime != null){
+                            rangeLastTime = rangeLastTime.and(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())));
+                        }else{
+                            rangeLastTime = Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod()));
+                        }
+                    }
+                    if(rangeCreateTime != null && rangeLastTime != null) {
+                        query.addConditions(rangeCreateTime.or(rangeLastTime));
                     }
 
                     return query;

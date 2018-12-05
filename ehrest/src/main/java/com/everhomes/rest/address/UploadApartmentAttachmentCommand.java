@@ -22,11 +22,30 @@ public class UploadApartmentAttachmentCommand {
     private Long organizationId;
     @NotNull private String contentUri;
     @NotNull private String attachmentName;
+    
+    private Integer namespaceId;
+	private Long communityId;
 
     private String ownerType;
     private Long ownerId;
 
-    public String getOwnerType() {
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public String getOwnerType() {
         return ownerType;
     }
 

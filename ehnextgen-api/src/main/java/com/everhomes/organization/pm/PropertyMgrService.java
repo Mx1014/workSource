@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressArrangement;
+import com.everhomes.address.AddressProperties;
 import com.everhomes.community.Community;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
@@ -14,6 +17,7 @@ import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
+import com.everhomes.rest.address.ListApartmentEventsResponse;
 import com.everhomes.rest.address.ListApartmentsByMultiStatusResponse;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
@@ -545,6 +549,24 @@ public interface PropertyMgrService {
 	List<ApartmentBriefInfoDTO> listApartmentsInBuilding(ListApartmentsInBuildingCommand cmd);
 
 	OrganizationOwnerDTO getOrgOwnerByContactToken(GetOrgOwnerByContactTokenCommand cmd);
+
+	void saveAddressEvent(int opearteType, Address newAddress, Address oldAddress,Byte newLivingStatus,Byte oldLivingStatus);
+	
+	void saveAddressArrangementEvent(int opearteType, Address address,AddressArrangement newArrangement,AddressArrangement oldArrangement);
+
+	void saveAddressArrangementEventAboutAddress(int opearteType, AddressArrangement arrangement,Address newAddress, Address oldAddress);
+
+	void saveAddressAuthorizePriceEvent(int opearteType, Long addressId, AddressProperties newAddressProperties,AddressProperties oldAddressProperties);
+
+	void saveAddressReservationEvent(int opearteType, Long addressId, PmResourceReservation newResourceReservation,
+			PmResourceReservation oldResourceReservation);
+
+	String getAddressArrangementEventContent(int opearteType, AddressArrangement arrangement, Address newAddress,
+			Address oldAddress);
+
+	ListApartmentEventsResponse listApartmentEventsV2(ListApartmentEventsCommand cmd);
+
+	ApartmentManagementPrivilegeDTO hasApartmentManagementPrivilege(ApartmentManagementPrivilegeCommand cmd); 	
 
 	ListApartmentsForAppResponse listApartmentsForApp(ListApartmentsForAppCommand cmd);
 

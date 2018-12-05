@@ -3636,10 +3636,11 @@ public class CustomerServiceImpl implements CustomerService {
             if (customerTrackings != null && customerTrackings.size() > 0) {
                 customer.setLastTrackingTime(customerTrackings.get(0).getTrackingTime());
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-//                enterpriseCustomerSearcher.feedDoc(customer);
+                enterpriseCustomerSearcher.feedDoc(customer);
             }else {
                 customer.setLastTrackingTime(null);
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+                enterpriseCustomerSearcher.feedDoc(customer);
             }
         }
     }
