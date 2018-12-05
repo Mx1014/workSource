@@ -23,7 +23,8 @@ import java.util.List;
  * <li>noticeTel:催缴联系号码</li>
  * <li>amountReceivable:应收(元)</li>
  * <li>amountReceived:实收(元)</li>
- * <li>amountOwed:欠收(元)</li>
+ * <li>amountOwed:欠收(元)</li>+
+ * <li>taxAmount:税额(元)</li>
  * <li>billStatus:账单状态，0:待缴;1:已缴</li>
  * <li>noticeTimes:已催缴次数</li>
  * <li>ownerId:所属者id</li>
@@ -62,6 +63,7 @@ public class ListBillsDTO {
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
     private BigDecimal amountOwed;
+    private BigDecimal taxAmount;
     private Byte billStatus;
     private Integer noticeTimes;
     private String ownerId;
@@ -398,6 +400,14 @@ public class ListBillsDTO {
 
 	public void setBillItemDTOList(List<BillItemDTO> billItemDTOList) {
 		this.billItemDTOList = billItemDTOList;
+	}
+
+	public BigDecimal getTaxAmount() {
+		return taxAmount;
+	}
+
+	public void setTaxAmount(BigDecimal taxAmount) {
+		this.taxAmount = taxAmount;
 	}
 
 }

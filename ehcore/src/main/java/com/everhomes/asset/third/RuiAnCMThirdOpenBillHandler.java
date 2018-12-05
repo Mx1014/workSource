@@ -102,6 +102,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 	 */
 	private void setBillInvalidParamNull(ListBillsDTO dto) {
 		dto.setDateStr(null);
+		dto.setTargetId(null);
 		dto.setBillGroupName(null);
 		dto.setNoticeTimes(null);
 		dto.setOwnerId(null);
