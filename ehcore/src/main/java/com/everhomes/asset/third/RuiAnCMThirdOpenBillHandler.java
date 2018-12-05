@@ -93,9 +93,12 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 //						if(community != null) {
 //							communityId = community.getId();
 //						}
-						//2、获取左邻客户ID
+						//2、获取左邻企业ID
 						Long targetId = null;
-						targetId = cmDataObject.getCustomerId();
+						EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmDataObject.getCustomerId());
+						if(customer != null) {
+							targetId = customer.getOrganizationId();
+						}
 						//3、获取左邻楼栋单元地址ID
 						Long addressId = null;
 						if(cmDataObject.getContractUnit() != null && cmDataObject.getContractUnit().size() != 0) {
