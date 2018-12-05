@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.common.ServiceModuleConstants;
 
-@Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.PRINT_MODULE)
+@Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.ENTERPRISE_PAYMENT_AUTH)
 public class EnterprisePaymentAuthPortalPublishHandler implements PortalPublishHandler{
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterprisePaymentAuthPortalPublishHandler.class);
