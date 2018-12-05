@@ -48,5 +48,6 @@ public interface ServiceModuleConstants {
     long HOTLINE_MODULE = 40300;//服务热线
     long ENTERPRISE_VISITOR_MODULE = 52100;//企业访客
     long QUALITY_MODULE = 20600;//品质核查
+    long ENTERPRISE_PAYMENT_AUTH = 79880000L;//企业支付授权
     
 }
