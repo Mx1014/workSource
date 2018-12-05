@@ -245,8 +245,11 @@ public class WelfareServiceImpl implements WelfareService {
     }
 
     private Welfare saveWelfare(WelfaresDTO welfareDTO) {
-
+    	
         Welfare welfare = ConvertHelper.convert(welfareDTO, Welfare.class);
+        if(welfare.getIsDelete() == null){
+        	welfare.setIsDelete((byte) 0);
+        }
         if(welfareDTO.getCreateTime() != null)
             welfare.setCreateTime(new Timestamp(welfareDTO.getCreateTime()));
         welfare.setNamespaceId(UserContext.getCurrentNamespaceId());

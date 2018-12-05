@@ -39,7 +39,7 @@ public class WelfareProviderImpl implements WelfareProvider {
 	public void createWelfare(Welfare welfare) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWelfares.class));
 		welfare.setId(id);
-		welfare.setStatus((byte) 0);
+		welfare.setIsDelete((byte) 0);
 		welfare.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		welfare.setCreatorUid(UserContext.currentUserId());
 		welfare.setUpdateTime(welfare.getCreateTime());
