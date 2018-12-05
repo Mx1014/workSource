@@ -188,3 +188,37 @@ CREATE TABLE `eh_customer_statistics_total` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT = '客户统计表，每日累积';
 
+-- AUTHOR: djm
+-- 合同报表数据表 园区维度的 每个园区的数据信息
+CREATE TABLE `eh_contract_statistic_communities` (
+	`id` BIGINT (20) NOT NULL,
+	`namespace_id` INT DEFAULT NULL,
+	`community_id` BIGINT (20) DEFAULT NULL,
+	`date_str` VARCHAR (12) DEFAULT NULL COMMENT '统计月份（格式为xxxx-xx）',
+	`date_type` TINYINT (4) DEFAULT '2' COMMENT '统计时间类型： 1-统计月份（格式为xxxx-xx）, 2-统计年份（格式为xxxx）',
+	`rent_amount` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '每个园区的合同总额',
+	`rental_area` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '每个园区的合同租赁总面积',
+	`contract_count` INT DEFAULT '0' COMMENT '一个园区在租合同总份数',
+	`customer_count` INT DEFAULT '0' COMMENT '新签客户总数',
+	`org_contract_count` INT DEFAULT '0' COMMENT '企业合同总数',
+	`org_contract_amount` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '企业合同总额',
+	`user_contract_count` INT DEFAULT '0' COMMENT '个人合同总数',
+	`user_contract_amount` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '个人合同总额',
+	`new_contract_count` INT DEFAULT '0' COMMENT '新签合同总数',
+	`new_contract_amount` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '新签合同总额',
+	`new_contract_area` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '每个园区新签合同租赁总面积',
+	`denunciation_contract_count` INT DEFAULT '0' COMMENT '退约合同总数',
+	`denunciation_contract_amount` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '退约合同总额',
+	`denunciation_contract_area` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '每个园区续约合同租赁总面积',
+	`change_contract_count` INT DEFAULT '0' COMMENT '变更合同总数',
+	`change_contract_amount` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '变更合同总额',
+	`change_contract_area` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '每个园区变更合同租赁总面积',
+	`renew_contract_count` INT DEFAULT '0' COMMENT '续约合同总数',
+	`renew_contract_amount` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '续约合同总额',
+	`renew_contract_area` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '每个园区续约合同租赁总面积',
+	`deposit_amount` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '新增押金总额',
+	`status` TINYINT (4) DEFAULT '2' COMMENT '该条的记录状态：0-inactive, 1-confirming, 2-active',
+	`create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+	`update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '项目合同报表结果集（项目-月份）';

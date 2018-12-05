@@ -930,6 +930,10 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
     }
 
     private void updateMeetingManager(MeetingReservation meetingReservation) {
+        // 新版本会务人是必填项，但是旧版本APP没有该字段，避免旧版本编辑时将会务人字段清掉，因此需要这个逻辑
+        if (!StringUtils.hasText(meetingReservation.getMeetingManagerName()) || meetingReservation.getMeetingManagerDetailId() == null) {
+            return;
+        }
         meetingProvider.batchDeleteMeetingInvitationsByMeetingId(meetingReservation.getId(), MeetingInvitationRoleType.MEETING_MANAGER.getCode());
         MeetingInvitationDTO newMeetingManager = new MeetingInvitationDTO();
         newMeetingManager.setSourceName(meetingReservation.getMeetingManagerName());

@@ -1306,11 +1306,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
             }
         }
         //至少提前时间
-        Long time = now;if (NormalFlag.NEED.getCode() == rule.getRentalEndTimeFlag()) {
-             time = now + rule.getRentalEndTime();}
-            }if (time > showTimeStart) {
-                segmentTree.putSegment(showTimeStart,time,1);
-            }
+        Long time = now;
+        if (NormalFlag.NEED.getCode() == rule.getRentalEndTimeFlag()) {
+			time = now + rule.getRentalEndTime();
+			if (time > showTimeStart) {
+				segmentTree.putSegment(showTimeStart, time, 1);
+			}
+		}
 
         //是否有格子被预约
         List<RentalOrder> rentalOrders = rentalv2Provider.listActiveBillsByInterval(rentalSite.getId(), showTimeStart, showTimeEnd);
