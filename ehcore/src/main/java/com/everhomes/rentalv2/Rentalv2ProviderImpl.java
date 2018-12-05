@@ -121,9 +121,11 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.insertQuery(Tables.EH_RENTALV2_CELLS);
 		query.setRecord(record);
 		query.execute();
-
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2Cells.class,
 				null);
+		Long tmp = rsr.getId();
+		rsr.setId(rsr.getCellId());
+		rsr.setCellId(tmp);
 
 	}
 
@@ -2036,6 +2038,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		dao.update(rsr);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2Cells.class,
 				rsr.getId());
+
+		tmp = rsr.getId();
+		rsr.setId(rsr.getCellId());
+		rsr.setCellId(tmp);
 	}
 
 	@Override
