@@ -225,6 +225,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			dto.setFreeArea(r.getValue(b.FREE_AREA));
 			dto.setRentRate(r.getValue(b.RENT_RATE));
 			dto.setFreeRate(r.getValue(b.FREE_RATE));
+			dto.setSignedupApartmentCount(r.getValue(b.SIGNEDUP_APARTMENT_COUNT));
+			dto.setWaitingroomApartmentCount(r.getValue(b.WAITINGROOM_APARTMENT_COUNT));
 			
 			result.add(dto);
 		});
@@ -257,6 +259,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			BigDecimal occupiedApartmentCount = r.getValue(DSL.sum(a.OCCUPIED_APARTMENT_COUNT));
 			BigDecimal livingApartmentCount = r.getValue(DSL.sum(a.LIVING_APARTMENT_COUNT));
 			BigDecimal saledApartmentCount = r.getValue(DSL.sum(a.SALED_APARTMENT_COUNT));
+			BigDecimal signedupApartmentCount = r.getValue(DSL.sum(a.SIGNEDUP_APARTMENT_COUNT));
+			BigDecimal waitingroomApartmentCount = r.getValue(DSL.sum(a.WAITINGROOM_APARTMENT_COUNT));
 			
 			result.setCommunityCount(communityCount!=null ? communityCount : null);
 			result.setBuildingCount(buildingCount!=null ? buildingCount.intValue() : null);
@@ -266,6 +270,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			result.setOccupiedApartmentCount(occupiedApartmentCount!=null ? occupiedApartmentCount.intValue() : null);
 			result.setLivingApartmentCount(livingApartmentCount!=null ? livingApartmentCount.intValue() : null);
 			result.setSaledApartmentCount(saledApartmentCount!=null ? saledApartmentCount.intValue() : null);
+			result.setSignedupApartmentCount(signedupApartmentCount!=null ? signedupApartmentCount.intValue() : null);
+			result.setWaitingroomApartmentCount(waitingroomApartmentCount!=null ? waitingroomApartmentCount.intValue() : null);
 			result.setAreaSize(r.getValue(DSL.sum(a.AREA_SIZE)));
 			result.setRentArea(r.getValue(DSL.sum(a.RENT_AREA)));
 			result.setFreeArea(r.getValue(DSL.sum(a.FREE_AREA)));
@@ -330,6 +336,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			dto.setFreeArea(r.getValue(b.FREE_AREA));
 			dto.setRentRate(r.getValue(b.RENT_RATE));
 			dto.setFreeRate(r.getValue(b.FREE_RATE));
+			dto.setSignedupApartmentCount(r.getValue(b.SIGNEDUP_APARTMENT_COUNT));
+			dto.setWaitingroomApartmentCount(r.getValue(b.WAITINGROOM_APARTMENT_COUNT));
 			
 			result.add(dto);
 		});
@@ -363,7 +371,9 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			BigDecimal occupiedApartmentCount = r.getValue(DSL.sum(a.OCCUPIED_APARTMENT_COUNT));
 			BigDecimal livingApartmentCount = r.getValue(DSL.sum(a.LIVING_APARTMENT_COUNT));
 			BigDecimal saledApartmentCount = r.getValue(DSL.sum(a.SALED_APARTMENT_COUNT));
-			
+			BigDecimal signedupApartmentCount = r.getValue(DSL.sum(a.SIGNEDUP_APARTMENT_COUNT));
+			BigDecimal waitingroomApartmentCount = r.getValue(DSL.sum(a.WAITINGROOM_APARTMENT_COUNT));
+
 			result.setBuildingCount(buildingCount!=null ? buildingCount : null);
 			result.setTotalApartmentCount(totalApartmentCount!=null ? totalApartmentCount.intValue() : null);
 			result.setFreeApartmentCount(freeApartmentCount!=null ? freeApartmentCount.intValue() : null);
@@ -374,6 +384,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			result.setAreaSize(r.getValue(DSL.sum(a.AREA_SIZE)));
 			result.setRentArea(r.getValue(DSL.sum(a.RENT_AREA)));
 			result.setFreeArea(r.getValue(DSL.sum(a.FREE_AREA)));
+			result.setSignedupApartmentCount(signedupApartmentCount!=null ? signedupApartmentCount.intValue() : null);
+			result.setWaitingroomApartmentCount(waitingroomApartmentCount!=null ? waitingroomApartmentCount.intValue() : null);
 			
 			BigDecimal rentRate;
 			BigDecimal freeRate;
