@@ -2500,6 +2500,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		GetOfficeCubicleRentOrderResponse response = new GetOfficeCubicleRentOrderResponse();
 		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderById(cmd.getOrderId());
 		OfficeRentOrderDTO dto = ConvertHelper.convert(order, OfficeRentOrderDTO.class);
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(order.getSpaceId());
+		dto.setSpaceName(space.getName());
 		response.setOrders(dto);
 		return response;
 	}
