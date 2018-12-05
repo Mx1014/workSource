@@ -2353,7 +2353,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		return associateStaionList;
 	}
-	
+//	@Override
+//	public GetRefundRuleResponse getRefundRule(GetRefundRuleCommand cmd){
+//		
+//	}
 	@Override
 	public GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd){
 		GetStationDetailResponse resp = new GetStationDetailResponse();

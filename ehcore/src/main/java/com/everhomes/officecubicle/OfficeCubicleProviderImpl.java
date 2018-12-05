@@ -376,7 +376,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ID.lt(locator.getAnchor()));
 		step.limit(pageSize);
 		step.where(condition);
-		List<OfficeCubicleRentOrder> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.OPERATE_TIME.desc()).fetch().map((r) -> {
+		List<OfficeCubicleRentOrder> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.CREATE_TIME.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleRentOrder.class);
 		});
 		if (null != result && result.size() > 0)
