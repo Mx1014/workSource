@@ -145,7 +145,6 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 							//所有数据以生产方为准
 							if(cmBill.getBillType() != null && cmBill.getBillType().equals("服务费账单")) {
 								//CM把我方的服务账单又同步回来
-								//(3) 若用户线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
 								try{
 									PaymentBills zuolinServiceBill = assetProvider.findBillById(Long.parseLong(cmBill.getBillID()));
 									if(zuolinServiceBill != null) {
@@ -344,6 +343,26 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 										//如果账单的唯一标识存在，那么是更新
 										Long billId = existCmBill.getId();
 										paymentBills.setId(billId);
+										//支付过程对接逻辑
+										if(cmBill.getStatus() != null && cmBill.getStatus().equals("已缴账单")) {
+											if(existCmBill.getStatus().equals(AssetPaymentBillStatus.UNPAID.getCode())) {
+												//(2)若用户线下一次性全部支付，财务在CM中直接记录结果，正常同步状态给APP。未同步之前，APP端一直显示为“未支付”。
+												paymentBills.setThirdPaid(AssetPaymentBillStatus.PAID.getCode());//已在第三方支付
+												paymentBills.setPaymentType(AssetPaymentType.CMPAID.getCode());//支付方式置为：CM线下支付
+												paymentBills.setStatus(AssetPaymentBillStatus.PAID.getCode());//已支付
+												paymentBills.setConfirmFlag(AssetPaymentBillConfirmFlag.CONFIRM.getCode());//已确认
+											}else {
+												//(1)若用户在APP一次性全部支付，此时在APP端显示的支付状态是“已支付，待确认”。当财务看到了支付结果，在CM中确认收入以后，CM的账单状态变成“已支付”。下一次同步数据时，APP同步显示为 “已确认”。
+												paymentBills.setStatus(AssetPaymentBillStatus.PAID.getCode());//已支付
+												paymentBills.setConfirmFlag(AssetPaymentBillConfirmFlag.CONFIRM.getCode());//已确认
+											}
+										}else {
+											//(3) 若用户线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
+											//如果服务费账单已收大于0，那么说明已在CM线下支付过
+											if(amountReceived.compareTo(BigDecimal.ZERO) > 0) {
+												paymentBills.setThirdPaid(AssetPaymentBillStatus.PAID.getCode());//已在第三方支付
+											}
+										}
 										assetProvider.updateCMBill(paymentBills);
 										PaymentBillItems existCmBillItem = assetProvider.getCMBillItemByBillId(billId);
 										if(existCmBillItem != null) {
