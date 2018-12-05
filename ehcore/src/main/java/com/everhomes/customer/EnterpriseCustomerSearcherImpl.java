@@ -224,7 +224,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 });
                 builder.field("customerContactName", StringUtils.join(customerContactName, "|"));
             }
-            List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId(),customer.getCustomerSource());
+            List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId(),InvitedCustomerType.INVITED_CUSTOMER.getCode());
             if(trackings != null && trackings.size() > 0){
                 List<Timestamp> trackingTime = new ArrayList<>();
 
@@ -498,7 +498,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         FilterBuilder rfbt = null;
 
         if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
-            RangeFilterBuilder rf1 = new RangeFilterBuilder("lastTrackingTime");
+            RangeFilterBuilder rf1 = new RangeFilterBuilder("trackingTime");
             RangeFilterBuilder rf2 = new RangeFilterBuilder("createTime");
             Long startTime = cmd.getMinTrackingPeriod();
             Long endTime = cmd.getMaxTrackingPeriod();
