@@ -252,11 +252,11 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
     @Override
     public void batchCreateAppEntry(List<ServiceModuleAppEntry> serviceModuleAppEntries) {
         List<EhServiceModuleAppEntries> list = new ArrayList<>();
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppEntries.class));
+        long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppEntries.class), Long.valueOf(serviceModuleAppEntries.size()));
         for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntries) {
             serviceModuleAppEntry.setId(id);
             id++;
-            list.add(ConvertHelper.convert(serviceModuleAppEntries, EhServiceModuleAppEntries.class));
+            list.add(ConvertHelper.convert(serviceModuleAppEntry, EhServiceModuleAppEntries.class));
         }
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntries.class));
         EhServiceModuleAppEntriesDao dao = new EhServiceModuleAppEntriesDao(context.configuration());
