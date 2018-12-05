@@ -576,6 +576,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 					if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
 						menuDto.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
 						appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+					}else if (!StringUtils.isEmpty(entry.getEntryName())) {
+						menuDto.setName(entry.getEntryName());
+						appDTO.setName(entry.getEntryName());
 					}
 					menuDto.setAppConfig(appDTO);
 					menuDtos.add(menuDto);
