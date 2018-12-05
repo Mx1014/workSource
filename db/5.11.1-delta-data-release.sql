@@ -222,6 +222,11 @@ set @item_id = (select max(id) from `eh_var_field_group_scopes`);
 INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) 
 	VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1010, '房源日志', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
 
+-- AUTHOR:  谢旭双
+-- REMARK: 修改会议预定消息内容
+UPDATE eh_locale_strings SET text = REPLACE(text,'您','你') WHERE scope IN ('meetingErrorCode', 'meetingMessage');
+UPDATE eh_locale_templates SET text = REPLACE(text,'您','你'),description=REPLACE(description,'您','你')  WHERE scope='meetingMessage';
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
