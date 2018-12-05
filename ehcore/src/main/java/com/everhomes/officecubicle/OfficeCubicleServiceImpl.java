@@ -2306,7 +2306,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		resp.setRoom(room.stream().map(r->{
 			RoomDTO dto = ConvertHelper.convert(r,RoomDTO.class);
 			dto.setRoomId(r.getId());
-			List<AssociateStationDTO> associateStaionList = setAssociateStaion(station);
+			List<OfficeCubicleStation> associateStaion = 
+					officeCubicleProvider.getOfficeCubicleStation(null, cmd.getOwnerType(), cmd.getSpaceId(),r.getId(),(byte)1,null,null,null);
+			List<AssociateStationDTO> associateStaionList = setAssociateStaion(associateStaion);
 			dto.setAssociateStation(associateStaionList);
 			List<OfficeCubicleStationRent> stationRent = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(), null,(byte)0,r.getId());
 			Long rentDate = System.currentTimeMillis();
