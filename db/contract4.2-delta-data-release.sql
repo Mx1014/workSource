@@ -6,6 +6,4 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 -- REMARK: issue-37007 资产设置一房一价，租赁价格大于设定的价格，则合同不需要审批
 SET @id = (SELECT MAX(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '30001', 'zh_CN', '请输入正确的查询时间');
-
-
-INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '10014', 'zh_CN', '该房源信息已经存在');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '30002', 'zh_CN', '请输入查询项目');
