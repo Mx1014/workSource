@@ -536,8 +536,7 @@ public class WelfareServiceImpl implements WelfareService {
                     WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利不存在");
         }
         checkOperatorPrivilege(welfare.getOrganizationId(), cmd.getAppId());
-        if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus()) || WelfareStatus.SENDING == WelfareStatus.fromCode(welfare.getStatus())
-        		 || WelfareStatus.FAILED == WelfareStatus.fromCode(welfare.getStatus())) {
+        if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus()) || WelfareStatus.SENDING == WelfareStatus.fromCode(welfare.getStatus())) {
             throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                     WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能删除");
         }
