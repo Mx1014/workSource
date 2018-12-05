@@ -16,7 +16,18 @@ public class GetOfficeCubicleRefundRuleCommand {
 	private Long ownerId;
 	private String ownerType;
 	private Long spaceId;
+	private Integer price;
     
+
+	public Integer getPrice() {
+		return price;
+	}
+
+
+	public void setPrice(Integer price) {
+		this.price = price;
+	}
+
 
 	public Long getSpaceId() {
 		return spaceId;

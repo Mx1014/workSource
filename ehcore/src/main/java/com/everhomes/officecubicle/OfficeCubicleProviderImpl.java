@@ -35,6 +35,8 @@ import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rest.officecubicle.OfficeOrderStatus;
 import com.everhomes.rest.officecubicle.OfficeStatus;
+import com.everhomes.rest.user.NamespaceUserType;
+import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOfficeCubicleAttachments;
@@ -826,14 +828,25 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	@Override
 	public List<OfficeCubicleStation> getOfficeCubicleStationByTime(Long spaceId, Byte rentFlag,Long beginDate,Long endDate) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		SelectQuery<EhOfficeCubicleStationRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION);
-		if (spaceId != null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.SPACE_ID.eq(spaceId));
-		if (rentFlag != null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.eq(rentFlag));
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.BEGIN_TIME.gt(new Timestamp(endDate)));
-		query.addConditions(Operator.OR,Tables.EH_OFFICE_CUBICLE_STATION.END_TIME.lt(new Timestamp(beginDate)));
-		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStation.class));
+//		SelectQuery<EhOfficeCubicleStationRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION);
+//		if (spaceId != null)
+//			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.SPACE_ID.eq(spaceId));
+//		if (rentFlag != null)
+//			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.eq(rentFlag));
+//		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.BEGIN_TIME.gt(new Timestamp(endDate)));
+//		query.addConditions(Operator.OR,Tables.EH_OFFICE_CUBICLE_STATION.END_TIME.lt(new Timestamp(beginDate)));
+//		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStation.class));
+//		
+        com.everhomes.server.schema.tables.EhOfficeCubicleStation t = Tables.EH_OFFICE_CUBICLE_STATION;
+
+        Condition beginTime = t.EH_OFFICE_CUBICLE_STATION.BEGIN_TIME.gt(new Timestamp(endDate));
+        Condition endTime = t.EH_OFFICE_CUBICLE_STATION.END_TIME.lt(new Timestamp(beginDate));
+
+        return context.select().from(t)
+                .where(t.SPACE_ID.eq(spaceId))
+                .and(t.RENT_FLAG.eq(rentFlag))
+                .and(beginTime.or(endTime))
+                .fetchInto(OfficeCubicleStation.class);
 	}
 	
 	@Override

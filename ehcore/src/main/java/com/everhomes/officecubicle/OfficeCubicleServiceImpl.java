@@ -1120,10 +1120,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetOfficeCubicleRefundRuleResponse getOfficeCubicleRefundRule(GetOfficeCubicleRefundRuleCommand cmd){
 		GetOfficeCubicleRefundRuleResponse resp = new GetOfficeCubicleRefundRuleResponse();
-		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		List<OfficeCubicleRefundRule> rules = officeCubicleProvider.findRefundRule(cmd.getSpaceId());
 		if (rules == null){
 			return resp;
+		}
+		for(OfficeCubicleRefundRule rule : rules){
+			
 		}
 		resp.setRefundStrategy(rules.get(0).getRefundStrategy());
 		resp.setRefundStrategies(rules.stream().map(r->{
@@ -2198,7 +2200,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (shortRentStation != null){
 			shortRentStationSize = shortRentStation.size();
 		}
-		resp.setShortCubicleIdleNums(stationSize-shortRentStationSize);
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
+		Integer shortRentNums = 0;
+		if (space.getShortRentNums()!=null){
+			shortRentNums = Integer.valueOf(space.getShortRentNums());
+		}
+		resp.setShortCubicleIdleNums(shortRentNums-shortRentStationSize);
 		resp.setLongCubicleRentedNums(longRentStationSize);
 		List<OfficeCubicleStation> closeStation = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, (byte)0,null,null,null);
@@ -2207,12 +2214,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		resp.setLongRentCloseCubicleNums(closeStationSize);
 		resp.setLongCubicleIdleNums(stationSize-longRentStationSize);
-		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
-		Integer shortRentNums = 0;
-		if (space.getShortRentNums()!=null){
-			shortRentNums = Integer.valueOf(space.getShortRentNums());
-		}
-		resp.setShortCubicleRentedNums(shortRentNums-shortRentStationSize);
+
+		resp.setShortCubicleRentedNums(shortRentStationSize);
 		Integer rentRates =((shortRentStationSize+longRentStationSize)*100)/stationSize;
 		resp.setRentRates(rentRates);
 		return resp;
@@ -2239,7 +2242,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public GetStationForRoomResponse getStationForRoom (GetStationForRoomCommand cmd){
 		GetStationForRoomResponse resp = new GetStationForRoomResponse();
 		List<OfficeCubicleStation> station = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,cmd.getKeyword(),null,null);
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,cmd.getKeyword(),(byte)1,null);
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
 		for (OfficeCubicleStation s : station){
 			StationDTO dto = new StationDTO();
