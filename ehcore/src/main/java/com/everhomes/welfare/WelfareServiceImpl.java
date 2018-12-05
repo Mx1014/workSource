@@ -327,7 +327,7 @@ public class WelfareServiceImpl implements WelfareService {
             SendWelfaresResponse response = new SendWelfaresResponse();
             if (welfaresDTO.getId() != null) {
                 Welfare welfare = welfareProvider.findWelfareById(welfaresDTO.getId());
-                if(welfare == null || Byte.valueOf((byte)1).equals(welfareDTO.getStatus())){
+                if(welfare == null || Byte.valueOf((byte)1).equals(welfaresDTO.getStatus())){
                 	throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利被删除");
                 }
@@ -534,7 +534,7 @@ public class WelfareServiceImpl implements WelfareService {
     @Override
     public void deleteWelfare(DeleteWelfareCommand cmd) {
         Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfareId());
-        if (welfare == null || Byte.valueOf((byte)1).equals(welfareDTO.getStatus())) {
+        if (welfare == null || Byte.valueOf((byte)1).equals(welfare.getStatus())) {
             throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                     WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利不存在");
         }
@@ -584,7 +584,7 @@ public class WelfareServiceImpl implements WelfareService {
 	}
 
 	private void updateWelfareStatus(Welfare welfare, Byte status) {
-		if (welfare == null || Byte.valueOf((byte)1).equals(welfareDTO.getStatus())) {
+		if (welfare == null || Byte.valueOf((byte)1).equals(welfare.getStatus())) {
             throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                     WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利不存在");
         }
