@@ -2019,6 +2019,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setSpaceId(cmd.getSpaceId());
 		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
 		order.setOrderNo(orderNo);
+		order.setUseDetail(cmd.getUserDetail());
 		this.dbProvider.execute((TransactionStatus status) -> {
 			officeCubicleProvider.createCubicleRentOrder(order);
 			return null;
