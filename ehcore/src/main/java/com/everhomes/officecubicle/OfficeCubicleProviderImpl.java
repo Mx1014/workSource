@@ -864,9 +864,9 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		if (stationType != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_TYPE.eq(stationType));
 		if (beginDate != null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.gt(new Timestamp(beginDate)));
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.lt(new Timestamp(beginDate)));
 		if (endDate != null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.lt(new Timestamp(endDate)));
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.lt(new Timestamp(endDate)));
 		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStationRent.class));
 	}
 	

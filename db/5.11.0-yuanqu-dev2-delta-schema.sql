@@ -16,6 +16,8 @@ CREATE TABLE `eh_office_cubicle_station` (
   `price` DECIMAL(10,2) COMMENT '价格',
   `associate_room_id` BIGINT COMMENT '关联办公室id',
   `status` TINYINT COMMENT '1-未预定，2-已预定',
+  `begin_time` DATETIME COMMENT '预定开始时间',
+  `end_time` DATETIME COMMENT '预定结束时间',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -35,6 +37,8 @@ CREATE TABLE `eh_office_cubicle_room` (
   `description` TEXT COMMENT '描述',
   `price` DECIMAL(10,2) COMMENT '价格',
   `status` TINYINT COMMENT '1-未预定，2-已预定',
+  `begin_time` DATETIME COMMENT '预定开始时间',
+  `end_time` DATETIME COMMENT '预定结束时间',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 

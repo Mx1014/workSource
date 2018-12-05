@@ -2263,6 +2263,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		int j = 0;
 		for (OfficeCubicleStation s :station){
 			for (OfficeCubicleStationRent rs:rentStation){
+				LOGGER.info("1111");
 				if (rs.getStationId() == s.getId()){
 					station.remove(i);
 				}
@@ -2284,8 +2285,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			dto = ConvertHelper.convert(s,StationDTO.class);
 			dto.setStationId(s.getId());
-			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
-					UserContext.current().getUser().getId()));
 			stationDTO.add(dto);
 		}
 		resp.setStation(stationDTO);
