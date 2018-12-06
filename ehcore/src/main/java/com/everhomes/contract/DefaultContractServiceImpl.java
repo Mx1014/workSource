@@ -50,7 +50,6 @@ import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.asset.bill.AssetBillService;
 import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -85,8 +84,6 @@ import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.address.GetApartmentDetailCommand;
-import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
@@ -1751,11 +1748,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 		//by --djm issue-35586
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-
 			/*if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
-
-			if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
-
 				FindContractCommand command = new FindContractCommand();
 				command.setId(contract.getId());
 				command.setPartyAId(contract.getPartyAId());
@@ -1770,14 +1763,15 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
 							"apartments status is not free for contract!");
 				}
-			}
-		}*/
+			}*/
 			addToFlowCase(contract, flowcaseContractOwnerType);
 			//添加发起人字段
 			contract.setSponsorUid(UserContext.currentUserId().toString());
 			contract.setSponsorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
+
 		contractProvider.updateContract(contract);
+
 		//add by tangcen
 		//将父合同中关联的未出账单记为无效账单
 		//前端传过来的CostGenerationMethod字段实际上是对父合同未出账单的处理方式，因此把CostGenerationMethod的值存在父合同中，而非子合同中
@@ -1790,6 +1784,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 //				assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
 //			}
 		}
+
 		//记录合同事件日志，by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 		
@@ -1813,7 +1808,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		ContractDetailDTO contractDetailDTO = ConvertHelper.convert(contract, ContractDetailDTO.class);
 		
 		return contractDetailDTO;
-		//ConvertHelper.convert(contract, ContractDetailDTO.class);
+				//ConvertHelper.convert(contract, ContractDetailDTO.class);
 	}
 
 	protected Timestamp setToEnd(Long date) {
@@ -4541,6 +4536,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		return dto;
 	}
 	
+
 	//合同模板 生成合同文档
 	@Override
 	public void generateContractDocuments(GenerateContractDocumentsCommand cmd) {
@@ -5191,5 +5187,4 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			System.out.println();
 		}
 	}
-	
 }
