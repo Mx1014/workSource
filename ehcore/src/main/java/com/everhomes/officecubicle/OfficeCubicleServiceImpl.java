@@ -41,39 +41,26 @@ import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rentalv2.RentalCommonServiceImpl;
-import com.everhomes.rentalv2.RentalDefaultRule;
-import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalOrderHandler;
-import com.everhomes.rentalv2.RentalOrderRule;
-import com.everhomes.rentalv2.RentalRefundTip;
-import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2PriceRule;
 import com.everhomes.rentalv2.Rentalv2PriceRuleProvider;
 import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rentalv2.Rentalv2Service;
-import com.everhomes.rentalv2.job.RentalMessageJob;
-import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
 import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.TrueOrFalseFlag;
-import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdCommand;
 import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdResponse;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
-import com.everhomes.rest.general.order.CreateOrderBaseInfo;
 import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
-import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -89,7 +76,6 @@ import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUser
 import com.everhomes.rest.promotion.merchant.controller.GetPayerInfoByMerchantIdRestResponse;
 import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
-import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.promotion.order.CreateRefundOrderCommand;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
@@ -104,40 +90,28 @@ import com.everhomes.rest.rentalv2.PriceRuleType;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourcePriceRuleCommand;
 import com.everhomes.rest.rentalv2.admin.PriceRuleDTO;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.rest.rentalv2.admin.RentalDurationType;
 import com.everhomes.rest.rentalv2.admin.RentalDurationUnit;
-import com.everhomes.rest.rentalv2.admin.RentalOrderHandleType;
 import com.everhomes.rest.rentalv2.admin.RentalOrderStrategy;
-import com.everhomes.rest.rentalv2.admin.RentalRefundTipDTO;
-import com.everhomes.rest.rentalv2.admin.ResourcePriceRuleDTO;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceRentalRuleCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.util.*;
 
-import net.greghaines.jesque.Job;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.tools.ant.taskdefs.Get;
-import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
@@ -146,22 +120,13 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.parking.ParkingBusinessPayeeAccount;
-import com.everhomes.parking.ParkingBusinessPayeeAccountProvider;
-import com.everhomes.parking.ParkingRechargeRate;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.PaymentType;
@@ -170,7 +135,6 @@ import com.everhomes.paySDK.PaySettings;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.print.SiyinPrintNotificationTemplateCode;
-import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -180,17 +144,10 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.server.schema.tables.EhRentalv2DefaultRules;
-import com.everhomes.server.schema.tables.daos.EhParkingRechargeRatesDao;
-import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleAttachments;
-import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
-import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -1157,7 +1114,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			Integer refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space).intValue();
 			resp.setRefundPrice(refundPrice);
 		}
-		resp.setRefundTip(refundTips.stream().map(r->ConvertHelper.convert(r,OfficeCubicleRefundTipDTO.class)).collect(Collectors.toList()));
+		resp.setRefundTips(refundTips.stream().map(r->ConvertHelper.convert(r,OfficeCubicleRefundTipDTO.class)).collect(Collectors.toList()));
 		return resp;
 	}
     private BigDecimal calculateRefundAmount(OfficeCubicleRentOrder order, Long now, OfficeCubicleSpace space) {
@@ -2169,7 +2126,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			return null;
 		});
-		
+		rentalCommonService.rentalOrderSuccess(cmd.getRentalOrderNo());
 		return null;
 		
 	}
@@ -2623,6 +2580,23 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)1);
 			}else{
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)2);
+				QueryDefaultRuleAdminCommand cmd2 = new QueryDefaultRuleAdminCommand();
+		        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(r.getNamespaceId(),
+		                RentalV2ResourceType.STATION_BOOKING.getCode());
+				cmd2.setResourceType(RentalV2ResourceType.STATION_BOOKING.getCode());
+				cmd2.setResourceTypeId(type.getId());
+				cmd2.setSourceId(r.getId());
+				cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
+				QueryDefaultRuleAdminResponse resp2 = rentalv2Service.queryDefaultRule(cmd2);
+				dto.setNeedPay(resp2.getNeedPay());
+				
+				for (PriceRuleDTO priceRule :resp2.getPriceRules()){
+					if (priceRule.getRentalType() ==1){
+						dto.setDailyPrice(priceRule.getWorkdayPrice().intValue());
+					} else if (priceRule.getRentalType() ==2){
+						dto.setHalfdailyPrice(priceRule.getWorkdayPrice().intValue());
+					}
+				}
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null,null);

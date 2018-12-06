@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GetOfficeCubicleRefundRuleResponse {
     private Byte refundStrategy;
-    private List<OfficeCubicleRefundTipDTO> refundTip;
+    private List<OfficeCubicleRefundTipDTO> refundTips;
     private List<OfficeCubicleRefundRuleDTO> refundStrategies;
     private Integer refundPrice;
     
@@ -41,12 +41,12 @@ public class GetOfficeCubicleRefundRuleResponse {
 		this.refundStrategy = refundStrategy;
 	}
 
-	public List<OfficeCubicleRefundTipDTO> getRefundTip() {
-		return refundTip;
+	public List<OfficeCubicleRefundTipDTO> getRefundTips() {
+		return refundTips;
 	}
 
-	public void setRefundTip(List<OfficeCubicleRefundTipDTO> refundTip) {
-		this.refundTip = refundTip;
+	public void setRefundTips(List<OfficeCubicleRefundTipDTO> refundTips) {
+		this.refundTips = refundTips;
 	}
 
 	public List<OfficeCubicleRefundRuleDTO> getRefundStrategies() {
