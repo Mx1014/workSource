@@ -1885,7 +1885,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         ServiceModuleEntry serviceModuleEntry = ConvertHelper.convert(cmd, ServiceModuleEntry.class);
 
         serviceModuleEntry.setDefaultOrder(1000);
-
+        serviceModuleEntry.setModuleName(module.getName());
         serviceModuleEntryProvider.create(serviceModuleEntry);
 
         ServiceModuleEntryDTO dto = ConvertHelper.convert(serviceModuleEntry, ServiceModuleEntryDTO.class);
