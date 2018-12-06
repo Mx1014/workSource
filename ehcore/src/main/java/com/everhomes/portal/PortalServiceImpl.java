@@ -2623,7 +2623,7 @@ public class PortalServiceImpl implements PortalService {
 				item.setActionType(moduleApp.getActionType());
 				item.setActionData(moduleApp.getInstanceConfig());
 			}
-			setItemModuleAppActionData(item, instanceConfig.getModuleAppId());
+			setItemModuleAppActionData(item, instanceConfig.getModuleAppId(), null);
 		}
 		for (SceneType sceneType: SceneType.values()) {
 			if(sceneType == SceneType.DEFAULT ||
@@ -2892,10 +2892,10 @@ public class PortalServiceImpl implements PortalService {
 
 	private void setItemModuleAppActionData(LaunchPadItem item, String actionData){
 		ModuleAppActionData data = (ModuleAppActionData)StringHelper.fromJsonString(actionData, ModuleAppActionData.class);
-		setItemModuleAppActionData(item, data.getModuleAppId());
+		setItemModuleAppActionData(item, data.getModuleAppId(), data.getModuleEntryId());
 	}
 
-	private void setItemModuleAppActionData(LaunchPadItem item, Long moduleAppId){
+	private void setItemModuleAppActionData(LaunchPadItem item, Long moduleAppId, Long moduleEntryId){
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(moduleAppId);
 		if(null != moduleApp){
 			item.setAppId(moduleApp.getOriginId());
@@ -2912,7 +2912,7 @@ public class PortalServiceImpl implements PortalService {
 				HandlerGetItemActionDataCommand handlerCmd = new HandlerGetItemActionDataCommand();
 				handlerCmd.setAppOriginId(moduleApp.getOriginId());
 				handlerCmd.setAppId(moduleApp.getId());
-
+				handlerCmd.setModuleEntryId(moduleEntryId);
 				item.setActionData(handler.getItemActionData(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), handlerCmd));
 			}else{
 				item.setActionData(moduleApp.getInstanceConfig());
