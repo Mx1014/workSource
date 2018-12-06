@@ -1274,9 +1274,11 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             }
             long updateStartTime = System.currentTimeMillis();
             long roundStartTime = updateStartTime;
+            LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
             for(int i = 0; i < createBillCommands.size(); i++){
                 CreateBillCommand command = createBillCommands.get(i);
                 command.setCategoryId(categoryId);
+                command.setSourceName(localeString.getText());
                 List<Boolean> isCreate = new ArrayList<Boolean>();
             	isCreate.add(true);
             	if(cmd.getTargetType() != null && cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
@@ -1290,8 +1292,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             		createBillFromImport(command);//物业缴费V6.0（UE优化) 账单区分数据来源
             	}
             	
-            	if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
-                    long roundEndTime = updateStartTime;
+            	// 由于插入/更新数据非常慢，打印一下前两条的时间
+            	if(((i % 500) == 0 || i == 1) && LOGGER.isInfoEnabled()) {
+                    long roundEndTime = System.currentTimeMillis();
                     LOGGER.info("Process bill importing data(round update), index={}, dataSize={}, elapse={}", i, createBillCommands.size(), (roundEndTime - roundStartTime));
                     roundStartTime = roundEndTime;
             	}
@@ -1318,8 +1321,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     	//物业缴费V6.0（UE优化) 账单区分数据来源
     	command.setSourceType(AssetSourceTypeEnum.ASSET_MODULE.getSourceType());
     	command.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
-    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
-    	command.setSourceName(localeString.getText());
     	//物业缴费V6.0 ：批量导入的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
     	command.setCanDelete((byte)1);
     	command.setCanModify((byte)1);
@@ -1369,8 +1370,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     	//物业缴费V6.0（UE优化) 账单区分数据来源
     	command.setSourceType(AssetSourceTypeEnum.ASSET_MODULE.getSourceType());
     	command.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
-    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
-    	command.setSourceName(localeString.getText());
     	//物业缴费V6.0 ：批量导入的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
     	command.setCanDelete((byte)1);
     	command.setCanModify((byte)1);
@@ -1706,8 +1705,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             // 打印阶段日志和时间，方便定位性能问题 by lqs 20181206
             if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
                 long roundEndTime = System.currentTimeMillis();
-                LOGGER.info("Process bill importing data(round), index={}, namespaceId={}, billGroupId={}, targetType={}, mapSize={}, roundElapse={}, fieldRoundElapse={}", 
-                        i, namespaceId, billGroupId, targetType, map.size(), (roundEndTime - startTime), fieldRoundElapse);
+                int cmdSize = (cmds == null) ? 0 : cmds.size();
+                int dataSize = (datas == null) ? 0 : datas.size();
+                LOGGER.info("Process bill importing data(round), index={}, namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, roundElapse={}, fieldRoundElapse={}", 
+                        i, namespaceId, billGroupId, targetType, cmdSize, dataSize, (roundEndTime - startTime), fieldRoundElapse);
                 roundStartTime = roundEndTime;
                 fieldRoundElapse = 0;
             }
