@@ -9,6 +9,8 @@
 -- REMARK:服务联盟表单修复部分未迁移成功的表单数据
 -- REMARK: /yellowPage/transferFlowCaseVals  ownerId填写1802  将返回字符串发给黄明波
 
+-- AUTHOR: xq.tian  20181206
+-- REMARK: 将左邻基线和标准版的 ehcore.yml 里的 xss.enabled: true 改成 xss.enabled: false, 其他环境不用修改
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
