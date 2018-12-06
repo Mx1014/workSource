@@ -1272,6 +1272,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                 createBillCommands = entry.getKey();
                 datas = entry.getValue();
             }
+            long updateStartTime = System.currentTimeMillis();
             for(CreateBillCommand command : createBillCommands){
                 command.setCategoryId(categoryId);
                 List<Boolean> isCreate = new ArrayList<Boolean>();
@@ -1286,6 +1287,12 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             	if(isCreate.get(0)) {
             		createBillFromImport(command);//物业缴费V6.0（UE优化) 账单区分数据来源
             	}
+            }
+            if(LOGGER.isInfoEnabled()) {
+                long updateEndTime = System.currentTimeMillis();
+                int cmdSize = (createBillCommands == null) ? 0 : createBillCommands.size();
+                int dataSize = (datas == null) ? 0 : datas.size();
+                LOGGER.info("Process bill importing data(update), cmdSize={}, dataSize={}, elapse={}", cmdSize, dataSize, (updateEndTime - updateStartTime));
             }
             //设置导出报错的结果excel的标
             importTaskResponse.setTitle(datas.get(0).getData());
@@ -1388,6 +1395,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 
     @SuppressWarnings("rawtypes")
 	private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId, Long ownerId, Byte billSwitch, String targetType) {
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Process bill importing data(start), namespaceId={}, billGroupId={}, targetType={}, size={}", namespaceId, billGroupId, targetType, resultList.size());
+        }
         Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = new HashMap<>();
         List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
         List<CreateBillCommand> cmds = new ArrayList<>();
@@ -1412,6 +1423,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             else if(headers[i].contains("账单开始时间")) dateStrBeginIndex = i;
             else if(headers[i].contains("账单结束时间")) dateStrEndIndex = i;
         }
+        
+        long roundStartTime = System.currentTimeMillis();
+        long fieldRoundElapse = 0L;
         bill:for (int i = 2; i < resultList.size(); i++) {
             RowResult currentRow = (RowResult) resultList.get(i);
             String[] data = getOrderedCellValues(currentRow, headers.length);
@@ -1475,6 +1489,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             	}
         	}
             
+        	long fieldStartTime = System.currentTimeMillis();
             for(int j = 0; j < data.length; j++){
                 BillItemDTO item = new BillItemDTO();
                 if(headers[j].contains("客户名称")){
@@ -1637,6 +1652,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     cmd.setInvoiceNum(data[j]);
                 }
             }
+            fieldRoundElapse += System.currentTimeMillis() - fieldStartTime;
+            
             billGroupDTO.setBillGroupId(billGroupId);
             billGroupDTO.setBillItemDTOList(billItemDTOList);
             billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
@@ -1677,8 +1694,23 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             	}
             }
             cmds.add(cmd);
+            
+            // 打印阶段日志和时间，方便定位性能问题 by lqs 20181206
+            if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
+                long roundEndTime = System.currentTimeMillis();
+                LOGGER.info("Process bill importing data(round), namespaceId={}, billGroupId={}, targetType={}, mapSize={}, roundElapse={}, fieldRoundElapse={}", 
+                        namespaceId, billGroupId, targetType, map.size(), (roundEndTime - startTime), fieldRoundElapse);
+                roundStartTime = roundEndTime;
+                fieldRoundElapse = 0;
+            }
         }
         map.put(cmds, datas);
+        
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Process bill importing data(end), namespaceId={}, billGroupId={}, targetType={}, mapSize={}, elapse={}", namespaceId, billGroupId, targetType, map.size(), (endTime - startTime));
+        }
+        
         return map;
     }
 
