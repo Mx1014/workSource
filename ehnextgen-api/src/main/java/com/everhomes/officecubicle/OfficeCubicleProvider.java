@@ -150,4 +150,6 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleStationRent> searchCubicleStationRentByOrderId(Long spaceId, Long orderId);
 
+	List<OfficeCubicleRentOrder> findOfficeCubicleRentOrderByStatus(Byte[] orderStatus);
+
 }

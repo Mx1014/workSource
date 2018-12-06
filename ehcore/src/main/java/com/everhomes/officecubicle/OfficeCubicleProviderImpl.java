@@ -31,6 +31,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalCloseDate;
+import com.everhomes.rentalv2.RentalOrder;
 import com.everhomes.rentalv2.RentalRefundTip;
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceType;
@@ -825,6 +826,23 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		SelectQuery<EhOfficeCubicleRentOrdersRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
 		query.addConditions(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ID.eq(orderId));
 		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleRentOrder.class);
+	}
+	
+	@Override
+	public List<OfficeCubicleRentOrder> findOfficeCubicleRentOrderByStatus(Byte[] orderStatus) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS
+				.in(orderStatus);
+		step.where(condition);
+		List<OfficeCubicleRentOrder> result = step
+				.orderBy(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, OfficeCubicleRentOrder.class);
+				});
+		if (null != result && result.size() > 0)
+			return result ;
+		return new ArrayList<>();
 	}
 	
 

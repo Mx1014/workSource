@@ -90,6 +90,7 @@ import com.everhomes.rest.rentalv2.PriceRuleType;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
 import com.everhomes.rest.rentalv2.admin.PriceRuleDTO;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
@@ -112,6 +113,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
@@ -2651,5 +2653,26 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return dto;
 		}).collect(Collectors.toList()));
 		return resp;
+	}
+	
+	@Scheduled(cron = "0 0 8,12 * * ? ")
+	@Override
+	public void schedule(){
+		List<OfficeCubicleRentOrder> orders = 
+				this.officeCubicleProvider.findOfficeCubicleRentOrderByStatus(new Byte[]{OfficeCubiceOrderStatus.IN_USE.getCode(),
+						OfficeCubiceOrderStatus.PAID.getCode()});
+		for(OfficeCubicleRentOrder order:orders){
+			if(order.getOrderStatus().equals(OfficeCubiceOrderStatus.IN_USE.getCode())){
+				if(order.getEndTime().getTime()<System.currentTimeMillis()){
+					order.setOrderStatus(OfficeCubiceOrderStatus.COMPLETE.getCode());
+					officeCubicleProvider.updateCubicleRentOrder(order);
+				}
+			} else if(order.getOrderStatus().equals(OfficeCubiceOrderStatus.PAID.getCode())){
+				if(order.getBeginTime().getTime()<System.currentTimeMillis()){
+					order.setOrderStatus(OfficeCubiceOrderStatus.IN_USE.getCode());
+					officeCubicleProvider.updateCubicleRentOrder(order);
+				}
+			}
+		}
 	}
 }

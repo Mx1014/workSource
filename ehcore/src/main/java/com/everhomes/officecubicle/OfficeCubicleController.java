@@ -2,6 +2,7 @@ package com.everhomes.officecubicle;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -673,5 +674,11 @@ public class OfficeCubicleController extends ControllerBase {
         return response;
     	
     }
+    
+	@RequestMapping("testSch")
+	public String testSch(HttpServletRequest request,HttpServletResponse response){
+		this.officeCubicleService.schedule();
+		return null;
+	}
 }
 
