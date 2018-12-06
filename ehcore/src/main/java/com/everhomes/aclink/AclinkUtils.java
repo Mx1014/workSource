@@ -92,7 +92,6 @@ public class AclinkUtils {
         return Base64.encodeBase64String(binaryData);
     }
     
-    //???userId,??authId by liuyilin 20181108
     public static String packAesUserKey(String aesServerKey, Long authId, Integer keyId, Long expireTime) {
         try {
             byte[] serverKey = Base64.decodeBase64(aesServerKey);

@@ -20,7 +20,7 @@ public interface AclinkLogProvider {
 
 	List<AclinkLog> queryAclinkLogsByTime(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
-	//????????,join eh_door_auth
+	//join eh_door_auth
     List<AclinkLogDTO> queryAclinkLogDTOsByTime(ListingLocator locator, int count,
                                              ListingQueryBuilderCallback queryBuilderCallback);
     //add by liqingyan
