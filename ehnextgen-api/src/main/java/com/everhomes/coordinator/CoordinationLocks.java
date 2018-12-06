@@ -103,6 +103,8 @@ public enum CoordinationLocks {
     UNION_GROUP_LOCK("union.group"),
     UNION_GROUP_CLONE_LOCK("union_group_clone"),
 
+    WELFARE_EDIT_LOCK("welfare.edit"),
+
     PAY_CREATE_PREORDER("pay.create.preorder"),
 
     BILL_STATUS_UPDATE("bill.status.update"),

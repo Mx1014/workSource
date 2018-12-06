@@ -158,6 +158,8 @@ public class InvitedCustomerDTO {
     private String aptitudeFlagItemName;
 
 
+    private Timestamp createTime;
+
 
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
@@ -183,6 +185,13 @@ public class InvitedCustomerDTO {
 
     private Timestamp updateTime;
 
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
 
     public Long getOrganizationId() {
         return organizationId;

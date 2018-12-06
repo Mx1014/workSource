@@ -75,6 +75,9 @@ public class AclinkLogServiceImpl implements AclinkLogService {
 	
 	@Autowired
 	private DoorAccessProvider doorAccessProvider;
+
+    @Autowired
+    private DoorAccessService doorAccessService;
 	
     @Autowired
     private DoorAuthProvider doorAuthProvider;
@@ -146,6 +149,10 @@ public class AclinkLogServiceImpl implements AclinkLogService {
             }
         }
         aclinkLogProvider.createAclinkLogBatch(listAclinkLog);
+        //临时授权消息提示
+        listAclinkLog.stream().forEach(aclinkLog -> {
+            doorAccessService.sendMessageToAuthCreator(aclinkLog.getAuthId());
+        });
         
         //调用打卡
         doThirdPartPunchClock(listAuth, cmds.getItems(), AclinkLogEventType.PHONE_QR_OPEN.getCode(), CreateType.DOOR_PUNCH.getCode());

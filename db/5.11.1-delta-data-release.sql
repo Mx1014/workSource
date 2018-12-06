@@ -1,9 +1,15 @@
-
+﻿
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
 -- AUTHOR:
 -- REMARK:
+
+-- AUTHOR:黄明波
+-- REMARK:服务联盟表单修复部分未迁移成功的表单数据
+-- REMARK: /yellowPage/transferFlowCaseVals  ownerId填写1802  将返回字符串发给黄明波
+
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
@@ -26,6 +32,11 @@ SELECT 'meetingMessage' AS scope,100009 AS code,'zh_CN' AS locale,'您已不是�
 SELECT 'meetingMessage' AS scope,100010 AS code,'zh_CN' AS locale,'您已被指定为会务人' AS text
 )r LEFT JOIN eh_locale_strings s ON r.scope=s.scope AND r.code=s.code AND r.locale=s.locale
 WHERE s.id IS NULL;
+
+
+-- AUTHOR:吴寒
+-- REMARK: 支付授权module修改
+UPDATE  eh_service_modules SET client_handler_type = 2, HOST = NULL WHERE id= 79880000 ;
 
 -- AUTHOR: tangcen 2018年12月5日
 -- REMARK: 添加房源招商的权限
@@ -232,6 +243,27 @@ UPDATE eh_locale_templates SET text = REPLACE(text,'您','你'),description=REPL
 SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'address', '40001', 'zh_CN', '收费项名称不能为空');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'address', '40002', 'zh_CN', '授权金额不能为空');
+
+-- AUTHOR:丁建民 20181205
+-- REMARK: issue-37007 合同报表相关
+SET @eh_configurations = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ((@eh_configurations := @eh_configurations + 1), 'schedule.contractstatics.cronexpression', '0 30 2 * * ?', '合同报表定时任务', '0', NULL, '1');
+
+
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '30001', 'zh_CN', '请输入正确的查询时间');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '30002', 'zh_CN', '请输入查询项目');
+
+-- AUTHOR:  张智伟
+-- REMARK: issue-43865 web端参数传错，数据修复
+UPDATE eh_meeting_invitations SET source_type='MEMBER_DETAIL' WHERE source_type='source_user';
+
+-- AUTHOR:  吴寒
+-- REMARK: 福利v1.0:文字模板脚本
+SET @template_id = (SELECT MAX(id) FROM eh_locale_templates);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'welfare.msg', 1, 'zh_CN', '发福利消息', '$你收到了${subject},快去查看吧!', 0);
+-- 模块配置脚本
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES('273000','企业福利','310000','/100/310000/79880000','1','3','2','10','2018-09-26 16:51:46',NULL,NULL,'2018-09-26 16:51:46','0','0','0',NULL,'org_control','1','1','module','0','2',NULL,NULL,NULL,NULL);
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------

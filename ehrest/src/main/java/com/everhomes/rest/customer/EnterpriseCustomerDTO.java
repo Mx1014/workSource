@@ -253,6 +253,8 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     private String syncErrorMsg;
 
+    private Timestamp createTime;
+
     private Timestamp updateTime;
 
     @ItemType(OrganizationContactDTO.class)
@@ -277,6 +279,15 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private List<CustomerTrackerDTO> trackers;
     private CustomerRequirementDTO requirement;
     private CustomerCurrentRentDTO currentRent;
+
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
 
     public List<CreateCustomerTrackingCommand> getTrackingInfos() {
         return trackingInfos;

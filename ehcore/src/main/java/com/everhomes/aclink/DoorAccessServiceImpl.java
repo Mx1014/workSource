@@ -121,7 +121,6 @@ import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
-import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.openapi.FamilyAddressDTO;
@@ -141,9 +140,6 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
-import com.google.gson.JsonArray;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
-import com.sun.xml.bind.v2.TODO;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -167,9 +163,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -707,7 +700,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     	List<GroupMember> groupMembers = new ArrayList<GroupMember>();
         if(!StringUtils.isEmpty(cmd.getKeyword())){
-            users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
+            //users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
+            //广州越空间，keyword按用户昵称，电话或真实姓名查找
+            users = userProvider.listUsers(locator, pageSize, new ListingQueryBuilderCallback(){
+                @Override
+                public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                    Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + cmd.getKeyword()+ "%");
+                    cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeyword() + "%"));
+                    cond = cond.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getKeyword() + "%"));
+                    cond = cond.and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+                    query.addConditions(cond);
+                    return query;
+                }
+            });
         }else if(null != cmd.getOrganizationId()){
             users = doorAuthProvider.listDoorAuthByOrganizationId(cmd.getOrganizationId(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize);
         } else if(null != cmd.getCommunityId() && !StringUtils.isEmpty(cmd.getBuildingName())) {
@@ -5448,6 +5453,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			aclinkLog.setOwnerType(door.getOwnerType());
 			aclinkLog.setDoorType(door.getDoorType());
 			aclinkLogProvider.createAclinkLog(aclinkLog);
+			sendMessageToAuthCreator(auth.getId());
 		}
 	}
 
@@ -6926,8 +6932,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	
 
 	@Override
-	public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd) {
-		GetUserKeyInfoRespnose rsp = new GetUserKeyInfoRespnose();
+	public GetUserKeyInfoResponse getUserKeyInfo(GetUserKeyInfoCommand cmd) {
+		GetUserKeyInfoResponse rsp = new GetUserKeyInfoResponse();
 		User user = UserContext.current().getUser();
 		
 		rsp.setIsSupportRemote(DoorAuthStatus.INVALID.getCode());
@@ -6972,13 +6978,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				}
                 //服务热线
                 AclinkFormValues hotline = new AclinkFormValues();
-                HashMap<String, String> extraAction =  new HashMap<>();
+                List<AclinkKeyExtraActionsDTO> extraActions = new ArrayList<>();
+                AclinkKeyExtraActionsDTO extraAction = new AclinkKeyExtraActionsDTO();
                 hotline = doorAccessProvider.findAclinkFormValues(doorAccess.getOwnerId(),doorAccess.getOwnerType(), AclinkFormValuesType.HOTLINE.getCode());
                 if(null != hotline && hotline.getStatus() == (byte)1){
-                    extraAction.put("hotline", hotline.getValue() );
-                    rsp.setExtraActions(extraAction);
+                    extraAction.setExtraActionTitle("服务热线");
+                    extraAction.setExtraActionType(AclinkExtraActionsItemType.HOTLINE.getCode());
+                    extraAction.setExtraActionContent(hotline.getValue());
+                    extraActions.add(extraAction);
                 }
-
+                rsp.setExtraActions(extraActions);
 				rsp.setAuthId(auth.getId());
 				rsp.setIsSupportQR(doorAccess.getHasQr());
 				rsp.setIsSupportFaceOpen(doorAccess.getLocalServerId() != null && doorAccess.getLocalServerId() > 0

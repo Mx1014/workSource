@@ -4,8 +4,8 @@ package com.everhomes.rest.contract;
  * Created by ying.xiong on 2017/8/15.
  */
 public interface ContractErrorCode {
-    String SCOPE = "contract";
 
+	String SCOPE = "contract";
     int ERROR_CONTRACT_NOT_EXIST = 10001;  //合同不存在
     int ERROR_CONTRACTNUMBER_EXIST = 10002;  //合同编号已存在
     int ERROR_ENABLE_FLOW = 10003;  //请启用工作流
@@ -32,4 +32,9 @@ public interface ContractErrorCode {
     int ERROR_CONTRACT_SYNC_CUSTOMER_ERROR = 20002;//同步数据失败因为同步客户
     int ERROR_CONTRACT_SYNC_CONTRACT_ERROR = 20003;//同步数据失败因为同步合同
     int ERROR_CONTRACT_SYNC_BILL_ERROR = 20004;//同步数据失败因为账单
+
+    //合同报表模块
+    int CONTRACT_STATICS_TIME_DIMENSION_ERROR = 30001;//合同报表查询时间错误
+    int CONTRACT_STATICS_COMMUNITYS_ERROR = 30002;//合同报表查询园区错误
+
 }
