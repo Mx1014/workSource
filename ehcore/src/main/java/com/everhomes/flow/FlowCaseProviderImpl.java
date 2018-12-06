@@ -524,6 +524,9 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
                     FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
                     dto.setModuleId(record.getValue(t.MODULE_ID));
                     dto.setServiceName(record.getValue(t.SERVICE_TYPE));
+                    if (dto.getServiceName() == null || dto.getServiceName().isEmpty()) {
+                        dto.setServiceName(record.getValue(t.TITLE));
+                    }
                     dto.setNamespaceId(record.getValue(t.NAMESPACE_ID));
                     return dto;
                 });
