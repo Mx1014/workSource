@@ -2313,10 +2313,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
 		List<OfficeCubicleStation> rentStation = 
 				officeCubicleProvider.getOfficeCubicleStationByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),cmd.getKeyword());
+		LOGGER.info("rentStation :"+ rentStation);
 		List<OfficeCubicleRoom> room = 
 				officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,cmd.getKeyword());
 		List<OfficeCubicleRoom> rentRoom = 
 				officeCubicleProvider.getOfficeCubicleRoomByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),cmd.getKeyword());
+		LOGGER.info("rentRoom :"+ rentRoom);
 		station.addAll(rentStation);
 		room.addAll(rentRoom);
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
