@@ -421,6 +421,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public ListVisitReasonsResponse listVisitReasons(BaseVisitorsysCommand cmd) {
         beforePostForWeb(cmd);
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        if(cmd.getCommunityType() == null){
+            cmd.setCommunityType(CommunityType.COMMERCIAL.getCode());
+        }
         List<VisitorSysVisitReason> visitorSysVisitReasons = visitorSysVisitReasonProvider.listVisitorSysVisitReason(cmd.getNamespaceId(),cmd.getCommunityType());
         ListVisitReasonsResponse response = new ListVisitReasonsResponse();
         response.setVisitorReasonList(visitorSysVisitReasons.stream().map(r->{
@@ -2352,6 +2355,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         for (String s : checkMustFillField) {
             checkMustFillParams(visitor,s);
         }
+        if(visitor.getCommunityType() == null){
+//            communityProvider.findCommunityById()
+        }
+
         CommunityType communitType = CommunityType.fromCode(visitor.getCommunityType());
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(visitor.getOwnerType(),visitor.getOwnerId());
         if(CommunityType.COMMERCIAL.equals(communitType))

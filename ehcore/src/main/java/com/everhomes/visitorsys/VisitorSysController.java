@@ -876,7 +876,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /visitorsys/createOrUpdateVisitorForWeb</b>
+	 * <b>URL: /visitorsys/createOrUpdateVisitorForManage</b>
 	 * <p>
 	 * 4.创建临时/预约访客-h5 100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
 	 * </p>
