@@ -312,7 +312,7 @@ public class WelfareServiceImpl implements WelfareService {
 		if(null != request){
 			homeUrl = request.getHeader("Host");
 		}
-        return "http://"+homeUrl+"/enterprise-welfare/build/index.html?organizationId="+welfare.getOrganizationId()+"&namespaceId="+UserContext.getCurrentNamespaceId()
+        return "http://"+homeUrl+"/enterprise-welfare/build/index.html?organizationId="+welfare.getOrganizationId()+"&namespaceId=" + welfare.getNamespaceId()
         		+"&id="+welfare.getId()+"#/detail#sign_suffix";
     }
 
