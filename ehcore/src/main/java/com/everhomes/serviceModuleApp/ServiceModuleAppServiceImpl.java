@@ -986,7 +986,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         Byte routerSceneType = null;
         if(app.getEntryId() != null){
             List<ServiceModuleEntry> entrys = serviceModuleEntryProvider.listServiceModuleEntries(Arrays.asList(app.getModuleId()),
-                    ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(),ServiceModuleSceneType.CLIENT.getCode());
+                    ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),sceneType);
             ServiceModuleEntry entry = null;
             if (!CollectionUtils.isEmpty(entrys)) {
                 entry = entrys.get(0);
