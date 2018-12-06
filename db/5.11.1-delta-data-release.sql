@@ -12,6 +12,20 @@
 -- AUTHOR: xq.tian  20181206
 -- REMARK: 将左邻基线和标准版的 ehcore.yml 里的 xss.enabled: true 改成 xss.enabled: false, 其他环境不用修改
 
+-- AUTHOR: 杨崇鑫
+-- REMARK: 缺陷 #42424 智谷汇保证金账单历史数据迁移
+-- 1、先备份一下账单数据
+-- select * from eh_payment_bill_items where namespace_id=999945;
+-- select * from eh_payment_bills where namespace_id=999945; 
+-- 2、更新一下保证金计价条款的字段
+-- update eh_contract_charging_items set one_time_bill_status=1 where namespace_id=999945 and charging_item_id in (3,4) and contract_id in (5954,6251,6252,6352,6353,6448,6458,6717,7148,7223,7226,7227,7228,7229,7230,7231,7232,7233,7238,7239,7240,7242,7243,7244,7245,7246,7247,7250,7251,7289,7290,7291,7292,7293,7294,7295,7296,7297,7298,7299,7300,7301,7302,7303,7304,7305,7306,7307,7308,7309,7310,7311,7312,7313,7314,7315,7320,7321,7322,7323,7324,7325,7326,7327,7328,7329,7330,7339,7343,7348,7351,7353,7355,7358,7359,7361,7363,7364,7365,7370,7371,7372,7374,7375,7417,7418,7419,7420,7423,7424,7425,7428,7429,7430,7431,7432,7433,8790,8791,8794,8795,8797,8800,8801,8802,8803,8806,8807,8808,9316,9317,9318,9319,9320,9321,9322,9323,9324,9325,9326,9327,9328,9329,9330,9331,9332,9333,9334,9335,9336,9337,9339,9340,9342,9343,9344,9345,9346,9347,9348,9349,9350,9413,9440,9441,9442,9443,9444,9445,9448,9451,9452,9453,9454,9455,9458,9459,9460,9461,9462,9463,9490,9491,9498,9501,9504,9507,9510,9511,9514,9517,9518,9519,9522,9523,9568,9571,9574,9575,9576,9577,9582,9585,9586,9591,9594,9597,9604,9606,9619,9647,9710,10004,10005,10407,10473,10474,10507,10516,10578,10582,10583,10584,10587,10701,10702,10703,10704,10705,10706,10707,10708,10709,10715,10716,10717,10718,10719,10721,10726,10758,10915,11026,11027,11028,11031,11032,11035,11036,11037,11038,11039,11041,11042,11044,11045,11046,11048,11049,11050,11051,11052,11053,11054,11056,11057,11060,11063,11064,11065,11066,11068,11069,11070,11071,11072,11073,11074,11098,11099,11100,11101,11102,11103,11104,11105,11106,11107,11108,11109,11110,11111,11112,11165,11167,11189,11191,11194,11228,11229,11233,11298,11299,11300,11303,11304,11306,11307,11317,11319,11321,11323,11325,11327,11384,11424,11425,11457,11467,11719,11749,11812,11813,11821,11828,11909,11925,11928,11975,11976,11993,12047,12060,12118,14000,14178,14179,14181,14182,14200,14201,14281,14408,14415,14438,14439,14440,14441,14442,14443,14444,14445,14446,14447,14448,14467,14468,14539,14540,14541,14542,14543,14544,14545,14546,14547,14552,14553,14558,14559,14693,14734,14736,14834,14838,14854,14855,14856);
+-- 3、根据合同id,自动刷新合同账单
+-- 执行接口/contract/autoGeneratingBill
+-- namespaceId填：999945
+-- contractIds填：5954,6251,6252,6352,6353,6448,6458,6717,7148,7223,7226,7227,7228,7229,7230,7231,7232,7233,7238,7239,7240,7242,7243,7244,7245,7246,7247,7250,7251,7289,7290,7291,7292,7293,7294,7295,7296,7297,7298,7299,7300,7301,7302,7303,7304,7305,7306,7307,7308,7309,7310,7311,7312,7313,7314,7315,7320,7321,7322,7323,7324,7325,7326,7327,7328,7329,7330,7339,7343,7348,7351,7353,7355,7358,7359,7361,7363,7364,7365,7370,7371,7372,7374,7375,7417,7418,7419,7420,7423,7424,7425,7428,7429,7430,7431,7432,7433,8790,8791,8794,8795,8797,8800,8801,8802,8803,8806,8807,8808,9316,9317,9318,9319,9320,9321,9322,9323,9324,9325,9326,9327,9328,9329,9330,9331,9332,9333,9334,9335,9336,9337,9339,9340,9342,9343,9344,9345,9346,9347,9348,9349,9350,9413,9440,9441,9442,9443,9444,9445,9448,9451,9452,9453,9454,9455,9458,9459,9460,9461,9462,9463,9490,9491,9498,9501,9504,9507,9510,9511,9514,9517,9518,9519,9522,9523,9568,9571,9574,9575,9576,9577,9582,9585,9586,9591,9594,9597,9604,9606,9619,9647,9710,10004,10005,10407,10473,10474,10507,10516,10578,10582,10583,10584,10587,10701,10702,10703,10704,10705,10706,10707,10708,10709,10715,10716,10717,10718,10719,10721,10726,10758,10915,11026,11027,11028,11031,11032,11035,11036,11037,11038,11039,11041,11042,11044,11045,11046,11048,11049,11050,11051,11052,11053,11054,11056,11057,11060,11063,11064,11065,11066,11068,11069,11070,11071,11072,11073,11074,11098,11099,11100,11101,11102,11103,11104,11105,11106,11107,11108,11109,11110,11111,11112,11165,11167,11189,11191,11194,11228,11229,11233,11298,11299,11300,11303,11304,11306,11307,11317,11319,11321,11323,11325,11327,11384,11424,11425,11457,11467,11719,11749,11812,11813,11821,11828,11909,11925,11928,11975,11976,11993,12047,12060,12118,14000,14178,14179,14181,14182,14200,14201,14281,14408,14415,14438,14439,14440,14441,14442,14443,14444,14445,14446,14447,14448,14467,14468,14539,14540,14541,14542,14543,14544,14545,14546,14547,14552,14553,14558,14559,14693,14734,14736,14834,14838,14854,14855,14856
+-- 点击一次即可，因为需要执行很久，所以肯定会超时
+
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
@@ -37,7 +51,7 @@ WHERE s.id IS NULL;
 
 
 -- AUTHOR:吴寒
--- REMARK:支付授权module修改
+-- REMARK: 支付授权module修改
 UPDATE  eh_service_modules SET client_handler_type = 2, HOST = NULL WHERE id= 79880000 ;
 
 -- AUTHOR: tangcen 2018年12月5日
@@ -240,6 +254,11 @@ INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `gr
 UPDATE eh_locale_strings SET text = REPLACE(text,'您','你') WHERE scope IN ('meetingErrorCode', 'meetingMessage');
 UPDATE eh_locale_templates SET text = REPLACE(text,'您','你'),description=REPLACE(description,'您','你')  WHERE scope='meetingMessage';
 
+-- AUTHOR: tangcen
+-- REMARK: 添加导入房源授权价时的出错提示
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'address', '40001', 'zh_CN', '收费项名称不能为空');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'address', '40002', 'zh_CN', '授权金额不能为空');
 
 -- AUTHOR:丁建民 20181205
 -- REMARK: issue-37007 合同报表相关
@@ -255,6 +274,18 @@ INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES 
 -- REMARK: issue-43865 web端参数传错，数据修复
 UPDATE eh_meeting_invitations SET source_type='MEMBER_DETAIL' WHERE source_type='source_user';
 
+-- AUTHOR:  吴寒
+-- REMARK: 福利v1.0:文字模板脚本
+SET @template_id = (SELECT MAX(id) FROM eh_locale_templates);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'welfare.msg', 1, 'zh_CN', '发福利消息', '$你收到了${subject},快去查看吧!', 0);
+-- 模块配置脚本
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES('273000','企业福利','310000','/100/310000/79880000','1','3','2','10','2018-09-26 16:51:46',NULL,NULL,'2018-09-26 16:51:46','0','0','0',NULL,'org_control','1','1','module','0','2',NULL,NULL,NULL,NULL);
+
+
+-- AUTHOR:丁建民 20181205
+-- REMARK: issue-44220 
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '10016', 'zh_CN', '调整周期 不能为0');
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
@@ -327,7 +358,7 @@ SET @namespace_id := 0;
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'wuyebaoxiu', '物业报修', 20100, 0, NULL, NULL, NULL);
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'wuyekefu', '物业客服', 40300, 0, NULL, NULL, NULL);
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'wuyejiaofei', '物业缴费', 20400, 0, NULL, NULL, NULL);
-INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'fangkeyuyue', '访客预约', 52100, 0, NULL, NULL, NULL);
+INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'fangkeyuyue', '访客预约', 41800, 0, NULL, NULL, NULL);
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'tingchejiaofei', '停车缴费', 40800, 0, NULL, NULL, NULL);
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'pinzhihecha', '品质核查', 20600, 0, NULL, NULL, NULL);
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'shequhuodong', '社区活动', 10600, 0, NULL, NULL, NULL);
@@ -344,6 +375,35 @@ INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent
 
 -- 添加测试token
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('xfyun.tpp.testToken', '341a5441a2ac8c2f', '讯飞测试token', 0, NULL, 0);
+
+
+-- 添加测试停车场
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.host', 'http://10.1.10.37:80', '接口地址', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.appkey', '880076901009202', 'appkey', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.secretKey', '880076901009202', 'secretKey', 999925, NULL, 1);
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO2.host', 'http://10.1.10.37:80', '接口地址', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO2.appkey', '880076901009202', 'appkey', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO2.secretKey', '880076901009202', 'secretKey', 999925, NULL, 1);
+
+set @max_lots_id := (select ifnull(max(id),0)  from eh_parking_lots);
+set @namespace_id := 999925;
+set @community_id := 240111044832061113;
+set @parking_name := '金茂雅苑一期停车场';
+set @parking_vendor := 'HKWS_SHJINMAO';
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) 
+VALUES ((@max_lots_id := @max_lots_id + 1), 'community', @community_id,  @parking_name,  @parking_vendor, '', 2, 1, now(), @namespace_id, '{"expiredRechargeFlag":0,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0,"monthRechargeFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee","monthRecharge"]');
+
+set @community_id := 240111044832061114;
+set @parking_name := '金茂雅苑二期停车场';
+set @parking_vendor := 'HKWS_SHJINMAO2';
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) 
+VALUES ((@max_lots_id := @max_lots_id + 1), 'community', @community_id,  @parking_name,  @parking_vendor, '', 2, 1, now(), @namespace_id, '{"expiredRechargeFlag":0,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0,"monthRechargeFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee","monthRecharge"]');
+
+
+
+
+
 
 
 

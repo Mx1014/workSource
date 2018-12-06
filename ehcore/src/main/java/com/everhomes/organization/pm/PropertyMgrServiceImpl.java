@@ -8359,7 +8359,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			String[] propertyNames = { "apartmentName", "livingStatus", "chargeArea", "chargingItemsName",
 					"authorizePrice", "apartmentAuthorizeType", "namespaceAddressType", "namespaceAddressToken" };
 
-			String[] titleNames = { "*房源", "*状态", "收费面积", "费项名称", "授权价", "周期", "第三方来源", "第三方标识" };
+			String[] titleNames = { "*房源", "*状态", "收费面积", "*收费项名称", "*授权金额", "周期", "第三方来源", "第三方标识" };
 			int[] titleSizes = { 20, 20, 20, 20, 20, 20, 20, 20 };
 
 			return excelUtils.getOutputStream(propertyNames, titleNames, titleSizes, filterData);
@@ -8458,6 +8458,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				errorLogs.add(log);
 				continue;
 			}
+			
 			if (StringUtils.isEmpty(data.getStatus())) {
 				log.setData(data);
 				log.setErrorLog("apartmentStatus is null");
@@ -8476,6 +8477,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 					continue;
 				}
 			}
+			
+			if (StringUtils.isEmpty(data.getChargingItemsName())) {
+				log.setData(data);
+				log.setErrorLog("chargingItemsName is null");
+				log.setCode(AddressServiceErrorCode.ERROR_CHARGING_ITEMS_NAME_EMPTY);
+				errorLogs.add(log);
+				continue;
+			}
+			
+			if (StringUtils.isEmpty(data.getAuthorizePrice())) {
+				log.setData(data);
+				log.setErrorLog("authorize price is null");
+				log.setCode(AddressServiceErrorCode.ERROR_AUTHORIZE_PRICE_EMPTY);
+				errorLogs.add(log);
+				continue;
+			}
+			
 			if (!StringUtils.isEmpty(data.getApartmentAuthorizeType())) {
 				Byte apartmentAuthorizeType = AuthorizePriceType.fromDesc(data.getApartmentAuthorizeType()).getCode();
 				if (apartmentAuthorizeType == -1) {
