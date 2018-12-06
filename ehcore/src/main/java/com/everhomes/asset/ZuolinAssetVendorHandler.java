@@ -954,8 +954,11 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     List<PaymentBills> enclosedBills = (List<PaymentBills>) entry.getValue();
                     if (enclosedBills.size() > 0){
                         Long billGroupId = enclosedBills.get(0).getBillGroupId();
+                        Byte thirdPaid = enclosedBills.get(0).getThirdPaid();
                         dto.setBillGroupName(assetGroupProvider.getbillGroupNameById(billGroupId));
                         dto.setBillGroupId(billGroupId);
+                        //物业缴费V7.4：若用户在第三方线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
+                        dto.setThirdPaid(thirdPaid);
                         //新增收款方账户类型、账户ID字段 
                         PaymentBillGroup paymentBillGroup = assetGroupProvider.getBillGroupById(billGroupId);
                         if(paymentBillGroup != null) {
