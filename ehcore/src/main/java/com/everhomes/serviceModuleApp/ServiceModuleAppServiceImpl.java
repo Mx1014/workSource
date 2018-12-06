@@ -681,51 +681,13 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
     private List<ServiceModuleApp> findUserOrganizationApps(Long organizationId, Byte appType, Byte sceneType){
 
-        List<ServiceModuleApp> apps = new ArrayList<>();
-
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
         List<ServiceModuleApp> tempApps = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), appType,
                 sceneType, OrganizationAppStatus.ENABLE.getCode(), null);
-        if(tempApps != null && tempApps.size() > 0) {
 
-            //用户是否启用自定义配置
-            UserAppFlag userAppFlag = userAppFlagProvider.findUserAppFlag(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), organizationId);
-
-            //有用户自定义应用
-            if(userAppFlag != null){
-                List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), organizationId);
-                if (userApps != null && userApps.size() != 0) {
-                    for (UserApp userApp : userApps) {
-                        for (ServiceModuleApp app : tempApps) {
-                            if (userApp.getAppId().equals(app.getEntryId())) {
-                                apps.add(app);
-                            }
-                        }
-                    }
-                }
-            } else {
-                List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(organizationId);
-                if (!CollectionUtils.isEmpty(workPlatformApps)) {
-                    for (WorkPlatformApp workPlatformApp : workPlatformApps) {
-                        if (TrueOrFalseFlag.FALSE.getCode().equals(workPlatformApp.getVisibleFlag())) {
-                            continue;
-                        }
-                        for (ServiceModuleApp app : tempApps) {
-                            if (app.getOriginId().equals(workPlatformApp.getAppId()) && app.getEntryId().equals(workPlatformApp.getEntryId())) {
-                                apps.add(app);
-                            }
-                        }
-                    }
-                }else {
-                    apps.addAll(tempApps);
-                }
-
-            }
-        }
-
-        return apps;
+        return tempApps;
     }
 
 
@@ -1751,6 +1713,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
             }
         }
 
+        appDtos = sortUserAppDTO(appDtos,orgId);
         AppDTO allIcon = getAllIconForWorkPlatform(orgId, AllOrMoreType.ALL.getCode());
         appDtos.add(allIcon);
         ListAllAppsResponse response = new ListAllAppsResponse();
@@ -1761,6 +1724,42 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	    return response;
     }
 
+    private List<AppDTO> sortUserAppDTO(List<AppDTO> appDTOS, Long orgId) {
+	    List<AppDTO> list = new ArrayList<>();
+        //用户是否启用自定义配置
+        UserAppFlag userAppFlag = userAppFlagProvider.findUserAppFlag(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
+
+        //有用户自定义应用
+        if(userAppFlag != null){
+            List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
+            if (userApps != null && userApps.size() != 0) {
+                for (UserApp userApp : userApps) {
+                    for (AppDTO app : appDTOS) {
+                        if (userApp.getAppId().equals(app.getEntryId())) {
+                            list.add(app);
+                        }
+                    }
+                }
+            }
+        } else {
+            List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(orgId);
+            if (!CollectionUtils.isEmpty(workPlatformApps)) {
+                for (WorkPlatformApp workPlatformApp : workPlatformApps) {
+                    if (TrueOrFalseFlag.FALSE.getCode().equals(workPlatformApp.getVisibleFlag())) {
+                        continue;
+                    }
+                    for (AppDTO app : appDTOS) {
+                        if (app.getAppId().equals(workPlatformApp.getAppId()) && app.getEntryId().equals(workPlatformApp.getEntryId())) {
+                            list.add(app);
+                        }
+                    }
+                }
+            }else {
+                list.addAll(appDTOS);
+            }
+        }
+        return list;
+    }
     private List<AppDTO> sortAppDTO(List<AppDTO> appDTOS, Long orgId) {
         List<AppDTO> appDTOs = new ArrayList<>();
         List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(orgId);
