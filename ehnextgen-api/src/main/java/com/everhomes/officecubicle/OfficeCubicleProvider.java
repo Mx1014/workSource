@@ -148,4 +148,6 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleRefundTips> listRefundTips(Long spaceId, Byte refundStrategy);
 
+	List<OfficeCubicleStationRent> searchCubicleStationRentByOrderId(Long spaceId, Long orderId);
+
 }

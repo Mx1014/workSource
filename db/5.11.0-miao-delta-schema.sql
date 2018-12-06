@@ -52,6 +52,7 @@ CREATE TABLE `eh_office_cubicle_station_rent` (
   `rent_type` TINYINT COMMENT '1-长租，0-短租',
   `station_type` TINYINT COMMENT '1-普通工位，0-办公室',
   `station_id` BIGINT COMMENT '工位/办公室Id',
+  `station_name` VARCHAR(127),
   `status` TINYINT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,

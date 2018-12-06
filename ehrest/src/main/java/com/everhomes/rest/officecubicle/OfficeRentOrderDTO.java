@@ -55,7 +55,6 @@ public class OfficeRentOrderDTO {
 	private String openTime;
 	private List<String> rentStation;
 
-
 	public List<String> getRentStation() {
 		return rentStation;
 	}

@@ -2126,7 +2126,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			return null;
 		});
-		rentalCommonService.rentalOrderSuccess(cmd.getRentalOrderNo());
+		if (cmd.getRentalOrderNo()!=null){
+			rentalCommonService.rentalOrderSuccess(cmd.getRentalOrderNo());
+		}
 		return null;
 		
 	}
@@ -2480,6 +2482,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setOrders(new ArrayList<OfficeRentOrderDTO>());
+
 		orders.forEach((other) -> {
 			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
 			dto.setAccountName(other.getAccountName());
@@ -2488,6 +2491,18 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setOrderNo(other.getOrderNo());
 			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(other.getSpaceId());
 			dto.setSpaceName(space.getName());
+			if (cmd.getRentType() == 1){
+				List<OfficeCubicleStationRent> stationRent = 
+						officeCubicleProvider.searchCubicleStationRentByOrderId(cmd.getSpaceId(),other.getId());
+//				stationRent.forEach((s) -> {
+//					List<String> rentStation = new ArrayList<String>();
+//					rentStation.add(s.getnam);
+//					OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
+//					attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
+//							UserContext.current().getUser().getId()));
+//					dto.getShortRentAttachments().add(attachmentDTO);
+//					});
+			}
 			response.getOrders().add(dto);
 		});
 
@@ -2503,7 +2518,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-
+		if (cmd.getOrderStatus().equals(OfficeCubiceOrderStatus.EFFECTIVE.getCode())){
+			
+		}
 		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),null, null,
 				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),null,null,null,cmd.getRentType(), cmd.getOrderStatus());
 		if (null == orders)
@@ -2517,10 +2534,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		response.setOrders(new ArrayList<OfficeRentOrderDTO>());
 		orders.forEach((other) -> {
 			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
-			GetRentalBillCommand cmd2 = new GetRentalBillCommand();
-			cmd2.setBillId(other.getRentalOrderNo());
-			RentalBillDTO rentalDTO = rentalv2Service.getRentalBill(cmd2);
-			dto.setOpenTime(rentalDTO.getOpenTime());
+			if (cmd.getRentType() == 0){
+				GetRentalBillCommand cmd2 = new GetRentalBillCommand();
+				cmd2.setBillId(other.getRentalOrderNo());
+				RentalBillDTO rentalDTO = rentalv2Service.getRentalBill(cmd2);
+				dto.setOpenTime(rentalDTO.getOpenTime());
+			}
 			response.getOrders().add(dto);
 		});
 
@@ -2588,15 +2607,16 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd2.setSourceId(r.getId());
 				cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
 				QueryDefaultRuleAdminResponse resp2 = rentalv2Service.queryDefaultRule(cmd2);
-				dto.setNeedPay(resp2.getNeedPay());
-				
+				Integer dailyPrice = 0;
+				Integer halfdailyPrice = 0;
 				for (PriceRuleDTO priceRule :resp2.getPriceRules()){
 					if (priceRule.getRentalType() ==1){
-						dto.setDailyPrice(priceRule.getWorkdayPrice().intValue());
+						dailyPrice = priceRule.getWorkdayPrice().intValue();
 					} else if (priceRule.getRentalType() ==2){
-						dto.setHalfdailyPrice(priceRule.getWorkdayPrice().intValue());
+						halfdailyPrice = priceRule.getWorkdayPrice().intValue();
 					}
 				}
+				dto.setMinUnitPrice(dailyPrice>halfdailyPrice?new BigDecimal(halfdailyPrice):new BigDecimal(dailyPrice));
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null,null);

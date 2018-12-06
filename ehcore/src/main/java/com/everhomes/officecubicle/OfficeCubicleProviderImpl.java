@@ -449,6 +449,22 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
+	public List<OfficeCubicleStationRent> searchCubicleStationRentByOrderId(Long spaceId,Long orderId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.gt(new Timestamp(System.currentTimeMillis())));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.ORDER_ID.eq(orderId));
+		step.where(condition);
+		List<OfficeCubicleStationRent> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_STATION_RENT.OPERATE_TIME.desc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleStationRent.class);
+		});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+	
+	@Override
 	public void deleteAttachmentsBySpaceId(Long id,Byte type) {
 		dbProvider.getDslContext(AccessSpec.readOnly()).delete(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS)
 		.where(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id))

@@ -24,43 +24,6 @@ public class SpaceForAppDTO {
     private String address;
     private String coverUrl;
     private Byte rentType;
-	private Integer dailyPrice;
-	private Integer halfdailyPrice;
-	private Byte needPay;
-
-	
-    public Byte getNeedPay() {
-		return needPay;
-	}
-	public void setNeedPay(Byte needPay) {
-		this.needPay = needPay;
-	}
-
-	public Integer getDailyPrice() {
-		return dailyPrice;
-	}
-
-
-
-
-	public void setDailyPrice(Integer dailyPrice) {
-		this.dailyPrice = dailyPrice;
-	}
-
-
-
-
-	public Integer getHalfdailyPrice() {
-		return halfdailyPrice;
-	}
-
-
-
-
-	public void setHalfdailyPrice(Integer halfdailyPrice) {
-		this.halfdailyPrice = halfdailyPrice;
-	}
-
 
 
 
