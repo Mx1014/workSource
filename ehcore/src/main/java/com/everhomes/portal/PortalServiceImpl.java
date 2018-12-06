@@ -2013,6 +2013,8 @@ public class PortalServiceImpl implements PortalService {
 				app.setCustomTag(customTag);
 				serviceModuleAppProvider.updateServiceModuleApp(app);
 			}
+			//发布应用时，同时同步应用入口信息
+            publishAppEntries(app);
 		}
 
 		/**
@@ -2029,6 +2031,77 @@ public class PortalServiceImpl implements PortalService {
 		}
 
 	}
+
+	private void publishAppEntries(ServiceModuleApp app) {
+        List<ServiceModuleAppEntry> appEntries = this.serviceModuleEntryProvider.listServiceModuleAppEntries(app.getOriginId(), null,
+                TerminalType.MOBILE.getCode(), null, null);
+
+        List<ServiceModuleEntry> moduleEntries = this.serviceModuleEntryProvider.listServiceModuleEntries(app.getModuleId(), null,
+                TerminalType.MOBILE.getCode(), null, null);
+        if (appEntries.size() > moduleEntries.size()) {
+            if (CollectionUtils.isEmpty(moduleEntries)) {
+                for (ServiceModuleAppEntry appEntry : appEntries) {
+                    this.serviceModuleEntryProvider.deleteAppEntry(appEntry.getId());
+                }
+            } else {
+                ServiceModuleEntry moduleEntry = moduleEntries.get(0);
+                for (ServiceModuleAppEntry appEntry : appEntries) {
+                    if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
+                        appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
+                        appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
+                        appEntry.setEntryName(moduleEntry.getEntryName());
+                        appEntry.setIconUri(moduleEntry.getIconUri());
+                        this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
+                    } else {
+                        this.serviceModuleEntryProvider.deleteAppEntry(appEntry.getId());
+                    }
+                }
+
+            }
+
+        } else if (appEntries.size() < moduleEntries.size()) {
+            if (CollectionUtils.isEmpty(appEntries)) {
+                for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                    ServiceModuleAppEntry appEntry = ConvertHelper.convert(moduleEntry, ServiceModuleAppEntry.class);
+                    appEntry.setAppId(app.getOriginId());
+                    appEntry.setAppName(app.getName());
+                    appEntry.setId(null);
+                    this.serviceModuleEntryProvider.createAppEntry(appEntry);
+                }
+            } else {
+                ServiceModuleAppEntry appEntry = appEntries.get(0);
+                for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                    if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
+                        appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
+                        appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
+                        appEntry.setEntryName(moduleEntry.getEntryName());
+                        appEntry.setIconUri(moduleEntry.getIconUri());
+                        this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
+                    } else {
+                        ServiceModuleAppEntry newAppEntry = ConvertHelper.convert(moduleEntry, ServiceModuleAppEntry.class);
+                        newAppEntry.setAppId(app.getOriginId());
+                        newAppEntry.setAppName(app.getName());
+                        newAppEntry.setId(null);
+                        this.serviceModuleEntryProvider.createAppEntry(newAppEntry);
+                    }
+                }
+            }
+        } else {
+            if (!CollectionUtils.isEmpty(appEntries) && !CollectionUtils.isEmpty(moduleEntries)) {
+                for (ServiceModuleAppEntry appEntry : appEntries) {
+                    for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                        if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
+                            appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
+                            appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
+                            appEntry.setEntryName(moduleEntry.getEntryName());
+                            appEntry.setIconUri(moduleEntry.getIconUri());
+                            this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 	private void cleanOldVersion(Integer namespaceId){
 		List<PortalVersion> list = portalVersionProvider.listPortalVersion(namespaceId, null);

@@ -1542,16 +1542,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         serviceModuleEntry.setLocationType(cmd.getLocationType());
         serviceModuleEntry.setSceneType(cmd.getSceneType());
         serviceModuleEntry.setAppCategoryId(cmd.getAppCategoryId());
-        //在修改terminalType之前，先修改应用入口详细信息
-        if (!cmd.getTerminalType().equals(serviceModuleEntry.getTerminalType())) {
-            if (cmd.getTerminalType().equals(TerminalType.MOBILE.getCode())) {
-                createAppEntry(serviceModuleEntry);
-            }else {
-                deleteAppEntry(serviceModuleEntry);
-            }
-        }else {
-            updateAppEntry(serviceModuleEntry);
-        }
+//        //在修改terminalType之前，先修改应用入口详细信息
+//        if (!cmd.getTerminalType().equals(serviceModuleEntry.getTerminalType())) {
+//            if (cmd.getTerminalType().equals(TerminalType.MOBILE.getCode())) {
+//                createAppEntry(serviceModuleEntry);
+//            }else {
+//                deleteAppEntry(serviceModuleEntry);
+//            }
+//        }else {
+//            updateAppEntry(serviceModuleEntry);
+//        }
         serviceModuleEntry.setTerminalType(cmd.getTerminalType());
         serviceModuleEntryProvider.udpate(serviceModuleEntry);
 
@@ -1858,10 +1858,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
 
         serviceModuleEntryProvider.delete(serviceModuleEntry.getId());
-        //删除入口时，同时删除应用入口详细信息
-        if (TerminalType.MOBILE.getCode() == serviceModuleEntry.getTerminalType()) {
-            deleteAppEntry(serviceModuleEntry);
-        }
+//        //删除入口时，同时删除应用入口详细信息
+//        if (TerminalType.MOBILE.getCode() == serviceModuleEntry.getTerminalType()) {
+//            deleteAppEntry(serviceModuleEntry);
+//        }
     }
 
     @Override
@@ -1900,10 +1900,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 dto.setAppCategoryName(appCategory.getName());
             }
         }
-        //新增入口时，同时新增应用入口数据
-        if (TerminalType.MOBILE.getCode() == serviceModuleEntry.getTerminalType()) {
-            createAppEntry(serviceModuleEntry);
-        }
+//        //新增入口时，同时新增应用入口数据
+//        if (TerminalType.MOBILE.getCode() == serviceModuleEntry.getTerminalType()) {
+//            createAppEntry(serviceModuleEntry);
+//        }
         return dto;
 
     }
