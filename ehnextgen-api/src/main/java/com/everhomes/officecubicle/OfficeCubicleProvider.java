@@ -142,4 +142,10 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleStation> getOfficeCubicleStationByTime(Long spaceId, Byte rentFlag, Long beginDate, Long endDate,
 			String keyword);
 
+	void createRefundTip(OfficeCubicleRefundTips tip);
+
+	void deleteRefundTip(Long spaceId);
+
+	List<OfficeCubicleRefundTips> listRefundTips(Long spaceId, Byte refundStrategy);
+
 }

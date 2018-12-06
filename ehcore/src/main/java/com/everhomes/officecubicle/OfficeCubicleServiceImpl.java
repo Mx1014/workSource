@@ -48,6 +48,7 @@ import com.everhomes.rentalv2.RentalDefaultRule;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rentalv2.RentalOrder;
 import com.everhomes.rentalv2.RentalOrderHandler;
+import com.everhomes.rentalv2.RentalRefundTip;
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2PriceRule;
@@ -107,6 +108,7 @@ import com.everhomes.rest.rentalv2.admin.GetResourcePriceRuleCommand;
 import com.everhomes.rest.rentalv2.admin.PriceRuleDTO;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.rest.rentalv2.admin.RentalRefundTipDTO;
 import com.everhomes.rest.rentalv2.admin.ResourcePriceRuleDTO;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceRentalRuleCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -1102,17 +1104,32 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (refundRule != null){
 			officeCubicleProvider.deleteRefundRule(cmd.getSpaceId());
 		}
+		OfficeCubicleRefundRule rule = new OfficeCubicleRefundRule();
+		rule.setRefundStrategy(cmd.getRefundStrategy());
+		rule.setSpaceId(cmd.getSpaceId());
+		rule.setNamespaceId(cmd.getNamespaceId());
+		rule.setOwnerId(cmd.getOwnerId());
+		rule.setOwnerType(cmd.getOwnerType());
 		if (cmd.getRefundStrategies()!=null){
-			officeCubicleProvider.deleteRefundRule(cmd.getSpaceId());
 			for(OfficeCubicleRefundRuleDTO dto :cmd.getRefundStrategies()){
-				OfficeCubicleRefundRule rule = ConvertHelper.convert(dto,OfficeCubicleRefundRule.class);
-				rule.setRefundStrategy(cmd.getRefundStrategy());
-				rule.setSpaceId(cmd.getSpaceId());
-				rule.setNamespaceId(cmd.getNamespaceId());
-				rule.setOwnerId(cmd.getOwnerId());
-				rule.setOwnerType(cmd.getOwnerType());
+				rule = ConvertHelper.convert(dto,OfficeCubicleRefundRule.class);
 				officeCubicleProvider.createRefundRule(rule);
 			}
+		} else {
+			officeCubicleProvider.createRefundRule(rule);
+		}
+		
+		officeCubicleProvider.deleteRefundTip(cmd.getSpaceId());
+		createOfficeCubicleRefundTips(cmd.getSpaceId(),cmd.getRefundTip());
+	}
+	private void createOfficeCubicleRefundTips(Long spaceId,List<OfficeCubicleRefundTipDTO> refundTips){
+		if (refundTips != null && !refundTips.isEmpty()){
+			refundTips.forEach(r->{
+				OfficeCubicleRefundTips tip = ConvertHelper.convert(r,OfficeCubicleRefundTips.class);
+				tip.setNamespaceId(UserContext.getCurrentNamespaceId());
+				tip.setSpaceId(spaceId);
+				officeCubicleProvider.createRefundTip(tip);
+			});
 		}
 	}
 	@Override
@@ -1122,14 +1139,14 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (rules == null){
 			return resp;
 		}
-		for(OfficeCubicleRefundRule rule : rules){
-			
-		}
+
 		resp.setRefundStrategy(rules.get(0).getRefundStrategy());
 		resp.setRefundStrategies(rules.stream().map(r->{
 			OfficeCubicleRefundRuleDTO dto = ConvertHelper.convert(r,OfficeCubicleRefundRuleDTO.class);
 			return dto;
 			}).collect(Collectors.toList()));
+		List<OfficeCubicleRefundTips> refundTips = officeCubicleProvider.listRefundTips(cmd.getSpaceId(), null);
+		resp.setRefundTip(refundTips.stream().map(r->ConvertHelper.convert(r,OfficeCubicleRefundTipDTO.class)).collect(Collectors.toList()));
 		return resp;
 	}
 	@Override

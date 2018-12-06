@@ -31,6 +31,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalCloseDate;
+import com.everhomes.rentalv2.RentalRefundTip;
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rest.officecubicle.OfficeOrderStatus;
@@ -43,6 +44,7 @@ import com.everhomes.server.schema.tables.EhOfficeCubicleAttachments;
 import com.everhomes.server.schema.tables.EhOfficeCubicleCategories;
 import com.everhomes.server.schema.tables.EhOfficeCubicleChargeUsers;
 import com.everhomes.server.schema.tables.EhOfficeCubicleRefundRule;
+import com.everhomes.server.schema.tables.EhOfficeCubicleRefundTips;
 import com.everhomes.server.schema.tables.EhOfficeCubicleRoom;
 import com.everhomes.server.schema.tables.EhOfficeCubicleStation;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleOrdersDao;
@@ -57,6 +59,7 @@ import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleRentOrders;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleSpaces;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleStationRent;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2RefundTips;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceTypes;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
@@ -65,12 +68,14 @@ import com.everhomes.server.schema.tables.records.EhOfficeCubicleCategoriesRecor
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleChargeUsersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleRefundRuleRecord;
+import com.everhomes.server.schema.tables.records.EhOfficeCubicleRefundTipsRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleRentOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleRoomRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleSpacesRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleStationRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleStationRentRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2CloseDatesRecord;
+import com.everhomes.server.schema.tables.records.EhRentalv2RefundTipsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2ResourcesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2TimeIntervalRecord;
 import com.everhomes.util.ConvertHelper;
@@ -188,6 +193,43 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		query.setRecord(record);
 		query.execute();
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleRefundRule.class, null);
+	}
+	
+	@Override
+	public void createRefundTip(OfficeCubicleRefundTips tip) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhOfficeCubicleRefundTips.class));
+		tip.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleRefundTipsRecord record = ConvertHelper.convert(tip,
+				EhOfficeCubicleRefundTipsRecord.class);
+		InsertQuery<EhOfficeCubicleRefundTipsRecord> query = context
+				.insertQuery(Tables.EH_OFFICE_CUBICLE_REFUND_TIPS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleRefundTips.class,
+				null);
+	}
+	
+	@Override
+	public void deleteRefundTip(Long spaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		context.delete(Tables.EH_OFFICE_CUBICLE_REFUND_TIPS)
+				.where(Tables.EH_OFFICE_CUBICLE_REFUND_TIPS.SPACE_ID.eq(spaceId))
+				.execute();
+	}
+	
+	@Override
+	public List<OfficeCubicleRefundTips> listRefundTips(Long spaceId, Byte refundStrategy) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_REFUND_TIPS);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_REFUND_TIPS.SPACE_ID.eq(spaceId);
+		if (refundStrategy != null)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_REFUND_TIPS.REFUND_STRATEGY.eq(refundStrategy));
+		step.where(condition);
+
+		return step.fetch().map(r-> ConvertHelper.convert(r,OfficeCubicleRefundTips.class));
 	}
 	
 	@Override
