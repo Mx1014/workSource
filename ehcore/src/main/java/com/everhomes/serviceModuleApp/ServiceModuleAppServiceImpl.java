@@ -906,7 +906,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				routerSceneType = entry.getSceneType();
 			}
 			//优先使用entryIcon
-			if(entry != null && !StringUtils.isEmpty(entry.getIconUri())){
+			if(entry != null){
                 List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
                         this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(),entry.getId(),null,null);
                 if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
@@ -915,8 +915,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                             serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
                     appDTO.setIconUrl(url);
                 }else {
-                    String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
-                    appDTO.setIconUrl(url);
+                    if (!StringUtils.isEmpty(entry.getIconUri())) {
+                        String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
+                        appDTO.setIconUrl(url);
+                    }else {
+                        ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
+                        if(profile != null && profile.getIconUri() != null){
+                            String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
+                            appDTO.setIconUrl(url);
+                        }
+                    }
                 }
 			}else {
 				ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
@@ -996,7 +1004,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 routerSceneType = entry.getSceneType();
             }
             //优先使用entryIcon
-            if(entry != null && !StringUtils.isEmpty(entry.getIconUri())){
+            if(entry != null){
                 List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
                         this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(),entry.getId(),null,null);
                 if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
@@ -1005,8 +1013,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                             serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
                     appDTO.setIconUrl(url);
                 }else {
-                    String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
-                    appDTO.setIconUrl(url);
+                    if (!StringUtils.isEmpty(entry.getIconUri())) {
+                        String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
+                        appDTO.setIconUrl(url);
+                    }else {
+                        ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
+                        if(profile != null && profile.getIconUri() != null){
+                            String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
+                            appDTO.setIconUrl(url);
+                        }
+                    }
                 }
             }else {
                 ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
