@@ -533,6 +533,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId));
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.OPEN_FLAG.eq((byte)1));
 		if (null != cityId)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_ID.eq(cityId));
 		if (null != locator && locator.getAnchor() != null)
