@@ -398,7 +398,8 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getQueryString())
                     .field("subject", 1.2f)
-                    .field("content", 1.0f).prefixLength(2);
+                    .field("content", 1.0f)
+                    .field("tag", 1.0f).prefixLength(2);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
