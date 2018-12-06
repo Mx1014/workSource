@@ -91,6 +91,9 @@ public class StationBookingRentalResourceHandler implements RentalResourceHandle
         openTimeDTO.setDayCloseTime(22D);
         openTimes.add(openTimeDTO);
         addCmd.setOpenTimes(openTimes);
+
+        //默认关闭节假日
+        addCmd.setHolidayOpenFlag((byte)0);
     }
 
     @Override
