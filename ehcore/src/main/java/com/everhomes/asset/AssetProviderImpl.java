@@ -26,6 +26,7 @@ import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
 import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
+import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.contract.ContractTemplateStatus;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
@@ -3975,6 +3976,8 @@ public class AssetProviderImpl implements AssetProvider {
         query.addSelect(bill.DATE_STR_END);
         query.addSelect(bill.STATUS);
         query.addSelect(bill.ID);
+        query.addSelect(bill.SOURCE_TYPE);
+        query.addSelect(bill.CONFIRM_FLAG);
         if(namespaceId!=null){
             query.addConditions(bill.NAMESPACE_ID.eq(namespaceId));
         }
@@ -4009,6 +4012,14 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDateStrEnd(r.getValue(bill.DATE_STR_END));
                     dto.setChargeStatus(r.getValue(bill.STATUS));
                     dto.setBillId(String.valueOf(r.getValue(bill.ID)));
+                    //物业缴费V7.4:若用户在APP一次性全部支付，此时在APP端显示的支付状态是“已支付，待确认”。当财务看到了支付结果，在CM中确认收入以后，CM的账单状态变成“已支付”。下一次同步数据时，APP同步显示为 “已确认”。
+                    //账单来源是来源于CM，以及是服务费账单（资源预订、云打印）类型的，那么需要瑞安财务确认支付结果
+                    String sourceType = r.getValue(bill.SOURCE_TYPE);
+                    if(AssetModuleNotifyConstants.ASSET_CM_MODULE.equals(sourceType) 
+                    		|| AssetSourceType.RENTAL_MODULE.equals(sourceType)
+                    		|| AssetSourceType.PRINT_MODULE.equals(sourceType)) {
+                    	dto.setConfirmFlag(r.getValue(bill.CONFIRM_FLAG) != null ? r.getValue(bill.CONFIRM_FLAG) : 0);
+                    }
                     list.add(dto);
                     return null;
                 });
