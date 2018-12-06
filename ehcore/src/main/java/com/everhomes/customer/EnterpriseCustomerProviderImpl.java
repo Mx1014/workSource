@@ -146,7 +146,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         LOGGER.info("create customer: {}", StringHelper.toJsonString(customer));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
         customer.setId(id);
-        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(customer.getCreateTime() == null)
+            customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         customer.setStatus(CommonStatus.ACTIVE.getCode());
 

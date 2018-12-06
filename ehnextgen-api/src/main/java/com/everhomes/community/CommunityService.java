@@ -63,7 +63,7 @@ public interface CommunityService {
 	
 	ListBuildingsByStatusCommandResponse listBuildingsByStatus(listBuildingsByStatusCommand cmd);
 	
-	ImportDataResponse importBuildingData(MultipartFile mfile, Long userId);
+	ImportFileTaskDTO importBuildingData(ImportBuildingDataCommand cmd, MultipartFile files);
 	
 	CommunityUserResponse listUserCommunities(ListCommunityUsersCommand cmd);
 
@@ -208,6 +208,8 @@ public interface CommunityService {
 
 	OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd);
 
+	ImportDataResponse importBuildingData(MultipartFile mfile, Long userId);
+
 	ApartmentCountInBuildingDTO countApartmentInBuilding(Long buildingId);
 
 	BuildingStatisticsForAppDTO getBuildingStatisticsForApp(GetBuildingStatisticsCommand cmd);
@@ -221,6 +223,5 @@ public interface CommunityService {
 	ListBuildingsForThirdPartyResponse listBuildingsForThirdParty(ListBuildingsForThirdPartyCommand cmd);
 
 	ListAddressesForThirdPartyResponse listAddressesForThirdParty(ListAddressesForThirdPartyCommand cmd);
-
 
 }

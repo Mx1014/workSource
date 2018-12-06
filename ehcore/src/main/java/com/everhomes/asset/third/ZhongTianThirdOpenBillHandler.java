@@ -215,12 +215,28 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 		if(cmd.getBillId() != null) {
 			//如果账单已经在左邻支付，那么EAS调用左邻的收款回传接口是无效调用，已支付的数据以左邻为准
 			PaymentBills bill = assetProvider.findBillById(cmd.getBillId());
-	        if(bill != null && bill.getStatus().equals(AssetPaymentBillStatus.PAID.getCode()))  {
-	            if(LOGGER.isInfoEnabled()) {
-	                LOGGER.info("Bill orders have been paid, billId={}", cmd.getBillId());
+			if(bill != null) {
+				//校验账单是否是已出账单
+				if(!bill.getSwitch().equals((byte) 1))  {
+		            if(LOGGER.isInfoEnabled()) {
+		                LOGGER.info("Bill is not switch, billId={}", cmd.getBillId());
+		            }
+		            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.BILL_NOT_SWITCH, "Bill is not switch");
+		        }
+				//校验账单是否已缴
+				if(bill.getStatus().equals(AssetPaymentBillStatus.PAID.getCode()))  {
+		            if(LOGGER.isInfoEnabled()) {
+		                LOGGER.info("Bill orders have been paid, billId={}", cmd.getBillId());
+		            }
+		            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS, "Bills have been paid");
+		        }
+			}else {
+				if(LOGGER.isInfoEnabled()) {
+	                LOGGER.info("Bill not exist, billId={}", cmd.getBillId());
 	            }
-	            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS, "Bills have been paid");
-	        }
+	            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.BILL_NOT_EXIST, "Bill not exist");
+			}
+			
 	        //重新计算待收 = 应收 - 已收
 	        BigDecimal amountOwed = bill.getAmountReceivable().subtract(cmd.getAmountReceived());
 	        amountOwed = amountOwed.setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -236,5 +252,6 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 		}
 		return dto;
 	}
+	
 
 }

@@ -2,11 +2,16 @@ package com.everhomes.meeting;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+
 public class QueryMyMeetingsCondition {
     private Integer namespaceId;
     private Long organizationId;
     private boolean endFlag;
     private Long detailId;
+    private Date betweenFromDate;
+    private Date betweenToDate;
     private Integer pageSize;
     private Integer offset;
 
@@ -68,6 +73,22 @@ public class QueryMyMeetingsCondition {
 
     public void setOffset(Integer offset) {
         this.offset = offset;
+    }
+
+    public Date getBetweenFromDate() {
+        return betweenFromDate;
+    }
+
+    public void setBetweenFromDate(Date betweenFromDate) {
+        this.betweenFromDate = betweenFromDate;
+    }
+
+    public Date getBetweenToDate() {
+        return betweenToDate;
+    }
+
+    public void setBetweenToDate(Date betweenToDate) {
+        this.betweenToDate = betweenToDate;
     }
 
     @Override

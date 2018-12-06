@@ -67,7 +67,6 @@ public class PropertyReportFormJob extends QuartzJobBean{
 	
 	//定时统计园区数据的接口
 	public void generateReportFormStatics() {
-		
 		//开事务
 		dbProvider.execute((TransactionStatus status) -> {
 			//先删掉这个月的的统计数据

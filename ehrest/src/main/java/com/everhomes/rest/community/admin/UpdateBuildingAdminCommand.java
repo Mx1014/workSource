@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -40,6 +41,16 @@ public class UpdateBuildingAdminCommand {
 	
 	private Long communityId;
 	
+	private Long organizationId;
+	
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
 	private String name;
 
 	private String aliasName;
@@ -382,5 +393,10 @@ public class UpdateBuildingAdminCommand {
 
 	public void setTelecommunicationDescription(String telecommunicationDescription) {
 		this.telecommunicationDescription = telecommunicationDescription;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }
