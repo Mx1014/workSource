@@ -238,6 +238,11 @@ INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `gr
 UPDATE eh_locale_strings SET text = REPLACE(text,'您','你') WHERE scope IN ('meetingErrorCode', 'meetingMessage');
 UPDATE eh_locale_templates SET text = REPLACE(text,'您','你'),description=REPLACE(description,'您','你')  WHERE scope='meetingMessage';
 
+-- AUTHOR: tangcen
+-- REMARK: 添加导入房源授权价时的出错提示
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'address', '40001', 'zh_CN', '收费项名称不能为空');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'address', '40002', 'zh_CN', '授权金额不能为空');
 
 -- AUTHOR:丁建民 20181205
 -- REMARK: issue-37007 合同报表相关
