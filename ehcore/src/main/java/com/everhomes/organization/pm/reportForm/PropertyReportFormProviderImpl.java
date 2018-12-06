@@ -197,6 +197,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addSelect(a.ID,a.NAME,
 				b.BUILDING_COUNT,b.TOTAL_APARTMENT_COUNT,b.FREE_APARTMENT_COUNT,b.RENT_APARTMENT_COUNT,
 				b.OCCUPIED_APARTMENT_COUNT,b.LIVING_APARTMENT_COUNT,b.SALED_APARTMENT_COUNT,
+				b.SIGNEDUP_APARTMENT_COUNT,b.WAITINGROOM_APARTMENT_COUNT,
 				b.AREA_SIZE,b.RENT_AREA,b.FREE_AREA,
 				b.RENT_RATE,b.FREE_RATE);
 		query.addFrom(a);
@@ -243,7 +244,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(DSL.countDistinct(a.COMMUNITY_ID),DSL.sum(a.BUILDING_COUNT),DSL.sum(a.TOTAL_APARTMENT_COUNT),DSL.sum(a.FREE_APARTMENT_COUNT),
 				DSL.sum(a.RENT_APARTMENT_COUNT),DSL.sum(a.OCCUPIED_APARTMENT_COUNT),DSL.sum(a.LIVING_APARTMENT_COUNT),
-				DSL.sum(a.SALED_APARTMENT_COUNT),DSL.sum(a.AREA_SIZE),DSL.sum(a.RENT_AREA),DSL.sum(a.FREE_AREA));
+				DSL.sum(a.SALED_APARTMENT_COUNT),DSL.sum(a.SIGNEDUP_APARTMENT_COUNT),DSL.sum(a.WAITINGROOM_APARTMENT_COUNT),
+				DSL.sum(a.AREA_SIZE),DSL.sum(a.RENT_AREA),DSL.sum(a.FREE_AREA));
 		query.addFrom(a);
 		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(a.COMMUNITY_ID.in(communityIds));
@@ -304,6 +306,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addSelect(a.ID,a.NAME,a.COMMUNITY_ID,
 				b.TOTAL_APARTMENT_COUNT,b.FREE_APARTMENT_COUNT,b.RENT_APARTMENT_COUNT,
 				b.OCCUPIED_APARTMENT_COUNT,b.LIVING_APARTMENT_COUNT,b.SALED_APARTMENT_COUNT,
+				b.SIGNEDUP_APARTMENT_COUNT,b.WAITINGROOM_APARTMENT_COUNT,
 				b.AREA_SIZE,b.RENT_AREA,b.FREE_AREA,b.RENT_RATE,b.FREE_RATE);
 		query.addFrom(a);
 		query.addJoin(b, JoinType.LEFT_OUTER_JOIN, a.ID.eq(b.BUILDING_ID));
@@ -355,7 +358,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(DSL.countDistinct(a.BUILDING_ID),DSL.sum(a.TOTAL_APARTMENT_COUNT),DSL.sum(a.FREE_APARTMENT_COUNT),
 				DSL.sum(a.RENT_APARTMENT_COUNT),DSL.sum(a.OCCUPIED_APARTMENT_COUNT),DSL.sum(a.LIVING_APARTMENT_COUNT),
-				DSL.sum(a.SALED_APARTMENT_COUNT),DSL.sum(a.AREA_SIZE),DSL.sum(a.RENT_AREA),DSL.sum(a.FREE_AREA));
+				DSL.sum(a.SALED_APARTMENT_COUNT),DSL.sum(a.SIGNEDUP_APARTMENT_COUNT),DSL.sum(a.WAITINGROOM_APARTMENT_COUNT),
+				DSL.sum(a.AREA_SIZE),DSL.sum(a.RENT_AREA),DSL.sum(a.FREE_AREA));
 		query.addFrom(a);
 		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(a.COMMUNITY_ID.eq(communityId));
