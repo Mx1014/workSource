@@ -97,6 +97,12 @@ public interface ArchivesService {
 
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
+    boolean checkDismiss(Long userId, Long orgId);
+
+    boolean checkDismiss(OrganizationMemberDetails member);
+
+//    void syncArchivesDismissStatus();
+
     /* 同步数据接口 start */
     void makeArchivesCheckInTime();
 

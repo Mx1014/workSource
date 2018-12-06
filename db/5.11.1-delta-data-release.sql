@@ -35,7 +35,7 @@ WHERE s.id IS NULL;
 
 
 -- AUTHOR:吴寒
--- REMARK:支付授权module修改
+-- REMARK: 支付授权module修改
 UPDATE  eh_service_modules SET client_handler_type = 2, HOST = NULL WHERE id= 79880000 ;
 
 -- AUTHOR: tangcen 2018年12月5日
@@ -238,6 +238,11 @@ INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `gr
 UPDATE eh_locale_strings SET text = REPLACE(text,'您','你') WHERE scope IN ('meetingErrorCode', 'meetingMessage');
 UPDATE eh_locale_templates SET text = REPLACE(text,'您','你'),description=REPLACE(description,'您','你')  WHERE scope='meetingMessage';
 
+-- AUTHOR: tangcen
+-- REMARK: 添加导入房源授权价时的出错提示
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'address', '40001', 'zh_CN', '收费项名称不能为空');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'address', '40002', 'zh_CN', '授权金额不能为空');
 
 -- AUTHOR:丁建民 20181205
 -- REMARK: issue-37007 合同报表相关
@@ -252,6 +257,13 @@ INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES 
 -- AUTHOR:  张智伟
 -- REMARK: issue-43865 web端参数传错，数据修复
 UPDATE eh_meeting_invitations SET source_type='MEMBER_DETAIL' WHERE source_type='source_user';
+
+-- AUTHOR:  吴寒
+-- REMARK: 福利v1.0:文字模板脚本
+SET @template_id = (SELECT MAX(id) FROM eh_locale_templates);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'welfare.msg', 1, 'zh_CN', '发福利消息', '$你收到了${subject},快去查看吧!', 0);
+-- 模块配置脚本
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES('273000','企业福利','310000','/100/310000/79880000','1','3','2','10','2018-09-26 16:51:46',NULL,NULL,'2018-09-26 16:51:46','0','0','0',NULL,'org_control','1','1','module','0','2',NULL,NULL,NULL,NULL);
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -325,7 +337,7 @@ SET @namespace_id := 0;
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'wuyebaoxiu', '物业报修', 20100, 0, NULL, NULL, NULL);
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'wuyekefu', '物业客服', 40300, 0, NULL, NULL, NULL);
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'wuyejiaofei', '物业缴费', 20400, 0, NULL, NULL, NULL);
-INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'fangkeyuyue', '访客预约', 52100, 0, NULL, NULL, NULL);
+INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'fangkeyuyue', '访客预约', 41800, 0, NULL, NULL, NULL);
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'tingchejiaofei', '停车缴费', 40800, 0, NULL, NULL, NULL);
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'pinzhihecha', '品质核查', 20600, 0, NULL, NULL, NULL);
 INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent`, `description`, `module_id`, `type`, `default_router`, `client_handler_type`, `access_control_type`) VALUES (@max_id := @max_id + 1, @namespace_id, @vendor, concat(@vendor, '.', @service), 'shequhuodong', '社区活动', 10600, 0, NULL, NULL, NULL);
@@ -342,6 +354,35 @@ INSERT INTO `eh_xfyun_match` (`id`, `namespace_id`, `vendor`, `service`, `intent
 
 -- 添加测试token
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('xfyun.tpp.testToken', '341a5441a2ac8c2f', '讯飞测试token', 0, NULL, 0);
+
+
+-- 添加测试停车场
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.host', 'http://10.1.10.37:80', '接口地址', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.appkey', '880076901009202', 'appkey', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO.secretKey', '880076901009202', 'secretKey', 999925, NULL, 1);
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO2.host', 'http://10.1.10.37:80', '接口地址', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO2.appkey', '880076901009202', 'appkey', 999925, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.hkws.HKWS_SHJINMAO2.secretKey', '880076901009202', 'secretKey', 999925, NULL, 1);
+
+set @max_lots_id := (select ifnull(max(id),0)  from eh_parking_lots);
+set @namespace_id := 999925;
+set @community_id := 240111044832061113;
+set @parking_name := '金茂雅苑一期停车场';
+set @parking_vendor := 'HKWS_SHJINMAO';
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) 
+VALUES ((@max_lots_id := @max_lots_id + 1), 'community', @community_id,  @parking_name,  @parking_vendor, '', 2, 1, now(), @namespace_id, '{"expiredRechargeFlag":0,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0,"monthRechargeFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee","monthRecharge"]');
+
+set @community_id := 240111044832061114;
+set @parking_name := '金茂雅苑二期停车场';
+set @parking_vendor := 'HKWS_SHJINMAO2';
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) 
+VALUES ((@max_lots_id := @max_lots_id + 1), 'community', @community_id,  @parking_name,  @parking_vendor, '', 2, 1, now(), @namespace_id, '{"expiredRechargeFlag":0,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0,"monthRechargeFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee","monthRecharge"]');
+
+
+
+
+
 
 
 

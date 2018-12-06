@@ -742,7 +742,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
 
         if(cmd.getParentId() != null && cmd.getParentId() == 0){
             List<PmTaskCategory> categories = pmTaskProvider.listTaskCategories(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getAppId(),cmd.getParentId(),null,null,Integer.MAX_VALUE);
-            response.setRequests(categories.stream().map(r->ConvertHelper.convert(r,CategoryDTO.class)).collect(Collectors.toList()));
+            response.setRequests(categories.stream().filter(r->r.getId()==1L).map(r->ConvertHelper.convert(r,CategoryDTO.class)).collect(Collectors.toList()));
         } else {
             List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
 //      V3.6 过滤正中会办事的中间类型

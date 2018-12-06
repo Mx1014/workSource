@@ -19,6 +19,7 @@ import java.util.List;
  *     <li>siteAddress: 办公地址</li>
  *     <li>apartmentFlag: 公寓标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>apartmentAddress: 公寓地址</li>
+ *     <li>backgroundImgUrl: 小区或园区项目的图片链接</li>
  * </ul>
  */
 public class CommunityInfoDTO {
@@ -34,6 +35,7 @@ public class CommunityInfoDTO {
     private String siteAddress;
     private Byte apartmentFlag;
     private String apartmentAddress;
+    private String backgroundImgUrl;
 
     public Long getId() {
         return id;
@@ -130,7 +132,14 @@ public class CommunityInfoDTO {
     public void setApartmentAddress(String apartmentAddress) {
         this.apartmentAddress = apartmentAddress;
     }
+    
+	public String getBackgroundImgUrl() {
+		return backgroundImgUrl;
+	}
 
+	public void setBackgroundImgUrl(String backgroundImgUrl) {
+		this.backgroundImgUrl = backgroundImgUrl;
+	}
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
