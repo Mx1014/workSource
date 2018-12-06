@@ -205,7 +205,13 @@ public class PropertyReportFormJob extends QuartzJobBean{
 					break;	
 				case OCCUPIED:
 					buildingStatistics.setOccupiedApartmentCount(buildingStatistics.getOccupiedApartmentCount() + 1);
-					break;		
+					break;
+				case SIGNEDUP:
+					buildingStatistics.setSignedupApartmentCount(buildingStatistics.getSignedupApartmentCount() + 1);
+					break;
+				case WAITINGROOM:
+					buildingStatistics.setWaitingroomApartmentCount(buildingStatistics.getWaitingroomApartmentCount() + 1);
+					break;
 				default:
 					break;
 			}
@@ -234,7 +240,13 @@ public class PropertyReportFormJob extends QuartzJobBean{
 					break;	
 				case OCCUPIED:
 					communityStatistics.setOccupiedApartmentCount(communityStatistics.getOccupiedApartmentCount() + 1);
-					break;		
+					break;
+				case SIGNEDUP:
+					communityStatistics.setSignedupApartmentCount(communityStatistics.getSignedupApartmentCount() + 1);
+					break;
+				case WAITINGROOM:
+					communityStatistics.setWaitingroomApartmentCount(communityStatistics.getWaitingroomApartmentCount() + 1);
+					break;
 				default:
 					break;
 			}
@@ -261,6 +273,8 @@ public class PropertyReportFormJob extends QuartzJobBean{
 			communityStatistics.setOccupiedApartmentCount(0);
 			communityStatistics.setLivingApartmentCount(0);
 			communityStatistics.setSaledApartmentCount(0);
+			communityStatistics.setSignedupApartmentCount(0);
+			communityStatistics.setWaitingroomApartmentCount(0);
 			
 			communityStatistics.setAreaSize(BigDecimal.valueOf(community.getAreaSize()!=null?community.getAreaSize():0.0));
 			communityStatistics.setRentArea(BigDecimal.valueOf(community.getRentArea()!=null?community.getRentArea():0.0));
@@ -301,6 +315,8 @@ public class PropertyReportFormJob extends QuartzJobBean{
 			buildingStatistics.setOccupiedApartmentCount(0);
 			buildingStatistics.setLivingApartmentCount(0);
 			buildingStatistics.setSaledApartmentCount(0);
+			buildingStatistics.setSignedupApartmentCount(0);
+			buildingStatistics.setWaitingroomApartmentCount(0);
 			
 			buildingStatistics.setAreaSize(BigDecimal.valueOf(building.getAreaSize() != null ? building.getAreaSize():0.0));
 			buildingStatistics.setRentArea(BigDecimal.valueOf(building.getRentArea() != null ? building.getRentArea():0.0));
