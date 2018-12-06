@@ -23,6 +23,7 @@ public class BaseVisitorsysCommand {
     private Long pmId;
 
     private Byte communityType;
+    private Long communityId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -78,6 +79,14 @@ public class BaseVisitorsysCommand {
 
     public void setCommunityType(Byte communityType) {
         this.communityType = communityType;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override
