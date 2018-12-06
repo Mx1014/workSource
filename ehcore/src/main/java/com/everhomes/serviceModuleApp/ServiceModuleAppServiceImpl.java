@@ -948,6 +948,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
     private AppDTO toAppDtoForWorkPlatform(ServiceModuleApp app, Byte sceneType, Long orgId){
 
+		List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(orgId);
+		if (!CollectionUtils.isEmpty(workPlatformApps)) {
+            for (WorkPlatformApp workPlatformApp : workPlatformApps) {
+                if (app.getOriginId().equals(workPlatformApp.getAppId()) && app.getEntryId().equals(workPlatformApp.getEntryId())) {
+                    if (TrueOrFalseFlag.FALSE.getCode().equals(workPlatformApp.getVisibleFlag())) {
+                        return null;
+                    }
+                }
+            }
+        }
         AppDTO appDTO = ConvertHelper.convert(app, AppDTO.class);
 
         ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(app.getModuleId());
