@@ -197,12 +197,13 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
 
     @Override
     public Long getAccountId(RentalOrder order) {
+        RentalResource rentalResource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
         List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, order.getNamespaceId(), "community",
-                order.getCommunityId(), order.getRentalResourceId(), "vipParking");
+                rentalResource.getCommunityId(), rentalResource.getId(), "vipParking");
         if (accounts != null && accounts.size()>0 && accounts.get(0).getPayeeId() != null)
             return  accounts.get(0).getPayeeId();
         //如果没有 查看是否有商户号
-        Long merchantId = this.gerMerchantId(order);
+        Long merchantId = this.gerMerchantId(rentalResource);
         if (merchantId == null)
             return null;
         //根据商户号查收款账户
@@ -231,9 +232,9 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
 
 
     @Override
-    public Long gerMerchantId(RentalOrder order) {
-        List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, order.getNamespaceId(), "community",
-                order.getCommunityId(), order.getRentalResourceId(), "vipParking");
+    public Long gerMerchantId(RentalResource rentalResource) {
+        List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, UserContext.getCurrentNamespaceId(), "community",
+                rentalResource.getCommunityId(), rentalResource.getId(), "vipParking");
         if (accounts != null && accounts.size()>0)
             return  accounts.get(0).getMerchantId();
         return null;

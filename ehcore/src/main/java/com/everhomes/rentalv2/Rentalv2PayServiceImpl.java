@@ -261,8 +261,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     private Long getRentalOrderMerchant(Long rentalBillId){
         RentalOrder order = rentalv2Provider.findRentalBillById(rentalBillId);
         RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
-
-        return handler.gerMerchantId(order);
+        RentalResource rentalResource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
+        return handler.gerMerchantId(rentalResource);
     }
 
     private ListBizPayeeAccountDTO convertAccount(PayUserDTO payUserDTO){

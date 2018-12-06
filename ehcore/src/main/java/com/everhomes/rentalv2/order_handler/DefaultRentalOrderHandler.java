@@ -50,7 +50,6 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
     protected GeneralOrderService orderService;
     @Autowired
     private ConfigurationProvider configurationProvider;
-
     @Override
     public BigDecimal getRefundAmount(RentalOrder order, Long time) {
         BigDecimal refundAmount = rentalCommonService.calculateRefundAmount(order, time);
@@ -59,19 +58,20 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
 
     @Override
     public Long getAccountId(RentalOrder order) {
+        RentalResource rentalResource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
         //查特殊账户
-        List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-                null, RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId(), null, null);
+        List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(null, rentalResource.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
+                null, RuleSourceType.RESOURCE.getCode(), rentalResource.getId(), null, null);
         if (accounts != null && accounts.size()>0 && accounts.get(0).getAccountId() != null)
             return accounts.get(0).getAccountId();
         //查通用账户
-        accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-                null, RuleSourceType.DEFAULT.getCode(), order.getResourceTypeId(), null, null);
+        accounts = this.rentalv2AccountProvider.listPayAccounts(null, rentalResource.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
+                null, RuleSourceType.DEFAULT.getCode(), rentalResource.getResourceTypeId(), null, null);
         if (accounts != null && accounts.size()>0 && accounts.get(0).getAccountId() != null)
             return accounts.get(0).getAccountId();
 
         //如果都没有 查看是否有商户号
-        Long merchantId = this.gerMerchantId(order);
+        Long merchantId = this.gerMerchantId(rentalResource);
         if (merchantId == null)
             return null;
         //根据商户号查收款账户
@@ -125,15 +125,15 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
     }
 
     @Override
-    public Long gerMerchantId(RentalOrder order) {
+    public Long gerMerchantId(RentalResource rentalResource) {
         //查特殊账户
-        List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-                null, RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId(), null, null);
+        List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(null, rentalResource.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
+                null, RuleSourceType.RESOURCE.getCode(), rentalResource.getId(), null, null);
         if (accounts != null && accounts.size()>0)
             return accounts.get(0).getMerchantId();
         //查通用账户
-        accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-                null, RuleSourceType.DEFAULT.getCode(), order.getResourceTypeId(), null, null);
+        accounts = this.rentalv2AccountProvider.listPayAccounts(null, rentalResource.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
+                null, RuleSourceType.DEFAULT.getCode(), rentalResource.getResourceTypeId(), null, null);
         if (accounts != null && accounts.size()>0)
             return accounts.get(0).getMerchantId();
         return null;

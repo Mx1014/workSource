@@ -50,7 +50,7 @@ public interface RentalOrderHandler {
     //获取收款方账户id
     public Long getAccountId(RentalOrder order);
 
-    default public Long gerMerchantId(RentalOrder order){return null;}
+    default public Long gerMerchantId(RentalResource rentalResource){return null;}
 
     default public void processCreateMerchantOrderCmd(CreateMerchantOrderCommand cmd,RentalOrder order){}
 }
