@@ -4214,9 +4214,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	@Override
 	public String getVisitorUrlById(GetVisitorCommand cmd) {
         DoorAuth auth = doorAuthProvider.getDoorAuthById(Long.valueOf(cmd.getId()));
-        if(auth == null || (auth.getLinglingUuid() == null && auth.getAuthType() == 0)) {
+        if(auth == null || auth.getAuthType() == 0) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "tempAuth not found");
-        }else{
+        }else if(auth.getLinglingUuid() == null || auth.getLinglingUuid().isEmpty()){
         	//TODO driverType暂不处理;doorAccessType暂时只考虑zuolin by liuyilin 20181026
             String uuid = UUID.randomUUID().toString();
             uuid = uuid.replace("-", "");
