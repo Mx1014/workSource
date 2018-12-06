@@ -23,6 +23,7 @@ import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.bill.AssetPaymentType;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
@@ -224,7 +225,9 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 		            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.BILL_NOT_SWITCH, "Bill is not switch");
 		        }
 				//校验账单是否已缴
-				if(bill.getStatus().equals(AssetPaymentBillStatus.PAID.getCode()))  {
+				//如果是第三方支付导致的已缴，允许再次修改支付状态以及金额
+				if(bill.getStatus().equals(AssetPaymentBillStatus.PAID.getCode())
+						&& !bill.getThirdPaid().equals(AssetPaymentBillStatus.PAID.getCode()))  {
 		            if(LOGGER.isInfoEnabled()) {
 		                LOGGER.info("Bill orders have been paid, billId={}", cmd.getBillId());
 		            }
@@ -240,7 +243,14 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 	        //重新计算待收 = 应收 - 已收
 	        BigDecimal amountOwed = bill.getAmountReceivable().subtract(cmd.getAmountReceived());
 	        amountOwed = amountOwed.setScale(2, BigDecimal.ROUND_HALF_UP);
-			assetBillProvider.changeChargeStatus(UserContext.getCurrentNamespaceId(), cmd.getBillId(), cmd.getAmountReceived(), amountOwed, cmd.getPaymentType());
+	        //如果待收金额为0，那么置为已缴状态
+	        Byte billStatus = 0;
+	        if(amountOwed.equals(BigDecimal.ZERO)) {
+	        	billStatus = 1;
+	        }
+	        Integer paymentType = AssetPaymentType.ZHONGTIANPAID.getCode();
+			assetBillProvider.changeChargeStatus(UserContext.getCurrentNamespaceId(), cmd.getBillId(), cmd.getAmountReceived(), amountOwed,
+					paymentType, billStatus);
 			dto.setBillId(cmd.getBillId().toString());
 			dto.setAmountReceivable(bill.getAmountReceivable());
 			dto.setAmountReceived(cmd.getAmountReceived());
