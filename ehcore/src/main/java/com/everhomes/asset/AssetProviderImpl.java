@@ -4041,9 +4041,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType))
                 .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
-                //物业缴费V7.5（中天-资管与财务EAS系统对接） ： 不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付)
-                .and(Tables.EH_PAYMENT_BILLS.THIRD_PAID.isNull()
-                		.or(Tables.EH_PAYMENT_BILLS.THIRD_PAID.ne(AssetPaymentBillStatus.PAID.getCode())))
                 .fetchInto(PaymentBills.class);
     }
 

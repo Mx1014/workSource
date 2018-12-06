@@ -865,7 +865,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             SelectQuery<Record> query = context.selectQuery();
             query.addSelect(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.AMOUNT_OWED,t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE,t.STATUS,t.NOTICETEL,t.NOTICE_TIMES,
                     t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
-                    t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL);
+                    t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,t.THIRD_PAID);
             query.addFrom(t, t2);
             query.addConditions(t.ID.eq(t2.BILL_ID));
             query.addConditions(t.TARGET_TYPE.eq(cmd.getTargetType()));
@@ -878,8 +878,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
             query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
             query.addConditions(t2.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
-            query.addConditions(t.THIRD_PAID.isNull()
-            		.or(t.THIRD_PAID.ne(AssetPaymentBillStatus.PAID.getCode())));//物业缴费V7.5（中天-资管与财务EAS系统对接） ： 不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
             query.addGroupBy(t.ID);
             paymentBills = query.fetchInto(PaymentBills.class);
         }
@@ -890,7 +888,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             //剩下的按照billGroup再分tab
             Map<ContractIdBillGroup, List<PaymentBills>> idMap = new HashMap<>();
             Map<ContractNumBillGroup, List<PaymentBills>> numMap = new HashMap<>();
-            Map<Long, List<PaymentBills>> groupMap = new HashMap<>();
+            Map<String, List<PaymentBills>> groupMap = new HashMap<>();
             for (int i = 0; i < paymentBills.size(); i++) {
                 PaymentBills bill = paymentBills.get(i);
                 if (bill.getContractId() != null) {
@@ -919,12 +917,24 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     }
                     continue;
                 }else{
-                    if (groupMap.containsKey(bill.getBillGroupId())) {
-                        groupMap.get(bill.getBillGroupId()).add(bill);
+                    if (groupMap.containsKey(bill.getBillGroupId() + "")) {
+                    	//物业缴费V7.4：若用户在第三方线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
+                    	if(bill.getThirdPaid() != null && bill.getThirdPaid().equals(AssetPaymentBillStatus.PAID.getCode())) {
+                    		if(groupMap.containsKey(bill.getBillGroupId() + "thirdPaid")) {
+                    			groupMap.get(bill.getBillGroupId() + "thirdPaid").add(bill);
+                    		}else {
+                    			List<PaymentBills> idList = new ArrayList<>();
+                                idList.add(bill);
+                                groupMap.put(bill.getBillGroupId() + "thirdPaid", idList);
+                    		}
+                    	}else {
+                    		groupMap.get(bill.getBillGroupId() + "").add(bill);
+                    	}
                     } else {
                         List<PaymentBills> idList = new ArrayList<>();
                         idList.add(bill);
-                        groupMap.put(bill.getBillGroupId(), idList);
+                        String key = bill.getBillGroupId() + "";
+                        groupMap.put(key, idList);
                     }
                 }
             }
@@ -983,6 +993,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                         v2.setAmountReceivable(bill.getAmountReceivable().toString());
                         v2.setBillDuration(bill.getDateStrBegin() + "至" + bill.getDateStrEnd());
                         v2.setBillId(String.valueOf(bill.getId()));
+                        //物业缴费V7.4：若用户在第三方线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
+                        v2.setThirdPaid(bill.getThirdPaid());
                         list.add(v2);
                     }
                     dto.setAddressStr(assetProvider.getAddressStrByIds(addressIds.stream().collect(Collectors.toList())));
