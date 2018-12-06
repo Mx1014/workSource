@@ -1104,20 +1104,18 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (refundRule != null){
 			officeCubicleProvider.deleteRefundRule(cmd.getSpaceId());
 		}
-		OfficeCubicleRefundRule rule = new OfficeCubicleRefundRule();
-		rule.setRefundStrategy(cmd.getRefundStrategy());
-		rule.setSpaceId(cmd.getSpaceId());
-		rule.setNamespaceId(cmd.getNamespaceId());
-		rule.setOwnerId(cmd.getOwnerId());
-		rule.setOwnerType(cmd.getOwnerType());
 		if (cmd.getRefundStrategies()!=null){
 			for(OfficeCubicleRefundRuleDTO dto :cmd.getRefundStrategies()){
-				rule = ConvertHelper.convert(dto,OfficeCubicleRefundRule.class);
+				OfficeCubicleRefundRule rule  = ConvertHelper.convert(dto,OfficeCubicleRefundRule.class);
+				rule.setRefundStrategy(cmd.getRefundStrategy());
+				rule.setSpaceId(cmd.getSpaceId());
+				rule.setNamespaceId(cmd.getNamespaceId());
+				rule.setOwnerId(cmd.getOwnerId());
+				rule.setOwnerType(cmd.getOwnerType());
 				officeCubicleProvider.createRefundRule(rule);
 			}
-		} else {
-			officeCubicleProvider.createRefundRule(rule);
 		}
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		
 		officeCubicleProvider.deleteRefundTip(cmd.getSpaceId());
 		createOfficeCubicleRefundTips(cmd.getSpaceId(),cmd.getRefundTip());
