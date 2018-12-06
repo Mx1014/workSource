@@ -1273,7 +1273,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                 datas = entry.getValue();
             }
             long updateStartTime = System.currentTimeMillis();
-            for(CreateBillCommand command : createBillCommands){
+            long roundStartTime = updateStartTime;
+            for(int i = 0; i < createBillCommands.size(); i++){
+                CreateBillCommand command = createBillCommands.get(i);
                 command.setCategoryId(categoryId);
                 List<Boolean> isCreate = new ArrayList<Boolean>();
             	isCreate.add(true);
@@ -1287,12 +1289,18 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             	if(isCreate.get(0)) {
             		createBillFromImport(command);//物业缴费V6.0（UE优化) 账单区分数据来源
             	}
+            	
+            	if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
+                    long roundEndTime = updateStartTime;
+                    LOGGER.info("Process bill importing data(round update), index={}, dataSize={}, elapse={}", i, createBillCommands.size(), (roundEndTime - roundStartTime));
+                    roundStartTime = roundEndTime;
+            	}
             }
             if(LOGGER.isInfoEnabled()) {
                 long updateEndTime = System.currentTimeMillis();
                 int cmdSize = (createBillCommands == null) ? 0 : createBillCommands.size();
                 int dataSize = (datas == null) ? 0 : datas.size();
-                LOGGER.info("Process bill importing data(update), cmdSize={}, dataSize={}, elapse={}", cmdSize, dataSize, (updateEndTime - updateStartTime));
+                LOGGER.info("Process bill importing data(update end), cmdSize={}, dataSize={}, elapse={}", cmdSize, dataSize, (updateEndTime - updateStartTime));
             }
             //设置导出报错的结果excel的标
             importTaskResponse.setTitle(datas.get(0).getData());
@@ -1698,8 +1706,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             // 打印阶段日志和时间，方便定位性能问题 by lqs 20181206
             if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
                 long roundEndTime = System.currentTimeMillis();
-                LOGGER.info("Process bill importing data(round), namespaceId={}, billGroupId={}, targetType={}, mapSize={}, roundElapse={}, fieldRoundElapse={}", 
-                        namespaceId, billGroupId, targetType, map.size(), (roundEndTime - startTime), fieldRoundElapse);
+                LOGGER.info("Process bill importing data(round), index={}, namespaceId={}, billGroupId={}, targetType={}, mapSize={}, roundElapse={}, fieldRoundElapse={}", 
+                        i, namespaceId, billGroupId, targetType, map.size(), (roundEndTime - startTime), fieldRoundElapse);
                 roundStartTime = roundEndTime;
                 fieldRoundElapse = 0;
             }
@@ -1708,7 +1716,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
-            LOGGER.info("Process bill importing data(end), namespaceId={}, billGroupId={}, targetType={}, mapSize={}, elapse={}", namespaceId, billGroupId, targetType, map.size(), (endTime - startTime));
+            int cmdSize = (cmds == null) ? 0 : cmds.size();
+            int dataSize = (datas == null) ? 0 : datas.size();
+            LOGGER.info("Process bill importing data(end), namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, elapse={}", 
+                    namespaceId, billGroupId, targetType, cmdSize, dataSize, (endTime - startTime));
         }
         
         return map;
