@@ -290,9 +290,25 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 		}
 		
 		List<ParkingInfo> parkInfos = JSONArray.parseArray(resp.getData(), ParkingInfo.class);
-
-		return CollectionUtils.isEmpty(parkInfos) ? null : parkInfos.get(0).getParkUuid();
+		if (CollectionUtils.isEmpty(parkInfos)) {
+			return null;
+		}
+		
+		String parkingLotName = parkingProvider.findParkingLotNameByVendorName(UserContext.getCurrentNamespaceId(),
+				getParkingVendorName());
+		if (null == parkingLotName) {
+			return null;
+		}
+		
+		for (ParkingInfo parkInfo : parkInfos) {
+			if (parkingLotName.equals(parkInfo.getParkName())) {
+				return parkInfo.getParkUuid();
+			}
+		}
+		
+		return null;
 	}
+
 
 	private String getParkingUuidRedisKey() {
 		return getSpecificConfigPrefix() + "parkUuid";
