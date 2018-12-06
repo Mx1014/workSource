@@ -6178,11 +6178,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		List<String> listMac = new ArrayList<String>();
 		ListZLDoorAccessResponse rsp = new ListZLDoorAccessResponse();
 		//TODO 上海华润对接调试用,待appSecret与公司关联实现后补完 by liuyilin 20180802
-		App app = UserContext.current().getCallerApp();
-		if(app == null || app.getName() == null){
-			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth error");
-		}
-		Long ownerId = Long.valueOf(app.getName());
+//		App app = UserContext.current().getCallerApp();
+//		if(app == null || app.getName() == null){
+//			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth error");
+//		}
+		Long ownerId = 1045660L;//Long.valueOf(app.getName());
 		ListDoorAccessGroupCommand cmd = new ListDoorAccessGroupCommand();
 		cmd.setOwnerId(ownerId);
 		cmd.setOwnerType(DoorAccessOwnerType.ENTERPRISE.getCode());
@@ -6191,7 +6191,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			for(DoorAccessDTO da : das){
 				listMac.add(da.getHardwareId());
 			}
-			rsp.setMacAddress(listMac);
+			rsp.setListMac(listMac);			//待对接方上线,改为rsp.setMacAddress(listMac);
 		}
 		return rsp;
 	}
