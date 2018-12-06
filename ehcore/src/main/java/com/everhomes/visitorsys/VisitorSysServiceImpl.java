@@ -2356,9 +2356,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             checkMustFillParams(visitor,s);
         }
         if(visitor.getCommunityType() == null){
-//            communityProvider.findCommunityById()
+            Community community = communityProvider.findCommunityById(visitor.getCommunityId());
+            if(community != null){
+                visitor.setCommunityType(community.getCommunityType());
+            }
         }
-
         CommunityType communitType = CommunityType.fromCode(visitor.getCommunityType());
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(visitor.getOwnerType(),visitor.getOwnerId());
         if(CommunityType.COMMERCIAL.equals(communitType))
