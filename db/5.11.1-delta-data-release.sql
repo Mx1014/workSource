@@ -35,7 +35,7 @@ WHERE s.id IS NULL;
 
 
 -- AUTHOR:吴寒
--- REMARK:支付授权module修改
+-- REMARK: 支付授权module修改
 UPDATE  eh_service_modules SET client_handler_type = 2, HOST = NULL WHERE id= 79880000 ;
 
 -- AUTHOR: tangcen 2018年12月5日
@@ -254,10 +254,10 @@ INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES 
 UPDATE eh_meeting_invitations SET source_type='MEMBER_DETAIL' WHERE source_type='source_user';
 
 -- AUTHOR:  吴寒
--- added by wh 2018-6-12  :薪酬工资条发放消息
+-- REMARK: 福利v1.0:文字模板脚本
 SET @template_id = (SELECT MAX(id) FROM eh_locale_templates);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'welfare.msg', 1, 'zh_CN', '发福利消息', '$你收到了${subject},快去查看吧!', 0);
--- 模块配置  
+-- 模块配置脚本
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES('273000','企业福利','310000','/100/310000/79880000','1','3','2','10','2018-09-26 16:51:46',NULL,NULL,'2018-09-26 16:51:46','0','0','0',NULL,'org_control','1','1','module','0','2',NULL,NULL,NULL,NULL);
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
