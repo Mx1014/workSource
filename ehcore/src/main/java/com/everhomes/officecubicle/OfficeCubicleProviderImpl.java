@@ -766,7 +766,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	@Override
 	public void createCubicleRentOrder(OfficeCubicleRentOrder order) {
 		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhRentalv2Resources.class));
+				.getSequenceDomainFromTablePojo(EhOfficeCubicleRentOrders.class));
 		order.setId(id);
 		order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		order.setCreatorUid(UserContext.currentUserId());
