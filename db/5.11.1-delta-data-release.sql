@@ -279,6 +279,11 @@ INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`
 -- 模块配置脚本
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES('273000','企业福利','310000','/100/310000/79880000','1','3','2','10','2018-09-26 16:51:46',NULL,NULL,'2018-09-26 16:51:46','0','0','0',NULL,'org_control','1','1','module','0','2',NULL,NULL,NULL,NULL);
 
+
+-- AUTHOR:丁建民 20181205
+-- REMARK: issue-44220 
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '10016', 'zh_CN', '调整周期 不能为0');
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
