@@ -2308,17 +2308,18 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetCubicleForOrderResponse getCubicleForOrder (GetCubicleForOrderCommand cmd){
 		GetCubicleForOrderResponse resp = new GetCubicleForOrderResponse();
-		
+		String keyword = "";
+		if (StringUtils.isNotBlank(cmd.getKeyword())){
+			keyword = cmd.getKeyword();
+		}
 		List<OfficeCubicleStation> station = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
 		List<OfficeCubicleStation> rentStation = 
-				officeCubicleProvider.getOfficeCubicleStationByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),cmd.getKeyword());
-		LOGGER.info("rentStation :"+ rentStation);
+				officeCubicleProvider.getOfficeCubicleStationByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),keyword);
 		List<OfficeCubicleRoom> room = 
 				officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,cmd.getKeyword());
 		List<OfficeCubicleRoom> rentRoom = 
-				officeCubicleProvider.getOfficeCubicleRoomByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),cmd.getKeyword());
-		LOGGER.info("rentRoom :"+ rentRoom);
+				officeCubicleProvider.getOfficeCubicleRoomByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),keyword);
 		station.addAll(rentStation);
 		room.addAll(rentRoom);
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
@@ -2493,8 +2494,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
 			dto.setAccountName(other.getAccountName());
 			dto.setCreateTime(other.getCreateTime().getTime());
-			dto.setUserDetail(other.getUseDetail());
 			dto.setOrderNo(other.getOrderNo());
+			if (other.getRentType() == 1){
+				dto.setBeginTime(other.getBeginTime().getTime());
+				dto.setEndTime(other.getEndTime().getTime());
+			} else if(other.getRentType() == 0){
+				dto.setUserDetail(other.getUseDetail());
+			}
 			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(other.getSpaceId());
 			dto.setSpaceName(space.getName());
 			response.getOrders().add(dto);

@@ -81,6 +81,8 @@ import com.everhomes.server.schema.tables.records.EhRentalv2TimeIntervalRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
+import freemarker.template.utility.StringUtil;
+
 @Component
 public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OfficeCubicleProviderImpl.class);
@@ -876,7 +878,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.ASSOCIATE_ROOM_ID.eq(roomId));
 		if (rentFlag != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.eq(rentFlag));
-		if (keyword != null)
+		if (StringUtils.isNotBlank(keyword))
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.STATION_NAME.like("%" + keyword +"%"));
 		if (status != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.STATUS.eq(status));
@@ -892,7 +894,6 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
         Condition beginTime = t.EH_OFFICE_CUBICLE_STATION.BEGIN_TIME.gt(new Timestamp(endDate));
         Condition endTime = t.EH_OFFICE_CUBICLE_STATION.END_TIME.lt(new Timestamp(beginDate));
-
         return context.select().from(t)
                 .where(t.SPACE_ID.eq(spaceId))
                 .and(t.RENT_FLAG.eq(rentFlag))
@@ -980,7 +981,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.STATUS.eq(status));
 		if (roomId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.ID.eq(roomId));
-		if (keyword !=null)
+		if (StringUtils.isNotBlank(keyword))
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.ROOM_NAME.like("%" + keyword +"%"));
 		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleRoom.class));
 	}

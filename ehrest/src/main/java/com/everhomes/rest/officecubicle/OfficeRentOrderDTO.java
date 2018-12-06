@@ -55,8 +55,16 @@ public class OfficeRentOrderDTO {
 	private String openTime;
 	private List<String> rentStation;
 	private Long beginTime;
+	private Long endTime;
 	
-	
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
 	public Long getBeginTime() {
 		return beginTime;
 	}
