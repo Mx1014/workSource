@@ -57,6 +57,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.template.GetKeywordsUtils;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.*;
@@ -1750,11 +1751,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 		//by --djm issue-35586
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-<<<<<<< Updated upstream
+
 			/*if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
-=======
+
 			if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
->>>>>>> Stashed changes
+
 				FindContractCommand command = new FindContractCommand();
 				command.setId(contract.getId());
 				command.setPartyAId(contract.getPartyAId());
@@ -1769,20 +1770,14 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
 							"apartments status is not free for contract!");
 				}
-<<<<<<< Updated upstream
-			}*/
-=======
 			}
-			
->>>>>>> Stashed changes
+		}*/
 			addToFlowCase(contract, flowcaseContractOwnerType);
 			//添加发起人字段
 			contract.setSponsorUid(UserContext.currentUserId().toString());
 			contract.setSponsorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
-
 		contractProvider.updateContract(contract);
-
 		//add by tangcen
 		//将父合同中关联的未出账单记为无效账单
 		//前端传过来的CostGenerationMethod字段实际上是对父合同未出账单的处理方式，因此把CostGenerationMethod的值存在父合同中，而非子合同中
@@ -1795,7 +1790,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 //				assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
 //			}
 		}
-
 		//记录合同事件日志，by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 		
@@ -1819,7 +1813,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		ContractDetailDTO contractDetailDTO = ConvertHelper.convert(contract, ContractDetailDTO.class);
 		
 		return contractDetailDTO;
-				//ConvertHelper.convert(contract, ContractDetailDTO.class);
+		//ConvertHelper.convert(contract, ContractDetailDTO.class);
 	}
 
 	protected Timestamp setToEnd(Long date) {
@@ -4550,7 +4544,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	//合同模板 生成合同文档
 	@Override
 	public void generateContractDocuments(GenerateContractDocumentsCommand cmd) {
-		
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("UserContext", UserContext.current().getUser());
 		// 调用初始化，启动线程
@@ -4566,7 +4559,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		// 1 、 取模板
 		
 		// 2、循环模板内容
-		
 		String contents = "<p>招商客户</p><p><br/></p><p>客户名称：${<span style=\"background:#B8B8B8\">ZS.客户名称<a style=\"display: none\">@@investmentPromotion.name##</a></span>}&nbsp;&nbsp;${<span style=\"background:#B8B8B8\">ZS.客户级别<a style=\"display: none\">@@investmentPromotion.levelItemId##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">ZS.客户联系人<a style=\"display: none\">@@investmentPromotion.customerContact##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">ZS.招商跟进人<a style=\"display: none\">@@investmentPromotion.trackerUid##</a></span>}</p><p><br/></p><p>——————————————————</p><p><br/></p><p>客户信息：</p><p>${<span style=\"background:#B8B8B8\">KH.客户名称<a style=\"display: none\">@@enterpriseCustomer.name##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.客户类型<a style=\"display: none\">@@enterpriseCustomer.categoryItemId##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.联系人<a style=\"display: none\">@@enterpriseCustomer.contactName##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.手机号码<a style=\"display: none\">@@enterpriseCustomer.contactMobile##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.客户来源<a style=\"display: none\">@@enterpriseCustomer.sourceItemId##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.经营年限<a style=\"display: none\">@@enterpriseCustomer.bizLife##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.产品类型<a style=\"display: none\">@@enterpriseCustomer.corpProductCategoryItemId##</a></span>}</p><p><br/></p><p><br/></p><p>————————————————</p><p><br/></p><p>资产信息：</p><p>${<span style=\"background:#B8B8B8\">ZC1.项目名称<a style=\"display: none\">@@apartments.0.communityName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.项目地址<a style=\"display: none\">@@apartments.0.communityAddress##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.楼宇名称<a style=\"display: none\">@@apartments.0.buildingName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.楼宇地址<a style=\"display: none\">@@apartments.0.buildingAddress##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.房源名称<a style=\"display: none\">@@apartments.0.apartmentName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.建筑面积<a style=\"display: none\">@@apartments.0.areaSize##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.收费面积<a style=\"display: none\">@@apartments.0.chargeArea##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.公摊面积<a style=\"display: none\">@@apartments.0.sharedArea##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC2.项目名称<a style=\"display: none\">@@apartments.1.communityName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC2.项目地址<a style=\"display: none\">@@apartments.1.communityAddress##</a></span>}</p><p><br/></p><p><br/></p><p>——————————</p><p>合同信息</p><p>${<span style=\"background:#B8B8B8\">合同编号<a style=\"display: none\">@@contractNumber##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">合同名称<a style=\"display: none\">@@name##</a></span>}</p><p><br/></p><p>${<span style=\"background:#B8B8B8\">付款方式<a style=\"display: none\">@@paidType##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">合同状态<a style=\"display: none\">@@status##</a></span>}</p><p><br/></p><p>————————</p><p><br/></p><p>计价条款：</p><p>1、${<span style=\"background:#B8B8B8\">J1.收费项目<a style=\"display: none\">@@chargingItems.0.chargingItemName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.应用资产<a style=\"display: none\">@@chargingItems.0.apartments##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.单价含税<a style=\"display: none\">@@chargingItems.0.dj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.单价不含税<a style=\"display: none\">@@chargingItems.0.djbhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.单价含税<a style=\"display: none\">@@chargingItems.0.dj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.面积<a style=\"display: none\">@@chargingItems.0.mj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.固定金额含税<a style=\"display: none\">@@chargingItems.0.gdje##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.固定金额不含税含税<a style=\"display: none\">@@chargingItems.0.gdjebhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.税率<a style=\"display: none\">@@chargingItems.0.taxRate##</a></span>}</p><p><br/></p><p><br/></p><p><br/></p><p>2、${<span style=\"background:#B8B8B8\">J2.截止日期<a style=\"display: none\">@@chargingItems.1.chargingExpiredTime##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.收费项目<a style=\"display: none\">@@chargingItems.1.chargingItemName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.单价含税<a style=\"display: none\">@@chargingItems.1.dj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.单价不含税<a style=\"display: none\">@@chargingItems.1.djbhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.面积<a style=\"display: none\">@@chargingItems.1.mj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.固定金额不含税含税<a style=\"display: none\">@@chargingItems.1.gdjebhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.固定金额含税<a style=\"display: none\">@@chargingItems.1.gdje##</a></span>}</p><p><br/></p><p><br/></p><p>调租计划：</p><p>1、${<span style=\"background:#B8B8B8\">T1.调整类型<a style=\"display: none\">@@adjusts.0.changeMethod##</a></span>}&nbsp; &nbsp;${<span style=\"background:#B8B8B8\">T1.调整幅度<a style=\"display: none\">@@adjusts.0.changeRange##</a></span>}&nbsp; &nbsp;${<span style=\"background:#B8B8B8\">T1.应用资产<a style=\"display: none\">@@adjusts.0.apartments##</a></span>}&nbsp;&nbsp;${<span style=\"background:#B8B8B8\">T1.起计日期<a style=\"display: none\">@@adjusts.0.changeStartTime##</a></span>}${<span style=\"background:#B8B8B8\">T1.应用资产<a style=\"display: none\">@@adjusts.0.apartments##</a></span>}</p><p><br/></p><p>免租计划：</p><p>1、${<span style=\"background:#B8B8B8\">M1.收费项目<a style=\"display: none\">@@frees.0.chargingItemName##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.免租金额<a style=\"display: none\">@@frees.0.changeRange##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.应用资产<a style=\"display: none\">@@frees.0.apartments##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.起计日期<a style=\"display: none\">@@frees.0.changeStartTime##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.截止日期<a style=\"display: none\">@@frees.0.changeExpiredTime##</a></span>}</p><p><br/></p><p><br/></p><p><br/></p><p><br/></p>";
 		
 		Map<String, String> resultMap = new HashMap<String, String>();
@@ -4588,20 +4580,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		for (String key : results) {
 			System.out.println(key);
 			List<String> values = utils.getKeywordsWithoutPattern(key, "@@", "##");
-
-			// 查询合同value信息
-			/*
-			 * Contract contract =
-			 * contractProvider.findContractById(cmd.getContractId());
-			 * 
-			 * FindContractCommand command = new FindContractCommand();
-			 * command.setId(contract.getId());
-			 * command.setPartyAId(contract.getPartyAId());
-			 * command.setCommunityId(contract.getCommunityId());
-			 * command.setNamespaceId(contract.getNamespaceId());
-			 * command.setCategoryId(contract.getCategoryId());
-			 * ContractDetailDTO contractDetailDTO = findContract(command);
-			 */
 
 			for (int i = 0; i < values.size(); i++) {
 
@@ -4897,6 +4875,20 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	    return s;
 	  else
 	    return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
+	}
+	
+	public static void main(String[] args) {
+		String contents = "<p>招商客户</p><p><br/></p><p>客户名称：${<span style=\"background:#B8B8B8\">ZS.客户名称<a style=\"display: none\">@@investmentPromotion.name##</a></span>}&nbsp;&nbsp;${<span style=\"background:#B8B8B8\">ZS.客户级别<a style=\"display: none\">@@investmentPromotion.levelItemId##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">ZS.客户联系人<a style=\"display: none\">@@investmentPromotion.customerContact##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">ZS.招商跟进人<a style=\"display: none\">@@investmentPromotion.trackerUid##</a></span>}</p><p><br/></p><p>——————————————————</p><p><br/></p><p>客户信息：</p><p>${<span style=\"background:#B8B8B8\">KH.客户名称<a style=\"display: none\">@@enterpriseCustomer.name##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.客户类型<a style=\"display: none\">@@enterpriseCustomer.categoryItemId##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.联系人<a style=\"display: none\">@@enterpriseCustomer.contactName##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.手机号码<a style=\"display: none\">@@enterpriseCustomer.contactMobile##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.客户来源<a style=\"display: none\">@@enterpriseCustomer.sourceItemId##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.经营年限<a style=\"display: none\">@@enterpriseCustomer.bizLife##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.产品类型<a style=\"display: none\">@@enterpriseCustomer.corpProductCategoryItemId##</a></span>}</p><p><br/></p><p><br/></p><p>————————————————</p><p><br/></p><p>资产信息：</p><p>${<span style=\"background:#B8B8B8\">ZC1.项目名称<a style=\"display: none\">@@apartments.0.communityName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.项目地址<a style=\"display: none\">@@apartments.0.communityAddress##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.楼宇名称<a style=\"display: none\">@@apartments.0.buildingName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.楼宇地址<a style=\"display: none\">@@apartments.0.buildingAddress##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.房源名称<a style=\"display: none\">@@apartments.0.apartmentName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.建筑面积<a style=\"display: none\">@@apartments.0.areaSize##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.收费面积<a style=\"display: none\">@@apartments.0.chargeArea##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.公摊面积<a style=\"display: none\">@@apartments.0.sharedArea##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC2.项目名称<a style=\"display: none\">@@apartments.1.communityName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC2.项目地址<a style=\"display: none\">@@apartments.1.communityAddress##</a></span>}</p><p><br/></p><p><br/></p><p>——————————</p><p>合同信息</p><p>${<span style=\"background:#B8B8B8\">合同编号<a style=\"display: none\">@@contractNumber##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">合同名称<a style=\"display: none\">@@name##</a></span>}</p><p><br/></p><p>${<span style=\"background:#B8B8B8\">付款方式<a style=\"display: none\">@@paidType##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">合同状态<a style=\"display: none\">@@status##</a></span>}</p><p><br/></p><p>————————</p><p><br/></p><p>计价条款：</p><p>1、${<span style=\"background:#B8B8B8\">J1.收费项目<a style=\"display: none\">@@chargingItems.0.chargingItemName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.应用资产<a style=\"display: none\">@@chargingItems.0.apartments##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.单价含税<a style=\"display: none\">@@chargingItems.0.dj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.单价不含税<a style=\"display: none\">@@chargingItems.0.djbhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.单价含税<a style=\"display: none\">@@chargingItems.0.dj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.面积<a style=\"display: none\">@@chargingItems.0.mj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.固定金额含税<a style=\"display: none\">@@chargingItems.0.gdje##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.固定金额不含税含税<a style=\"display: none\">@@chargingItems.0.gdjebhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.税率<a style=\"display: none\">@@chargingItems.0.taxRate##</a></span>}</p><p><br/></p><p><br/></p><p><br/></p><p>2、${<span style=\"background:#B8B8B8\">J2.截止日期<a style=\"display: none\">@@chargingItems.1.chargingExpiredTime##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.收费项目<a style=\"display: none\">@@chargingItems.1.chargingItemName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.单价含税<a style=\"display: none\">@@chargingItems.1.dj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.单价不含税<a style=\"display: none\">@@chargingItems.1.djbhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.面积<a style=\"display: none\">@@chargingItems.1.mj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.固定金额不含税含税<a style=\"display: none\">@@chargingItems.1.gdjebhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.固定金额含税<a style=\"display: none\">@@chargingItems.1.gdje##</a></span>}</p><p><br/></p><p><br/></p><p>调租计划：</p><p>1、${<span style=\"background:#B8B8B8\">T1.调整类型<a style=\"display: none\">@@adjusts.0.changeMethod##</a></span>}&nbsp; &nbsp;${<span style=\"background:#B8B8B8\">T1.调整幅度<a style=\"display: none\">@@adjusts.0.changeRange##</a></span>}&nbsp; &nbsp;${<span style=\"background:#B8B8B8\">T1.应用资产<a style=\"display: none\">@@adjusts.0.apartments##</a></span>}&nbsp;&nbsp;${<span style=\"background:#B8B8B8\">T1.起计日期<a style=\"display: none\">@@adjusts.0.changeStartTime##</a></span>}${<span style=\"background:#B8B8B8\">T1.应用资产<a style=\"display: none\">@@adjusts.0.apartments##</a></span>}</p><p><br/></p><p>免租计划：</p><p>1、${<span style=\"background:#B8B8B8\">M1.收费项目<a style=\"display: none\">@@frees.0.chargingItemName##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.免租金额<a style=\"display: none\">@@frees.0.changeRange##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.应用资产<a style=\"display: none\">@@frees.0.apartments##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.起计日期<a style=\"display: none\">@@frees.0.changeStartTime##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.截止日期<a style=\"display: none\">@@frees.0.changeExpiredTime##</a></span>}</p><p><br/></p><p><br/></p><p><br/></p><p><br/></p>";
+		
+		GetKeywordsUtils utils = new GetKeywordsUtils();
+		List<String> results = utils.getKeywordsWithPattern(contents, "${", "}");
+		
+		for (String key : results) {
+			System.out.println(key);
+			List<String> values = utils.getKeywordsWithoutPattern(key, "@@", "##");
+			System.out.println(values.get(0));
+			System.out.println();
+		}
 	}
 	
 	

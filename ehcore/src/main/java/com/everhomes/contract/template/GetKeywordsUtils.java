@@ -1,4 +1,4 @@
-package com.everhomes.contract;
+package com.everhomes.contract.template;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,11 +6,16 @@ import java.util.List;
 /**
  * @author Steve
  * @version 1.0
- * @description com.test.demo06.getKeyWords
+ * @description 
  * @date 2018/12/3
  */
 public class GetKeywordsUtils {
 
+	/**
+	 * 该方法可以提取出一段文本中，以特定开始标记、结束标记包裹的关键字
+	 * 返回所有符合条件的关键字列表，关键字带着开始、结束标记
+	 * 注意：开始标记和结束标记不能相同
+	 */
     public List<String> getKeywordsWithPattern(String text,String startParten,String endParten){
         List<String> results = new ArrayList<>();
 
@@ -23,30 +28,14 @@ public class GetKeywordsUtils {
 
         for (int i = 0; i < textArray.length; i++) {
             //判断是否开始匹配
-            int countStart = 0;
             if (textArray[i] == startPartenArray[0]){
-                for (int j = 0; j < startPartenArray.length; j++) {
-                    if (textArray[i+j] == startPartenArray[j]){
-                        countStart++;
-                    }else {
-                        break;
-                    }
-                }
-                if (countStart == startParten.length()){
+                if (checkPattern(text, startParten, i)){
                     beginFlag = true;
                 }
             }
             //判断是否结束匹配
-            int countEnd = 0;
             if (textArray[i] == endPartenArray[0]){
-                for (int j = 0; j < endPartenArray.length; j++) {
-                    if (textArray[i+j] == endPartenArray[j]){
-                        countEnd++;
-                    }else {
-                        break;
-                    }
-                }
-                if (countEnd == endParten.length()){
+                if (checkPattern(text, endParten, i)){
                     beginFlag = false;
                     tempSB.append(endParten);
                     results.add(tempSB.toString());
@@ -61,6 +50,11 @@ public class GetKeywordsUtils {
         return results;
     }
 
+    /**
+	 * 该方法可以提取出一段文本中，以特定开始标记、结束标记包裹的关键字
+	 * 返回所有符合条件的关键字列表，关键字不带开始、结束标记
+	 * 注意：开始标记和结束标记不能相同
+	 */
     public List<String> getKeywordsWithoutPattern(String text,String startParten,String endParten){
         List<String> results = new ArrayList<>();
 
@@ -73,30 +67,14 @@ public class GetKeywordsUtils {
 
         for (int i = 0; i < textArray.length; i++) {
             //判断是否开始匹配
-            int countStart = 0;
             if (textArray[i] == startPartenArray[0]){
-                for (int j = 0; j < startPartenArray.length; j++) {
-                    if (textArray[i+j] == startPartenArray[j]){
-                        countStart++;
-                    }else {
-                        break;
-                    }
-                }
-                if (countStart == startParten.length()){
+                if (checkPattern(text, startParten, i)){
                     beginFlag = true;
                 }
             }
             //判断是否结束匹配
-            int countEnd = 0;
             if (textArray[i] == endPartenArray[0]){
-                for (int j = 0; j < endPartenArray.length; j++) {
-                    if (textArray[i+j] == endPartenArray[j]){
-                        countEnd++;
-                    }else {
-                        break;
-                    }
-                }
-                if (countEnd == endParten.length()){
+                if (checkPattern(text, endParten, i)){
                     beginFlag = false;
                     results.add(tempSB.substring(startParten.length()));
                     tempSB.setLength(0);
@@ -110,6 +88,20 @@ public class GetKeywordsUtils {
         return results;
     }
 
-
-
+    private boolean checkPattern(String text,String pattern,int startIndex){
+    	char[] patternArray = pattern.toCharArray();
+    	char[] textArray = text.toCharArray();
+    	
+    	int count = 0;
+    	for (int j = 0; j < patternArray.length; j++) {
+            if (textArray[startIndex+j] == patternArray[j]){
+            	count++;
+            }else {
+            	return false;
+            }
+        }
+    	if (count == pattern.length())
+    		return true;
+    	return false;
+    }
 }

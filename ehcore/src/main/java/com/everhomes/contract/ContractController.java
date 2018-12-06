@@ -726,7 +726,6 @@ public class ContractController extends ControllerBase {
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
 		contractService.generateContractDocuments(cmd);
-		
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
