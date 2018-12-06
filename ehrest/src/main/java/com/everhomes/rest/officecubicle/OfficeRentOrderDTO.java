@@ -54,6 +54,16 @@ public class OfficeRentOrderDTO {
     private String accountName;
 	private String openTime;
 	private List<String> rentStation;
+	private Long beginTime;
+	
+	
+	public Long getBeginTime() {
+		return beginTime;
+	}
+
+	public void setBeginTime(Long beginTime) {
+		this.beginTime = beginTime;
+	}
 
 	public List<String> getRentStation() {
 		return rentStation;
