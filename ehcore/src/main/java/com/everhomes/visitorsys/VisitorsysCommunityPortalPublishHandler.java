@@ -29,8 +29,7 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
     private PortalVersionProvider portalVersionProvider;
     @Autowired
     private ServiceModuleAppProvider serviceModuleAppProvider;
-    @Autowired
-    private ServiceModuleEntryProvider serviceModuleEntryProvider;
+
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
         PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
@@ -48,21 +47,6 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
 
     @Override
     public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
-        JSONObject jsonObject = JSON.parseObject(instanceConfig);
-        if (!StringUtils.isEmpty(jsonObject.getString("url")) && cmd.getModuleEntryId() != null) {
-            String url = jsonObject.getString("url");
-            String newUrl = "";
-            ServiceModuleEntry serviceModuleEntry = this.serviceModuleEntryProvider.findById(cmd.getModuleEntryId());
-            if (serviceModuleEntry != null) {
-                String[] urls = url.split("[?]");
-                if (urls.length > 1) {
-                    jsonObject.remove("url");
-                    newUrl = urls[0] + "?sceneType=" + serviceModuleEntry.getSceneType() + "&" + urls[1];
-                    jsonObject.put("url",newUrl);
-                    return jsonObject.toJSONString();
-                }
-            }
-        }
         return instanceConfig;
     }
 
