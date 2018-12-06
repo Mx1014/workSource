@@ -1151,14 +1151,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return dto;
 			}).collect(Collectors.toList()));
 		List<OfficeCubicleRefundTips> refundTips = officeCubicleProvider.listRefundTips(cmd.getSpaceId(), null);
-		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderById(cmd.getOrderId());
-		Integer refundPrice = calculateRefundAmount(order,System.currentTimeMillis()).intValue();
-		resp.setRefundPrice(refundPrice);
+		if (cmd.getOrderId() !=null){
+			OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderById(cmd.getOrderId());
+			Integer refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space).intValue();
+			resp.setRefundPrice(refundPrice);
+		}
 		resp.setRefundTip(refundTips.stream().map(r->ConvertHelper.convert(r,OfficeCubicleRefundTipDTO.class)).collect(Collectors.toList()));
 		return resp;
 	}
-    private BigDecimal calculateRefundAmount(OfficeCubicleRentOrder order, Long now) {
-		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(order.getSpaceId());
+    private BigDecimal calculateRefundAmount(OfficeCubicleRentOrder order, Long now, OfficeCubicleSpace space) {
 
         if (space.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
 
