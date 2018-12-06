@@ -985,18 +985,29 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         Byte routerLocationType = null;
         Byte routerSceneType = null;
         if(app.getEntryId() != null){
-            ServiceModuleAppEntry entry = serviceModuleEntryProvider.findAppEntryById(app.getEntryId());
+            List<ServiceModuleEntry> entrys = serviceModuleEntryProvider.listServiceModuleEntries(Arrays.asList(app.getModuleId()),
+                    ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(),ServiceModuleSceneType.CLIENT.getCode());
+            ServiceModuleEntry entry = null;
+            if (!CollectionUtils.isEmpty(entrys)) {
+                entry = entrys.get(0);
+            }
             if(entry != null){
                 routerLocationType = entry.getLocationType();
                 routerSceneType = entry.getSceneType();
-                //使用应用入口名称
-                appDTO.setName(entry.getEntryName());
             }
-
             //优先使用entryIcon
             if(entry != null && !StringUtils.isEmpty(entry.getIconUri())){
-                String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
-                appDTO.setIconUrl(url);
+                List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+                        this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(),entry.getId(),null,null);
+                if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
+                    appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                    String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
+                            serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
+                    appDTO.setIconUrl(url);
+                }else {
+                    String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
+                    appDTO.setIconUrl(url);
+                }
             }else {
                 ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
                 if(profile != null && profile.getIconUri() != null){
@@ -2004,7 +2015,13 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
             dto.setEntryId(app.getEntryId());
             List<ServiceModuleEntry> entries = this.serviceModuleEntryProvider.listServiceModuleEntries(Arrays.asList(app.getModuleId()), locationType, sceneType);
             if (!CollectionUtils.isEmpty(entries)) {
-                dto.setAppEntry(entries.get(0).getEntryName());
+                List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(), entries.get(0).getId(),
+                        null,null);
+                if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfiles)) {
+                    dto.setAppEntry(serviceModuleAppEntryProfiles.get(0).getEntryName());
+                }else {
+                    dto.setAppEntry(entries.get(0).getEntryName());
+                }
             }
             WorkPlatformApp workPlatformApp = this.workPlatformAppProvider.getWorkPlatformApp(app.getOriginId(), orgId,app.getEntryId());
             if (workPlatformApp != null) {
