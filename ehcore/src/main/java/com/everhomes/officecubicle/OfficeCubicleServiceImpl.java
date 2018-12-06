@@ -2546,8 +2546,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeRentOrderDTO dto = ConvertHelper.convert(order, OfficeRentOrderDTO.class);
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(order.getSpaceId());
 		dto.setSpaceName(space.getName());
-		RentalOrder rentalOrder = rentalv2Provider.findRentalBillById(order.getRentalOrderNo());
-		dto.setBeginTime(rentalOrder.getStartTime().getTime());
+		if (order.getRentalOrderNo()!=null){
+			RentalOrder rentalOrder = rentalv2Provider.findRentalBillById(order.getRentalOrderNo());
+			dto.setBeginTime(rentalOrder.getStartTime().getTime());
+		}
 		List<OfficeCubicleStationRent> stationRent = 
 				officeCubicleProvider.searchCubicleStationRentByOrderId(order.getSpaceId(),order.getId());
 		List<String> rentStation = new ArrayList<String>();
