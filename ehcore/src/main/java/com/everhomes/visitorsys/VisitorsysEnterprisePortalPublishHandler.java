@@ -27,7 +27,7 @@ public class VisitorsysEnterprisePortalPublishHandler implements PortalPublishHa
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
         PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
-        List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, releaseVersion == null ? null : releaseVersion.getId(), VisitorsysConstant.COMMUNITY_MODULE_ID);
+        List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, releaseVersion == null ? null : releaseVersion.getId(), VisitorsysConstant.ENTERPRISE_MODULE_ID);
         if(serviceModuleApps!=null && serviceModuleApps.size()>0){
             return String.format(instanceConfig,namespaceId,serviceModuleApps.get(serviceModuleApps.size()-1).getOriginId());
         }
