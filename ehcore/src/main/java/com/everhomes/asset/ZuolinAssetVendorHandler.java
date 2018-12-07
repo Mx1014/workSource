@@ -1392,7 +1392,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         
         List<Long> addressIds = new ArrayList<>();
         for (BillItemDTO billItemDTO : command.getBillGroupDTO().getBillItemDTOList()) {
-            if (!addressIds.contains(billItemDTO.getAddressId())) {
+            if (billItemDTO.getAddressId() != null && !addressIds.contains(billItemDTO.getAddressId())) {
                 addressIds.add(billItemDTO.getAddressId());// 一个账单可能有多个楼栋门牌
             }
         }
@@ -1705,6 +1705,11 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             		Address addressByBuildingApartmentName = addressProvider.findAddressByBuildingApartmentName(namespaceId, ownerId, buildingName, apartmentName);
             		if(addressByBuildingApartmentName != null) {
             			addressId = addressByBuildingApartmentName.getId();
+            		} else {
+            		    log.setErrorLog("楼栋/门牌找不到");
+                        log.setCode(AssetBillImportErrorCodes.ADDRESS_INCORRECT);
+                        datas.add(log);
+                        continue bill;
             		}
             	}else {
             		log.setErrorLog("楼栋/门牌格式错误，楼栋门牌要以/分开");
