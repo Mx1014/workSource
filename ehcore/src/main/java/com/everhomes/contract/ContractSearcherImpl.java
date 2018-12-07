@@ -1029,6 +1029,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		} catch (ParseException e) {
 			LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error");
 		}
+		// 合同统计是基于园区id进行统计的，历史原因1000000域空间的园区id都为空，不做统计，需要过滤掉
 		qb = QueryBuilders
 					.boolQuery().must(QueryBuilders.rangeQuery("updateTime").from(firstdateUpdateTime).to(lastdateUpdateTime))
 					.mustNot(QueryBuilders.regexpQuery("namespaceId", "1000000"));
