@@ -1,11 +1,11 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
-import com.everhomes.util.StringHelper;
-
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
+
+import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
@@ -44,6 +44,10 @@ import javax.validation.constraints.NotNull;
  * <li>consumeUserId:企业下面的某个人的ID</li>
  * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
  * <li>sorts:参考{@link com.everhomes.rest.asset.ReSortCmd}</li>
+ * <li>updateTime:更新时间，为空全量同步数据，不为空是增量同步（该时间点以后的数据信息），使用1970-01-01 00:00:00开始到现在的毫秒数（时间戳）</li>
+ * <li>communityId:项目ID(左邻的项目id),如何不传，可以跨园区获取数据，否则获取的是该园区下面的数据信息</li>
+ * <li>switchList:物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单）</li>
+ * <li>contractId:合同ID</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -65,6 +69,7 @@ public class ListBillsCommand {
     private String buildingName;
     private String apartmentName;
     private Byte status;
+    private List<Byte> switchList;//物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单）
     private String targetType;
     private String contractNum;
     private Long organizationId;
@@ -72,33 +77,23 @@ public class ListBillsCommand {
     private Long targetIdForEnt;
     private Long dueDayCountStart;//欠费天数开始范围
     private Long dueDayCountEnd;//欠费天数结束范围
-
     private Long moduleId;//用于下载中心
-
-    public Long getModuleId() {
-        return moduleId;
-    }
-
-    public void setModuleId(Long moduleId) {
-        this.moduleId = moduleId;
-    }
-
     private Integer paymentType;
     private Byte isUploadCertificate;
     private String customerTel;
     private Long communityId;
-
     //新增账单来源信息
     private String sourceType;
     private Long sourceId;
     private String sourceName;
     private Long consumeUserId;
-
     //物业缴费V6.0 账单、费项表增加是否删除状态字段
     private Byte deleteFlag;
-
     //账单列表处增加筛选项：欠费金额、应收、已收、待收等排序
     private List<ReSortCmd> sorts;
+    private Long updateTime;
+    private Long contractId;
+    
     public Long getCommunityId() {
         return communityId;
     }
@@ -373,4 +368,37 @@ public class ListBillsCommand {
     public void setSorts(List<ReSortCmd> sorts) {
         this.sorts = sorts;
     }
+    
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
+	public Long getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Long updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public List<Byte> getSwitchList() {
+		return switchList;
+	}
+
+	public void setSwitchList(List<Byte> switchList) {
+		this.switchList = switchList;
+	}
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
+	}
+    
 }

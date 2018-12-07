@@ -231,4 +231,16 @@ public interface ConfigConstants {
     
     //资产报表定时任务
 	public static final String SCHEDULE_PROPERTY_TASK_TIME = "schedule.property.task.time";
+
+	//客户端地址模式
+	public static final String CLIENT_ADDRESS_MODE = "client.address.mode";
+
+	// 模块安全防护会话静默时长
+    public static final String SERVICE_MODULE_SECURITY_TIME_OUT = "service.module.security.time.out";
+    
+	//合同报表定时任务
+	public static final String SCHEDULE_CONTRACT_TASK_TIME = "schedule.contractstatics.cronexpression";
+	
+	//缴费对接门禁定时任务
+	public static final String SCHEDULE_ASSET_DOORACCESS_TASK_TIME = "asset.dooraccess.cronexpression";
 }

@@ -12,6 +12,10 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmtask.PmTask;
+import com.everhomes.pmtask.PmTaskCategory;
+import com.everhomes.pmtask.PmTaskHandle;
+import com.everhomes.pmtask.PmTaskLog;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
@@ -19,7 +23,8 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
-
+import com.everhomes.rest.pmtask.PmTaskFlowStatus;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -64,6 +69,7 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
@@ -128,6 +134,9 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
 	@Autowired
 	ClickStatDetailProvider detailProvider;
+	
+	@Autowired
+	private SmsProvider smsProvider;
 
 	@Override
 	public FlowModuleInfo initModule() {
@@ -536,8 +545,17 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
 			List<Tuple<String, Object>> variables) {
-		// TODO Auto-generated method stub
-		
+		FlowCase flowCase = ctx.getFlowCase();
+
+		ServiceAlliances serviceAlliance = yellowPageProvider.findServiceAllianceById(flowCase.getReferId(), null,
+				null);
+		if (SmsTemplateCode.SERVICE_ALLIANCE_NEW_APPLY_TO_MANAGE == templateId) {
+			smsProvider.addToTupleList(variables, "applierName", flowCase.getApplierName());
+			smsProvider.addToTupleList(variables, "applierPhone", flowCase.getApplierPhone());
+			smsProvider.addToTupleList(variables, "serviceName", serviceAlliance.getName());
+		} else if (SmsTemplateCode.SERVICE_ALLIANCE_NEW_APPLY_TO_USER == templateId) {
+			smsProvider.addToTupleList(variables, "serviceName", serviceAlliance.getName());
+		}
 	}
 	
 	/**   
@@ -781,4 +799,5 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
             }
         }
     }
+    
 }

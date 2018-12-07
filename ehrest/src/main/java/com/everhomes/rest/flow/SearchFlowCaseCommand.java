@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  *     <li>projectType: 项目类型</li>
  *     <li>startTime: startTime</li>
  *     <li>endTime: endTime</li>
+ *     <li>originAppId: 应用 Id</li>
  * </ul>
  */
 public class SearchFlowCaseCommand {
@@ -42,6 +43,7 @@ public class SearchFlowCaseCommand {
     private String projectType;
     private Long startTime;
     private Long endTime;
+    private Long originAppId;
 
     public Byte getFlowCaseStatus() {
         return flowCaseStatus;
@@ -177,6 +179,14 @@ public class SearchFlowCaseCommand {
 
     public void setServiceType(String serviceType) {
         this.serviceType = serviceType;
+    }
+
+    public Long getOriginAppId() {
+        return originAppId;
+    }
+
+    public void setOriginAppId(Long originAppId) {
+        this.originAppId = originAppId;
     }
 
     @Override

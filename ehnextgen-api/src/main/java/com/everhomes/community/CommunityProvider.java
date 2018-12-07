@@ -184,5 +184,20 @@ public interface CommunityProvider {
 	String findCommunityCategoryByCommunityId(Long communityId);
 	List<Building> findBuildingsByIds(List<Long> buildingIds);
 	List<Long> findCommunityIdsByOrgId(Long organizationId);
+
+
+
+    /**
+     * Author: 黄鹏宇
+     * Remark: 获取所有生效的业务用community
+     */
+    List<Community> listAllBizCommunities();
+	List<com.everhomes.rest.openapi.CommunityDTO> listCommunitiesForThirdParty(Integer namespaceId, Long communityId, Long pageAnchor, int pageSize,
+			Timestamp updateTime);
+	List<com.everhomes.rest.openapi.BuildingDTO> listBuildingsForThirdParty(Integer namespaceId, Long communityId,
+			Long pageAnchor, int pageSize, Timestamp updateTime);
+	List<com.everhomes.rest.openapi.ApartmentDTO> listAddressesForThirdParty(Integer namespaceId, Long communityId,
+			Long buildingId, Long pageAnchor, int pageSize, Timestamp updateTime);
+
 	
 }

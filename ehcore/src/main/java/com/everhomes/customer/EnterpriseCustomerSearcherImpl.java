@@ -67,6 +67,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -159,6 +160,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
 
+            //EnterpriseCustomer customerTemp = enterpriseCustomerProvider.findById(customer.getId());
             builder.field("id", customer.getId());
             builder.field("ownerId", customer.getOwnerId());
             builder.field("communityId", customer.getCommunityId());
@@ -175,6 +177,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("trackingUid",customer.getTrackingUid());
             builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
             builder.field("lastTrackingTime" , customer.getLastTrackingTime());
+            builder.field("updateTime" , customer.getUpdateTime());
+            builder.field("createTime" , customer.getCreateTime());
             builder.field("propertyType" , customer.getPropertyType());
             builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
             builder.field("propertyArea" , customer.getPropertyArea());
@@ -220,18 +224,37 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 });
                 builder.field("customerContactName", StringUtils.join(customerContactName, "|"));
             }
+            List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId(),InvitedCustomerType.INVITED_CUSTOMER.getCode());
+            if(trackings != null && trackings.size() > 0){
+                List<Timestamp> trackingTime = new ArrayList<>();
+
+                trackings.forEach(r -> {
+                    if(r.getTrackingTime() != null){
+                        trackingTime.add(r.getTrackingTime());
+                    }
+                });
+                builder.field("trackingTime", trackingTime);
+            }
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
                 List<String> addressIds = new ArrayList<>();
                 entryInfos.forEach((e) -> {
-                    buildings.add(e.getBuildingId().toString());
-                    if (e.getAddressId() != null){
-                        addressIds.add(e.getAddressId().toString());
+                    if(e.getBuildingId() != null) {
+                        buildings.add(e.getBuildingId().toString());
+                        if (e.getAddressId() != null) {
+                            if(e.getAddressId() != null) {
+                                addressIds.add(e.getAddressId().toString());
+                            }
+                        }
                     }
                 });
-                builder.field("buildingId", StringUtils.join(buildings, "|"));
-                builder.field("addressId", StringUtils.join(addressIds, "|"));
+                if(buildings.size() > 0){
+                    builder.field("buildingId", StringUtils.join(buildings, "|"));
+                }
+                if(addressIds.size() > 0){
+                    builder.field("addressId", StringUtils.join(addressIds, "|"));
+                }
 //                builder.array("buildings", buildings);
 //                builder.array("addressId", addressIds);
             }
@@ -306,6 +329,17 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         return response;
     }
 
+
+    @Override
+    public SearchEnterpriseCustomerResponse queryEnterpriseCustomersForOpenAPI(SearchEnterpriseCustomerCommand cmd){
+        if(cmd.getPageSize() != null && cmd.getPageSize() > 100){
+            cmd.setPageSize(100);
+        }
+        cmd.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+        return queryEnterpriseCustomers(cmd,true);
+    }
+
+
     @Override
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd,Boolean isAdmin) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
@@ -353,7 +387,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         FilterBuilder nfb = FilterBuilders.termFilter("status", CommonStatus.INACTIVE.getCode());
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        if(cmd.getCommunityId() != null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        }
         //是否为资质客户增加筛选
 
         if(cmd.getContractSearchCustomerFlag() != null && cmd.getContractSearchCustomerFlag() == 1){
@@ -426,16 +462,21 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
 
 
-
+        if(null != cmd.getUpdateTime()){
+            RangeFilterBuilder rf = new RangeFilterBuilder("updateTime");
+            Long startTime = cmd.getUpdateTime();
+            rf.gte(new Timestamp(startTime));
+            fb = FilterBuilders.andFilter(fb, rf);
+        }
 
 
         //跟进时间、资产类型、资产面积、资产单价增加筛选
-        if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
+        /*if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
         	RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
         	Long startTime = getTomorrowLastTimestamp(cmd.getLastTrackingTime());
         	rf.gte(startTime);
         	fb = FilterBuilders.andFilter(fb, rf); 
-        }
+        }*/
 
         if(cmd.getTrackerUids() != null && cmd.getTrackerUids().size()>0){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackerUid", cmd.getTrackingUids()));
@@ -462,26 +503,51 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         	
         }
 
+        FilterBuilder rfbt = null;
+
         if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
+            RangeFilterBuilder rf1 = new RangeFilterBuilder("trackingTime");
+            RangeFilterBuilder rf2 = new RangeFilterBuilder("createTime");
+            Long startTime = cmd.getMinTrackingPeriod();
+            Long endTime = cmd.getMaxTrackingPeriod();
+            if(null != startTime){
+                rf1.gte(new Timestamp(startTime));
+                rf2.gte(new Timestamp(startTime));
+            }
+            if(null != endTime){
+                rf1.lte(new Timestamp(endTime));
+                rf2.lte(new Timestamp(endTime));
+            }
+            rfbt = FilterBuilders.orFilter(rf1, rf2);
+            fb = FilterBuilders.andFilter(fb, rfbt);
+
+        }
+
+        /*if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
             if(null != cmd.getMinTrackingPeriod() && null != cmd.getMaxTrackingPeriod()){
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+                RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
                 Long startTime = cmd.getMinTrackingPeriod();
                 Long endTime = cmd.getMaxTrackingPeriod();
                 rf.gte(new Timestamp(startTime));
                 rf.lte(new Timestamp(endTime));
-                fb = FilterBuilders.andFilter(fb, rf);
+                rfbt2 = FilterBuilders.orFilter(fb, rf);
             }else if(null != cmd.getMinTrackingPeriod() && null == cmd.getMaxTrackingPeriod()){
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+                RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
                 Long startTime = cmd.getMinTrackingPeriod();
                 rf.gte(startTime);
-                fb = FilterBuilders.andFilter(fb, rf);
+                rfbt2 = FilterBuilders.andFilter(fb, rf);
             }else{
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+                RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
                 Long endTime = cmd.getMaxTrackingPeriod();
                 rf.lte(endTime);
-                fb = FilterBuilders.andFilter(fb, rf);
+                rfbt2 = FilterBuilders.andFilter(fb, rf);
             }
-        }
+            rfbt1 = FilterBuilders.orFilter(rfbt1, rfbt2);
+            fb = FilterBuilders.andFilter(fb, rfbt1);
+        }*/
+
+
+
 
         if(null != cmd.getRequirementMinArea() || null != cmd.getRequirementMaxArea()){
             if(null != cmd.getRequirementMinArea() && null != cmd.getRequirementMaxArea()){
@@ -582,7 +648,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                     if (customer != null) {
                         // zuolin base
                     customer.setOwnerId(cmd.getOrgId());
-                    EnterpriseCustomerDTO dto = convertToDTO(customer);
+                    EnterpriseCustomerDTO dto = null;
+                    if(cmd.getMobileFlag() == null || cmd.getMobileFlag() == 0){
+                        dto = convertToDTO(customer);
+                    }else{
+                        dto = mobileConvertToDTO(customer);
+                    }
                     dtos.add(dto);
                 }
             });}
@@ -961,6 +1032,94 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             dto.setEntryInfos(entryInfos);
         }
 
+
+
+        CustomerRequirementDTO requirementDTO = invitedCustomerService.getCustomerRequirementDTOByCustomerId(dto.getId());
+        if(requirementDTO != null){
+            dto.setRequirement(requirementDTO);
+
+        }
+
+
+
+        List<CustomerContact> customerContacts = invitedCustomerProvider.findContactByCustomerId(dto.getId());
+        List<CustomerContactDTO> contactDTOS = new ArrayList<>();
+        if(customerContacts != null && customerContacts.size() > 0){
+            customerContacts.forEach(r-> contactDTOS.add(ConvertHelper.convert(r, CustomerContactDTO.class)));
+            dto.setContacts(contactDTOS);
+        }
+
+
+
+        List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerId(dto.getId());
+        if(trackers != null && trackers.size() > 0){
+            List<CustomerTrackerDTO> trackerDTOS = new ArrayList<>();
+            trackers.forEach(r-> {
+                CustomerTrackerDTO trackerDTO = ConvertHelper.convert(r, CustomerTrackerDTO.class);
+                List<OrganizationMember> oMembers = organizationProvider.listOrganizationMembersByUId(trackerDTO.getTrackerUid());
+                if (oMembers != null && oMembers.size()>0) {
+                    trackerDTO.setTrackerPhone(oMembers.get(0).getContactToken());
+                    trackerDTO.setTrackerName(oMembers.get(0).getContactName());
+                }
+                trackerDTOS.add(trackerDTO);
+            });
+            dto.setTrackers(trackerDTOS);
+        }
+
+
+
+
+
+        LOGGER.debug("customer entry info list end time  :{}",System.currentTimeMillis());
+        return dto;
+    }
+
+
+    private EnterpriseCustomerDTO mobileConvertToDTO(EnterpriseCustomer customer) {
+        LOGGER.debug("convertToDTO start time :{}",System.currentTimeMillis());
+        EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        Integer result = 0;
+//        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
+
+//        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
+
+
+        if (dto.getTrackingUid() != null && dto.getTrackingUid() != 0) {
+            dto.setTrackingName(dto.getTrackingName());
+        }
+
+
+        if (null != dto.getEntryStatusItemId()) {
+            ScopeFieldItem entryStatusItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getEntryStatusItemId());
+            if (null != entryStatusItem) {
+                dto.setEntryStatusItemName(entryStatusItem.getItemDisplayName());
+            } else {
+                dto.setEntryStatusItemName(null);
+            }
+        }
+
+
+        LOGGER.debug("switch items name end time :{}",System.currentTimeMillis());
+
+        //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
+        if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
+            dto.setThirdPartFlag(true);
+        }
+
+        if (customer.getLastTrackingTime() != null) {
+            result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
+            dto.setTrackingPeriod(result);
+        }
+        ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
+        command.setOrganizationId(customer.getOrganizationId());
+        command.setCustomerId(customer.getId());
+        command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        command.setCommunityId(customer.getCommunityId());
+        /*
+        List<OrganizationContactDTO> admins = customerService.listOrganizationAdmin(command);
+        dto.setEnterpriseAdmins(admins);
+        LOGGER.debug("list organization admins  end time  :{}",System.currentTimeMillis());
+        */
 
 
         CustomerRequirementDTO requirementDTO = invitedCustomerService.getCustomerRequirementDTOByCustomerId(dto.getId());

@@ -328,10 +328,13 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(cmd.getMerchantOrderId());
 		if (order == null) { //做一下兼容
-			Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
-			order = checkOrder(orderId);
+			 order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getBizOrderNum());
+			if (order == null ){
+				Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
+				order = checkOrder(orderId);
+			}
 		}
-
+		
 		if(order == null){
 			LOGGER.error("the order {} not found.",cmd.getBizOrderNum());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,

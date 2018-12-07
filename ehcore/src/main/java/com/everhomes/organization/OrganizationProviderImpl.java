@@ -91,6 +91,9 @@ import org.springframework.util.StringUtils;
 
 
 
+
+
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -3032,8 +3035,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public void createOrganizationAddressMapping(CommunityAddressMapping addressMapping) {
-
-        assert (addressMapping.getOrganizationId() != null);
+    	
+    	//CommunityAddressMapping中不再存OrganizationId，兼容标准版的修改
+        //assert (addressMapping.getOrganizationId() != null);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddressMappings.class));
@@ -3047,8 +3051,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public void updateOrganizationAddressMapping(CommunityAddressMapping addressMapping) {
-
-        assert (addressMapping.getOrganizationId() != null);
+    	//CommunityAddressMapping中不再存OrganizationId，兼容标准版的修改
+        //assert (addressMapping.getOrganizationId() != null);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
@@ -7123,7 +7127,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public OrganizationMember listOrganizationMembersByGroupTypeAndContactToken(String groupType, String contactToken,String grouPath) {
+	public OrganizationMember listOrganizationMembersByGroupTypeAndContactToken(List<String> groupTypeList, String contactToken,String grouPath) {
         //1.获取上下文
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
@@ -7131,7 +7135,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         List<OrganizationMember> result = new ArrayList<OrganizationMember>();
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypeList));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(grouPath+"%"));
         
@@ -7191,5 +7195,33 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.STATUS.eq(com.everhomes.rest.organization.Status.ACTIVE.getCode()))
                 .fetchInto(Long.class);
         return targetIdList;
+    }
+
+	@Override
+	public void updateOrganizationMemberDetailsContactToken(Integer namespaceId, Long userId, String newContactToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS).set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN, newContactToken)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(userId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.ne(0L)).execute();
+	}
+
+	@Override
+	public void updateOrganizationMembersContactToken(Integer namespaceId, Long userId, String newContactToken) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATION_MEMBERS).set(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN, newContactToken)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L)).execute();
+	}
+
+	@Override
+    public List<Long> getOrganizationIdsHaveCommunity(){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> ids = context.select(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID)
+                .from(Tables.EH_ORGANIZATION_COMMUNITIES).groupBy(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID)
+                .fetchInto(Long.class);
+        return ids;
     }
 }

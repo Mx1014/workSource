@@ -146,7 +146,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         LOGGER.info("create customer: {}", StringHelper.toJsonString(customer));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
         customer.setId(id);
-        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(customer.getCreateTime() == null)
+            customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         customer.setStatus(CommonStatus.ACTIVE.getCode());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -513,6 +514,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        //fix#issue-38574 统计不统计招商客户
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CUSTOMER_SOURCE.eq(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode()));
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<EnterpriseCustomer> result = new ArrayList<>();
@@ -2625,12 +2628,14 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         return context.select(DSL.max(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME))
                 .from(Tables.EH_CUSTOMER_TRACKINGS)
                 .where(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .and(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId))
                 .and(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_SOURCE.eq(customerSource))
                 .fetchAnyInto(Timestamp.class);
     }
 
     @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor, Integer namespaceId){
+
         List<CreateOrganizationAdminCommand> dtoList = new ArrayList<>();
         if(nextPageAnchor == null){
             nextPageAnchor = 0l;
@@ -2664,7 +2669,6 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         });
         return dtoList;
     }
-
 
     @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor){

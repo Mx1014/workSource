@@ -62,6 +62,7 @@ import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
 import com.everhomes.rest.asset.AssetEnergyType;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillSourceId;
+import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.AssetServiceErrorCode;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BatchImportBillsCommand;
@@ -95,8 +96,6 @@ import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
 import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
 import com.everhomes.rest.asset.ListBillItemsResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListBillsDTO;
-import com.everhomes.rest.asset.ListBillsResponse;
 import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
 import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
 import com.everhomes.rest.asset.ListUploadCertificatesCommand;
@@ -114,6 +113,8 @@ import com.everhomes.rest.asset.TenantType;
 import com.everhomes.rest.asset.UploadCertificateInfoDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
@@ -833,11 +834,14 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     @SuppressWarnings({ "unused", "unchecked" })
 	@Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
-
-        checkCustomerParameter(cmd.getTargetType(), cmd.getTargetId());
+    	if(cmd.getTargetType() != null && !cmd.getTargetType().equals(AssetPaymentConstants.EH_USER) && !cmd.getTargetType().equals(AssetPaymentConstants.EH_ORGANIZATION)){
+            LOGGER.error("target type is neither eh_user nor eh_organization");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"target type is neither eh_user nor eh_organization");
+        }
         List<ShowBillForClientV2DTO> tabBills = new ArrayList<>();
         List<PaymentBills> paymentBills = new ArrayList<PaymentBills>();
         if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+        	checkCustomerParameter(cmd.getTargetType(), cmd.getTargetId());
         	//企业客户是所有企业管理员可以查看和支付，校验企业管理员的权限
             paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId(),cmd.getOwnerType(),cmd.getOwnerId());
         }else {
@@ -874,6 +878,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
             query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
             query.addConditions(t2.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
+            query.addConditions(t.THIRD_PAID.isNull()
+            		.or(t.THIRD_PAID.ne(AssetPaymentBillStatus.PAID.getCode())));//物业缴费V7.5（中天-资管与财务EAS系统对接） ： 不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
             query.addGroupBy(t.ID);
             paymentBills = query.fetchInto(PaymentBills.class);
         }
@@ -1266,8 +1272,13 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                 createBillCommands = entry.getKey();
                 datas = entry.getValue();
             }
-            for(CreateBillCommand command : createBillCommands){
+            long updateStartTime = System.currentTimeMillis();
+            long roundStartTime = updateStartTime;
+            LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
+            for(int i = 0; i < createBillCommands.size(); i++){
+                CreateBillCommand command = createBillCommands.get(i);
                 command.setCategoryId(categoryId);
+                command.setSourceName(localeString.getText());
                 List<Boolean> isCreate = new ArrayList<Boolean>();
             	isCreate.add(true);
             	if(cmd.getTargetType() != null && cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
@@ -1280,6 +1291,19 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             	if(isCreate.get(0)) {
             		createBillFromImport(command);//物业缴费V6.0（UE优化) 账单区分数据来源
             	}
+            	
+            	// 由于插入/更新数据非常慢，打印一下前两条的时间
+            	if(((i % 500) == 0 || i == 1) && LOGGER.isInfoEnabled()) {
+                    long roundEndTime = System.currentTimeMillis();
+                    LOGGER.info("Process bill importing data(round update), index={}, dataSize={}, elapse={}", i, createBillCommands.size(), (roundEndTime - roundStartTime));
+                    roundStartTime = roundEndTime;
+            	}
+            }
+            if(LOGGER.isInfoEnabled()) {
+                long updateEndTime = System.currentTimeMillis();
+                int cmdSize = (createBillCommands == null) ? 0 : createBillCommands.size();
+                int dataSize = (datas == null) ? 0 : datas.size();
+                LOGGER.info("Process bill importing data(update end), cmdSize={}, dataSize={}, elapse={}", cmdSize, dataSize, (updateEndTime - updateStartTime));
             }
             //设置导出报错的结果excel的标
             importTaskResponse.setTitle(datas.get(0).getData());
@@ -1294,6 +1318,13 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     }
     
     private void modifyBillForUser(CreateBillCommand command, List<Boolean> isCreate){
+    	//物业缴费V6.0（UE优化) 账单区分数据来源
+    	command.setSourceType(AssetSourceTypeEnum.ASSET_MODULE.getSourceType());
+    	command.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
+    	//物业缴费V6.0 ：批量导入的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
+    	command.setCanDelete((byte)1);
+    	command.setCanModify((byte)1);
+    	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
@@ -1336,6 +1367,13 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     }
     
     private void modifyBillForOrg(CreateBillCommand command, List<Boolean> isCreate){
+    	//物业缴费V6.0（UE优化) 账单区分数据来源
+    	command.setSourceType(AssetSourceTypeEnum.ASSET_MODULE.getSourceType());
+    	command.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
+    	//物业缴费V6.0 ：批量导入的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
+    	command.setCanDelete((byte)1);
+    	command.setCanModify((byte)1);
+    	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
@@ -1364,6 +1402,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 
     @SuppressWarnings("rawtypes")
 	private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId, Long ownerId, Byte billSwitch, String targetType) {
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Process bill importing data(start), namespaceId={}, billGroupId={}, targetType={}, size={}", namespaceId, billGroupId, targetType, resultList.size());
+        }
         Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = new HashMap<>();
         List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
         List<CreateBillCommand> cmds = new ArrayList<>();
@@ -1388,6 +1430,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             else if(headers[i].contains("账单开始时间")) dateStrBeginIndex = i;
             else if(headers[i].contains("账单结束时间")) dateStrEndIndex = i;
         }
+        
+        long roundStartTime = System.currentTimeMillis();
+        long fieldRoundElapse = 0L;
         bill:for (int i = 2; i < resultList.size(); i++) {
             RowResult currentRow = (RowResult) resultList.get(i);
             String[] data = getOrderedCellValues(currentRow, headers.length);
@@ -1451,6 +1496,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             	}
         	}
             
+        	long fieldStartTime = System.currentTimeMillis();
             for(int j = 0; j < data.length; j++){
                 BillItemDTO item = new BillItemDTO();
                 if(headers[j].contains("客户名称")){
@@ -1613,6 +1659,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     cmd.setInvoiceNum(data[j]);
                 }
             }
+            fieldRoundElapse += System.currentTimeMillis() - fieldStartTime;
+            
             billGroupDTO.setBillGroupId(billGroupId);
             billGroupDTO.setBillItemDTOList(billItemDTOList);
             billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
@@ -1653,8 +1701,28 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             	}
             }
             cmds.add(cmd);
+            
+            // 打印阶段日志和时间，方便定位性能问题 by lqs 20181206
+            if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
+                long roundEndTime = System.currentTimeMillis();
+                int cmdSize = (cmds == null) ? 0 : cmds.size();
+                int dataSize = (datas == null) ? 0 : datas.size();
+                LOGGER.info("Process bill importing data(round), index={}, namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, roundElapse={}, fieldRoundElapse={}", 
+                        i, namespaceId, billGroupId, targetType, cmdSize, dataSize, (roundEndTime - startTime), fieldRoundElapse);
+                roundStartTime = roundEndTime;
+                fieldRoundElapse = 0;
+            }
         }
         map.put(cmds, datas);
+        
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            int cmdSize = (cmds == null) ? 0 : cmds.size();
+            int dataSize = (datas == null) ? 0 : datas.size();
+            LOGGER.info("Process bill importing data(end), namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, elapse={}", 
+                    namespaceId, billGroupId, targetType, cmdSize, dataSize, (endTime - startTime));
+        }
+        
         return map;
     }
 

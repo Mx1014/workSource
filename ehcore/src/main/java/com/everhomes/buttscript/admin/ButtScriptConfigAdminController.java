@@ -4,6 +4,7 @@ package com.everhomes.buttscript.admin;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.buttscript.ButtScriptConfigService;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestDoc(value="ButtScriptConfig Admin controller", site="core")
 @RestController
 @RequestMapping("/admin/buttScriptConfig")
-public class ButtScriptConfigAdminController {
+public class ButtScriptConfigAdminController extends ControllerBase {
 
     @Autowired
     private ButtScriptConfigService buttScriptConfigService ;

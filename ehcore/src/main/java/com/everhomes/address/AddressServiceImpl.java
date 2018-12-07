@@ -50,6 +50,8 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.pm.AddressEvent;
+import com.everhomes.organization.pm.AddressTrackingTemplateCode;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
@@ -112,6 +114,7 @@ import com.everhomes.rest.address.SuggestCommunityDTO;
 import com.everhomes.rest.address.UpdateAddressArrangementCommand;
 import com.everhomes.rest.address.UploadApartmentAttachmentCommand;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressArrangementDTO;
 import com.everhomes.rest.address.AddressArrangementStatus;
@@ -221,6 +224,7 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroupHistory;
 import com.everhomes.user.UserGroupHistoryProvider;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.UserServiceAddress;
@@ -380,8 +384,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
     @Autowired
     private ScheduleProvider scheduleProvider;
-@Autowired
+    
+    @Autowired
     private CustomerService customerService;
+    
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
@@ -957,10 +965,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         //表eh_addresses和表eh_organization_addresses进行联查
         SelectQuery<Record> query = context.select().from(Tables.EH_ADDRESSES).getQuery();
-        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
+        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID),Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
         query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%"+cmd.getKeyword()+"%"));
+        //issue-42749:租客管理模块楼宇信息跟实际楼宇数据不一致,其他有楼宇查询的地方全部都是这样的情况,其余模块将已删除的房源也查出来了
+        query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0));
         if(cmd.getBuildingName() != null){
             query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.eq(cmd.getBuildingName()));
         }
@@ -2043,6 +2054,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
     @Override
 	public Object importParkAddressData(ImportAddressCommand cmd, MultipartFile file) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_IMPORT_ADDRESS, cmd.getOrganizationId(), cmd.getCommunityId());
+
     	Long userId = UserContext.current().getUser().getId();
     	ImportFileTask task = new ImportFileTask();
 		try {
@@ -2965,7 +2978,8 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 
     @Override
     public void deleteApartmentAttachment(DeleteApartmentAttachmentCommand cmd) {
-        addressProvider.deleteApartmentAttachment(cmd.getId());
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_DELETE_APARTMENT_ATTACHMENT, cmd.getOrganizationId(), cmd.getCommunityId());
+    	addressProvider.deleteApartmentAttachment(cmd.getId());
     }
 
     @Override
@@ -2981,7 +2995,9 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 
     @Override
     public ApartmentAttachmentDTO uploadApartmentAttachment(UploadApartmentAttachmentCommand cmd) {
-        AddressAttachment attachment = new AddressAttachment();
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_UPLOAD_APARTMENT_ATTACHMENT, cmd.getOrganizationId(), cmd.getCommunityId());
+    	
+    	AddressAttachment attachment = new AddressAttachment();
         attachment.setAddressId(cmd.getAddressId());
         attachment.setContentUri(cmd.getContentUri());
         attachment.setName(cmd.getAttachmentName());
@@ -3149,8 +3165,10 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 	@Override
 	public void createAddressArrangement(CreateAddressArrangementCommand cmd) {
 		if (cmd.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+			assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_CREATE_SPLIT_ARRANGEMENT, cmd.getOrganizationId(), cmd.getCommunityId());
 			createSplitArrangement(cmd);
 		}else if (cmd.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+			assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_CREATE_MERGE_ARRANGEMENT, cmd.getOrganizationId(), cmd.getCommunityId());
 			createMergeArrangement(cmd);
 		}
 	}
@@ -3173,11 +3191,13 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 			address.setIsFutureApartment((byte) 1);
 			address.setNamespaceId(targetAddress.getNamespaceId());
 			address.setCommunityId(targetAddress.getCommunityId());
+			address.setCommunityName(targetAddress.getCommunityName());
 			address.setCityName(targetAddress.getCityName());
 			address.setCityId(targetAddress.getCityId());
 			address.setAreaId(targetAddress.getAreaId());
 			address.setAreaName(targetAddress.getAreaName());
 			address.setApartmentFloor(targetAddress.getApartmentFloor());
+			address.setBuildingId(targetAddress.getBuildingId());
 			address.setBuildingName(targetAddress.getBuildingName());
 			address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
 
@@ -3197,6 +3217,8 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 		User user = UserContext.current().getUser();
 		arrangement.setCreatorUid(user.getId());
 		addressProvider.createAddressArrangement(arrangement);
+		//记录到房源日志中
+		propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_ADD, targetAddress, arrangement, null);
 	}
 
 	private void createMergeArrangement(CreateAddressArrangementCommand cmd) {
@@ -3257,6 +3279,8 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 		User user = UserContext.current().getUser();
 		arrangement.setCreatorUid(user.getId());
 		addressProvider.createAddressArrangement(arrangement);
+		//记录到房源日志中
+		propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_ADD, targetAddress, arrangement, null);
 	}
 
 	//添加房源、小区、机构的对应关系，设置房源的具体状态存在eh_organization_address_mappings表中
@@ -3272,6 +3296,7 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
         organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
 	}
 
+	//转化为0时0分0秒的Timestamp
 	private Timestamp formatTime(Long time){
 		Timestamp result = null;
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -3389,12 +3414,22 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ARRANGEMENT_NOT_EXIST,
                     "the addressArrangement does not exist!");
 		}
+		//用于日志记录
+		AddressArrangement oldArrangement = addressProvider.findAddressArrangementById(cmd.getId());
+		Address targetAddress = addressProvider.findAddressById(arrangement.getAddressId());
+		
 		if (cmd.getDateBegin()!=null && formatTime(cmd.getDateBegin()) != arrangement.getDateBegin()) {
 			arrangement.setDateBegin(formatTime(cmd.getDateBegin()));
 			arrangement.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			User user = UserContext.current().getUser();
 			arrangement.setUpdateUid(user.getId());
 			addressProvider.updateAddressArrangement(arrangement);
+			//记录到房源日志中
+			if (arrangement.getOperationType().equals(AddressArrangementType.SPLIT.getCode())) {
+				propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_UPDATE, targetAddress, arrangement, oldArrangement);
+			}else if (arrangement.getOperationType().equals(AddressArrangementType.MERGE.getCode())) {
+				propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_UPDATE, targetAddress, arrangement, oldArrangement);
+			}
 		}
 
 		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
@@ -3405,6 +3440,8 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 					throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ADDRESS_NOT_EXIST,
 		                    "the address does not exist!");
 				}
+				//用于日志记录
+				Address oldAddress = addressProvider.findAddressById(dto.getAddressId());
 				if (dto.getApartmentName() != null && !dto.getApartmentName().equals(address.getApartmentName())) {
 					address.setApartmentName(dto.getApartmentName());
 					address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
@@ -3414,6 +3451,17 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 				address.setFreeArea(dto.getFreeArea());
 				address.setRentArea(dto.getRentArea());
 				addressProvider.updateAddress(address);
+				//记录到房源日志中
+				String content = null;
+				if (arrangement.getOperationType().equals(AddressArrangementType.SPLIT.getCode())) {
+					content = propertyMgrService.getAddressArrangementEventContent(AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_UPDATE, arrangement, address, oldAddress);
+				}else if (arrangement.getOperationType().equals(AddressArrangementType.MERGE.getCode())) {
+					content = propertyMgrService.getAddressArrangementEventContent(AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_UPDATE, arrangement, address, oldAddress);
+				}
+				AddressEvent event = addressProvider.findAddressEventByAddressIdAndOperateTime(targetAddress.getId(),arrangement.getUpdateTime());
+				String newContent = event.getContent() + ";" + content;
+				event.setContent(newContent);
+				addressProvider.updateAddressEvent(event);
 			}
 		}
 	}
@@ -3421,6 +3469,7 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 	@Override
 	public void deleteAddressArrangement(DeleteAddressArrangementCommand cmd) {
 		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
+		Address address = addressProvider.findAddressById(arrangement.getAddressId());
 		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
 		//删除未来房源
 		for (String addressId : targetIds) {
@@ -3429,6 +3478,12 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 			addressProvider.updateAddress(futureAddress);
 		}
 		addressProvider.deleteAddressArrangement(cmd.getId());
+		//记录到房源日志中
+		if (arrangement.getOperationType().equals(AddressArrangementType.SPLIT.getCode())) {
+			propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_DELETE, address, arrangement, null);
+		}else if (arrangement.getOperationType().equals(AddressArrangementType.MERGE.getCode())) {
+			propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_DELETE, address, arrangement, null);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -3682,6 +3737,8 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 
 	@Override
 	public void exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse response) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_EXPORT_ADDRESS, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		List<ApartmentDTO> aptList = this.listApartmentsByKeyword(cmd).second();
 		if (aptList != null && aptList.size()>0) {
 			String fileName = null;
@@ -3794,7 +3851,9 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 			}
 		}
 		return filterData;
-	}//四舍五入截断double类型数据
+	}
+	
+	//四舍五入截断double类型数据
 	private double doubleRoundHalfUp(double input,int scale){
 		BigDecimal digit = new BigDecimal(input);
 		return digit.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
@@ -3842,4 +3901,9 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
         }
 	}
 
+	private void assetManagementPrivilegeCheck(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ASSET_MANAGEMENT, null, null, null, communityId);
+	}
+	
+	
 }

@@ -56,7 +56,7 @@ public class DoorAccessSchedule implements ApplicationListener<ContextRefreshedE
 	}
 
 	public void init() {
-		String cronExpression = configurationProvider.getValue("asset.dooraccess.cronexpression", "");
+		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_ASSET_DOORACCESS_TASK_TIME, "0 30 2 * * ? ");
 		String autoReading = "EnergyAutoReading " + System.currentTimeMillis();
 		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
 		LOGGER.info("================================================energyTaskServer: " + taskServer + ", equipmentIp: " + equipmentIp);

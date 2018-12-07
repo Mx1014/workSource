@@ -212,12 +212,12 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
             fb = FilterBuilders.andFilter(fb, rf);
         }
 
-        if(cmd.getEndTime() != null) {
-            RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
-            //rf.lt(cmd.getEndTime());
-            rf.lte(cmd.getEndTime());//修复缺陷 #39719 【标准版全量】左邻 能耗管理 计划管理 查询栏 by ycx
-            fb = FilterBuilders.andFilter(fb, rf);
-        }
+//        if(cmd.getEndTime() != null) {
+//            RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
+//            //rf.lt(cmd.getEndTime());
+//            rf.lte(cmd.getEndTime());//修复缺陷 #39719 【标准版全量】左邻 能耗管理 计划管理 查询栏 by ycx
+//            fb = FilterBuilders.andFilter(fb, rf);
+//        }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;

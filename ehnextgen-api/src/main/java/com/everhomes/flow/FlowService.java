@@ -467,7 +467,7 @@ public interface FlowService {
 
     void deleteFlowButton(DeleteFlowButtonCommand cmd);
 
-    ListFlowServiceTypeResponse listFlowServiceTypes(ListFlowServiceTypesCommand cmd);
+    ListFlowServiceTypeResponse listFlowServiceTypes(SearchFlowCaseCommand cmd);
 
     ListNextBranchesResponse listNextBranches(ListNextBranchesCommand cmd);
 
@@ -529,9 +529,9 @@ public interface FlowService {
 
     void updateNeedAllProcessorComplete(UpdateNeedAllProcessorCompleteCommand cmd);
 
-    ListFlowModuleAppsResponse listFlowModuleApps(ListFlowModuleAppsCommand cmd);
+    ListFlowModuleAppsResponse listFlowModuleApps(SearchFlowCaseCommand cmd);
 
-	ListFlowModuleAppServiceTypesResponse listFlowModuleAppServiceTypes(ListFlowModuleAppServiceTypesCommand cmd);
+	ListFlowModuleAppServiceTypesResponse listFlowModuleAppServiceTypes(SearchFlowCaseCommand cmd);
 
     DeferredResult<Object> flowScriptMappingCall(Byte mode, Long id1, Long id2, String functionName, HttpServletRequest request);
 
@@ -554,4 +554,6 @@ public interface FlowService {
     Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
 
     void doFlowMirror(DoFlowMirrorCommand cmd);
+
+	FlowGraphDTO getFlowGraphByFlowVersion(FlowIdVersionCommand cmd);
 }

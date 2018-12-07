@@ -99,6 +99,7 @@ public class AddRentalSiteSingleSimpleRule {
 
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
+	private String resourceType;
 
 	@Override
 	public String toString() {
@@ -406,5 +407,13 @@ public class AddRentalSiteSingleSimpleRule {
 
 	public void setApprovingUserOriginalPrice(BigDecimal approvingUserOriginalPrice) {
 		this.approvingUserOriginalPrice = approvingUserOriginalPrice;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
 	}
 }

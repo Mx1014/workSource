@@ -754,10 +754,10 @@ public class AclController extends ControllerBase {
      * <p>更改超级管理员（标准版）</p>
      */
     @RequestMapping("updateTopAdminstrator")
-    @RestReturn(value=String.class)
+    @RestReturn(value=GetAdministratorInfosByUserIdResponse.class)
     public RestResponse updateTopAdminstrator(@Valid CreateOrganizationAdminCommand cmd) {
-        rolePrivilegeService.updateTopAdminstrator(cmd);
-        RestResponse response = new RestResponse();
+        GetAdministratorInfosByUserIdResponse resp = rolePrivilegeService.updateTopAdminstrator(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -16,7 +16,6 @@ import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.enterprise.EnterprisePropertyDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.asset.NoticeMemberIdAndContact;
-
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
@@ -75,7 +74,7 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> listOrganizationMembers(Long memberUid);
 
-    OrganizationMember listOrganizationMembersByGroupTypeAndContactToken(String groupType,String contactToken,String grouPath);
+    OrganizationMember listOrganizationMembersByGroupTypeAndContactToken(List<String> groupTypeList,String contactToken,String grouPath);
 
     void createOrganizationCommunity(OrganizationCommunity organizationCommunity);
 
@@ -1005,4 +1004,11 @@ public interface OrganizationProvider {
 
     List<Long> listOrganizationIdFromUserAuthenticationOrganization(List<Long> orgIds, Integer namespaceId, Byte authFlag);
     //用户认证审核end
+
+	void updateOrganizationMemberDetailsContactToken(Integer namespaceId, Long userId, String newContactToken);
+
+	void updateOrganizationMembersContactToken(Integer namespaceId, Long userId, String newContactToken);
+
+	List<Long> getOrganizationIdsHaveCommunity();
+
 }

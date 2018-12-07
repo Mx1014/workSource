@@ -11,6 +11,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInfoDTO;
+import com.everhomes.rest.user.ZhenZhiHuiUserDetailInfo;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,20 @@ public class OAuth2ApiController extends ControllerBase {
         return new RestResponse(info);
     }
 
+    /**
+     * <b>URL: /oauth2api/getUserInfoForZhenZhiHui</b>
+     * <p>给圳智慧用的获取用户信息的接口</p>
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping("getUserInfoForZhenZhiHui")
+    @RestReturn(value=ZhenZhiHuiUserDetailInfo.class)
+    public RestResponse getUserInfoForZhenZhiHui(HttpServletRequest request, HttpServletResponse response) {
+        AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
+        ZhenZhiHuiUserDetailInfo info = this.oAuth2ApiService.getUserInfoForZhenZhiHui(accessToken.getGrantorUid());
+        return new RestResponse(info);
+    }
     /**
      * <b>URL: /oauth2api/trd/authenticationInfo</b>
      * <p>用户认证信息</p>

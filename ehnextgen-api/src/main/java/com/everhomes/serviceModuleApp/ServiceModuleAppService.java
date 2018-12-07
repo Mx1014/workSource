@@ -70,7 +70,7 @@ public interface ServiceModuleAppService {
     ListAllAppsResponse listAllApps(ListAllLaunchPadAppsCommand cmd);
 
     ListAllAppsResponse listAllAppsForWorkPlatform(ListAllLaunchPadAppsCommand cmd);
-    
+
     ListServiceModuleAppsForEnterprisePayResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd);
 
 	ListWorkPlatformAppResponse listWorkPlatformApp(ListWorkPlatformAppCommand cmd);
@@ -80,4 +80,6 @@ public interface ServiceModuleAppService {
 	void updateWorkPlatformApp(UpdateWorkPlatformAppCommand cmd);
 
 	void updateWorkPlatformAppSort(UpdateWorkPlatformAppSortCommand cmd);
+
+	List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps);
 }

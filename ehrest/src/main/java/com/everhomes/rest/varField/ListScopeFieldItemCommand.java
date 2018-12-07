@@ -23,6 +23,8 @@ public class ListScopeFieldItemCommand {
 
     private Long ownerId;
 
+    private String moduleName;
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -66,5 +68,13 @@ public class ListScopeFieldItemCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
     }
 }

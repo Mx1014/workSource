@@ -26,8 +26,15 @@ public class AclinkFormValuesDTO {
     private Timestamp createTime;
     private Long operatorUid;
     private Timestamp operateTime;
+    private String titleName;
 
+    public String getTitleName() {
+        return titleName;
+    }
 
+    public void setTitleName(String titleName) {
+        this.titleName = titleName;
+    }
 
     public Long getId() {
         return id;

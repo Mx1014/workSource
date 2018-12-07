@@ -47,6 +47,7 @@ public class ContractChargingItemDTO {
     private List<BuildingApartmentDTO> apartments;
     private Long billGroupId;//物业缴费V6.3 签合同选择计价条款前，先选择账单组
     private String billGroupName;//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
+    private Byte oneTimeBillStatus;//缺陷 #42424 是否是一次性产生费用 add by 杨崇鑫
 
 	public String getLateFeeformula() {
         return lateFeeformula;
@@ -190,6 +191,14 @@ public class ContractChargingItemDTO {
 
 	public void setBillGroupName(String billGroupName) {
 		this.billGroupName = billGroupName;
+	}
+
+	public Byte getOneTimeBillStatus() {
+		return oneTimeBillStatus;
+	}
+
+	public void setOneTimeBillStatus(Byte oneTimeBillStatus) {
+		this.oneTimeBillStatus = oneTimeBillStatus;
 	}
     
 }
