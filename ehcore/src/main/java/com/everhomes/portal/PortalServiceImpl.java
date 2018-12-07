@@ -4210,7 +4210,7 @@ public class PortalServiceImpl implements PortalService {
 		for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
 		    PortalVersion portalVersion = this.portalVersionProvider.findReleaseVersion(namespaceInfoDTO.getId());
 		    List<ServiceModuleApp> serviceModuleApps = this.serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(),portalVersion.getId(),
-                    null, ServiceModuleAppType.COMMUNITY.getCode(),null,null);
+                    null,null,null, ServiceModuleAppType.COMMUNITY.getCode(),null,null,null,null);
 		    if (!CollectionUtils.isEmpty(serviceModuleApps)) {
 		        for (ServiceModuleApp serviceModuleApp : serviceModuleApps) {
 		            List<ServiceModuleEntry> serviceModuleEntries = this.serviceModuleEntryProvider.listServiceModuleEntries(serviceModuleApp.getModuleId(),
