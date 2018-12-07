@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>resourceTypeId: 资源id</li>
  * <li>pageType: 样式{@link com.everhomes.rest.rentalv2.RentalPageType} </li>
+ * <li>detaiPageType: 资源详情样式 0：默认 1：时间轴 </li>
  * <li>payMode: 支付模式 0 :线上支付 1 :线下支付 2 :审批线上支付/li>
  * <li>identify: 资源类型的分类 {@link com.everhomes.rest.rentalv2.RentalV2ResourceType}</li>
  * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
@@ -21,6 +22,8 @@ public class RentalInstanceConfig {
 	private Long resourceTypeId;
 
 	private Byte pageType;
+
+	private Byte detaiPageType;
 
 	private Byte payMode;
 
@@ -96,6 +99,14 @@ public class RentalInstanceConfig {
 
 	public void setCrossCommuFlag(Byte crossCommuFlag) {
 		this.crossCommuFlag = crossCommuFlag;
+	}
+
+	public Byte getDetaiPageType() {
+		return detaiPageType;
+	}
+
+	public void setDetaiPageType(Byte detaiPageType) {
+		this.detaiPageType = detaiPageType;
 	}
 
 	@Override

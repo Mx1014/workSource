@@ -1448,7 +1448,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
 		String detailUrl = configurationProvider.getValue(ConfigConstants.RENTAL_RESOURCE_DETAIL_URL, "");
-		detailUrl = String.format(detailUrl, UserContext.getCurrentNamespaceId(), rentalSite.getId());
+		Byte detailPageType = resourceType.getDetailPageType() == null ? (byte)0 : resourceType.getDetailPageType();
+		detailUrl = String.format(detailUrl, UserContext.getCurrentNamespaceId(), rentalSite.getId(),detailPageType.toString());
 
 
 		rSiteDTO.setDetailUrl(homeUrl + detailUrl);

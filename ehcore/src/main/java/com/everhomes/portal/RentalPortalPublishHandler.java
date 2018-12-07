@@ -63,6 +63,9 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
         if(null == rentalInstanceConfig.getPageType()){
             rentalInstanceConfig.setPageType((byte)0);
         }
+        if(null == rentalInstanceConfig.getDetaiPageType()){
+            rentalInstanceConfig.setDetaiPageType((byte)0);
+        }
         if (null == rentalInstanceConfig.getPayMode())
             rentalInstanceConfig.setPayMode((byte)0);
 
@@ -74,6 +77,7 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
             rentalInstanceConfig.setCrossCommuFlag((byte)1);
 
         rentalResourceType.setPageType(rentalInstanceConfig.getPageType());
+        rentalInstanceConfig.setDetaiPageType(rentalInstanceConfig.getDetaiPageType());
         rentalResourceType.setPayMode(rentalInstanceConfig.getPayMode());
         rentalResourceType.setIdentify(rentalInstanceConfig.getIdentify());
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
@@ -89,6 +93,9 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
         if(null != rentalResourceType){
             if(null == rentalInstanceConfig.getPageType()){
                 rentalResourceType.setPageType((byte)0);
+            }
+            if(null == rentalInstanceConfig.getDetaiPageType()){
+                rentalResourceType.setDetailPageType((byte)0);
             }
             if (null != rentalInstanceConfig.getPayMode())
                 rentalResourceType.setPayMode(rentalInstanceConfig.getPayMode());
