@@ -88,6 +88,8 @@ public interface AssetProvider {
 
     List<ListBillExemptionItemsDTO> listBillExemptionItems(String billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
 
+    void deleteBill(Long billId,String merchantOrderId);
+
     void deleteBill(Long billId);
 
     void deleteBillItem(Long billItemId);
@@ -289,9 +291,7 @@ public interface AssetProvider {
 
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
-    void deleteExemptionItems(DSLContext context, Long exemptionItemId);
-
-    List<Long> findExemptionItemsByBillItem(Long billId);
+    void deletExemptionItem(DSLContext context,Long billID,String merchantOrderId);
 
     //add by tangcen
 	String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long categoryId, Long chargingItemId);

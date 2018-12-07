@@ -4773,14 +4773,16 @@ public class AssetServiceImpl implements AssetService {
             PaymentBills paymentBill = assetProvider.findPaymentBillById(billId);
             //当MerchantOrderId不为空时，删除相应账单
 		    if (paymentBill.getMerchantOrderId()!=null&&paymentBill.getMerchantOrderId().length()>0){
-                assetProvider.deleteBill(billId);
+                assetProvider.deleteBill(billId,cmd.getMerchantOrderId());
+
             }else{
 		        //当MerchantOrderId为空时，删除相应明细
                 assetProvider.deleteBillItems(billId,cmd.getMerchantOrderId());
+                assetProvider.reCalBillById(billId);
                 List<PaymentBillItems> billItems =assetProvider.findPaymentBillItems(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),billId);
                 if (billItems==null){
                     //当账单明细为空时，删除账单
-                    assetProvider.deleteBill(billId);
+                    assetProvider.deleteBill(billId,cmd.getMerchantOrderId());
                 }
             }
 

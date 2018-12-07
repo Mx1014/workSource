@@ -1704,6 +1704,7 @@ public class AssetProviderImpl implements AssetProvider {
                     exemptionItem.setAmount(amount);
                     exemptionItem.setBillGroupId(billGroupId);
                     exemptionItem.setBillId(nextBillId);
+                    exemptionItem.setMerchantOrderId(Long.valueOf(cmd.getMerchantOrderId()));
                     exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     exemptionItem.setCreatorUid(UserContext.currentUserId());
                     exemptionItem.setId(currentExemItemSeq);
@@ -2983,7 +2984,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void deleteBill(Long billId) {
+    public void deleteBill(Long billId,String merchantOrderId) {
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             //删除账单（置状态）
@@ -2991,14 +2992,26 @@ public class AssetProviderImpl implements AssetProvider {
             		.set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                     .execute();
-            //查找
+            //删除费项（置状态）
+            context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+                    .set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+                    .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                    .execute();
+            //删除优惠项
+            deletExemptionItem(context,billId,merchantOrderId);
+            return null;
+        });
+    }
 
-
-            List<Long> exemptionItemIds = findExemptionItemsByBillItem(billId);
-            for(Long exemptionItemId:exemptionItemIds){
-
-            }
-
+    @Override
+    public void deleteBill(Long billId){
+        this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            //删除账单（置状态）
+            context.update(Tables.EH_PAYMENT_BILLS)
+                    .set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+                    .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                    .execute();
             //删除费项（置状态）
             context.update(Tables.EH_PAYMENT_BILL_ITEMS)
                     .set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
@@ -3018,30 +3031,17 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
                     .and(Tables.EH_PAYMENT_BILL_ITEMS.MERCHANT_ORDER_ID.eq(merchantOrderId))
                     .execute();
+            //删除优惠项
+            deletExemptionItem(context,billId,merchantOrderId);
             return null;
         });
     }
 
-    @Override
-    public void deleteExemptionItems(DSLContext context,Long exemptionItemId){
-        //删除相关优惠项
-        context.update(Tables.EH_PAYMENT_BILL_ITEMS)
-                .set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
-                .where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(exemptionItemId))
+    public void deletExemptionItem(DSLContext context,Long billID,String merchantOrderId) {
+        context.delete(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
+                .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.BILL_ID.eq(billID))
+                .and(Tables.EH_PAYMENT_EXEMPTION_ITEMS.MERCHANT_ORDER_ID.eq(Long.valueOf(merchantOrderId)))
                 .execute();
-    }
-
-    @Override
-    public List<Long> findExemptionItemsByBillItem(Long billId){
-        List<Long> exemptionItemIds = null;
-        List<PaymentBillItems> billItems = findPaymentBillItems(null,null,null,billId);
-        if (billItems!=null){
-            exemptionItemIds=new ArrayList<>();
-            for (PaymentBillItems billItem:billItems){
-                exemptionItemIds.add(billItem.getId());
-            }
-        }
-        return exemptionItemIds;
     }
 
     @Override
