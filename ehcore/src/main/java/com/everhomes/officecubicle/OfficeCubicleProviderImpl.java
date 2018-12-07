@@ -439,6 +439,45 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
+	public List<OfficeCubicleRentOrder> searchCubicleOrdersByToken(String ownerType,Long ownerId,Long spaceId,
+												 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,
+												 Byte rentType, Byte orderStatus,String reserverContactToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.NAMESPACE_ID.eq(currentNamespaceId);
+		if(ownerType!=null) {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.OWNER_TYPE.eq(ownerType));
+		}
+		if(ownerId!=null) {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.OWNER_ID.eq(ownerId));
+		}
+		if(spaceId!=null)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.SPACE_ID.eq(spaceId));
+		if (null != rentType)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.RENT_TYPE.eq(rentType));
+		if (null != orderStatus){
+			if (orderStatus.equals(OfficeCubiceOrderStatus.EFFECTIVE.getCode())){
+				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.in(
+						new Byte[]{OfficeCubiceOrderStatus.IN_USE.getCode(),OfficeCubiceOrderStatus.PAID.getCode()}));
+			} else{
+				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.eq(orderStatus));
+			}
+		}
+		if(StringUtils.isNotBlank(reserverContactToken))
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.RESERVER_CONTACT_TOKEN.eq(reserverContactToken));
+		if (null != locator && locator.getAnchor() != null)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ID.lt(locator.getAnchor()));
+		step.limit(pageSize);
+		step.where(condition);
+		List<OfficeCubicleRentOrder> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.CREATE_TIME.desc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleRentOrder.class);
+		});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+	
+	@Override
 	public List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId,
 												 Integer currentNamespaceId, Byte rentType, Byte stationType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

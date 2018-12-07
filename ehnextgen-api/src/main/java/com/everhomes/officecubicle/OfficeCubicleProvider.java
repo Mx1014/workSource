@@ -152,4 +152,8 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleRentOrder> findOfficeCubicleRentOrderByStatus(Byte[] orderStatus);
 
+	List<OfficeCubicleRentOrder> searchCubicleOrdersByToken(String ownerType, Long ownerId, Long spaceId,
+			CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId, Byte rentType,
+			Byte orderStatus, String reserverContactToken);
+
 }

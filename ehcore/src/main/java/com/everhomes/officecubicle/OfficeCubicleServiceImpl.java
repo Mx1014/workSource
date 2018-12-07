@@ -155,6 +155,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 
 /**
  * 工位预定service实现
@@ -230,6 +231,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	private Rentalv2Provider rentalv2Provider;
 	@Autowired
 	private RentalCommonServiceImpl rentalCommonService;
+	@Autowired
+    private UserService userService;
 	private Integer getNamespaceId(Integer namespaceId){
 		if(namespaceId!=null){
 			return namespaceId;
@@ -2518,10 +2521,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(Long.MAX_VALUE);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),null, null,
-				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),null,null,null,cmd.getRentType(), cmd.getOrderStatus());
+//		String token = userService.getUserIdentifier(UserContext.currentUserId()).getIdentifierToken();
+		String token = "17722647891";
+		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrdersByToken(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getSpaceId(),
+				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),cmd.getRentType(), cmd.getOrderStatus(), token);
 		if (null == orders)
 			return response;
 		Long nextPageAnchor = null;
@@ -2533,12 +2539,17 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		response.setOrders(new ArrayList<OfficeRentOrderDTO>());
 		orders.forEach((other) -> {
 			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
+			dto.setCreateTime(other.getCreateTime().getTime());
 			if (cmd.getRentType() == 0){
 				GetRentalBillCommand cmd2 = new GetRentalBillCommand();
 				cmd2.setBillId(other.getRentalOrderNo());
 				RentalBillDTO rentalDTO = rentalv2Service.getRentalBill(cmd2);
 				dto.setOpenTime(rentalDTO.getOpenTime());
-			}
+				dto.setUserDetail(other.getUseDetail());
+			}else if (other.getRentType() == 1){
+				dto.setBeginTime(other.getBeginTime().getTime());
+				dto.setEndTime(other.getEndTime().getTime());
+			} 
 			response.getOrders().add(dto);
 		});
 
