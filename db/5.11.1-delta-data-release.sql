@@ -9,6 +9,9 @@
 -- REMARK:服务联盟表单修复部分未迁移成功的表单数据
 -- REMARK: /yellowPage/transferFlowCaseVals  ownerId填写1802  将返回字符串发给黄明波
 
+-- AUTHOR: xq.tian  20181206
+-- REMARK: 将左邻基线和标准版的 ehcore.yml 里的 xss.enabled: true 改成 xss.enabled: false, 其他环境不用修改
+
 -- AUTHOR: 杨崇鑫 2018-12-07
 -- REMARK: 缺陷 #42424 智谷汇保证金账单历史数据迁移
 -- 1、先备份一下账单数据
@@ -29,7 +32,6 @@
 -- 然后执行接口customer/syncEnterpriseCustomerIndex
 -- 3：然后将招商客户的统计所需数据初始化
 -- 最后请执行接口invitedCustomer/initCustomerStatusToDB（此方法每个环境只能执行一次，该方法为异步方法，点击后会立刻返回成功);
-
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------

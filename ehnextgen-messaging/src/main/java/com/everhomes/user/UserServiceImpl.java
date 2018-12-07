@@ -7544,14 +7544,17 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     @Override
     public void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText) {
-        User user = this.userProvider.findUserById(userId);
-        if(user == null){
-            LOGGER.error("Unable to find the user , userId= {}",  userId);
-            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
-        }
-        user.setVipLevel(vipLevel);
-        user.setVipLevelText(vipLevelText);
-        userProvider.updateUser(user);
+	    // 通过统一用户改 vip 信息
+	    sdkUserService.updateUserVipLevel(userId, vipLevel, vipLevelText);
+
+        // User user = this.userProvider.findUserById(userId);
+        // if(user == null){
+        //     LOGGER.error("Unable to find the user , userId= {}",  userId);
+        //     throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
+        // }
+        // user.setVipLevel(vipLevel);
+        // user.setVipLevelText(vipLevelText);
+        // userProvider.updateUser(user);
     }
 
 
