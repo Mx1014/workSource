@@ -1798,7 +1798,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.OFFICE_CUBICLE.getPycode(),order.getId()));
 		createOrderCommand.setPayeeUserId(getPayerInfoByMerchantIdRestResponse.getResponse().getId());
 		List<Rentalv2PriceRule> priceRule = rentalv2PriceRuleProvider.listPriceRuleByOwner("station_booking", PriceRuleType.RESOURCE.getCode(), cmd.getSpaceId());
-		createOrderCommand.setAmount(priceRule.get(0).getWorkdayPrice().longValue());
+		createOrderCommand.setAmount(priceRule.get(0).getWorkdayPrice().multiply(new BigDecimal(100)).longValue());
 		createOrderCommand.setExtendInfo(extendInfo);
 		createOrderCommand.setGoodsName(extendInfo);
 		createOrderCommand.setClientAppName(cmd.getClientAppName());
@@ -1855,7 +1855,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Long expiredIntervalTime = getExpiredIntervalTime(response.getExpirationMillis());
 		preDto.setExpiredIntervalTime(expiredIntervalTime);
 		preDto.setOrderId(order.getId());
-		preDto.setAmount(priceRule.get(0).getWorkdayPrice().longValue());
+		preDto.setAmount(priceRule.get(0).getWorkdayPrice().multiply(new BigDecimal(100)).longValue());
 		AddRentalOrderUsingInfoCommand rentalCommand = new AddRentalOrderUsingInfoCommand(); 
 		rentalCommand.setRentalBillId(cmd.getRentalOrderNo());
 		rentalCommand.setRentalType(cmd.getRentalType());
