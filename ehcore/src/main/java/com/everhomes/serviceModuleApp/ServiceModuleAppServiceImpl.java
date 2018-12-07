@@ -1761,7 +1761,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                             flag = true;
                         }
                     }
-                    if (flag) {
+                    if (!flag) {
                         noUserApp.add(app);
                     }
                 }
