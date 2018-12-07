@@ -24,6 +24,9 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType</li>
  * <li>stationId:工位Id</li>
  * <li>rentType:1长租，0短租</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class CreateCubicleOrderBackgroundCommand {
@@ -46,8 +49,35 @@ public class CreateCubicleOrderBackgroundCommand {
 	private List<Long> roomId;
 	private String userDetail;
 	private Long rentalOrderNo;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
 	
 	
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
 	public Long getRentalOrderNo() {
 		return rentalOrderNo;
 	}

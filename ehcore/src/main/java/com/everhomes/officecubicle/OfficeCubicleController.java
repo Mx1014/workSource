@@ -308,9 +308,9 @@ public class OfficeCubicleController extends ControllerBase {
      * <p>客户端创建订单</p>
      */
     @RequestMapping("createCubicleOrderV2")
-    @RestReturn(CreateOfficeCubicleOrderResponse.class)
+    @RestReturn(PreOrderDTO.class)
     public RestResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd) {
-    	CreateOfficeCubicleOrderResponse  resp = this.officeCubicleService.createCubicleOrderV2(cmd);
+    	com.everhomes.rest.order.PreOrderDTO  resp = this.officeCubicleService.createCubicleOrderV2(cmd);
     	
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);

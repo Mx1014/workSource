@@ -10,6 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>spaceId: 停车场ID</li>
  * <li>roomId: 办公室id</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class DeleteRoomAdminCommand {
@@ -18,9 +21,36 @@ public class DeleteRoomAdminCommand {
     private Long ownerId;
     private Long spaceId;
     private Long roomId;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
 
+	
+    public Long getCurrentPMId() {
+		return currentPMId;
+	}
 
-    public Integer getNamespaceId() {
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+	public Integer getNamespaceId() {
         return namespaceId;
     }
 

@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.ListPayeeAccountCommand;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 
@@ -124,6 +125,6 @@ public interface OfficeCubicleService {
 
 	void schedule();
 
-	CreateOfficeCubicleOrderResponse createCubicleOrderV2(CreateOfficeCubicleOrderCommand cmd);
+	PreOrderDTO createCubicleOrderV2(CreateOfficeCubicleOrderCommand cmd);
 
 }

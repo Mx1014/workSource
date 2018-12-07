@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *空间订单
  *<li> spaceId: 空间 id	</li> 
+ * <li>clientAppName: 客户端realm值</li>
  * <li>reserverName: 预订人姓名 </li> 
  * <li>reserveContactToken:  预订人联系方式</li> 
  * <li>reserveEnterpriseId: 预订人公司Id</li> 
@@ -34,12 +35,24 @@ public class CreateOfficeCubicleOrderCommand {
 	private Long ownerId;
 	private Byte paymentType;
 	private Byte rentalType;
-
+	private String clientAppName;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 	  
+
+
+	public String getClientAppName() {
+		return clientAppName;
+	}
+
+
+
+	public void setClientAppName(String clientAppName) {
+		this.clientAppName = clientAppName;
+	}
+
 
 
 	public Byte getRentalType() {
