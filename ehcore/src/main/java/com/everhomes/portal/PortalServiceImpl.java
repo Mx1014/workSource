@@ -4206,28 +4206,36 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public void initAppEntryProfileData() {
-		List<NamespaceInfoDTO> namespaceInfoDTOS = this.namespacesService.listNamespace();
-		for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
-		    PortalVersion portalVersion = this.portalVersionProvider.findReleaseVersion(namespaceInfoDTO.getId());
-		    List<ServiceModuleApp> serviceModuleApps = this.serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(),portalVersion.getId(),
-                    null,null,null, ServiceModuleAppType.COMMUNITY.getCode(),null,null,null,null);
-		    if (!CollectionUtils.isEmpty(serviceModuleApps)) {
-		        for (ServiceModuleApp serviceModuleApp : serviceModuleApps) {
-		            List<ServiceModuleEntry> serviceModuleEntries = this.serviceModuleEntryProvider.listServiceModuleEntries(serviceModuleApp.getModuleId(),
-                            null,null,null,null);
-		            if (!CollectionUtils.isEmpty(serviceModuleEntries)) {
-		                for (ServiceModuleEntry serviceModuleEntry : serviceModuleEntries) {
-                            ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = new ServiceModuleAppEntryProfile();
-                            serviceModuleAppEntryProfile.setOriginId(serviceModuleApp.getOriginId());
-                            serviceModuleAppEntryProfile.setEntryId(serviceModuleEntry.getId());
-                            serviceModuleAppEntryProfile.setAppEntrySetting(TrueOrFalseFlag.TRUE.getCode());
-                            serviceModuleAppEntryProfile.setEntryName(serviceModuleApp.getName());
-                            serviceModuleAppEntryProfile.setEntryUri(serviceModuleApp.getIconUri());
-                            this.serviceModuleAppProvider.createServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                List<NamespaceInfoDTO> namespaceInfoDTOS = namespacesService.listNamespace();
+                for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
+                    PortalVersion portalVersion = portalVersionProvider.findReleaseVersion(namespaceInfoDTO.getId());
+                    List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(),portalVersion.getId(),
+                            null,null,null, ServiceModuleAppType.COMMUNITY.getCode(),null,null,null,null);
+                    if (!CollectionUtils.isEmpty(serviceModuleApps)) {
+                        for (ServiceModuleApp serviceModuleApp : serviceModuleApps) {
+                            List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(serviceModuleApp.getModuleId(),
+                                    null,null,null,null);
+                            if (!CollectionUtils.isEmpty(serviceModuleEntries)) {
+                                for (ServiceModuleEntry serviceModuleEntry : serviceModuleEntries) {
+                                    ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = new ServiceModuleAppEntryProfile();
+                                    serviceModuleAppEntryProfile.setOriginId(serviceModuleApp.getOriginId());
+                                    serviceModuleAppEntryProfile.setEntryId(serviceModuleEntry.getId());
+                                    serviceModuleAppEntryProfile.setAppEntrySetting(TrueOrFalseFlag.TRUE.getCode());
+                                    serviceModuleAppEntryProfile.setEntryName(serviceModuleApp.getName());
+                                    serviceModuleAppEntryProfile.setEntryUri(serviceModuleApp.getIconUri());
+                                    serviceModuleAppProvider.createServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+                                }
+                            }
                         }
                     }
+                    LOGGER.info("NamespaceId = {}",namespaceInfoDTO.getId());
                 }
+            LOGGER.info("initAppEntryProfileData success!");
             }
-        }
+        });
+
 	}
 }
