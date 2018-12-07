@@ -4635,10 +4635,11 @@ public class AssetServiceImpl implements AssetService {
 			Long billGroupId = mapping.getBillGroupId();
 			Long charingItemId = mapping.getChargingItemId();
 			//统一账单不支持重复记账
-			PaymentBills paymentBill = assetProvider.findPaymentBill(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getSourceId(), cmd.getMerchantOrderId());
-			if(paymentBill != null) {
+//            PaymentBills paymentBill = assetProvider.findPaymentBill(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getSourceId(), cmd.getMerchantOrderId());
+            List<PaymentBillItems> paymentBillItemsList = assetProvider.findPaymentBillItems(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getSourceId(), cmd.getMerchantOrderId());
+			if(paymentBillItemsList != null) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-	                    "This bill is exist, namespaceId={" + cmd.getNamespaceId() + "}, sourceType={" + cmd.getSourceType() + "}, "
+	                    "Those billItems are exist, namespaceId={" + cmd.getNamespaceId() + "}, sourceType={" + cmd.getSourceType() + "}, "
 	                    		+ "sourceId={" + cmd.getSourceId() + "}, merchantOrderId={" + cmd.getMerchantOrderId() + "}");
 			}
 			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
@@ -4715,7 +4716,8 @@ public class AssetServiceImpl implements AssetService {
 		billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
 		createBillCommand.setBillGroupDTO(billGroupDTO);
 
-		ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand, null);
+		ListBillsDTO dto = assetProvider.creatPropertyBillForCommunity(createBillCommand);
+//        ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand,null);
 		//主要是把以前缴费这边为了兼容对接使用的String类型的billId全部换成Long类型的billId，因为创建统一账单都是在缴费这边的表，都是Long
 		ListGeneralBillsDTO convertDTO = ConvertHelper.convert(dto, ListGeneralBillsDTO.class);
 		Long billId = Long.parseLong(dto.getBillId());
@@ -4723,6 +4725,8 @@ public class AssetServiceImpl implements AssetService {
 
 		return convertDTO;
 	}
+
+
 
 	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
 		List<Long> billIdList = cmd.getBillIdList();
@@ -4732,9 +4736,26 @@ public class AssetServiceImpl implements AssetService {
 			if(null != paymentBill) {
 				if(null != cmd.getMerchantOrderId()) {
 					if(!cmd.getMerchantOrderId().equals(paymentBill.getMerchantOrderId())) {
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-			                    "merchantOrderId valid error, merchantOrderId={" + cmd.getMerchantOrderId() + "}, "
-			                    		+ "merchantOrderIdFindByBillId={" + paymentBill.getMerchantOrderId() + "}");
+                        List<PaymentBillItems> billItems =assetProvider.findPaymentBillItems(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),billId);
+                        if(billItems!=null){
+                            //当所有的明细MerchantOrderId与入参的MerchantOrderId不能匹配时，flag为false。
+                            Boolean flag = false;
+                            for (PaymentBillItems billItem:billItems){
+                                if (cmd.getMerchantOrderId().equals(billItem.getMerchantOrderId())){
+                                    flag = true;
+                                    break;
+                                }
+                            }
+                            //不能匹配时报异常
+                            if(!flag){
+                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                                        "merchantOrderId valid error, merchantOrderId={" + cmd.getMerchantOrderId() + "}, "
+                                                + "merchantOrderIdFindByBillId={" + paymentBill.getMerchantOrderId() + "}"
+                                                +(paymentBill.getMerchantOrderId()!=null?"merchantOrderIdFindByBillId={"
+                                                + paymentBill.getMerchantOrderId() + "}":
+                                                "can't find the matching getMerchantOrderId in billItems"));
+                            }
+                        }
 					}
 				}else {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -4747,7 +4768,20 @@ public class AssetServiceImpl implements AssetService {
 		}
 		//2、校验通过，取消账单
 		for(Long billId : billIdList) {
-			assetProvider.deleteBill(billId);
+            PaymentBills paymentBill = assetProvider.findPaymentBillById(billId);
+            //当MerchantOrderId不为空时，删除相应账单
+		    if (paymentBill.getMerchantOrderId()!=null&&paymentBill.getMerchantOrderId().length()>0){
+                assetProvider.deleteBill(billId);
+            }else{
+		        //当MerchantOrderId为空时，删除相应明细
+                assetProvider.deleteBillItems(billId,cmd.getMerchantOrderId());
+                List<PaymentBillItems> billItems =assetProvider.findPaymentBillItems(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),billId);
+                if (billItems==null){
+                    //当账单明细为空时，删除账单
+                    assetProvider.deleteBill(billId);
+                }
+            }
+
 		}
 	}
 

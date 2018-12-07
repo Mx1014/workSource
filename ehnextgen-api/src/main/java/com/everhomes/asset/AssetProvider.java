@@ -1,65 +1,21 @@
 package com.everhomes.asset;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentServiceConfig;
+import com.everhomes.order.PaymentUser;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
+import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
+import com.everhomes.server.schema.tables.pojos.*;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.order.PaymentAccount;
-import com.everhomes.order.PaymentServiceConfig;
-import com.everhomes.order.PaymentUser;
-import com.everhomes.rest.asset.AssetBillDateDTO;
-import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
-import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
-import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
-import com.everhomes.rest.asset.BatchUpdateBillsToPaidCmd;
-import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
-import com.everhomes.rest.asset.BillDTO;
-import com.everhomes.rest.asset.BillDetailDTO;
-import com.everhomes.rest.asset.BillStaticsDTO;
-import com.everhomes.rest.asset.CreateBillCommand;
-import com.everhomes.rest.asset.CreateChargingItemCommand;
-import com.everhomes.rest.asset.GetChargingStandardCommand;
-import com.everhomes.rest.asset.GetChargingStandardDTO;
-import com.everhomes.rest.asset.GetDoorAccessParamCommand;
-import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
-import com.everhomes.rest.asset.ListAllBillsForClientDTO;
-import com.everhomes.rest.asset.ListAvailableVariablesCommand;
-import com.everhomes.rest.asset.ListAvailableVariablesDTO;
-import com.everhomes.rest.asset.ListBillDetailResponse;
-import com.everhomes.rest.asset.ListBillDetailVO;
-import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
-import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
-import com.everhomes.rest.asset.ListChargingItemsDTO;
-import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
-import com.everhomes.rest.asset.ListChargingStandardsDTO;
-import com.everhomes.rest.asset.ListLateFineStandardsDTO;
-import com.everhomes.rest.asset.ListPaymentBillCmd;
-import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
-import com.everhomes.rest.asset.OwnerIdentityCommand;
-import com.everhomes.rest.asset.PaymentExpectancyDTO;
-import com.everhomes.rest.asset.PaymentOrderBillDTO;
-import com.everhomes.rest.asset.SetDoorAccessParamCommand;
-import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
-import com.everhomes.rest.asset.ShowCreateBillDTO;
-import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
-import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
-import com.everhomes.rest.asset.VariableIdAndValue;
-import com.everhomes.rest.asset.bill.ListBillsDTO;
-import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
-import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
-import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
-import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes;
-import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
-import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 
 /**
  * Created by Wentian on 2017/2/20.
@@ -113,6 +69,8 @@ public interface AssetProvider {
 
     ListBillsDTO creatPropertyBill(CreateBillCommand cmd, Long billId);
 
+    ListBillsDTO creatPropertyBillForCommunity( CreateBillCommand cmd);
+
     ListBillDetailResponse listBillDetail(Long billId);
 
     List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType, Long categoryId);
@@ -132,6 +90,8 @@ public interface AssetProvider {
     void deleteBill(Long billId);
 
     void deleteBillItem(Long billItemId);
+
+    void deleteBillItems(Long billId ,String merchantOrderId);
 
     void deletExemptionItem(Long exemptionItemId);
 
@@ -318,6 +278,13 @@ public interface AssetProvider {
     PaymentBills findPaymentBillById(Long billId);
 
     PaymentBills findPaymentBill(Integer namespaceId, String sourceType, Long sourceId, String thirdBillId);
+
+    //add by Meng qianxiang
+    List<PaymentBills> findPaymentBills(PaymentBillsCommand PBCmd);
+
+    List<PaymentBillItems> findPaymentBillItems(Integer namespaceId,Long ownerId,String ownerType,Long billId);
+
+    List<PaymentBillItems> findPaymentBillItems(Integer namespaceId, String sourceType, Long sourceId, String thirdBillId);
 
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
