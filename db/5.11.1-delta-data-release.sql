@@ -359,6 +359,13 @@ UPDATE eh_service_modules SET module_control_type='community_control' WHERE id='
 UPDATE eh_service_modules SET client_handler_type = 1 WHERE id = 25000;
 
 
+	
+	
+-- AUTHOR:黄明波
+-- REMARK:修复链接详情问题
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('serviceAlliance.detail.url', '/service-alliance-web/build/index.html?%s#/detail#sign_suffix', '5.11.0后使用这个', 0, NULL, 1);
+
+	
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
