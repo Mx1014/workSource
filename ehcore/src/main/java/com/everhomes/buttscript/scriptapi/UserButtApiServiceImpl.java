@@ -1,6 +1,7 @@
 package com.everhomes.buttscript.scriptapi;
 
 import com.everhomes.flow.*;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
@@ -17,6 +18,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.scriptengine.nashorn.NashornModuleApiService;
 import com.everhomes.user.User;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.collections.CollectionUtils;
@@ -26,7 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class UserButtApiServiceImpl implements NashornModuleApiService {
@@ -42,6 +46,12 @@ public class UserButtApiServiceImpl implements NashornModuleApiService {
 
     @Autowired
     private MessagingService messagingService;
+
+    @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
 
     @Override
     public String name() {
@@ -89,13 +99,20 @@ public class UserButtApiServiceImpl implements NashornModuleApiService {
     }
 
     private void sendVipLevelMessageToUser(Long userId, String levelName) {
-        String notifyTextForApplicant = "您已成为" + levelName + "会员";
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("levelName", levelName);
+        User user = this.userProvider.findUserById(userId);
+        String locale = "zh_CN";
+        if (user != null) {
+            locale = user.getLocale();
+        }
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString("ruian.message", 1, locale, map, "您已成为" + levelName +"会员");
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
-        messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(notifyTextForApplicant);
-        messageDto.setMetaAppId(AppConstants.APPID_ENTERPRISE);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
         messageDto.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(userId)));
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                 AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(userId),
