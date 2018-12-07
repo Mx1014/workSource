@@ -4683,16 +4683,19 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 						ContractReportformStatisticCommunitys communityStatistics = communityResultMap.get(contract.getCommunityId());
 						countContractForCommunity(communityStatistics, contract);
 					} else {
-						Community community = communityProvider.findCommunityById(contract.getCommunityId());
-						if (community != null) {
-							ContractReportformStatisticCommunitys communityStatistics = initCommunityStatistics(contract.getCommunityId(),todayDateStr);
-							communityResultMap.put(contract.getCommunityId(), communityStatistics);
-							countContractForCommunity(communityStatistics, contract);
-						} else {
-							if (LOGGER.isDebugEnabled()) {
-								LOGGER.debug("community is null !!! communityId is " + contract.getCommunityId());
+						if (contract.getCommunityId() != null) {
+							Community community = communityProvider.findCommunityById(contract.getCommunityId());
+							if (community != null) {
+								ContractReportformStatisticCommunitys communityStatistics = initCommunityStatistics(contract.getCommunityId(),todayDateStr);
+								communityResultMap.put(contract.getCommunityId(), communityStatistics);
+								countContractForCommunity(communityStatistics, contract);
+							} else {
+								if (LOGGER.isDebugEnabled()) {
+									LOGGER.debug("community is null !!! communityId is " + contract.getCommunityId());
+								}
 							}
 						}
+						LOGGER.info("generateReportFormStatics communityId is " + contract);
 					}
 				}
 
