@@ -1303,7 +1303,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             	// 由于插入/更新数据非常慢，打印一下前两条的时间
             	if(((i % 500) == 0 || i == 1) && LOGGER.isInfoEnabled()) {
                     long roundEndTime = System.currentTimeMillis();
-                    LOGGER.info("Process bill importing data(round update), index={}, dataSize={}, elapse={}", i, createBillCommands.size(), (roundEndTime - roundStartTime));
+                    LOGGER.info("Process bill importing data, create or update bills roundly, index={}, dataSize={}, elapse={}", i, createBillCommands.size(), (roundEndTime - roundStartTime));
                     roundStartTime = roundEndTime;
             	}
             }
@@ -1311,7 +1311,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                 long updateEndTime = System.currentTimeMillis();
                 int cmdSize = (createBillCommands == null) ? 0 : createBillCommands.size();
                 int dataSize = (datas == null) ? 0 : datas.size();
-                LOGGER.info("Process bill importing data(update end), cmdSize={}, dataSize={}, elapse={}", cmdSize, dataSize, (updateEndTime - updateStartTime));
+                LOGGER.info("Process bill importing data, create or update bills end, cmdSize={}, dataSize={}, elapse={}", cmdSize, dataSize, (updateEndTime - updateStartTime));
             }
             //设置导出报错的结果excel的标
             importTaskResponse.setTitle(datas.get(0).getData());
@@ -1930,7 +1930,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                 long roundEndTime = System.currentTimeMillis();
                 int cmdSize = (cmds == null) ? 0 : cmds.size();
                 int dataSize = (datas == null) ? 0 : datas.size();
-                LOGGER.info("Process bill importing data(round), index={}, namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, roundElapse={}, fieldRoundElapse={}", 
+                LOGGER.info("Process bill importing data, parse excel data roundly, index={}, namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, roundElapse={}, fieldRoundElapse={}", 
                         i, namespaceId, billGroupId, targetType, cmdSize, dataSize, (roundEndTime - startTime), fieldRoundElapse);
                 roundStartTime = roundEndTime;
                 fieldRoundElapse = 0;
@@ -1942,7 +1942,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             long endTime = System.currentTimeMillis();
             int cmdSize = (cmds == null) ? 0 : cmds.size();
             int dataSize = (datas == null) ? 0 : datas.size();
-            LOGGER.info("Process bill importing data(end), namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, elapse={}", 
+            LOGGER.info("Process bill importing data, parse excel data end, namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, elapse={}", 
                     namespaceId, billGroupId, targetType, cmdSize, dataSize, (endTime - startTime));
         }
         
