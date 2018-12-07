@@ -1703,7 +1703,6 @@ public class AssetProviderImpl implements AssetProvider {
                     }
                     exemptionItem.setAmount(amount);
                     exemptionItem.setBillGroupId(billGroupId);
-
                     exemptionItem.setBillId(nextBillId);
                     exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     exemptionItem.setCreatorUid(UserContext.currentUserId());
@@ -2992,11 +2991,19 @@ public class AssetProviderImpl implements AssetProvider {
             		.set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                     .execute();
+            //查找
+
+
+            List<Long> exemptionItemIds = findExemptionItemsByBillItem(billId);
+            for(Long exemptionItemId:exemptionItemIds){
+
+            }
+
             //删除费项（置状态）
             context.update(Tables.EH_PAYMENT_BILL_ITEMS)
-	    		.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
-	            .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
-	            .execute();
+                    .set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+                    .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                    .execute();
             return null;
         });
     }
@@ -3013,6 +3020,28 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
             return null;
         });
+    }
+
+    @Override
+    public void deleteExemptionItems(DSLContext context,Long exemptionItemId){
+        //删除相关优惠项
+        context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+                .set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(exemptionItemId))
+                .execute();
+    }
+
+    @Override
+    public List<Long> findExemptionItemsByBillItem(Long billId){
+        List<Long> exemptionItemIds = null;
+        List<PaymentBillItems> billItems = findPaymentBillItems(null,null,null,billId);
+        if (billItems!=null){
+            exemptionItemIds=new ArrayList<>();
+            for (PaymentBillItems billItem:billItems){
+                exemptionItemIds.add(billItem.getId());
+            }
+        }
+        return exemptionItemIds;
     }
 
     @Override

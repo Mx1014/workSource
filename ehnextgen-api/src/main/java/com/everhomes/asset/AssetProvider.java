@@ -9,6 +9,7 @@ import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
 import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.server.schema.tables.pojos.*;
+import org.jooq.DSLContext;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -287,6 +288,10 @@ public interface AssetProvider {
     List<PaymentBillItems> findPaymentBillItems(Integer namespaceId, String sourceType, Long sourceId, String thirdBillId);
 
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
+
+    void deleteExemptionItems(DSLContext context, Long exemptionItemId);
+
+    List<Long> findExemptionItemsByBillItem(Long billId);
 
     //add by tangcen
 	String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long categoryId, Long chargingItemId);

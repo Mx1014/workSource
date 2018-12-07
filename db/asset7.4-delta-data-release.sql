@@ -7,8 +7,9 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
--- AUTHOR:
--- REMARK:
+-- AUTHOR:孟千翔
+-- REMARK:设置减免金额均为删除
+UPDATE eh_payment_exemption_items SET delete_flag=1
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
@@ -84,3 +85,4 @@ update eh_payment_app_views set has_view = 1 where namespace_id=999929 and view_
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: jinmao
 -- DESCRIPTION: 此SECTION只在上海金茂-智臻生活 -999925执行的脚本
+
