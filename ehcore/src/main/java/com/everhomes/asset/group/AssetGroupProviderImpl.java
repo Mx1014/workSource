@@ -2,8 +2,10 @@ package com.everhomes.asset.group;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -36,6 +38,9 @@ import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ModifyBillGroupCommand;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.print.PrintErrorCode;
+import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
+import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhContractChargingItems;
@@ -49,6 +54,7 @@ import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 /**
  * @author created by ycx
  * @date 下午8:42:50
@@ -64,8 +70,10 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
  
+//    @Autowired
+//    private com.everhomes.paySDK.api.PayService payServiceV2;
     @Autowired
-    private com.everhomes.paySDK.api.PayService payServiceV2;
+    private com.everhomes.gorder.sdk.order.GeneralOrderService payServiceV2;
     
     private DSLContext getReadOnlyContext(){
         return this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -111,7 +119,9 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
             dto.setBillDayType(r.getValue(t.BILLS_DAY_TYPE));
             dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
             dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
-            userIds.add(r.getValue(t.BIZ_PAYEE_ID));
+            if(r.getValue(t.BIZ_PAYEE_ID) != null) {
+            	userIds.add(r.getValue(t.BIZ_PAYEE_ID));
+            }
             list.add(dto);
             return null;
         });
@@ -119,7 +129,15 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("listBillGroups(request), cmd={}", userIds);
         }
-        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
+        //List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
+        ListPayUsersByMerchantIdsCommand cmd = new ListPayUsersByMerchantIdsCommand();
+		cmd.setIds(userIds);
+		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd);
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_MERCHANT_ID_NOT_FOUND, "merchant id not found");
+		}
+		List<PayUserDTO> payUserDTOs = resp.getResponse();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
         }
