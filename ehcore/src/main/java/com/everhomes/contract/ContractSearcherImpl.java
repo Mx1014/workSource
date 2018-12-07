@@ -986,7 +986,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		lastCa.set(Calendar.MINUTE, 59);
 		lastCa.set(Calendar.SECOND, 59);
 		
-		qb = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("updateTime").from(firstCa.getTime()).to(lastCa.getTime()));
+		//qb = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("updateTime").from(firstCa.getTime()).to(lastCa.getTime()));
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		Long anchor = 0l;
