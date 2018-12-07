@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateZLVisitorQRKeyResponse {
-	private String macAddress;
+	private String MacAddress;//待对接方上线,改为macAddress
 	private String qrCode;
 	private String phone;
 	private String userName;
@@ -22,10 +22,10 @@ public class CreateZLVisitorQRKeyResponse {
 	private Long authId;
 	
 	public String getMacAddress() {
-		return macAddress;
+		return MacAddress;
 	}
 	public void setMacAddress(String macAddress) {
-		this.macAddress = macAddress;
+		this.MacAddress = macAddress;
 	}
 	public String getQrCode() {
 		return qrCode;
