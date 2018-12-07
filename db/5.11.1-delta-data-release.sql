@@ -339,6 +339,12 @@ INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES 
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
+
+-- AUTHOR:梁燕龙 20181207
+-- REMARK: 更新会员信息时，推送消息给用户
+SET @id = (SELECT max(id) from eh_locale_templates);
+INSERT INTO eh_locale_templates(id, scope, code, locale, description, text, namespace_id)
+    VALUES (@id, 'ruian.message', 1,'zh_CN','瑞安升级会员时，推送消息给用户','您已成为${levelName}会员',0);
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
