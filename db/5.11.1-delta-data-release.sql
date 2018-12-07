@@ -37,6 +37,9 @@
 -- 1.执行 issue-44230(合同报表数据迁移问题)的sql,在下面
 -- 2.同步es /contract/syncContracts
 -- 3.调用接口/contract/reportForm/excuteContractReportFormJob 生成合同统计数据，时间比较长
+-- AUTHOR:梁燕龙20181207
+-- 执行/portal/initAppEntryProfileData
+-- 点击一次即可，在日志没有输出initAppEntryProfileData success 这个日志之前，不要让测试进行测试。
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
