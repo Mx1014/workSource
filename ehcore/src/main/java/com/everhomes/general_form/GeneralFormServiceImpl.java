@@ -994,7 +994,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
                     "generalFormGogsFileNotExist not exist");
         } catch (Exception e){
-            LOGGER.error("Gogs OthersException .", e);
+            LOGGER.error("Gogs OthersException: ", e);
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Gogs OthersException");
         }
         return ConvertHelper.convert(generalFormPrintTemplate, GeneralFormPrintTemplateDTO.class);
     }
@@ -1050,7 +1052,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
                     "generalFormGogsFileNotExist not exist");
         } catch (Exception e){
-            LOGGER.error("Gogs OthersException .", e);
+            LOGGER.error("Gogs OthersException: ", e);
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Gogs OthersException");
         }
         return ConvertHelper.convert(generalFormPrintTemplate, GeneralFormPrintTemplateDTO.class);
     }

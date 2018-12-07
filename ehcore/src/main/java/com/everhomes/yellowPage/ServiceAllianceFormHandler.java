@@ -17,11 +17,7 @@ import com.everhomes.general_approval.GeneralApprovalFormHandler;
 import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
-import com.everhomes.general_form.GeneralForm;
-import com.everhomes.general_form.GeneralFormModuleHandler;
-import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormVal;
-import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.general_form.*;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseStatus;
@@ -31,28 +27,15 @@ import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
-import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
-import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
-import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
-import com.everhomes.rest.general_approval.GeneralFormRenderType;
-import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
-import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostGeneralFormDTO;
-import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.poi.util.StringUtil;
+import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -91,6 +74,9 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 	
 	@Autowired
 	private FlowProvider flowProvider;
+
+	@Autowired
+	private GeneralFormService generalFormService;
 
 	@Override
 	public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
@@ -176,15 +162,32 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
 		// 把values 存起来
 		List<GeneralFormVal> result = new ArrayList<>();
-		for (PostApprovalFormItem val : cmd.getValues()) {
-			GeneralFormVal obj = ConvertHelper.convert(form, GeneralFormVal.class);
-			obj.setSourceType(EhFlowCases.class.getSimpleName());
-			obj.setSourceId(flowCaseId);
-			obj.setFieldName(val.getFieldName());
-			obj.setFieldType(val.getFieldType());
-			obj.setFieldValue(val.getFieldValue());
-			generalFormValProvider.createGeneralFormVal(obj);
-			result.add(obj);
+		// 表单字段配置ID为空，按原来的逻辑创建表单值
+		if(cmd.getFormFieldsConfigId() == null && cmd.getValues() != null) {
+			for (PostApprovalFormItem val : cmd.getValues()) {
+				GeneralFormVal obj = ConvertHelper.convert(form, GeneralFormVal.class);
+				obj.setSourceType(EhFlowCases.class.getSimpleName());
+				obj.setSourceId(flowCaseId);
+				obj.setFieldName(val.getFieldName());
+				obj.setFieldType(val.getFieldType());
+				obj.setFieldValue(val.getFieldValue());
+				generalFormValProvider.createGeneralFormVal(obj);
+				result.add(obj);
+			}
+		} else{
+			// 表单字段配置ID不为空，即为工作流节点提交的表单值，直接修改
+			List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId(), null, null);
+			if(cmd.getValues() != null && formValues != null){
+				for(PostApprovalFormItem val : cmd.getValues()){
+					for(GeneralFormVal formValue : formValues){
+						// 根据FieldName来判断两个值属于同一字段
+						if(val.getFieldName().equals(formValue.getFieldName())){
+							formValue.setFieldValue(val.getFieldValue());
+							generalFormValProvider.updateGeneralFormVal(formValue);
+						}
+					}
+				}
+			}
 		}
 
 		// add by jiarui 20180705
@@ -199,7 +202,6 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 			event.setParams(map);
 			event.setEventName(SystemEvent.SERVICE_ALLIANCE_CREATE.dft());
 		});
-
 	}
 
 	@Override

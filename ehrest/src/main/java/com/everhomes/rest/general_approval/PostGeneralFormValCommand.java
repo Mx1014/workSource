@@ -18,6 +18,7 @@ import java.util.List;
  * <li>formOriginId: 表单id</li>
  * <li>formVersion: 表单版本</li>
  * <li>flowNodeId: 工作流节点ID</li>
+ * <li>formFieldsConfigId：表单字段配置ID</li>
  * <li>values: 审批项中，每项对应的值{@link PostApprovalFormItem} </li>
  * </ul>
  * @author janson
@@ -42,6 +43,11 @@ public class PostGeneralFormValCommand {
     private Long orgId;
 
     private Long moduleId;
+
+	/**
+	 * added by huqi at 20181206
+	 */
+	private Long formFieldsConfigId;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> values;
@@ -174,6 +180,13 @@ public class PostGeneralFormValCommand {
 		this.flowNodeId = flowNodeId;
 	}
 
+	public Long getFormFieldsConfigId() {
+		return formFieldsConfigId;
+	}
+
+	public void setFormFieldsConfigId(Long formFieldsConfigId) {
+		this.formFieldsConfigId = formFieldsConfigId;
+	}
 
 	@Override
     public String toString() {
