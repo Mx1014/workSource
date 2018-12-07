@@ -5509,16 +5509,24 @@ public class AssetServiceImpl implements AssetService {
 				cmd.setActivationFlag((byte)1);
 				cmd.setOwnerType("EhOrganizations");
 				cmd.setOwnerId(null);
-				//List<OrganizationContactDTO> lists = rolePrivilegeService.listOrganizationSuperAdministrators(cmd);//获取超级管理员
-	            //LOGGER.info("organization manager check for bill display, cmd = {}", cmd.toString());
-	            List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd);//获取企业管理员
-	            LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
-	            for(OrganizationContactDTO dto : organizationContactDTOS){
-	            	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(dto.getTargetId(), namespaceId);
+				//获取超级管理员
+		        OrganizationContactDTO topAdminDTO = rolePrivilegeService.listOrganizationTopAdministrator(cmd);
+		        if(topAdminDTO != null){
+		        	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(topAdminDTO.getTargetId(), namespaceId);
 	            	if(userIdentifier != null) {
 	    				phoneNumbers.add(userIdentifier.getIdentifierToken());
 	    			}
-	            }
+		        }else {
+		        	//获取企业管理员
+		        	List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd);
+		            LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+		            for(OrganizationContactDTO dto : organizationContactDTOS){
+		            	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(dto.getTargetId(), namespaceId);
+		            	if(userIdentifier != null) {
+		    				phoneNumbers.add(userIdentifier.getIdentifierToken());
+		    			}
+		            }
+		        }
 		    }
 		} catch (Exception e) {
 			LOGGER.error("/asset/listNotSettledBillDetail getPhoneNumber() {}", targetType, targetId, namespaceId, e);
