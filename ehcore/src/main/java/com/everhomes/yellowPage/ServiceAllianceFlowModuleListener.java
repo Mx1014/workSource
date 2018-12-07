@@ -587,7 +587,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
 
 		//把客户端或前端需要的东西放到OBEJECT中
-		flowCase.setCustomObject(getCustomObject(flowCase, entities));
+		flowCase.setCustomObject(getCustomObject(flowCase, entities, form, valItems));
 
 		return entities;
 		
@@ -684,9 +684,12 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	
 	/**
 	 * 根据工作流保存一些业务信息
+	 * @param form 
+	 * @param valItems 
+	 * @param approvalId
 	 * @return
 	 */
-	private String getCustomObject(FlowCase flowCase, List<FlowCaseEntity> entities) {
+	private String getCustomObject(FlowCase flowCase, List<FlowCaseEntity> entities, GeneralForm form, List<PostApprovalFormItem> valItems) {
 
 		JSONObject json = new JSONObject();
 		for (FlowCaseEntity entity : entities) {
@@ -694,8 +697,18 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		}
 
 		fillEnanbleProvider(json, flowCase);
+		fillFormInfo(json, form);
+		fillFormVals(json,valItems);
 
 		return json.toJSONString();
+	}
+
+	private void fillFormVals(JSONObject json, List<PostApprovalFormItem> valItems) {
+		json.put("customObjectFormVals", StringHelper.toJsonString(valItems));
+	}
+
+	private void fillFormInfo(JSONObject json, GeneralForm form) {
+		json.put("formOriginId", form.getFormOriginId());
 	}
 
 	private void fillEnanbleProvider(JSONObject json, FlowCase flowCase) {
