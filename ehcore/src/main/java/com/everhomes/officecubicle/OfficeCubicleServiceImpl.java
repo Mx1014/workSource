@@ -2622,16 +2622,16 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd2.setSourceId(r.getId());
 				cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
 				QueryDefaultRuleAdminResponse resp2 = rentalv2Service.queryDefaultRule(cmd2);
-				Integer dailyPrice = 0;
-				Integer halfdailyPrice = 0;
+				BigDecimal dailyPrice = new BigDecimal(0);
+				BigDecimal halfdailyPrice = new BigDecimal(0);
 				for (PriceRuleDTO priceRule :resp2.getPriceRules()){
 					if (priceRule.getRentalType() ==1){
-						dailyPrice = priceRule.getWorkdayPrice().intValue();
+						dailyPrice = priceRule.getWorkdayPrice();
 					} else if (priceRule.getRentalType() ==2){
-						halfdailyPrice = priceRule.getWorkdayPrice().intValue();
+						halfdailyPrice = priceRule.getWorkdayPrice();
 					}
 				}
-				dto.setMinUnitPrice(dailyPrice>halfdailyPrice?new BigDecimal(halfdailyPrice):new BigDecimal(dailyPrice));
+				dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?halfdailyPrice:dailyPrice);
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null,null);
