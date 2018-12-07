@@ -439,20 +439,11 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public List<OfficeCubicleRentOrder> searchCubicleOrdersByToken(String ownerType,Long ownerId,Long spaceId,
-												 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,
+	public List<OfficeCubicleRentOrder> searchCubicleOrdersByToken(CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,
 												 Byte rentType, Byte orderStatus,String reserverContactToken) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.NAMESPACE_ID.eq(currentNamespaceId);
-		if(ownerType!=null) {
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.OWNER_TYPE.eq(ownerType));
-		}
-		if(ownerId!=null) {
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.OWNER_ID.eq(ownerId));
-		}
-		if(spaceId!=null)
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.SPACE_ID.eq(spaceId));
 		if (null != rentType)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.RENT_TYPE.eq(rentType));
 		if (null != orderStatus){

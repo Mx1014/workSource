@@ -2524,8 +2524,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		String token = userService.getUserIdentifier(UserContext.currentUserId()).getIdentifierToken();
-		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrdersByToken(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getSpaceId(),
+//		String token = userService.getUserIdentifier(UserContext.currentUserId()).getIdentifierToken();
+		String token = "12000001802";
+		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrdersByToken(
 				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),cmd.getRentType(), cmd.getOrderStatus(), token);
 		if (null == orders)
 			return response;
