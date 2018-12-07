@@ -9223,11 +9223,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 					filterResults.remove(dto);
 				}
 			}
+			Collections.sort(filterResults);
 			response.setResults(filterResults);
 		}else {
+			Collections.sort(results);
 			response.setResults(results);
 		}
-		
 		return response;
 	}
 
