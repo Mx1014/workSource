@@ -1714,9 +1714,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         	String buildingName = null,apartmentName = null;
         	Long addressId = null;
         	if(address != null && address.trim() != "") {
-        		if(address.indexOf("/") != -1) {
-            		buildingName = address.split("/")[0];
-            		apartmentName = address.split("/")[1];
+        	    int pos = address.indexOf("/");
+        		if(pos != -1) {
+            		buildingName = address.substring(0, pos);
+            		apartmentName = address.substring(pos + 1);
             		Address addressByBuildingApartmentName = addressProvider.findAddressByBuildingApartmentName(namespaceId, ownerId, buildingName, apartmentName);
             		if(addressByBuildingApartmentName != null) {
             			addressId = addressByBuildingApartmentName.getId();
