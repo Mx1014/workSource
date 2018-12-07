@@ -1454,7 +1454,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysFlagType visitorInfoFlag = VisitorsysFlagType.fromCode(enterpriseConfig.getBaseConfig().getVisitorInfoFlag());
         if(visitorInfoFlag == VisitorsysFlagType.YES) {
             BaseVisitorInfoDTO convert = ConvertHelper.convert(enterpriseVisitor, BaseVisitorInfoDTO.class);
-            if(communityVisitor.getCommunityType() == null || communityVisitor.getCommunityType().byteValue() == CommunityType.RESIDENTIAL.getCode()){
+            if(communityVisitor.getCommunityType() == null || communityVisitor.getCommunityType().byteValue() == CommunityType.COMMERCIAL.getCode()){
                 convert.setEnterpriseFormValues(enterpriseVisitor.getFormJsonValue()==null?null:JSONObject.parseObject(enterpriseVisitor.getFormJsonValue(),
                         new TypeReference<List<VisitorsysApprovalFormItem>>() {}));
             }
