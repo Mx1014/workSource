@@ -35,6 +35,7 @@ import com.everhomes.rentalv2.RentalOrder;
 import com.everhomes.rentalv2.RentalRefundTip;
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceType;
+import com.everhomes.rest.officecubicle.OfficeCubiceOrderStatus;
 import com.everhomes.rest.officecubicle.OfficeOrderStatus;
 import com.everhomes.rest.officecubicle.OfficeStatus;
 import com.everhomes.rest.user.NamespaceUserType;
@@ -417,8 +418,14 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.REQUEST_TYPE.eq(requestType));
 		if (null != rentType)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.RENT_TYPE.eq(rentType));
-		if (null != orderStatus)
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.eq(orderStatus));
+		if (null != orderStatus){
+			if (orderStatus.equals(OfficeCubiceOrderStatus.EFFECTIVE.getCode())){
+				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.in(
+						new Byte[]{OfficeCubiceOrderStatus.IN_USE.getCode(),OfficeCubiceOrderStatus.PAID.getCode()}));
+			} else{
+				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.eq(orderStatus));
+			}
+		}
 		if (null != locator && locator.getAnchor() != null)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ID.lt(locator.getAnchor()));
 		step.limit(pageSize);

@@ -377,7 +377,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setHolidayOpenFlag(resp.getHolidayOpenFlag());
 		dto.setHolidayType(resp.getHolidayType());
 		dto.setNeedPay(resp.getNeedPay());
-		
+
 		for (PriceRuleDTO priceRule :resp.getPriceRules()){
 			if (priceRule.getRentalType() ==1){
 				dto.setDailyPrice(priceRule.getWorkdayPrice().intValue());
@@ -1100,23 +1100,23 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public GetOfficeCubicleRefundRuleResponse getOfficeCubicleRefundRule(GetOfficeCubicleRefundRuleCommand cmd){
 		GetOfficeCubicleRefundRuleResponse resp = new GetOfficeCubicleRefundRuleResponse();
 		List<OfficeCubicleRefundRule> rules = officeCubicleProvider.findRefundRule(cmd.getSpaceId());
-		if (rules == null){
-			return resp;
-		}
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
-		
 		resp.setRefundStrategy(space.getRefundStrategy());
-		resp.setRefundStrategies(rules.stream().map(r->{
-			OfficeCubicleRefundRuleDTO dto = ConvertHelper.convert(r,OfficeCubicleRefundRuleDTO.class);
-			return dto;
-			}).collect(Collectors.toList()));
+		if (rules != null){
+			resp.setRefundStrategies(rules.stream().map(r->{
+				OfficeCubicleRefundRuleDTO dto = ConvertHelper.convert(r,OfficeCubicleRefundRuleDTO.class);
+				return dto;
+				}).collect(Collectors.toList()));
+		}
 		List<OfficeCubicleRefundTips> refundTips = officeCubicleProvider.listRefundTips(cmd.getSpaceId(), null);
 		if (cmd.getOrderId() !=null){
 			OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderById(cmd.getOrderId());
 			Integer refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space).intValue();
 			resp.setRefundPrice(refundPrice);
 		}
-		resp.setRefundTips(refundTips.stream().map(r->ConvertHelper.convert(r,OfficeCubicleRefundTipDTO.class)).collect(Collectors.toList()));
+		if(refundTips!=null){
+			resp.setRefundTips(refundTips.stream().map(r->ConvertHelper.convert(r,OfficeCubicleRefundTipDTO.class)).collect(Collectors.toList()));
+		}
 		return resp;
 	}
     private BigDecimal calculateRefundAmount(OfficeCubicleRentOrder order, Long now, OfficeCubicleSpace space) {
@@ -2520,9 +2520,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		if (cmd.getOrderStatus().equals(OfficeCubiceOrderStatus.EFFECTIVE.getCode())){
-			
-		}
 		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),null, null,
 				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),null,null,null,cmd.getRentType(), cmd.getOrderStatus());
 		if (null == orders)
