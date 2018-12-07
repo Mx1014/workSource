@@ -9,7 +9,7 @@
 -- REMARK:服务联盟表单修复部分未迁移成功的表单数据
 -- REMARK: /yellowPage/transferFlowCaseVals  ownerId填写1802  将返回字符串发给黄明波
 
--- AUTHOR: 杨崇鑫
+-- AUTHOR: 杨崇鑫 2018-12-07
 -- REMARK: 缺陷 #42424 智谷汇保证金账单历史数据迁移
 -- 1、先备份一下账单数据
 -- select * from eh_payment_bill_items where namespace_id=999945;
