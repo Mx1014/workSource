@@ -70,6 +70,7 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `owner_type`  VARCHAR(255) COMMENT 'owner type: community',
   `owner_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
   `space_id` BIGINT COMMENT '空间ID',
+  `space_name` VARCHAR(255) COMMENT '空间名称',
   `begin_time` DATETIME COMMENT '预定开始时间',
   `end_time` DATETIME COMMENT '预定结束时间',
   `rent_type` TINYINT COMMENT '1-长租，0-短租',
