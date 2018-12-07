@@ -18,6 +18,7 @@ import java.util.List;
  *     <li>securityPayServer: 支付双向安全校验</li>
  *     <li>indexDtos: 主页签信息{@link IndexDTO}</li>
  *     <li>clientAddressMode : 客户端项目地址模式  0 普通模式  1 图片模式</li>
+ *     <li>authPopupConfig: 注册后是否引导用户进行认证，1为是，0为否</li>
  * </ul>
  */
 public class SystemInfoResponse {
@@ -45,6 +46,16 @@ public class SystemInfoResponse {
     private List<IndexDTO> indexDtos;
     
     private Integer clientAddressMode;
+
+    private Byte authPopupConfig;
+
+    public Byte getAuthPopupConfig() {
+        return authPopupConfig;
+    }
+
+    public void setAuthPopupConfig(Byte authPopupConfig) {
+        this.authPopupConfig = authPopupConfig;
+    }
 
     public String getSecurityPayServer() {
         return securityPayServer;
