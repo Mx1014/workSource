@@ -311,3 +311,8 @@ CREATE TABLE `eh_welfare_points` (
   PRIMARY KEY (`id`),
   KEY i_point_welfare_id (`welfare_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '企业福利积分表';
+
+-- AUTHOR: mengqianxiang
+-- REMARK: 增加eh_payment_exemption_items表的状态字段
+ALTER TABLE eh_payment_exemption_items ADD `bill_item_id` BIGINT COMMENT "账单明细ID"
+ALTER TABLE eh_payment_exemption_items ADD `delete_flag` TINYINT COMMENT "删除状态：0：已删除；1：正常使用"
