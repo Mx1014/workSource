@@ -351,6 +351,11 @@ INSERT INTO eh_service_modules(id, name, parent_id, path, type, level, status, d
 -- REMARK: issue-43457
 UPDATE eh_service_modules SET module_control_type='community_control' WHERE id='230000';
 
+-- AUTHOR:黄鹏宇
+-- REMAKE: 修复请示单类型错误
+UPDATE eh_service_modules SET client_handler_type = 1 WHERE id = 25000;
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
