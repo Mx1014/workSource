@@ -383,9 +383,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		for (PriceRuleDTO priceRule :resp.getPriceRules()){
 			if (priceRule.getRentalType() ==1){
-				dto.setDailyPrice(priceRule.getWorkdayPrice().intValue());
+				dto.setDailyPrice(priceRule.getWorkdayPrice());
 			} else if (priceRule.getRentalType() ==2){
-				dto.setHalfdailyPrice(priceRule.getWorkdayPrice().intValue());
+				dto.setHalfdailyPrice(priceRule.getWorkdayPrice());
 			}
 		}
 		return dto;
@@ -2524,8 +2524,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-//		String token = userService.getUserIdentifier(UserContext.currentUserId()).getIdentifierToken();
-		String token = "17722647891";
+		String token = userService.getUserIdentifier(UserContext.currentUserId()).getIdentifierToken();
 		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrdersByToken(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getSpaceId(),
 				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),cmd.getRentType(), cmd.getOrderStatus(), token);
 		if (null == orders)
