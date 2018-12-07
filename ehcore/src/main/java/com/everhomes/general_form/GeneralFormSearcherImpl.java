@@ -338,8 +338,8 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 					}
                 	returnMap.put("transformStatus",request.getTransformStatus());
                 	//--------房源招商申请业务--------
+                    returnMap.put("createdTime", request.getCreatedTime());
                 }
-                returnMap.put("createdTime", request.getCreatedTime());
                 returnMap.put("sourceId", sourceId);
                 returnMap.put("formVersion", formVersion);
                 returnMap.put("formOriginId", formOriginId);

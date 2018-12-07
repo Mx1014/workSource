@@ -16,6 +16,8 @@ public interface EnterpriseCustomerSearcher {
 
     void bulkUpdate(List<EnterpriseCustomer> customers);
 
+    void syncSingleCustomer(Long customerId);
+
     void feedDoc(EnterpriseCustomer customer);
 
     void syncFromDb();
