@@ -33,7 +33,6 @@ import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkLogCreateCommand;
 import com.everhomes.rest.aclink.AclinkLogListResponse;
-import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenByHardwareIdCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
@@ -97,6 +96,9 @@ public class AclinkController extends ControllerBase {
 
     @Autowired
     AclinkServerService aclinkServerService;
+    
+    @Autowired
+    AclinkLogService aclinkLogService;
 
     /**
      * <b>URL: /aclink/activing</b>
@@ -743,13 +745,46 @@ public class AclinkController extends ControllerBase {
     
     /**
      * <b>URL: /aclink/createAclinkLog</b>
-     * <p>获取门禁列表</p>
+     * <p>app回传开门日志</p>
      * @return 门禁列表
      */
     @RequestMapping("createAclinkLog")
     @RestReturn(value=AclinkLogListResponse.class)
     public RestResponse createAclinkLog(@Valid AclinkLogCreateCommand cmd) {
-        RestResponse response = new RestResponse(doorAccessService.createAclinkLog(cmd));
+        RestResponse response = new RestResponse(aclinkLogService.createAclinkLog(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /aclink/createAclinkLogByServer</b>
+     * <p>内网服务器回传开门日志</p>
+     * @return 门禁列表
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("createAclinkLogByServer")
+    @RestReturn(value=AclinkLogListResponse.class)
+    public RestResponse createAclinkLogByServer(@Valid AclinkLogCreateCommand cmd) {
+    	//TODO RequireAuthentication
+        RestResponse response = new RestResponse(aclinkLogService.createAclinkLogByLocalServer(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /aclink/recordFaceRecognitionResult</b>
+     * <p>内网服务器回传识别结果</p>
+     * @return 门禁列表
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("recordFaceRecognitionResult")
+    @RestReturn(value=String.class)
+    public RestResponse recordFaceRecognitionResult(@Valid AclinkLogCreateCommand cmd) {
+    	//TODO RequireAuthentication
+        RestResponse response = new RestResponse();
+        aclinkLogService.recordFaceRecognitionResult(cmd);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -963,7 +998,7 @@ public class AclinkController extends ControllerBase {
      * @return
      */
     @RequestMapping("getUserKeyInfo")
-    @RestReturn(value=GetUserKeyInfoRespnose.class)
+    @RestReturn(value= GetUserKeyInfoResponse.class)
     public RestResponse getUserKeyInfo(GetUserKeyInfoCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.getUserKeyInfo(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

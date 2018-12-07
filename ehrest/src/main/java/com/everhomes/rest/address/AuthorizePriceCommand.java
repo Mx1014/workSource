@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>communityId: 小区Id</li>
  * <li>namespaceId: namespaceId</li>
+ * <li>organizationId: 物业管理公司id</li>
  * <li>addressId: 地址Id</li>
  * <li>buildingId: 楼栋ID</li>
  * <li>chargingItemsId: 费项id</li>
@@ -27,6 +28,15 @@ public class AuthorizePriceCommand {
 	private Byte apartmentAuthorizeType;
 	private Long pageAnchor = 0L;
 	private Integer pageSize;
+	private Long organizationId;
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 
 	public Long getId() {
 		return id;

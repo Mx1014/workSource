@@ -8,9 +8,10 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 1000：CM线下支付
+ * 1001：中天线下支付
  */
 public enum AssetPaymentType {
-    CMPAID(1000, "CM线下支付");
+    CMPAID(1000, "CM线下支付"), ZHONGTIANPAID(1001, "中天线下支付");
 
     private Integer code;
     private String name;

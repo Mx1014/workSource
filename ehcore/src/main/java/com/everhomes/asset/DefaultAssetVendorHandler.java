@@ -436,7 +436,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	 * @return 扩展信息
 	 */
 	protected String genPaymentExtendInfo(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
-		StringBuilder strBuilder = new StringBuilder();
+		String result = "";
         if(cmd.getBills() != null) {
         	for(BillIdAndAmount billIdAndAmount : cmd.getBills()) {
         		Long billId = Long.parseLong(billIdAndAmount.getBillId());
@@ -448,17 +448,20 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
                 	for(BillItemDTO billItemDTO : billItemDTOList) {
                 		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(billItemDTO.getSourceType());
                 		String paymentExtendsInfo = generalBillHandler.getPaymentExtendInfo(billItemDTO);
-                		strBuilder.append(paymentExtendsInfo);
-                		strBuilder.append(",");
+                		//修复缺陷 #44105：物业缴费支付时extend_info重复
+                		if(!result.contains(paymentExtendsInfo)) {
+                			result += paymentExtendsInfo;
+                    		result += ",";
+                		}
                 	}
                 }
         	}
         }
         //去掉最后一个逗号
-        if(strBuilder.length() != 0) {
-        	strBuilder = strBuilder.deleteCharAt(strBuilder.length() - 1);
+        if(result.length() != 0) {
+        	result = result.substring(0, result.length() - 1);
         }
-        return strBuilder.toString();
+        return result;
 	}
 	
 	private String getPayCallbackUrl(CreatePaymentBillOrderCommand cmd) {

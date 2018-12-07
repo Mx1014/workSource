@@ -2,10 +2,12 @@
 package com.everhomes.rest.aclink;
 
 import java.util.HashMap;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-public class GetUserKeyInfoRespnose {
+public class GetUserKeyInfoResponse {
 	private DoorAccessQRKeyDTO qrInfo;
 	private Long authId;
 	private Byte isSupportQR;
@@ -20,7 +22,9 @@ public class GetUserKeyInfoRespnose {
 	private String hardwareId;
 	private String macCopy;
 	private String blueToothSecret;
-	private HashMap<String,String> extraActions;
+	@ItemType(AclinkKeyExtraActionsDTO.class)
+	private List<AclinkKeyExtraActionsDTO> extraActions;
+
 	private HashMap<String, String> authInfo;
 	
 	public Long getAuthId() {
@@ -107,10 +111,10 @@ public class GetUserKeyInfoRespnose {
 	public void setBlueToothSecret(String blueToothSecret) {
 		this.blueToothSecret = blueToothSecret;
 	}
-	public HashMap<String, String> getExtraActions() {
+	public List<AclinkKeyExtraActionsDTO> getExtraActions() {
 		return extraActions;
 	}
-	public void setExtraActions(HashMap<String, String> extraActions) {
+	public void setExtraActions(List<AclinkKeyExtraActionsDTO> extraActions) {
 		this.extraActions = extraActions;
 	}
 	public HashMap<String, String> getAuthInfo() {

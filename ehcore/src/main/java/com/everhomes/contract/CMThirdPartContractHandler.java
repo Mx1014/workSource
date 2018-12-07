@@ -222,6 +222,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }
 
         }
+
         //此方法可以获取当前正在进行同步的数据
         List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
 
@@ -961,7 +962,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         customer.setStatus(CommonStatus.ACTIVE.getCode());
         customer.setOperatorUid(1L);
         customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
-        customer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
+        customer.setLevelItemId(CustomerLevelType.REGISTERED_CUSTOMER.getCode());
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //      customer.setVersion(ebeiCustomer.getVersion());
 //            if(customer.getTrackingUid() == null) {

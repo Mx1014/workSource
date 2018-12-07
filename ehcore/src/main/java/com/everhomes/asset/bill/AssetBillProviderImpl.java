@@ -229,8 +229,8 @@ public class AssetBillProviderImpl implements AssetBillProvider {
         return vo;
     }
 	
-	public void changeChargeStatus(Integer currentNamespaceId, Long billId, BigDecimal amountReceived,
-			BigDecimal amountOwed, Integer paymentType) {
+	public void changeChargeStatus(Integer currentNamespaceId, Long billId, BigDecimal amountReceived, BigDecimal amountOwed,
+			Integer paymentType, Byte billStatus) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         context.update(t)
@@ -238,6 +238,7 @@ public class AssetBillProviderImpl implements AssetBillProvider {
                 .set(t.AMOUNT_RECEIVED, amountReceived)
                 .set(t.AMOUNT_OWED, amountOwed)
                 .set(t.THIRD_PAID, AssetPaymentBillStatus.PAID.getCode()) //总体原则：不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
+                .set(t.STATUS, billStatus)
                 .where(t.ID.eq(billId))
                 .and(t.NAMESPACE_ID.eq(currentNamespaceId))
                 .execute();

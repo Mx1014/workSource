@@ -5,7 +5,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>organizationId: 机构id(从customer中的organizationId拿)</li>
+ * <li>organizationId: 目标公司 id (从customer中的organizationId拿)</li>
+ * <li>currentOrganizationId: 当前公司 id</li>
  * <li>contactToken: 手机号</li>
  * <li>contactName:  用户姓名</li>
  * <li>customerId:  customer organization之间的映射关系</li>
@@ -23,7 +24,8 @@ public class CreateOrganizationAdminCommand {
 	private Long ownerId;
 	
 	private Long organizationId;
-	
+	private Long currentOrganizationId;
+
 	private String contactToken;
 	
 	private String contactName;
@@ -116,6 +118,14 @@ public class CreateOrganizationAdminCommand {
 
 	public void setReservePrivilege(Byte reservePrivilege) {
 		this.reservePrivilege = reservePrivilege;
+	}
+
+	public Long getCurrentOrganizationId() {
+		return currentOrganizationId;
+	}
+
+	public void setCurrentOrganizationId(Long currentOrganizationId) {
+		this.currentOrganizationId = currentOrganizationId;
 	}
 
 	@Override

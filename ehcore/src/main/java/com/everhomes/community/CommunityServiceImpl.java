@@ -126,6 +126,7 @@ import com.everhomes.rest.community.GetCommunityStatisticsCommand;
 import com.everhomes.rest.community.GetFloorRangeCommand;
 import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.rest.community.GetTreeProjectCategoriesCommand;
+import com.everhomes.rest.community.ImportBuildingDataCommand;
 import com.everhomes.rest.community.ImportBuildingDataDTO;
 import com.everhomes.rest.community.ImportCommunityDataDTO;
 import com.everhomes.rest.community.ListAllCommunitiesResponse;
@@ -1232,7 +1233,6 @@ public class CommunityServiceImpl implements CommunityService {
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 
 		//首先需要根据namespaceId和communityId来进行查询数据库eh_building中是否存在楼栋名称相同的楼栋
-		//// TODO: 2018/5/11
 		List<com.everhomes.building.Building> buildingList = buildingProvider.getBuildingByCommunityIdAndNamespaceId(cmd.getCommunityId(),cmd.getNamespaceId(),cmd.getName());
 		//非空校验 exclude itself
 		if(CollectionUtils.isNotEmpty(buildingList) && buildingList.size()>1){
@@ -1267,11 +1267,16 @@ public class CommunityServiceImpl implements CommunityService {
 
 		dbProvider.execute((TransactionStatus status) -> {
 			if (cmd.getId() == null) {
+				assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_CREATE_BUILDING, cmd.getOrganizationId(), cmd.getCommunityId());
+
+				//在该方法开头已经检验过了，因此这里检查园区下是否有同名的楼栋的代码可以注释掉
 				//检查园区下是否有同名的楼栋
-				checkBuildingNameUnique(cmd.getName(), cmd.getCommunityId());
+				//checkBuildingNameUnique(cmd.getName(), cmd.getCommunityId());
 				LOGGER.info("add building, cmd={}", cmd);
 				this.communityProvider.createBuilding(userId, building);
 			} else {
+				assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_UPDATE_BUILDING, cmd.getOrganizationId(), cmd.getCommunityId());
+
 				LOGGER.info("update building, cmd={}", cmd);
 				Building b = this.communityProvider.findBuildingById(cmd.getId());
 				building.setCreatorUid(b.getCreatorUid());
@@ -1304,6 +1309,8 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
 
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_DELETE_BUILDING, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
 //		1.若楼栋或楼栋下的门牌关联了合同或其他业务（如车辆、服务等），则
 //		不允许删除；
@@ -1555,7 +1562,9 @@ public class CommunityServiceImpl implements CommunityService {
 	*/
 
 	@Override
-	public ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file) {
+	public ImportFileTaskDTO importBuildingData(ImportBuildingDataCommand cmd, MultipartFile file) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_IMPORT_BUILDING, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		Long userId = UserContext.current().getUser().getId();
 		ImportFileTask task = new ImportFileTask();
 		try {
@@ -1568,7 +1577,7 @@ public class CommunityServiceImpl implements CommunityService {
 						"File content is empty");
 			}
 			task.setOwnerType(EntityType.COMMUNITY.getCode());
-			task.setOwnerId(communityId);
+			task.setOwnerId(cmd.getCommunityId());
 			task.setType(ImportFileTaskType.BUILDING.getCode());
 			task.setCreatorUid(userId);
 			task = importFileService.executeTask(() -> {
@@ -1579,7 +1588,7 @@ public class CommunityServiceImpl implements CommunityService {
 						response.setTitle(datas.get(0));
 						datas.remove(0);
 					}
-					List<ImportFileResultLog<ImportBuildingDataDTO>> results = importBuildingData(datas, userId, communityId);
+					List<ImportFileResultLog<ImportBuildingDataDTO>> results = importBuildingData(datas, userId, cmd.getCommunityId());
 					response.setTotalCount((long)datas.size());
 					response.setFailCount((long)results.size());
 					response.setLogs(results);
@@ -1823,8 +1832,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	@Override
-	public ImportDataResponse importBuildingData(MultipartFile mfile,
-			Long userId) {
+	public ImportDataResponse importBuildingData(MultipartFile mfile, Long userId) {
 		ImportDataResponse importDataResponse = new ImportDataResponse();
 		try {
 			//解析excel
@@ -1968,6 +1976,20 @@ public class CommunityServiceImpl implements CommunityService {
 				return o2.getApproveTime().compareTo(o1.getApproveTime());
 			}
 		});
+		
+		//小区待认证数据的排序，创建时间降序
+		if(cmd.getMemberStatus().equals(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode())){
+			Collections.sort(memberDTOList,new Comparator<GroupMemberDTO>(){
+				@Override
+				public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+					if(o1.getCreateTime() == null || o2.getCreateTime() == null)
+						return -1;
+					return o2.getCreateTime().compareTo(o1.getCreateTime());
+				}
+				
+			});
+		}
+		
 		CommunityAuthUserAddressResponse res = new CommunityAuthUserAddressResponse();
 		res.setDtos(memberDTOList);
 		res.setNextPageAnchor(locator.getAnchor());
@@ -5763,6 +5785,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void updateCommunityAndCategory(UpdateCommunityNewCommand cmd) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_UPDATE_COMMUNITY, cmd.getOrganizationId(), cmd.getCommunityId());
+
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 
 		community.setName(cmd.getCommunityName());
@@ -5886,7 +5910,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void exportBuildingByKeywords(ListBuildingsByKeywordsCommand cmd, HttpServletResponse response) {
-        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_EXPORT_BUILDING, cmd.getOrganizationId(), cmd.getCommunityId());
+		
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         if (community == null) {
             LOGGER.error("Community is not exist.");
             throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
@@ -6004,6 +6030,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public ListApartmentsInCommunityResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd) {
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_GET_APARTMENT_DETAIL, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		ListApartmentsInCommunityResponse result = new ListApartmentsInCommunityResponse();
 		List<ApartmentInfoDTO> apartments = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
@@ -6144,6 +6172,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void changeBuildingOrder(ChangeBuildingOrderCommand cmd) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_CHANGE_BUILDING_ORDER, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		if (cmd.getBuildingOrders() != null && cmd.getBuildingOrders().size() > 0) {
 			List<BuildingOrderDTO> buildingOrders = cmd.getBuildingOrders();
 
@@ -6167,9 +6197,10 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 	}
 
-
 	@Override
 	public void exportApartmentsInCommunity(ListApartmentsInCommunityCommand cmd,HttpServletResponse response) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_EXPORT_APARTMENTS_IN_COMMUNITY, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		ListApartmentsInCommunityResponse result = new ListApartmentsInCommunityResponse();
 		List<ApartmentExportDataDTO> data = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
@@ -6401,6 +6432,11 @@ public class CommunityServiceImpl implements CommunityService {
 		return dto;
 	}
 	
+
+	private void assetManagementPrivilegeCheck(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ASSET_MANAGEMENT, null, null, null, communityId);
+	}
+	
 	@Override
 	public BuildingStatisticsForAppDTO getBuildingStatisticsForApp(GetBuildingStatisticsCommand cmd) {
 		if(cmd.getBuildingId() == null){
@@ -6585,6 +6621,12 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	@Override
+
+	public ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file) {
+		// TODO Auto-generated method stub
+		return null;
+	}	
+	
 	public ListBuildingsForThirdPartyResponse listBuildingsForThirdParty(ListBuildingsForThirdPartyCommand cmd) {
 		ListBuildingsForThirdPartyResponse response = new ListBuildingsForThirdPartyResponse();
 		
