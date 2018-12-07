@@ -143,4 +143,5 @@ public interface PortalService {
 	PortalLayoutDTO findIndexPortalLayout(FindIndexPortalLayoutCommand cmd);
 
 	void initAppEntryData();
+	void initAppEntryProfileData();
 }

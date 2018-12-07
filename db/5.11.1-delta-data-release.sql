@@ -9,6 +9,9 @@
 -- REMARK:服务联盟表单修复部分未迁移成功的表单数据
 -- REMARK: /yellowPage/transferFlowCaseVals  ownerId填写1802  将返回字符串发给黄明波
 
+-- AUTHOR: xq.tian  20181206
+-- REMARK: 将左邻基线和标准版的 ehcore.yml 里的 xss.enabled: true 改成 xss.enabled: false, 其他环境不用修改
+
 -- AUTHOR: 杨崇鑫 2018-12-07
 -- REMARK: 缺陷 #42424 智谷汇保证金账单历史数据迁移
 -- 1、先备份一下账单数据
@@ -29,7 +32,6 @@
 -- 然后执行接口customer/syncEnterpriseCustomerIndex
 -- 3：然后将招商客户的统计所需数据初始化
 -- 最后请执行接口invitedCustomer/initCustomerStatusToDB（此方法每个环境只能执行一次，该方法为异步方法，点击后会立刻返回成功);
-
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
@@ -330,7 +332,7 @@ UPDATE eh_service_modules SET name = '待办事项-定制' WHERE id = 56300;
 UPDATE eh_service_modules SET name = '园区支付授权-定制' WHERE id = 200000;
 UPDATE eh_service_modules SET name = '企业支付授权' WHERE id = 79880000;
 UPDATE eh_service_modules SET name = '左邻会议' WHERE id = 50700;
-INSERT INTO eh_service_modules(id, name, parent_id, parent_id, type, level, status, default_order, create_time,
+INSERT INTO eh_service_modules(id, name, parent_id, path, type, level, status, default_order, create_time,
                                instance_config,operator_uid,creator_uid,description,multiple_flag, module_control_type,access_control_type,
                                menu_auth_flag,category,app_type,client_handler_type)
     VALUES (274000,'同事圈',50000,'/100/50000/274000',1,3,2,100,now(),'',0,0,'',1,'org_control',2,1,'module',0,0);

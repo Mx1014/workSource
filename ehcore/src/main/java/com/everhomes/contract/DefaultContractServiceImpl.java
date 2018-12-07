@@ -4587,7 +4587,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			}else {
 				todayDateStr = dateStr.getDateStr();
 			}
-			//String todayDateStr = getTodayDateStr();
 			contractProvider.deleteCommunityDataByDateStr(todayDateStr);
 
 			// 开始遍历，进行数据统计
@@ -4610,17 +4609,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			firstCa.setTime(userDate);
 			firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
 			// 设置本月第一天
-			//Calendar firstCa = Calendar.getInstance();
-			/*firstCa.add(Calendar.MONTH, 0);
-			firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
-			firstCa.set(Calendar.HOUR_OF_DAY, 0);
-			firstCa.set(Calendar.MINUTE, 0);
-			firstCa.set(Calendar.SECOND, 0);
-			firstCa.set(Calendar.MILLISECOND, 0);*/
 			String firststr = sdf.format(firstCa.getTime());
 
 			// 设置本月最后
-			//Calendar lastCa = Calendar.getInstance();
 			lastCa.setTime(userDate);
 			lastCa.set(Calendar.DAY_OF_MONTH, lastCa.getActualMaximum(Calendar.DAY_OF_MONTH));
 			lastCa.set(Calendar.HOUR_OF_DAY, 23);
@@ -4647,7 +4638,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			}
 
 			// 园区统计结果集
-			Map<Long, ContractReportformStatisticCommunitys> communityResultMap = new HashMap<>();
+			Map<String, ContractReportformStatisticCommunitys> communityResultMap = new HashMap<>();
 			// 分页遍历开始
 			for (int currentPage = 0; currentPage <= totalPage; currentPage++) {
 				long startTime = System.currentTimeMillis();
@@ -4667,10 +4658,10 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				// 插入上一页统计得到的数据
 				if (currentPage != 0) {
 					// 插入园区信息统计数据
-					if (contracts != null && contracts.size() > 0 && communityResultMap.containsKey(contracts.get(0).getCommunityId())) {
-						ContractReportformStatisticCommunitys remove = communityResultMap.remove(contracts.get(0).getCommunityId());
+					if (contracts != null && contracts.size() > 0 && communityResultMap.containsKey(contracts.get(0).getCommunityId()+"_"+sdfMM.format(contracts.get(0).getUpdateTime()))) {
+						ContractReportformStatisticCommunitys remove = communityResultMap.remove(contracts.get(0).getCommunityId()+"_"+sdfMM.format(contracts.get(0).getUpdateTime()));
 						createCommunityStatics(communityResultMap);
-						communityResultMap.put(remove.getCommunityId(), remove);
+						communityResultMap.put(remove.getCommunityId()+"_"+sdfMM.format(contracts.get(0).getUpdateTime()), remove);
 					} else {
 						createCommunityStatics(communityResultMap);
 					}
@@ -4679,19 +4670,23 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				// 生成统计数据
 				for (ContractDTO contract : contracts) {
 					// 园区信息统计数据
-					if (communityResultMap.containsKey(contract.getCommunityId())) {
-						ContractReportformStatisticCommunitys communityStatistics = communityResultMap.get(contract.getCommunityId());
+					if (communityResultMap.containsKey(contract.getCommunityId()+"_"+sdfMM.format(contract.getUpdateTime()))) {
+						ContractReportformStatisticCommunitys communityStatistics = communityResultMap.get(contract.getCommunityId()+"_"+sdfMM.format(contract.getUpdateTime()));
 						countContractForCommunity(communityStatistics, contract);
 					} else {
-						Community community = communityProvider.findCommunityById(contract.getCommunityId());
-						if (community != null) {
-							ContractReportformStatisticCommunitys communityStatistics = initCommunityStatistics(contract.getCommunityId(),todayDateStr);
-							communityResultMap.put(contract.getCommunityId(), communityStatistics);
-							countContractForCommunity(communityStatistics, contract);
-						} else {
-							if (LOGGER.isDebugEnabled()) {
-								LOGGER.debug("community is null !!! communityId is " + contract.getCommunityId());
+						// 园区id为空的不做合同统计
+						if (contract.getCommunityId() != null) {
+							Community community = communityProvider.findCommunityById(contract.getCommunityId());
+							if (community != null) {
+								ContractReportformStatisticCommunitys communityStatistics = initCommunityStatistics(contract.getCommunityId(),sdfMM.format(contract.getUpdateTime()));
+								communityResultMap.put(contract.getCommunityId()+"_"+sdfMM.format(contract.getUpdateTime()), communityStatistics);
+								countContractForCommunity(communityStatistics, contract);
+							} else {
+								LOGGER.info("Contract statistics for community, community id  is not found, communityId={}, contractId={}",
+										contract.getCommunityId(), contract.getId());
 							}
+						} else {
+							LOGGER.info("Contract statistics for community, community id is null, contractId={} ", contract.getId());
 						}
 					}
 				}
@@ -4744,7 +4739,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		return communityStatistics;
 	}
 
-	private void createCommunityStatics(Map<Long, ContractReportformStatisticCommunitys> communityResultMap) {
+	private void createCommunityStatics(Map<String, ContractReportformStatisticCommunitys> communityResultMap) {
 		Collection<ContractReportformStatisticCommunitys> values = communityResultMap.values();
 		for (ContractReportformStatisticCommunitys communityStatistics : values) {
 			contractProvider.createCommunityStatics(communityStatistics);

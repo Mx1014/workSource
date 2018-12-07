@@ -1758,7 +1758,7 @@ public class ContractProviderImpl implements ContractProvider {
 	public void deleteCommunityDataByDateStr(String dateStr) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		context.delete(Tables.EH_CONTRACT_STATISTIC_COMMUNITIES)
-				.where(Tables.EH_CONTRACT_STATISTIC_COMMUNITIES.DATE_STR.eq(dateStr))
+				//.where(Tables.EH_CONTRACT_STATISTIC_COMMUNITIES.DATE_STR.eq(dateStr))
 				.execute();
 	}
 	
@@ -1769,8 +1769,8 @@ public class ContractProviderImpl implements ContractProvider {
 				       .from(Tables.EH_CONTRACTS)
 				       .where(Tables.EH_CONTRACTS.NAMESPACE_ID.ne(0))
 				       .and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()).or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.DENUNCIATION.getCode())))
-				       .and(Tables.EH_CONTRACTS.COMMUNITY_ID.isNotNull())
-				       .and(Tables.EH_CONTRACTS.UPDATE_TIME.between(firstdateUpdateTime, lastdateUpdateTime))
+				       //.and(Tables.EH_CONTRACTS.COMMUNITY_ID.isNotNull())
+				       //.and(Tables.EH_CONTRACTS.UPDATE_TIME.between(firstdateUpdateTime, lastdateUpdateTime))
 				       .fetchAnyInto(Integer.class);
 	}
 	
