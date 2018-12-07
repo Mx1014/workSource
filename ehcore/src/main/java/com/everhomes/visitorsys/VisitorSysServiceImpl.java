@@ -2356,9 +2356,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             checkMustFillParams(visitor,s);
         }
         if(visitor.getCommunityType() == null){
-            Community community = communityProvider.findCommunityById(visitor.getCommunityId());
-            if(community != null){
-                visitor.setCommunityType(community.getCommunityType());
+            if(visitor.getCommunityId() == null){
+//              没有传类型也没有id，设置默认值为商业园区
+                visitor.setCommunityType(CommunityType.COMMERCIAL.getCode());
+            } else{
+                Community community = communityProvider.findCommunityById(visitor.getCommunityId());
+                if(community != null){
+                    visitor.setCommunityType(community.getCommunityType());
+                }
             }
         }
         CommunityType communitType = CommunityType.fromCode(visitor.getCommunityType());
