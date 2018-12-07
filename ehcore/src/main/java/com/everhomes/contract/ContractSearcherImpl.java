@@ -943,7 +943,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		
 		if (cmd.getCommunityId() != null)
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
-
+		
+		//fb = FilterBuilders.andFilter(fb, FilterBuilders.existsFilter("communityId"));
+		
 		//统计正常合同，退约合同
 		List<Byte> statusList = new ArrayList<Byte>();
 		statusList.add(ContractStatus.ACTIVE.getCode());
@@ -1027,8 +1029,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		} catch (ParseException e) {
 			LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error");
 		}
-		qb = QueryBuilders.boolQuery()
-					.must(QueryBuilders.rangeQuery("updateTime").from(firstdateUpdateTime).to(lastdateUpdateTime));
+		qb = QueryBuilders
+					.boolQuery().must(QueryBuilders.rangeQuery("updateTime").from(firstdateUpdateTime).to(lastdateUpdateTime))
+					.mustNot(QueryBuilders.regexpQuery("namespaceId", "1000000"));
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		Long anchor = 0l;
