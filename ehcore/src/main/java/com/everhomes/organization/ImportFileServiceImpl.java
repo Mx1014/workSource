@@ -67,9 +67,9 @@ public class ImportFileServiceImpl implements ImportFileService{
                     task.setStatus(ImportFileTaskStatus.FINISH.getCode());
                     task.setResult(StringHelper.toJsonString(response));
                 }catch (Exception e){
-                    LOGGER.error("Import file task executing error, task={}", task, e);
                     task.setStatus(ImportFileTaskStatus.EXCEPTION.getCode());
                     task.setResult(e.toString());
+                    LOGGER.error("Import file task executing error, task={}", task, e);
                 }finally {
                     organizationProvider.updateImportFileTask(task);
                 }

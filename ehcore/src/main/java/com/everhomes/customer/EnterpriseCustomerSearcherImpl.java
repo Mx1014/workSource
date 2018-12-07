@@ -150,6 +150,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     }
 
     @Override
+    public void syncSingleCustomer(Long customerId){
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(customerId);
+        if(customer != null){
+            feedDoc(customer);
+        }
+    }
+
+    @Override
     public void feedDoc(EnterpriseCustomer customer) {
         XContentBuilder source = createDoc(customer);
         feedDoc(customer.getId().toString(), source);
