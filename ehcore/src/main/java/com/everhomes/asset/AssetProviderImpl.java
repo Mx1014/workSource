@@ -15,14 +15,20 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
 import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
+import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.contract.ContractTemplateStatus;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -96,6 +102,9 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private AssetGroupProvider assetGroupProvider;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
 
 //    @Override
@@ -520,9 +529,13 @@ public class AssetProviderImpl implements AssetProvider {
                 t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
                 t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
         		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
-        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY);
-        query.addFrom(t, t2);
-        query.addConditions(t.ID.eq(t2.BILL_ID));
+        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY,
+        		t.TAX_AMOUNT);
+//        query.addFrom(t, t2);
+//        query.addConditions(t.ID.eq(t2.BILL_ID));
+        query.addFrom(t);
+        query.addJoin(t2, t.ID.eq(t2.BILL_ID));
+        		
         query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
         if(!org.springframework.util.StringUtils.isEmpty(ownerType)) {
         	query.addConditions(t.OWNER_TYPE.eq(ownerType));
@@ -561,10 +574,17 @@ public class AssetProviderImpl implements AssetProvider {
 	                    "This updateTime is error, updateTime={" + cmd.getUpdateTime() + "}");
 			}
         }
+        //物业缴费V7.4(瑞安项目-资产管理对接CM系统) 通过账单内是否包含服务费用（资源预定、云打印）
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getSourceTypeList())){
+            query.addConditions(t2.SOURCE_TYPE.in(cmd.getSourceTypeList()));
+        }
+        //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getThirdSign())){
+            query.addConditions(t.THIRD_SIGN.eq(cmd.getThirdSign()).or(t.THIRD_SIGN.isNull()));
+        }
         if(!org.springframework.util.StringUtils.isEmpty(cmd.getContractId())) {
         	query.addConditions(t.CONTRACT_ID.eq(cmd.getContractId()));
         }
-
         if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
@@ -646,6 +666,14 @@ public class AssetProviderImpl implements AssetProvider {
         if(status!=null && status == 1){
             query.addOrderBy(t.STATUS);
         }
+        //瑞安CM对接，如果企业关联的是瑞安那边系统中的资产，则需要将这部分产生的账单查出来
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getIsCheckProperty())) {
+			query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES,JoinType.LEFT_OUTER_JOIN,t.TARGET_ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID));
+			query.addJoin(Tables.EH_ADDRESSES,JoinType.LEFT_OUTER_JOIN,Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID));
+			query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq("ruian_cm"));
+			query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()));
+			query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
+		}
         query.addOrderBy(t.DATE_STR_BEGIN.desc());
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
@@ -656,6 +684,7 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
             dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
             dto.setAmountReceived(r.getValue(t.AMOUNT_RECEIVED));
+            dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));
             if(!org.springframework.util.StringUtils.isEmpty(billGroupName)) {
                 dto.setBillGroupName(billGroupName);
             }else{
@@ -668,12 +697,16 @@ public class AssetProviderImpl implements AssetProvider {
             if (r.getValue(t.NOTICETEL) != null) {
             	dto.setNoticeTelList(Arrays.asList((r.getValue(t.NOTICETEL)).split(",")));
 			}
-
             dto.setNoticeTimes(r.getValue(t.NOTICE_TIMES));
             dto.setDateStr(r.getValue(t.DATE_STR));
-            dto.setTargetName(r.getValue(t.TARGET_NAME));
             dto.setTargetId(r.getValue(t.TARGET_ID, String.class));
+            dto.setTargetName(r.getValue(t.TARGET_NAME));
             dto.setTargetType(r.getValue(t.TARGET_TYPE));
+            //如果企业客户类型下+客户名称是空+客户ID不为空，那么需根据客户ID找到客户名称
+            if(dto.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode()) && dto.getTargetName() == null && dto.getTargetId() != null) {
+            	Organization organization = organizationProvider.findOrganizationById(r.getValue(t.TARGET_ID));
+            	dto.setTargetName(organization.getName());
+            }
             dto.setOwnerId(r.getValue(t.OWNER_ID, String.class));
             dto.setOwnerType(r.getValue(t.OWNER_TYPE));
             dto.setContractNum(r.getValue(t.CONTRACT_NUM));
@@ -2991,6 +3024,15 @@ public class AssetProviderImpl implements AssetProvider {
     		.where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
             .execute();
     }
+    
+    public void deleteBillItemByBillId(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //删除费项（置状态）
+        context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+    		.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+    		.where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+            .execute();
+    }
 
     @Override
     public void deletExemptionItem(Long exemptionItemId) {
@@ -4498,6 +4540,8 @@ public class AssetProviderImpl implements AssetProvider {
         query.addSelect(bill.DATE_STR_END);
         query.addSelect(bill.STATUS);
         query.addSelect(bill.ID);
+        query.addSelect(bill.SOURCE_TYPE);
+        query.addSelect(bill.CONFIRM_FLAG);
         if(namespaceId!=null){
             query.addConditions(bill.NAMESPACE_ID.eq(namespaceId));
         }
@@ -4532,6 +4576,14 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDateStrEnd(r.getValue(bill.DATE_STR_END));
                     dto.setChargeStatus(r.getValue(bill.STATUS));
                     dto.setBillId(String.valueOf(r.getValue(bill.ID)));
+                    //物业缴费V7.4:若用户在APP一次性全部支付，此时在APP端显示的支付状态是“已支付，待确认”。当财务看到了支付结果，在CM中确认收入以后，CM的账单状态变成“已支付”。下一次同步数据时，APP同步显示为 “已确认”。
+                    //账单来源是来源于CM，以及是服务费账单（资源预订、云打印）类型的，那么需要瑞安财务确认支付结果
+                    String sourceType = r.getValue(bill.SOURCE_TYPE);
+                    if(AssetModuleNotifyConstants.ASSET_CM_MODULE.equals(sourceType) 
+                    		|| AssetSourceType.RENTAL_MODULE.equals(sourceType)
+                    		|| AssetSourceType.PRINT_MODULE.equals(sourceType)) {
+                    	dto.setConfirmFlag(r.getValue(bill.CONFIRM_FLAG) != null ? r.getValue(bill.CONFIRM_FLAG) : 0);
+                    }
                     list.add(dto);
                     return null;
                 });
@@ -4564,9 +4616,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType))
                 .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
-                //物业缴费V7.5（中天-资管与财务EAS系统对接） ： 不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付)
-                .and(Tables.EH_PAYMENT_BILLS.THIRD_PAID.isNull()
-                		.or(Tables.EH_PAYMENT_BILLS.THIRD_PAID.ne(AssetPaymentBillStatus.PAID.getCode())))
                 .fetchInto(PaymentBills.class);
     }
 

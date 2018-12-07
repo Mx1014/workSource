@@ -65,8 +65,8 @@ public class ContractScheduleJob extends QuartzJobBean {
 
     public static final String SCHEDELE_NAME = "contract-";
 
-    //public static String CRON_EXPRESSION = "0 0 2 * * ?";
-    public static String CRON_EXPRESSION = "0 10 * * * ?";
+    public static String CRON_EXPRESSION = "0 0 2 * * ?";
+    //public static String CRON_EXPRESSION = "0 10 * * * ?";
 
     @Autowired
     private ScheduleProvider scheduleProvider;

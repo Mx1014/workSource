@@ -10,9 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>ENTERPRISE_VISITOR(3): 访客预约</li>
  * <li>PARKING(4): 停车缴费</li>
  * <li>ASSET(5): 物业缴费</li>
- * <li>ASSET(6): 品质核查</li>
- * <li>ASSET(7): 社区活动</li>
- * <li>ASSET(8): 资源预约</li>
+ * <li>QUALITY(6): 品质核查</li>
+ * <li>ACTIVITY(7): 社区活动</li>
+ * <li>RENTAL(8): 资源预约</li>
  * <li>MY_APPLY(10000): 我的工单</li>
  * <li>YOULINYUEXUAN(10001): 悦邻优选</li>
  * </ul>

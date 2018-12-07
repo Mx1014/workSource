@@ -28,7 +28,6 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.gogs.*;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
@@ -51,6 +50,7 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.news.NewsCommentContentType;
@@ -72,6 +72,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.everhomes.util.*;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -81,6 +84,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -3114,6 +3118,36 @@ public class FlowServiceImpl implements FlowService {
                 dto.setNeedEvaluate((byte) 1);
             }
         }
+
+        // content 转 entity
+        dto.setEntities(contentToEntitys(flowCase.getContent()));
+    }
+
+    private List<FlowCaseEntity> contentToEntitys(String content) {
+        if (content != null) {
+            String[] split = content.split("\n");
+            List<FlowCaseEntity> entities = new ArrayList<>(split.length);
+            for (String line : split) {
+                FlowCaseEntity entity = new FlowCaseEntity();
+                // 英文冒号
+                int colonIndex = line.indexOf(":");
+                if (colonIndex == -1) {
+                    // 中文冒号
+                    colonIndex = line.indexOf("：");
+                }
+                if (colonIndex != -1) {
+                    entity.setKey(line.substring(0, colonIndex));
+                    entity.setValue(line.substring(colonIndex+1));
+                    entity.setEntityType(FlowCaseEntityType.LIST.getCode());
+                } else {
+                    entity.setValue(line);
+                    entity.setEntityType(FlowCaseEntityType.TEXT.getCode());
+                }
+                entities.add(entity);
+            }
+            return entities;
+        }
+        return new ArrayList<>();
     }
 
     @Override
@@ -3163,11 +3197,6 @@ public class FlowServiceImpl implements FlowService {
 
     @Override
     public SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd) {
-        return searchFlowCases(cmd, null);
-    }
-
-    @Override
-    public SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback) {
         SearchFlowCaseResponse resp = new SearchFlowCaseResponse();
         if (cmd.getNamespaceId() == null) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -3194,15 +3223,15 @@ public class FlowServiceImpl implements FlowService {
         if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
             type = 1;
             flowUserType = FlowUserType.APPLIER;
-            details = flowCaseProvider.findApplierFlowCases(locator, count, cmd, callback);
+            details = flowCaseProvider.findApplierFlowCases(locator, count, cmd, null);
         } else if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
             type = 2;
             flowUserType = FlowUserType.PROCESSOR;
-            details = flowCaseProvider.findAdminFlowCases(locator, count, cmd, callback);
+            details = flowCaseProvider.findAdminFlowCases(locator, count, cmd, null);
         } else {
             type = 3;
             flowUserType = FlowUserType.PROCESSOR;
-            details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd, callback);
+            details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd, null);
         }
 
         List<FlowCaseDTO> dtos = new ArrayList<>();

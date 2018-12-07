@@ -146,7 +146,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         LOGGER.info("create customer: {}", StringHelper.toJsonString(customer));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
         customer.setId(id);
-        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(customer.getCreateTime() == null)
+            customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         customer.setStatus(CommonStatus.ACTIVE.getCode());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -352,6 +353,26 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        if(result.size() == 0) {
+            return null;
+        }
+        return result.get(0);
+    }
+    
+    @Override
+    public EnterpriseCustomer findByOrganizationIdAndType(Long organizationId, String namespaceCustomerType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(namespaceCustomerType));
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<EnterpriseCustomer> result = new ArrayList<>();
@@ -2634,6 +2655,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor, Integer namespaceId){
+
         List<CreateOrganizationAdminCommand> dtoList = new ArrayList<>();
         if(nextPageAnchor == null){
             nextPageAnchor = 0l;
@@ -2667,7 +2689,6 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         });
         return dtoList;
     }
-
 
     @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor){

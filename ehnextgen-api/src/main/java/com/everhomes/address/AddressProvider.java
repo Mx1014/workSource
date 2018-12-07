@@ -7,6 +7,7 @@ import com.everhomes.community.Community;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.organization.pm.AddressEvent;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.ApartmentBriefInfoDTO;
@@ -186,7 +187,15 @@ public interface AddressProvider {
 	 * @param cityId 城市ID
 	 */
 	void updateAddressOfCityId(Long addressId, Long cityId);
+
+	void createAddressEvent(AddressEvent event);
+	void deleteAddressEventByAddressId(Long addressId);
+	List<AddressEvent> listAddressEvents(Long addressId, Integer pageSize, Long pageAnchor);
+	AddressEvent findAddressEventByAddressIdAndOperateTime(Long addressId, Timestamp updateTime);
+	void updateAddressEvent(AddressEvent event);
+
 	List<ApartmentBriefInfoDTO> listApartmentsByMultiStatus(Integer namespaceId, Long communityId, String buildingName,
 			String apartment, List<Byte> livingStatus, Long pageAnchor, int pageSize);
 	List<Address> findActiveAddress(int startIndex, int pageSize);
+	List<Long> findOrganizationAddressByOrganizationId(Long organizationId);
 }

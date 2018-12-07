@@ -2,6 +2,11 @@
 package com.everhomes.serviceModuleApp;
 
 import com.everhomes.rest.launchpad.ListAllAppsResponse;
+import com.everhomes.rest.launchpad.ListWorkPlatformAppCommand;
+import com.everhomes.rest.launchpad.ListWorkPlatformAppResponse;
+import com.everhomes.rest.launchpad.SaveWorkPlatformAppCommand;
+import com.everhomes.rest.launchpad.UpdateWorkPlatformAppCommand;
+import com.everhomes.rest.launchpad.UpdateWorkPlatformAppSortCommand;
 import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
@@ -58,11 +63,23 @@ public interface ServiceModuleAppService {
 
 	void updateBaseUserApps(UpdateUserAppsCommand cmd);
 
+	void updateBaseUserAppsForWorkPlatform(UpdateUserAppsForWorkPlatformCommand cmd);
+
 	void updateRecommendApps(UpdateRecommendAppsCommand cmd);
 
     ListAllAppsResponse listAllApps(ListAllLaunchPadAppsCommand cmd);
-    
+
+    ListAllAppsResponse listAllAppsForWorkPlatform(ListAllLaunchPadAppsCommand cmd);
+
     ListServiceModuleAppsForEnterprisePayResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd);
+
+	ListWorkPlatformAppResponse listWorkPlatformApp(ListWorkPlatformAppCommand cmd);
+
+	void saveWorkPlatformApp(SaveWorkPlatformAppCommand cmd);
+
+	void updateWorkPlatformApp(UpdateWorkPlatformAppCommand cmd);
+
+	void updateWorkPlatformAppSort(UpdateWorkPlatformAppSortCommand cmd);
 
 	List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps);
 }

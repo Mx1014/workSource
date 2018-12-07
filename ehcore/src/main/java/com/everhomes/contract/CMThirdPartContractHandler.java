@@ -4,6 +4,9 @@ package com.everhomes.contract;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.third.RuiAnCMThirdOpenBillHandler;
+import com.everhomes.asset.third.ThirdOpenBillHandler;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -219,6 +222,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }
 
         }
+
         //此方法可以获取当前正在进行同步的数据
         List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
 
@@ -246,7 +250,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
         //同步CM数据到物业账单表
         try{
-            assetService.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
+            //assetService.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
+        	RuiAnCMThirdOpenBillHandler handler = PlatformContext.getComponent(ThirdOpenBillHandler.THIRDOPENBILL_PREFIX + NAMESPACE_ID);
+            handler.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
         }catch(Exception e){
             LOGGER.error("sync data from RuiAnCM is fail cause Bill " ,e);
             //将同步锁置为失效，此时可以再次创建任务
@@ -297,26 +303,20 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     }
 
 
-    private void syncDataToDb(Byte dataType,List<CMDataObject> mergeContractList, Long taskId, Long categoryId, Byte contractApplicationScene) {
-        /*List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, dataType);
-        if (backupList == null || backupList.isEmpty()) {
-            LOGGER.debug("syncDataToDb backupList is empty, NAMESPACE_ID: {}, dataType: {}", NAMESPACE_ID, dataType);
-            return ;
-        }*/
-        try {
-            //LOGGER.debug("syncDataToDb backupList size：{}", backupList.size());
-            updateAllData(dataType, NAMESPACE_ID, mergeContractList, categoryId, contractApplicationScene);
-        } finally {
-            //zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
-            //syncDataTaskService.createSyncErrorMsg(NAMESPACE_ID, taskId);
-        }
+	private void syncDataToDb(Byte dataType, List<CMDataObject> mergeContractList, Long taskId, Long categoryId, Byte contractApplicationScene) {
+		try {
+			LOGGER.debug("syncDataToDb mergeContractList size：{}", mergeContractList);
+			updateAllData(dataType, NAMESPACE_ID, mergeContractList, categoryId, contractApplicationScene);
+		} finally {
+			// zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+			// syncDataTaskService.createSyncErrorMsg(NAMESPACE_ID, taskId);
+			LOGGER.debug("syncDataToDb updateAllData error！");
+		}
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("dataType {} get out thread=================", dataType);
-        }
-    }
-
-
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("dataType {} get out thread=================", dataType);
+		}
+	}
 
     private String getNextDay(String date, SimpleDateFormat sdf){
         try {
@@ -350,122 +350,169 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         zjSyncdataBackupProvider.createZjSyncdataBackup(backup);
     }
 
-    private void updateAllData(Byte dataType, Integer namespaceId, List<CMDataObject> mergeContractList, Long categoryId, Byte contractApplicationScene) {
-        DataType cmDataType = DataType.fromCode(dataType);
-        LOGGER.debug("CM DataType : {}", cmDataType);
-        switch (cmDataType) {
-            case CONTRACT:
-                LOGGER.debug("syncDataToDb SYNC CONTRACT");
-                syncAllContracts(namespaceId, mergeContractList, categoryId, contractApplicationScene);
-                break;
-            case APARTMENT_LIVING_STATUS:
-                //syncApartmentLivingStatus(namespaceId, backupList);
-                break;
-            default:
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                        "error data type");
-        }
-    }
+	private void updateAllData(Byte dataType, Integer namespaceId, List<CMDataObject> mergeContractList, Long categoryId, Byte contractApplicationScene) {
+		DataType cmDataType = DataType.fromCode(dataType);
+		LOGGER.debug("CM DataType : {}", cmDataType);
+		switch (cmDataType) {
+		case CONTRACT:
+			LOGGER.debug("syncDataToDb SYNC CONTRACT");
+			syncAllContracts(namespaceId, mergeContractList, categoryId, contractApplicationScene);
+			break;
+		case APARTMENT_LIVING_STATUS:
+			// syncApartmentLivingStatus(namespaceId, backupList);
+			break;
+		default:
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "error data type");
+		}
+	}
 
-    private void syncAllContracts(Integer namespaceId,  List<CMDataObject> mergeContractList, Long categoryId, Byte contractApplicationScene) {
-        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
-        //allFlag为part时，仅更新单个特定的项目数据即可
+	private void syncAllContracts(Integer namespaceId, List<CMDataObject> mergeContractList, Long categoryId, Byte contractApplicationScene) {
+		// 必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+		// allFlag为part时，仅更新单个特定的项目数据即可
 
-    	/*List<CMDataObject> mergeContractList = mergeBackupList(backupList, CMDataObject.class);
+		List<Contract> myContractList = contractProvider.listContractByNamespaceType(namespaceId, NamespaceCommunityType.RUIAN_CM.getCode(), null, null);
 
-		for (int i = 0; i < mergeContractList.size(); i++) {
-			Community community = communityProvider.findCommunityByNamespaceToken(
-					NamespaceCommunityType.RUIAN_CM.getCode(),
-					mergeContractList.get(i).getContractHeader().getPropertyID());
-			if (community == null) {
-				return;
+		LOGGER.debug("syncDataToDb namespaceId: {}, myContractList size: {}, theirContractList size: {}", namespaceId, myContractList.size(), mergeContractList.size());
+
+		syncAllContracts(namespaceId, myContractList, mergeContractList, categoryId, contractApplicationScene);
+	}
+
+	private void syncAllContracts(Integer namespaceId, List<Contract> myContractList, List<CMDataObject> theirContractList, Long categoryId, Byte contractApplicationScene) {
+		if (theirContractList != null) {
+			for (CMDataObject cmContract : theirContractList) {
+				// 瑞安删除合同
+				if ("0".equals(convertContractStatus(cmContract.getContractHeader().getRecordstatus()))) {
+					if (myContractList != null) {
+						for (Contract contract : myContractList) {
+							if (NamespaceContractType.RUIAN_CM.getCode().equals(contract.getNamespaceContractType())
+									&& contract.getNamespaceContractToken().equals(cmContract.getContractHeader().getRentalID())) {
+								LOGGER.info("CM deleteContract RentalID = " + cmContract.getContractHeader().getRentalID());
+								deleteContract(contract, cmContract, categoryId, contractApplicationScene);
+							}
+						}
+					}
+				// CM原合同已结束，APP将合同设置为已过期，并且擦除全部未支付的账单信息（若原合同的账单已被用户支付，则不擦除）；
+				} else if ("7".equals(convertContractStatus(cmContract.getContractHeader().getRecordstatus()))) {
+					Boolean notdeal = true;
+					if (myContractList != null) {
+						for (Contract contract : myContractList) {
+							if (NamespaceContractType.RUIAN_CM.getCode().equals(contract.getNamespaceContractType())
+									&& contract.getNamespaceContractToken().equals(cmContract.getContractHeader().getRentalID())) {
+								notdeal = false;
+								// 删除账单
+								// 1、删除账单，删除合同
+								List<Long> contractIdList = new ArrayList<Long>();
+								contractIdList.add(contract.getId());
+
+								try {
+									RuiAnCMThirdOpenBillHandler handler = PlatformContext.getComponent(ThirdOpenBillHandler.THIRDOPENBILL_PREFIX + NAMESPACE_ID);
+									handler.batchDeleteBillFromContract(contract.getNamespaceId(), contractIdList);
+								} catch (Exception e) {
+									LOGGER.info("CM deleteContract batchDeleteBillFromContract  = " + contract);
+								}
+
+								updateContract(contract, cmContract, categoryId, contractApplicationScene);
+							}
+						}
+					}
+					if (notdeal) {
+						// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+						Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, cmContract.getContractHeader().getContractNo(), categoryId);
+						if (contract == null) {
+							insertContract(NAMESPACE_ID, cmContract, categoryId);
+						} else {
+							// 1、删除账单，删除合同
+							List<Long> contractIdList = new ArrayList<Long>();
+							contractIdList.add(contract.getId());
+
+							try {
+								RuiAnCMThirdOpenBillHandler handler = PlatformContext.getComponent(ThirdOpenBillHandler.THIRDOPENBILL_PREFIX + NAMESPACE_ID);
+								handler.batchDeleteBillFromContract(contract.getNamespaceId(), contractIdList);
+							} catch (Exception e) {
+								LOGGER.info("CM deleteContract batchDeleteBillFromContract  = " + contract);
+							}
+							updateContract(contract, cmContract, categoryId, contractApplicationScene);
+						}
+					}
+				// 3 不需要特殊处理的合同，都同步过来
+				} else {
+					Boolean notdeal = true;
+					if (myContractList != null) {
+						for (Contract contract : myContractList) {
+							if (NamespaceContractType.RUIAN_CM.getCode().equals(contract.getNamespaceContractType())
+									&& contract.getNamespaceContractToken().equals(cmContract.getContractHeader().getRentalID())) {
+								notdeal = false;
+								updateContract(contract, cmContract, categoryId, contractApplicationScene);
+							}
+						}
+					}
+					if (notdeal) {
+						// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+						Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, cmContract.getContractHeader().getContractNo(), categoryId);
+						if (contract == null) {
+							insertContract(NAMESPACE_ID, cmContract, categoryId);
+						} else {
+							updateContract(contract, cmContract, categoryId, contractApplicationScene);
+						}
+					}
+				}
 			}
-			mergeContractList.get(i).setCommunityId(community.getId());
+		}
+	}
+    
+	// 瑞安同步过来的合同删除的
+	private void deleteContract(Contract contract, CMDataObject cmContractData, Long categoryId, Byte contractApplicationScene) {
+		LOGGER.info("CM deleteContract Start contract = " + contract);
+		// 1、删除账单，删除合同
+		List<Long> contractIdList = new ArrayList<Long>();
+		contractIdList.add(contract.getId());
+		try {
+			RuiAnCMThirdOpenBillHandler handler = PlatformContext.getComponent(ThirdOpenBillHandler.THIRDOPENBILL_PREFIX + NAMESPACE_ID);
+			handler.batchDeleteBillFromContract(contract.getNamespaceId(), contractIdList);
+		} catch (Exception e) {
+			LOGGER.info("CM deleteContract batchDeleteBillFromContract  = " + contract);
+		}
 
-		}*/
+		DeleteContractCommand command = new DeleteContractCommand();
+		command.setId(contract.getId());
+		command.setCommunityId(contract.getCommunityId());
+		command.setNamespaceId(contract.getNamespaceId());
+		command.setCheckAuth(false);
 
+		getContractService(contract.getNamespaceId()).deleteContract(command);
 
-        //List<CMDataObject> mergeContractList = mergeBackupList(backupList, CMDataObject.class);
-        //这部分已经传过来
-
-
-        List<Contract> myContractList = contractProvider.listContractByNamespaceType(namespaceId, NamespaceCommunityType.RUIAN_CM.getCode(), null, null);
-
-
-
-        LOGGER.debug("syncDataToDb namespaceId: {}, myContractList size: {}, theirContractList size: {}",
-                namespaceId, myContractList.size(), mergeContractList.size());
-
-
-        syncAllContracts(namespaceId, myContractList, mergeContractList, categoryId, contractApplicationScene);
-
-        /*if (mergeContractList.size() > 0) {
-            List<String> ownerIdList = mergeContractList.stream().map(EbeiContract::getOwnerId).collect(Collectors.toList());
-            String ownerIds = ownerIdList.toString().substring(1, ownerIdList.toString().length()-1);
-            //getOwnerStatus(communityIdentifier, ownerIds);
-        }*/
+		if (contract.getCustomerId() != null) {
+			EnterpriseCustomer customer = customerProvider.findById(contract.getCustomerId());
+			if (customer != null) {
+				customer.setContactAddress("");
+				customerProvider.updateEnterpriseCustomer(customer);
+				List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
+				List<Long> addressIds = listContractRelatedAddresses(cmContractData.getContractUnit());
+				if (myOrganizationAddressList != null && addressIds != null && addressIds.size() > 0) {
+					List<OrganizationAddress> organizationAddresses = myOrganizationAddressList.stream()
+							.filter((r) -> addressIds.contains(r.getAddressId())).collect(Collectors.toList());
+					for (OrganizationAddress organizationAddress : organizationAddresses) {
+						deleteOrganizationAddress(organizationAddress);
+					}
+				}
+			}
+		}
+	}
+    
+	private List<Long> listContractRelatedAddresses(List<CMContractUnit> roomInfos) {
+		List<String> addressIds = new ArrayList<>();
+		if (roomInfos != null && roomInfos.size() > 0) {
+			addressIds = roomInfos.stream().map(CMContractUnit::getUnitID).collect(Collectors.toList());
+			return addressProvider.listThirdPartRelatedAddresses(NamespaceAddressType.RUIAN_CM.getCode(), addressIds);
+		}
+		return new ArrayList<>();
+	}
+    
+    private ContractService getContractService(Integer namespaceId) {
+        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+        return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
     }
-
-    private void syncAllContracts(Integer namespaceId, List<Contract> myContractList, List<CMDataObject> theirContractList, Long categoryId, Byte contractApplicationScene) {
-        if (theirContractList != null) {
-            for (CMDataObject cmContract : theirContractList) {
-                //删除状态暂不考虑
-                if ("0".equals(convertContractStatus(cmContract.getContractHeader().getRecordstatus()))) {
-                    if (myContractList != null) {
-                        for (Contract contract : myContractList) {
-                            if (NamespaceContractType.RUIAN_CM.getCode().equals(contract.getNamespaceContractType())
-                                    && contract.getNamespaceContractToken().equals(cmContract.getContractHeader().getRentalID())) {
-                                //deleteContract(contract,ebeiContract.getHouseInfoList());
-                            }
-                        }
-                    }
-                    //待发起 未提交
-                } else if("1".equals(convertContractStatus(cmContract.getContractHeader().getRecordstatus()))) {
-                    Boolean notdeal = true;
-                    if (myContractList != null) {
-                        for (Contract contract : myContractList) {
-                            if (NamespaceContractType.RUIAN_CM.getCode().equals(contract.getNamespaceContractType())
-                                    && contract.getNamespaceContractToken().equals(cmContract.getContractHeader().getRentalID())) {
-                                notdeal = false;
-                                updateContract(contract, cmContract, categoryId, contractApplicationScene);
-                            }
-                        }
-                    }
-                    if(notdeal){
-                        // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                        Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, cmContract.getContractHeader().getContractNo(), categoryId);
-                        if (contract == null) {
-                            insertContract(NAMESPACE_ID, cmContract, categoryId);
-                        }else {
-                            updateContract(contract, cmContract, categoryId, contractApplicationScene);
-                        }
-                    }
-                    //3 审批中
-                } else {
-                    Boolean notdeal = true;
-                    if (myContractList != null) {
-                        for (Contract contract : myContractList) {
-                            if (NamespaceContractType.RUIAN_CM.getCode().equals(contract.getNamespaceContractType())
-                                    && contract.getNamespaceContractToken().equals(cmContract.getContractHeader().getRentalID())) {
-                                notdeal = false;
-                                updateContract(contract, cmContract, categoryId, contractApplicationScene);
-                            }
-                        }
-                    }
-                    if(notdeal){
-                        // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                        Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, cmContract.getContractHeader().getContractNo(), categoryId);
-                        if (contract == null) {
-                            insertContract(NAMESPACE_ID, cmContract, categoryId);
-                        }else {
-                            updateContract(contract, cmContract, categoryId, contractApplicationScene);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
+    
     private void insertContract(Integer namespaceId, CMDataObject cmContractData, Long categoryId) {
         Contract contract = new Contract();
         contract.setNamespaceId(namespaceId);
@@ -512,6 +559,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             contract.setCustomerId(customer.getId());
         }
 
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getParentID())) {
+        	contract.setParentId(Long.parseLong(cmContractData.getContractHeader().getParentID()));
+        }
         contract.setCreateUid(UserContext.currentUserId());
         contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         contractProvider.createContract(contract);
@@ -600,7 +650,6 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         contract.setContractNumber(cmContractData.getContractHeader().getContractNo());
         contract.setName("瑞安合同");
         //contract.setBuildingRename(cmContractData.getBuildingRename());
-
         contract.setCategoryId(categoryId);
 
         if(StringUtils.isNotBlank(cmContractData.getContractHeader().getStartDate())) {
@@ -633,6 +682,10 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
         //由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字
         contract.setSponsorUid(cmContractData.getContractHeader().getCreateUserName());
+        // 原合同编号
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getParentID())) {
+        	contract.setParentId(Long.parseLong(cmContractData.getContractHeader().getParentID()));
+        }
 
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceContractType.RUIAN_CM.getCode(), cmContractData.getContractHeader().getAccountID());
         if(customer != null) {
@@ -720,13 +773,13 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     private Byte convertContractStatus(String ebeiContractStatus) {
         if(ebeiContractStatus != null) {
             switch (ebeiContractStatus) {
-                case "已结束": return ContractStatus.HISTORY.getCode();
-                case "未提交": return ContractStatus.DRAFT.getCode();
-                case "待审批": return ContractStatus.WAITING_FOR_APPROVAL.getCode();
-                case "已审批": return ContractStatus.ACTIVE.getCode();
+            	case "未提交": return ContractStatus.DRAFT.getCode();
+            	case "待审批": return ContractStatus.WAITING_FOR_APPROVAL.getCode();
+            	case "已审批": return ContractStatus.ACTIVE.getCode();//?
+                case "已结束": return ContractStatus.EXPIRED.getCode();
                 case "已终止": return ContractStatus.DENUNCIATION.getCode();
                 case "已驳回": return ContractStatus.APPROVE_NOT_QUALITIED.getCode();
-
+                case "已作废": return ContractStatus.INACTIVE.getCode();
                 default: return null;
             }
         }
@@ -909,7 +962,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         customer.setStatus(CommonStatus.ACTIVE.getCode());
         customer.setOperatorUid(1L);
         customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
-        customer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
+        customer.setLevelItemId(CustomerLevelType.REGISTERED_CUSTOMER.getCode());
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //      customer.setVersion(ebeiCustomer.getVersion());
 //            if(customer.getTrackingUid() == null) {

@@ -483,4 +483,6 @@ public interface AssetProvider {
 
 	AssetBillDateDTO generateBillDate(Long billGroupId, String dateStrBegin, String dateStrEnd);
 	
+	void deleteBillItemByBillId(Long billId);
+	
 }
