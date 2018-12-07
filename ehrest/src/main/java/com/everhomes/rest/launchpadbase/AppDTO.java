@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *     <li>routerQuery: 路由参数，例如: ""</li>
  *     <li>router: router</li>
  *     <li>accessControlType: accessControlType</li>
+ *     <li>entryId: 应用入口ID</li>
  * </ul>
  */
 public class AppDTO {
@@ -64,6 +65,15 @@ public class AppDTO {
     //权限控制
     private Byte accessControlType;
 
+    private Long entryId;
+
+    public Long getEntryId() {
+        return entryId;
+    }
+
+    public void setEntryId(Long entryId) {
+        this.entryId = entryId;
+    }
 
     public Long getItemId() {
         return itemId;

@@ -141,4 +141,6 @@ public interface PortalService {
     void revertVersion(RevertVersionCommand cmd);
 
 	PortalLayoutDTO findIndexPortalLayout(FindIndexPortalLayoutCommand cmd);
+
+	void initAppEntryData();
 }

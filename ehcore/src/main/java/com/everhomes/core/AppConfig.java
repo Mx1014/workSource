@@ -97,7 +97,7 @@ public class AppConfig implements AsyncConfigurer {
     class SpringAsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
         @Override
         public void handleUncaughtException(Throwable throwable, Method method, Object... obj) {
-                    LOGGER.error("Exception occurs in async method", throwable.getMessage());
+                    LOGGER.error("Exception occurs in async method {}", throwable);
                 }
     }
 }

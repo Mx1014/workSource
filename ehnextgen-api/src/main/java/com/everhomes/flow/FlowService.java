@@ -251,7 +251,6 @@ public interface FlowService {
 
 	/**
 	 * 获取 FlowButton 的详细信息
-	 * @param cmd
 	 * @return
 	 */
 	FlowButtonDetailDTO getFlowButtonDetail(Long flowButtonId);
@@ -320,8 +319,6 @@ public interface FlowService {
 	FlowCase createFlowCase(CreateFlowCaseCommand flowCaseCmd);
 
 	FlowModuleDTO getModuleById(Long moduleId);
-
-    SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback);
 
     /**
 	 * 获取 FlowCase 的详细日志信息

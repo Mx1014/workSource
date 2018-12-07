@@ -6,6 +6,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.portal.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -694,6 +695,21 @@ public class PortalController extends ControllerBase {
 		LOGGER.info("revertVersion time = {}, cmd = {}", System.currentTimeMillis(), cmd);
 
 		portalService.revertVersion(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>初始化应用入口数据</p>
+	 * <b>URL: /portal/initAppEntryData</b>
+	 */
+	@RequestMapping("initAppEntryData")
+	@RestReturn(String.class)
+    @RequireAuthentication(false)
+	public RestResponse initAppEntryData(){
+		portalService.initAppEntryData();
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

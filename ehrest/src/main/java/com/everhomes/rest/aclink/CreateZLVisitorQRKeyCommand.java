@@ -17,14 +17,14 @@ import com.everhomes.util.StringHelper;
  * <li>validFromMs: 有效期开始时间</li>
  * <li>validEndMs: 有效期终止时间</li>
  * <li>totalAuthAmount: 有效开门次数</li>
+ * <li>兼容旧版本:</li>
+ * <li>MacAddress: 门禁ID</li>
  * </ul>
  */
 public class CreateZLVisitorQRKeyCommand {
     private String phone;
-    
-    @NotNull
-    private String macAddress;
-    
+//    private String macAddress;
+    private String MacAddress;
     private String userName;
     private String visitorEvent;
     private String organization;
@@ -43,11 +43,14 @@ public class CreateZLVisitorQRKeyCommand {
 		this.phone = phone;
 	}
 	public String getMacAddress() {
-		return macAddress;
+//		return macAddress == null || macAddress.isEmpty() ? MacAddress : macAddress;
+		return MacAddress;
 	}
 	public void setMacAddress(String macAddress) {
-		this.macAddress = macAddress;
+//		this.macAddress = macAddress;
+		MacAddress = macAddress;
 	}
+	
 	public String getUserName() {
 		return userName;
 	}

@@ -964,7 +964,6 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
 		}
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat sdfMM = new SimpleDateFormat("yyyy-MM");
 		//设置本月第一天
 		Calendar firstCa = Calendar.getInstance();
@@ -979,7 +978,6 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		}
 		firstCa.setTime(userDate);
 		firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
-		String firststr = sdf.format(firstCa.getTime());
 
 		// 设置本月最后
 		lastCa.setTime(userDate);
@@ -987,17 +985,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		lastCa.set(Calendar.HOUR_OF_DAY, 23);
 		lastCa.set(Calendar.MINUTE, 59);
 		lastCa.set(Calendar.SECOND, 59);
-		String laststr = sdf.format(lastCa.getTime());
 		
-		Date firstdateUpdateTime = null;
-		Date lastdateUpdateTime = null;
-		try {
-			firstdateUpdateTime = sdf.parse(firststr);
-			lastdateUpdateTime = sdf.parse(laststr);
-		} catch (ParseException e) {
-			LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error, firststr ={} ,laststr ={} ,StackInfo ={}", firststr, laststr, e.getStackTrace());
-		}
-		//qb = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("updateTime").from(firstdateUpdateTime).to(lastdateUpdateTime));
+		qb = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("updateTime").from(firstCa.getTime()).to(lastCa.getTime()));
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		Long anchor = 0l;
