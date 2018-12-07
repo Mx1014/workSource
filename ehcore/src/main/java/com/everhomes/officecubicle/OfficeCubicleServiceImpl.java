@@ -1732,7 +1732,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	}
 	
 	@Override
-	public CreateOfficeCubicleOrderResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd){
+	public CreateOfficeCubicleOrderResponse createCubicleOrderV2(CreateOfficeCubicleOrderCommand cmd){
 		OfficeCubicleRentOrder order = ConvertHelper.convert(cmd, OfficeCubicleRentOrder.class);
 		RentalOrder rentalOrder = rentalv2Provider.findRentalBillById(cmd.getRentalOrderNo());
 		order.setUseDetail(rentalOrder.getUseDetail());

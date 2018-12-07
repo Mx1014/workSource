@@ -64,8 +64,6 @@ public interface OfficeCubicleService {
 
 	void addCubicle(AddCubicleAdminCommand cmd);
 
-	CreateOfficeCubicleOrderResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd);
-
 	void createOrUpdateOfficeCubiclePayeeAccount(CreateOrUpdateOfficeCubiclePayeeAccountCommand cmd);
 
 	List<ListOfficeCubicleAccountDTO> listOfficeCubicleAccount(ListOfficeCubicleAccountCommand cmd);
@@ -125,5 +123,7 @@ public interface OfficeCubicleService {
 	ListRentOrderForAppResponse listRentOrderForApp(ListRentOrderForAppCommand cmd);
 
 	void schedule();
+
+	CreateOfficeCubicleOrderResponse createCubicleOrderV2(CreateOfficeCubicleOrderCommand cmd);
 
 }

@@ -304,13 +304,13 @@ public class OfficeCubicleController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /officecubicle/createCubicleGeneralOrder</b> 
+     * <b>URL: /officecubicle/createCubicleOrderV2</b> 
      * <p>客户端创建订单</p>
      */
-    @RequestMapping("createCubicleGeneralOrder")
+    @RequestMapping("createCubicleOrderV2")
     @RestReturn(CreateOfficeCubicleOrderResponse.class)
     public RestResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd) {
-    	CreateOfficeCubicleOrderResponse  resp = this.officeCubicleService.createCubicleGeneralOrder(cmd);
+    	CreateOfficeCubicleOrderResponse  resp = this.officeCubicleService.createCubicleOrderV2(cmd);
     	
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
