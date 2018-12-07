@@ -1405,6 +1405,21 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         return identifier;
     }
     
+    /**
+     * <p>个人客户的帐单以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性（这三个信息构成唯一标识)，导入的时候需要比较是否已经存在相同标识的帐单，
+     * 如果相同标识的帐单已经存在，则需要先删除再重新建。而这个比较过程，原来是把eh_payment_bills表与eh_payment_bill_items进行联查，其中帐单时间
+     * 和帐单组在eh_payment_bills表，而门牌信息却在eh_payment_bill_items表里，联查出来的数据数目与items的数量一样，而更新是按这个数量来进行更新，
+     * 实际只需要按帐单更新即可，这是费时的点一；比较的时候，每次查完，再跟excel数据里的门牌进行比较，使得比较次数也很多，比较很慢，这是费时点二；</p>
+     * <p>为了加快速度，先把excel数据里出现的时间段，把数据库已有的帐单分批遍历出来（分批是为了减少内存的占用），然后组装出帐单组和帐单时间的标识；
+     * 再把用到的帐单分批把其关联的费项明细遍历出来，把对应的门牌信息组装到标识里，形成完整的帐单标识；比较的时候，把excel里的数据也按同样的规则组装
+     * 出标识；</p>
+     * <p>标识在组装的过程中是使用一个map保存，key为帐单ID，value为标识；为了在比较的时候可以快速找到标识，把该map反转一下，也就是key是标识，value
+     * 是帐单ID（注意：如果数据中有两个帐单标识一样，则会被覆盖掉），这样在比较时可以用map的查找速度来得到，而不是每次查找都遍历所有标识才能找到；
+     * 两个标识比较如果相同则认为帐单已存在，先删除再插入。</p>
+     * <p>帐单标识格式：<b>帐单组_账单开始时间_帐单结束时间</b></p>
+     * @param billDatas excel表中的数据列表
+     * @return 帐单标识map
+     */
     private Map<String, String> prepareUserBillIdentifiers(List<CreateBillCommand> billDatas) {
         long startTime = System.currentTimeMillis();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
