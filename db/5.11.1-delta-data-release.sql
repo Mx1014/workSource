@@ -285,12 +285,87 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 -- REMARK: issue-44220 
 SET @id = (SELECT MAX(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '10016', 'zh_CN', '调整周期 不能为0');
+
+-- AUTHOR:梁燕龙
+-- REMARK:修改模块数据
+UPDATE eh_service_modules SET name = '园区电子报-定制' WHERE id = 10500;
+UPDATE eh_service_modules SET name = '行业协会-定制' WHERE id = 10760;
+UPDATE eh_service_modules SET name = '短信推送' WHERE id = 12200;
+UPDATE eh_service_modules SET name = '物业报修' WHERE id = 20100;
+UPDATE eh_service_modules SET name = '缴费管理' WHERE id = 20400;
+UPDATE eh_service_modules SET app_type = 0 WHERE id = 20500;
+UPDATE eh_service_modules SET name = '企业客户管理' WHERE id = 21100;
+UPDATE eh_service_modules SET app_type = 0 WHERE id = 21400;
+UPDATE eh_service_modules SET name = '科技园合同管理-定制' WHERE id = 32500;
+UPDATE eh_service_modules SET name = '孵化器入驻-定制' WHERE id = 36000;
+UPDATE eh_service_modules SET name = '园区地图-定制' WHERE id = 40070;
+UPDATE eh_service_modules SET name = '资源预约' WHERE id = 40400;
+UPDATE eh_service_modules SET name = '快递服务-定制' WHERE id = 40700;
+UPDATE eh_service_modules SET name = '企业人才-定制' WHERE id = 40730;
+UPDATE eh_service_modules SET name = '车辆管理-定制' WHERE id = 40900;
+UPDATE eh_service_modules SET name = '门禁APP用户端' WHERE id = 41000;
+UPDATE eh_service_modules SET name = '园区班车-定制' WHERE id = 41015;
+UPDATE eh_service_modules SET name = '一键上网-定制' WHERE id = 41100;
+UPDATE eh_service_modules SET name = '储能一卡通-定制' WHERE id = 41200;
+UPDATE eh_service_modules SET name = '园区文件管理-定制' WHERE id = 41500;
+UPDATE eh_service_modules SET name = '园区审批-定制' WHERE id = 41600;
+UPDATE eh_service_modules SET name = '政务服务-定制' WHERE id = 41900;
+UPDATE eh_service_modules SET name = '门禁钥匙管理-定制' WHERE id = 42000;
+UPDATE eh_service_modules SET name = '组织管理' WHERE id = 50100;
+UPDATE eh_service_modules SET name = '会议管理' WHERE id = 53000;
+UPDATE eh_service_modules SET name = '招商管理' WHERE id = 150020;
+UPDATE eh_service_modules SET app_type = 0 WHERE id = 200000;
+UPDATE eh_service_modules SET name = 'H5快讯-定制' WHERE id = 10800001;
+UPDATE eh_service_modules SET name = '文档管理' WHERE id = 55000;
+UPDATE eh_service_modules SET name = '北环门禁-定制' WHERE id = 272000;
+UPDATE eh_service_modules SET name = '待办事项-定制' WHERE id = 56300;
+UPDATE eh_service_modules SET name = '园区支付授权-定制' WHERE id = 200000;
+UPDATE eh_service_modules SET name = '企业支付授权' WHERE id = 79880000;
+UPDATE eh_service_modules SET name = '左邻会议' WHERE id = 50700;
+INSERT INTO eh_service_modules(id, name, parent_id, parent_id, type, level, status, default_order, create_time,
+                               instance_config,operator_uid,creator_uid,description,multiple_flag, module_control_type,access_control_type,
+                               menu_auth_flag,category,app_type,client_handler_type)
+    VALUES (274000,'同事圈',50000,'/100/50000/274000',1,3,2,100,now(),'',0,0,'',1,'org_control',2,1,'module',0,0);
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
 -- AUTHOR:
 -- REMARK:
+-- --------------------- SECTION END zuolin-base ---------------------------------------------
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: zuolin-standard
+-- DESCRIPTION: 此SECTION只在左邻标准版执行的脚本
+
+-- AUTHOR:梁燕龙 20181120
+-- REMARK: 将移动端工作台的通讯录合我的任务移动到企业办公中
+SET @id = (SELECT IFNULL(MAX(id),0) from eh_service_module_entries);
+SET @categoryId = (SELECT IFNULL(id,0) from eh_app_categories WHERE name = '企业办公' AND location_type = 1);
+INSERT INTO eh_service_module_entries (id,module_id, module_name, entry_name, terminal_type, location_type, scene_type, app_category_id, default_order)
+VALUES (@id := @id+1,50100,'组织架构','通讯录',1,1,1,@categoryId,1);
+INSERT INTO eh_service_module_entries (id,module_id, module_name, entry_name, terminal_type, location_type, scene_type, app_category_id, default_order)
+VALUES (@id := @id+1,13000,'任务管理','我的任务',1,1,1,@categoryId,2);
+
+-- AUTHOR: 梁燕龙 20181123
+-- REMARK: 删除原来的用户编辑数据
+DELETE from eh_user_apps WHERE location_type = 1 OR location_type = 2;
+DELETE from eh_user_app_flags WHERE location_type = 1 OR location_type = 2;
+
+-- AUTHOR:梁燕龙 20181207
+-- REMARK: 初始化标准版工作台数据
+SET @versionCode = '201812070000';
+
+SET @bizAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 92100 AND `namespace_id` = 2);
+SET @activityAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 10600 AND `namespace_id` = 2);
+SET @forumAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 10100 AND `namespace_id` = 2);
+SET @newsAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 10800 AND `namespace_id` = 2);
+SET @communityBulletinsAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 10300 AND `namespace_id` = 2);
+SET @enterpriseBulletinsAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 57000 AND `namespace_id` = 2);
+SET @meetingAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 53000 AND `namespace_id` = 2);
+SET @workFlowAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 13000 AND `namespace_id` = 2);
+UPDATE eh_launch_pad_layouts set version_code = @versionCode, layout_json  = CONCAT('{"versionCode":"',@versionCode,'","layoutName":\"ServiceMarketLayout\",\"displayName\":\"工作台\",\"groups\":[{\"groupId\":1,\"groupName\":\"容器\","title":"容器","titleFlag":0,"titleStyle":101,"titleSize":1,"titleMoreFlag":0,\"columnCount\":4,\"defaultOrder\":0,\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31058\",\"paddingTop\":0.0,\"paddingLeft\":16.0,\"paddingBottom\":0.0,\"paddingRight\":16.0,\"lineSpacing\":0.0,\"columnSpacing\":0.0,\"cssStyleFlag\":1.0,\"backgroundColor\":\"#ffffff\",\"allAppFlag\":1.0,\"itemShowNum\":8.0},\"separatorFlag\":0,\"separatorHeight\":0,\"style\":\"Fold\",\"widget\":\"Navigator\"},{\"defaultOrder\":3,\"groupName\":\"公告\",\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31059\",\"rowCount\":2.0,\"noticeCount\":2.0,\"style\":1,\"shadow\":1.0,\"moduleId\":57000.0,\"appId\":', @enterpriseBulletinsAppId ,'},\"separatorFlag\":1,\"separatorHeight\":16,\"widget\":\"Bulletins\"},{\"columnCount\":1,\"defaultOrder\":2,\"groupName\":\"任务管理\","title":"任务管理","titleFlag":1,\"titleUrl\":\"http://10.1.10.96:5000/image/aW1hZ2UvTVRveE1XTTJZMkV3T0dOaE5tRXdNamczTXpGbE5EYzFObVkzWm1ObFlURm1OUQ?token=Yv6KLSwtNo3CIcOxq8Un08lDTtx0Jdm34cLLMr14_wus_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVhtQDaIAv1jXj79MDeAPBIk\",\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31060\",\"moduleId\":13000,\"appId\":',@workFlowAppid,',\"clientHandlerType\":0,\"maxShowNum\":3.0,\"routerPath\":\"/index\",\"routerQuery\":\"appId=',@workFlowAppId,'&moduleId=13000&clientHandlerType=0&locationType=1&sceneType=1&displayName=%E4%BB%BB%E5%8A%A1%E7%AE%A1%E7%90%86\",\"router\":\"zl://workflow/index?appId=',@workFlowAppId,'&moduleId=13000&clientHandlerType=0&locationType=1&sceneType=1&displayName=%E4%BB%BB%E5%8A%A1%E7%AE%A1%E7%90%86\"},\"separatorFlag\":1,\"separatorHeight\":16,\"style\":\"Default\",\"widget\":\"CardExtension\"},{\"columnCount\":1,\"defaultOrder\":4,\"groupName\":\"今日会议安排\","title":"今日会议安排","titleFlag":1,\"titleUrl\":\"\",\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31061\",\"moduleId\":53000,\"appId\":',@meetingAppId,',\"clientHandlerType\":0,\"routerPath\":\"/index\",\"router\":\"zl://meeting-reservation/index?appId=',@meetingAppId,'&moduleId=53000&clientHandlerType=0&locationType=1&sceneType=2&displayName=%E4%BC%9A%E8%AE%AE&url=http%3A%2F%2Foa.zuolin.com%2Fmobile%2Fstatic%2Fcoming_soon%2Findex.html\",\"routerQuery\":\"appId=',@meetingAppId,'&moduleId=53000&clientHandlerType=0&locationType=1&sceneType=2&displayName=%E4%BC%9A%E8%AE%AE&url=http%3A%2F%2Foa.zuolin.com%2Fmobile%2Fstatic%2Fcoming_soon%2Findex.html\"},\"separatorFlag\":0,\"separatorHeight\":0,\"style\":\"Default\",\"widget\":\"CardExtension\"}]}') WHERE type = 4 AND namespace_id = 2;
+UPDATE eh_launch_pad_layouts set version_code = @versionCode, layout_json  = CONCAT('{"versionCode":"',@versionCode,'","layoutName":\"ServiceMarketLayout\",\"displayName\":\"服务广场\",\"groups\":[{\"defaultOrder\":1,\"groupName\":\"banner图片1\",\"style\":\"Shape\",\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31056\",\"widthRatio\":16.0,\"heightRatio\":9.0,\"shadowFlag\":1.0,\"paddingFlag\":1.0,"autoScroll":1,"showDots":1},\"separatorFlag\":0,\"separatorHeight\":0,\"widget\":\"Banners\"},{\"groupId\":0,\"groupName\":\"容器\","title":"容器","titleFlag":0,"titleStyle":101,"titleSize":1,"titleMoreFlag":0,\"columnCount\":4,\"defaultOrder\":2,\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31058\",\"paddingTop\":0.0,\"paddingLeft\":16.0,\"paddingBottom\":0.0,\"paddingRight\":16.0,\"lineSpacing\":0.0,\"columnSpacing\":0.0,\"cssStyleFlag\":1.0,\"backgroundColor\":\"#ffffff\",\"allAppFlag\":1.0},\"separatorFlag\":0,\"separatorHeight\":0,\"style\":\"Default\",\"widget\":\"Navigator\"},{\"defaultOrder\":3,\"groupName\":\"公告\",\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31057\",\"rowCount\":1.0,\"style\":2.0,\"shadow\":1.0,\"moduleId\":10300.0,\"appId\":', @communityBulletinsAppId ,'},\"separatorFlag\":0,\"separatorHeight\":0,\"widget\":\"Bulletins\"},{\"groupName\":\"电商入口\",\"widget\":\"NavigatorTemp\"},{\"defaultOrder\":4,\"groupName\":\"商品精选\","title":"商品精选","titleFlag":1,"titleStyle":101,"titleSize":1,"titleMoreFlag":1,\"instanceConfig\":{\"itemGroup\":\"OPPushBiz\",\"moduleId\":92100.0,\"appId\":', @bizAppId, ',\"entityCount\":5.0,\"newsSize\":5.0,\"appConfig\":{}},\"separatorFlag\":1,\"separatorHeight\":0,\"style\":\"HorizontalScrollSquareView\",\"widget\":\"OPPush\"},{\"defaultOrder\":8,\"groupName\":\"园区快讯\","title":"园区快讯","titleFlag":1,"titleStyle":101,"titleSize":1,"titleMoreFlag":1,\"instanceConfig\":{\"moduleId\":10800,\"appId\":', @newsAppId, ',\"actionType\":48,\"newsSize\":5.0,\"appConfig\":{}},\"separatorFlag\":1,\"separatorHeight\":0,\"style\":\"NewsListView\",\"widget\":\"OPPush\"},{\"defaultOrder\":5,\"groupName\":\"活动\","title":"活动","titleFlag":1,"titleStyle":101,"titleSize":1,"titleMoreFlag":1,\"instanceConfig\":{\"itemGroup\":\"OPPushActivity\",\"entityCount\":5.0,\"subjectHeight\":0.0,\"descriptionHeight\":0.0,\"newsSize\":5.0,\"moduleId\":10600.0,\"appId\":', @activityAppId, ',\"actionType\":61.0,\"appConfig\":{\"categoryId\":1.0,\"publishPrivilege\":1.0,\"livePrivilege\":0.0,\"listStyle\":2.0,\"scope\":3.0,\"style\":4.0}},\"separatorFlag\":1,\"separatorHeight\":0,\"style\":\"HorizontalScrollWideView\",\"widget\":\"OPPush\"},{\"defaultOrder\":7,\"groupName\":\"论坛\","title":"论坛","titleFlag":1,"titleStyle":101,"titleSize":1,"titleMoreFlag":1,\"instanceConfig\":{\"moduleId\":10100.0,\"appId\":', @forumAppId, ',\"actionType\":62.0,\"newsSize\":5.0,\"appConfig\":{}},\"separatorFlag\":1,\"separatorHeight\":0,\"style\":\"TextImageWithTagListView\",\"widget\":\"OPPush\"}]}') WHERE type = 5 AND namespace_id = 2 ;
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev

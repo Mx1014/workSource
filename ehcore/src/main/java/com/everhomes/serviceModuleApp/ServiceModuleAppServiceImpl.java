@@ -1792,7 +1792,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         }
         return appDTOs;
     }
-    private List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
 	@Override
 	public List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
 		List<AppDTO> appDtos = new ArrayList<>() ;
