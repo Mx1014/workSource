@@ -13,7 +13,9 @@ import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhServiceModuleAppEntryProfilesDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAppEntryProfiles;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhOrganizationAppsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
@@ -527,6 +529,79 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
+	public List<ServiceModuleApp> listInstallServiceModuleAppsWithEntries(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Field<?> fieldArr[] = Tables.EH_SERVICE_MODULE_APPS.fields();
+		List<Field<?>> fields = new ArrayList<Field<?>>();
+		fields.addAll(Arrays.asList(fieldArr));
+
+		if(locationType != null || sceneType != null){
+			fields.add(Tables.EH_SERVICE_MODULE_APP_ENTRIES.ENTRY_NAME);
+			fields.add(Tables.EH_SERVICE_MODULE_APP_ENTRIES.ID);
+		}
+
+		SelectQuery<Record> query = context.select(fields).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
+
+		if(appType != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
+		}
+
+
+
+		//入口类型
+		if(locationType != null || sceneType != null || appCategoryId != null){
+			query.addJoin(Tables.EH_SERVICE_MODULE_APP_ENTRIES, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_SERVICE_MODULE_APP_ENTRIES.APP_ID));
+			query.addOrderBy(Tables.EH_SERVICE_MODULE_APP_ENTRIES.DEFAULT_ORDER.asc());
+			if(locationType != null){
+				query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.LOCATION_TYPE.eq(locationType));
+			}
+
+			if(sceneType != null){
+				query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.SCENE_TYPE.eq(sceneType));
+			}
+
+			if(appCategoryId != null){
+				query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRIES.APP_CATEGORY_ID.eq(appCategoryId));
+			}
+		}
+
+
+		//安装信息
+		query.addJoin(Tables.EH_ORGANIZATION_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID));
+		query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(orgId));
+		if(organizationAppStatus != null){
+			query.addConditions(Tables.EH_ORGANIZATION_APPS.STATUS.eq(organizationAppStatus));
+		}
+
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
+
+
+
+		//query.addGroupBy(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID);
+
+		List<ServiceModuleApp> apps = query.fetch().map((r) -> {
+			ServiceModuleApp ap = RecordHelper.convert(r, ServiceModuleApp.class);
+
+			try {
+				String name = r.getValue(Tables.EH_SERVICE_MODULE_APP_ENTRIES.ENTRY_NAME);
+				if(locationType != null || sceneType != null && !StringUtils.isEmpty(name)) {
+					ap.setName(name);
+				}
+
+				ap.setEntryId(r.getValue(Tables.EH_SERVICE_MODULE_APP_ENTRIES.ID));
+
+			} catch (IllegalArgumentException ex) {
+				//Ignore this exception
+			}
+
+			return ap;
+		});
+		return apps;
+	}
+
+	@Override
 	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Field<?> fieldArr[] = Tables.EH_SERVICE_MODULE_APPS.fields();
@@ -626,5 +701,40 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
 	}
+
+	@Override
+	public void createServiceModuleAppEntryProfile(ServiceModuleAppEntryProfile serviceModuleAppEntryProfile) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppEntryProfiles.class));
+		serviceModuleAppEntryProfile.setId(id);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntryProfiles.class));
+        EhServiceModuleAppEntryProfilesDao dao = new EhServiceModuleAppEntryProfilesDao(context.configuration());
+		dao.insert(serviceModuleAppEntryProfile);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleApps.class, null);
+	}
+
+	@Override
+	public void updateServiceModuleAppEntryProfile(ServiceModuleAppEntryProfile serviceModuleAppEntryProfile) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntryProfiles.class));
+        EhServiceModuleAppEntryProfilesDao dao = new EhServiceModuleAppEntryProfilesDao(context.configuration());
+        dao.update(serviceModuleAppEntryProfile);
+	}
+
+    @Override
+    public List<ServiceModuleAppEntryProfile> listServiceModuleAppEntryProfile(Long originId, Long entryId, Byte entryCategory, Byte entrySettingFlag) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES.fields()).from(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES).getQuery();
+        query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES.ORIGIN_ID.eq(originId));
+        if (entryId != null) {
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES.ENTRY_ID.eq(entryId));
+        }
+        if (entryCategory != null) {
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES.ENTRY_CATEGORY.eq(entryCategory));
+        }
+        if (entrySettingFlag != null) {
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES.APP_ENTRY_SETTING.eq(entrySettingFlag));
+        }
+        return query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleAppEntryProfile.class));
+    }
 
 }
