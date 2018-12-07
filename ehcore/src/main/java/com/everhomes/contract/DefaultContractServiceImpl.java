@@ -4590,7 +4590,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			contractProvider.deleteCommunityDataByDateStr(todayDateStr);
 
 			// 开始遍历，进行数据统计
-			int pageSize = 1000;
+			int pageSize = 20;
 			// 只统计本月的数据，每次统计，会把本月的此次之前的数据清空
 			// 传过来的时间进行格式化时间戳转化
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -4658,6 +4658,14 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				// 插入上一页统计得到的数据
 				if (currentPage != 0) {
 					// 插入园区信息统计数据
+					Iterator<ContractDTO> iterator = contracts.iterator();
+					while(iterator.hasNext()){
+						ContractDTO dto = iterator.next();
+						if (dto.getCommunityId() == null && dto.getUpdateTime() == null ) {
+							iterator.remove();
+						}
+					}
+					
 					if (contracts != null && contracts.size() > 0 && communityResultMap.containsKey(contracts.get(0).getCommunityId()+"_"+sdfMM.format(contracts.get(0).getUpdateTime()))) {
 						ContractReportformStatisticCommunitys remove = communityResultMap.remove(contracts.get(0).getCommunityId()+"_"+sdfMM.format(contracts.get(0).getUpdateTime()));
 						createCommunityStatics(communityResultMap);
@@ -4669,6 +4677,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 				// 生成统计数据
 				for (ContractDTO contract : contracts) {
+					if (contract.getCommunityId() == null || contract.getUpdateTime() == null) {
+						continue ;
+					}
 					// 园区信息统计数据
 					if (communityResultMap.containsKey(contract.getCommunityId()+"_"+sdfMM.format(contract.getUpdateTime()))) {
 						ContractReportformStatisticCommunitys communityStatistics = communityResultMap.get(contract.getCommunityId()+"_"+sdfMM.format(contract.getUpdateTime()));

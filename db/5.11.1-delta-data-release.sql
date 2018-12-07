@@ -33,6 +33,10 @@
 -- 3：然后将招商客户的统计所需数据初始化
 -- 最后请执行接口invitedCustomer/initCustomerStatusToDB（此方法每个环境只能执行一次，该方法为异步方法，点击后会立刻返回成功);
 
+-- AUTHOR: 丁建民 20181207
+-- 1.执行 issue-44230(合同报表数据迁移问题)的sql,在下面
+-- 2.同步es /contract/syncContracts
+-- 3.调用接口/contract/reportForm/excuteContractReportFormJob 生成合同统计数据，时间比较长
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -295,6 +299,12 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 -- REMARK: issue-44220 
 SET @id = (SELECT MAX(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '10016', 'zh_CN', '调整周期 不能为0');
+
+-- AUTHOR:丁建民 20181207
+-- REMARK: issue-44230(合同报表数据迁移问题)
+UPDATE eh_contracts as aa inner join (
+SELECT t1.id, t1.update_time,t1.create_time from eh_contracts as t1, eh_contracts as t2 WHERE t1.id=t2.id and t1.`status` in (2, 10) and t1.update_time is NULL
+) as tt  ON aa.id=tt.id SET aa.`update_time`=tt.create_time;
 
 -- AUTHOR:梁燕龙
 -- REMARK:修改模块数据
