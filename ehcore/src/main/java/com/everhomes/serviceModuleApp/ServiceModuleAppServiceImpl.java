@@ -854,7 +854,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
                         this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(),entry.getId(),null,null);
                 if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
-                    appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                    if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                        appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                    }else {
+                        appDTO.setName(entry.getEntryName());
+                    }
                     String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
                             serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
                     appDTO.setIconUrl(url);
@@ -952,7 +956,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
                         this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(),entry.getId(),null,null);
                 if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
-                    appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                	if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                        appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                    }else {
+                	    appDTO.setName(entry.getEntryName());
+                    }
                     String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
                             serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
                     appDTO.setIconUrl(url);
@@ -1296,7 +1304,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                             List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
                                     this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(appCommunityConfigDto.getAppOriginId(),entry.getId(),null,null);
 							if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
-							    appCommunityConfigDto.setDisplayName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+							    if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                                    appCommunityConfigDto.setDisplayName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                                }else {
+                                    appCommunityConfigDto.setDisplayName(entry.getEntryName());
+                                }
                                 String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
                                         serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
                                 appCommunityConfigDto.setIconUrl(url);
@@ -2041,7 +2053,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(), entries.get(0).getId(),
                         null,null);
                 if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfiles)) {
-                    dto.setAppEntry(serviceModuleAppEntryProfiles.get(0).getEntryName());
+                    if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfiles.get(0).getAppEntrySetting())) {
+                        dto.setAppEntry(serviceModuleAppEntryProfiles.get(0).getEntryName());
+                    }else {
+                        dto.setAppEntry(entries.get(0).getEntryName());
+                    }
                 }else {
                     dto.setAppEntry(entries.get(0).getEntryName());
                 }
