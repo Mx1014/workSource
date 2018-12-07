@@ -23,6 +23,14 @@
 -- 点击一次即可，因为需要执行很久，所以肯定会超时
 
 
+-- AUTHOR: 黄鹏宇 2018-12-07
+-- 1.请先刷一次db/search/enterpriseCustomer.sh
+-- 2.刷新ES客户数据
+-- 然后执行接口customer/syncEnterpriseCustomerIndex
+-- 3：然后将招商客户的统计所需数据初始化
+-- 最后请执行接口invitedCustomer/initCustomerStatusToDB（此方法每个环境只能执行一次，该方法为异步方法，点击后会立刻返回成功);
+
+
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
