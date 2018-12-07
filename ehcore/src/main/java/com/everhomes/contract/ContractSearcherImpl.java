@@ -995,10 +995,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 			firstdateUpdateTime = sdf.parse(firststr);
 			lastdateUpdateTime = sdf.parse(laststr);
 		} catch (ParseException e) {
-			LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error, firststr ={} ,laststr ={}", firststr,laststr);
+			LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error, firststr ={} ,laststr ={} ,StackInfo ={}", firststr, laststr, e);
 		}
-		qb = QueryBuilders
-					.boolQuery().must(QueryBuilders.rangeQuery("updateTime").from(firstdateUpdateTime).to(lastdateUpdateTime));
+		qb = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("updateTime").from(firstdateUpdateTime).to(lastdateUpdateTime));
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		Long anchor = 0l;
