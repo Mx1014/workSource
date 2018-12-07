@@ -964,27 +964,6 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
 		}
 		
-		
-		// 传过来的时间进行格式化时间戳转化
-		/*SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		//设置本月第一天
-		Calendar firstCa = Calendar.getInstance();
-		firstCa.add(Calendar.MONTH, 0);
-		firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
-		firstCa.set(Calendar.HOUR_OF_DAY, 0);
-		firstCa.set(Calendar.MINUTE, 0);
-		firstCa.set(Calendar.SECOND, 0);
-		firstCa.set(Calendar.MILLISECOND, 0);
-		String firststr = sdf.format(firstCa.getTime());
-		
-		//设置本月最后
-		Calendar lastCa = Calendar.getInstance();
-		lastCa.set(Calendar.DAY_OF_MONTH, lastCa.getActualMaximum(Calendar.DAY_OF_MONTH));
-		lastCa.set(Calendar.HOUR_OF_DAY, 23);
-		lastCa.set(Calendar.MINUTE, 59);
-		lastCa.set(Calendar.SECOND, 59);
-		String laststr = sdf.format(lastCa.getTime());*/
-		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat sdfMM = new SimpleDateFormat("yyyy-MM");
 		//设置本月第一天
@@ -1000,18 +979,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		}
 		firstCa.setTime(userDate);
 		firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
-		// 设置本月第一天
-		//Calendar firstCa = Calendar.getInstance();
-		/*firstCa.add(Calendar.MONTH, 0);
-		firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
-		firstCa.set(Calendar.HOUR_OF_DAY, 0);
-		firstCa.set(Calendar.MINUTE, 0);
-		firstCa.set(Calendar.SECOND, 0);
-		firstCa.set(Calendar.MILLISECOND, 0);*/
 		String firststr = sdf.format(firstCa.getTime());
 
 		// 设置本月最后
-		//Calendar lastCa = Calendar.getInstance();
 		lastCa.setTime(userDate);
 		lastCa.set(Calendar.DAY_OF_MONTH, lastCa.getActualMaximum(Calendar.DAY_OF_MONTH));
 		lastCa.set(Calendar.HOUR_OF_DAY, 23);
@@ -1027,10 +997,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		} catch (ParseException e) {
 			LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error");
 		}
-		// 合同统计是基于园区id进行统计的，历史原因1000000域空间的园区id都为空，不做统计，需要过滤掉
 		qb = QueryBuilders
 					.boolQuery().must(QueryBuilders.rangeQuery("updateTime").from(firstdateUpdateTime).to(lastdateUpdateTime));
-					/*.mustNot(QueryBuilders.regexpQuery("namespaceId", "1000000"));*/
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		Long anchor = 0l;

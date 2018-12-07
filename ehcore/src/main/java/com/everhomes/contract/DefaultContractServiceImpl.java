@@ -4683,6 +4683,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 						ContractReportformStatisticCommunitys communityStatistics = communityResultMap.get(contract.getCommunityId());
 						countContractForCommunity(communityStatistics, contract);
 					} else {
+						// 园区id为空的不做合同统计
 						if (contract.getCommunityId() != null) {
 							Community community = communityProvider.findCommunityById(contract.getCommunityId());
 							if (community != null) {
@@ -4690,12 +4691,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 								communityResultMap.put(contract.getCommunityId(), communityStatistics);
 								countContractForCommunity(communityStatistics, contract);
 							} else {
-								if (LOGGER.isDebugEnabled()) {
-									LOGGER.debug("community is null !!! communityId is " + contract.getCommunityId());
-								}
+								LOGGER.info("GenerateReportFormStatics from eh_contracts(communityId) in findCommunityById is notexist ! communityId is " + contract.getCommunityId());
 							}
+						} else {
+							LOGGER.info("GenerateReportFormStatics communityId in eh_contracts is null, contractId is  " + contract.getId());
 						}
-						LOGGER.info("generateReportFormStatics communityId is " + contract);
 					}
 				}
 
