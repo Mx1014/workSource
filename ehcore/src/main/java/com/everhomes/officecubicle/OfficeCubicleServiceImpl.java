@@ -1845,6 +1845,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		AddRentalOrderUsingInfoResponse rentalResponse = rentalv2Service.addRentalOrderUsingInfo(rentalCommand);
 		order.setRentalOrderNo(rentalResponse.getBillId());
 		order.setBizOrderNo(response.getBizOrderNum());
+		order.setSpaceName(space.getName());
 		officeCubicleProvider.updateCubicleRentOrder(order);
 		return resp;
 		
@@ -2069,6 +2070,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
 		order.setOrderNo(orderNo);
 		order.setUseDetail(cmd.getUserDetail());
+		order.setSpaceName(space.getName());
 		this.dbProvider.execute((TransactionStatus status) -> {
 			officeCubicleProvider.createCubicleRentOrder(order);
 			return null;
@@ -2506,8 +2508,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			} else if(other.getRentType() == 0){
 				dto.setUserDetail(other.getUseDetail());
 			}
-			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(other.getSpaceId());
-			dto.setSpaceName(space.getName());
+			dto.setSpaceName(other.getSpaceName());
 			response.getOrders().add(dto);
 		});
 
@@ -2549,6 +2550,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				dto.setBeginTime(other.getBeginTime().getTime());
 				dto.setEndTime(other.getEndTime().getTime());
 			} 
+			dto.setSpaceName(other.getSpaceName());
 			response.getOrders().add(dto);
 		});
 
