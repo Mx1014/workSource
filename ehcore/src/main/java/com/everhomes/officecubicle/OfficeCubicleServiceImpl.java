@@ -1084,7 +1084,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		space.setRefundStrategy(cmd.getRefundStrategy());
 		officeCubicleProvider.updateSpace(space);
 		officeCubicleProvider.deleteRefundTip(cmd.getSpaceId());
-		createOfficeCubicleRefundTips(cmd.getSpaceId(),cmd.getRefundTip());
+		createOfficeCubicleRefundTips(cmd.getSpaceId(),cmd.getRefundTips());
 	}
 	private void createOfficeCubicleRefundTips(Long spaceId,List<OfficeCubicleRefundTipDTO> refundTips){
 		if (refundTips != null && !refundTips.isEmpty()){
