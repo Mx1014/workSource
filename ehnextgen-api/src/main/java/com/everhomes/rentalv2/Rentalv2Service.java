@@ -1,17 +1,13 @@
 package com.everhomes.rentalv2;
 
 import com.everhomes.rest.archives.ArchivesContactDTO;
-import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 public interface Rentalv2Service {
 
@@ -237,5 +233,7 @@ public interface Rentalv2Service {
 	ArchivesContactDTO registerUser(RegisterUserCommand cmd);
 
 	void test(GetRentalOrderDetailCommand cmd);
+
+	SearchShopsResponse searchShops(SearchShopsCommand cmd);
 
 }

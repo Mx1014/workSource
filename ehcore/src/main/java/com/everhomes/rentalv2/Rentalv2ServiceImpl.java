@@ -27,6 +27,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -44,21 +45,14 @@ import com.everhomes.rentalv2.job.*;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
-import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.AddArchivesContactCommand;
 import com.everhomes.rest.archives.ArchivesContactDTO;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.enterprise.ListUserOrganizationsCommand;
 import com.everhomes.rest.enterprise.ListUserOrganizationsResponse;
-import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.launchpadbase.AppContext;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -79,8 +73,6 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.rentalv2.SceneType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
@@ -89,12 +81,10 @@ import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
-import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 
 import com.google.gson.Gson;
-import net.greghaines.jesque.Job;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -9146,6 +9136,28 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			sceneType = sceneType + "," + user.getVipLevelText();
 		}
 		response.setSceneType(sceneType);
+		return response;
+	}
+
+	@Override
+	public SearchShopsResponse searchShops(SearchShopsCommand cmd) {
+		SearchShopsResponse response = new SearchShopsResponse();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
+		String bizApi = "/zl-ec/rest/openapi/shop/queryShopInfoByNamespace";
+		Map<String, Object> param = new HashMap<>();
+		param.put("namespaceId", namespaceId);
+		param.put("keyword", cmd.getKeyword());
+		try {
+			String jsonStr = HttpUtils.postJson((bizServer + bizApi), StringHelper.toJsonString(param), 1000, "UTF-8");
+			SearchShopsResponse searchShopsResponse = (SearchShopsResponse) StringHelper.fromJsonString(jsonStr,SearchShopsResponse.class);
+			if (searchShopsResponse != null && searchShopsResponse.getResult() && searchShopsResponse.getBody() != null){
+				return searchShopsResponse;
+			}
+		}catch (Exception e) {
+			LOGGER.error("biz server response error", e);
+		}
+
 		return response;
 	}
 }

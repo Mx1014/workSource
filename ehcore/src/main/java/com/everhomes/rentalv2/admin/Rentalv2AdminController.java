@@ -983,4 +983,19 @@ public class Rentalv2AdminController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /rental/admin/searchShops</b>
+	 * <p>
+	 * 获取店铺信息
+	 * </p>
+	 */
+	@RequestMapping("searchShops")
+	@RestReturn(String.class)
+	public RestResponse searchShops( SearchShopsCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }
