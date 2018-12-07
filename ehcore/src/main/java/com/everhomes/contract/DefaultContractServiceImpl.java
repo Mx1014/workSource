@@ -1815,6 +1815,19 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		//change by tangcen
 		dealContractAttachments(contract, cmd.getAttachments());
 		contractSearcher.feedDoc(contract);
+		
+		// 调租调整周期不能为0
+		if (cmd.getAdjusts() != null) {
+			List<ContractChargingChangeDTO> contractChargingChangeList = cmd.getAdjusts();
+			for (ContractChargingChangeDTO contractChargingChange : contractChargingChangeList) {
+				if (contractChargingChange.getChangePeriod() == 0) {
+					LOGGER.error("updateContract for Adjusts!");
+					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ADJUST_CHANGEPERIOD_IS_ERROR,
+							"contract Adjusts ChangePeriod is zero!");
+				}
+			}
+
+		}
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
 
 		contract.setPaymentFlag(exist.getPaymentFlag());

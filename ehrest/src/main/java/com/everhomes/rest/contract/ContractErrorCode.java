@@ -27,6 +27,7 @@ public interface ContractErrorCode {
     int ERROR_BILLINGCYCLE_IS_EMPTY = 10013;  //合同计价条款计费周期不存在
     int ERROR_ADDRESS_PROPERTIES_IS_EXIST = 10014;  //该房源信息已经存在
     int ERROR_APARTMENTS_NOT_FREE_ERROR = 10015;//存在已占用房源
+    int ERROR_ADJUST_CHANGEPERIOD_IS_ERROR = 10016;//调租 调整周期 不能为0
 
     int ERROR_CONTRACT_SYNC_UNKNOW_ERROR = 20001;//同步数据失败
     int ERROR_CONTRACT_SYNC_CUSTOMER_ERROR = 20002;//同步数据失败因为同步客户

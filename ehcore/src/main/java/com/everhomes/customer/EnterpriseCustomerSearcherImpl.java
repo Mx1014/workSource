@@ -240,13 +240,21 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 List<String> buildings = new ArrayList<>();
                 List<String> addressIds = new ArrayList<>();
                 entryInfos.forEach((e) -> {
-                    buildings.add(e.getBuildingId().toString());
-                    if (e.getAddressId() != null){
-                        addressIds.add(e.getAddressId().toString());
+                    if(e.getBuildingId() != null) {
+                        buildings.add(e.getBuildingId().toString());
+                        if (e.getAddressId() != null) {
+                            if(e.getAddressId() != null) {
+                                addressIds.add(e.getAddressId().toString());
+                            }
+                        }
                     }
                 });
-                builder.field("buildingId", StringUtils.join(buildings, "|"));
-                builder.field("addressId", StringUtils.join(addressIds, "|"));
+                if(buildings.size() > 0){
+                    builder.field("buildingId", StringUtils.join(buildings, "|"));
+                }
+                if(addressIds.size() > 0){
+                    builder.field("addressId", StringUtils.join(addressIds, "|"));
+                }
 //                builder.array("buildings", buildings);
 //                builder.array("addressId", addressIds);
             }

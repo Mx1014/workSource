@@ -556,6 +556,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     }
 
+    @Override
     public String findNameByOwnerAndUser(Long ownerId, Long uid) {
         OrganizationMember member = findMemberByOwnerAndUser(ownerId, uid);
 

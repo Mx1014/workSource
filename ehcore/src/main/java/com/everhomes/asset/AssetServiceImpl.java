@@ -1305,7 +1305,8 @@ public class AssetServiceImpl implements AssetService {
                      }else{
                         // #32243  check if the next day is beyond the maximum day of the next month
                         int prevDay = d.get(Calendar.DAY_OF_MONTH);
-                        d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
+                        //修复缺陷 #44139 【保证金】【合同管理】将一次性收费项与其他收费周期放在同一账单组，签合同时添加两条计价条款，费用清单生成不了
+                        d.add(Calendar.MONTH, billGroupBillingCycle.getMonthOffset()+1);
                         int maximumDay = d.getActualMaximum(Calendar.DAY_OF_MONTH);
                         if(prevDay <= maximumDay){
                             d.add(Calendar.DAY_OF_MONTH, -1);
