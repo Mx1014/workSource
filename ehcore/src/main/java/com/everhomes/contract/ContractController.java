@@ -721,7 +721,7 @@ public class ContractController extends ControllerBase {
 	 * <b>URL: /contract/generateContractDocuments</b>
 	 */
 	@RequestMapping("generateContractDocuments")
-	@RestReturn(String.class)
+	@RestReturn(ContractDocumentDTO.class)
 	public RestResponse generateContractDocuments(GenerateContractDocumentsCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
@@ -735,13 +735,31 @@ public class ContractController extends ControllerBase {
 	
 	/**
 	 * <p>合同模板/查看生成的合同文档</p>
-	 * <b>URL: /contract/viewContractDocuments</b>
+	 * <b>URL: /contract/getContractDocuments</b>
 	 */
-	/*@RequestMapping("autoGeneratingBill")
-	@RestReturn(String.class)
-	public RestResponse autoGeneratingBill(AutoGeneratingBillCommand cmd){
+	@RequestMapping("getContractDocuments")
+	@RestReturn(ContractDocumentDTO.class)
+	public RestResponse getContractDocuments(GetContractDocumentsCommand cmd){
 		ContractService contractService = getContractService(cmd.getNamespaceId());
-		contractService.autoGeneratingBill(cmd);
-		return new RestResponse();
-	}*/
+		ContractDocumentDTO result = contractService.getContractDocuments(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>合同模板/更新合同文档的内容</p>
+	 * <b>URL: /contract/updateContractDocuments</b>
+	 */
+	@RequestMapping("updateContractDocuments")
+	@RestReturn(String.class)
+	public RestResponse updateContractDocuments(UpdateContractDocumentsCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.updateContractDocuments(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
