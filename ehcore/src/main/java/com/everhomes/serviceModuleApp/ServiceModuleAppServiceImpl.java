@@ -1346,7 +1346,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                             List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
                                     this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(appCommunityConfigDto.getAppOriginId(),serviceModuleEntries.get(0).getId(),null,null);
                             if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
-                                appCommunityConfigDto.setDisplayName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                                if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                                    appCommunityConfigDto.setDisplayName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                                }else {
+                                    appCommunityConfigDto.setDisplayName(serviceModuleEntries.get(0).getEntryName());
+                                }
                                 String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
                                         serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
                                 appCommunityConfigDto.setIconUrl(url);
