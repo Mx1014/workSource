@@ -322,7 +322,7 @@ UPDATE eh_service_modules SET name = '待办事项-定制' WHERE id = 56300;
 UPDATE eh_service_modules SET name = '园区支付授权-定制' WHERE id = 200000;
 UPDATE eh_service_modules SET name = '企业支付授权' WHERE id = 79880000;
 UPDATE eh_service_modules SET name = '左邻会议' WHERE id = 50700;
-INSERT INTO eh_service_modules(id, name, parent_id, parent_id, type, level, status, default_order, create_time,
+INSERT INTO eh_service_modules(id, name, parent_id, path, type, level, status, default_order, create_time,
                                instance_config,operator_uid,creator_uid,description,multiple_flag, module_control_type,access_control_type,
                                menu_auth_flag,category,app_type,client_handler_type)
     VALUES (274000,'同事圈',50000,'/100/50000/274000',1,3,2,100,now(),'',0,0,'',1,'org_control',2,1,'module',0,0);
