@@ -22,7 +22,6 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
-import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
 import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
@@ -1704,6 +1703,7 @@ public class AssetProviderImpl implements AssetProvider {
                     }
                     exemptionItem.setAmount(amount);
                     exemptionItem.setBillGroupId(billGroupId);
+
                     exemptionItem.setBillId(nextBillId);
                     exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     exemptionItem.setCreatorUid(UserContext.currentUserId());
@@ -4582,7 +4582,7 @@ public class AssetProviderImpl implements AssetProvider {
                     if(AssetModuleNotifyConstants.ASSET_CM_MODULE.equals(sourceType) 
                     		|| AssetSourceType.RENTAL_MODULE.equals(sourceType)
                     		|| AssetSourceType.PRINT_MODULE.equals(sourceType)) {
-                    	dto.setConfirmFlag(r.getValue(bill.CONFIRM_FLAG) != null ? r.getValue(bill.CONFIRM_FLAG) : 0);
+                    	dto.setConfirmFlag(r.getValue(bill.CONFIRM_FLAG) != null ? r.getValue(bill.CONFIRM_FLAG) : (byte)0);
                     }
                     list.add(dto);
                     return null;
