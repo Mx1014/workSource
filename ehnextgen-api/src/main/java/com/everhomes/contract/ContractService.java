@@ -83,6 +83,8 @@ public interface ContractService {
 	default void autoGeneratingBill(AutoGeneratingBillCommand cmd){};
 	
 	// 合同模板
-	default void generateContractDocuments(GenerateContractDocumentsCommand cmd){};
+	void generateContractDocuments(GenerateContractDocumentsCommand cmd);
+	ContractDocumentDTO getContractDocuments(GetContractDocumentsCommand cmd);
+	void updateContractDocuments(UpdateContractDocumentsCommand cmd);
 
 }

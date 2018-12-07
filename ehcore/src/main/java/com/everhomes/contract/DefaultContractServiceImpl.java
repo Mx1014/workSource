@@ -56,6 +56,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.template.ContractTemplateHandler;
 import com.everhomes.contract.template.GetKeywordsUtils;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -3659,7 +3660,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					LOGGER.error("Gogs OthersException .", e);
 				}
 			}
-			
 			dto.setContractTemplate(contractTemplatedto);
 		}
 		
@@ -4880,12 +4880,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		GetKeywordsUtils utils = new GetKeywordsUtils();
 		List<String> replaceKeys = utils.getKeywordsWithPattern(contents, "${", "}");
 		
-		List<String> dataKeys = new ArrayList<>();
-		for (String replaceKey : replaceKeys) {
-			List<String> values = utils.getKeywordsWithoutPattern(replaceKey, "@@", "##");
-			dataKeys.add(values.get(0));
-		}
-		
 		// 查询合同value信息
 		Contract contract = contractProvider.findContractById(cmd.getContractId());
 		FindContractCommand command = new FindContractCommand();
@@ -4895,75 +4889,30 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		command.setNamespaceId(contract.getNamespaceId());
 		command.setCategoryId(contract.getCategoryId());
 		ContractDetailDTO contractDetailDTO = findContract(command);
+		
+		Map<String, ContractTemplateHandler> handlerMap = new HashMap<>();
+		Map<String, String> dataMap = new HashMap<>();
+		String dataValue = null;
+		
+		for (String replaceKey : replaceKeys) {
+				List<String> dataKeys = utils.getKeywordsWithoutPattern(replaceKey, "@@", "##");
+				String dataKey = dataKeys.get(0);
+				String[] segments = dataKey.split("\\.");
 	
-		for (String dataKey : dataKeys) {
-				String[] sArray = dataKey.split("\\.");
-	
-				switch (sArray[0]) {
-	
+				switch (segments[0]) {
 				// 计价条款
 				case "chargingItems":
-	
-					String ChargingItemInfoKey = "";
-					String ChargingItemInfoValue = "";
-					for (int j = 0; j < sArray.length; j++) {
-						ChargingItemInfoKey = sArray[sArray.length - 1];
+					ContractTemplateHandler chargingItemsHandler = handlerMap.get("chargingItems");
+					if (chargingItemsHandler == null) {
+						chargingItemsHandler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "chargingItems");
+						handlerMap.put("chargingItems", chargingItemsHandler);
 					}
-	
-					List<ContractChargingItemDTO> contractChargingItemList = contractDetailDTO.getChargingItems();
-	
-					if ((Integer.parseInt(sArray[1])) > (contractChargingItemList.size()) - 1) {
-						resultMap.put(key, "");
-						continue;
+					
+					if (chargingItemsHandler.isValid(contractDetailDTO, segments)) {
+						dataValue = chargingItemsHandler.getValue(contractDetailDTO, segments);
 					}
-	
-					ContractChargingItemDTO contractChargingItem = contractChargingItemList
-							.get(Integer.parseInt(sArray[1]));
-	
-					Class chargingItemType = ContractChargingItemDTO.class;
-	
-					String chargingVariables = contractChargingItem.getChargingVariables();
-	
-					if (chargingVariables.contains("\"variableIdentifier\":\"dj\"")) {// 单价
-						ChargingVariables chargingVariableList = (ChargingVariables) StringHelper
-								.fromJsonString(chargingVariables, ChargingVariables.class);
-	
-					} else if (chargingVariables.contains("\"variableIdentifier\":\"gdje\"")) {// 固定金额
-						ChargingVariables chargingVariableList = (ChargingVariables) StringHelper
-								.fromJsonString(chargingVariables, ChargingVariables.class);
-						if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
-							BigDecimal gdje = BigDecimal.ZERO;// 固定金额(含税)
-							BigDecimal gdjebhs = BigDecimal.ZERO;// 固定金额(不含税)
-							for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
-								if (chargingVariable.getVariableIdentifier() != null) {
-									if (chargingVariable.getVariableIdentifier().equals("gdje")) {
-										gdje = BigDecimal
-												.valueOf(Double.parseDouble(chargingVariable.getVariableValue() + ""));
-									}
-								}
-							}
-						}
-					}
-					try {
-						Field chargingItemNamef = chargingItemType.getDeclaredField(ChargingItemInfoKey);
-						chargingItemNamef.setAccessible(true);
-						ChargingItemInfoValue = chargingItemNamef.get(contractChargingItem).toString();
-					} catch (NoSuchFieldException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (SecurityException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (IllegalArgumentException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (IllegalAccessException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-	
-					resultMap.put(key, ChargingItemInfoValue);
-	
+					dataMap.put(replaceKey, dataValue);
+					
 					break;
 	
 				// 调租
