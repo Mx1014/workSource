@@ -4590,7 +4590,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			contractProvider.deleteCommunityDataByDateStr(todayDateStr);
 
 			// 开始遍历，进行数据统计
-			int pageSize = 20;
+			int pageSize = 1000;
 			// 只统计本月的数据，每次统计，会把本月的此次之前的数据清空
 			// 传过来的时间进行格式化时间戳转化
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
