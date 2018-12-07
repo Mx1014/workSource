@@ -4587,7 +4587,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			}else {
 				todayDateStr = dateStr.getDateStr();
 			}
-			//String todayDateStr = getTodayDateStr();
 			contractProvider.deleteCommunityDataByDateStr(todayDateStr);
 
 			// 开始遍历，进行数据统计
@@ -4647,7 +4646,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			}
 
 			// 园区统计结果集
-			Map<Long, ContractReportformStatisticCommunitys> communityResultMap = new HashMap<>();
+			Map<String, ContractReportformStatisticCommunitys> communityResultMap = new HashMap<>();
 			// 分页遍历开始
 			for (int currentPage = 0; currentPage <= totalPage; currentPage++) {
 				long startTime = System.currentTimeMillis();
@@ -4663,14 +4662,17 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				crfcmd.setDateStr(todayDateStr);
 				ListContractsResponse listContractsResponse = contractSearcher.contractReportFormListContracts(crfcmd);
 				List<ContractDTO> contracts = listContractsResponse.getContracts();
+				
+				SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+				//yyyyMM.format(contracts.get(0).getUpdateTime());
 
 				// 插入上一页统计得到的数据
 				if (currentPage != 0) {
 					// 插入园区信息统计数据
-					if (contracts != null && contracts.size() > 0 && communityResultMap.containsKey(contracts.get(0).getCommunityId())) {
-						ContractReportformStatisticCommunitys remove = communityResultMap.remove(contracts.get(0).getCommunityId());
+					if (contracts != null && contracts.size() > 0 && communityResultMap.containsKey(contracts.get(0).getCommunityId()+"_"+yyyyMM.format(contracts.get(0).getUpdateTime()))) {
+						ContractReportformStatisticCommunitys remove = communityResultMap.remove(contracts.get(0).getCommunityId()+"_"+yyyyMM.format(contracts.get(0).getUpdateTime()));
 						createCommunityStatics(communityResultMap);
-						communityResultMap.put(remove.getCommunityId(), remove);
+						communityResultMap.put(remove.getCommunityId()+"_"+yyyyMM.format(contracts.get(0).getUpdateTime()), remove);
 					} else {
 						createCommunityStatics(communityResultMap);
 					}
@@ -4679,16 +4681,16 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				// 生成统计数据
 				for (ContractDTO contract : contracts) {
 					// 园区信息统计数据
-					if (communityResultMap.containsKey(contract.getCommunityId())) {
-						ContractReportformStatisticCommunitys communityStatistics = communityResultMap.get(contract.getCommunityId());
+					if (communityResultMap.containsKey(contract.getCommunityId()+"_"+yyyyMM.format(contract.getUpdateTime()))) {
+						ContractReportformStatisticCommunitys communityStatistics = communityResultMap.get(contract.getCommunityId()+"_"+yyyyMM.format(contract.getUpdateTime()));
 						countContractForCommunity(communityStatistics, contract);
 					} else {
 						// 园区id为空的不做合同统计
 						if (contract.getCommunityId() != null) {
 							Community community = communityProvider.findCommunityById(contract.getCommunityId());
 							if (community != null) {
-								ContractReportformStatisticCommunitys communityStatistics = initCommunityStatistics(contract.getCommunityId(),todayDateStr);
-								communityResultMap.put(contract.getCommunityId(), communityStatistics);
+								ContractReportformStatisticCommunitys communityStatistics = initCommunityStatistics(contract.getCommunityId(),yyyyMM.format(contract.getUpdateTime()));
+								communityResultMap.put(contract.getCommunityId()+"_"+yyyyMM.format(contract.getUpdateTime()), communityStatistics);
 								countContractForCommunity(communityStatistics, contract);
 							} else {
 								LOGGER.info("ContractStatics from eh_communities(communityId) in findCommunityById is notfound ! communityId={} ,contractId={}",
@@ -4748,7 +4750,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		return communityStatistics;
 	}
 
-	private void createCommunityStatics(Map<Long, ContractReportformStatisticCommunitys> communityResultMap) {
+	private void createCommunityStatics(Map<String, ContractReportformStatisticCommunitys> communityResultMap) {
 		Collection<ContractReportformStatisticCommunitys> values = communityResultMap.values();
 		for (ContractReportformStatisticCommunitys communityStatistics : values) {
 			contractProvider.createCommunityStatics(communityStatistics);

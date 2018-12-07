@@ -75,6 +75,7 @@ public class ContractDTO {
 	private String communityName;
 	private Byte assetPaymentBillStatus;
 	private Byte customerType;
+	private Timestamp updateTime;
 	
 	@ItemType(OrganizationContactDTO.class)
 	private List<OrganizationContactDTO> adminMembers;
@@ -85,6 +86,14 @@ public class ContractDTO {
 	@ItemType(ContractTemplateDTO.class)
     private ContractTemplateDTO contractTemplate;
 	
+	public Timestamp getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+
 	public String getCommunityName() {
 		return communityName;
 	}
