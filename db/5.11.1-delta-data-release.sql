@@ -336,6 +336,11 @@ INSERT INTO eh_service_modules(id, name, parent_id, parent_id, type, level, stat
                                instance_config,operator_uid,creator_uid,description,multiple_flag, module_control_type,access_control_type,
                                menu_auth_flag,category,app_type,client_handler_type)
     VALUES (274000,'同事圈',50000,'/100/50000/274000',1,3,2,100,now(),'',0,0,'',1,'org_control',2,1,'module',0,0);
+
+-- AUTHOR:tangcen
+-- REMARK: issue-43457
+UPDATE eh_service_modules SET module_control_type='community_control' WHERE id='230000';
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base

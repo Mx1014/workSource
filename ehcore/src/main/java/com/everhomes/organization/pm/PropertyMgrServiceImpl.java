@@ -9229,7 +9229,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			Collections.sort(results);
 			response.setResults(results);
 		}
-		
 		return response;
 	}
 
