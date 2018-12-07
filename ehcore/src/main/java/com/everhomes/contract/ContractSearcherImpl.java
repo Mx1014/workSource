@@ -995,7 +995,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 			firstdateUpdateTime = sdf.parse(firststr);
 			lastdateUpdateTime = sdf.parse(laststr);
 		} catch (ParseException e) {
-			LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error");
+			LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error, firststr ={} ,laststr ={}", firststr,laststr);
 		}
 		qb = QueryBuilders
 					.boolQuery().must(QueryBuilders.rangeQuery("updateTime").from(firstdateUpdateTime).to(lastdateUpdateTime));
