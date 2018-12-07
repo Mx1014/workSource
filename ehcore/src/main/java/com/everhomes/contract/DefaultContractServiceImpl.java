@@ -4691,11 +4691,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 								communityResultMap.put(contract.getCommunityId(), communityStatistics);
 								countContractForCommunity(communityStatistics, contract);
 							} else {
-								LOGGER.info("Contract statistics for community, Communityid is notfound, communityId={}, contractId={}",
+								LOGGER.info("Contract statistics for community, id of community  is not found, communityId={}, contractId={}",
 										contract.getCommunityId(), contract.getId());
 							}
 						} else {
-							LOGGER.info("Contract statistics for community, Communityid is null, contractId={} ", contract.getId());
+							LOGGER.info("Contract statistics for community, id of community is null, contractId={} ", contract.getId());
 						}
 					}
 				}
