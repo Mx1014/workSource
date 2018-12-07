@@ -1751,10 +1751,32 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         if(userAppFlag != null){
             List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
             if (userApps != null && userApps.size() != 0) {
-                for (UserApp userApp : userApps) {
-                    for (AppDTO app : appDTOS) {
+                List<AppDTO> noUserApp = new ArrayList<>();
+                for (AppDTO app : appDTOS) {
+                    //新安装的应用，没有在用户编辑的数据里，但是还是要展示.
+                    boolean flag = false;
+                    for (UserApp userApp : userApps) {
                         if (userApp.getAppId().equals(app.getEntryId())) {
                             list.add(app);
+                            flag = true;
+                        }
+                    }
+                    if (flag) {
+                        noUserApp.add(app);
+                    }
+                }
+                if (!CollectionUtils.isEmpty(noUserApp)) {
+                    List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(orgId);
+                    if (!CollectionUtils.isEmpty(workPlatformApps)) {
+                        for (WorkPlatformApp workPlatformApp : workPlatformApps) {
+                            if (TrueOrFalseFlag.FALSE.getCode().equals(workPlatformApp.getVisibleFlag())) {
+                                continue;
+                            }
+                            for (AppDTO app : noUserApp) {
+                                if (app.getAppId().equals(workPlatformApp.getAppId()) && app.getEntryId().equals(workPlatformApp.getEntryId())) {
+                                    list.add(app);
+                                }
+                            }
                         }
                     }
                 }
