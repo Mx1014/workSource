@@ -363,8 +363,14 @@ UPDATE eh_service_modules SET client_handler_type = 1 WHERE id = 25000;
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
--- AUTHOR:
--- REMARK:
+
+-- AUTHOR:马世亨 20181207
+-- REMARK:物业报修住总配置为左邻版
+update eh_configurations set value = 'flow',is_readonly = 0 where name = 'pmtask.handler-999955';
+
+-- AUTHOR:马世亨 20181207
+-- REMARK:物业报修国贸对接域名修改
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pmtask.archibus.url', 'http://maintain.chinaworldservice.cn:8080/archibus/webServices/fmWork?wsdl', '物业报修国贸对接地址', '0', NULL, '0');
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-standard
