@@ -2,6 +2,7 @@
 package com.everhomes.aclink.admin;
 
 import com.everhomes.aclink.*;
+import com.everhomes.aclink.faceplusplus.FacePlusPlusService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -52,7 +53,10 @@ public class AclinkAdminController extends ControllerBase {
     
     @Autowired
     private AclinkLogService aclinkLogService;
-    
+
+    @Autowired
+    private FacePlusPlusService facePlusPlusService;
+
     /**
      * <b>URL: /admin/aclink/searchDoorAccess</b>
      * <p>获取门禁列表</p>
@@ -1859,4 +1863,87 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     *
+     * <b>URL: /admin/aclink/faceplusLogin</b>
+     * <p>登录face++ </p>
+     * @return
+     */
+    @RequestMapping("faceplusLogin")
+    @RestReturn(value=FaceplusLoginResponse.class)
+    public RestResponse faceplusLogin(FaceplusLoginCommand cmd){
+        RestResponse response = new RestResponse(facePlusPlusService.faceplusLogin(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+//    /**
+//     *
+//     * <b>URL: /admin/aclink/faceplusRegister</b>
+//     * <p>登录face++ </p>
+//     * @return
+//     */
+//    @RequestMapping("syncLocalUserData")
+//    @RestReturn(value=SyncLocalUserDataResponse.class)
+//    public RestResponse syncLocalUserData(SyncLocalUserDataCommand cmd){
+//        //同步单个用户,根据ownerId查内网服务器uuid,通过borderServer通知内网服务器,由内网服务器根据userId拉取数据
+//        RestResponse response = new RestResponse(faceRecognitionPhotoService.syncLocalUserData(cmd));
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     *
+//     * <b>URL: /admin/aclink/faceplusQueryUser</b>
+//     * <p>同步人脸识别照片及授权(注册用户) </p>
+//     * @return
+//     */
+//    @RequireAuthentication(false)
+//    @RequestMapping("syncLocalUserData")
+//    @RestReturn(value=SyncLocalUserDataResponse.class)
+//    public RestResponse syncLocalUserData(SyncLocalUserDataCommand cmd){
+//        //同步单个用户,根据ownerId查内网服务器uuid,通过borderServer通知内网服务器,由内网服务器根据userId拉取数据
+//        RestResponse response = new RestResponse(faceRecognitionPhotoService.syncLocalUserData(cmd));
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     *
+//     * <b>URL: /admin/aclink/faceplusDeleteUser</b>
+//     * <p>同步人脸识别照片及授权(注册用户) </p>
+//     * @return
+//     */
+//    @RequireAuthentication(false)
+//    @RequestMapping("syncLocalUserData")
+//    @RestReturn(value=SyncLocalUserDataResponse.class)
+//    public RestResponse syncLocalUserData(SyncLocalUserDataCommand cmd){
+//        //同步单个用户,根据ownerId查内网服务器uuid,通过borderServer通知内网服务器,由内网服务器根据userId拉取数据
+//        RestResponse response = new RestResponse(faceRecognitionPhotoService.syncLocalUserData(cmd));
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     *
+//     * <b>URL: /admin/aclink/faceplusSyncPhoto</b>
+//     * <p>同步人脸识别照片及授权(注册用户) </p>
+//     * @return
+//     */
+//    @RequireAuthentication(false)
+//    @RequestMapping("syncLocalUserData")
+//    @RestReturn(value=SyncLocalUserDataResponse.class)
+//    public RestResponse syncLocalUserData(SyncLocalUserDataCommand cmd){
+//        //同步单个用户,根据ownerId查内网服务器uuid,通过borderServer通知内网服务器,由内网服务器根据userId拉取数据
+//        RestResponse response = new RestResponse(faceRecognitionPhotoService.syncLocalUserData(cmd));
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+
 }
