@@ -1674,26 +1674,33 @@ public class AssetProviderImpl implements AssetProvider {
             try {
                 billId = checkBillItemIsInBill(assetBillDateDTO,cmd);
             }catch (ParseException parseException){
-                throw new RuntimeException("parse date error");
+                LOGGER.error("parse date error");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "parse date error");
             }
             long nextBillId;
             if(billId != null) {
                 nextBillId = billId;
             }else {
-                nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
+                nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                        com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
                 if(nextBillId == 0){
-                    nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
+                    nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                            com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
                 }
             }
 
             if(list2!=null) {
                 //bill exemption
                 List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
-//                long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class), list2.size());
+//                long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(
+//                com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class), list2.size());
                 for(int i = 0; i < list2.size(); i++){
-                    long currentExemItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
+                    long currentExemItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                            com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
                     if(currentExemItemSeq == 0){
-                        currentExemItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
+                        currentExemItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                                com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
                     }
                     ExemptionItemDTO exemptionItemDTO = list2.get(i);
                     PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
@@ -1742,9 +1749,11 @@ public class AssetProviderImpl implements AssetProvider {
             List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
             if(list1!=null){
                 for(int i = 0; i < list1.size() ; i++) {
-                    long currentBillItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+                    long currentBillItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                            com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
                     if(currentBillItemSeq == 0){
-                        this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+                        this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                                com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
                     }
                     BillItemDTO dto = list1.get(i);
                     PaymentBillItems item = new PaymentBillItems();
