@@ -1802,7 +1802,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		createOrderCommand.setExtendInfo(extendInfo);
 		createOrderCommand.setGoodsName(extendInfo);
 		createOrderCommand.setClientAppName(cmd.getClientAppName());
-        String homeurl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+//        String homeurl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+		String homeurl = "http://10.1.110.79/evh";
 		String callbackurl = homeurl + contextPath + configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"officecubicle.pay.callBackUrl", "/officecubicle/payNotify");
 		createOrderCommand.setBackUrl(callbackurl);
 		createOrderCommand.setSourceType(1);
