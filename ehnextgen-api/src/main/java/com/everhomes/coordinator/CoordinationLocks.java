@@ -181,7 +181,9 @@ public enum CoordinationLocks {
     SYNC_USER_MODIFY("sync_user_modify"),
     SYNC_USER_IDEN_MODIFY("sync_user_iden_modify"),
 	
-	OFFICE_CUBICLE_STATION_RENT("office_cubicle_station_rent");
+	OFFICE_CUBICLE_STATION_RENT("office_cubicle_station_rent"),
+	OFFICE_CUBICLE_ORDER_STATUS("office_cubicle_order_status");
+	
 	
 
     private String code;

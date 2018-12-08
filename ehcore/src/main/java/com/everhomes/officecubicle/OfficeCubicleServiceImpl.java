@@ -1802,8 +1802,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		createOrderCommand.setExtendInfo(extendInfo);
 		createOrderCommand.setGoodsName(extendInfo);
 		createOrderCommand.setClientAppName(cmd.getClientAppName());
-//        String homeurl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-		String homeurl = "http://10.1.110.79:8080";
+        String homeurl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+//		String homeurl = "http://10.1.110.79:8080";
 		String callbackurl = homeurl + contextPath + configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"officecubicle.pay.callBackUrl", "/officecubicle/payNotify");
 		createOrderCommand.setBackUrl(callbackurl);
 		createOrderCommand.setSourceType(1);
@@ -1942,22 +1942,24 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderByBizOrderNum(cmd.getBizOrderNum());
 		if(cmd.getOrderType() == 3) {
-			order.setOrderStatus(OfficeCubiceOrderStatus.PAID.getCode());
-			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
-			order.setOperatorUid(UserContext.currentUserId());
-			officeCubicleProvider.updateCubicleRentOrder(order);
-			rentalCommonService.rentalOrderSuccess(order.getRentalOrderNo());
-			int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
-			List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
-			smsProvider.addToTupleList(variables, "createTime", order.getCreateTime());
-			smsProvider.addToTupleList(variables, "orderId", order.getId());
-			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
-			OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
-			rent.setOrderId(order.getId());
-			rent.setRentType((byte)0);
-			for(int i=0;i<= order.getRentCount() ;i++){
-				officeCubicleProvider.createCubicleStationRent(rent);
-			}
+			this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_ORDER_STATUS.getCode() + order.getOrderNo()).enter(()-> {
+				order.setOrderStatus(OfficeCubiceOrderStatus.PAID.getCode());
+				order.setOperateTime(new Timestamp(System.currentTimeMillis()));
+				order.setOperatorUid(UserContext.currentUserId());
+				officeCubicleProvider.updateCubicleRentOrder(order);
+				rentalCommonService.rentalOrderSuccess(order.getRentalOrderNo());
+				int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
+				List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
+				smsProvider.addToTupleList(variables, "createTime", order.getCreateTime());
+				smsProvider.addToTupleList(variables, "orderId", order.getId());
+				sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
+				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
+				rent.setOrderId(order.getId());
+				rent.setRentType((byte)0);
+				for(int i=0;i<= order.getRentCount() ;i++){
+					officeCubicleProvider.createCubicleStationRent(rent);
+				}
+			});
 		}else if(cmd.getOrderType() == 4){
 			order.setOrderStatus(OfficeCubiceOrderStatus.REFUNDED.getCode());
 			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
@@ -1991,7 +1993,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
         if (null == userIdentifier) {
             LOGGER.error("userIdentifier is null...userId = " + creatorUid);
         } else {
-            smsProvider.sendSms(namespaceId, userIdentifier.getIdentifierToken(), templateScope,
+            smsProvider.sendSms(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
                     templateId, templateLocale, variables);
         }
     }
