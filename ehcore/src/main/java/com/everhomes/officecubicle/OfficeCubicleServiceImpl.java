@@ -1986,6 +1986,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
         UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(creatorUid,
                 IdentifierType.MOBILE.getCode());
+        LOGGER.info("miao shouji : " + userIdentifier +" yukongjian + " + namespaceId);
         if (null == userIdentifier) {
             LOGGER.error("userIdentifier is null...userId = " + creatorUid);
         } else {
