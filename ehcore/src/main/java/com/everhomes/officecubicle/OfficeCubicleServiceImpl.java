@@ -1941,8 +1941,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					"invaild ordertype,"+cmd.getOrderType());
 		}
 		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderByBizOrderNum(cmd.getBizOrderNum());
+		Long lockId = order.getOrderNo();
 		if(cmd.getOrderType() == 3) {
-			this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_ORDER_STATUS.getCode() + order.getOrderNo()).enter(()-> {
+			coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getId()).enter(()-> {
 				order.setOrderStatus(OfficeCubiceOrderStatus.PAID.getCode());
 				order.setOperateTime(new Timestamp(System.currentTimeMillis()));
 				order.setOperatorUid(UserContext.currentUserId());
@@ -1959,6 +1960,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				for(int i=0;i<= order.getRentCount() ;i++){
 					officeCubicleProvider.createCubicleStationRent(rent);
 				}
+				return null;
 			});
 		}else if(cmd.getOrderType() == 4){
 			order.setOrderStatus(OfficeCubiceOrderStatus.REFUNDED.getCode());
