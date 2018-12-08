@@ -120,7 +120,7 @@ public class ContractPortalPublishHandler implements PortalPublishHandler {
 		if (null != contractCategory) {
 			contractCategory.setName(name);
 			contractCategory.setContractApplicationScene(contractInstanceConfig.getContractApplicationScene());
-			contractCategory.setsetPrintSwitchStatus(contractInstanceConfig.getPrintSwitchStatus());
+			contractCategory.setPrintSwitchStatus(contractInstanceConfig.getPrintSwitchStatus());
 			contractCategory.setEditorSwitchStatus(contractInstanceConfig.getEditorSwitchStatus());
 			contractProvider.updateContractCategory(contractCategory);
 		} else {
