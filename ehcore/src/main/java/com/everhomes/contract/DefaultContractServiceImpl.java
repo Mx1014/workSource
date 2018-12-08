@@ -4907,14 +4907,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 						chargingItemsHandler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "chargingItems");
 						handlerMap.put("chargingItems", chargingItemsHandler);
 					}
-					
 					if (chargingItemsHandler.isValid(contractDetailDTO, segments)) {
 						dataValue = chargingItemsHandler.getValue(contractDetailDTO, segments);
 					}
 					dataMap.put(replaceKey, dataValue);
 					
 					break;
-	
 				// 调租
 				case "adjusts":
 	
@@ -4959,7 +4957,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	
 				// 免租
 				case "frees":
-	
 					String freesInfoKey = "";
 					String freesInfoValue = "";
 					for (int j = 0; j < sArray.length; j++) {

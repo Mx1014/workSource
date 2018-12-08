@@ -25,7 +25,7 @@ public class GetKeywordsUtils {
 
         boolean beginFlag = false;
         StringBuffer tempSB = new StringBuffer();
-
+        
         for (int i = 0; i < textArray.length; i++) {
             //判断是否开始匹配
             if (textArray[i] == startPartenArray[0]){
