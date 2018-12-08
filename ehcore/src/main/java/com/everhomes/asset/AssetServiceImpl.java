@@ -4723,8 +4723,9 @@ public class AssetServiceImpl implements AssetService {
 		billGroupDTO.setBillItemDTOList(billItemDTOList);
 		billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
 		createBillCommand.setBillGroupDTO(billGroupDTO);
+		createBillCommand.setCanMergeBillItem(true);
 
-		ListBillsDTO dto = assetProvider.creatPropertyBillForCommunity(createBillCommand);
+		ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand,null);
 //        ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand,null);
 		//主要是把以前缴费这边为了兼容对接使用的String类型的billId全部换成Long类型的billId，因为创建统一账单都是在缴费这边的表，都是Long
 		ListGeneralBillsDTO convertDTO = ConvertHelper.convert(dto, ListGeneralBillsDTO.class);
@@ -4836,7 +4837,6 @@ public class AssetServiceImpl implements AssetService {
         }
         //2、校验通过，取消账单明细，当明细为空时，删除账单
     for(Long preCancleBillId : billIdList) {
-        PaymentBills preCanclePaymentBill = assetProvider.findPaymentBillById(preCancleBillId);
         //取消明细
         assetProvider.deleteBillItems(preCancleBillId,cmd.getMerchantOrderId());
         assetProvider.reCalBillById(preCancleBillId);

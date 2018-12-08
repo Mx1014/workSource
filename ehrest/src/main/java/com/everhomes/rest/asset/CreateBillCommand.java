@@ -2,10 +2,10 @@
 package com.everhomes.rest.asset;
 
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  *<ul>
@@ -37,6 +37,7 @@ import com.everhomes.util.StringHelper;
  * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
  * <li>canDelete:0：不可删除；1：可删除</li>
  * <li>canModify:0：不可编辑；1：可编辑</li>
+ * <li>canMergeBillItem:true：可以合并明细；false：可编辑</li>
  *</ul>
  */
 public class CreateBillCommand {
@@ -76,6 +77,8 @@ public class CreateBillCommand {
     private Long organizationId;
     //物业缴费V7.1 统一账单加入的：统一订单定义的唯一标识
     private String merchantOrderId;
+    //物业缴费v7.4 瑞安对接合并同账期账单至明细
+    private Boolean canMergeBillItem = false;
     
     public List<String> getNoticeTelList() {
 		return noticeTelList;
@@ -338,4 +341,11 @@ public class CreateBillCommand {
 		this.consumeUserName = consumeUserName;
 	}
 
+    public Boolean getCanMergeBillItem() {
+        return canMergeBillItem;
+    }
+
+    public void setCanMergeBillItem(Boolean canMergeBillItem) {
+        this.canMergeBillItem = canMergeBillItem;
+    }
 }
