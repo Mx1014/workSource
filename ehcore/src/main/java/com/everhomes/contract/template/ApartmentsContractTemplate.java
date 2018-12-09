@@ -29,7 +29,7 @@ public class ApartmentsContractTemplate implements ContractTemplateHandler{
 	
 	/**
 	 * 合法的例子：
-	 * 单价含税：chargingItems.0.chargingVariables.gdjebhs
+	 * 项目名称：apartments.0.communityName
 	 */
 	@Override
 	public boolean isValid(ContractDetailDTO contract, String[] segments) {

@@ -12,6 +12,9 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
  
 public class PropertyUtils {
+	
+	private PropertyUtils()	{}
+	
 /*	
 	public static PropertyDescriptor getPropertyDescriptor(Class<? extends Object> clazz, String propertyName) {
 		StringBuffer sb = new StringBuffer();//构建一个可变字符串用来构建方法名称
