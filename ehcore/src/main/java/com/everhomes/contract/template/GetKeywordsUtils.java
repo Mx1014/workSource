@@ -16,7 +16,7 @@ public class GetKeywordsUtils {
 	 * 返回所有符合条件的关键字列表，关键字带着开始、结束标记
 	 * 注意：开始标记和结束标记不能相同
 	 */
-    public List<String> getKeywordsWithPattern(String text,String startParten,String endParten){
+    public static List<String> getKeywordsWithPattern(String text,String startParten,String endParten){
         List<String> results = new ArrayList<>();
 
         char[] startPartenArray = startParten.toCharArray();
@@ -55,7 +55,7 @@ public class GetKeywordsUtils {
 	 * 返回所有符合条件的关键字列表，关键字不带开始、结束标记
 	 * 注意：开始标记和结束标记不能相同
 	 */
-    public List<String> getKeywordsWithoutPattern(String text,String startParten,String endParten){
+    public static List<String> getKeywordsWithoutPattern(String text,String startParten,String endParten){
         List<String> results = new ArrayList<>();
 
         char[] startPartenArray = startParten.toCharArray();
@@ -88,7 +88,7 @@ public class GetKeywordsUtils {
         return results;
     }
 
-    private boolean checkPattern(String text,String pattern,int startIndex){
+    private static boolean checkPattern(String text,String pattern,int startIndex){
     	char[] patternArray = pattern.toCharArray();
     	char[] textArray = text.toCharArray();
     	

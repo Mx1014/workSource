@@ -1,5 +1,11 @@
 package com.everhomes.contract.template;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.mysql.fabric.xmlrpc.base.Array;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.beans.IntrospectionException;
@@ -56,4 +62,20 @@ public class PropertyUtils {
 		}
 		return value;//返回值
 	}
+	
+	/**
+	 * 获取一个类声明的所有变量的变量名
+	 * @param clazz
+	 * @return
+	 */
+	public static List<String> getDeclaredFieldsName(Class<?> clazz){
+		List<String> result = new ArrayList<>();
+		Field[] declaredFields = clazz.getDeclaredFields();
+		for (Field field : declaredFields) {
+			String name = field.getName();
+			result.add(name);
+		}
+		return result;
+	}
+	
 }
