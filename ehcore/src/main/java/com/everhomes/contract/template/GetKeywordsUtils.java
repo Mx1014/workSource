@@ -117,22 +117,43 @@ public class GetKeywordsUtils {
 
         boolean beginFlag = false;
         
+        int endCount = 0;
+        String key = null;
+        String value = null;
+        
         for (int i = 0; i < textArray.length; i++) {
-        	textSB = textSB.append(textArray[i]);
+        	
+        	if (beginFlag || (i <= endCount && key != null) ) {
+        		//这时正在进行关键字的匹配过程，不对textSB进行append操作
+			}else {
+				textSB.append(textArray[i]);
+			}
+        	
+        	//关键字的匹配过程结束，用得到的value替换文本中的关键字
+        	//在这里，要将key置为null，因为key不为null说明匹配过程还在进行
+        	if (i == endCount && key != null) {
+				value = dataMap.get(key);
+				textSB.append(value);
+				textSB.append(textArray[i]);
+				key = null;
+			}
         	
         	//判断是否开始匹配
             if (textArray[i] == startPartenArray[0]){
                 if (checkPattern(text, startParten, i)){
                     beginFlag = true;
+                    textSB.deleteCharAt(textSB.length() - 1);
                 }
             }
             //判断是否结束匹配
             if (textArray[i] == endPartenArray[0]){
                 if (checkPattern(text, endParten, i)){
                     beginFlag = false;
-                    keySB.append(endParten);
+                    endCount = i + endParten.length();
                     
-                    textSB.
+                    keySB.append(endParten);
+                    key = keySB.toString();
+                    
                     keySB.setLength(0);
                     continue;
                 }
