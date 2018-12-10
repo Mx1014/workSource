@@ -995,8 +995,20 @@ public class ParkingServiceImpl implements ParkingService {
 
 			List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, order.getPlateNumber());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			String sdate = sdf.format(cards.get(0).getEndTime());
-
+			String sdate = null;
+			if (cards != null){
+				sdate = sdf.format(cards.get(0).getEndTime());
+			} else {
+				ParkingCardRequest cardRequest = parkingProvider.findParkingCardRequestByPlateNumber( order.getPlateNumber());
+				GetOpenCardInfoCommand cmd = new GetOpenCardInfoCommand();
+				cmd.setOwnerId(order.getOwnerId());
+				cmd.setOwnerType(order.getOwnerType());
+				cmd.setParkingLotId(parkingLot.getId());
+				cmd.setParkingRequestId(cardRequest.getId());
+				cmd.setPlateNumber(order.getPlateNumber());
+				OpenCardInfoDTO cardDTO = handler.getOpenCardInfo(cmd);
+				sdate = sdf.format(cardDTO.getExpireDate());
+			}
 			e = new OrderDescriptionEntity();
 			e.setKey("当前有效期");
 			e.setValue(sdate);
