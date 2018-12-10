@@ -1746,7 +1746,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
     private List<AppDTO> sortUserAppDTO(List<AppDTO> appDTOS, Long orgId) {
 	    List<AppDTO> list = new ArrayList<>();
-	    for (AppDTO appDTO : list) {
+	    for (AppDTO appDTO : appDTOS) {
 	        list.add(null);
         }
         //用户是否启用自定义配置
