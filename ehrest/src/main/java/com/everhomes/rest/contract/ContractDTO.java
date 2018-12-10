@@ -76,6 +76,7 @@ public class ContractDTO {
 	private Byte assetPaymentBillStatus;
 	private Byte customerType;
 	private Timestamp updateTime;
+	private Long documentId;
 	
 	@ItemType(OrganizationContactDTO.class)
 	private List<OrganizationContactDTO> adminMembers;
@@ -86,6 +87,14 @@ public class ContractDTO {
 	@ItemType(ContractTemplateDTO.class)
     private ContractTemplateDTO contractTemplate;
 	
+	public Long getDocumentId() {
+		return documentId;
+	}
+
+	public void setDocumentId(Long documentId) {
+		this.documentId = documentId;
+	}
+
 	public Timestamp getUpdateTime() {
 		return updateTime;
 	}

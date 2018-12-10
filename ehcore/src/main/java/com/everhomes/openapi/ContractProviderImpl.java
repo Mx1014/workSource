@@ -1774,6 +1774,8 @@ public class ContractProviderImpl implements ContractProvider {
 		contractDocument.setId(id);
 		contractDocument.setCreatorUid(UserContext.currentUserId());
 		contractDocument.setCreateTime(getCurrentTimeStamp());
+		contractDocument.setUpdateUid(UserContext.currentUserId());
+		contractDocument.setUpdateTime(getCurrentTimeStamp());
 		dao.insert(contractDocument);
 	}
 
