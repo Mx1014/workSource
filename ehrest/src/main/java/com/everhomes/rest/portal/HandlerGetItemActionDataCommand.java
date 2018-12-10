@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>appId: 应用表主键Id</li>
  *     <li>appOriginId: 应用跨版本不变id</li>
+ *     <li>moduleEntryId: 应用入口ID</li>
  * </ul>
  */
 public class HandlerGetItemActionDataCommand {
@@ -14,6 +15,16 @@ public class HandlerGetItemActionDataCommand {
 	private Long appId;
 
 	private Long appOriginId;
+
+	private Long moduleEntryId;
+
+	public Long getModuleEntryId() {
+		return moduleEntryId;
+	}
+
+	public void setModuleEntryId(Long moduleEntryId) {
+		this.moduleEntryId = moduleEntryId;
+	}
 
 	public Long getAppId() {
 		return appId;

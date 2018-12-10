@@ -824,10 +824,16 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 .on(t.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
                         .and(t.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
                 .where(condition)
-                .groupBy(t.MODULE_ID, t.SERVICE_TYPE)
+                .groupBy(t.MODULE_ID, t.ORIGIN_APP_ID, t.SERVICE_TYPE)
                 .fetch(record -> {
                     FlowServiceTypeDTO dto = RecordHelper.convert(record, FlowServiceTypeDTO.class);
                     dto.setServiceName(record.getValue(t.SERVICE_TYPE));
+                    if (dto.getServiceName() == null || dto.getServiceName().isEmpty()) {
+                        dto.setServiceName(record.getValue(t.TITLE));
+                    }
+                    if (dto.getServiceName() == null || dto.getServiceName().isEmpty()) {
+                        dto.setServiceName(record.getValue(t.MODULE_NAME));
+                    }
                     return dto;
                 });
     }

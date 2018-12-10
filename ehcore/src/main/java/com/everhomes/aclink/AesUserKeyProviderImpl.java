@@ -109,10 +109,11 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
         query.addConditions(Tables.EH_AES_USER_KEY.DOOR_ID.eq(refId));
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_AES_USER_KEY.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_AES_USER_KEY.ID.lt(locator.getAnchor()));
             }
 
         query.addLimit(count);
+        query.addOrderBy(Tables.EH_AES_USER_KEY.ID.desc());
         List<AesUserKey> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, AesUserKey.class);
         });

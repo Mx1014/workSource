@@ -8,8 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul> 添加访客授权。
  * <li>phone: 电话</li>
- * <li>doorId: 门禁ID</li>
- * <li>namespaceId: 域空间ID</li>
+ * <li>macAddress: 门禁ID</li>
  * <li>userName: 访客姓名</li>
  * <li>organization: 公司名称</li>
  * <li>description: 来访说明</li>
@@ -18,14 +17,14 @@ import com.everhomes.util.StringHelper;
  * <li>validFromMs: 有效期开始时间</li>
  * <li>validEndMs: 有效期终止时间</li>
  * <li>totalAuthAmount: 有效开门次数</li>
+ * <li>兼容旧版本:</li>
+ * <li>MacAddress: 门禁ID</li>
  * </ul>
  */
 public class CreateZLVisitorQRKeyCommand {
     private String phone;
-    
-    @NotNull
+//    private String macAddress;
     private String MacAddress;
-    
     private String userName;
     private String visitorEvent;
     private String organization;
@@ -44,11 +43,14 @@ public class CreateZLVisitorQRKeyCommand {
 		this.phone = phone;
 	}
 	public String getMacAddress() {
+//		return macAddress == null || macAddress.isEmpty() ? MacAddress : macAddress;
 		return MacAddress;
 	}
 	public void setMacAddress(String macAddress) {
+//		this.macAddress = macAddress;
 		MacAddress = macAddress;
 	}
+	
 	public String getUserName() {
 		return userName;
 	}

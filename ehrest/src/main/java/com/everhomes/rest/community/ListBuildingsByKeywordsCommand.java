@@ -20,7 +20,14 @@ public class ListBuildingsByKeywordsCommand {
 	private String keyWords;
 	private Long pageAnchor;
 	private Integer pageSize;
+	private Long organizationId;
 	
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}

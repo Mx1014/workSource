@@ -1305,7 +1305,8 @@ public class AssetServiceImpl implements AssetService {
                      }else{
                         // #32243  check if the next day is beyond the maximum day of the next month
                         int prevDay = d.get(Calendar.DAY_OF_MONTH);
-                        d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
+                        //修复缺陷 #44139 【保证金】【合同管理】将一次性收费项与其他收费周期放在同一账单组，签合同时添加两条计价条款，费用清单生成不了
+                        d.add(Calendar.MONTH, billGroupBillingCycle.getMonthOffset()+1);
                         int maximumDay = d.getActualMaximum(Calendar.DAY_OF_MONTH);
                         if(prevDay <= maximumDay){
                             d.add(Calendar.DAY_OF_MONTH, -1);
@@ -5508,16 +5509,24 @@ public class AssetServiceImpl implements AssetService {
 				cmd.setActivationFlag((byte)1);
 				cmd.setOwnerType("EhOrganizations");
 				cmd.setOwnerId(null);
-				//List<OrganizationContactDTO> lists = rolePrivilegeService.listOrganizationSuperAdministrators(cmd);//获取超级管理员
-	            //LOGGER.info("organization manager check for bill display, cmd = {}", cmd.toString());
-	            List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd);//获取企业管理员
-	            LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
-	            for(OrganizationContactDTO dto : organizationContactDTOS){
-	            	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(dto.getTargetId(), namespaceId);
+				//获取超级管理员
+		        OrganizationContactDTO topAdminDTO = rolePrivilegeService.listOrganizationTopAdministrator(cmd);
+		        if(topAdminDTO != null){
+		        	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(topAdminDTO.getTargetId(), namespaceId);
 	            	if(userIdentifier != null) {
 	    				phoneNumbers.add(userIdentifier.getIdentifierToken());
 	    			}
-	            }
+		        }else {
+		        	//获取企业管理员
+		        	List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd);
+		            LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+		            for(OrganizationContactDTO dto : organizationContactDTOS){
+		            	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(dto.getTargetId(), namespaceId);
+		            	if(userIdentifier != null) {
+		    				phoneNumbers.add(userIdentifier.getIdentifierToken());
+		    			}
+		            }
+		        }
 		    }
 		} catch (Exception e) {
 			LOGGER.error("/asset/listNotSettledBillDetail getPhoneNumber() {}", targetType, targetId, namespaceId, e);

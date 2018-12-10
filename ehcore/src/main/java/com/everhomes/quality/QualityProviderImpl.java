@@ -1798,8 +1798,10 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 		if(inspectionType != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
 
-		if(SpecificationScopeCode.ALL.equals(SpecificationScopeCode.fromCode(scopeCode))){
-			// base support
+		//issue-43661 【智谷汇】品质核查，后台制定的计划，执行人和审阅人在APP端都看不到 by djm
+		//pc把类型和标准建到了全部下面，而在具体园区下面设置任务，在pc可以看到任务
+		// app端同步数据，根据园区获取数据，具体园区下面没有对应的ownerId 所以前端传过来null取查询类型、标准，sql里面ownerId=null 这样查询不出数据，导致categories为空，app端数据无法显示
+		if(SpecificationScopeCode.ALL.equals(SpecificationScopeCode.fromCode(scopeCode)) && ownerId !=null){
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
 		}
 		
