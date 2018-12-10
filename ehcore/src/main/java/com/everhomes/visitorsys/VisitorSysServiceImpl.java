@@ -1459,11 +1459,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(communityVisitor.getCommunityType() == null || communityVisitor.getCommunityType().byteValue() == CommunityType.COMMERCIAL.getCode()) {
             location = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(enterpriseVisitor.getOfficeLocationId());
         } else if(communityVisitor.getCommunityType().byteValue() == CommunityType.RESIDENTIAL.getCode()){
-            Address address = addressProvider.findGroupAddress(communityVisitor.getOfficeLocationId());
-            location = ConvertHelper.convert(address,VisitorSysOfficeLocation.class);
-            location.setOfficeLocationName(address.getCommunityName());
-            location.setAddresses(address.getAddress());
-            location.setMapAddresses(location.getAddresses());
+            List<VisitorSysOfficeLocation> list = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(communityVisitor.getNamespaceId(),communityVisitor.getOwnerType(),communityVisitor.getOwnerId(), 100,0L);
+            if(list != null && list.size() > 0){
+                location = list.get(0);
+            }
         }
         VisitorsysFlagType visitorInfoFlag = VisitorsysFlagType.fromCode(enterpriseConfig.getBaseConfig().getVisitorInfoFlag());
         if(visitorInfoFlag == VisitorsysFlagType.YES) {
