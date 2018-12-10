@@ -1761,7 +1761,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setOwnerId(cmd.getOwnerId());
 		order.setOwnerType(cmd.getOwnerType());
 		order.setNamespaceId(UserContext.getCurrentNamespaceId());
+		order.setReserverEnterpriseName(cmd.getReserveEnterprise());
+		order.setReserverContactToken(cmd.getReserveContactToken());
+		order.setReserverName(cmd.getReserverName());
 		order.setRentType((byte)0);
+		order.setReserverUid(UserContext.currentUserId());
 		this.dbProvider.execute((TransactionStatus status) -> {
 			officeCubicleProvider.createCubicleRentOrder(order);
 			return null;
@@ -2093,6 +2097,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setReserverEnterpriseId(cmd.getReserverEnterpriseId());
 		order.setReserverEnterpriseName(cmd.getReserverEnterpriseName());
 		order.setReserverName(cmd.getReserverName());
+		if (cmd.getReserverUid()!= null){
+			order.setReserverUid(cmd.getReserverUid());
+		}
 		order.setSpaceId(cmd.getSpaceId());
 		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
 		order.setOrderNo(orderNo);
@@ -2271,6 +2278,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return resp;
 		stationSize = station.size();
 		resp.setCubicleNums(station.size());
+//		List<OfficeCubicleStation> s = 
+//				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), roomId, rentFlag, keyword, status, stationId);
 		List<OfficeCubicleStationRent> longRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)1,(byte)1,null);
 		List<OfficeCubicleStationRent> shortRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)0,(byte)1,null);
 		Integer shortRentStationSize = 0;

@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *空间后台订单
  *<li> spaceId: 空间 id	</li> 
  * <li>rentCount: 预定工位数量</li>  
+ * <li>reserverUid:预定人id</li>
  * <li>reserverName: 预订人姓名 </li> 
  * <li>reserveContactToken:  预订人联系方式</li> 
  * <li>reserveEnterpriseId: 预订人公司id</li> 
@@ -31,7 +32,7 @@ import com.everhomes.util.StringHelper;
  */
 public class CreateCubicleOrderBackgroundCommand {
 	private Long spaceId;
-    
+    private Long reserverUid;
     private String reserverName;
     private String reserverEnterpriseName;
     private Long reserverEnterpriseId;
@@ -54,6 +55,14 @@ public class CreateCubicleOrderBackgroundCommand {
 	private Long appId;
 	
 	
+	public Long getReserverUid() {
+		return reserverUid;
+	}
+
+	public void setReserverUid(Long reserverUid) {
+		this.reserverUid = reserverUid;
+	}
+
 	public Long getCurrentPMId() {
 		return currentPMId;
 	}
