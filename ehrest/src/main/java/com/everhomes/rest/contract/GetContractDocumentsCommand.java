@@ -12,10 +12,10 @@ import com.everhomes.util.StringHelper;
  */
 public class GetContractDocumentsCommand {
 	
+	private Long id;
 	private Integer namespaceId;
 	private Long orgId;
 	private Long communityId;
-	private Long id;
 	private Long contractId;
 	
 	public Integer getNamespaceId() {

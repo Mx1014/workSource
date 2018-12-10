@@ -20,6 +20,7 @@ public class UpdateContractDocumentsCommand {
 	private Long contractId;
 	private Long id;
 	private String content;
+	private Long templateId;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -57,7 +58,12 @@ public class UpdateContractDocumentsCommand {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	
+	public Long getTemplateId() {
+		return templateId;
+	}
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

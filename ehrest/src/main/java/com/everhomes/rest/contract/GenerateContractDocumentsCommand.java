@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>id: 合同文档id</li>
  * <li>namespaceId: 域空间id</li>
  * <li>contractId: 合同id</li>
  * <li>categoryId: 合同类型多入口</li>
@@ -17,6 +18,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GenerateContractDocumentsCommand {
 	
+	private Long id;
 	private Integer namespaceId;
 	private Long contractId;
 	private Long categoryId;
@@ -27,6 +29,14 @@ public class GenerateContractDocumentsCommand {
 	private Long orgId;
 	private Long communityId;
 	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}

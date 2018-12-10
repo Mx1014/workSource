@@ -15,6 +15,7 @@ import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.contract.ContractTaskOperateLog;
+import com.everhomes.contract.template.ContractDocument;
 import com.everhomes.filedownload.Task;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
@@ -160,5 +161,11 @@ public interface ContractProvider {
 	ContractTaskOperateLog findContractOperateTaskById(Long id);
 
 	List<Contract> findAnyStatusContractByAddressId(Long addressId);
+
+	ContractDocument findContractDocumentById(Long id);
+
+	void createContractDocument(ContractDocument contractDocument);
+
+	void updateContractDocument(ContractDocument contractDocument);
 
 }

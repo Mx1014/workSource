@@ -56,8 +56,11 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.template.ContractDocument;
+import com.everhomes.contract.template.ContractDocumentsStatus;
 import com.everhomes.contract.template.ContractTemplateHandler;
 import com.everhomes.contract.template.GetKeywordsUtils;
+import com.everhomes.contract.template.PropertyUtils;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.*;
@@ -3389,7 +3392,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				contractTemplate.setVersion(0);
 				//查询gogs上面的数据
 				String moduleType = "ContractTemplate_" + cmd.getCategoryId();
-				GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplateParent.getOwnerId());
+				GogsRepo repo = gogsRepo("contractTemplate",contractTemplateParent.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplateParent.getOwnerId());
 				String contents=gogsGetScript(repo, contractTemplateParent.gogsPath(), contractTemplateParent.getLastCommit());
 				contractTemplate.setContents(gogsGetScript(repo, contractTemplateParent.gogsPath(), contractTemplateParent.getLastCommit()));
 			}
@@ -3413,7 +3416,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			//1.建仓库 不同应用建立不同仓库
 			try {
 				String moduleType = "ContractTemplate_" + contractTemplate.getCategoryId();
-				GogsRepo repo = gogsRepo(contractTemplate.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplate.getOwnerId());
+				GogsRepo repo = gogsRepo("contractTemplate",contractTemplate.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplate.getOwnerId());
 				//2.提交脚本
 				GogsCommit commit = gogsCommitScript(repo, contractTemplate.gogsPath(), lastCommit, contractTemplate.getContents(), isNewFile);
 				//3.存储提交脚本返回的id
@@ -3481,7 +3484,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			try {
 				//1.建仓库
 				String moduleType = "ContractTemplate_" + contractTemplate.getCategoryId();
-				GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplateParent.getOwnerId());
+				GogsRepo repo = gogsRepo("contractTemplate",contractTemplateParent.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplateParent.getOwnerId());
 				//2.提交脚本
 				GogsCommit commit = gogsCommitScript(repo, contractTemplateParent.gogsPath(), lastCommit, contractTemplateParent.getContents(), isNewFile);
 				//3.存储提交脚本返回的id
@@ -3646,7 +3649,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				try {
 					//查询gogs上面的数据
 					String moduleType = "ContractTemplate_" + contractTemplatedto.getCategoryId();
-					GogsRepo repo = gogsRepo(contractTemplatedto.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplatedto.getOwnerId());
+					GogsRepo repo = gogsRepo("contractTemplate",contractTemplatedto.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplatedto.getOwnerId());
 					contractTemplatedto.setContents(gogsGetScript(repo, contractTemplatedto.gogsPath(), contractTemplatedto.getLastCommit()));
 				} catch (GogsConflictException e) {
 					LOGGER.error("contractTemplateName {} in namespace {} already exist!", contractTemplatedto.gogsPath(), cmd.getNamespaceId());
@@ -3688,7 +3691,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
         try {
 			//1.建仓库
 			String moduleType = "ContractTemplate_" + cmd.getCategoryId();
-			GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplateParent.getOwnerId());
+			GogsRepo repo = gogsRepo("contractTemplate",contractTemplateParent.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplateParent.getOwnerId());
 			gogsDeleteScript(repo, oldPath, oldCommit);
         } catch (GogsConflictException e) {
 			LOGGER.error("contractTemplateName {} in namespace {} already exist!", oldPath, cmd.getNamespaceId());
@@ -3732,11 +3735,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		return functionIds;
 	}
 
-    protected GogsRepo gogsRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
+    protected GogsRepo gogsRepo(String repoName,Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
         GogsRepo repo = gogsService.getAnyRepo(namespaceId, moduleType, moduleId, ownerType, ownerId);
         if (repo == null) {
             repo = new GogsRepo();
-            repo.setName("contractTemplate");
+            repo.setName(repoName);
             repo.setNamespaceId(namespaceId);
             repo.setModuleType(moduleType);
             repo.setModuleId(moduleId);
@@ -4538,14 +4541,90 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	
 	@Override
 	public ContractDocumentDTO getContractDocuments(GetContractDocumentsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ContractDocumentDTO result = new ContractDocumentDTO();
+		ContractDocument contractDocument = contractProvider.findContractDocumentById(cmd.getId());
+		if (contractDocument != null) {
+			result.setId(contractDocument.getId());
+			if ("gogs".equals(contractDocument.getContentType())) {
+				try {
+					//查询gogs上面的数据
+					String moduleType = "ContractDocument_" + contractDocument.getCategoryId();
+					GogsRepo repo = gogsRepo("contractDocument",contractDocument.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractDocuments", contractDocument.getCommunityId());
+					contractDocument.setContent(gogsGetScript(repo, contractDocument.gogsPath(), contractDocument.getContent()));
+				} catch (GogsConflictException e) {
+					LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
+					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+							"contractDocumentName is already exist");
+				} catch (GogsNotExistException e) {
+					LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
+					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
+							"contractGogsFileNotExist is already exist");
+				} catch (Exception e){
+					LOGGER.error("Gogs OthersException .", e);
+				}
+			}
+		}
+		return result;
 	}
 
-	@Override
+	@Override 
 	public void updateContractDocuments(UpdateContractDocumentsCommand cmd) {
-		// TODO Auto-generated method stub
+		if (null == cmd.getId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+		ContractDocument parentContractDocument = contractProvider.findContractDocumentById(cmd.getId());
 		
+		ContractDocument contractDocument = getContractDocumentFromParent(parentContractDocument);
+		contractDocument.setContractTemplateId(cmd.getTemplateId());
+		
+		//不是新文件
+		Boolean isNewFile = false;
+		String lastCommit = parentContractDocument.getContent();
+		
+		if ("gogs".equals(contractDocument.getContentType())) {
+			//使用gogs存储合同内容
+			try {
+				//1.建仓库
+				String moduleType = "ContractDocument_" + contractDocument.getCategoryId();
+				GogsRepo repo = gogsRepo("contractDocument",contractDocument.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractDocuments", contractDocument.getCommunityId());
+				//2.提交脚本
+				GogsCommit commit = gogsCommitScript(repo, contractDocument.gogsPath(), lastCommit, cmd.getContent(), isNewFile);
+				//3.存储提交脚本返回的id
+				contractDocument.setContent(commit.getId());
+				//4、存入数据库
+				contractProvider.createContractDocument(contractDocument);
+				//5、让父文档失效
+				parentContractDocument.setStatus(ContractDocumentsStatus.INACTIVE.getCode());
+				contractProvider.updateContractDocument(parentContractDocument);
+			} catch (GogsConflictException e) {
+				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+						"contractDocumentName is already exist");
+			} catch (GogsNotExistException e) {
+				LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
+						"contractGogsFileNotExist is already exist");
+			} catch (Exception e){
+				LOGGER.error("Gogs OthersException .", e);
+			}
+		}
+	}
+	
+	private ContractDocument getContractDocumentFromParent(ContractDocument parentContractDocument){
+		ContractDocument contractDocument = new ContractDocument();
+		contractDocument.setContentType("gogs");
+		contractDocument.setParentId(parentContractDocument.getId());
+		contractDocument.setVersion(parentContractDocument.getVersion() + 1);
+		
+		contractDocument.setName(parentContractDocument.getName());
+		contractDocument.setNamespaceId(parentContractDocument.getNamespaceId());
+		contractDocument.setCategoryId(parentContractDocument.getCategoryId());
+		contractDocument.setCommunityId(parentContractDocument.getCommunityId());
+		contractDocument.setContractId(parentContractDocument.getContractId());
+		contractDocument.setStatus(ContractDocumentsStatus.ACTIVE.getCode());
+		return contractDocument;
 	}
 	
 	//合同模板 生成合同文档
@@ -4563,8 +4642,8 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 	
 	private void generateContractDocuments(GenerateContractDocumentsCommand cmd, Map<String, Object> params) {
-		// 1 、 取模板
-		String contractTemplateText = "<p>招商客户</p><p><br/></p><p>客户名称：${<span style=\"background:#B8B8B8\">ZS.客户名称<a style=\"display: none\">@@investmentPromotion.name##</a></span>}&nbsp;&nbsp;${<span style=\"background:#B8B8B8\">ZS.客户级别<a style=\"display: none\">@@investmentPromotion.levelItemId##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">ZS.客户联系人<a style=\"display: none\">@@investmentPromotion.customerContact##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">ZS.招商跟进人<a style=\"display: none\">@@investmentPromotion.trackerUid##</a></span>}</p><p><br/></p><p>——————————————————</p><p><br/></p><p>客户信息：</p><p>${<span style=\"background:#B8B8B8\">KH.客户名称<a style=\"display: none\">@@enterpriseCustomer.name##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.客户类型<a style=\"display: none\">@@enterpriseCustomer.categoryItemId##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.联系人<a style=\"display: none\">@@enterpriseCustomer.contactName##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.手机号码<a style=\"display: none\">@@enterpriseCustomer.contactMobile##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.客户来源<a style=\"display: none\">@@enterpriseCustomer.sourceItemId##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.经营年限<a style=\"display: none\">@@enterpriseCustomer.bizLife##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">KH.产品类型<a style=\"display: none\">@@enterpriseCustomer.corpProductCategoryItemId##</a></span>}</p><p><br/></p><p><br/></p><p>————————————————</p><p><br/></p><p>资产信息：</p><p>${<span style=\"background:#B8B8B8\">ZC1.项目名称<a style=\"display: none\">@@apartments.0.communityName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.项目地址<a style=\"display: none\">@@apartments.0.communityAddress##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.楼宇名称<a style=\"display: none\">@@apartments.0.buildingName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.楼宇地址<a style=\"display: none\">@@apartments.0.buildingAddress##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.房源名称<a style=\"display: none\">@@apartments.0.apartmentName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.建筑面积<a style=\"display: none\">@@apartments.0.areaSize##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.收费面积<a style=\"display: none\">@@apartments.0.chargeArea##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC1.公摊面积<a style=\"display: none\">@@apartments.0.sharedArea##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC2.项目名称<a style=\"display: none\">@@apartments.1.communityName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">ZC2.项目地址<a style=\"display: none\">@@apartments.1.communityAddress##</a></span>}</p><p><br/></p><p><br/></p><p>——————————</p><p>合同信息</p><p>${<span style=\"background:#B8B8B8\">合同编号<a style=\"display: none\">@@contractNumber##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">合同名称<a style=\"display: none\">@@name##</a></span>}</p><p><br/></p><p>${<span style=\"background:#B8B8B8\">付款方式<a style=\"display: none\">@@paidType##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">合同状态<a style=\"display: none\">@@status##</a></span>}</p><p><br/></p><p>————————</p><p><br/></p><p>计价条款：</p><p>1、${<span style=\"background:#B8B8B8\">J1.收费项目<a style=\"display: none\">@@chargingItems.0.chargingItemName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.应用资产<a style=\"display: none\">@@chargingItems.0.apartments##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.单价含税<a style=\"display: none\">@@chargingItems.0.dj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.单价不含税<a style=\"display: none\">@@chargingItems.0.djbhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.单价含税<a style=\"display: none\">@@chargingItems.0.dj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.面积<a style=\"display: none\">@@chargingItems.0.mj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.固定金额含税<a style=\"display: none\">@@chargingItems.0.gdje##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.固定金额不含税含税<a style=\"display: none\">@@chargingItems.0.gdjebhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J1.税率<a style=\"display: none\">@@chargingItems.0.taxRate##</a></span>}</p><p><br/></p><p><br/></p><p><br/></p><p>2、${<span style=\"background:#B8B8B8\">J2.截止日期<a style=\"display: none\">@@chargingItems.1.chargingExpiredTime##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.收费项目<a style=\"display: none\">@@chargingItems.1.chargingItemName##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.单价含税<a style=\"display: none\">@@chargingItems.1.dj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.单价不含税<a style=\"display: none\">@@chargingItems.1.djbhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.面积<a style=\"display: none\">@@chargingItems.1.mj##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.固定金额不含税含税<a style=\"display: none\">@@chargingItems.1.gdjebhs##</a></span>}</p><p>${<span style=\"background:#B8B8B8\">J2.固定金额含税<a style=\"display: none\">@@chargingItems.1.gdje##</a></span>}</p><p><br/></p><p><br/></p><p>调租计划：</p><p>1、${<span style=\"background:#B8B8B8\">T1.调整类型<a style=\"display: none\">@@adjusts.0.changeMethod##</a></span>}&nbsp; &nbsp;${<span style=\"background:#B8B8B8\">T1.调整幅度<a style=\"display: none\">@@adjusts.0.changeRange##</a></span>}&nbsp; &nbsp;${<span style=\"background:#B8B8B8\">T1.应用资产<a style=\"display: none\">@@adjusts.0.apartments##</a></span>}&nbsp;&nbsp;${<span style=\"background:#B8B8B8\">T1.起计日期<a style=\"display: none\">@@adjusts.0.changeStartTime##</a></span>}${<span style=\"background:#B8B8B8\">T1.应用资产<a style=\"display: none\">@@adjusts.0.apartments##</a></span>}</p><p><br/></p><p>免租计划：</p><p>1、${<span style=\"background:#B8B8B8\">M1.收费项目<a style=\"display: none\">@@frees.0.chargingItemName##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.免租金额<a style=\"display: none\">@@frees.0.changeRange##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.应用资产<a style=\"display: none\">@@frees.0.apartments##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.起计日期<a style=\"display: none\">@@frees.0.changeStartTime##</a></span>}&nbsp;${<span style=\"background:#B8B8B8\">M1.截止日期<a style=\"display: none\">@@frees.0.changeExpiredTime##</a></span>}</p><p><br/></p><p><br/></p><p><br/></p><p><br/></p>";
+		// 1 、 从gogs中获取模板
+		String contractTemplateText = getContractTemplateText(cmd);
 		// 2、循环模板内容,获取要替换的字符串列表
 		List<String> replaceKeys = GetKeywordsUtils.getKeywordsWithPattern(contractTemplateText, "${", "}");
 		// 3、获取合同详情
@@ -4573,7 +4652,69 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		Map<String, String> dataMap = getContractTemplateDataMap(replaceKeys,contractDetailDTO);
 		// 5、循环模板内容，把模板中的key换成value，获取合同文档
 		String contractDocumentText = GetKeywordsUtils.translate(dataMap,contractTemplateText, "${", "}");
-		// 
+		// 6、把得到的合同文档存到gogs里去，并记录在数据库中
+		saveContractDocumentToGogs(cmd,contractDocumentText);
+	}
+	
+	private void saveContractDocumentToGogs(GenerateContractDocumentsCommand cmd, String contractDocumentText) {
+		ContractDocument contractDocument = new ContractDocument();
+		contractDocument.setContentType("gogs");
+		contractDocument.setVersion(0);
+		contractDocument.setParentId(0L);
+		contractDocument.setCategoryId(cmd.getCategoryId());
+		contractDocument.setContractId(cmd.getContractId());
+		contractDocument.setContractTemplateId(cmd.getTemplateId());
+		contractDocument.setCommunityId(cmd.getCommunityId());
+		contractDocument.setNamespaceId(cmd.getNamespaceId());
+		contractDocument.setStatus(ContractDocumentsStatus.ACTIVE.getCode());
+		Contract relatedContract = contractProvider.findContractById(cmd.getContractId());
+		if (relatedContract != null) {
+			contractDocument.setName(relatedContract.getName());
+		}
+		
+		//是否是新增的文件
+		Boolean isNewFile = true;
+		String lastCommit = "";
+		
+		if ("gogs".equals(contractDocument.getContentType())) {
+			//使用gogs存储合同内容
+			//1.建仓库 不同应用建立不同仓库
+			try {
+				String moduleType = "ContractDocument_" + contractDocument.getCategoryId();
+				GogsRepo repo = gogsRepo("contractDocument",contractDocument.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractDocuments", contractDocument.getCommunityId());
+				//2.提交脚本
+				GogsCommit commit = gogsCommitScript(repo, contractDocument.gogsPath(), lastCommit, contractDocumentText, isNewFile);
+				//3.存储提交脚本返回的id
+				contractDocument.setContent(commit.getId());
+				contractProvider.createContractDocument(contractDocument);
+			} catch (GogsConflictException e) {
+				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+						"contractDocumentName is already exist");
+			} catch (GogsNotExistException e) {
+				LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
+						"contractGogsFileNotExist is already exist");
+			} catch (Exception e){
+				LOGGER.error("Gogs OthersException .", e);
+			}
+		}
+	}
+
+	private String getContractTemplateText(GenerateContractDocumentsCommand cmd){
+		String contractTemplateText = null;
+		GetContractTemplateDetailCommand command = new GetContractTemplateDetailCommand();
+		command.setContractId(cmd.getContractId());
+		command.setNamespaceId(cmd.getNamespaceId());
+		command.setTemplateId(cmd.getTemplateId());
+		ContractDTO contractDTO = getContractTemplateDetail(command);
+		if (contractDTO != null) {
+			ContractTemplateDTO contractTemplate = contractDTO.getContractTemplate();
+			if (contractTemplate != null) {
+				contractTemplateText = contractTemplate.getContents();
+			}
+		}
+		return contractTemplateText;
 	}
 	
 	private ContractDetailDTO geContractDetail(Long contractId){
@@ -4674,8 +4815,8 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 	
 	public static void main(String[] args) {
-		String contents = "<p>招商客户</p><p><br/></p><p>客户名称：${<span style=\"background:#B8B8B8\">ZS.客户名称<a style=\"display: none\">@@investmentPromotion.name##</a></span>}&nbsp;&nbsp;${<span style=\"background:#B8B8B8\">ZS.客户级别<a style=\"display: none\">@@investmentPromotion.levelItemId##</a></span>}&nbsp;";
-		
+//		String contents = "<p>招商客户</p><p><br/></p><p>客户名称：${<span style=\"background:#B8B8B8\">ZS.客户名称<a style=\"display: none\">@@investmentPromotion.name##</a></span>}&nbsp;&nbsp;${<span style=\"background:#B8B8B8\">ZS.客户级别<a style=\"display: none\">@@investmentPromotion.levelItemId##</a></span>}&nbsp;";
+//		
 //		List<String> results = GetKeywordsUtils.getKeywordsWithPattern(contents, "${", "}");
 //		
 //		for (String key : results) {
@@ -4688,12 +4829,26 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 //			}
 //			System.out.println();
 //		}
-		
-		Map<String, String> dataMap = new HashMap<>();
-		dataMap.put("${<span style=\"background:#B8B8B8\">ZS.客户名称<a style=\"display: none\">@@investmentPromotion.name##</a></span>}", "张三");
-		dataMap.put("${<span style=\"background:#B8B8B8\">ZS.客户级别<a style=\"display: none\">@@investmentPromotion.levelItemId##</a></span>}", "测试数据");
-		String contractDocumentText = GetKeywordsUtils.translate(dataMap,contents, "${", "}");
-		System.out.println(contractDocumentText);
+//		
+//		Map<String, String> dataMap = new HashMap<>();
+//		dataMap.put("${<span style=\"background:#B8B8B8\">ZS.客户名称<a style=\"display: none\">@@investmentPromotion.name##</a></span>}", "张三");
+//		dataMap.put("${<span style=\"background:#B8B8B8\">ZS.客户级别<a style=\"display: none\">@@investmentPromotion.levelItemId##</a></span>}", "测试数据");
+//		String contractDocumentText = GetKeywordsUtils.translate(dataMap,contents, "${", "}");
+//		System.out.println(contractDocumentText);
+		BuildingApartmentDTO dto = new BuildingApartmentDTO();
+		dto.setApartmentName("1栋101");
+		if (PropertyUtils.containsField(BuildingApartmentDTO.class, "aaa")) {
+			System.out.println(PropertyUtils.getProperty(dto, "aaa"));
+		}
+		if (PropertyUtils.containsField(BuildingApartmentDTO.class, "buildingName")) {
+			System.out.println(PropertyUtils.getProperty(dto, "buildingName"));
+		}
+		if (PropertyUtils.containsField(BuildingApartmentDTO.class, "apartmentName")) {
+			System.out.println(PropertyUtils.getProperty(dto, "apartmentName"));
+		}
+//		Object property01 = PropertyUtils.getProperty(dto, "aaa");
+//		Object property02 = PropertyUtils.getProperty(dto, "buildingName");
+//		Object property03 = PropertyUtils.getProperty(dto, "apartmentName");
 		
 	}
 
