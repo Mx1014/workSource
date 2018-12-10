@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *     <li>routerPath: routerPath</li>
  *     <li>routerQuery: routerQuery</li>
  *     <li>router: router</li>
+ *     <li>maxShowNum: 最大展示数量</li>
  * </ul>
  */
 public class CardExtension {
@@ -30,6 +31,16 @@ public class CardExtension {
     private String routerQuery;
 
     private String router;
+
+    private Integer maxShowNum;
+
+    public Integer getMaxShowNum() {
+        return maxShowNum;
+    }
+
+    public void setMaxShowNum(Integer maxShowNum) {
+        this.maxShowNum = maxShowNum;
+    }
 
     public String getItemGroup() {
         return itemGroup;

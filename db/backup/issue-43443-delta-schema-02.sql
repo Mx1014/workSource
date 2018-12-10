@@ -396,28 +396,3 @@ CREATE TABLE `eh_tickets` (
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '圳智慧TICKET表';
-
--- AUTHOR: 黄明波 20181127
--- REMARK: 云打印微信支付需求
-ALTER TABLE `eh_siyin_print_business_payee_accounts` MODIFY COLUMN `payee_id` BIGINT(20) NULL DEFAULT NULL COMMENT '支付帐号id';
-
-
--- AUTHOR: 黄鹏宇 20181128
--- REMARK: 去除创建管理员一定要有用户的限制
-ALTER TABLE eh_enterprise_customer_admins MODIFY creator_uid BIGINT NULL;
-
-
--- AUTHOR: 杨崇鑫 20181128
--- REMARK: 缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费。 给智谷汇的权限
-ALTER TABLE `eh_contract_charging_items` ADD COLUMN `one_time_bill_status` TINYINT COMMENT '是否是一次性产生费用，1：是，0：否';
-
-
--- AUTHOR: 梁燕龙 20181129
--- REMARK: 增加手机号索引
-ALTER TABLE eh_user_identifiers ADD INDEX i_eh_user_idf_token(`identifier_token`);
-
--- AUTHOR: ljs 20181129
--- REMARK: 给eh_addresses表添加索引
-ALTER TABLE `eh_addresses` ADD INDEX `i_eh_addr_building_id` (`building_id`) USING BTREE;
-
--- END

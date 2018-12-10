@@ -5,9 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.ListCustomerApartmentActivityCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -227,6 +225,193 @@ public class InvitedCustomerController extends ControllerBase {
     public RestResponse signCustomerDataToThird(@Valid SignCustomerDataToThirdCommand cmd) {
         String url = invitedCustomerService.signCustomerDataToThird(cmd);
         RestResponse response = new RestResponse(url);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    //========================统计相关接口========================
+
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/initCustomerStatusToDB</b>
+     * <p>将现在系统中所有客户的状态初始化进数据库</p>
+     */
+    @RequestMapping("initCustomerStatusToDB")
+    @RestReturn(value = String.class)
+    public RestResponse initCustomerStatusToDB() {
+        invitedCustomerService.initCustomerStatusToDB();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/testCustomerStatistic</b>
+     * <p>进行某天的某种统计</p>
+     */
+    @RequestMapping("testCustomerStatistic")
+    @RestReturn(value = String.class)
+    public RestResponse testCustomerStatistic(TestCreateCustomerStatisticCommand cmd) {
+        invitedCustomerService.testCustomerStatistic(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticDaily</b>
+     * <p>获取某天的数据，分园区获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticDaily")
+    @RestReturn(value = GetCustomerStatisticResponse.class)
+    public RestResponse queryCustomerStatisticDaily(GetCustomerStatisticsCommand cmd) {
+        GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsDaily(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticDailyTotal</b>
+     * <p>获取某天的数据，分管理公司获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticDailyTotal")
+    @RestReturn(value = GetCustomerStatisticResponse.class)
+    public RestResponse queryCustomerStatisticDailyTotal(GetCustomerStatisticsCommand cmd) {
+        GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsDailyTotal(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticMonthly</b>
+     * <p>获取某月的数据</p>
+     */
+    @RequestMapping("queryCustomerStatisticMonthly")
+    @RestReturn(value = GetCustomerStatisticResponse.class)
+    public RestResponse queryCustomerStatisticMonthly(GetCustomerStatisticsCommand cmd) {
+        GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsMonthly(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticMonthlyTotal</b>
+     * <p>获取某月的数据，分管理公司获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticMonthlyTotal")
+    @RestReturn(value = GetCustomerStatisticResponse.class)
+    public RestResponse queryCustomerStatisticMonthlyTotal(GetCustomerStatisticsCommand cmd) {
+        GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsMonthlyTotal(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticMonthlyNow</b>
+     * <p>获取某月的数据</p>
+     */
+    @RequestMapping("queryCustomerStatisticMonthlyNow")
+    @RestReturn(value = GetCustomerStatisticNowResponse.class)
+    public RestResponse queryCustomerStatisticMonthlyNow(GetCustomerStatisticNowCommand cmd) {
+        GetCustomerStatisticNowResponse dto = invitedCustomerService.queryCustomerStatisticMonthlyNow(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticMonthlyTotalNow</b>
+     * <p>获取某月的数据，分管理公司获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticMonthlyTotalNow")
+    @RestReturn(value = CustomerStatisticsDTO.class)
+    public RestResponse queryCustomerStatisticMonthlyTotalNow(GetCustomerStatisticsCommand cmd) {
+        CustomerStatisticsDTO dto = invitedCustomerService.queryCustomerStatisticMonthlyTotalNow(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticDailyNow</b>
+     * <p>获取某月的数据</p>
+     */
+    @RequestMapping("queryCustomerStatisticDailyNow")
+    @RestReturn(value = GetCustomerStatisticNowResponse.class)
+    public RestResponse queryCustomerStatisticDailyNow(GetCustomerStatisticNowCommand cmd) {
+        GetCustomerStatisticNowResponse dto = invitedCustomerService.queryCustomerStatisticDailyNow(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticDailyTotalNow</b>
+     * <p>获取某月的数据，分管理公司获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticDailyTotalNow")
+    @RestReturn(value = CustomerStatisticsDTO.class)
+    public RestResponse queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsCommand cmd) {
+        CustomerStatisticsDTO dto = invitedCustomerService.queryCustomerStatisticDailyTotalNow(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticTotal</b>
+     * <p>获取当前系统的累计数据，分管理公司获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticTotal")
+    @RestReturn(value = CustomerStatisticsDTO.class)
+    public RestResponse queryCustomerStatisticTotal(GetCustomerStatisticsCommand cmd) {
+        CustomerStatisticsDTO dto = invitedCustomerService.queryCustomerStatisticTotal(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>issue-41304 招商客户1.3（新增招商客户相关统计报表） (导出对接下载中心)</p>
+     * <b>URL: /invitedCustomer/exportCustomerStatistic</b>
+     */
+    @RequestMapping("exportCustomerStatistic")
+    @RestReturn(value = String.class)
+    public RestResponse exportCustomerStatistic(ExportCustomerStatisticsCommand cmd) {
+        invitedCustomerService.exportCustomerStatistic(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

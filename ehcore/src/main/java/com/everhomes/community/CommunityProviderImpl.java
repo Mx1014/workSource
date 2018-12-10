@@ -2128,6 +2128,13 @@ public class CommunityProviderImpl implements CommunityProvider {
 						.fetchInto(Long.class);
 	}
 
+
+    @Override
+    public List<Community> listAllBizCommunities() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_COMMUNITIES.ID,Tables.EH_COMMUNITIES.NAMESPACE_ID).from(Tables.EH_COMMUNITIES).where(Tables.EH_COMMUNITIES.NAMESPACE_ID.ne(0)).fetchInto(Community.class);
+    }
+
 	@Override
 	public List<com.everhomes.rest.openapi.CommunityDTO> listCommunitiesForThirdParty(Integer namespaceId,Long communityId, Long pageAnchor,
 			int pageSize, Timestamp updateTime) {

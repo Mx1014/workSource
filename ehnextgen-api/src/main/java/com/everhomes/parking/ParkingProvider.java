@@ -174,4 +174,6 @@ public interface ParkingProvider {
 
 	ParkingRechargeOrder findParkingRechargeOrderByGeneralOrderId(Long gorderId);
 
+	String findParkingLotNameByVendorName(Integer namespaceId, String vendorName);
+
 }

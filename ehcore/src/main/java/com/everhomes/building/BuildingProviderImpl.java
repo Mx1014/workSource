@@ -150,6 +150,7 @@ public class BuildingProviderImpl implements BuildingProvider {
 				.where(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
 				.and(Tables.EH_BUILDINGS.NAME.eq(buildingName))
 				.and(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()))
 				.fetchInto(Building.class);
 		return buildingList;
 	}

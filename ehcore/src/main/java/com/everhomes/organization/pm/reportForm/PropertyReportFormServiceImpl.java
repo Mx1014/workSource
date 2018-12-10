@@ -598,70 +598,80 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 		cell7.setCellStyle(style);
 		cell7.setCellValue(dto.getRentApartmentCount() != null ? dto.getRentApartmentCount().toString() : "0");
 		
-		//已占用房源数
+		//已占用房源数(在5.11.1改为已占用房源数)
 		Cell cell8 = tempRow.createCell(7);
 		cell8.setCellStyle(style);
 		cell8.setCellValue(dto.getOccupiedApartmentCount() != null ? dto.getOccupiedApartmentCount().toString() : "0");
 		
-		//自用房源数
+		//待签约房源数
 		Cell cell9 = tempRow.createCell(8);
 		cell9.setCellStyle(style);
-		cell9.setCellValue(dto.getLivingApartmentCount() != null ? dto.getLivingApartmentCount().toString() : "0");
+		cell9.setCellValue(dto.getSignedupApartmentCount() != null ? dto.getSignedupApartmentCount().toString() : "0");
 		
-		//已售房源数
+		//待接房房源数
 		Cell cell10 = tempRow.createCell(9);
 		cell10.setCellStyle(style);
-		cell10.setCellValue(dto.getSaledApartmentCount() != null ? dto.getSaledApartmentCount().toString() : "0");
+		cell10.setCellValue(dto.getWaitingroomApartmentCount() != null ? dto.getWaitingroomApartmentCount().toString() : "0");
 		
-		//建筑面积
+		//自用房源数
 		Cell cell11 = tempRow.createCell(10);
 		cell11.setCellStyle(style);
-		cell11.setCellValue(dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
+		cell11.setCellValue(dto.getLivingApartmentCount() != null ? dto.getLivingApartmentCount().toString() : "0");
 		
-		//在租面积
+		//已售房源数
 		Cell cell12 = tempRow.createCell(11);
 		cell12.setCellStyle(style);
-		cell12.setCellValue(dto.getRentArea() != null ? dto.getRentArea().toString() : "0");
+		cell12.setCellValue(dto.getSaledApartmentCount() != null ? dto.getSaledApartmentCount().toString() : "0");
 		
-		//可招租面积
+		//建筑面积
 		Cell cell13 = tempRow.createCell(12);
 		cell13.setCellStyle(style);
-		cell13.setCellValue(dto.getFreeArea() != null ? dto.getFreeArea().toString() : "0");
+		cell13.setCellValue(dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
 		
-		//出租率(%)
+		//在租面积
 		Cell cell14 = tempRow.createCell(13);
 		cell14.setCellStyle(style);
-		cell14.setCellValue((dto.getRentRate() != null ? dto.getRentRate().toString() : "0") + "%");
+		cell14.setCellValue(dto.getRentArea() != null ? dto.getRentArea().toString() : "0");
 		
-		//空置率(%)
+		//可招租面积
 		Cell cell15 = tempRow.createCell(14);
 		cell15.setCellStyle(style);
-		cell15.setCellValue((dto.getFreeRate() != null ? dto.getFreeRate().toString() : "0") + "%");
+		cell15.setCellValue(dto.getFreeArea() != null ? dto.getFreeArea().toString() : "0");
 		
-		//应收含税金额(元)
+		//出租率(%)
 		Cell cell16 = tempRow.createCell(15);
 		cell16.setCellStyle(style);
-		cell16.setCellValue(dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
+		cell16.setCellValue((dto.getRentRate() != null ? dto.getRentRate().toString() : "0") + "%");
 		
-		//已收金额(元)
+		//空置率(%)
 		Cell cell17 = tempRow.createCell(16);
 		cell17.setCellStyle(style);
-		cell17.setCellValue(dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
+		cell17.setCellValue((dto.getFreeRate() != null ? dto.getFreeRate().toString() : "0") + "%");
 		
-		//待收金额(元)
+		//应收含税金额(元)
 		Cell cell18 = tempRow.createCell(17);
 		cell18.setCellStyle(style);
-		cell18.setCellValue(dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
+		cell18.setCellValue(dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
 		
-		//总欠费天数(天)
+		//已收金额(元)
 		Cell cell19 = tempRow.createCell(18);
 		cell19.setCellStyle(style);
-		cell19.setCellValue(dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
+		cell19.setCellValue(dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
 		
-		//收缴率(%)
+		//待收金额(元)
 		Cell cell20 = tempRow.createCell(19);
 		cell20.setCellStyle(style);
-		cell20.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
+		cell20.setCellValue(dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
+		
+		//总欠费天数(天)
+		Cell cell21 = tempRow.createCell(20);
+		cell21.setCellStyle(style);
+		cell21.setCellValue(dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
+		
+		//收缴率(%)
+		Cell cell22 = tempRow.createCell(21);
+		cell22.setCellStyle(style);
+		cell22.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
 	}
 	
     private void fillRowCellTotalCommunityStatistic(Row tempRow, CellStyle style, boolean isLastRow, int orderNum,
@@ -701,11 +711,124 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 		cell7.setCellStyle(style);
 		cell7.setCellValue(dto.getRentApartmentCount() != null ? dto.getRentApartmentCount().toString() : "0");
 		
-		//已占用房源数
+		//已占用房源数(在5.11.1改为已占用房源数)
 		Cell cell8 = tempRow.createCell(7);
 		cell8.setCellStyle(style);
 		cell8.setCellValue(dto.getOccupiedApartmentCount() != null ? dto.getOccupiedApartmentCount().toString() : "0");
 		
+		//待签约房源数
+		Cell cell9 = tempRow.createCell(8);
+		cell9.setCellStyle(style);
+		cell9.setCellValue(dto.getSignedupApartmentCount() != null ? dto.getSignedupApartmentCount().toString() : "0");
+		
+		//待接房房源数
+		Cell cell10 = tempRow.createCell(9);
+		cell10.setCellStyle(style);
+		cell10.setCellValue(dto.getWaitingroomApartmentCount() != null ? dto.getWaitingroomApartmentCount().toString() : "0");
+		
+		//自用房源数
+		Cell cell11 = tempRow.createCell(10);
+		cell11.setCellStyle(style);
+		cell11.setCellValue(dto.getLivingApartmentCount() != null ? dto.getLivingApartmentCount().toString() : "0");
+		
+		//已售房源数
+		Cell cell12 = tempRow.createCell(11);
+		cell12.setCellStyle(style);
+		cell12.setCellValue(dto.getSaledApartmentCount() != null ? dto.getSaledApartmentCount().toString() : "0");
+		
+		//建筑面积
+		Cell cell13 = tempRow.createCell(12);
+		cell13.setCellStyle(style);
+		cell13.setCellValue(dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
+		
+		//在租面积
+		Cell cell14 = tempRow.createCell(13);
+		cell14.setCellStyle(style);
+		cell14.setCellValue(dto.getRentArea() != null ? dto.getRentArea().toString() : "0");
+		
+		//可招租面积
+		Cell cell15 = tempRow.createCell(14);
+		cell15.setCellStyle(style);
+		cell15.setCellValue(dto.getFreeArea() != null ? dto.getFreeArea().toString() : "0");
+		
+		//出租率(%)
+		Cell cell16 = tempRow.createCell(15);
+		cell16.setCellStyle(style);
+		cell16.setCellValue((dto.getRentRate() != null ? dto.getRentRate().toString() : "0") + "%");
+		
+		//空置率(%)
+		Cell cell17 = tempRow.createCell(16);
+		cell17.setCellStyle(style);
+		cell17.setCellValue((dto.getFreeRate() != null ? dto.getFreeRate().toString() : "0") + "%");
+		
+		//应收含税金额(元)
+		Cell cell18 = tempRow.createCell(17);
+		cell18.setCellStyle(style);
+		cell18.setCellValue(dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
+		
+		//已收金额(元)
+		Cell cell19 = tempRow.createCell(18);
+		cell19.setCellStyle(style);
+		cell19.setCellValue(dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
+		
+		//待收金额(元)
+		Cell cell20 = tempRow.createCell(19);
+		cell20.setCellStyle(style);
+		cell20.setCellValue(dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
+		
+		//总欠费天数(天)
+		Cell cell21 = tempRow.createCell(20);
+		cell21.setCellStyle(style);
+		cell21.setCellValue(dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
+		
+		//收缴率(%)
+		Cell cell22 = tempRow.createCell(21);
+		cell22.setCellStyle(style);
+		cell22.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
+	}
+    
+	private void fillRowCellBuildingStatistic(Row tempRow, CellStyle style, boolean isLastRow, int orderNum,
+			BuildingReportFormDTO dto) {
+		//序号
+		Cell cell0 = tempRow.createCell(0);
+		cell0.setCellStyle(style);
+		cell0.setCellValue(orderNum);
+			
+		//楼宇名称
+		Cell cell2 = tempRow.createCell(1);
+		cell2.setCellStyle(style);
+		cell2.setCellValue(dto.getBuildingName());
+		
+		//房源总数
+		Cell cell3 = tempRow.createCell(2);
+		cell3.setCellStyle(style);
+		cell3.setCellValue(dto.getTotalApartmentCount() != null ? dto.getTotalApartmentCount().toString() : "0");
+		
+		//待租房源数
+		Cell cell4 = tempRow.createCell(3);
+		cell4.setCellStyle(style);
+		cell4.setCellValue(dto.getFreeApartmentCount() != null ? dto.getFreeApartmentCount().toString() : "0");	
+		
+		//已出租房源数
+		Cell cell5 = tempRow.createCell(4);
+		cell5.setCellStyle(style);
+		cell5.setCellValue(dto.getRentApartmentCount() != null ? dto.getRentApartmentCount().toString() : "0");
+		
+		//已占用房源数(在5.11.1改为已占用房源数)
+		Cell cell6 = tempRow.createCell(5);
+		cell6.setCellStyle(style);
+		cell6.setCellValue(dto.getOccupiedApartmentCount() != null ? dto.getOccupiedApartmentCount().toString() : "0");
+		
+		//待签约房源数
+		Cell cell7 = tempRow.createCell(6);
+		cell7.setCellStyle(style);
+		cell7.setCellValue(dto.getSignedupApartmentCount() != null ? dto.getSignedupApartmentCount().toString() : "0");
+		
+		//待接房房源数
+		Cell cell8 = tempRow.createCell(7);
+		cell8.setCellStyle(style);
+		cell8.setCellValue(dto.getWaitingroomApartmentCount() != null ? dto.getWaitingroomApartmentCount().toString() : "0");
+
 		//自用房源数
 		Cell cell9 = tempRow.createCell(8);
 		cell9.setCellStyle(style);
@@ -766,99 +889,6 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 		cell20.setCellStyle(style);
 		cell20.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
 	}
-    
-	private void fillRowCellBuildingStatistic(Row tempRow, CellStyle style, boolean isLastRow, int orderNum,
-			BuildingReportFormDTO dto) {
-		//序号
-		Cell cell0 = tempRow.createCell(0);
-		cell0.setCellStyle(style);
-		cell0.setCellValue(orderNum);
-			
-		//楼宇名称
-		Cell cell2 = tempRow.createCell(1);
-		cell2.setCellStyle(style);
-		cell2.setCellValue(dto.getBuildingName());
-		
-		//房源总数
-		Cell cell3 = tempRow.createCell(2);
-		cell3.setCellStyle(style);
-		cell3.setCellValue(dto.getTotalApartmentCount() != null ? dto.getTotalApartmentCount().toString() : "0");
-		
-		//待租房源数
-		Cell cell4 = tempRow.createCell(3);
-		cell4.setCellStyle(style);
-		cell4.setCellValue(dto.getFreeApartmentCount() != null ? dto.getFreeApartmentCount().toString() : "0");	
-		
-		//已出租房源数
-		Cell cell5 = tempRow.createCell(4);
-		cell5.setCellStyle(style);
-		cell5.setCellValue(dto.getRentApartmentCount() != null ? dto.getRentApartmentCount().toString() : "0");
-		
-		//已占用房源数
-		Cell cell6 = tempRow.createCell(5);
-		cell6.setCellStyle(style);
-		cell6.setCellValue(dto.getOccupiedApartmentCount() != null ? dto.getOccupiedApartmentCount().toString() : "0");
-		
-		//自用房源数
-		Cell cell7 = tempRow.createCell(6);
-		cell7.setCellStyle(style);
-		cell7.setCellValue(dto.getLivingApartmentCount() != null ? dto.getLivingApartmentCount().toString() : "0");
-		
-		//已售房源数
-		Cell cell8 = tempRow.createCell(7);
-		cell8.setCellStyle(style);
-		cell8.setCellValue(dto.getSaledApartmentCount() != null ? dto.getSaledApartmentCount().toString() : "0");
-		
-		//建筑面积
-		Cell cell9 = tempRow.createCell(8);
-		cell9.setCellStyle(style);
-		cell9.setCellValue(dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
-		
-		//在租面积
-		Cell cell10 = tempRow.createCell(9);
-		cell10.setCellStyle(style);
-		cell10.setCellValue(dto.getRentArea() != null ? dto.getRentArea().toString() : "0");
-		
-		//可招租面积
-		Cell cell11 = tempRow.createCell(10);
-		cell11.setCellStyle(style);
-		cell11.setCellValue(dto.getFreeArea() != null ? dto.getFreeArea().toString() : "0");
-		
-		//出租率(%)
-		Cell cell12 = tempRow.createCell(11);
-		cell12.setCellStyle(style);
-		cell12.setCellValue((dto.getRentRate() != null ? dto.getRentRate().toString() : "0") + "%");
-		
-		//空置率(%)
-		Cell cell13 = tempRow.createCell(12);
-		cell13.setCellStyle(style);
-		cell13.setCellValue((dto.getFreeRate() != null ? dto.getFreeRate().toString() : "0") + "%");
-		
-		//应收含税金额(元)
-		Cell cell14 = tempRow.createCell(13);
-		cell14.setCellStyle(style);
-		cell14.setCellValue(dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
-		
-		//已收金额(元)
-		Cell cell15 = tempRow.createCell(14);
-		cell15.setCellStyle(style);
-		cell15.setCellValue(dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
-		
-		//待收金额(元)
-		Cell cell16 = tempRow.createCell(15);
-		cell16.setCellStyle(style);
-		cell16.setCellValue(dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
-		
-		//总欠费天数(天)
-		Cell cell17 = tempRow.createCell(16);
-		cell17.setCellStyle(style);
-		cell17.setCellValue(dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
-		
-		//收缴率(%)
-		Cell cell18 = tempRow.createCell(17);
-		cell18.setCellStyle(style);
-		cell18.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
-	}
 	
 	private void fillRowCellTotalBuildingStatistic(Row tempRow, CellStyle style, boolean isLastRow, int orderNum,
 			TotalBuildingStaticsDTO dto) {
@@ -887,70 +917,80 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 		cell5.setCellStyle(style);
 		cell5.setCellValue(dto.getRentApartmentCount() != null ? dto.getRentApartmentCount().toString() : "0");
 		
-		//已占用房源数
+		//已占用房源数(在5.11.1改为已占用房源数)
 		Cell cell6 = tempRow.createCell(5);
 		cell6.setCellStyle(style);
 		cell6.setCellValue(dto.getOccupiedApartmentCount() != null ? dto.getOccupiedApartmentCount().toString() : "0");
 		
-		//自用房源数
+		//待签约房源数
 		Cell cell7 = tempRow.createCell(6);
 		cell7.setCellStyle(style);
-		cell7.setCellValue(dto.getLivingApartmentCount() != null ? dto.getLivingApartmentCount().toString() : "0");
+		cell7.setCellValue(dto.getSignedupApartmentCount() != null ? dto.getSignedupApartmentCount().toString() : "0");
 		
-		//已售房源数
+		//待接房房源数
 		Cell cell8 = tempRow.createCell(7);
 		cell8.setCellStyle(style);
-		cell8.setCellValue(dto.getSaledApartmentCount() != null ? dto.getSaledApartmentCount().toString() : "0");
-		
-		//建筑面积
+		cell8.setCellValue(dto.getWaitingroomApartmentCount() != null ? dto.getWaitingroomApartmentCount().toString() : "0");
+
+		//自用房源数
 		Cell cell9 = tempRow.createCell(8);
 		cell9.setCellStyle(style);
-		cell9.setCellValue(dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
+		cell9.setCellValue(dto.getLivingApartmentCount() != null ? dto.getLivingApartmentCount().toString() : "0");
 		
-		//在租面积
+		//已售房源数
 		Cell cell10 = tempRow.createCell(9);
 		cell10.setCellStyle(style);
-		cell10.setCellValue(dto.getRentArea() != null ? dto.getRentArea().toString() : "0");
+		cell10.setCellValue(dto.getSaledApartmentCount() != null ? dto.getSaledApartmentCount().toString() : "0");
 		
-		//可招租面积
+		//建筑面积
 		Cell cell11 = tempRow.createCell(10);
 		cell11.setCellStyle(style);
-		cell11.setCellValue(dto.getFreeArea() != null ? dto.getFreeArea().toString() : "0");
+		cell11.setCellValue(dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
 		
-		//出租率(%)
+		//在租面积
 		Cell cell12 = tempRow.createCell(11);
 		cell12.setCellStyle(style);
-		cell12.setCellValue((dto.getRentRate() != null ? dto.getRentRate().toString() : "0") + "%");
+		cell12.setCellValue(dto.getRentArea() != null ? dto.getRentArea().toString() : "0");
 		
-		//空置率(%)
+		//可招租面积
 		Cell cell13 = tempRow.createCell(12);
 		cell13.setCellStyle(style);
-		cell13.setCellValue((dto.getFreeRate() != null ? dto.getFreeRate().toString() : "0") + "%");
+		cell13.setCellValue(dto.getFreeArea() != null ? dto.getFreeArea().toString() : "0");
 		
-		//应收含税金额(元)
+		//出租率(%)
 		Cell cell14 = tempRow.createCell(13);
 		cell14.setCellStyle(style);
-		cell14.setCellValue(dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
+		cell14.setCellValue((dto.getRentRate() != null ? dto.getRentRate().toString() : "0") + "%");
 		
-		//已收金额(元)
+		//空置率(%)
 		Cell cell15 = tempRow.createCell(14);
 		cell15.setCellStyle(style);
-		cell15.setCellValue(dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
+		cell15.setCellValue((dto.getFreeRate() != null ? dto.getFreeRate().toString() : "0") + "%");
 		
-		//待收金额(元)
+		//应收含税金额(元)
 		Cell cell16 = tempRow.createCell(15);
 		cell16.setCellStyle(style);
-		cell16.setCellValue(dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
+		cell16.setCellValue(dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
 		
-		//总欠费天数(天)
+		//已收金额(元)
 		Cell cell17 = tempRow.createCell(16);
 		cell17.setCellStyle(style);
-		cell17.setCellValue(dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
+		cell17.setCellValue(dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
 		
-		//收缴率(%)
+		//待收金额(元)
 		Cell cell18 = tempRow.createCell(17);
 		cell18.setCellStyle(style);
-		cell18.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
+		cell18.setCellValue(dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
+		
+		//总欠费天数(天)
+		Cell cell19 = tempRow.createCell(18);
+		cell19.setCellStyle(style);
+		cell19.setCellValue(dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
+		
+		//收缴率(%)
+		Cell cell20 = tempRow.createCell(19);
+		cell20.setCellStyle(style);
+		cell20.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
 	}
 	
 	private String getTodayYearStr(){

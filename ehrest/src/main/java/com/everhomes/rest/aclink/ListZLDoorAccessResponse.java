@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class ListZLDoorAccessResponse {
-	private List<String> listMac;
+	private List<String> listMac;//待对接方新版上线时,改为macAddress
 
 	public List<String> getListMac() {
 		return listMac;
