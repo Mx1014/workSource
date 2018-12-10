@@ -1758,6 +1758,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				PriceRuleType.RESOURCE.getCode(), cmd.getSpaceId());
 		order.setPrice(price.get(0).getWorkdayPrice());
 		order.setOrderNo(orderNo);
+		order.setOwnerId(cmd.getOwnerId());
+		order.setOwnerType(cmd.getOwnerType());
+		order.setNamespaceId(UserContext.getCurrentNamespaceId());
+		order.setRentType((byte)0);
 		this.dbProvider.execute((TransactionStatus status) -> {
 			officeCubicleProvider.createCubicleRentOrder(order);
 			return null;
@@ -1949,7 +1953,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				rentalCommonService.rentalOrderSuccess(order.getRentalOrderNo());
 				int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
 				List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceName());
-				smsProvider.addToTupleList(variables, "reserveTime", order.getCreateTime());
+				smsProvider.addToTupleList(variables, "reserveTime", order.getUseDetail());
 				smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
 				sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
@@ -1989,7 +1993,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
         UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(creatorUid,
                 IdentifierType.MOBILE.getCode());
-        LOGGER.info("miao shouji : " + userIdentifier +" yukongjian + " + namespaceId);
         if (null == userIdentifier) {
             LOGGER.error("userIdentifier is null...userId = " + creatorUid);
         } else {
