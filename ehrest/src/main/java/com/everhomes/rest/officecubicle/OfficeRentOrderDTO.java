@@ -47,7 +47,7 @@ public class OfficeRentOrderDTO {
     private Long createTime;
     private BigDecimal price;
     private Byte paidMode;
-    private Byte paidType;
+    private String paidType;
     private Byte requestType;
     private Byte orderStatus;
     private Long orderNo;
@@ -129,11 +129,11 @@ public class OfficeRentOrderDTO {
 		this.paidMode = paidMode;
 	}
 
-	public Byte getPaidType() {
+	public String getPaidType() {
 		return paidType;
 	}
 
-	public void setPaidType(Byte paidType) {
+	public void setPaidType(String paidType) {
 		this.paidType = paidType;
 	}
 
