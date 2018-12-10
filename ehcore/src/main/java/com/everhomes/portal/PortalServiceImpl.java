@@ -551,7 +551,7 @@ public class PortalServiceImpl implements PortalService {
                 StringBuilder o1StringBuilder = new StringBuilder();
                 StringBuilder o2StringBuilder = new StringBuilder();
                 o1StringBuilder.append(o1.getTerminalType()==null?0:o1.getTerminalType()).append(o1.getSceneType()==null?0:100-o1.getSceneType());
-                o2StringBuilder.append(o1.getTerminalType()==null?0:o2.getTerminalType()).append(o2.getSceneType()==null?0:100-o2.getSceneType());
+                o2StringBuilder.append(o2.getTerminalType()==null?0:o2.getTerminalType()).append(o2.getSceneType()==null?0:100-o2.getSceneType());
                 return o2StringBuilder.toString().compareTo(o1StringBuilder.toString());
 //                if (o1 == null || o2 == null) {
 //                    return -1;
@@ -589,7 +589,7 @@ public class PortalServiceImpl implements PortalService {
                 StringBuilder o1StringBuilder = new StringBuilder();
                 StringBuilder o2StringBuilder = new StringBuilder();
                 o1StringBuilder.append(o1.getTerminalType()==null?0:o1.getTerminalType()).append(o1.getSceneType()==null?0:100-o1.getSceneType());
-                o2StringBuilder.append(o1.getTerminalType()==null?0:o2.getTerminalType()).append(o2.getSceneType()==null?0:100-o2.getSceneType());
+                o2StringBuilder.append(o2.getTerminalType()==null?0:o2.getTerminalType()).append(o2.getSceneType()==null?0:100-o2.getSceneType());
 //                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
 //                    return -1;
 //                }
