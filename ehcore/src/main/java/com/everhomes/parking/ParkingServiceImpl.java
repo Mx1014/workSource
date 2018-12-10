@@ -993,12 +993,12 @@ public class ParkingServiceImpl implements ParkingService {
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			ParkingVendorHandler handler = getParkingVendorHandler(parkingLot.getVendorName());
 
-			List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, order.getPlateNumber());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			String sdate = null;
-			if (cards != null){
+			if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())){
+				List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, order.getPlateNumber());
 				sdate = sdf.format(cards.get(0).getEndTime());
-			} else {
+			} else if(order.getOrderType().equals(ParkingOrderType.OPEN_CARD.getCode())) {
 				ParkingCardRequest cardRequest = parkingProvider.findParkingCardRequestByPlateNumber( order.getPlateNumber());
 				GetOpenCardInfoCommand cmd = new GetOpenCardInfoCommand();
 				cmd.setOwnerId(order.getOwnerId());
