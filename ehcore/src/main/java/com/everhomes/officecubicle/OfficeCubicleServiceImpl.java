@@ -2831,7 +2831,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		return resp;
 	}
 	
-	@Scheduled(cron = "0 0 8,12 * * ? ")
+	@Scheduled(cron = "0 0 8,12,18 * * ? ")
 	@Override
 	public void schedule(){
 		List<OfficeCubicleRentOrder> orders = 
