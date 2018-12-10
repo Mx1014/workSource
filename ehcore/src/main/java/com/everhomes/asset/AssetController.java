@@ -1050,6 +1050,20 @@ public class AssetController extends ControllerBase {
 		restResponse.setErrorDescription("OK");
 		return restResponse;
 	}
+	
+	/**
+	 * <b>URL: /asset/payBillsV2</b>
+	 * <p>支付对接统一订单</p>
+	 */
+	@RequestMapping("payBillsV2")
+	@RestReturn(PayAssetGeneralOrderResponse.class)
+	public RestResponse payBillsV2(CreatePaymentBillOrderCommand cmd) {
+		PayAssetGeneralOrderResponse response = assetService.payBillsV2(cmd);
+		RestResponse restResponse = new RestResponse(response);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 
 	/**
 	 * <b>URL: /asset/listPaymentBill</b>

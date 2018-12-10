@@ -17,9 +17,12 @@ import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
+import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
 import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUserIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
 import com.everhomes.rest.promotion.order.*;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.GetPurchaseOrderRestResponse;
@@ -83,14 +86,14 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 
 	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
     
-    public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {
-        //校验参数
+    public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {//校验参数
         checkPaymentBillOrderPaidStatus(cmd);//检测账单是否已支付
-        PaymentBillGroup billGroup = checkBillGroup(cmd);
-        checkBusinessPayer(cmd);
-        checkPaymentPayeeId(cmd, billGroup);
+        PaymentBillGroup billGroup = checkBillGroup(cmd);//校验账单组是否存在
+        checkBusinessPayer(cmd);//
+        checkPaymentPayeeId(cmd, billGroup);//校验收款方帐号是否配置到了帐单组中，没有收款方帐号无法支付
+        checkMerchantIdExist(billGroup.getBizPayeeId());//校验收款方账号在统一订单系统中是否存在
 
-        // 组装订单数据
+        //准备创建订单的参数
         CreatePurchaseOrderCommand preOrderCommand = preparePaymentBillOrder(cmd, billGroup);
         
         // 发送下单请求
@@ -659,5 +662,18 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 //        }
 //        return result;
 	}
+	
+	private void checkMerchantIdExist(Long merchantId) {
+    	ListPayUsersByMerchantIdsCommand cmd = new ListPayUsersByMerchantIdsCommand();
+    	cmd.setIds(Arrays.asList(merchantId));
+		ListPayUsersByMerchantIdsRestResponse resp = orderService.listPayUsersByMerchantIds(cmd);
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+            throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_MERCHANT_ID_NOT_FOUND,
+                    "merchant id not found");
+		}
+	}
+	
+	
 
 }

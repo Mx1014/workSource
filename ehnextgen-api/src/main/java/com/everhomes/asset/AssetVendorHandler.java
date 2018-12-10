@@ -52,6 +52,7 @@ import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.bill.PayAssetGeneralOrderResponse;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderCommand;
@@ -292,5 +293,10 @@ public abstract class AssetVendorHandler {
                 "Insufficient privilege");
 	}
 
+	public PayAssetGeneralOrderResponse createOrderV2(CreatePaymentBillOrderCommand cmd) {
+		LOGGER.error("Insufficient privilege, handler createOrderV2");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
 
 }

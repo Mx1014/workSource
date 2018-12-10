@@ -54,6 +54,7 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.bill.PayAssetGeneralOrderResponse;
 import com.everhomes.rest.asset.calculate.AssetOneTimeBillStatus;
 import com.everhomes.rest.asset.calculate.NatualQuarterMonthDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -5706,6 +5707,13 @@ public class AssetServiceImpl implements AssetService {
 
 	public PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd) {
 		return assetProvider.listPaymentBillDetail(cmd.getBillId());
+	}
+
+	public PayAssetGeneralOrderResponse payBillsV2(CreatePaymentBillOrderCommand cmd) {
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        cmd.setSourceType(SourceType.MOBILE.getCode());
+        return handler.createOrderV2(cmd);
 	}
 	
 }

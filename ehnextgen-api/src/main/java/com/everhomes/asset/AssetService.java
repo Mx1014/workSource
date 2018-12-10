@@ -103,6 +103,7 @@ import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.bill.PayAssetGeneralOrderResponse;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -354,4 +355,6 @@ public interface AssetService {
 	void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId);
 	
 	PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd);
+	
+	PayAssetGeneralOrderResponse payBillsV2(CreatePaymentBillOrderCommand cmd);
 }
