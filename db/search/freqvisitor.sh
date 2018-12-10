@@ -7,16 +7,14 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/freqvisitor" -d '
      "freqvisitor" : {
             "properties" : {
             	"namespaceId" : {
-                    "type": "long",
-                    "index": "not_analyzed"
+                    "type": "long"
                 },
                 "ownerType" : {
                     "type": "string",
                     "index": "not_analyzed"
                 },
                 "ownerId" : {
-                    "type": "long",
-                    "index": "not_analyzed"
+                    "type": "long"
                 },
                 "id" : {
                     "type": "long",

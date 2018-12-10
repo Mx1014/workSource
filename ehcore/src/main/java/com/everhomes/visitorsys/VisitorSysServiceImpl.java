@@ -1448,9 +1448,23 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             response.setQrcode(communityVisitor.getDoorGuardQrcode());
         }
         //目前只有公司访客邀请函，所以以下设置基于公司访客邀请函的设置
-        response = VisitorSysUtils.copyAllNotNullProperties(enterpriseConfig, response);
-        response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
-        VisitorSysOfficeLocation location = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(enterpriseVisitor.getOfficeLocationId());
+        if(communityVisitor.getCommunityType() == null || communityVisitor.getCommunityType().byteValue() == CommunityType.COMMERCIAL.getCode()) {
+            response = VisitorSysUtils.copyAllNotNullProperties(enterpriseConfig, response);
+            response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
+        }else if(communityVisitor.getCommunityType().byteValue() == CommunityType.RESIDENTIAL.getCode()){
+            response = VisitorSysUtils.copyAllNotNullProperties(communityConfig, response);
+            response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
+        }
+        VisitorSysOfficeLocation location = new VisitorSysOfficeLocation();
+        if(communityVisitor.getCommunityType() == null || communityVisitor.getCommunityType().byteValue() == CommunityType.COMMERCIAL.getCode()) {
+            location = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(enterpriseVisitor.getOfficeLocationId());
+        } else if(communityVisitor.getCommunityType().byteValue() == CommunityType.RESIDENTIAL.getCode()){
+            Address address = addressProvider.findGroupAddress(communityVisitor.getOfficeLocationId());
+            location = ConvertHelper.convert(address,VisitorSysOfficeLocation.class);
+            location.setOfficeLocationName(address.getCommunityName());
+            location.setAddresses(address.getAddress());
+            location.setMapAddresses(location.getAddresses());
+        }
         VisitorsysFlagType visitorInfoFlag = VisitorsysFlagType.fromCode(enterpriseConfig.getBaseConfig().getVisitorInfoFlag());
         if(visitorInfoFlag == VisitorsysFlagType.YES) {
             BaseVisitorInfoDTO convert = ConvertHelper.convert(enterpriseVisitor, BaseVisitorInfoDTO.class);
