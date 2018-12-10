@@ -1751,6 +1751,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeCubicleSpace space = this.officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
 			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
+			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
 		 CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
