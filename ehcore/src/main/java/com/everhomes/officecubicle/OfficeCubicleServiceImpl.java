@@ -894,7 +894,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeCubicleRequestType requestTpye = OfficeCubicleRequestType.fromCode(dto.getRequestType());
 		row.createCell(++i).setCellValue(requestTpye==null?"":requestTpye.getDesc());
 		//订单状态
-		OfficeCubiceOrderStatus orderStatus = OfficeCubiceOrderStatus.fromCode(dto.getOrderStatus());
+		OfficeCubicleOrderStatus orderStatus = OfficeCubicleOrderStatus.fromCode(dto.getOrderStatus());
 		row.createCell(++i).setCellValue(orderStatus==null?"":orderStatus.getDescription());
 		
 	}
@@ -1748,6 +1748,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		OfficeCubicleSpace space = this.officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
+			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
 			return;
 		}
 		 CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
@@ -2031,7 +2032,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderByBizOrderNum(cmd.getBizOrderNum());
 		if(cmd.getOrderType() == 3) {
 			coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_ORDER_STATUS.getCode() + order.getId()).enter(()-> {
-				order.setOrderStatus(OfficeCubiceOrderStatus.PAID.getCode());
+				order.setOrderStatus(OfficeCubicleOrderStatus.PAID.getCode());
 				order.setOperateTime(new Timestamp(System.currentTimeMillis()));
 				order.setOperatorUid(UserContext.currentUserId());
 				if (cmd.getPaymentType() != null){
@@ -2057,7 +2058,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				return null;
 			});
 		}else if(cmd.getOrderType() == 4){
-			order.setOrderStatus(OfficeCubiceOrderStatus.REFUNDED.getCode());
+			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
 			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			order.setOperatorUid(UserContext.currentUserId());
 			officeCubicleProvider.updateCubicleRentOrder(order);
@@ -2208,7 +2209,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setBeginTime(new Timestamp(cmd.getBeginTime()));
 		order.setEndTime(new Timestamp(cmd.getEndTime()));
 		order.setRentType(cmd.getRentType());
-		order.setOrderStatus(OfficeCubiceOrderStatus.PAID.getCode());
+		order.setOrderStatus(OfficeCubicleOrderStatus.PAID.getCode());
 		order.setOwnerId(cmd.getOwnerId());
 		order.setOwnerType(cmd.getOwnerType());
 		if (cmd.getRentCount()!=null){
@@ -2835,17 +2836,17 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public void schedule(){
 		List<OfficeCubicleRentOrder> orders = 
-				this.officeCubicleProvider.findOfficeCubicleRentOrderByStatus(new Byte[]{OfficeCubiceOrderStatus.IN_USE.getCode(),
-						OfficeCubiceOrderStatus.PAID.getCode()});
+				this.officeCubicleProvider.findOfficeCubicleRentOrderByStatus(new Byte[]{OfficeCubicleOrderStatus.IN_USE.getCode(),
+						OfficeCubicleOrderStatus.PAID.getCode()});
 		for(OfficeCubicleRentOrder order:orders){
-			if(order.getOrderStatus().equals(OfficeCubiceOrderStatus.IN_USE.getCode())){
+			if(order.getOrderStatus().equals(OfficeCubicleOrderStatus.IN_USE.getCode())){
 				if(order.getEndTime().getTime()<System.currentTimeMillis()){
-					order.setOrderStatus(OfficeCubiceOrderStatus.COMPLETE.getCode());
+					order.setOrderStatus(OfficeCubicleOrderStatus.COMPLETE.getCode());
 					officeCubicleProvider.updateCubicleRentOrder(order);
 				}
-			} else if(order.getOrderStatus().equals(OfficeCubiceOrderStatus.PAID.getCode())){
+			} else if(order.getOrderStatus().equals(OfficeCubicleOrderStatus.PAID.getCode())){
 				if(order.getBeginTime().getTime()<System.currentTimeMillis()){
-					order.setOrderStatus(OfficeCubiceOrderStatus.IN_USE.getCode());
+					order.setOrderStatus(OfficeCubicleOrderStatus.IN_USE.getCode());
 					officeCubicleProvider.updateCubicleRentOrder(order);
 				}
 			}

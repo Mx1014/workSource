@@ -11,14 +11,14 @@ package com.everhomes.rest.officecubicle;
  * <li>REFUNDED(6): 已退款</li>
  * </ul>
  */
-public enum OfficeCubiceOrderStatus {
+public enum OfficeCubicleOrderStatus {
     /*INACTIVE((byte)0, "无效"), */UNPAID((byte)1, "待付款"), PAID((byte)2, "待使用"), IN_USE((byte)3, "使用中"),
     COMPLETE((byte)4, "已完成"), REFUNDING((byte)5, "退款中"), REFUNDED((byte)6, "已退款"),EFFECTIVE((byte)11,"有效订单");
     
     private byte code;
     private String description;
     
-    private OfficeCubiceOrderStatus(byte code, String description) {
+    private OfficeCubicleOrderStatus(byte code, String description) {
         this.code = code;
         this.description = description;
     }
@@ -27,10 +27,10 @@ public enum OfficeCubiceOrderStatus {
         return this.code;
     }
     
-    public static OfficeCubiceOrderStatus fromCode(Byte code) {
+    public static OfficeCubicleOrderStatus fromCode(Byte code) {
         if(code != null) {
-        	OfficeCubiceOrderStatus[] values = OfficeCubiceOrderStatus.values();
-            for(OfficeCubiceOrderStatus value : values) {
+        	OfficeCubicleOrderStatus[] values = OfficeCubicleOrderStatus.values();
+            for(OfficeCubicleOrderStatus value : values) {
                 if(value.code == code.byteValue()) {
                     return value;
                 }
