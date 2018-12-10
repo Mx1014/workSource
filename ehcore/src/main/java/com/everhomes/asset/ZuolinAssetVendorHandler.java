@@ -1579,7 +1579,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             Long existAddressId = existAddresses.get(item.getBillId());
             if(existAddressId == null || !existAddressId.equals(item.getAddressId())) {
                 String identifier = map.get(item.getBillId());
-                if(identifier != null) {
+                if(identifier == null) {
                     identifier = "unknown";
                 }
                 String addressIdStr = (item.getAddressId() == null) ? "" : String.valueOf(item.getAddressId());
