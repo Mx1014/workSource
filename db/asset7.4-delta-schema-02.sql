@@ -353,7 +353,3 @@ CREATE TABLE `eh_service_module_app_entries` (
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '应用的入口数据';
 
--- AUTHOR: mengqianxiang
--- REMARK: 增加eh_payment_exemption_items表的状态字段
-ALTER TABLE eh_payment_exemption_items ADD `merchant_order_id` BIGINT  COMMENT "账单明细ID";
-ALTER TABLE eh_payment_exemption_items ADD `delete_flag` TINYINT DEFAULT 1 COMMENT "删除状态：0：已删除；1：正常使用";
