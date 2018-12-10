@@ -1733,7 +1733,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getStationId());
-			station = ConvertHelper.convert(cmd, OfficeCubicleStation.class);
 			station.setId(cmd.getStationId());
 			station.setDescription(cmd.getDescription());
 			station.setNamespaceId(cmd.getNamespaceId());
@@ -1949,7 +1948,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				officeCubicleProvider.updateCubicleRentOrder(order);
 				rentalCommonService.rentalOrderSuccess(order.getRentalOrderNo());
 				int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
-				List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
+				List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceName());
 				smsProvider.addToTupleList(variables, "reserveTime", order.getCreateTime());
 				smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
 				sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
