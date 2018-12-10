@@ -84,6 +84,7 @@ CREATE TABLE `eh_office_cubicle_rent_orders` (
   `price` DECIMAL(10,2) COMMENT '价格',
   `rent_count` BIGINT COMMENT '预定数量',
   `remark` TEXT COMMENT '备注',
+  `reserver_uid` BIGINT COMMENT '预定人id',
   `reserver_name` VARCHAR(32) COMMENT '预定人姓名',
   `reserver_enterprise_name` VARCHAR(64) COMMENT '预定人公司名称',
   `reserver_enterprise_Id` BIGINT COMMENT '预定人公司ID',
