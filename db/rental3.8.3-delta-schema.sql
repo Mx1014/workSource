@@ -7,7 +7,7 @@ ADD COLUMN `preview_using_image_uri`  varchar(255) NULL COMMENT '资源概览 �
 ALTER TABLE `eh_rentalv2_default_rules`
 ADD COLUMN `preview_idle_image_uri`  varchar(255) NULL COMMENT '资源概览 空闲图片' AFTER `preview_using_image_uri`;
 ALTER TABLE `eh_rentalv2_default_rules`
-ADD COLUMN `shop_name`  varchar(255) NULL COMMENT '关联商铺名' AFTER `priview_idle_image_uri`;
+ADD COLUMN `shop_name`  varchar(255) NULL COMMENT '关联商铺名' AFTER `preview_idle_image_uri`;
 ALTER TABLE `eh_rentalv2_default_rules`
 ADD COLUMN `shop_no`  varchar(255) NULL COMMENT '关联商铺号' AFTER `shop_name`;
 ALTER TABLE `eh_rentalv2_default_rules`
