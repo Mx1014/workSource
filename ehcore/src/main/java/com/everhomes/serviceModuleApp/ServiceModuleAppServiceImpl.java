@@ -74,6 +74,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -1743,7 +1744,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
     }
 
     private List<AppDTO> sortUserAppDTO(List<AppDTO> appDTOS, Long orgId) {
-	    List<AppDTO> list = new ArrayList<>(appDTOS.size());
+	    List<AppDTO> list = new LinkedList<>();
         //用户是否启用自定义配置
         UserAppFlag userAppFlag = userAppFlagProvider.findUserAppFlag(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
 
