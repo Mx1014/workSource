@@ -407,9 +407,9 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.OWNER_ID.eq(ownerId));
 		}
 		if (null != beginDate)
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.BEGIN_TIME.gt(new Timestamp(beginDate)));
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.CREATE_TIME.gt(new Timestamp(beginDate)));
 		if (null != endDate)
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.END_TIME.lt(new Timestamp(endDate)));
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.CREATE_TIME.lt(new Timestamp(endDate)));
 		if (StringUtils.isNotBlank(paidType))
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.PAID_TYPE.eq(paidType));
 		if (null != paidMode)

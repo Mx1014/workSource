@@ -817,26 +817,29 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		int i = -1;
 		// 序号
 		row.createCell(++i).setCellValue(row.getRowNum());
+		
+		// 预订人
+		row.createCell(++i).setCellValue(dto.getReserverName());
+		// 联系电话
+		row.createCell(++i).setCellValue(dto.getReserveContactToken());
 		// 项目名称
 		row.createCell(++i).setCellValue(dto.getSpaceName());
-		// 所在城市
-		row.createCell(++i).setCellValue(dto.getProvinceName() + dto.getCityName());
+//		// 所在城市
+//		row.createCell(++i).setCellValue(dto.getProvinceName() + dto.getCityName());
 		// 订单时间
 		row.createCell(++i).setCellValue(datetimeSF.format(new Timestamp(dto.getReserveTime())));
 		// 预定类别
-		OfficeOrderType ordertype = OfficeOrderType.fromCode(dto.getOrderType());
-		row.createCell(++i).setCellValue(ordertype==null?"":ordertype.getMsg());
+//		OfficeOrderType ordertype = OfficeOrderType.fromCode(dto.getOrderType());
+//		row.createCell(++i).setCellValue(ordertype==null?"":ordertype.getMsg());
 		// 工位类别
-		OfficeRentType renttype = OfficeRentType.fromCode(dto.getRentType());
-		row.createCell(++i).setCellValue(renttype==null?"":renttype.getMsg());
+//		OfficeRentType renttype = OfficeRentType.fromCode(dto.getRentType());
+//		row.createCell(++i).setCellValue(renttype==null?"":renttype.getMsg());
 		// 工位数/面积
 //		OfficeSpaceType spaceType = OfficeSpaceType.fromCode(dto.getSpaceType()==null?(byte)1:(byte)2);
 //		row.createCell(++i).setCellValue(dto.getSpaceSize() + spaceType==null?"":spaceType.getMsg());
-		// 预订人
-		row.createCell(++i).setCellValue(dto.getReserverName());
 
-		// 联系电话
-		row.createCell(++i).setCellValue(dto.getReserveContactToken());
+
+		
 
 		// 工作流状态
 		if(dto!=null && dto.getWorkFlowStatus()!=null) {
@@ -1124,7 +1127,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	}
     private BigDecimal calculateRefundAmount(OfficeCubicleRentOrder order, Long now, OfficeCubicleSpace space) {
 
-        if (space.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
+    	LOGGER.info("getRefundStrategy : " + space.getRefundStrategy() + "RentalOrderStrategy: " + RentalOrderStrategy.FULL.getCode());
+        if (space.getRefundStrategy().equals(RentalOrderStrategy.CUSTOM.getCode())) {
 
             List<OfficeCubicleRefundRule> refundRules = officeCubicleProvider.findRefundRule(order.getSpaceId());
 
@@ -1173,9 +1177,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 
             return amount;
-        }else if (order.getRefundStrategy() == RentalOrderStrategy.FULL.getCode()) {
+        }else if (space.getRefundStrategy().equals(RentalOrderStrategy.FULL.getCode())) {
             return order.getPrice();
-        }else if (order.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
+        }else if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
         	return new BigDecimal(0);
         }
         
