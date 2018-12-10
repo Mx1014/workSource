@@ -1911,34 +1911,36 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             cmd.setOwnerType("community");
             cmd.setOwnerId(ownerId);
             cmd.setIsSettled(billSwitch);
+            // 对于个人客户导帐单时，会有可能出现这样的一个情况：不同门牌的业主名称一样，但实际上他们是不同的人，所以不能把他们当同一个客户来看；
+            // 故需要生成多个帐单，即使客户名称、帐期、门牌一样的时候也生成多个，让用户在界面上确认，如果多了可以删除，但合并了则有问题 by lqs 20181210
             //个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
-            if(targetType.equals(AssetTargetType.USER.getCode())){
-            	for(int m = 0;m < cmds.size();m++) {
-            		CreateBillCommand createBillCommand = cmds.get(m);
-            		if(cmd.getTargetName().equals(createBillCommand.getTargetName()) 
-        				&& cmd.getDateStrBegin().equals(createBillCommand.getDateStrBegin())
-        				&& cmd.getDateStrEnd().equals(createBillCommand.getDateStrEnd())) {
-            			//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
-        				if(createBillCommand.getAddresses().equals(cmd.getAddresses())) {
-        					cmds.set(m, cmd);
-                			continue bill;
-        				}else if(!createBillCommand.getAddresses().contains(cmd.getAddresses())){//未合并为一个账单之前的情况，如：456、457， 新的数据是456，是不同的数据，所以是新增。
-        					//个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
-        					BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
-                			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
-                			List<ExemptionItemDTO> newExemptionItemDTOList = newBillGroupDTO.getExemptionItemDTOList();
-                			newBillItemDTOList.addAll(billItemDTOList);
-                			newExemptionItemDTOList.addAll(exemptionItemDTOList);
-                			newBillGroupDTO.setBillItemDTOList(newBillItemDTOList);
-                			newBillGroupDTO.setExemptionItemDTOList(newExemptionItemDTOList);
-                			createBillCommand.setBillGroupDTO(newBillGroupDTO);
-                			createBillCommand.setAddresses(cmd.getAddresses() + "," + createBillCommand.getAddresses());
-                			cmds.set(m, createBillCommand);
-                			continue bill;
-        				}
-            		}
-            	}
-            }
+//            if(targetType.equals(AssetTargetType.USER.getCode())){
+//            	for(int m = 0;m < cmds.size();m++) {
+//            		CreateBillCommand createBillCommand = cmds.get(m);
+//            		if(cmd.getTargetName().equals(createBillCommand.getTargetName()) 
+//        				&& cmd.getDateStrBegin().equals(createBillCommand.getDateStrBegin())
+//        				&& cmd.getDateStrEnd().equals(createBillCommand.getDateStrEnd())) {
+//            			//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+//        				if(createBillCommand.getAddresses().equals(cmd.getAddresses())) {
+//        					cmds.set(m, cmd);
+//                			continue bill;
+//        				}else if(!createBillCommand.getAddresses().contains(cmd.getAddresses())){//未合并为一个账单之前的情况，如：456、457， 新的数据是456，是不同的数据，所以是新增。
+//        					//个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
+//        					BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
+//                			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
+//                			List<ExemptionItemDTO> newExemptionItemDTOList = newBillGroupDTO.getExemptionItemDTOList();
+//                			newBillItemDTOList.addAll(billItemDTOList);
+//                			newExemptionItemDTOList.addAll(exemptionItemDTOList);
+//                			newBillGroupDTO.setBillItemDTOList(newBillItemDTOList);
+//                			newBillGroupDTO.setExemptionItemDTOList(newExemptionItemDTOList);
+//                			createBillCommand.setBillGroupDTO(newBillGroupDTO);
+//                			createBillCommand.setAddresses(cmd.getAddresses() + "," + createBillCommand.getAddresses());
+//                			cmds.set(m, createBillCommand);
+//                			continue bill;
+//        				}
+//            		}
+//            	}
+//            }
             cmds.add(cmd);
             
             // 打印阶段日志和时间，方便定位性能问题 by lqs 20181206
