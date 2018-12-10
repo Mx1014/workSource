@@ -28,8 +28,8 @@ public class SearchCubicleOrdersCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	private Long beginDate;
-	private Long endDate;
+	private Long beginTime;
+	private Long endTime;
 	private String spaceName;
 	private Long spaceId;
 	private String reserveKeyword;
@@ -110,25 +110,23 @@ public class SearchCubicleOrdersCommand {
 		this.ownerId = ownerId;
 	}
 
-
-
-	public Long getBeginDate() {
-		return beginDate;
+	public Long getBeginTime() {
+		return beginTime;
 	}
 
 
-	public void setBeginDate(Long beginDate) {
-		this.beginDate = beginDate;
+	public void setBeginTime(Long beginTime) {
+		this.beginTime = beginTime;
 	}
 
 
-	public Long getEndDate() {
-		return endDate;
+	public Long getEndTime() {
+		return endTime;
 	}
 
 
-	public void setEndDate(Long endDate) {
-		this.endDate = endDate;
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
 	}
 
 

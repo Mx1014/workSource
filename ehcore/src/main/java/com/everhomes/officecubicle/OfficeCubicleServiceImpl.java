@@ -683,7 +683,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049600L, cmd.getAppId(), null,cmd.getCurrentProjectId());//预定详情权限
 		}
 		Integer pageSize = Integer.MAX_VALUE;
-		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginDate(), cmd.getEndDate(),
+		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginTime(), cmd.getEndTime(),
 				new CrossShardListingLocator(), pageSize + 1, getNamespaceId(cmd.getNamespaceId()),cmd.getPaidType(),cmd.getPaidMode(),cmd.getRequestType(),cmd.getRentType(), cmd.getOrderStatus());
 
 		if (null == orders) {
@@ -1140,7 +1140,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			Integer refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space).intValue();
 			resp.setRefundPrice(refundPrice);
 			OfficeCubicleRefundRule orderRule = findOfficeCubicleRefundRule(order,System.currentTimeMillis(),space);
-			resp.setRefundRate(orderRule.getFactor().intValue());
+			if (orderRule!= null){
+				resp.setRefundRate(orderRule.getFactor().intValue());
+			}
 		}
 		if(refundTips!=null){
 			resp.setRefundTips(refundTips.stream().map(r->ConvertHelper.convert(r,OfficeCubicleRefundTipDTO.class)).collect(Collectors.toList()));
@@ -2637,8 +2639,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-
-		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginDate(), cmd.getEndDate(),
+		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginTime(), cmd.getEndTime(),
 				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),cmd.getPaidType(),cmd.getPaidMode(),cmd.getRequestType(),cmd.getRentType(), cmd.getOrderStatus());
 		if (null == orders)
 			return response;

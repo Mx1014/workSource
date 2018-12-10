@@ -245,13 +245,13 @@ public class OfficeCubicleController extends ControllerBase {
     
     
 	/**
-	 * <b>URL: /officecubicle/exprotCubicleOrder</b>
+	 * <b>URL: /officecubicle/exportCubicleOrder</b>
 	 * <p>
 	 * 导出订单
 	 * </p>
 	 */
-	@RequestMapping("exprotCubicleOrder")
-	public String exprotCubicleOrder(@Valid SearchCubicleOrdersCommand cmd,HttpServletResponse response) {
+	@RequestMapping("exportCubicleOrder")
+	public String exportCubicleOrder(@Valid SearchCubicleOrdersCommand cmd,HttpServletResponse response) {
 //		HttpServletResponse commandResponse = rentalService.exportRentalBills(cmd, response );
 		HttpServletResponse commandResponse = this.officeCubicleService.exportCubicleOrders(cmd,response);
 		return null;
