@@ -2,6 +2,7 @@
 package com.everhomes.rest.officecubicle;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.rest.officecubicle.admin.OfficeCubicleRefundTipDTO;
@@ -22,23 +23,25 @@ public class GetOfficeCubicleRefundRuleResponse {
     private Byte refundStrategy;
     private List<OfficeCubicleRefundTipDTO> refundTips;
     private List<OfficeCubicleRefundRuleDTO> refundStrategies;
-    private Integer refundPrice;
-    private Integer refundRate;
+    private BigDecimal refundPrice;
+    private BigDecimal refundRate;
     
 
-    public Integer getRefundRate() {
+
+	public BigDecimal getRefundRate() {
 		return refundRate;
 	}
 
-	public void setRefundRate(Integer refundRate) {
+	public void setRefundRate(BigDecimal refundRate) {
 		this.refundRate = refundRate;
 	}
 
-	public Integer getRefundPrice() {
+
+	public BigDecimal getRefundPrice() {
 		return refundPrice;
 	}
 
-	public void setRefundPrice(Integer refundPrice) {
+	public void setRefundPrice(BigDecimal refundPrice) {
 		this.refundPrice = refundPrice;
 	}
 
