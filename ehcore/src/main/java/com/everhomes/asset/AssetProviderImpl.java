@@ -2183,7 +2183,10 @@ public class AssetProviderImpl implements AssetProvider {
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID
         		, o.ENERGY_CONSUME,o.AMOUNT_RECEIVABLE_WITHOUT_TAX,o.TAX_AMOUNT,o.TAX_RATE
         		, o.SOURCE_ID, o.SOURCE_TYPE, o.SOURCE_NAME, o.CONSUME_USER_ID, o.CAN_DELETE, o.CAN_MODIFY
-        		, o.GOODS_SERVE_APPLY_NAME)
+        		, o.GOODS_SERVE_APPLY_NAME, o.GOODS_SERVE_TYPE, o.GOODS_NAMESPACE
+        		, o.GOODS_TAG1, o.GOODS_TAG2, o.GOODS_TAG3, o.GOODS_TAG4, o.GOODS_TAG5
+        		, o.GOODS_TAG, o.GOODS_NAME, o.GOODS_DESCRIPTION, o.GOODS_COUNTS
+        		, o.GOODS_COUNTS, o.GOODS_PRICE, o.GOODS_TOTALPRICE)
                 .from(o)
                 .leftOuterJoin(k)
                 .on(o.CHARGING_ITEMS_ID.eq(k.ID))
@@ -2225,6 +2228,20 @@ public class AssetProviderImpl implements AssetProvider {
                     itemDTO.setCanModify(f.getValue(o.CAN_MODIFY));
                     //物业缴费V7.1（企业记账流程打通）: 增加商品信息字段
                     itemDTO.setGoodsServeApplyName(f.getValue(o.GOODS_SERVE_APPLY_NAME));
+                    //物业缴费V7.4 对接最新的统一订单和商户
+                    itemDTO.setGoodsServeType(f.getValue(o.GOODS_SERVE_TYPE));
+                    itemDTO.setGoodsNamespace(f.getValue(o.GOODS_NAMESPACE));
+                    itemDTO.setGoodsTag1(f.getValue(o.GOODS_TAG1));
+                    itemDTO.setGoodsTag2(f.getValue(o.GOODS_TAG2));
+                    itemDTO.setGoodsTag3(f.getValue(o.GOODS_TAG3));
+                    itemDTO.setGoodsTag4(f.getValue(o.GOODS_TAG4));
+                    itemDTO.setGoodsTag5(f.getValue(o.GOODS_TAG5));
+                    itemDTO.setGoodsTag(f.getValue(o.GOODS_TAG));
+                    itemDTO.setGoodsName(f.getValue(o.GOODS_NAME));
+                    itemDTO.setGoodsDescription(f.getValue(o.GOODS_DESCRIPTION));
+                    itemDTO.setGoodsCounts(f.getValue(o.GOODS_COUNTS));
+                    itemDTO.setGoodsPrice(f.getValue(o.GOODS_PRICE));
+                    itemDTO.setGoodsTotalPrice(f.getValue(o.GOODS_TOTALPRICE));
                     list1.add(itemDTO);
                     return null;
                 });

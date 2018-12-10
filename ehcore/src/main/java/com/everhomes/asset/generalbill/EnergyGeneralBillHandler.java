@@ -14,6 +14,7 @@ import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
 import com.everhomes.rest.asset.modulemapping.AssetMapContractConfig;
 import com.everhomes.rest.asset.modulemapping.AssetMapEnergyConfig;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
@@ -71,8 +72,22 @@ public class EnergyGeneralBillHandler implements GeneralBillHandler{
      * @return
      */
 	public GoodDTO getGoodsInfo(BillItemDTO billItemDTO) {
-		
-		return null;
+		//服务类别	域空间	服务提供方标识1	服务提供方标识2	服务提供方标识3	服务提供方标识4	服务提供方标识5	服务提供方名称	商品标识		商品名称	商品说明	数量	金额
+		//资产	NS			项目			楼栋			门牌			/			/		项目-楼栋-门牌	费项ID	租金/水费/电费	    面积	/	x
+		GoodDTO good = new GoodDTO();
+		good.setNamespace("NS");
+		//资产：项目-楼栋-门牌
+		String projectName = assetProvider.getProjectNameByBillID(billItemDTO.getBillId());
+		String buildingName = billItemDTO.getBuildingName();
+		String apartmentName = billItemDTO.getApartmentName();
+		good.setTag1(projectName);
+		good.setTag2(buildingName);
+		good.setTag3(apartmentName);
+		good.setServeType(ServiceModuleConstants.ASSET_MODULE + "");
+		good.setServeApplyName(projectName + "-" + buildingName + "-" + apartmentName);//服务提供方名称
+		good.setGoodTag(billItemDTO.getBillItemId() + "");//商品标识
+		good.setGoodName(billItemDTO.getBillItemName());//商品名称
+		return good;
 	}
 
 }
