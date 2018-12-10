@@ -1763,7 +1763,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                     for (UserApp userApp : userApps) {
                         if (userApp.getAppId().equals(app.getEntryId())) {
                             if (userApp.getOrder() == 0) {
-                                list.add(userApp.getOrder(), app);
+                                list.set(userApp.getOrder(), app);
                             }else {
                                 list.set(userApp.getOrder() - 1, app);
                             }
