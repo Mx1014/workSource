@@ -74,6 +74,21 @@ public class UserAppProviderImpl implements UserAppProvider {
 	}
 
 	@Override
+	public List<UserApp> listUserApps(Byte locationType, Long locationTargetId, Long appId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUserApps.class));
+		SelectQuery<EhUserAppsRecord> query = context.selectQuery(Tables.EH_USER_APPS);
+		query.addConditions(Tables.EH_USER_APPS.APP_ID.eq(appId));
+		query.addConditions(Tables.EH_USER_APPS.LOCATION_TYPE.eq(locationType));
+		query.addConditions(Tables.EH_USER_APPS.LOCATION_TARGET_ID.eq(locationTargetId));
+
+		query.addOrderBy(Tables.EH_USER_APPS.ORDER.asc());
+
+		List<UserApp> userApps = query.fetchInto(UserApp.class);
+
+		return userApps;
+	}
+
+	@Override
 	public void delete(Long id) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUserApps.class));

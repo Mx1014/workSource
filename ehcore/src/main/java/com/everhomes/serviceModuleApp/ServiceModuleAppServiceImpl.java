@@ -445,6 +445,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                         this.workPlatformAppProvider.updateWorkPlatformApp(app);
                     }
                 }
+                List<UserApp> userApps = this.userAppProvider.listUserApps(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),orgapp.getOrgId(),oldApp.getEntryId());
+                if (!CollectionUtils.isEmpty(userApps)) {
+                    List<Long> ids = userApps.stream().map(UserApp::getId).collect(Collectors.toList());
+                    this.userAppProvider.delete(ids);
+                }
             }
         }
 
@@ -1085,6 +1090,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                             app.setOrder(app.getOrder()-1);
                             this.workPlatformAppProvider.updateWorkPlatformApp(app);
                         }
+                    }
+                    List<UserApp> userApps = this.userAppProvider.listUserApps(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),orgapp.getOrgId(),oldApp.getEntryId());
+                    if (!CollectionUtils.isEmpty(userApps)) {
+                        List<Long> ids = userApps.stream().map(UserApp::getId).collect(Collectors.toList());
+                        this.userAppProvider.delete(ids);
                     }
                 }
             }
@@ -1746,9 +1756,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
     private List<AppDTO> sortUserAppDTO(List<AppDTO> appDTOS, Long orgId) {
 	    List<AppDTO> list = new ArrayList<>();
-	    for (AppDTO appDTO : appDTOS) {
-	        list.add(null);
-        }
         //用户是否启用自定义配置
         UserAppFlag userAppFlag = userAppFlagProvider.findUserAppFlag(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
 
@@ -1756,6 +1763,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         if(userAppFlag != null){
             List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
             if (userApps != null && userApps.size() != 0) {
+                for (AppDTO appDTO : appDTOS) {
+                    list.add(null);
+                }
                 List<AppDTO> noUserApp = new ArrayList<>();
                 for (AppDTO app : appDTOS) {
                     //新安装的应用，没有在用户编辑的数据里，但是还是要展示.
