@@ -1379,9 +1379,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 //        });
     	String identifier = genUserBillIdentifier(command);
     	String billIdStr = existBills.get(identifier);
-    	if(LOGGER.isDebugEnabled()) {
-    	    LOGGER.debug("Process bill importing data, duplicated identifiers, identifier={}, existBills={}", identifier, existBills);
-    	}
+//    	if(LOGGER.isDebugEnabled()) {
+//    	    LOGGER.debug("Process bill importing data, duplicated identifiers, identifier={}, existBills={}", identifier, existBills);
+//    	}
     	if(billIdStr != null) {
     	    assetProvider.modifyBillForImport(Long.parseLong(billIdStr), command);
     	    isCreate.set(0, false);
