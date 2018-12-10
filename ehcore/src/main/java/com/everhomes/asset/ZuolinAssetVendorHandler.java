@@ -1278,7 +1278,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             
             // 原来的实现方式是对于每条excel数据，都进行帐单和费项的比较来判断帐单是否需要覆盖，这使得查询、比较、删除、插入次数过多，处理一条数据需要15秒以上，
             // 使得数据很难导进去，故先对已存在的数据进行处理成一个标识（字符串），方便后面比较 by lqs 20181207
-            Map<String, String> existBills = prepareUserBillIdentifiers(createBillCommands);
+            Map<String, String> existBills = null;
+            if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())) {
+                existBills = prepareUserBillIdentifiers(createBillCommands);
+            }
             
             long updateStartTime = System.currentTimeMillis();
             long roundStartTime = updateStartTime;
@@ -1558,19 +1561,31 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     }
     
     private void populateUserBillIdentifierWithAddress(Map<Long, String> map, List<Long> billIdList) {
+        List<PaymentBillItems> items = new ArrayList<PaymentBillItems>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         context.select().from(Tables.EH_PAYMENT_BILL_ITEMS).where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.in(billIdList))
         .orderBy(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID, Tables.EH_PAYMENT_BILL_ITEMS.ADDRESS_ID)
         .fetch()
         .forEach(r ->{
-            PaymentBillItems item = ConvertHelper.convert(r, PaymentBillItems.class);
-            String identifier = map.get(item.getBillId());
-            if(identifier != null) {
+            items.add(ConvertHelper.convert(r, PaymentBillItems.class));
+        });
+        
+        // 一个帐单下的多个费项明细所关联的地址，大部分都是相同的，需要过滤掉（注意：查询时，地址已经是排序好的，故不用再排序） by lqs 20181210
+        Map<Long, Long> existAddresses = new HashMap<Long, Long>();
+        for(PaymentBillItems item : items) {
+            Long existAddressId = existAddresses.get(item.getBillId());
+            if(existAddressId == null || !existAddressId.equals(item.getAddressId())) {
+                String identifier = map.get(item.getBillId());
+                if(identifier != null) {
+                    identifier = "unknown";
+                }
                 String addressIdStr = (item.getAddressId() == null) ? "" : String.valueOf(item.getAddressId());
                 identifier = identifier + "_" + addressIdStr;
                 map.put(item.getBillId(), identifier);
+                
+                existAddresses.put(item.getBillId(), item.getAddressId());
             }
-        });
+        }
     }
     
     private String concateUserBillIdentifier(Long billGroupId, String dateStrBegin, String dateStrEnd) {
