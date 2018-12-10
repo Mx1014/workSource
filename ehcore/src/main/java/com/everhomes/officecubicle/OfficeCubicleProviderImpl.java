@@ -425,6 +425,9 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			} else{
 				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.eq(orderStatus));
 			}
+		} else {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.ge(OfficeCubiceOrderStatus.PAID.getCode()));
+
 		}
 		if (null != locator && locator.getAnchor() != null)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ID.lt(locator.getAnchor()));
