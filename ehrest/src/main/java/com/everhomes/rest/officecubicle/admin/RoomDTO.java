@@ -29,8 +29,17 @@ public class RoomDTO {
     private List<AssociateStationDTO> associateStation;
     private Long rentDate;
     private String coverUrl;
+    private Byte status;
     
     
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
 
 	public String getCoverUrl() {
 		return coverUrl;

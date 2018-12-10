@@ -28,6 +28,18 @@ public class StationDTO {
     private Long associateRoomId;
     private String associateRoomName;
     private String coverUrl;
+    private Byte status;
+
+	public Byte getStatus() {
+		return status;
+	}
+
+
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
 
 
 	public String getCoverUrl() {

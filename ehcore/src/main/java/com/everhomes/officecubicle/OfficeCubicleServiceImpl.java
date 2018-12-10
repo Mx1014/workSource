@@ -1141,7 +1141,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			resp.setRefundPrice(refundPrice);
 			OfficeCubicleRefundRule orderRule = findOfficeCubicleRefundRule(order,System.currentTimeMillis(),space);
 			BigDecimal refundRate = new BigDecimal(0);
-			if (orderRule.getFactor()!= null){
+			if (orderRule != null){
 				refundRate = new BigDecimal(orderRule.getFactor());
 			}
 			resp.setRefundRate(refundRate);
