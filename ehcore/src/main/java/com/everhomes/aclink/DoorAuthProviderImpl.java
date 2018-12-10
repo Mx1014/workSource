@@ -151,11 +151,12 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
         //兼容LICENSEE_TYPE by liuyilin 20180921
         query.addConditions(fetchUserLicensee(null));
+        query.addOrderBy(Tables.EH_DOOR_AUTH.ID.desc());
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_DOOR_AUTH.ID.ge(locator.getAnchor()));
+            query.addConditions(Tables.EH_DOOR_AUTH.ID.le(locator.getAnchor()));
             }
 
         if(count > 0) query.addLimit(count + 1);

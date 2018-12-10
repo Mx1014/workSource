@@ -14,6 +14,7 @@ import java.sql.Timestamp;
  * <li>endTime：结束时间</li>
  * <li>communityId</li>
  * <li>namespaceId</li>
+ * <li>organizationId</li>
  *</ul>
  */
 public class CreateReservationCommand {
@@ -23,9 +24,17 @@ public class CreateReservationCommand {
     private String endTime;
     private Long communityId;
     private Integer namespaceId;
+    private Long organizationId;
 
+    public Long getOrganizationId() {
+		return organizationId;
+	}
 
-    public Long getCommunityId() {
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public Long getCommunityId() {
         return communityId;
     }
 

@@ -3,13 +3,16 @@ package com.everhomes.rest.asset.bill;
 
 import java.util.List;
 
+import com.everhomes.util.StringHelper;
+
 /**
  *<ul>
- * <li>namespaceId:域空间ID</li>
- * <li>ownerId:所属者ID</li>
- * <li>ownerType:所属者类型</li>
- * <li>organizationId:当前登录企业ID（主要用于做权限校验）</li>
- * <li>billIdList:账单id列表</li>
+ * <li>namespaceId: 域空间ID</li>
+ * <li>ownerId: 所属者ID</li>
+ * <li>ownerType: 所属者类型</li>
+ * <li>organizationId: 当前登录企业ID（主要用于做权限校验）</li>
+ * <li>billIdList: 账单id列表</li>
+ * <li>appId: 应用ID</li>
  *</ul>
  */
 public class BatchDeleteBillCommand {
@@ -18,6 +21,7 @@ public class BatchDeleteBillCommand {
     private Long ownerId;
     private Long organizationId;
     private List<Long> billIdList;
+    private Long appId;
     
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -49,5 +53,15 @@ public class BatchDeleteBillCommand {
 	public void setBillIdList(List<Long> billIdList) {
 		this.billIdList = billIdList;
 	}
+    public Long getAppId() {
+        return appId;
+    }
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
 
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

@@ -166,8 +166,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteOrganizationSuperAdministrators")
     @RestReturn(value=String.class)
     public RestResponse deleteOrganizationSuperAdministrators(@Valid DeleteOrganizationAdminCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_DELETE);
+        // SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        // resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_DELETE);
         rolePrivilegeService.deleteOrganizationSuperAdministrators(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -754,10 +754,10 @@ public class AclController extends ControllerBase {
      * <p>更改超级管理员（标准版）</p>
      */
     @RequestMapping("updateTopAdminstrator")
-    @RestReturn(value=String.class)
+    @RestReturn(value=GetAdministratorInfosByUserIdResponse.class)
     public RestResponse updateTopAdminstrator(@Valid CreateOrganizationAdminCommand cmd) {
-        rolePrivilegeService.updateTopAdminstrator(cmd);
-        RestResponse response = new RestResponse();
+        GetAdministratorInfosByUserIdResponse resp = rolePrivilegeService.updateTopAdminstrator(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -1902,4 +1902,15 @@ public class UserController extends ControllerBase {
         this.userService.sendVerificationCodeSms(cmd.getNamespaceId(), cmd.getPhoneNumber(), cmd.getCode());
 		return new RestResponse("OK");
     }
+
+    /**
+     * <b>URL: /user/fixUserSync</b>
+     * <p>触发用户同步, 从 ehcore 到 ehuser </p>
+     */
+    @RequestMapping("fixUserSync")
+    @RestReturn(String.class)
+    public RestResponse fixUserSync(@Valid FixUserSyncCommand cmd) {
+        this.userService.fixUserSync(cmd);
+		return new RestResponse("OK");
+    }
 }

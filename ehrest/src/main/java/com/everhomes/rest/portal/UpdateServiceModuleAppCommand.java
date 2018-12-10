@@ -3,6 +3,8 @@ package com.everhomes.rest.portal;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * 
  * <ul>参数:
@@ -11,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>instanceConfig: 应用参数配置，比如活动，服务联盟就要特殊的参数配置</li>
  * <li>accessControlType: 权限控制类型 1-全部, 2-登录, 3-认证 参考{@link com.everhomes.rest.module.AccessControlType}</li>
  * <li>enableEnterprisePayFlag: 支持企业支付标记，0-否，1-是，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ * <li>appEntrySettingFlag: 是否开启自定义，0：否，1：是</li>
+ * <li>appEntryDtos: app应用入口配置信息，请参考{@link com.everhomes.rest.portal.AppEntryDTO}</li>
  * </ul>
  */
 public class UpdateServiceModuleAppCommand {
@@ -30,6 +34,26 @@ public class UpdateServiceModuleAppCommand {
 	private Byte accessControlType;
 
 	private Byte enableEnterprisePayFlag;
+
+	private Byte appEntrySettingFlag;
+
+	private List<AppEntryDTO> appEntryDtos;
+
+	public List<AppEntryDTO> getAppEntryDtos() {
+		return appEntryDtos;
+	}
+
+	public void setAppEntryDtos(List<AppEntryDTO> appEntryDtos) {
+		this.appEntryDtos = appEntryDtos;
+	}
+
+	public Byte getAppEntrySettingFlag() {
+		return appEntrySettingFlag;
+	}
+
+	public void setAppEntrySettingFlag(Byte appEntrySettingFlag) {
+		this.appEntrySettingFlag = appEntrySettingFlag;
+	}
 
 	public UpdateServiceModuleAppCommand() {
 

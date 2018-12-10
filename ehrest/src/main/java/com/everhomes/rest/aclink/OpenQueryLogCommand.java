@@ -14,6 +14,8 @@ import com.everhomes.util.StringHelper;
  * <li>macAddresses:门禁mac地址列表</li>
  * <li>pageAnchor:锚点</li>
  * <li>pageSize:分页大小</li>
+ * <li>validFromMs:开门起始时间</li>
+ * <li>validEndMs:开门截止时间</li>
  * </ul>
  *
  */
@@ -29,10 +31,24 @@ public class OpenQueryLogCommand {
 	private String signature;
 	private Long timestamp;
 	private Integer nonce;
-	private String crypto; 
+	private String crypto;
+	private Long validFromMs;
+	private Long validEndMs;
  
 	
-    public Long getEventType() {
+    public Long getValidFromMs() {
+		return validFromMs;
+	}
+	public void setValidFromMs(Long validFromMs) {
+		this.validFromMs = validFromMs;
+	}
+	public Long getValidEndMs() {
+		return validEndMs;
+	}
+	public void setValidEndMs(Long validEndMs) {
+		this.validEndMs = validEndMs;
+	}
+	public Long getEventType() {
         return eventType;
     }
     public void setEventType(Long eventType) {

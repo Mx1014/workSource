@@ -26,6 +26,7 @@ public class FindAutoAssignRentalSiteWeekStatusCommand {
 	private Byte priceType;
 	private String packageName;
 	private String sceneToken;
+	private String sceneType;
 
 	public String getResourceType() {
 		return resourceType;
@@ -86,5 +87,13 @@ public class FindAutoAssignRentalSiteWeekStatusCommand {
 
 	public void setPriceType(Byte priceType) {
 		this.priceType = priceType;
+	}
+
+	public String getSceneType() {
+		return sceneType;
+	}
+
+	public void setSceneType(String sceneType) {
+		this.sceneType = sceneType;
 	}
 }

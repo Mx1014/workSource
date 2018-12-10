@@ -1,10 +1,22 @@
 package com.everhomes.xfyun;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -13,6 +25,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
@@ -27,6 +42,9 @@ import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.module.ServiceModuleLocationType;
 import com.everhomes.rest.module.ServiceModuleSceneType;
 import com.everhomes.rest.portal.ClientHandlerType;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.xfyun.AfterDealCommand;
+import com.everhomes.rest.xfyun.AfterDealResponse;
 import com.everhomes.rest.xfyun.QueryRoutersCommand;
 import com.everhomes.rest.xfyun.QueryRoutersResponse;
 import com.everhomes.rest.xfyun.RouterDTO;
@@ -35,8 +53,10 @@ import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.WebTokenGenerator;
 
 @Component
 public class XunfeiYunServiceImpl implements XunfeiYunService{
@@ -44,16 +64,18 @@ public class XunfeiYunServiceImpl implements XunfeiYunService{
 	private static final Logger LOGGER = LoggerFactory.getLogger(XunfeiYunServiceImpl.class);
 	
 	@Autowired
-	ServiceModuleAppProvider serviceModuleAppProvider;
-	@Autowired
-	ServiceModuleAppService serviceModuleAppService;
+	private ServiceModuleAppService serviceModuleAppService;
 	
 	@Autowired
-	OrganizationProvider organizationProvider;
+	private OrganizationProvider organizationProvider;
 	@Autowired
-	PortalVersionProvider portalVersionProvider;
+	private ConfigurationProvider configurationProvider;
 	@Autowired
-	ConfigurationProvider configurationProvider;
+	private UserService userService;
+	@Autowired
+	private XfyunMatchProvider xfyunMatchProvider;
+	@Autowired
+	private CommunityProvider communityProvider;
 	 
     private static Map<Long, RouterTypeEnum> APP_ROUTER_TYPE_ENUM_MAP = new HashMap<>(20);
     private static Map<Integer, RouterTypeEnum> SELF_ROUTER_TYPE_ENUM_MAP = new HashMap<>(10);	
@@ -139,12 +161,251 @@ public class XunfeiYunServiceImpl implements XunfeiYunService{
 		if (null == organizationProperty) {
 			return new ArrayList<>(1);
 		}
-
 		Long orgId = organizationProperty.getOrganizationId();
 		Byte sceneType = ServiceModuleSceneType.CLIENT.getCode();
+
 		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(namespaceId, moduleId, null,
 				null, null);
+
 		return serviceModuleAppService.toAppDtos(communityId, orgId, sceneType, apps);
 	}
+
+
+	@Override
+	public void afterDeal(HttpServletRequest req ,HttpServletResponse resp) {
+		
+		//判断是否用于校验token的请求
+		if (isTestRequest(req)) {
+			
+			//设置返回信息
+			addToBody(resp, "text/plain;charset=UTF-8", encryptToken(getAfterDealTestToken()));
+			return;
+		}
+		
+		String jsonStr  = getJSONText(req);
+		if (null == jsonStr) {
+			LOGGER.error("afterDeal jsonStr null:");
+			return ;
+		}
+		LOGGER.info("afterDeal json:"+jsonStr);
+		
+		XunfeiYunAfterDealTool tool = new XunfeiYunAfterDealTool(jsonStr);
+		if (!tool.isSuccess()) {
+			LOGGER.error("afterDeal  not success:");
+			return;
+		}
+		
+		if (!tool.isVerified()) {
+			LOGGER.error("tool not verified");
+			return;
+		}
+		
+		//是否登录
+		boolean isUser = checkUserToken(tool.getLoginToken()); 
+		if (!isUser) {
+			LOGGER.error("afterDeal login error token:"+ tool.getLoginToken());
+			return ;
+		}
+		
+		AppDTO appDto = queryRouter(tool.getRouterQueryParams());
+		if (null == appDto) {
+			return ;
+		}
+		
+		String routerString = appDto.toString();
+		LOGGER.info("hit router:"+routerString);
+		
+		//设置返回信息
+		addToBody(resp, "application/json;charset=UTF-8", routerString);
+	}
+	
+	private String getAfterDealTestToken() {
+		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(), getAfterDealConfigPrefix()+"testToken", "");
+	}
+
+	private String getAfterDealConfigPrefix() {
+		return "xfyun.tpp.";
+	}
+	
+
+	private boolean isTestRequest(HttpServletRequest req) {
+		
+		String signature = req.getParameter("signature");
+		if (null != signature) {
+			return true;
+		}
+		
+		return false;
+	}
+
+
+	private void addToBody(HttpServletResponse resp, String contentType, String content) {
+		resp.setHeader("content-type", contentType);
+
+		ServletOutputStream outputStream =  null;
+		try {
+			outputStream = resp.getOutputStream();
+			outputStream.write(content.getBytes("utf-8"));
+			outputStream.flush();
+			outputStream.close();
+		} catch (IOException e) {
+			LOGGER.error("error wirter : e:"+e.getMessage());
+		} 
+	}
+	
+	private AppDTO queryRouter(RouterQueryParamCommand cmd) {
+
+		if (!isRouterQueryParamValid(cmd)) {
+			return null;
+		}
+
+		XfyunMatch match = xfyunMatchProvider.findMatch(cmd.getIntent().getVendor(), cmd.getIntent().getService(),
+				cmd.getIntent().getFirstIntent());
+		if (null == match) {
+			return null;
+		}
+
+		if (1 == match.getType()) {
+			//自定义配置
+			return getSelfRouter(match);
+		}
+		
+		//模块配置
+		Community community = communityProvider.findCommunityById(cmd.getContext().getCommunityId());
+		if (null == community) {
+			return null;
+		}
+		
+		List<AppDTO> dtos = getTargetApps(community.getNamespaceId(), cmd.getContext().getCommunityId(),
+				match.getModuleId());
+		if (CollectionUtils.isEmpty(dtos)) {
+			return null;
+		}
+
+		for (AppDTO dto : dtos) {
+			if (dto.getName().equals(cmd.getVerifyText())) {
+				return dto;
+			}
+		}
+
+		return dtos.get(0);
+	}
+	
+	private String getRouterByMatch(XfyunMatch match) {
+		String router = match.getDefaultRouter();
+		if (null == router) {
+			return null;
+		}
+
+		// 拼接clientHandlerType
+		if (router.indexOf("?") < 0) {
+			router = router + "?";
+		} else {
+			router = router + "&";
+		}
+
+		router += "clientHandlerType=" + (null == match.getClientHandlerType() ? ClientHandlerType.NATIVE.getCode()
+				: match.getClientHandlerType());
+
+		// 设置home.url
+		int pos1 = router.indexOf("$");
+		if (pos1 < 0) {
+			return router;
+		}
+
+		int pos2 = router.indexOf("}");
+
+		String homeUrl = configurationProvider.getValue("home.url", null);
+		return router.substring(0, pos1) + homeUrl + router.substring(pos2 + 1);
+	}
+	
+	private AppDTO getSelfRouter(XfyunMatch match) {
+		AppDTO appDto = new AppDTO();
+		appDto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
+		appDto.setAccessControlType(AccessControlType.ALL.getCode());
+		appDto.setRouter(getRouterByMatch(match));
+
+		if (null != match.getClientHandlerType()) {
+			appDto.setClientHandlerType(match.getClientHandlerType());
+		}
+		
+		if (null != match.getAccessControlType()) {
+			appDto.setAccessControlType(match.getAccessControlType());
+		}
+		
+		return appDto;
+	}
+
+
+	private boolean isRouterQueryParamValid(RouterQueryParamCommand cmd) {
+		if (null == cmd 
+				|| null == cmd.getContext()
+				|| null == cmd.getContext().getCommunityId()
+				|| null == cmd.getIntent()) {
+			
+			return false;
+		}
+		
+		return true;
+	}
+
+
+	private boolean checkUserToken(String loginTokenString) {
+		LoginToken token = WebTokenGenerator.getInstance().fromWebToken(loginTokenString, LoginToken.class);
+        if (!userService.isValid(token)) {
+        	return false;
+        }
+        return true;
+	}
+
+
+	public String getJSONText(HttpServletRequest request) {
+		StringBuilder sb = new StringBuilder();
+
+		try { 
+			// 获取输入流
+			BufferedReader streamReader = new BufferedReader(new InputStreamReader(request.getInputStream(), "UTF-8"));
+
+			String line = null;
+			while ((line = streamReader.readLine()) != null) {
+				sb.append(line);
+			}
+		} catch (Exception e) {
+			LOGGER.error("can't get json text from request");
+			return null;
+		}
+		
+		return sb.toString();
+	}
+	
+	private  String encryptToken(String src) {
+		MessageDigest md;
+		byte[] b = new byte[1];;
+		try {
+			md = MessageDigest.getInstance("SHA-1");
+			b = md.digest(src.getBytes("utf-8"));
+		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) { 
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return byte2HexStr(b);
+	}
+	
+    /** 
+     * 字节数组转化为大写16进制字符串 
+     */
+   
+    private static String byte2HexStr(byte[] b) {  
+        StringBuilder sb = new StringBuilder();  
+        for (int i = 0; i < b.length; i++) {  
+            String s = Integer.toHexString(b[i] & 0xFF);  
+            if (s.length() == 1) {  
+                sb.append("0");  
+            }  
+            sb.append(s.toLowerCase());  
+        }  
+        return sb.toString();  
+
+    }
 	
 }

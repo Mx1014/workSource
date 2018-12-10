@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  *     <li>resourceType: 资源实体类型 小区园区：EhCommunities</li>
  *     <li>namespaceId: 域空间id</li>
  *     <li>communityNumber: 项目编号</li>
+ *     <li><li>organizationId: 管理公司id，用于权限校验</li> </li>
  * </ul>
  */
 public class UpdateCommunityNewCommand {
@@ -42,7 +43,14 @@ public class UpdateCommunityNewCommand {
     private String resourceType;
     private Integer namespaceId;
     private String communityNumber;
+    private Long organizationId;
     
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 	public String getCommunityNumber() {
 		return communityNumber;
 	}

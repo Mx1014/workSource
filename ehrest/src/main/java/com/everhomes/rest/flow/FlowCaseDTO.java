@@ -3,6 +3,7 @@ package com.everhomes.rest.flow;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -41,6 +42,7 @@ import java.sql.Timestamp;
  *     <li>concurrentFlag: 是否是并发执行标记</li>
  *     <li>routeUri: 路由跳转</li>
  *     <li>serviceType: 业务类型</li>
+ *     <li>entities: 简单详情的字段列表 {@link com.everhomes.rest.flow.FlowCaseEntity}</li>
  * </ul>
  */
 public class FlowCaseDTO {
@@ -82,6 +84,8 @@ public class FlowCaseDTO {
 
     private String routeUri;
     private String serviceType;
+
+    private List<FlowCaseEntity> entities;
 
     public Long getId() {
         return id;
@@ -353,6 +357,14 @@ public class FlowCaseDTO {
 
     public void setServiceType(String serviceType) {
         this.serviceType = serviceType;
+    }
+
+    public List<FlowCaseEntity> getEntities() {
+        return entities;
+    }
+
+    public void setEntities(List<FlowCaseEntity> entities) {
+        this.entities = entities;
     }
 
     @Override

@@ -92,7 +92,7 @@ public class OPPushServiceAllianceHandler implements OPPushHandler{
 			
 			card.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
 			card.setRouterPath("/detail");
-			String url = processDetailUrl(sa.getId(), sa.getOwnerId(), context.getCommunityId(), pageRealDisplayType);
+			String url = processDetailUrl(sa.getId(), context.getCommunityId(), sa.getParentId(), pageRealDisplayType);
 			try {
 				card.setRouterQuery("url=" + URLEncoder.encode(url, "UTF-8"));
 			} catch (UnsupportedEncodingException e) {
@@ -146,20 +146,20 @@ public class OPPushServiceAllianceHandler implements OPPushHandler{
 	private String processDetailUrl(Long serviceId, Long communityId, Long type, String pageRealDisplayType) {
 
 		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
-
-		StringBuilder detailUrl = new StringBuilder("/service-alliance-web/build/detail.html?id=" + serviceId);
-		detailUrl.append("&ns=" + UserContext.getCurrentNamespaceId());
-		detailUrl.append("&communityId=" + communityId);
-		detailUrl.append("&type=" + type);
+		String detailUrl = configurationProvider.getValue(ConfigConstants.SERVICE_DETAIL_URL, "");
+		StringBuilder params = new StringBuilder("detailId=" + serviceId);
+		params.append("&ns=" + UserContext.getCurrentNamespaceId());
+		params.append("&communityId=" + communityId);
+		params.append("&type=" + type);
 		Long userId = UserContext.currentUserId();
 		if (null != userId) {
-			detailUrl.append("&userId=" + userId);
+			params.append("&userId=" + userId);
 		}
-		detailUrl.append("&supportZoom=1");
-		detailUrl.append("#/home/" + pageRealDisplayType);
-		detailUrl.append("#sign_suffix");
+		params.append("&supportZoom=1");
+//		detailUrl.append("#/home/" + pageRealDisplayType);
+//		params.append("#/detail#sign_suffix");
 
-		return homeUrl + detailUrl.toString();
+		return homeUrl + String.format(detailUrl, params.toString());
 	}
 	
 	
