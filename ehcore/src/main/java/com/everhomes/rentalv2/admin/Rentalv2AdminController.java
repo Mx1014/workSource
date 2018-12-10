@@ -738,6 +738,80 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 
 	/**
+	 *
+	 * <b>URL: /rental/admin/updateResourcePreviewImage<b>
+	 * <p>修改资源概览图片</p>
+	 */
+	@RequestMapping("updateResourcePreviewImage")
+	@RestReturn(String.class)
+	public RestResponse updateResourcePreviewImage(updateResourcePreviewImageCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
+		rentalService.updateResourcePreviewImage(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourcePreviewImage<b>
+	 * <p>获取资源概览图片</p>
+	 */
+	@RequestMapping("getResourcePreviewImage")
+	@RestReturn(ResourcePreviewImageDTO.class)
+	public RestResponse getResourcePreviewImage(GetResourcePreviewImageCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
+		RestResponse response = new RestResponse(rentalService.getResourcePreviewImage(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/updateResourceShopSetting<b>
+	 * <p>修改资源商铺关联信息</p>
+	 */
+	@RequestMapping("updateResourceShopSetting")
+	@RestReturn(String.class)
+	public RestResponse updateResourceShopSetting(UpdateResourceShopSettingCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
+		rentalService.updateResourceShopSetting(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourceShopSetting<b>
+	 * <p>获取资源商铺关联信息</p>
+	 */
+	@RequestMapping("getResourceShopSetting")
+	@RestReturn(ResourceShopSettingDTO.class)
+	public RestResponse getResourceShopSetting(GetResourceShopSettingCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
+		RestResponse response = new RestResponse(rentalService.getResourceShopSetting(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /rental/admin/searchRentalOrders</b>
 	 * <p>查询订单</p>
 	 */

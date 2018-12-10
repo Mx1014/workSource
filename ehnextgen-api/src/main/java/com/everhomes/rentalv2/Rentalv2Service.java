@@ -173,6 +173,14 @@ public interface Rentalv2Service {
 
 	void updateResourceOrderRule(UpdateResourceOrderRuleCommand cmd);
 
+	void updateResourcePreviewImage(updateResourcePreviewImageCommand cmd);
+
+	void updateResourceShopSetting(UpdateResourceShopSettingCommand cmd);
+
+	ResourceShopSettingDTO getResourceShopSetting(GetResourceShopSettingCommand cmd);
+
+	ResourcePreviewImageDTO getResourcePreviewImage(GetResourcePreviewImageCommand cmd);
+
 	ResourceOrderRuleDTO getResourceOrderRule(GetResourceOrderRuleCommand cmd);
 
 	ResourceAttachmentDTO getResourceAttachment(GetResourceAttachmentCommand cmd);

@@ -7941,6 +7941,47 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
+	public void updateResourcePreviewImage(updateResourcePreviewImageCommand cmd) {
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+
+		if (null == rule) {
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
+		}
+		rule.setPreviewUsingImageUri(cmd.getPreviewUsingImageUri());
+		rule.setPreviewIdleImageUri(cmd.getPreviewIdleImageUri());
+		this.rentalv2Provider.updateRentalDefaultRule(rule);
+
+	}
+
+	@Override
+	public ResourcePreviewImageDTO getResourcePreviewImage(GetResourcePreviewImageCommand cmd) {
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
+
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+
+		ResourcePreviewImageDTO dto = ConvertHelper.convert(rule,ResourcePreviewImageDTO.class);
+		return dto;
+	}
+
+	@Override
+	public void updateResourceShopSetting(UpdateResourceShopSettingCommand cmd) {
+		
+	}
+
+	@Override
+	public ResourceShopSettingDTO getResourceShopSetting(GetResourceShopSettingCommand cmd) {
+		return null;
+	}
+
+	@Override
 	public ResourceAttachmentDTO getResourceAttachment(GetResourceAttachmentCommand cmd) {
 		if (StringUtils.isBlank(cmd.getResourceType())) {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
