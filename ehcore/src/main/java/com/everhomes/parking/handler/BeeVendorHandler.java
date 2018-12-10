@@ -182,7 +182,7 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
             dto.setPlateNumber(cmd.getPlateNumber());
             long now = System.currentTimeMillis();
             dto.setOpenDate(now);
-            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
+            dto.setExpireDate(Utils.getTimestampByAddThirtyDays(now, requestMonthCount).getTime());
             if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
                 dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
             }else {
