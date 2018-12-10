@@ -1,6 +1,7 @@
 package com.everhomes.meeting;
 
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.meeting.QueryMyMeetingTemplateCondition;
 import com.everhomes.server.schema.tables.pojos.EhMeetingInvitations;
 import com.everhomes.server.schema.tables.pojos.EhMeetingReservations;
 
@@ -55,11 +56,13 @@ public interface MeetingProvider {
 
     List<MeetingReservation> findMeetingReservationsByDetailId(QueryMyMeetingsCondition condition);
 
-    List<EhMeetingInvitations> findMeetingInvitationsByMeetingId(Long meetingReservationId, String roleType);
+    List<EhMeetingInvitations> findMeetingInvitationsByMeetingId(Long meetingReservationId, String... roleTypes);
 
     int countMeetingInvitation(Long meetingReservationId, String sourceType, Long sourceId);
 
     void batchCreateMeetingInvitations(List<EhMeetingInvitations> meetingInvitations);
+
+    void batchDeleteMeetingInvitationsByMeetingId(Long meetingReservationId, String... roleTypes);
 
     void batchDeleteMeetingInvitations(List<EhMeetingInvitations> meetingInvitations);
 
@@ -75,10 +78,29 @@ public interface MeetingProvider {
 
     List<MeetingRecord> findMeetingRecordsByDetailId(QueryMyMeetingRecordsCondition condition);
 
-	List<MeetingAttachment> listMeetingAttachements(Long ownerId, String ownerType);
+	List<MeetingAttachment> listMeetingAttachments(Long ownerId, String ownerType);
 
 	void batchDeleteMeetingAttachments(List<MeetingAttachment> deleteAttachements);
 
 	void batchCreateMeetingAttachments(List<MeetingAttachment> addAttachements);
 
+    void deleteMeetingAttachmentsByOwnerId(Integer namespaceId, String ownerType, Long ownerId);
+
+    MeetingTemplate findMeetingTemplateById(Long id, Integer namespaceId, Long organizationId, Long userId);
+
+    Long createMeetingTemplate(MeetingTemplate template);
+
+    Long updateMeetingTemplate(MeetingTemplate template);
+
+    void deleteMeetingTemplate(MeetingTemplate template);
+
+    List<MeetingTemplate> findMeetingTemplates(QueryMyMeetingTemplateCondition condition);
+
+    List<MeetingInvitationTemplate> findMeetingInvitationTemplates(Integer namespaceId, Long organizationId, Long meetingTemplateId);
+
+    void deleteMeetingInvitationTemplates(Integer namespaceId, Long organizationId, Long meetingTemplateId);
+
+    void batchCreateMeetingInvitationTemplate(List<MeetingInvitationTemplate> invitationTemplates);
+
+    void batchDeleteMeetingInvitationTemplate(List<MeetingInvitationTemplate> invitationTemplates);
 }

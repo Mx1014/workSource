@@ -17,6 +17,7 @@ import java.util.List;
  *     <li>columnSpacing: columnSpacing</li>
  *     <li>backgroundColor: backgroundColor</li>
  *     <li>allAppFlag: 全部标志，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>itemShowNum: 展示更多或者全部的数目</li>
  * </ul>
  */
 public class Navigator {
@@ -31,6 +32,15 @@ public class Navigator {
     private Integer columnSpacing;
     private String backgroundColor;
     private Byte allAppFlag;
+    private Integer itemShowNum;
+
+    public Integer getItemShowNum() {
+        return itemShowNum;
+    }
+
+    public void setItemShowNum(Integer itemShowNum) {
+        this.itemShowNum = itemShowNum;
+    }
 
     public Integer getCssStyleFlag() {
         return cssStyleFlag;

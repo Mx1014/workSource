@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -565,7 +566,17 @@ public class WebMenuServiceImpl implements WebMenuService {
 				//模块和场景都一致
 				if(entry.getModuleId().equals(menu.getModuleId()) && entry.getSceneType().equals(menu.getSceneType())){
 					WebMenuDTO menuDto = ConvertHelper.convert(menu, WebMenuDTO.class);
-					ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
+                    ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
+					List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+							this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(menu.getAppId(),entry.getId(),null,null);
+					if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList) &&
+                            TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                        menuDto.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                        appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+					}else if (!StringUtils.isEmpty(entry.getEntryName())) {
+						menuDto.setName(entry.getEntryName());
+						appDTO.setName(entry.getEntryName());
+					}
 					menuDto.setAppConfig(appDTO);
 					menuDtos.add(menuDto);
 				}

@@ -33,8 +33,12 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_approval.GeneralApprovalVal;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -201,9 +205,11 @@ import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceAttachmentsDao;
+import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadItems;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
 import com.everhomes.server.schema.tables.records.EhAllianceServiceCategoryMatchRecord;
+import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
 import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAllianceAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
@@ -414,6 +420,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private ServiceModuleAppService serviceModuleAppService;
 	@Autowired
 	private NamespaceProvider namespaceProvider;
+	@Autowired
+	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	private GeneralApprovalValProvider generalApprovalValProvider;
 	
 	
 	
@@ -4466,6 +4476,86 @@ public class YellowPageServiceImpl implements YellowPageService {
 		updateQuery.addConditions(MATCH.NAMESPACE_ID.eq(oldCag.getNamespaceId()));
 		updateQuery.addConditions(MATCH.CATEGORY_ID.eq(oldCag.getId()));
 		updateQuery.execute();
+	}
+	
+	
+	private List<FlowCase> queryFlowCases() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhFlowCasesRecord> query = context.selectQuery(Tables.EH_FLOW_CASES);
+		query.addConditions(Tables.EH_FLOW_CASES.MODULE_ID.eq(40500L).or(Tables.EH_FLOW_CASES.MODULE_TYPE.eq("service_alliance")));
+		return query.fetchInto(FlowCase.class);
+	}
+	
+	@Override
+	public String transferFlowCaseVals() {
+		int total = 0;
+		int alreadyHave = 0;
+		int noneVal = 0;
+		int update = 0;
+		int noForm = 0;
+		StringBuilder noformstr = new StringBuilder("(");
+		List<FlowCase> flowCases = queryFlowCases();
+
+		for (FlowCase flowCase : flowCases) {
+
+			total++;
+
+			boolean isExist = findFormValByFlowCase(flowCase);
+			if (isExist) {
+				alreadyHave++;
+				continue;
+			}
+
+			List<GeneralApprovalVal> approvalVals = queryApprovalValsByFlowCase(flowCase);
+			if (CollectionUtils.isEmpty(approvalVals)) {
+				noneVal++;
+				continue;
+			}
+
+			// 查表单
+			GeneralForm form = generalFormProvider.getGeneralFormByApproval(approvalVals.get(0).getFormOriginId(),
+					approvalVals.get(0).getFormVersion());
+			if (null == form) {
+				noForm++;
+				noformstr.append(flowCase.getId() + ",");
+				continue;
+			}
+
+			update++;
+			dbProvider.execute(r -> {
+
+				for (GeneralApprovalVal approvalVal : approvalVals) {
+					GeneralFormVal obj = ConvertHelper.convert(form, GeneralFormVal.class);
+					obj.setSourceType(EhFlowCases.class.getSimpleName());
+					obj.setSourceId(approvalVal.getFlowCaseId());
+					obj.setFieldName(approvalVal.getFieldName());
+					obj.setFieldType(approvalVal.getFieldType());
+					obj.setFieldValue(approvalVal.getFieldStr3());
+					generalFormValProvider.createGeneralFormVal(obj);
+				}
+
+				return null;
+			});
+
+		}
+		
+		noformstr.append(")");
+		
+		return "t:"+total+" u:"+update+" ah:"+alreadyHave+" nv:"+noneVal+" nf:"+noForm+" "+noformstr.toString();
+	}
+
+	private List<GeneralApprovalVal> queryApprovalValsByFlowCase(FlowCase flowCase) {
+		return generalApprovalValProvider.queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
+	}
+
+	private boolean findFormValByFlowCase(FlowCase flowCase) {
+		
+        List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(), flowCase.getId());
+		if(CollectionUtils.isEmpty(vals)) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 

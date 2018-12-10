@@ -9,28 +9,36 @@ import com.everhomes.rest.meeting.AbandonMeetingReservationLockTimeCommand;
 import com.everhomes.rest.meeting.CancelMeetingReservationCommand;
 import com.everhomes.rest.meeting.CreateMeetingRecordCommand;
 import com.everhomes.rest.meeting.CreateOrUpdateMeetingRoomCommand;
+import com.everhomes.rest.meeting.CreateOrUpdateMeetingTemplateCommand;
 import com.everhomes.rest.meeting.DeleteMeetingRecordCommand;
 import com.everhomes.rest.meeting.DeleteMeetingRoomCommand;
+import com.everhomes.rest.meeting.DeleteMeetingTemplateCommand;
 import com.everhomes.rest.meeting.EndMeetingReservationCommand;
 import com.everhomes.rest.meeting.GetMeetingRecordDetailCommand;
 import com.everhomes.rest.meeting.GetMeetingReservationDetailCommand;
 import com.everhomes.rest.meeting.GetMeetingReservationSimpleByTimeUnitCommand;
 import com.everhomes.rest.meeting.GetMeetingRoomDetailCommand;
 import com.everhomes.rest.meeting.GetMeetingRoomSimpleInfoCommand;
+import com.everhomes.rest.meeting.GetMeetingTemplateCommand;
 import com.everhomes.rest.meeting.ListMeetingRoomDetailInfoCommand;
 import com.everhomes.rest.meeting.ListMeetingRoomDetailInfoResponse;
 import com.everhomes.rest.meeting.ListMeetingRoomSimpleInfoCommand;
 import com.everhomes.rest.meeting.ListMeetingRoomSimpleInfoResponse;
 import com.everhomes.rest.meeting.ListMyMeetingRecordsCommand;
 import com.everhomes.rest.meeting.ListMyMeetingRecordsResponse;
+import com.everhomes.rest.meeting.ListMyMeetingTemplateCommand;
+import com.everhomes.rest.meeting.ListMyMeetingTemplateResponse;
 import com.everhomes.rest.meeting.ListMyMeetingsCommand;
 import com.everhomes.rest.meeting.ListMyMeetingsResponse;
+import com.everhomes.rest.meeting.ListMyUnfinishedMeetingCommand;
+import com.everhomes.rest.meeting.ListMyUnfinishedMeetingResponse;
 import com.everhomes.rest.meeting.MeetingRecordDetailInfoDTO;
 import com.everhomes.rest.meeting.MeetingReservationDetailDTO;
 import com.everhomes.rest.meeting.MeetingReservationLockTimeCommand;
 import com.everhomes.rest.meeting.MeetingReservationSimpleDTO;
 import com.everhomes.rest.meeting.MeetingRoomDetailInfoDTO;
 import com.everhomes.rest.meeting.MeetingRoomSimpleInfoDTO;
+import com.everhomes.rest.meeting.MeetingTemplateDTO;
 import com.everhomes.rest.meeting.UpdateMeetingRecordCommand;
 import com.everhomes.rest.meeting.UpdateMeetingReservationCommand;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -305,6 +313,73 @@ public class MeetingController extends ControllerBase {
     public RestResponse listMyMeetingRecords(ListMyMeetingRecordsCommand cmd) {
         ListMyMeetingRecordsResponse listMyMeetingRecordsResponse = meetingService.listMyMeetingRecords(cmd);
         RestResponse response = new RestResponse(listMyMeetingRecordsResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /meeting/createOrUpdateMeetingTemplate</b>
+     * <p>新增或编辑会议模板</p>
+     */
+    @RequestMapping("createOrUpdateMeetingTemplate")
+    @RestReturn(String.class)
+    public RestResponse createOrUpdateMeetingTemplate(CreateOrUpdateMeetingTemplateCommand cmd) {
+        meetingService.createOrUpdateMeetingTemplate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /meeting/deleteMeetingTemplate</b>
+     * <p>删除会议模板</p>
+     */
+    @RequestMapping("deleteMeetingTemplate")
+    @RestReturn(String.class)
+    public RestResponse deleteMeetingTemplate(DeleteMeetingTemplateCommand cmd) {
+        meetingService.deleteMeetingTemplate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /meeting/listMyMeetingTemplates</b>
+     * <p>我的会议模板</p>
+     */
+    @RequestMapping("listMyMeetingTemplates")
+    @RestReturn(ListMyMeetingTemplateResponse.class)
+    public RestResponse listMyMeetingTemplates(ListMyMeetingTemplateCommand cmd) {
+        RestResponse response = new RestResponse(meetingService.listMyMeetingTemplates(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /meeting/getMeetingTemplateById</b>
+     * <p>我的会议模板</p>
+     */
+    @RequestMapping("getMeetingTemplateById")
+    @RestReturn(MeetingTemplateDTO.class)
+    public RestResponse getMeetingTemplateById(GetMeetingTemplateCommand cmd) {
+        RestResponse response = new RestResponse(meetingService.getMeetingTemplateById(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /meeting/listMyUnfinishedMeetings</b>
+     * <p>列出我的未结束的会议</p>
+     */
+    @RequestMapping("listMyUnfinishedMeetings")
+    @RestReturn(ListMyUnfinishedMeetingResponse.class)
+    public RestResponse listMyUnfinishedMeetings(ListMyUnfinishedMeetingCommand cmd) {
+        RestResponse response = new RestResponse(meetingService.listMyUnfinishedMeetings(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

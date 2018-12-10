@@ -21,5 +21,5 @@ public class MeetingErrorCodeConstants {
     public static final int MEETING_RECORD_DUPLICATED_ERROR = 100016;
     public static final int MEETING_RECORD_MEETING_NO_COMPLETE_ERROR = 100017;
     public static final int MEETING_COMPLETE_BEFORE_BEGIN_ERROR = 100018;
-    public static final int MEETING_BEGIN_OR_END_CANNOT_CANCEL_ERROR = 100019;
+    public static final int MEETING_TEMPLATE_NOT_EXIST_ERROR = 100020;
 }

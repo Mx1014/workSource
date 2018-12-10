@@ -1288,5 +1288,25 @@ public class YellowPageController  extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /yellowPage/transferFlowCaseVals</b>
+	 * <p>
+	 * 获取用户服务记录
+	 * </p>
+	 */
+	@RequestMapping("transferFlowCaseVals")
+	@RestReturn(value = String.class)
+	public RestResponse transferFlowCaseVals(UpdateFAQSolveTimesCommand cmd) {
+		
+		if (null == cmd.getOwnerId() || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = yellowPageService.transferFlowCaseVals();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
 	
 }

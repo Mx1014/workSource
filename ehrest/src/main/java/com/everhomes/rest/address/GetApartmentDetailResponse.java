@@ -72,6 +72,7 @@ public class GetApartmentDetailResponse {
 	private BigDecimal apartmentRent;
 	private Byte apartmentRentType;
 	private String apartAuthorizePrice;
+	private Byte rentalContractRelated;
     
 	public String getApartAuthorizePrice() {
 		return apartAuthorizePrice;
@@ -326,6 +327,14 @@ public class GetApartmentDetailResponse {
 
 	public void setBuildingId(Long buildingId) {
 		this.buildingId = buildingId;
+	}
+	
+	public Byte getRentalContractRelated() {
+		return rentalContractRelated;
+	}
+
+	public void setRentalContractRelated(Byte rentalContractRelated) {
+		this.rentalContractRelated = rentalContractRelated;
 	}
 
 	@Override

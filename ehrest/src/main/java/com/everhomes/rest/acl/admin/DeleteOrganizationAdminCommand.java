@@ -9,7 +9,8 @@ import javax.validation.constraints.NotNull;
  * <ul>
  * <li>ownerType: ownerType</li>
  * <li>ownerId: ownerId</li>
- * <li>organizationId: 机构id</li>
+ * <li>organizationId: 目标机构id</li>
+ * <li>currentOrganizationId: 当前公司的id</li>
  * <li>contactToken: 管理员手机号</li>
  * <li>communityId: 小区id</li>
  * <li>namespaceId:namespaceId </li>
@@ -26,6 +27,7 @@ public class DeleteOrganizationAdminCommand {
 
 	@NotNull
 	private Long organizationId;
+	private Long currentOrganizationId;
 
 	@NotNull
 	private String contactToken;
@@ -103,10 +105,16 @@ public class DeleteOrganizationAdminCommand {
 		this.customerId = customerId;
 	}
 
+	public Long getCurrentOrganizationId() {
+		return currentOrganizationId;
+	}
+
+	public void setCurrentOrganizationId(Long currentOrganizationId) {
+		this.currentOrganizationId = currentOrganizationId;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
-
 }
