@@ -84,8 +84,8 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
     
     public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {
-        // 校验参数
-        checkPaymentBillOrderPaidStatus(cmd);
+        //校验参数
+        checkPaymentBillOrderPaidStatus(cmd);//检测账单是否已支付
         PaymentBillGroup billGroup = checkBillGroup(cmd);
         checkBusinessPayer(cmd);
         checkPaymentPayeeId(cmd, billGroup);
