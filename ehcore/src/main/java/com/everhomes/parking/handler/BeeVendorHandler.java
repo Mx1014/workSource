@@ -211,7 +211,7 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         }
 
         Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
-        Timestamp timestampEnd = new Timestamp(Utils.getLongByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue(),true));
+        Timestamp timestampEnd = Utils.getTimestampByAddThirtyDays(timestampStart.getTime(), order.getMonthCount().intValue());
         order.setStartPeriod(timestampStart);
         order.setEndPeriod(timestampEnd);
 
