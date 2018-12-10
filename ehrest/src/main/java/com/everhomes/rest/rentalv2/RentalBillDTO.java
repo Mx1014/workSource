@@ -133,6 +133,7 @@ public class RentalBillDTO {
 	private String openTime;
 	private Long appId;
 	private Byte fileFlag;
+	private String shopUrl;
 
 	@Override
 	public String toString() {
@@ -635,5 +636,13 @@ public class RentalBillDTO {
 
 	public void setFileFlag(Byte fileFlag) {
 		this.fileFlag = fileFlag;
+	}
+
+	public String getShopUrl() {
+		return shopUrl;
+	}
+
+	public void setShopUrl(String shopUrl) {
+		this.shopUrl = shopUrl;
 	}
 }

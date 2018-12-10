@@ -53,6 +53,8 @@ public interface Rentalv2Service {
 	FindRentalSiteWeekStatusCommandResponse findRentalSiteWeekStatus(
 			FindRentalSiteWeekStatusCommand cmd);
 
+	FindRentalSiteDayStatusCommandResponse findRentalSiteDayStatus(
+			FindRentalSiteDayStatusCommand cmd);
 
 	void exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
 	void exportRentalBills(SearchRentalOrdersCommand cmd,HttpServletResponse response);
