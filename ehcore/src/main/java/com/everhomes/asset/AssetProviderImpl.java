@@ -3728,6 +3728,8 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(PBCmd.getTargetType()));
         }
 
+        query.addConditions(Tables.EH_PAYMENT_BILLS.SWITCH.eq(BillSwitch.UNSETTLED.getCode()));
+
         query.addConditions(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));
 
         query.addConditions(Tables.EH_PAYMENT_BILLS.STATUS.eq(BillStatus.UNFINISHED.getCode()));
