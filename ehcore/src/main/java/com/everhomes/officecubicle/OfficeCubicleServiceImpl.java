@@ -777,7 +777,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("rentalBill");
 
-		this.createRentalBillsBookSheetHead(sheet);
+		this.createCubicleBillsBookSheetHead(sheet);
 		for (OfficeRentOrderDTO dto : dtos) {
 			this.setNewCubicleRentBillsBookRow(sheet, dto);
 		}
@@ -801,17 +801,32 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Row row = sheet.createRow(sheet.getLastRowNum());
 		int i = -1;
 		row.createCell(++i).setCellValue("序号");
-		row.createCell(++i).setCellValue("空间名称");
-		row.createCell(++i).setCellValue("所在城市");
-		row.createCell(++i).setCellValue("订单时间");
-		row.createCell(++i).setCellValue("预定类别");
-		row.createCell(++i).setCellValue("工位类别");
-//		row.createCell(++i).setCellValue("工位数/面积");
-		row.createCell(++i).setCellValue("预订人");
+		row.createCell(++i).setCellValue("申请时间");
+		row.createCell(++i).setCellValue("预约人");
 		row.createCell(++i).setCellValue("联系电话");
+		row.createCell(++i).setCellValue("预约空间");
+		row.createCell(++i).setCellValue("参观日期");
 		row.createCell(++i).setCellValue("状态");
 	}
 
+	private void createCubicleBillsBookSheetHead(Sheet sheet) {
+
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i = -1;
+		row.createCell(++i).setCellValue("序号");
+		row.createCell(++i).setCellValue("订单提交时间");
+		row.createCell(++i).setCellValue("订单类型");
+		row.createCell(++i).setCellValue("预定时间");
+		row.createCell(++i).setCellValue("预定人");
+		row.createCell(++i).setCellValue("联系方式");
+		row.createCell(++i).setCellValue("订单金额（元）");
+		row.createCell(++i).setCellValue("支付类型");
+		row.createCell(++i).setCellValue("支付方式");
+		row.createCell(++i).setCellValue("订单来源");
+		row.createCell(++i).setCellValue("订单状态");
+	}
+	
+	
 	private void setNewRentalBillsBookRow(Sheet sheet, OfficeOrderDTO dto) {
 		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 		int i = -1;
@@ -857,8 +872,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		row.createCell(++i).setCellValue(row.getRowNum());
 		// 申请时间
 		row.createCell(++i).setCellValue(dto.getCreateTime());
+		//订单类型
+		OfficeCubiceRentType rentType = OfficeCubiceRentType.fromCode(dto.getRentType());
+		row.createCell(++i).setCellValue(rentType==null?"":rentType.getDescription());
 		// 预定时间
 		row.createCell(++i).setCellValue(dto.getUserDetail());
+		// 预订人
+		row.createCell(++i).setCellValue(dto.getReserverName());
+		// 联系电话
+		row.createCell(++i).setCellValue(dto.getReserverContactToken());
 		//订单金额
 		row.createCell(++i).setCellValue(String.valueOf(dto.getPrice()));
 		//支付类型
@@ -871,12 +893,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeCubiceOrderStatus orderStatus = OfficeCubiceOrderStatus.fromCode(dto.getOrderStatus());
 		row.createCell(++i).setCellValue(orderStatus==null?"":orderStatus.getDescription());
 		
-		// 预订人
-		row.createCell(++i).setCellValue(dto.getReserverName());
-
-		// 联系电话
-		row.createCell(++i).setCellValue(dto.getReserverContactToken());
-
 	}
 	
 	@Override
@@ -2150,7 +2166,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setSpaceId(cmd.getSpaceId());
 		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
 		order.setOrderNo(orderNo);
-		order.setUseDetail(cmd.getUserDetail());
+		order.setUseDetail(cmd.getUseDetail());
 		order.setSpaceName(space.getName());
 		this.dbProvider.execute((TransactionStatus status) -> {
 			officeCubicleProvider.createCubicleRentOrder(order);
