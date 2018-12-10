@@ -353,3 +353,4 @@ CREATE TABLE `eh_service_module_app_entries` (
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '应用的入口数据';
 
+
