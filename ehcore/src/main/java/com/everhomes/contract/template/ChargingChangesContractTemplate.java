@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.contract.ContractChargingChangeDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractTemplateBuildingApartmentDTO;
 
 @Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "chargingChanges")
 public class ChargingChangesContractTemplate implements ContractTemplateHandler{
@@ -46,12 +47,18 @@ public class ChargingChangesContractTemplate implements ContractTemplateHandler{
 		}
 		//index不能超出list的范围
 		if ("adjusts".equals(type)) {
-			return checkIndexWithinRange(contract.getAdjusts(), index);
+			if (!checkIndexWithinRange(contract.getAdjusts(), index)) {
+				return false;
+			}
 		}else if("frees".equals(type)){
-			return checkIndexWithinRange(contract.getFrees(), index);
-		}else {
+			if (!checkIndexWithinRange(contract.getFrees(), index)) {
+				return false;
+			}
+		}
+		if (!PropertyUtils.containsField(ContractChargingChangeDTO.class, segments[2])) {
 			return false;
 		}
+		return true;
 	}
 
 	@Override

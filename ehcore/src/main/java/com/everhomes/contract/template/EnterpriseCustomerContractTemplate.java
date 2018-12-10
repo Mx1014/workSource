@@ -29,6 +29,9 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 		if (contract == null || segments == null || segments.length == 0 ) {
 			return false;
 		}
+		if (!PropertyUtils.containsField(EnterpriseCustomerDTO.class, segments[1])) {
+			return false;
+		}
 		return true;
 	}
 

@@ -59,7 +59,7 @@ public class PropertyUtils {
 		try {
 			pd = new PropertyDescriptor(propertyName, clazz);
 			Method getMethod = pd.getReadMethod();//从属性描述器中获取 get 方法
-			value = getMethod.invoke(clazz, new Object[]{});//调用方法获取方法的返回值
+			value = getMethod.invoke(obj);//调用方法获取方法的返回值
 		} catch (IntrospectionException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
 			e1.printStackTrace();
 		}
@@ -79,6 +79,17 @@ public class PropertyUtils {
 			result.add(name);
 		}
 		return result;
+	}
+	
+	/**
+	 * 判断一个类中是否有某个变量名
+	 * @param clazz
+	 * @param propertyName
+	 * @return
+	 */
+	public static boolean containsField(Class<?> clazz,String propertyName){
+		List<String> declaredFieldsName = getDeclaredFieldsName(clazz);
+		return declaredFieldsName.contains(propertyName);
 	}
 	
 }

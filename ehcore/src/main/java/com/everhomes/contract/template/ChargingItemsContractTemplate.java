@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.asset.ChargingVariable;
 import com.everhomes.rest.asset.ChargingVariables;
+import com.everhomes.rest.contract.ContractChargingChangeDTO;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.util.StringHelper;
@@ -43,6 +44,9 @@ public class ChargingItemsContractTemplate implements ContractTemplateHandler{
 				return false;
 			}
 		}else {
+			return false;
+		}
+		if (!PropertyUtils.containsField(ContractChargingItemDTO.class, segments[2])) {
 			return false;
 		}
 		//chargingVariables是一个json字符串

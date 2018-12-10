@@ -54,6 +54,9 @@ public class ApartmentsContractTemplate implements ContractTemplateHandler{
 		}else {
 			return false;
 		}
+		if (!PropertyUtils.containsField(ContractTemplateBuildingApartmentDTO.class, segments[2])) {
+			return false;
+		}
 		return true;
 	}
 	
