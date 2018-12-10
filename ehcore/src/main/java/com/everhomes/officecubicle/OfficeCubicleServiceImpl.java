@@ -1941,9 +1941,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					"invaild ordertype,"+cmd.getOrderType());
 		}
 		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderByBizOrderNum(cmd.getBizOrderNum());
-		Long lockId = order.getOrderNo();
 		if(cmd.getOrderType() == 3) {
-			coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getId()).enter(()-> {
+			coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_ORDER_STATUS.getCode() + order.getId()).enter(()-> {
 				order.setOrderStatus(OfficeCubiceOrderStatus.PAID.getCode());
 				order.setOperateTime(new Timestamp(System.currentTimeMillis()));
 				order.setOperatorUid(UserContext.currentUserId());
@@ -1951,8 +1950,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				rentalCommonService.rentalOrderSuccess(order.getRentalOrderNo());
 				int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
 				List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
-				smsProvider.addToTupleList(variables, "createTime", order.getCreateTime());
-				smsProvider.addToTupleList(variables, "orderId", order.getId());
+				smsProvider.addToTupleList(variables, "reserveTime", order.getCreateTime());
+				smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
 				sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 				rent.setOrderId(order.getId());
@@ -1970,9 +1969,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
 			int templateId = SmsTemplateCode.OFFICE_CUBICLE_REFUND;
 			List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
-			smsProvider.addToTupleList(variables, "orderId", order.getId());
-			smsProvider.addToTupleList(variables, "totalAmount", order.getPrice());
-			smsProvider.addToTupleList(variables, "refundAmount", order.getId());
+			smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
+			smsProvider.addToTupleList(variables, "price", order.getPrice());
+			smsProvider.addToTupleList(variables, "refundPrice", order.getId());
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 		}
 	}
