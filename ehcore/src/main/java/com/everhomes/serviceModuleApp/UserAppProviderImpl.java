@@ -12,9 +12,11 @@ import com.everhomes.server.schema.tables.daos.EhUserAppsDao;
 import com.everhomes.server.schema.tables.pojos.EhUserApps;
 import com.everhomes.server.schema.tables.records.EhUserAppsRecord;
 import com.everhomes.util.ConvertHelper;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.List;
@@ -88,6 +90,14 @@ public class UserAppProviderImpl implements UserAppProvider {
 		return userApps;
 	}
 
+    @Override
+    public Integer getMaxOrder(Long userId, Byte locationType, Long locationTargetId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUserApps.class));
+        Condition condition = Tables.EH_USER_APPS.USER_ID.eq(userId)
+                .and(Tables.EH_USER_APPS.LOCATION_TYPE.eq(locationType))
+                .and(Tables.EH_USER_APPS.LOCATION_TARGET_ID.eq(locationTargetId));
+        return context.select(DSL.max(Tables.EH_USER_APPS.ORDER)).from(Tables.EH_USER_APPS).where(condition).fetchOneInto(Integer.class);
+    }
 	@Override
 	public void delete(Long id) {
 

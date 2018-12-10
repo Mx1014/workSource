@@ -1763,8 +1763,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         if(userAppFlag != null){
             List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
             if (userApps != null && userApps.size() != 0) {
-                for (AppDTO appDTO : appDTOS) {
-                    list.add(null);
+                Integer maxOrder = userAppProvider.getMaxOrder(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
+                if (maxOrder != null) {
+                    for (int i=0;i<maxOrder;i++) {
+                        list.add(null);
+                    }
                 }
                 List<AppDTO> noUserApp = new ArrayList<>();
                 for (AppDTO app : appDTOS) {
