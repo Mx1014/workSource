@@ -1955,6 +1955,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				order.setOrderStatus(OfficeCubiceOrderStatus.PAID.getCode());
 				order.setOperateTime(new Timestamp(System.currentTimeMillis()));
 				order.setOperatorUid(UserContext.currentUserId());
+				if (cmd.getPaymentType() != null){
+					order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				}
+				if (cmd.getPaymentType() != null && cmd.getPaymentType() == 29)
+					order.setPaidMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+				else
+					order.setPaidMode(GorderPayType.PERSON_PAY.getCode());
 				officeCubicleProvider.updateCubicleRentOrder(order);
 				rentalCommonService.rentalOrderSuccess(order.getRentalOrderNo());
 				int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
@@ -1983,6 +1990,40 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			smsProvider.addToTupleList(variables, "refundPrice", order.getId());
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 		}
+	}
+	
+	/**
+	 * 将3.0版本支付的支付方式转为老的支付宝和微信的支付方式
+	 * @param paymentType
+	 * @return
+	 */
+	private String transferPaidType(Integer paymentType) {
+						/* 支付类型
+						 * WECHAT_APPPAY(1): 微信APP支付
+						 * GATEWAY_PAY(2): 网关支付
+						 * POS_PAY(3): 订单POS
+						 * REALNAME_PAY(4): 实名付（单笔）
+						 * REALNAME_BATCHPAY(5): 实名付（批量）
+						 * WITHOLD(6): 通联通代扣
+						 * WECHAT_SCAN_PAY(7):  微信扫码支付(正扫)
+						 * ALI_SCAN_PAY(8): 支付宝扫码支付(正扫)
+						 * WECHAT_JS_PAY(9): 微信JS 支付（公众号）
+						 * ALI_JS_PAY(10): 支付宝JS 支付（生活号）
+						 * QQWALLET_JS_PAY(11): QQ 钱包JS 支付
+						 * WCHAT_CODE_PAY(12): 微信刷卡支付（被扫）
+						 * ALI_CODE_PAY(13): 支付宝刷卡支付(被扫)
+						 * QQWALLET_CODE_PAY(14): QQ 钱包刷卡支付(被扫)
+						 * BALANCE_PAY(15): 账户余额
+						 * COUPON_PAY(16): 代金券（不建议使用，建议使用下面的批量代金券方式）
+						 * COUPON_BATCHPAY(17): 批量代金券
+						 * WITHDRAW(18): 通联通代付
+						 * QUICK_PAY(19):
+						 * WITHDRAW_AUTO(20):*/
+		if(paymentType==1 || paymentType==7 || paymentType==9 || paymentType==12 || paymentType==21)
+			return "10002";
+		if(paymentType==8 || paymentType==10 || paymentType==13)
+			return "10001";
+		return paymentType+"";
 	}
 	
 	private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
