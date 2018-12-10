@@ -4624,6 +4624,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				//5、让父文档失效
 				parentContractDocument.setStatus(ContractDocumentsStatus.INACTIVE.getCode());
 				contractProvider.updateContractDocument(parentContractDocument);
+				//6、更新合同中的documentId
+				Contract contract = contractProvider.findContractById(contractDocument.getContractId());
+				if (contract != null) {
+					contract.setDocumentId(contractDocument.getId());
+					contractProvider.updateContract(contract);
+				}
 			} catch (GogsConflictException e) {
 				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
 				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
@@ -4664,7 +4670,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			public void run() {
 				generateContractDocuments(cmd, params);
 			}
-		});
+		});	
 	}
 	
 	private void generateContractDocuments(GenerateContractDocumentsCommand cmd, Map<String, Object> params) {
@@ -4693,9 +4699,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		contractDocument.setCommunityId(cmd.getCommunityId());
 		contractDocument.setNamespaceId(cmd.getNamespaceId());
 		contractDocument.setStatus(ContractDocumentsStatus.ACTIVE.getCode());
-		Contract relatedContract = contractProvider.findContractById(cmd.getContractId());
-		if (relatedContract != null) {
-			contractDocument.setName(relatedContract.getName());
+		Contract contract = contractProvider.findContractById(cmd.getContractId());
+		if (contract != null) {
+			contractDocument.setName(contract.getName());
 		}
 		
 		//是否是新增的文件
@@ -4713,6 +4719,10 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				//3.存储提交脚本返回的id
 				contractDocument.setContent(commit.getId());
 				contractProvider.createContractDocument(contractDocument);
+				if (contract != null) {
+					contract.setDocumentId(contractDocument.getId());
+					contractProvider.updateContract(contract);
+				}
 			} catch (GogsConflictException e) {
 				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
 				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
