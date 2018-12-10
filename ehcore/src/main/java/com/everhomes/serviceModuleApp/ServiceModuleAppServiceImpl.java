@@ -1743,7 +1743,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
     }
 
     private List<AppDTO> sortUserAppDTO(List<AppDTO> appDTOS, Long orgId) {
-	    List<AppDTO> list = new ArrayList<>();
+	    List<AppDTO> list = new ArrayList<>(appDTOS.size());
         //用户是否启用自定义配置
         UserAppFlag userAppFlag = userAppFlagProvider.findUserAppFlag(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
 
