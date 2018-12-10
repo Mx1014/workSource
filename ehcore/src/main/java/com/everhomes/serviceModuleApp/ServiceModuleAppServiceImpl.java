@@ -74,6 +74,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -1744,7 +1745,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
     }
 
     private List<AppDTO> sortUserAppDTO(List<AppDTO> appDTOS, Long orgId) {
-	    List<AppDTO> list = new LinkedList<>();
+	    List<AppDTO> list = new ArrayList<>();
+	    for (AppDTO appDTO : list) {
+	        list.add(null);
+        }
         //用户是否启用自定义配置
         UserAppFlag userAppFlag = userAppFlagProvider.findUserAppFlag(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
 
@@ -1768,6 +1772,13 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                     }
                     if (!flag) {
                         noUserApp.add(app);
+                    }
+                }
+                Iterator iterator  = list.iterator();
+                while (iterator.hasNext()) {
+                    AppDTO appDTO = (AppDTO) iterator.next();
+                    if (appDTO == null) {
+                        iterator.remove();
                     }
                 }
                 if (!CollectionUtils.isEmpty(noUserApp)) {
