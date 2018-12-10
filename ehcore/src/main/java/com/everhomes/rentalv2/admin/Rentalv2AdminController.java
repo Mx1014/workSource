@@ -990,9 +990,9 @@ public class Rentalv2AdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("searchShops")
-	@RestReturn(String.class)
+	@RestReturn(SearchShopsResponse.class)
 	public RestResponse searchShops( SearchShopsCommand cmd) {
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(rentalService.searchShops(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
