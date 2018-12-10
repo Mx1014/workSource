@@ -1746,19 +1746,22 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					OfficeCubicleErrorCode.ERROR_REFUND_ERROR,
 					"支付系统订单号不存在");
 		}
+		OfficeCubicleSpace space = this.officeCubicleProvider.getSpaceById(cmd.getSpaceId());
+		if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
+			return;
+		}
 		 CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
 	        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
 	        createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 	        createRefundOrderCommand.setAccountCode("NS"+order.getNamespaceId().toString());
-
+	        BigDecimal refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space);
 	        createRefundOrderCommand.setBusinessOrderNumber(order.getBizOrderNo());
-	        createRefundOrderCommand.setAmount(order.getPrice().longValue());
+	        createRefundOrderCommand.setAmount(refundPrice.longValue());
 	        createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
 	        createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
 	        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-	        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"refund.v2.callback.url.rental", "");
-	        String backUrl = homeUrl + contextPath + backUri;
-	        createRefundOrderCommand.setCallbackUrl(backUrl);
+			String callbackurl = homeUrl + contextPath + configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"officecubicle.pay.callBackUrl", "/officecubicle/payNotify");
+	        createRefundOrderCommand.setCallbackUrl(callbackurl);
 	        createRefundOrderCommand.setSourceType(SourceType.MOBILE.getCode());
 
 	        CreateRefundOrderRestResponse refundOrderRestResponse = this.orderService.createRefundOrder(createRefundOrderCommand);
