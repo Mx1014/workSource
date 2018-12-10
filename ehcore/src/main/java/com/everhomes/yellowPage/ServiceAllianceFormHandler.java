@@ -176,11 +176,12 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 			}
 		} else{
 			// 表单字段配置ID不为空，即为工作流节点提交的表单值，直接修改
-			List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId(), null, null);
+			// 根据sourceId和sourceType查询已提交的表单值
+			List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
 			if(cmd.getValues() != null && formValues != null){
 				for(PostApprovalFormItem val : cmd.getValues()){
 					for(GeneralFormVal formValue : formValues){
-						// 根据FieldName来判断两个值属于同一字段
+						// 根据FieldName来判断两个表单值属于同一字段
 						if(val.getFieldName().equals(formValue.getFieldName())){
 							formValue.setFieldValue(val.getFieldValue());
 							generalFormValProvider.updateGeneralFormVal(formValue);
