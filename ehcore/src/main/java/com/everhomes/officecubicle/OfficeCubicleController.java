@@ -251,7 +251,7 @@ public class OfficeCubicleController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("exprotCubicleOrders")
-	public String exprotSpaceOrders(@Valid SearchCubicleOrdersCommand cmd,HttpServletResponse response) {
+	public String exprotCubicleOrders(@Valid SearchCubicleOrdersCommand cmd,HttpServletResponse response) {
 //		HttpServletResponse commandResponse = rentalService.exportRentalBills(cmd, response );
 		HttpServletResponse commandResponse = this.officeCubicleService.exportCubicleOrders(cmd,response);
 		return null;

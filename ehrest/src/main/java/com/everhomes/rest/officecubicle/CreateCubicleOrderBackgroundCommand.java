@@ -48,7 +48,7 @@ public class CreateCubicleOrderBackgroundCommand {
 	private Long ownerId;
 	private List<Long> stationId;
 	private List<Long> roomId;
-	private String userDetail;
+	private String useDetail;
 	private Long rentalOrderNo;
 	private Long currentPMId;
 	private Long currentProjectId;
@@ -95,12 +95,12 @@ public class CreateCubicleOrderBackgroundCommand {
 		this.rentalOrderNo = rentalOrderNo;
 	}
 
-	public String getUserDetail() {
-		return userDetail;
+	public String getUseDetail() {
+		return useDetail;
 	}
 
-	public void setUserDetail(String userDetail) {
-		this.userDetail = userDetail;
+	public void setUseDetail(String useDetail) {
+		this.useDetail = useDetail;
 	}
 
 	public List<Long> getStationId() {

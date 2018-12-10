@@ -661,6 +661,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		orders.forEach((other) -> {
 			OfficeOrderDTO dto = ConvertHelper.convert(other, OfficeOrderDTO.class);
 			dto.setReserveTime(other.getReserveTime().getTime());
+			dto.setCreateTime(other.getCreateTime().getTime());
 			dtos.add(dto);
 		});
 		URL rootPath = OfficeCubicleServiceImpl.class.getResource("/");
@@ -693,6 +694,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		orders.forEach((other) -> {
 			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
+			dto.setCreateTime(other.getCreateTime().getTime());
 			dtos.add(dto);
 		});
 		URL rootPath = OfficeCubicleServiceImpl.class.getResource("/");
@@ -833,7 +835,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		// 序号
 		row.createCell(++i).setCellValue(row.getRowNum());
 		
-		// 预订人
+		// 申请时间
+		row.createCell(++i).setCellValue(datetimeSF.format(new Timestamp(dto.getCreateTime())));
+		//预定人
 		row.createCell(++i).setCellValue(dto.getReserverName());
 		// 联系电话
 		row.createCell(++i).setCellValue(dto.getReserveContactToken());
@@ -871,7 +875,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		// 序号
 		row.createCell(++i).setCellValue(row.getRowNum());
 		// 申请时间
-		row.createCell(++i).setCellValue(dto.getCreateTime());
+		row.createCell(++i).setCellValue(datetimeSF.format(new Timestamp(dto.getCreateTime())));
 		//订单类型
 		OfficeCubiceRentType rentType = OfficeCubiceRentType.fromCode(dto.getRentType());
 		row.createCell(++i).setCellValue(rentType==null?"":rentType.getDescription());

@@ -57,8 +57,17 @@ public class OfficeOrderDTO {
     private String reserveEnterprise;
 	private Byte workFlowStatus;
 	private Long flowCaseId;
+	private Long createTime;
 
 	
+	public Long getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
+	}
+
 	public Long getFlowCaseId() {
 		return flowCaseId;
 	}
