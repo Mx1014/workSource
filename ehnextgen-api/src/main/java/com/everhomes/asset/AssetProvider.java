@@ -70,7 +70,7 @@ public interface AssetProvider {
 
     ListBillsDTO creatPropertyBill(CreateBillCommand cmd, Long billId);
 
-    ListBillsDTO creatPropertyBillForCommunity( CreateBillCommand cmd);
+//    ListBillsDTO creatPropertyBillForCommunity( CreateBillCommand cmd);
 
     ListBillDetailResponse listBillDetail(Long billId);
 
