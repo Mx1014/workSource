@@ -1861,6 +1861,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
         List<BaseVisitorDTO> visitorDtoList = response.getVisitorDtoList();
 
+        BaseVisitorDTO bean = visitorDtoList.get(0);
+        CommunityType communityType = CommunityType.fromCode(bean.getCommunityType());
+
         Workbook wb = new XSSFWorkbook();
 
         Font font = wb.createFont();
@@ -1895,6 +1898,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             row.createCell(5).setCellValue("状态");
         }
 
+        if(communityType != null && communityType == CommunityType.RESIDENTIAL){
+            row.createCell(6).setCellValue("到访公寓");
+        }
+
         DateTimeFormatter datetimeSF = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
         for(int i = 0, size = visitorDtoList.size(); i < size; i++){
             Row tempRow = sheet.createRow(i + 1);
@@ -1915,8 +1922,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 VisitorsysStatus status = VisitorsysStatus.fromCode(visitorDTO.getVisitStatus());
                 tempRow.createCell(5).setCellValue(status==null?"未知":status.getDesc());
             }
+            if(communityType != null && communityType == CommunityType.RESIDENTIAL){
+                tempRow.createCell(6).setCellValue(visitorDTO.getOfficeLocationName());
+            }
 
         }
+
+
 
         ByteArrayOutputStream out = null;
         try {
