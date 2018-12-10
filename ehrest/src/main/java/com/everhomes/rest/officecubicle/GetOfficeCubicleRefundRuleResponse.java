@@ -23,9 +23,18 @@ public class GetOfficeCubicleRefundRuleResponse {
     private List<OfficeCubicleRefundTipDTO> refundTips;
     private List<OfficeCubicleRefundRuleDTO> refundStrategies;
     private Integer refundPrice;
+    private Integer refundRate;
     
 
-    public Integer getRefundPrice() {
+    public Integer getRefundRate() {
+		return refundRate;
+	}
+
+	public void setRefundRate(Integer refundRate) {
+		this.refundRate = refundRate;
+	}
+
+	public Integer getRefundPrice() {
 		return refundPrice;
 	}
 

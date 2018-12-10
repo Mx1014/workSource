@@ -1139,6 +1139,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderById(cmd.getOrderId());
 			Integer refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space).intValue();
 			resp.setRefundPrice(refundPrice);
+			OfficeCubicleRefundRule orderRule = findOfficeCubicleRefundRule(order,System.currentTimeMillis(),space);
+			resp.setRefundRate(orderRule.getFactor().intValue());
 		}
 		if(refundTips!=null){
 			resp.setRefundTips(refundTips.stream().map(r->ConvertHelper.convert(r,OfficeCubicleRefundTipDTO.class)).collect(Collectors.toList()));
@@ -1147,7 +1149,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	}
     private BigDecimal calculateRefundAmount(OfficeCubicleRentOrder order, Long now, OfficeCubicleSpace space) {
 
-    	LOGGER.info("getRefundStrategy : " + space.getRefundStrategy() + "RentalOrderStrategy: " + RentalOrderStrategy.FULL.getCode());
         if (space.getRefundStrategy().equals(RentalOrderStrategy.CUSTOM.getCode())) {
 
             List<OfficeCubicleRefundRule> refundRules = officeCubicleProvider.findRefundRule(order.getSpaceId());
@@ -1204,6 +1205,55 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
         }
         
         return order.getPrice();
+    }
+    private OfficeCubicleRefundRule findOfficeCubicleRefundRule(OfficeCubicleRentOrder order, Long now, OfficeCubicleSpace space) {
+
+        if (space.getRefundStrategy().equals(RentalOrderStrategy.CUSTOM.getCode())) {
+
+            List<OfficeCubicleRefundRule> refundRules = officeCubicleProvider.findRefundRule(order.getSpaceId());
+
+            List<OfficeCubicleRefundRule> outerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.OUTER.getCode())
+                    .collect(Collectors.toList());
+            List<OfficeCubicleRefundRule> innerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.INNER.getCode())
+                    .collect(Collectors.toList());
+
+            OfficeCubicleRefundRule orderRule = null;
+
+            Long startUseTime = order.getBeginTime().getTime();
+
+            long intervalTime = startUseTime - now;
+
+            //处于时间外，查找最大的时间
+            for (OfficeCubicleRefundRule r: outerRules) {
+                long duration = 0;
+
+                if (r.getDurationUnit() == RentalDurationUnit.HOUR.getCode()) {
+                    duration = (long)(r.getDuration() * 60 * 60 * 1000);
+                }
+                if (intervalTime > duration) {
+                    if (null == orderRule || r.getDuration() > orderRule.getDuration()) {
+                        orderRule = r;
+                    }
+                }
+            }
+            if (orderRule == null) {
+                //处于时间内，查找最小的时间
+                for (OfficeCubicleRefundRule r: innerRules) {
+                    long duration = 0;
+
+                    if (r.getDurationUnit() == RentalDurationUnit.HOUR.getCode()) {
+                        duration = (long)(r.getDuration() * 60 * 60 * 1000);
+                    }
+                    if (intervalTime < duration) {
+                        if (null == orderRule || r.getDuration() < orderRule.getDuration()) {
+                            orderRule = r;
+                        }
+                    }
+                }
+            }
+            return orderRule;
+        }
+        return null;
     }
 	@Override
 	public List<OfficeOrderDTO> getUserOrders() {
