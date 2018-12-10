@@ -1757,7 +1757,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                     boolean flag = false;
                     for (UserApp userApp : userApps) {
                         if (userApp.getAppId().equals(app.getEntryId())) {
-                            list.add(app);
+                            if (userApp.getOrder() == 0) {
+                                list.add(userApp.getOrder(), app);
+                            }else {
+                                list.add(userApp.getOrder() - 1, app);
+                            }
                             flag = true;
                         }
                     }
