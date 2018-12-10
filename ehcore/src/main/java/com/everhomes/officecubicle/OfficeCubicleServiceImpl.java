@@ -1761,11 +1761,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setOwnerId(cmd.getOwnerId());
 		order.setOwnerType(cmd.getOwnerType());
 		order.setNamespaceId(UserContext.getCurrentNamespaceId());
-		order.setReserverEnterpriseName(cmd.getReserveEnterprise());
-		order.setReserverContactToken(cmd.getReserveContactToken());
+		order.setReserverEnterpriseName(cmd.getReserverEnterpriseName());
+		order.setReserverEnterpriseId(cmd.getReserverEnterpriseId());
+		order.setReserverContactToken(cmd.getReserverContactToken());
 		order.setReserverName(cmd.getReserverName());
 		order.setRentType((byte)0);
 		order.setReserverUid(UserContext.currentUserId());
+		order.setRequestType(OfficeCubicleRequestType.CLIENT.getCode());
 		this.dbProvider.execute((TransactionStatus status) -> {
 			officeCubicleProvider.createCubicleRentOrder(order);
 			return null;
@@ -2561,9 +2563,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		String token = userService.getUserIdentifier(UserContext.currentUserId()).getIdentifierToken();
-		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrdersByToken(
-				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),cmd.getRentType(), cmd.getOrderStatus(), token);
+		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrdersByUid(
+				 locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()),cmd.getRentType(), cmd.getOrderStatus(), UserContext.currentUserId());
 		if (null == orders)
 			return response;
 		Long nextPageAnchor = null;

@@ -439,8 +439,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public List<OfficeCubicleRentOrder> searchCubicleOrdersByToken(CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,
-												 Byte rentType, Byte orderStatus,String reserverContactToken) {
+	public List<OfficeCubicleRentOrder> searchCubicleOrdersByUid(CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,
+												 Byte rentType, Byte orderStatus,Long reserverUid) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.NAMESPACE_ID.eq(currentNamespaceId);
@@ -454,8 +454,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.eq(orderStatus));
 			}
 		}
-		if(StringUtils.isNotBlank(reserverContactToken))
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.RESERVER_CONTACT_TOKEN.eq(reserverContactToken));
+		if(reserverUid != null)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.RESERVER_UID.eq(reserverUid));
 		if (null != locator && locator.getAnchor() != null)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ID.lt(locator.getAnchor()));
 		step.limit(pageSize);

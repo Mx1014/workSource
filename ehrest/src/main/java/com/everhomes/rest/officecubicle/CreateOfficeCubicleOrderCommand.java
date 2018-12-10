@@ -27,8 +27,9 @@ public class CreateOfficeCubicleOrderCommand {
 	private Long spaceId;
     
     private String reserverName;
-    private String reserveEnterprise;
-	private String reserveContactToken;
+    private String reserverEnterpriseName;
+    private Long reserverEnterpriseId;
+	private String reserverContactToken;
 	private String remark;
 	private Long rentalOrderNo;
 	private String ownerType;
@@ -99,24 +100,42 @@ public class CreateOfficeCubicleOrderCommand {
 	}
 
 
-	public String getReserveEnterprise() {
-		return reserveEnterprise;
+
+	public String getReserverEnterpriseName() {
+		return reserverEnterpriseName;
 	}
 
 
-	public void setReserveEnterprise(String reserveEnterprise) {
-		this.reserveEnterprise = reserveEnterprise;
+
+	public void setReserverEnterpriseName(String reserverEnterpriseName) {
+		this.reserverEnterpriseName = reserverEnterpriseName;
 	}
 
 
-	public String getReserveContactToken() {
-		return reserveContactToken;
+
+	public Long getReserverEnterpriseId() {
+		return reserverEnterpriseId;
 	}
 
 
-	public void setReserveContactToken(String reserveContactToken) {
-		this.reserveContactToken = reserveContactToken;
+
+	public void setReserverEnterpriseId(Long reserverEnterpriseId) {
+		this.reserverEnterpriseId = reserverEnterpriseId;
 	}
+
+
+
+	public String getReserverContactToken() {
+		return reserverContactToken;
+	}
+
+
+
+	public void setReserverContactToken(String reserverContactToken) {
+		this.reserverContactToken = reserverContactToken;
+	}
+
+
 
 	public String getRemark() {
 		return remark;
