@@ -17,6 +17,7 @@ import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
 import com.everhomes.rest.asset.modulemapping.AssetMapContractConfig;
 import com.everhomes.rest.asset.modulemapping.PrintInstanceConfigDTO;
+import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.StringHelper;
@@ -67,6 +68,16 @@ public class PrintGeneralBillHandler implements GeneralBillHandler{
 
 	public String getPaymentExtendInfo(BillItemDTO billItemDTO) {
 		return billItemDTO.getGoodsServeApplyName();
+	}
+	
+	/**
+     * 组装商品的基本信息
+     * @param billItemDTO
+     * @return
+     */
+	public GoodDTO getGoodsInfo(BillItemDTO billItemDTO) {
+		
+		return null;
 	}
 
 }

@@ -1,21 +1,51 @@
 package com.everhomes.asset;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
+
 import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.asset.util.MerchantOrderIdHelper;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.general.order.GeneralOrderBizHandler;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.pay.order.SourceType;
-import com.everhomes.rest.asset.*;
-import com.everhomes.rest.order.*;
+import com.everhomes.portal.PlatformContextNoWarnning;
+import com.everhomes.rest.asset.BillIdAndAmount;
+import com.everhomes.rest.asset.BillItemDTO;
+import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
+import com.everhomes.rest.asset.ListBillDetailCommand;
+import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.PaymentBillsCommand;
+import com.everhomes.rest.asset.bill.PayAssetGeneralOrderResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.general.order.CreateOrderBaseInfo;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PayServiceErrorCode;
 import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
@@ -23,9 +53,22 @@ import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
 import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
 import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUserIdRestResponse;
 import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
-import com.everhomes.rest.promotion.order.*;
+import com.everhomes.rest.promotion.order.BusinessOrderType;
+import com.everhomes.rest.promotion.order.BusinessPayerType;
+import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
+import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.GetPurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.GoodDTO;
+import com.everhomes.rest.promotion.order.NotifyBillHasBeenPaidCommand;
+import com.everhomes.rest.promotion.order.OrderDescriptionEntity;
+import com.everhomes.rest.promotion.order.OrderErrorCode;
+import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.promotion.order.PurchaseOrderDTO;
+import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.GetPurchaseOrderRestResponse;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -34,17 +77,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author created by ycx
@@ -83,15 +115,21 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 
 	@Autowired
     private MerchantOrderIdHelper merchantOrderIdHelper;
+	
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
 
 	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
     
-    public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {//校验参数
+	/**
+	 * 旧支付：微信、支付宝
+	 */
+    public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {
+    	//校验参数
         checkPaymentBillOrderPaidStatus(cmd);//检测账单是否已支付
         PaymentBillGroup billGroup = checkBillGroup(cmd);//校验账单组是否存在
-        checkBusinessPayer(cmd);//
+        checkBusinessPayer(cmd);
         checkPaymentPayeeId(cmd, billGroup);//校验收款方帐号是否配置到了帐单组中，没有收款方帐号无法支付
-        checkMerchantIdExist(billGroup.getBizPayeeId());//校验收款方账号在统一订单系统中是否存在
 
         //准备创建订单的参数
         CreatePurchaseOrderCommand preOrderCommand = preparePaymentBillOrder(cmd, billGroup);
@@ -106,7 +144,31 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	    return populatePreOrderDto(preOrderCommand, orderResponse);
 	}
     
-    protected CreatePurchaseOrderCommand preparePaymentBillOrder(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
+    /**
+     * 新支付：对接统一订单
+     */
+    public PayAssetGeneralOrderResponse createOrderV2(CreatePaymentBillOrderCommand cmd){
+    	//校验参数
+        checkPaymentBillOrderPaidStatus(cmd);//检测账单是否已支付
+        PaymentBillGroup billGroup = checkBillGroup(cmd);//校验账单组是否存在
+        checkBusinessPayer(cmd);
+        checkPaymentPayeeId(cmd, billGroup);//校验收款方帐号是否配置到了帐单组中，没有收款方帐号无法支付
+        checkMerchantIdExist(billGroup.getBizPayeeId());//校验收款方账号在统一订单系统中是否存在
+
+        //准备创建订单的参数，包括一些支付参数以及商品
+        CreateOrderBaseInfo baseInfo = preparePaymentBillOrderV2(cmd, billGroup);
+        
+        //发送下单请求
+        CreateMerchantOrderResponse generalOrderResp = getSiyinPrintGeneralOrderHandler().createOrder(baseInfo);
+
+        //根据订单和支付回来的报文更新业务信息
+        afterBillOrderCreatedV2(cmd, generalOrderResp);
+        
+        //返回给客户端支付的报文
+	    return populatePreOrderDtoV2(generalOrderResp);
+	}
+
+	protected CreatePurchaseOrderCommand preparePaymentBillOrder(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
         CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
         
         BigDecimal totalAmountCents = calculateBillOrderAmount(cmd);
@@ -152,6 +214,23 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         
         return preOrderCommand;
     }
+	
+	protected CreateOrderBaseInfo preparePaymentBillOrderV2(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
+		CreateOrderBaseInfo baseInfo = new CreateOrderBaseInfo();
+		baseInfo.setOwnerId(cmd.getCommunityId());
+		ServiceModuleApp app = getApp();
+		baseInfo.setAppOriginId(app.getOriginId());
+		baseInfo.setClientAppName(cmd.getClientAppName());
+		baseInfo.setPaymentMerchantId(billGroup.getBizPayeeId());
+		baseInfo.setGoods(buildGoods(cmd, billGroup));
+		BigDecimal totalAmountCents = calculateBillOrderAmount(cmd);
+		baseInfo.setTotalAmount(totalAmountCents);
+		baseInfo.setCallBackUrl(getPayCallbackUrl(cmd));
+		baseInfo.setOrderTitle(app.getName());
+		baseInfo.setPaySourceType(cmd.getSourceType());
+		baseInfo.setGoodsDetail(buildGoodsDetails(cmd, totalAmountCents));
+		return baseInfo;
+	}
     
 	protected PurchaseOrderCommandResponse sendCreatePreOrderRequest(CreatePurchaseOrderCommand createOrderCommand) {
         CreatePurchaseOrderRestResponse  createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
@@ -434,11 +513,13 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
                 	List<BillItemDTO> billItemDTOList = billDetail.getBillGroupDTO().getBillItemDTOList();
                 	for(BillItemDTO billItemDTO : billItemDTOList) {
                 		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(billItemDTO.getSourceType());
-                		String paymentExtendsInfo = generalBillHandler.getPaymentExtendInfo(billItemDTO);
-                		//修复缺陷 #44105：物业缴费支付时extend_info重复
-                		if(!result.contains(paymentExtendsInfo)) {
-                			result += paymentExtendsInfo;
-                    		result += ",";
+                		if(generalBillHandler != null) {
+                			String paymentExtendsInfo = generalBillHandler.getPaymentExtendInfo(billItemDTO);
+                    		//修复缺陷 #44105：物业缴费支付时extend_info重复
+                    		if(!result.contains(paymentExtendsInfo)) {
+                    			result += paymentExtendsInfo;
+                        		result += ",";
+                    		}
                 		}
                 	}
                 }
@@ -674,6 +755,77 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 		}
 	}
 	
+	private ServiceModuleApp getApp() {
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(
+				UserContext.getCurrentNamespaceId(),
+				ServiceModuleConstants.ASSET_MODULE,
+				null, null, null);
+		return apps.get(0);
+	}
 	
+	private List<GoodDTO> buildGoods(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
+		List<GoodDTO> goods = new ArrayList<>();
+		if(cmd.getBills() != null) {
+        	for(BillIdAndAmount billIdAndAmount : cmd.getBills()) {
+        		Long billId = Long.parseLong(billIdAndAmount.getBillId());
+                ListBillDetailCommand ncmd = new ListBillDetailCommand();
+                ncmd.setBillId(Long.valueOf(billId));
+                ListBillDetailResponse billDetail = listBillDetail(ncmd);
+                if(billDetail != null && billDetail.getBillGroupDTO() != null) {
+                	List<BillItemDTO> billItemDTOList = billDetail.getBillGroupDTO().getBillItemDTOList();
+                	for(BillItemDTO billItemDTO : billItemDTOList) {
+                		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(billItemDTO.getSourceType());
+                		if(generalBillHandler != null) {
+                			GoodDTO good = generalBillHandler.getGoodsInfo(billItemDTO);
+                			goods.add(good);
+                		}
+                	}
+                }
+        	}
+        }
+		return goods;
+	}
+	
+	private List<OrderDescriptionEntity> buildGoodsDetails(CreatePaymentBillOrderCommand cmd, BigDecimal totalAmountCents) {
+		// 设置订单展示
+		List<OrderDescriptionEntity> goodsDetail = new ArrayList<>();
+		OrderDescriptionEntity e = new OrderDescriptionEntity();
+		e.setKey("任务类型");
+		e.setValue("物业缴费");
+		goodsDetail.add(e);
+
+		e = new OrderDescriptionEntity();
+		e.setKey("订单金额");
+		e.setValue(String.valueOf(totalAmountCents) + "元");
+		goodsDetail.add(e);
+		return goodsDetail;
+	}
+	
+	private GeneralOrderBizHandler getSiyinPrintGeneralOrderHandler() {
+		return PlatformContextNoWarnning.getComponent(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
+	}
+	
+	protected void afterBillOrderCreatedV2(CreatePaymentBillOrderCommand cmd, CreateMerchantOrderResponse generalOrderResp) {
+        List<PaymentBillOrder> billOrderList = new ArrayList<PaymentBillOrder>();
+        for(BillIdAndAmount bill : cmd.getBills()) {
+            PaymentBillOrder orderBill  = new PaymentBillOrder();
+            orderBill.setNamespaceId(cmd.getNamespaceId());
+            orderBill.setAmount(new BigDecimal(bill.getAmountOwed()));
+            orderBill.setBillId(bill.getBillId());
+            orderBill.setGeneralOrderId(generalOrderResp.getMerchantOrderId());//统一订单ID
+            orderBill.setUid(UserContext.currentUserId());
+            orderBill.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            
+            billOrderList.add(orderBill);
+        }
+        assetProvider.createBillOrderMaps(billOrderList);
+	}
+	
+	protected PayAssetGeneralOrderResponse populatePreOrderDtoV2(CreateMerchantOrderResponse generalOrderResp) {
+		PayAssetGeneralOrderResponse resp2 = new PayAssetGeneralOrderResponse();
+		resp2.setOrderId(generalOrderResp.getMerchantOrderId());
+		resp2.setMerchantId(generalOrderResp.getMerchantId());
+		return resp2;
+	}
 
 }

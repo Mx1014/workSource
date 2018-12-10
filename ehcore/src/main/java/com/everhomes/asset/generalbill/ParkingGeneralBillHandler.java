@@ -17,6 +17,7 @@ import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
 import com.everhomes.rest.asset.modulemapping.ParkingInstanceConfigDTO;
 import com.everhomes.rest.asset.modulemapping.PrintInstanceConfigDTO;
+import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.util.StringHelper;
 
@@ -68,4 +69,13 @@ public class ParkingGeneralBillHandler implements GeneralBillHandler{
 		return billItemDTO.getGoodsServeApplyName();
 	}
 
+	/**
+     * 组装商品的基本信息
+     * @param billItemDTO
+     * @return
+     */
+	public GoodDTO getGoodsInfo(BillItemDTO billItemDTO) {
+		
+		return null;
+	}
 }
