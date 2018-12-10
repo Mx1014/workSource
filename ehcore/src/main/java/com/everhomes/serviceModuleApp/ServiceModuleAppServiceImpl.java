@@ -1765,7 +1765,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                             if (userApp.getOrder() == 0) {
                                 list.add(userApp.getOrder(), app);
                             }else {
-                                list.add(userApp.getOrder() - 1, app);
+                                list.set(userApp.getOrder() - 1, app);
                             }
                             flag = true;
                         }
