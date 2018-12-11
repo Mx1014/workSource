@@ -94,6 +94,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.yellowPage.YellowPageUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -101,7 +102,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -332,23 +335,79 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
 
     //face++对接
     private final static String URL_FACEPLUSPLUS = "";
+    private final static String FACEPLUSPLUS_USERNAME = "";
+    private final static String FACEPLUSPLUS_PASSWORD = "";
 
     @Override
-    public FaceplusLoginResponse faceplusLogin (FaceplusLoginCommand cmd){
+    public String faceplusLogin (FaceplusLoginCommand cmd){
+        Map<String, String> params = new HashMap<>();
+        params.put("username", FACEPLUSPLUS_USERNAME);
+        params.put("password", FACEPLUSPLUS_PASSWORD);
+        String url = URL_FACEPLUSPLUS + "/auth/login";
 
         return null;
     }
 
-    public String FacePlusPlusRegister (String url, String ip, String port){
-//        String url = "https://" + ip + ":" + port + "/subject";
+    public String FacePlusPlusRegister (){
+        String url = URL_FACEPLUSPLUS + "/auth/login";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         String result = null;
         try{
             httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(url);
+            httpPost.addHeader("User-Agent", "Koala Admin");
+//            httpPost.addHeader("cookie",cookie);
             response = httpClient.execute(httpPost);
+            int status = response.getStatusLine().getStatusCode();
+            HttpEntity resEntity = response.getEntity();
+            Header[] setCookie = httpPost.getHeaders("Set-Cookie");
+            String a = setCookie[0].getValue();
+            result = EntityUtils.toString(resEntity);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Get http result, url={}, result={}", url, result);
+            }
 
+        } catch (Exception e) {
+            LOGGER.error("Failed to get the http result, url={}", url, e);
+        } finally {
+            if(response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    public String facePlusPlusCreateUser (String cookie, Integer subjectType,String name){
+        String url = URL_FACEPLUSPLUS + "/subject";
+        CloseableHttpClient httpClient = null;
+        CloseableHttpResponse response = null;
+        String result = null;
+        try{
+            httpClient = HttpClients.createDefault();
+            HttpPost httpPost = new HttpPost(url);
+            httpPost.addHeader("cookie",cookie);
+
+            Map<String, Object> param = new HashMap<>();
+            param.put("subject_type", subjectType);
+            param.put("name", name);
+            String p = StringHelper.toJsonString(param);
+            StringEntity stringEntity = new StringEntity(p, StandardCharsets.UTF_8);
+            httpPost.setEntity(stringEntity);
+
+            response = httpClient.execute(httpPost);
             int status = response.getStatusLine().getStatusCode();
             HttpEntity resEntity = response.getEntity();
             result = EntityUtils.toString(resEntity);
@@ -378,12 +437,51 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
         return result;
     }
 
-    public String facePlusPlusUploadPhoto (){
+    public String facePlusPlusUploadPhoto (String fileName, String cookie){
+        String url = URL_FACEPLUSPLUS + "/subject";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         String result = null;
+        try{
+            httpClient = HttpClients.createDefault();
+            HttpPost httpPost = new HttpPost(url);
+            httpPost.addHeader("cookie",cookie);
+            httpPost.addHeader("Content-Type","multipart/form-data");
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.addBinaryBody("upload_file", fileStream,
+                    ContentType.APPLICATION_OCTET_STREAM, URLEncoder.encode(fileName, "UTF-8"));
+            HttpEntity multipart = builder.build();
 
-        return null;
+            httpPost.setEntity(multipart);
+
+            response = httpClient.execute(httpPost);
+            int status = response.getStatusLine().getStatusCode();
+            HttpEntity resEntity = response.getEntity();
+            result = EntityUtils.toString(resEntity);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Get http result, url={}, result={}", url, result);
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Failed to get the http result, url={}", url, e);
+        } finally {
+            if(response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
     }
 
 
