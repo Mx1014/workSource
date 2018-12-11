@@ -383,15 +383,22 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setHolidayType(resp.getHolidayType());
 		dto.setNeedPay(resp.getNeedPay());
 
+		PriceRuleDTO dailyPrice = new PriceRuleDTO();
+		PriceRuleDTO halfdailyPrice = new PriceRuleDTO();
 		for (PriceRuleDTO priceRule :resp.getPriceRules()){
 			if (priceRule.getRentalType() ==RentalType.DAY.getCode()){
-				dto.setDailyPrice(priceRule.getWorkdayPrice());
-			} else if (priceRule.getRentalType() ==RentalType.HALFDAY.getCode()){
-				dto.setHalfdailyPrice(priceRule.getWorkdayPrice());
-			} else if (priceRule.getRentalType() ==RentalType.THREETIMEADAY.getCode()){
-				dto.setHalfdailyPrice(priceRule.getWorkdayPrice());
+				dailyPrice = priceRule;
+			}
+			if (priceRule.getRentalType() ==RentalType.HALFDAY.getCode()){
+				halfdailyPrice = priceRule;
+			}
+			if (priceRule.getRentalType() ==RentalType.THREETIMEADAY.getCode()){
+				halfdailyPrice = priceRule;
 			}
 		}
+		dto.setDailyPrice(dailyPrice.getWorkdayPrice());
+		dto.setHalfdailyPrice(halfdailyPrice.getWorkdayPrice());
+
 		return dto;
 	}
 
@@ -2858,16 +2865,18 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd2.setSourceId(r.getId());
 				cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
 				QueryDefaultRuleAdminResponse resp2 = rentalv2Service.queryDefaultRule(cmd2);
-				BigDecimal dailyPrice = new BigDecimal(0);
-				BigDecimal halfdailyPrice = new BigDecimal(0);
+				PriceRuleDTO dailyPrice = new PriceRuleDTO();
+				PriceRuleDTO halfdailyPrice = new PriceRuleDTO();
 				for (PriceRuleDTO priceRule :resp2.getPriceRules()){
 					if (priceRule.getRentalType() ==RentalType.DAY.getCode()){
-						dailyPrice = priceRule.getWorkdayPrice();
-					} else if (priceRule.getRentalType() ==RentalType.HALFDAY.getCode()){
-						halfdailyPrice = priceRule.getWorkdayPrice();
+						dailyPrice = priceRule;
+					}
+					if (priceRule.getRentalType() ==RentalType.HALFDAY.getCode()){
+						halfdailyPrice = priceRule;
 					}
 				}
-				dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?halfdailyPrice:dailyPrice);
+				dto.setMinUnitPrice(dailyPrice.getWorkdayPrice().compareTo(halfdailyPrice.getWorkdayPrice())>0?
+						halfdailyPrice.getWorkdayPrice():dailyPrice.getWorkdayPrice());
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null,null);
