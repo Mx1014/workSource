@@ -88,6 +88,7 @@ import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoCommand;
 import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoResponse;
 import com.everhomes.rest.rentalv2.PriceRuleType;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
+import com.everhomes.rest.rentalv2.RentalType;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
@@ -382,9 +383,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setNeedPay(resp.getNeedPay());
 
 		for (PriceRuleDTO priceRule :resp.getPriceRules()){
-			if (priceRule.getRentalType() ==1){
+			if (priceRule.getRentalType() ==RentalType.DAY.getCode()){
 				dto.setDailyPrice(priceRule.getWorkdayPrice());
-			} else if (priceRule.getRentalType() ==2){
+			} else if (priceRule.getRentalType() ==RentalType.HALFDAY.getCode()){
+				dto.setHalfdailyPrice(priceRule.getWorkdayPrice());
+			} else if (priceRule.getRentalType() ==RentalType.THREETIMEADAY.getCode()){
 				dto.setHalfdailyPrice(priceRule.getWorkdayPrice());
 			}
 		}
@@ -682,9 +685,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049600L, cmd.getAppId(), null,cmd.getCurrentProjectId());//预定详情权限
 		}
-		Integer pageSize = Integer.MAX_VALUE;
 		List<OfficeCubicleRentOrder> orders = this.officeCubicleProvider.searchCubicleOrders(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginTime(), cmd.getEndTime(),
-				new CrossShardListingLocator(), pageSize + 1, getNamespaceId(cmd.getNamespaceId()),cmd.getPaidType(),cmd.getPaidMode(),cmd.getRequestType(),cmd.getRentType(), cmd.getOrderStatus());
+				new CrossShardListingLocator(), cmd.getPageSize(), getNamespaceId(cmd.getNamespaceId()),cmd.getPaidType(),cmd.getPaidMode(),cmd.getRequestType(),cmd.getRentType(), cmd.getOrderStatus());
 
 		if (null == orders) {
 			return null;
@@ -2836,9 +2838,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				BigDecimal dailyPrice = new BigDecimal(0);
 				BigDecimal halfdailyPrice = new BigDecimal(0);
 				for (PriceRuleDTO priceRule :resp2.getPriceRules()){
-					if (priceRule.getRentalType() ==1){
+					if (priceRule.getRentalType() ==RentalType.DAY.getCode()){
 						dailyPrice = priceRule.getWorkdayPrice();
-					} else if (priceRule.getRentalType() ==2){
+					} else if (priceRule.getRentalType() ==RentalType.HALFDAY.getCode()){
 						halfdailyPrice = priceRule.getWorkdayPrice();
 					}
 				}
