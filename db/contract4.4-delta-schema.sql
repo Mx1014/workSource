@@ -32,6 +32,15 @@ ALTER TABLE `eh_contracts` ADD COLUMN `document_id` bigint NULL COMMENT '当前�
 -- AUTHOR: djm 20181206
 -- REMARK: 合同套打添加动态字段
 SET @id = (SELECT MAX(id) from eh_var_fields);
+-- 固定添加的动态字段
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'apartmentDeliveryTime', '房屋交付日期', 'Long', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'downPaymentRentTime', '首期租金开始日期', 'Long', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'monthlyMargin', '保证金月数', 'Integer', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'marginAmount', '保证金金额', 'BigDecimal', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'monthlyServiceCharge', '月服务费金额', 'BigDecimal', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'preAmount', '预付金额', 'BigDecimal', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'contractingPlace', '签约地点', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+-- 预留字段
 INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag1', '预留字段1', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
 INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag2', '预留字段2', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
 INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag3', '预留字段3', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
@@ -43,6 +52,15 @@ INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_t
 INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag9', '预留字段9', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
 INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag10', '预留字段10', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
 
+-- 固定添加的动态字段
+ALTER TABLE `eh_contracts` ADD COLUMN `apartment_delivery_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '房屋交付日期';
+ALTER TABLE `eh_contracts` ADD COLUMN `down_payment_rent_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '首期租金开始日期';
+ALTER TABLE `eh_contracts` ADD COLUMN `monthly_margin` INT DEFAULT '0' COMMENT '保证金月数';
+ALTER TABLE `eh_contracts` ADD COLUMN `margin_amount` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '保证金金额';
+ALTER TABLE `eh_contracts` ADD COLUMN `monthly_service_charge` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '月服务费金额';
+ALTER TABLE `eh_contracts` ADD COLUMN `pre_amount` DECIMAL (12, 2) DEFAULT '0.00' COMMENT '预付金额';
+ALTER TABLE `eh_contracts` ADD COLUMN `contracting_place` VARCHAR (64) DEFAULT NULL COMMENT '签约地点';
+-- 预留字段
 ALTER TABLE `eh_contracts` ADD COLUMN `string_tag1` VARCHAR (64) DEFAULT NULL COMMENT '预留字段1';
 ALTER TABLE `eh_contracts` ADD COLUMN `string_tag2` VARCHAR (64) DEFAULT NULL COMMENT '预留字段2';
 ALTER TABLE `eh_contracts` ADD COLUMN `string_tag3` VARCHAR (64) DEFAULT NULL COMMENT '预留字段3';
@@ -54,25 +72,27 @@ ALTER TABLE `eh_contracts` ADD COLUMN `string_tag8` VARCHAR (64) DEFAULT NULL CO
 ALTER TABLE `eh_contracts` ADD COLUMN `string_tag9` VARCHAR (64) DEFAULT NULL COMMENT '预留字段9';
 ALTER TABLE `eh_contracts` ADD COLUMN `string_tag10` VARCHAR (64) DEFAULT NULL COMMENT '预留字段10';
 
+
+
 -- AUTHOR: tangcen 2018年12月11日
 -- REMARK: 在合同模板表中添加用于记录合同模板初始化参数的字段
 ALTER TABLE `eh_contract_templates` ADD COLUMN `init_params` varchar(1024) COMMENT '合同模板初始化参数（计价条款、关联资产等的数目），前端会解析这个json';
 
 -- AUTHOR: 黄鹏宇 2018年12月11日
 -- REMARK: 新建字段
-Alter table eh_enterprise_customers add column legal_address varchar(512) comment '法定地址';
-Alter table eh_enterprise_customers add column legal_address_zip varchar(32) comment '法定地址邮编';
-Alter table eh_enterprise_customers add column postal_address varchar(512) comment '通讯地址';
-Alter table eh_enterprise_customers add column postal_address_zip varchar(32) comment '通讯地址邮编';
-Alter table eh_enterprise_customers add column taxpayer_identification_code varchar(32) comment '纳税人识别号';
-Alter table eh_enterprise_customers add column identify_card_number varchar(32) comment '身份证号码';
-Alter table eh_enterprise_customers add column opening_bank varchar(64) comment '开户行';
-Alter table eh_enterprise_customers add column opening_name varchar(64) comment '开户名';
-Alter table eh_enterprise_customers add column opening_account varchar(32) comment '开户行账号';
-Alter table eh_enterprise_customers add column string_tag17 varchar(32) comment '预留字段17';
-Alter table eh_enterprise_customers add column string_tag18 varchar(32) comment '预留字段18';
-Alter table eh_enterprise_customers add column string_tag19 varchar(32) comment '预留字段19';
-Alter table eh_enterprise_customers add column string_tag20 varchar(32) comment '预留字段20';
-Alter table eh_enterprise_customers add column string_tag21 varchar(32) comment '预留字段21';
-Alter table eh_enterprise_customers add column corp_legal_person_duty varchar(32) comment '法人代表职务';
+ALTER table eh_enterprise_customers add column legal_address varchar(512) comment '法定地址';
+ALTER table eh_enterprise_customers add column legal_address_zip varchar(32) comment '法定地址邮编';
+ALTER table eh_enterprise_customers add column postal_address varchar(512) comment '通讯地址';
+ALTER table eh_enterprise_customers add column postal_address_zip varchar(32) comment '通讯地址邮编';
+ALTER table eh_enterprise_customers add column taxpayer_identification_code varchar(32) comment '纳税人识别号';
+ALTER table eh_enterprise_customers add column identify_card_number varchar(32) comment '身份证号码';
+ALTER table eh_enterprise_customers add column opening_bank varchar(64) comment '开户行';
+ALTER table eh_enterprise_customers add column opening_name varchar(64) comment '开户名';
+ALTER table eh_enterprise_customers add column opening_account varchar(32) comment '开户行账号';
+ALTER table eh_enterprise_customers add column string_tag17 varchar(32) comment '预留字段17';
+ALTER table eh_enterprise_customers add column string_tag18 varchar(32) comment '预留字段18';
+ALTER table eh_enterprise_customers add column string_tag19 varchar(32) comment '预留字段19';
+ALTER table eh_enterprise_customers add column string_tag20 varchar(32) comment '预留字段20';
+ALTER table eh_enterprise_customers add column string_tag21 varchar(32) comment '预留字段21';
+ALTER table eh_enterprise_customers add column corp_legal_person_duty varchar(32) comment '法人代表职务';
 
