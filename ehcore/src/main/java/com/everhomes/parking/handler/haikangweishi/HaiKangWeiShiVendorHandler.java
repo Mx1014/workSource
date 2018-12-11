@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,6 +43,7 @@ import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.parking.handler.haikangweishi.ErrorCodeEnum;
 import com.everhomes.rest.parking.handler.haikangweishi.HkwsThirdResponse;
+import com.everhomes.rest.parking.handler.haikangweishi.ParkingInfo;
 import com.everhomes.rest.parking.handler.haikangweishi.TempFeeInfo;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
@@ -59,7 +61,7 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 	private final String GET_TEMP_FEE_ORDER_URL = "/openapi/service/pms/charge/getChargeBill";
 	private final String NOTIFY_TEMP_FEE_RECHARGE = "/openapi/service/pms/charge/payVehilceBill";
 	private final String GET_DEFAULT_USER_UUID = "/openapi/service/base/user/getDefaultUserUuid";
-	
+	private final String GET_PARKING_UUID = "/openapi/service/pms/res/getParkingInfos";
 	@Autowired
 	BigCollectionProvider bigCollectionProvider;
 
@@ -88,13 +90,13 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 		TempFeeInfo tempFeeInfo = getParkingTempFee(plateNumber);
-		if (null == tempFeeInfo) {
+		if (null == tempFeeInfo || null == tempFeeInfo.getEnterTime()) { //这里需要做特殊判断
 			return dto;
 		}
 
 		dto.setPrice(new BigDecimal(tempFeeInfo.getCost()));
 		dto.setPlateNumber(plateNumber);
-		Timestamp entryTime = DateUtil.parseTimestamp(tempFeeInfo.getEnterTime());
+		Date entryTime =  DateUtil.strToDate(tempFeeInfo.getEnterTime(), "yyyyMMddHHmmss");
 		dto.setEntryTime(entryTime.getTime());
 		long now = System.currentTimeMillis();
 		dto.setPayTime(now);
@@ -167,12 +169,12 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 
 	private HkwsThirdResponse getParkingTempFeePost(String plateNumber) {
 		JSONObject json = new JSONObject();
-		json.put("parkUuid", getParkUuid());
+		json.put("parkUuid", getParkingUuid(false));
 		json.put("plateNo", plateNumber);
 		return post(GET_TEMP_FEE_ORDER_URL, json);
 	}
 
-	private String getOpUserUuidPost() {
+	public String getOpUserUuidPost() {
 		JSONObject json = new JSONObject();
 		json.put("appkey", getAppyKey());
 		json.put("time", System.currentTimeMillis());// 设置时间参数
@@ -189,7 +191,7 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 		return resp.getData();
 	}
 
-	private HkwsThirdResponse post(String urlSuffix, JSONObject json) {
+	public HkwsThirdResponse post(String urlSuffix, JSONObject json) {
 		json.put("appkey", getAppyKey());
 		json.put("time", System.currentTimeMillis());// 设置时间参数
 		json.put("opUserUuid", getOpUserUuid(false));// 设置操作用户UUID
@@ -208,37 +210,37 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 		return resp;
 	}
 
-	private boolean isSuccess(HkwsThirdResponse resp) {
+	public boolean isSuccess(HkwsThirdResponse resp) {
 		if (null != resp && ErrorCodeEnum.SUCCESS.getCode().equals(resp.getErrorCode())) {
 			return true;
 		}
 		return false;
 	}
 
-	private String convetUrl(String urlSuffix, JSONObject json) {
+	public String convetUrl(String urlSuffix, JSONObject json) {
 		return getHost() + urlSuffix + "?token=" + MD5Utils.getMD5(urlSuffix + json.toString() + getSecretKey());
 	}
 
-	private String getSpecificConfigPrefix() {
+	public String getSpecificConfigPrefix() {
 		return getBaseConfigPrefix() + getParkingVendorName() + ".";
 	}
 
-	private String getBaseConfigPrefix() {
+	public String getBaseConfigPrefix() {
 		return "parking.hkws.";
 	}
 
-	private String getHost() {
+	public String getHost() {
 		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(),
-				getSpecificConfigPrefix() + "host", "http://10.1.10.37:80");
+				getSpecificConfigPrefix() + "host", "");
 	}
 
-	private String getSecretKey() {
+	public String getSecretKey() {
 		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(),
-				getSpecificConfigPrefix() + "secretKey", "71aaeaf9687b48f5bc95ae3f8cf91d08");
+				getSpecificConfigPrefix() + "secretKey", "");
 	}
 
-	private String getOpUserUuid(boolean forcedUpdate) {
-		
+	public String getOpUserUuid(boolean forcedUpdate) {
+
 		String key = getOpUserUuidRedisKey();
 		if (!forcedUpdate) {
 			String uuid =  getRedisValue(key);
@@ -255,17 +257,68 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 		setRedisValue(key, newUuid, 365, TimeUnit.DAYS);
 		return newUuid;
 	}
-	
+
 	private String getOpUserUuidRedisKey() {
 		return getSpecificConfigPrefix() + "opUserUuid";
 	}
 
-	private String getAppyKey() {
+
+	private String getParkingUuid(boolean forcedUpdate) {
+
+		String key = getParkingUuidRedisKey();
+		if (!forcedUpdate) {
+			String uuid =  getRedisValue(key);
+			if (null!= uuid) {
+				return uuid;
+			}
+		}
+
+		String newUuid = getParkingUuidPost();
+		if (StringUtils.isBlank(newUuid)) {
+			throwError(ParkingErrorCode.ERROR_HKWS_FETCH_PARKING_UUID, "parkUuid fetch error");
+		}
+
+		setRedisValue(key, newUuid, 365, TimeUnit.DAYS);
+		return newUuid;
+	}
+
+	private String getParkingUuidPost() {
+		HkwsThirdResponse resp = post(GET_PARKING_UUID, new JSONObject());
+		if (!isSuccess(resp) || resp.isEmpty()) {
+			return null;
+		}
+
+		List<ParkingInfo> parkInfos = JSONArray.parseArray(resp.getData(), ParkingInfo.class);
+		if (CollectionUtils.isEmpty(parkInfos)) {
+			return null;
+		}
+
+		String parkingLotName = parkingProvider.findParkingLotNameByVendorName(UserContext.getCurrentNamespaceId(),
+				getParkingVendorName());
+		if (null == parkingLotName) {
+			return null;
+		}
+
+		for (ParkingInfo parkInfo : parkInfos) {
+			if (parkingLotName.equals(parkInfo.getParkName())) {
+				return parkInfo.getParkUuid();
+			}
+		}
+
+		return null;
+	}
+
+
+	private String getParkingUuidRedisKey() {
+		return getSpecificConfigPrefix() + "parkUuid";
+	}
+
+	public String getAppyKey() {
 		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(), getSpecificConfigPrefix() + "appKey",
 				"028c85ec");
 	}
-	
-	private String getParkUuid() {
+
+	public String getParkUuid() {
 		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(), getSpecificConfigPrefix() + "parkUuid",
 				"06dfa3ed3a5a4309bd087fd2625ea00e");
 	}
@@ -273,15 +326,15 @@ public abstract class HaiKangWeiShiVendorHandler extends DefaultParkingVendorHan
 	private void throwError(int errorCode, String errorMsg) {
 		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE_HKWS, errorCode, errorMsg);
 	}
-	
+
 	private String getRedisValue(String key) {
 		return  getRedisTemplate(key).opsForValue().get(key);
 	}
-	
+
 	private void setRedisValue(String key, String value, long time, TimeUnit timeUnit) {
 		getRedisTemplate(key).opsForValue().set(key, value, time, timeUnit);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private RedisTemplate<String, String> getRedisTemplate(String key) {
 		Accessor acc = bigCollectionProvider.getMapAccessor(key, "");

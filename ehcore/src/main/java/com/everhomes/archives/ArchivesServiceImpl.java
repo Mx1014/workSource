@@ -1625,21 +1625,15 @@ public class ArchivesServiceImpl implements ArchivesService {
     }*/
 
     @Override
-    public List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback) {
+    public List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, List<Long> departmentIds, ListingQueryBuilderCallback queryBuilderCallback) {
         List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), organizationId, (locator1, query) -> {
             queryBuilderCallback.buildCondition(locator, query);
-            if (departmentId != null) {
-                Organization department = organizationProvider.findOrganizationById(departmentId);
-
-    			List<String> groupTypes = new ArrayList<>();
-    			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-    			groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-    			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-                List<Organization> subDeparts = organizationProvider.listOrganizationByGroupTypesAndPath(department.getPath() + "%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+            if (CollectionUtils.isNotEmpty(departmentIds)) {
                 List<Long> subDptIds = new ArrayList<>();
-                subDeparts.forEach(r -> {
-                	subDptIds.add(r.getId());
-                });
+                for (Long departmentId : departmentIds) {
+                    addSubDptIds(departmentId, subDptIds);
+                }
+
                 List<Long> workGroups = organizationProvider.listOrganizationPersonnelDetailIdsByDepartmentIds(subDptIds);
                 List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentIds(subDptIds);
                 Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
@@ -1654,6 +1648,11 @@ public class ArchivesServiceImpl implements ArchivesService {
         });
 
         //  get the department name.
+        if (processEmployee(employees)) return employees;
+        return new ArrayList<>();
+    }
+
+    private boolean processEmployee(List<OrganizationMemberDetails> employees) {
         if (employees != null && employees.size() > 0) {
             for (OrganizationMemberDetails employee : employees) {
                 if (employee.getEmployeeStatus().equals(EmployeeStatus.DISMISSAL.getCode())) {
@@ -1663,8 +1662,45 @@ public class ArchivesServiceImpl implements ArchivesService {
                 } else
                     employee.setDepartmentName(convertToOrgNames(getEmployeeDepartment(employee.getId())));
             }
-            return employees;
+            return true;
         }
+        return false;
+    }
+
+    @Override
+    public void addSubDptIds(Long departmentId, List<Long> subDptIds) {
+        Organization department = organizationProvider.findOrganizationById(departmentId);
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        List<Organization> subDeparts = organizationProvider.listOrganizationByGroupTypesAndPath(department.getPath() + "%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+        subDeparts.forEach(r -> {
+            subDptIds.add(r.getId());
+        });
+    }
+
+    @Override
+    public List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback) {
+        List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), organizationId, (locator1, query) -> {
+            queryBuilderCallback.buildCondition(locator, query);
+            if (departmentId != null) {
+                List<Long> subDptIds = new ArrayList<>();
+                addSubDptIds(departmentId, subDptIds);
+                List<Long> workGroups = organizationProvider.listOrganizationPersonnelDetailIdsByDepartmentIds(subDptIds);
+                List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentIds(subDptIds);
+                Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
+                Condition con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
+                if (workGroups != null)
+                    con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(workGroups);
+                if (dismissGroups != null)
+                    con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(dismissGroups);
+                query.addConditions(con1.or(con2));
+            }
+            return query;
+        });
+
+        if (processEmployee(employees)) return employees;
         return new ArrayList<>();
     }
 
@@ -1872,6 +1908,37 @@ public class ArchivesServiceImpl implements ArchivesService {
         );
     }
 
+    /**
+     * 校验是否离职
+     * created by wuhan
+     */
+    @Override
+    public boolean checkDismiss(Long userId, Long orgId) {
+        OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetId(userId, orgId);
+        return checkDismiss(member);
+
+    }
+
+    /**
+     * 校验是否离职
+     * created by wuhan
+     */
+    @Override
+    public boolean checkDismiss(OrganizationMemberDetails member) {
+//        if (null != member.getDismissTime()) {
+//            if (DateHelper.currentGMTTime().after(member.getDismissTime())) {
+//                return true;
+//            }
+//        }
+        if (null == member) {
+            return true;
+        }
+        if (EmployeeStatus.fromCode(member.getEmployeeStatus()) == EmployeeStatus.DISMISSAL) {
+            return true;
+        }
+        return false;
+    }
+    
     @Override
     public ArchivesNotificationDTO getArchivesNotification(ArchivesNotificationCommand cmd){
         Integer namespaceId = cmd.getNamespaceId();

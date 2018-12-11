@@ -134,7 +134,7 @@ public class UserProviderImpl implements UserProvider {
         dao.insert(user);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUsers.class, null);
-        kafkaTemplate.send("user-create-core-event", 0, String.valueOf(0), StringHelper.toJsonString(user));
+        kafkaTemplate.send("user-create-core-event", String.valueOf(System.nanoTime()), StringHelper.toJsonString(user));
     }
 
     @Override
@@ -174,7 +174,7 @@ public class UserProviderImpl implements UserProvider {
         dao.update(user);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
-        kafkaTemplate.send("user-update-core-event", 0, String.valueOf(0), StringHelper.toJsonString(user));
+        kafkaTemplate.send("user-update-core-event", String.valueOf(System.nanoTime()), StringHelper.toJsonString(user));
 
     }
 
@@ -194,7 +194,8 @@ public class UserProviderImpl implements UserProvider {
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
             @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
-            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}"),
+            @CacheEvict(value="UserIdentifier-NamespaceAndToken", key="{#userIdentifier.namespaceId, #userIdentifier.identifierToken}" )})
     @Override
     public void updateIdentifierFromUnite(UserIdentifier userIdentifier) {
         assert(userIdentifier.getId() != null);
@@ -397,14 +398,15 @@ public class UserProviderImpl implements UserProvider {
         dao.insert(userIdentifier);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserIdentifiers.class, null);
-        kafkaTemplate.send("userIdentifier-create-core-event", 0, String.valueOf(0), StringHelper.toJsonString(userIdentifier));
+        kafkaTemplate.send("userIdentifier-create-core-event", String.valueOf(System.nanoTime()), StringHelper.toJsonString(userIdentifier));
 
     }
 
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
             @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
-            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}"),
+            @CacheEvict(value="UserIdentifier-NamespaceAndToken", key="{#userIdentifier.namespaceId, #userIdentifier.identifierToken}" )})
     @Override
     public void updateIdentifier(UserIdentifier userIdentifier) {
         assert(userIdentifier.getId() != null);
@@ -417,14 +419,15 @@ public class UserProviderImpl implements UserProvider {
         dao.update(userIdentifier);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());
-        kafkaTemplate.send("userIdentifier-update-core-event", 0, String.valueOf(0), StringHelper.toJsonString(userIdentifier));
+        kafkaTemplate.send("userIdentifier-update-core-event", String.valueOf(System.nanoTime()), StringHelper.toJsonString(userIdentifier));
 
     }
 
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
             @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
-            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}"),
+            @CacheEvict(value="UserIdentifier-NamespaceAndToken", key="{#userIdentifier.namespaceId, #userIdentifier.identifierToken}" )})
     @Override
     public void deleteIdentifier(UserIdentifier userIdentifier) {
         assert(userIdentifier.getId() != null);
@@ -435,7 +438,7 @@ public class UserProviderImpl implements UserProvider {
         dao.delete(userIdentifier);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());
-        kafkaTemplate.send("userIdentifier-delete-core-event", 0, String.valueOf(0), StringHelper.toJsonString(userIdentifier));
+        kafkaTemplate.send("userIdentifier-delete-core-event", String.valueOf(System.nanoTime()), StringHelper.toJsonString(userIdentifier));
 
     }
 
@@ -665,6 +668,7 @@ public class UserProviderImpl implements UserProvider {
      * @param identifierToken
      * @return
      */
+    @Cacheable(value = "UserIdentifier-NamespaceAndToken", key="{#namespaceId, #identifierToken}", unless="#result == null")
     @Override
     public UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken) {
         final List<UserIdentifier> result = new ArrayList<>();
@@ -2132,6 +2136,29 @@ public class UserProviderImpl implements UserProvider {
             return null;
         });
         return user;
+    }
+
+    @Override
+    public List<UserDTO> listUserInfoByIdentifierToken(Integer namespaceId, List<String> identifierTokens) {
+        List<UserDTO> userDTOList = new ArrayList<>();
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //表eh_users和表eh_user_identifiers进行联查
+        SelectQuery<Record> query = context.select().from(Tables.EH_USERS).getQuery();
+        query.addJoin(Tables.EH_USER_IDENTIFIERS,JoinType.JOIN,Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+        //添加查询条件
+        query.addConditions(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.in(identifierTokens));
+        query.fetch().map( r ->{
+            UserDTO user = new UserDTO();
+            user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+            user.setAccountName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
+            user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            user.setId(r.getValue(Tables.EH_USERS.ID));
+            userDTOList.add(user);
+            return null;
+        });
+        return userDTOList;
     }
 
     /**

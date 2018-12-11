@@ -1,6 +1,7 @@
 package com.everhomes.rentalv2;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
@@ -106,7 +107,7 @@ public interface Rentalv2Provider {
 	List<RentalTimeInterval> queryRentalTimeIntervalByOwner(String resourceType, String ownerType,
 			Long ownerId);
 
-	List<RentalCloseDate> queryRentalCloseDateByOwner(String resourceType, String ownerType, Long ownerId);
+	List<RentalCloseDate> queryRentalCloseDateByOwner(String resourceType, String ownerType, Long ownerId, Date startTime, Date endTime);
 
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String resourceType, String ownerType, Long ownerId,Byte attachmentType);
 

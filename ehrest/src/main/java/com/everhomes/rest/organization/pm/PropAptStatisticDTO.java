@@ -15,8 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>unsaleCount: 待售总数</li>
  * <li>occupiedCount: 被占用总数</li>
  * <li>defaultCount: 其他未知总数</li>
- * <li>SignedUpCount: 待签约总数</li>
- * <li>defaultCount: 待接房总数</li>
+ * <li>signedUpCount: 待签约总数</li>
+ * <li>waitingRoomCount: 待接房总数</li>
  * </ul>
  */
 public class PropAptStatisticDTO {

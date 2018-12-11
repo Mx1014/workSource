@@ -256,22 +256,52 @@ public class RemindServiceImpl implements RemindService  {
                 remindProvider.deleteRemindCategoryDefaultSharesByCategoryId(existRemindCategory.getId());
                 remindProvider.batchCreateRemindCategoryDefaultShare(buildDefaultShares(cmd.getShareToMembers(), existRemindCategory.getId()));
                 //给修改的category里面新增的共享人发信息
-                if(!CollectionUtils.isEmpty(cmd.getShareToMembers())){
-                	List<Remind> reminds = remindProvider.findRemindsByCategoryId(existRemindCategory.getId());
-                	if(CollectionUtils.isEmpty(reminds))
-                		return null;
-                	for(ShareMemberDTO shareToMember : cmd.getShareToMembers()){
-                		if(!checkCategoryShareExists(categoryShares, shareToMember)){
-                			for(Remind remind : reminds){
+
+            	List<Remind> reminds = remindProvider.findRemindsByCategoryId(existRemindCategory.getId());
+            	//分类没有关联提醒,那就直接返回
+            	if(CollectionUtils.isEmpty(reminds))
+            		return null;
+            	Map<Long,List<RemindShare>> remindsShares = new HashMap<>();
+                for(Remind remind : reminds){
+	                if(!CollectionUtils.isEmpty(cmd.getShareToMembers())){
+	                	for(ShareMemberDTO shareToMember : cmd.getShareToMembers()){
+	                		//判断是否在旧的分类共享人
+	                		if(!checkCategoryShareExists(categoryShares, shareToMember)){
+                				List<RemindShare> shares = findRemindShare(remindsShares, remind.getId());
+                				//判断是否在手选的共享人中
+                				RemindShare share = findShareRemindInShares(shares, shareToMember);
+                				if(share != null){
+                					remindProvider.deleteRemindShare(share);
+                					continue;
+                				}
                 				if(remind.getStatus().equals(RemindStatus.DONE.getCode())){
                 					continue;
                 				}
 	                			Remind trackRemind = convertRemindShareToMSGRemind(remind, shareToMember);
 	                            sendTrackMessageOnBackGround(remind.getPlanDescription(), Arrays.asList(trackRemind), RemindModifyType.CREATE_SUBSCRIBE);
-                			}
-                		}
-                	}
-                } 
+	                			
+	                		}
+	                	}
+	                }
+    				List<RemindShare> shares = findRemindShare(remindsShares, remind.getId());
+	                int shareCount = 0;
+	                String shareName = "";
+	                if (!CollectionUtils.isEmpty(cmd.getShareToMembers())) {
+	                	if("".equals(shareName)){
+	                		shareName = cmd.getShareToMembers().get(0).getSourceName();
+	                	}
+	                    shareCount += cmd.getShareToMembers().size();
+	                }
+	                
+	                if (!CollectionUtils.isEmpty(shares)) {
+	                	shareName = shares.get(0).getSharedSourceName();
+	                    shareCount += shares.size();
+	                }
+	                String remindShareShortDisplay = String.format("%s等%d人", shareName, shareCount);
+	                remind.setShareShortDisplay(remindShareShortDisplay);
+	                remind.setShareCount(shareCount);
+	                remindProvider.updateRemind(remind);
+                }
 
                 return null;
             });
@@ -279,8 +309,31 @@ public class RemindServiceImpl implements RemindService  {
         }
         return Long.valueOf(0);
     }
+ 
+	private RemindShare findShareRemindInShares(List<RemindShare> shares, ShareMemberDTO shareToMember) {
+		if (CollectionUtils.isEmpty(shares)) {
+            return null;
+        }
+    	for(RemindShare share: shares){
+    		if(share.getSharedSourceType().equals(shareToMember.getSourceType()) && share.getSharedSourceId().equals(shareToMember.getSourceId()))
+    			return share;
+    	}
+		return null;
+	}
 
-    private boolean checkCategoryShareExists(List<RemindCategoryDefaultShare> categoryShares,
+	private List<RemindShare> findRemindShare(Map<Long, List<RemindShare>> remindsShares, Long remindId) {
+		List<RemindShare> result = remindsShares.get(remindId);
+		if(null == result){
+			result = remindProvider.findShareMemberDetailsByRemindId(remindId);
+			if(result == null){
+				result = new ArrayList<>();
+			}
+			remindsShares.put(remindId, result);
+		}
+		return result;
+	}
+
+	private boolean checkCategoryShareExists(List<RemindCategoryDefaultShare> categoryShares,
 			ShareMemberDTO shareToMember) {
     	if (CollectionUtils.isEmpty(categoryShares)) {
             return false;
@@ -678,7 +731,7 @@ public class RemindServiceImpl implements RemindService  {
         }
         if (!CollectionUtils.isEmpty(cmd.getShareToMembers())) {
         	if("".equals(shareName)){
-        		shareName = shares.get(0).getSharedContractName();
+        		shareName = cmd.getShareToMembers().get(0).getSourceName();
         	}
             shareCount += cmd.getShareToMembers().size();
         }

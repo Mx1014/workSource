@@ -184,6 +184,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -1745,12 +1749,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
 
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
-            try {
-                // 这个代码只是为了修复错误的数据，后期删除
-                LOGGER.debug("Fetch user: {}", fetchUser(login.getUserId(), login.getNamespaceId()));
-            } catch (Exception e) {
-                LOGGER.error("Fetch user error", e);
-            }
             return true;
         } else {
             // 去统一用户那边检查登录状态
@@ -3609,9 +3607,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        if (!StringUtils.isEmpty(cmd.getSceneToken())) {
-            checkSceneToken(userId, cmd.getSceneToken());
-        }
+//        if (!StringUtils.isEmpty(cmd.getSceneToken())) {
+//            checkSceneToken(userId, cmd.getSceneToken());
+//        }
 
         GetUserRelatedAddressResponse response = new GetUserRelatedAddressResponse();
         List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
@@ -4835,6 +4833,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                                     log.getOwnerUid(), userIdentifier.getIdentifierToken(),
                                     userIdentifier.getRegionCode(), log.getIdentifierToken(), log.getRegionCode());
                             resetUserIdentifier(currUser, vo);
+                            // 如果该用户有组织成员信息则更新其中的手机号码字段信息
+                            archivesService.updateArchivesEmployeeContact(namespaceId, currUser.getId(), log.getIdentifierToken());
                             return true;
                         });
                     } else {
@@ -5304,9 +5304,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     public SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd) {
         // 1.通过 userId 与 organizationId 去找到 detailId
         // 2.根据 detailId 调用之前的获取信息接口
-        List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+    	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getUserId(), cmd.getOrganizationId());
         GetRelevantContactInfoCommand command = new GetRelevantContactInfoCommand();
-        command.setDetailId(members.get(0).getDetailId());
+        command.setDetailId(detail == null ? null : detail.getId());
         command.setOrganizationId(cmd.getOrganizationId());
         SceneContactV2DTO dto = this.getRelevantContactInfo(command);
         if (dto != null)
@@ -6303,17 +6303,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     newLogin.setDeviceIdentifier(cmd.getDeviceIdentifier());
                     accessor.putMapValueObject(String.valueOf(newLogin.getLoginId()), newLogin);
                 }
-
             }
-
-            List<Border> borders = this.borderProvider.listAllBorders();
-            List<String> borderStrs = borders.stream().map((Border border) -> {
-                return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
-            }).collect(Collectors.toList());
-
-            resp.setAccessPoints(borderStrs);
-            resp.setContentServer(contentServerService.getContentServer());
         }
+
+        List<Border> borders = this.borderProvider.listAllBorders();
+        List<String> borderStrs = borders.stream().map((Border border) -> {
+            return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
+        }).collect(Collectors.toList());
+
+        resp.setAccessPoints(borderStrs);
+        resp.setContentServer(contentServerService.getContentServer());
 
         Long l = configurationProvider.getLongValue(namespaceId, ConfigConstants.PAY_PLATFORM, 0L);
         resp.setPaymentPlatform(l);
@@ -6343,7 +6342,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		List<IndexDTO> indexDtos = launchPadService.listIndexDtos(namespaceId, userId);
 
 		resp.setIndexDtos(indexDtos);
-
+		
+		// 客户端地址模式配置, add by momoubin,18/11/09
+		resp.setClientAddressMode(this.configurationProvider.getIntValue(namespaceId, ConfigConstants.CLIENT_ADDRESS_MODE, 0));
+		resp.setAuthPopupConfig(Byte.valueOf(this.configurationProvider.getValue(namespaceId, "authPopupConfig", "1")));
         return resp;
     }
 
@@ -6892,7 +6894,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 					//根据公司id来查询eh_organization_details表中的信息，拿到公司的简称
 					OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
 					if(organizationDetail != null){
-						dto.setAliasName(organizationDetail.getDisplayName());
+						//add by momoubin,2018/11/28;由于一些企业detail信息的displayName是“”而不是null，导致了传给前端为“”，客户端优先使用aliasName代替name，导致无法显示。
+						dto.setAliasName((StringUtils.isBlank(organizationDetail.getDisplayName()))?null:(organizationDetail.getDisplayName()));
 					}
 					dto.setStatus(member.getStatus());
 					dto.setWorkPlatformFlag(org.getWorkPlatformFlag());
@@ -7538,14 +7541,17 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     @Override
     public void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText) {
-        User user = this.userProvider.findUserById(userId);
-        if(user == null){
-            LOGGER.error("Unable to find the user , userId= {}",  userId);
-            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
-        }
-        user.setVipLevel(vipLevel);
-        user.setVipLevelText(vipLevelText);
-        userProvider.updateUser(user);
+	    // 通过统一用户改 vip 信息
+	    sdkUserService.updateUserVipLevel(userId, vipLevel, vipLevelText);
+
+        // User user = this.userProvider.findUserById(userId);
+        // if(user == null){
+        //     LOGGER.error("Unable to find the user , userId= {}",  userId);
+        //     throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
+        // }
+        // user.setVipLevel(vipLevel);
+        // user.setVipLevelText(vipLevelText);
+        // userProvider.updateUser(user);
     }
 
 
@@ -7580,24 +7586,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             res.setErrorMsg("phones is null");
             return res ;
         }
+        List<UserDTO> userDTOList = this.userProvider.listUserInfoByIdentifierToken(cmd.getNamespaceId(), cmd.getPhones());
         for(String phone : phones){
             FindUsersByPhonesDTO dto = new FindUsersByPhonesDTO() ;
             dto.setPhone(phone);
-            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
-            if (userIdentifier != null) {
-                User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-                if (user != null) {
-                    user.setIdentifierToken(userIdentifier.getIdentifierToken());
-                    UserDTO userDTO = ConvertHelper.convert(user, UserDTO.class);
-                    //查询有结果，保存
+            Byte resultCode = TrueOrFalseCode.FALSE.getCode();
+            for (UserDTO userDTO : userDTOList) {
+                if (phone.equals(userDTO.getIdentifierToken())) {
                     dto.setUserDTO(userDTO);
-                    dto.setResult(TrueOrFalseCode.TRUE.getCode());
-                }else  {
-                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
+                    resultCode = TrueOrFalseCode.TRUE.getCode();
                 }
-            } else if(TrueOrFalseCode.FALSE.getCode().equals(cmd.getClear())){//若是不消除查询失败的数据才返回这些
-                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
             }
+            dto.setResult(resultCode);
             if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
                     || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回
                     && !TrueOrFalseCode.TRUE.getCode().equals(cmd.getClear()))){
@@ -7636,6 +7636,53 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
         response.setInfoUrl(StringHelper.interpolate(infoUrl,infoUrlParam));
         return response;
+    }
+
+    @Override
+    public void fixUserSync(FixUserSyncCommand cmd) {
+        new Thread(() -> {
+            CrossShardListingLocator locator = new CrossShardListingLocator();
+
+            int count = 1000;
+            do {
+                if (count < 0) {
+                    break;
+                }
+                count--;
+
+                List<User> users = userProvider.queryUsers(locator, 2000, (locator1, query) -> {
+                    if (cmd.getNamespaceId() != null) {
+                        query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                    }
+                    if (StringUtils.isNotEmpty(cmd.getStartDate())) {
+                        TemporalAccessor startDate = DateTimeFormatter.ofPattern("yyyyMMdd").parse(cmd.getStartDate());
+                        query.addConditions(Tables.EH_USERS.CREATE_TIME.ge(Timestamp.valueOf(LocalDate.from(startDate).atTime(LocalTime.MIN))));
+                    } else {
+                        query.addConditions(Tables.EH_USERS.CREATE_TIME.ge(Timestamp.valueOf(LocalDateTime.of(2018, 10, 29, 0, 0))));
+                    }
+                    if (StringUtils.isNotEmpty(cmd.getEndDate())) {
+                        TemporalAccessor endDate = DateTimeFormatter.ofPattern("yyyyMMdd").parse(cmd.getEndDate());
+                        query.addConditions(Tables.EH_USERS.CREATE_TIME.lt(Timestamp.valueOf(LocalDate.from(endDate).atTime(LocalTime.MAX))));
+                    }
+                    return query;
+                });
+                for (User user : users) {
+                    try {
+                        userProvider.updateUser(user);
+                        List<UserIdentifier> userIdentifiers = userProvider.listUserIdentifiersOfUser(user.getId());
+                        if (userIdentifiers != null) {
+                            userIdentifiers.forEach(iden -> {
+                                userProvider.updateIdentifier(iden);
+                                LOGGER.info("Fix user sync, identifier={}", iden);
+                            });
+                        }
+                        LOGGER.info("Fix user sync, user={}", user);
+                    } catch (Exception e) {
+                        LOGGER.error("fixUserInfoOnceTime error, user="+user, e);
+                    }
+                }
+            } while (locator.getAnchor() != null);
+        }, "fixUserInfoOnceTime").start();
     }
 
     /*******************统一用户同步数据**********************/
@@ -7713,8 +7760,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             if (namespace != null) {
                 //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
                 //所以这里加个判断，是新增还是更新.
-                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(
-                        userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                UserIdentifier existsIdentifier = this.userProvider.findIdentifierById(userIdentifier.getId());
                 if (existsIdentifier != null) {
                     if (existsIdentifier.getUpdateVersion() < userIdentifier.getUpdateVersion()) {
                         this.userProvider.updateIdentifierFromUnite(userIdentifier);

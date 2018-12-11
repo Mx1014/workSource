@@ -146,7 +146,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         LOGGER.info("create customer: {}", StringHelper.toJsonString(customer));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
         customer.setId(id);
-        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(customer.getCreateTime() == null)
+            customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         customer.setStatus(CommonStatus.ACTIVE.getCode());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -2627,12 +2628,14 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         return context.select(DSL.max(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME))
                 .from(Tables.EH_CUSTOMER_TRACKINGS)
                 .where(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .and(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId))
                 .and(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_SOURCE.eq(customerSource))
                 .fetchAnyInto(Timestamp.class);
     }
 
     @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor, Integer namespaceId){
+
         List<CreateOrganizationAdminCommand> dtoList = new ArrayList<>();
         if(nextPageAnchor == null){
             nextPageAnchor = 0l;
@@ -2666,7 +2669,6 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         });
         return dtoList;
     }
-
 
     @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor){

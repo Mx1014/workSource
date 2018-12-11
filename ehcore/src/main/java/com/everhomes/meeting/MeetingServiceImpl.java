@@ -16,8 +16,6 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
@@ -29,23 +27,31 @@ import com.everhomes.rest.meeting.AttachmentOwnerType;
 import com.everhomes.rest.meeting.CancelMeetingReservationCommand;
 import com.everhomes.rest.meeting.CreateMeetingRecordCommand;
 import com.everhomes.rest.meeting.CreateOrUpdateMeetingRoomCommand;
+import com.everhomes.rest.meeting.CreateOrUpdateMeetingTemplateCommand;
 import com.everhomes.rest.meeting.DeleteMeetingRecordCommand;
 import com.everhomes.rest.meeting.DeleteMeetingRoomCommand;
+import com.everhomes.rest.meeting.DeleteMeetingTemplateCommand;
 import com.everhomes.rest.meeting.EndMeetingReservationCommand;
 import com.everhomes.rest.meeting.GetMeetingRecordDetailCommand;
 import com.everhomes.rest.meeting.GetMeetingReservationDetailCommand;
 import com.everhomes.rest.meeting.GetMeetingReservationSimpleByTimeUnitCommand;
 import com.everhomes.rest.meeting.GetMeetingRoomDetailCommand;
 import com.everhomes.rest.meeting.GetMeetingRoomSimpleInfoCommand;
+import com.everhomes.rest.meeting.GetMeetingTemplateCommand;
 import com.everhomes.rest.meeting.ListMeetingRoomDetailInfoCommand;
 import com.everhomes.rest.meeting.ListMeetingRoomDetailInfoResponse;
 import com.everhomes.rest.meeting.ListMeetingRoomSimpleInfoCommand;
 import com.everhomes.rest.meeting.ListMeetingRoomSimpleInfoResponse;
 import com.everhomes.rest.meeting.ListMyMeetingRecordsCommand;
 import com.everhomes.rest.meeting.ListMyMeetingRecordsResponse;
+import com.everhomes.rest.meeting.ListMyMeetingTemplateCommand;
+import com.everhomes.rest.meeting.ListMyMeetingTemplateResponse;
 import com.everhomes.rest.meeting.ListMyMeetingsCommand;
 import com.everhomes.rest.meeting.ListMyMeetingsResponse;
+import com.everhomes.rest.meeting.ListMyUnfinishedMeetingCommand;
+import com.everhomes.rest.meeting.ListMyUnfinishedMeetingResponse;
 import com.everhomes.rest.meeting.MeetingAttachmentDTO;
+import com.everhomes.rest.meeting.MeetingDashboardDTO;
 import com.everhomes.rest.meeting.MeetingGeneralFlag;
 import com.everhomes.rest.meeting.MeetingInvitationDTO;
 import com.everhomes.rest.meeting.MeetingMemberSourceType;
@@ -62,6 +68,8 @@ import com.everhomes.rest.meeting.MeetingRoomReservationDTO;
 import com.everhomes.rest.meeting.MeetingRoomReservationTimeDTO;
 import com.everhomes.rest.meeting.MeetingRoomSimpleInfoDTO;
 import com.everhomes.rest.meeting.MeetingRoomStatus;
+import com.everhomes.rest.meeting.MeetingTemplateDTO;
+import com.everhomes.rest.meeting.QueryMyMeetingTemplateCondition;
 import com.everhomes.rest.meeting.UpdateMeetingRecordCommand;
 import com.everhomes.rest.meeting.UpdateMeetingReservationCommand;
 import com.everhomes.rest.messaging.ChannelType;
@@ -72,16 +80,15 @@ import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.RouterMetaObject;
+import com.everhomes.rest.organization.EmployeeStatus;
 import com.everhomes.scheduler.MeetingRemindScheduleJob;
 import com.everhomes.scheduler.MeetingRoomRecoveryScheduleJob;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhMeetingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhMeetingInvitations;
 import com.everhomes.server.schema.tables.pojos.EhMeetingReservations;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.techpark.punch.PunchProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
@@ -93,9 +100,6 @@ import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.hp.hpl.sparta.xpath.ThisNodeTest;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
-
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -107,10 +111,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Date;
@@ -122,7 +129,6 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -132,7 +138,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -161,8 +166,6 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
     @Autowired
     private DbProvider dbProvider;
     @Autowired
-    private NamespaceProvider namespaceProvider;
-    @Autowired
     private CoordinationProvider coordinationProvider;
     @Autowired
     private UserProvider userProvider;
@@ -170,6 +173,28 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
     private ContentServerService contentServerService;
     @Autowired
     private ScheduleProvider scheduleProvider;
+    private static final ThreadLocal<SimpleDateFormat> TIME_SDF = new ThreadLocal<SimpleDateFormat>() {
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("HH:mm");
+        }
+    };
+    private static final MeetingReservationSimpleComparator RESERVATION_SIMPLE_COMPARATOR = new MeetingReservationSimpleComparator();
+
+    private static class MeetingReservationSimpleComparator implements Comparator<MeetingReservationSimpleDTO> {
+        @Override
+        public int compare(MeetingReservationSimpleDTO o1, MeetingReservationSimpleDTO o2) {
+            MeetingReservationShowStatus s2 = MeetingReservationShowStatus.fromCode(o2.getStatus());
+            MeetingReservationShowStatus s1 = MeetingReservationShowStatus.fromCode(o1.getStatus());
+            // 这边空值判断是为了避免意外情况造成空指针，理论上不存在空值
+            if (s2 == null) {
+                s2 = MeetingReservationShowStatus.COMING_SOON;
+            }
+            if (s1 == null) {
+                s1 = MeetingReservationShowStatus.COMING_SOON;
+            }
+            return s1.ordinal() - s2.ordinal();
+        }
+    }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -467,16 +492,21 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         if (MeetingReservationStatus.CANCELED == MeetingReservationStatus.fromCode(meetingReservation.getStatus())) {
             throw errorWithMeetingReservationCanceled();
         }
-        if (!haveMeetingReservationReadPermission(meetingReservation)) {
+        OrganizationMemberDetails currentMember = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), meetingReservation.getOrganizationId());
+        if (!haveMeetingReservationReadPermission(meetingReservation, currentMember)) {
             throw errorWithMeetingReservationNoReadPermission();
         }
-        List<EhMeetingInvitations> meetingInvitations = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), null);
+        List<EhMeetingInvitations> meetingInvitations = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), MeetingInvitationRoleType.ATTENDEE.getCode(), MeetingInvitationRoleType.CC.getCode());
         MeetingRecord meetingRecord = meetingProvider.findMeetingRecordByMeetingReservationId(meetingReservation.getId());
 
         MeetingRecordDetailInfoDTO meetingRecordDetailInfoDTO = convertToMeetingRecordDetailInfoDTO(meetingReservation, meetingRecord, selectMeetingInvitationDTOs(meetingInvitations, MeetingInvitationRoleType.CC));
         MeetingReservationDetailDTO meetingReservationDetailDTO = convertToMeetingReservationDTO(meetingReservation);
+        meetingReservationDetailDTO.setManager(buildMeetingInvitationDTO(meetingReservation.getMeetingManagerDetailId(), currentMember));
         meetingReservationDetailDTO.setMeetingInvitationDTOS(getUserAvatar(selectMeetingInvitationDTOs(meetingInvitations, MeetingInvitationRoleType.ATTENDEE)));
-        meetingReservationDetailDTO.setMemberNamesSummary(buildMeetingReservationMemberNamesSummary(meetingReservation, meetingInvitations, false));
+        if (CollectionUtils.isEmpty(meetingReservationDetailDTO.getMeetingInvitationDTOS())) {
+            meetingReservationDetailDTO.setMeetingInvitationDTOS(Collections.singletonList(meetingReservationDetailDTO.getManager()));
+        }
+        meetingReservationDetailDTO.setMemberNamesSummary(buildMeetingReservationMemberNamesSummary(meetingReservation, meetingInvitations));
         meetingReservationDetailDTO.setMeetingRecordDetailInfoDTO(meetingRecordDetailInfoDTO);
         return meetingReservationDetailDTO;
     }
@@ -505,6 +535,9 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         meetingRecordDetailInfoDTO.setMeetingSponsorUserId(meetingReservation.getMeetingSponsorUserId());
         meetingRecordDetailInfoDTO.setMeetingSponsorDetailId(meetingReservation.getMeetingSponsorDetailId());
         meetingRecordDetailInfoDTO.setMeetingSponsorName(meetingReservation.getMeetingSponsorName());
+        meetingRecordDetailInfoDTO.setMeetingManagerUserId(meetingReservation.getMeetingManagerUserId());
+        meetingRecordDetailInfoDTO.setMeetingManagerDetailId(meetingReservation.getMeetingManagerDetailId());
+        meetingRecordDetailInfoDTO.setMeetingManagerName(meetingReservation.getMeetingManagerName());
         meetingRecordDetailInfoDTO.setMeetingDate(getTimeInMillis(meetingReservation.getMeetingDate()));
         meetingRecordDetailInfoDTO.setBeginTime(getTimeInMillis(new Time(meetingReservation.getExpectBeginTime().getTime())));
         meetingRecordDetailInfoDTO.setEndTime(getTimeInMillis(new Time(meetingReservation.getExpectEndTime().getTime())));
@@ -638,10 +671,15 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             });
             return null;
         });
+        OrganizationMemberDetails currentMember = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), meetingReservation.getOrganizationId());
         List<EhMeetingInvitations> meetingInvitations = buildDefaultMeetingInvitations(meetingReservation);
         MeetingReservationDetailDTO meetingReservationDetailDTO = convertToMeetingReservationDTO(meetingReservation);
+        meetingReservationDetailDTO.setManager(buildMeetingInvitationDTO(meetingReservation.getMeetingManagerDetailId(), currentMember));
         meetingReservationDetailDTO.setMeetingInvitationDTOS(getUserAvatar(selectMeetingInvitationDTOs(meetingInvitations, MeetingInvitationRoleType.ATTENDEE)));
-        meetingReservationDetailDTO.setMemberNamesSummary(buildMeetingReservationMemberNamesSummary(meetingReservation, meetingInvitations, false));
+        if (CollectionUtils.isEmpty(meetingReservationDetailDTO.getMeetingInvitationDTOS())) {
+            meetingReservationDetailDTO.setMeetingInvitationDTOS(Collections.singletonList(meetingReservationDetailDTO.getManager()));
+        }
+        meetingReservationDetailDTO.setMemberNamesSummary(buildMeetingReservationMemberNamesSummary(meetingReservation, meetingInvitations));
         return meetingReservationDetailDTO;
     }
 
@@ -659,8 +697,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 
     private MeetingReservationDetailDTO updateMeetingReservationLockTime(MeetingReservationLockTimeCommand cmd, MeetingRoom meetingRoom, Timestamp beginDateTime, Timestamp endDateTime) {
         MeetingReservation meetingReservation = meetingProvider.findMeetingReservationById(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), cmd.getMeetingReservationId());
-
-        checkWhenUpdateMeetingReservation(meetingReservation);
+        OrganizationMemberDetails currentMember = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        checkWhenUpdateMeetingReservation(meetingReservation, currentMember);
 
         // 加锁防止预定时间重用
         this.coordinationProvider.getNamedLock(CoordinationLocks.MEETING_ROOM_TIME_LOCK.getCode() + meetingRoom.getId()).enter(() -> {
@@ -686,8 +724,12 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
 
         MeetingReservationDetailDTO meetingReservationDetailDTO = convertToMeetingReservationDTO(meetingReservation);
+        meetingReservationDetailDTO.setManager(buildMeetingInvitationDTO(meetingReservation.getMeetingManagerDetailId(), currentMember));
         meetingReservationDetailDTO.setMeetingInvitationDTOS(getUserAvatar(selectMeetingInvitationDTOs(meetingInvitations, MeetingInvitationRoleType.ATTENDEE)));
-        meetingReservationDetailDTO.setMemberNamesSummary(buildMeetingReservationMemberNamesSummary(meetingReservation, meetingInvitations, false));
+        if (CollectionUtils.isEmpty(meetingReservationDetailDTO.getMeetingInvitationDTOS())) {
+            meetingReservationDetailDTO.setMeetingInvitationDTOS(Collections.singletonList(meetingReservationDetailDTO.getManager()));
+        }
+        meetingReservationDetailDTO.setMemberNamesSummary(buildMeetingReservationMemberNamesSummary(meetingReservation, meetingInvitations));
         sendMessageAfterMeetingUpdated(meetingInvitations, meetingReservation, meetingReservationDetailDTO.getMemberNamesSummary());
         return meetingReservationDetailDTO;
     }
@@ -728,18 +770,17 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         return meetingReservationDetailDTO;
     }
 
-    private List<MeetingAttachmentDTO> listMeetingAttachments(Long id,
-			AttachmentOwnerType attachmentOwnerType) {
-    	if(null == attachmentOwnerType)
-    		return null;
-    	List<MeetingAttachment> attachments = meetingProvider.listMeetingAttachements(id, attachmentOwnerType.getCode());
-    	if(null != attachments){
-    		return attachments.stream().map(r -> {
-    			return processAttachment2DTO(r);
-    		}).collect(Collectors.toList());
-    	}
-		return null;
-	}
+    private List<MeetingAttachmentDTO> listMeetingAttachments(Long id, AttachmentOwnerType attachmentOwnerType) {
+        if (null == attachmentOwnerType)
+            return null;
+        List<MeetingAttachment> attachments = meetingProvider.listMeetingAttachments(id, attachmentOwnerType.getCode());
+        if (null != attachments) {
+            return attachments.stream().map(r -> {
+                return processAttachment2DTO(r);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
 
 	private MeetingAttachmentDTO processAttachment2DTO(MeetingAttachment r) {
 		MeetingAttachmentDTO dto = ConvertHelper.convert(r , MeetingAttachmentDTO.class);
@@ -794,13 +835,31 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
         boolean isSubjectUpdate = !(cmd.getSubject().equals(meetingReservation.getSubject()) && stringEqual(cmd.getContent(),meetingReservation.getContent()));
         final MeetingReservation updateMeetingReservation = meetingReservation;
-        checkWhenUpdateMeetingReservation(updateMeetingReservation);
 
+        OrganizationMemberDetails currentMember = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        checkWhenUpdateMeetingReservation(updateMeetingReservation, currentMember);
+
+        // 记录修改前的会务人和修改后的会务人，用于发送消息提醒
+        Long originMeetingManagerUserId = meetingReservation.getMeetingManagerUserId();
+        if (cmd.getMeetingManagerDetailId() != null) {
+            OrganizationMemberDetails meetingManager = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getMeetingManagerDetailId());
+            if (meetingManager != null) {
+                updateMeetingReservation.setMeetingManagerUserId(meetingManager.getTargetId());
+                updateMeetingReservation.setMeetingManagerDetailId(meetingManager.getId());
+                updateMeetingReservation.setMeetingManagerName(meetingManager.getContactName());
+            }
+        }
         updateMeetingReservation.setSubject(cmd.getSubject());
         updateMeetingReservation.setContent(cmd.getContent());
         updateMeetingReservation.setSystemMessageFlag(cmd.getSystemMessageFlag());
         updateMeetingReservation.setEmailMessageFlag(cmd.getEmailMessageFlag());
         updateMeetingReservation.setStatus(MeetingReservationStatus.NORMAL.getCode());
+
+        // 不管参会人是否选择发起人，默认将发起人设置为参会人，并做去重处理
+        if (updateMeetingReservation.getMeetingSponsorDetailId() != null && updateMeetingReservation.getMeetingSponsorDetailId() > 0) {
+            OrganizationMemberDetails meetingSponsor = organizationProvider.findOrganizationMemberDetailsByDetailId(updateMeetingReservation.getMeetingSponsorDetailId());
+            cmd.setMeetingInvitations(addInvitationAndDistinct(cmd.getMeetingInvitations(), buildMeetingInvitationDTO(null, meetingSponsor)));
+        }
 
         List<OrganizationMemberDetails> memberDetails = getOrganizationMembersByInvitationSourceIds(buildEhMeetingInvitations(cmd.getMeetingInvitations(), updateMeetingReservation.getId(), MeetingInvitationRoleType.ATTENDEE));
         updateMeetingReservation.setInvitationUserCount(memberDetails != null ? memberDetails.size() : 0);
@@ -827,9 +886,9 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
         addMeetingInvitations.addAll(cmd.getMeetingInvitations());
         addMeetingInvitations.removeAll(existMeetingInvitations);
-        
+
         //附件
-        List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachements(meetingReservation.getId(), AttachmentOwnerType.EhMeetingReservations.getCode());
+        List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachments(meetingReservation.getId(), AttachmentOwnerType.EhMeetingReservations.getCode());
         List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingReservation);
         List<MeetingAttachment> existsAttachements = new ArrayList<>();
         List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements, existsAttachements);
@@ -844,28 +903,47 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             meetingProvider.batchDeleteMeetingInvitations(deleteMeetingInvitations);
             List<EhMeetingInvitations> addMeetingInvitationList = buildEhMeetingInvitations(addMeetingInvitations, id, MeetingInvitationRoleType.ATTENDEE);
             meetingProvider.batchCreateMeetingInvitations(addMeetingInvitationList);
-
+            // 在meeting_invitations中更新会务人信息，主要用于查询我的会议和我的会议纪要
+            updateMeetingManager(updateMeetingReservation);
             meetingProvider.batchDeleteMeetingAttachments(deleteAttachements);
             meetingProvider.batchCreateMeetingAttachments(addAttachements);
-            
+
             return null;
         });
 
         List<EhMeetingInvitations> currentMeetingInvitations = meetingProvider.findMeetingInvitationsByMeetingId(updateMeetingReservation.getId(), MeetingInvitationRoleType.ATTENDEE.getCode());
-        String memberNames = buildMeetingReservationMemberNamesSummary(updateMeetingReservation, currentMeetingInvitations, false);
+        String memberNames = buildMeetingReservationMemberNamesSummary(updateMeetingReservation, currentMeetingInvitations);
         sendMessageAfterMeetingCanceled(deleteMeetingInvitations, updateMeetingReservation, memberNames);
         sendMessageAfterMeetingInvited(buildEhMeetingInvitations(addMeetingInvitations, updateMeetingReservation.getId(), MeetingInvitationRoleType.ATTENDEE), updateMeetingReservation, memberNames);
         if (isSubjectUpdate) {
             sendMessageAfterMeetingUpdated(unChangedMeetingInvitations, updateMeetingReservation, memberNames);
         }
-
+        sendMessageAfterMeetingManagerChanged(updateMeetingReservation, originMeetingManagerUserId, updateMeetingReservation.getMeetingManagerUserId());
         MeetingReservationDetailDTO meetingReservationDetailDTO = convertToMeetingReservationDTO(updateMeetingReservation);
+        meetingReservationDetailDTO.setManager(buildMeetingInvitationDTO(updateMeetingReservation.getMeetingManagerDetailId(), currentMember));
         meetingReservationDetailDTO.setMeetingInvitationDTOS(getUserAvatar(selectMeetingInvitationDTOs(currentMeetingInvitations, MeetingInvitationRoleType.ATTENDEE)));
+        if (CollectionUtils.isEmpty(meetingReservationDetailDTO.getMeetingInvitationDTOS())) {
+            meetingReservationDetailDTO.setMeetingInvitationDTOS(Collections.singletonList(meetingReservationDetailDTO.getManager()));
+        }
         meetingReservationDetailDTO.setMemberNamesSummary(memberNames);
         return meetingReservationDetailDTO;
     }
 
-    private boolean stringEqual(String content, String content2) { 
+    private void updateMeetingManager(MeetingReservation meetingReservation) {
+        // 新版本会务人是必填项，但是旧版本APP没有该字段，避免旧版本编辑时将会务人字段清掉，因此需要这个逻辑
+        if (!StringUtils.hasText(meetingReservation.getMeetingManagerName()) || meetingReservation.getMeetingManagerDetailId() == null) {
+            return;
+        }
+        meetingProvider.batchDeleteMeetingInvitationsByMeetingId(meetingReservation.getId(), MeetingInvitationRoleType.MEETING_MANAGER.getCode());
+        MeetingInvitationDTO newMeetingManager = new MeetingInvitationDTO();
+        newMeetingManager.setSourceName(meetingReservation.getMeetingManagerName());
+        newMeetingManager.setSourceId(meetingReservation.getMeetingManagerDetailId());
+        newMeetingManager.setSourceType(MeetingMemberSourceType.MEMBER_DETAIL.getCode());
+        List<EhMeetingInvitations> addMeetingInvitationList = buildEhMeetingInvitations(Collections.singletonList(newMeetingManager), meetingReservation.getId(), MeetingInvitationRoleType.MEETING_MANAGER);
+        meetingProvider.batchCreateMeetingInvitations(addMeetingInvitationList);
+    }
+
+    private boolean stringEqual(String content, String content2) {
 		return content == null ? (content2 == null ? true : false) : content.equals(content2);
 	}
 
@@ -903,21 +981,35 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 		return addAttachements;
 	}
 
-	private List<MeetingAttachment> convertDTO2MeetingAttachment(
-			List<MeetingAttachmentDTO> meetingAttachments, MeetingReservation meetingReservation) {
-		if(meetingAttachments == null){
-			return null;
-		}
-		Map<String, String> fileIconUriMap = fileService.getFileIconUrl();
-		return meetingAttachments.stream().map(r->{
-			MeetingAttachment attachment = ConvertHelper.convert(r, MeetingAttachment.class);
-			attachment.setNamespaceId(meetingReservation.getNamespaceId());
-			attachment.setOwnerType(AttachmentOwnerType.EhMeetingReservations.getCode());
-			attachment.setOwnerId(meetingReservation.getId());
-			attachment.setContentIconUri(processIconUri(fileIconUriMap,r.getContentName())); 
-			return attachment;
-		}).collect(Collectors.toList());
-	}
+    private List<MeetingAttachment> convertDTO2MeetingAttachment(List<MeetingAttachmentDTO> meetingAttachments, MeetingReservation meetingReservation) {
+        if (meetingAttachments == null) {
+            return null;
+        }
+        Map<String, String> fileIconUriMap = fileService.getFileIconUrl();
+        return meetingAttachments.stream().map(r -> {
+            MeetingAttachment attachment = ConvertHelper.convert(r, MeetingAttachment.class);
+            attachment.setNamespaceId(meetingReservation.getNamespaceId());
+            attachment.setOwnerType(AttachmentOwnerType.EhMeetingReservations.getCode());
+            attachment.setOwnerId(meetingReservation.getId());
+            attachment.setContentIconUri(processIconUri(fileIconUriMap, r.getContentName()));
+            return attachment;
+        }).collect(Collectors.toList());
+    }
+
+    private List<MeetingAttachment> convertDTO2MeetingAttachment(List<MeetingAttachmentDTO> meetingAttachments, MeetingTemplate meetingTemplate) {
+        if (CollectionUtils.isEmpty(meetingAttachments)) {
+            return new ArrayList<>();
+        }
+        Map<String, String> fileIconUriMap = fileService.getFileIconUrl();
+        return meetingAttachments.stream().map(r -> {
+            MeetingAttachment attachment = ConvertHelper.convert(r, MeetingAttachment.class);
+            attachment.setNamespaceId(meetingTemplate.getNamespaceId());
+            attachment.setOwnerType(AttachmentOwnerType.EhMeetingTemplates.getCode());
+            attachment.setOwnerId(meetingTemplate.getId());
+            attachment.setContentIconUri(processIconUri(fileIconUriMap, r.getContentName()));
+            return attachment;
+        }).collect(Collectors.toList());
+    }
 
 	private String processIconUri(Map<String, String> fileIconUriMap, String fileName) {
 		String suffix = "other";
@@ -927,7 +1019,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 		return fileIconUriMap.get(suffix) == null ? fileIconUriMap.get("other") : fileIconUriMap.get(suffix);
 	}
 
-	private void checkWhenUpdateMeetingReservation(MeetingReservation meetingReservation) {
+    private void checkWhenUpdateMeetingReservation(MeetingReservation meetingReservation, OrganizationMemberDetails memberDetail) {
         if (meetingReservation == null) {
             throw errorWithMeetingReservationNoExist();
         }
@@ -935,7 +1027,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             throw errorWithMeetingReservationCanceled();
         }
         // 只有会议发起人才有修改权限
-        if (!haveMeetingReservationWritePermission(meetingReservation)) {
+        if (!haveMeetingReservationWritePermission(meetingReservation, memberDetail)) {
             throw errorWithNoPermissionUpdateMeetingReservation();
         }
         if (checkIsMeetingBegin(meetingReservation)) {
@@ -952,10 +1044,11 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             // 没有锁定时间，则直接返回
             return;
         }
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
         dbProvider.execute(transactionStatus -> {
             MeetingReservation lockTimeMeetingReservation = meetingProvider.findMeetingReservationById(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), cmd.getMeetingReservationId());
             if (lockTimeMeetingReservation != null && MeetingReservationStatus.TIME_LOCK == MeetingReservationStatus.fromCode(lockTimeMeetingReservation.getStatus())) {
-                if (!haveMeetingReservationWritePermission(lockTimeMeetingReservation)) {
+                if (!haveMeetingReservationWritePermission(lockTimeMeetingReservation, memberDetail)) {
                     throw errorWithNoPermissionUpdateMeetingReservation();
                 }
                 meetingProvider.deleteMeetingReservation(lockTimeMeetingReservation);
@@ -964,25 +1057,44 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         });
     }
 
-    private String buildMeetingReservationMemberNamesSummary(MeetingReservation meetingReservation, List<EhMeetingInvitations> meetingInvitations, boolean skipSponsor) {
+    private String buildMeetingReservationMemberNamesSummary(MeetingReservation meetingReservation, List<EhMeetingInvitations> meetingInvitations) {
         StringBuffer memberNamesSummary = new StringBuffer();
-        if (!skipSponsor) {
-            memberNamesSummary.append(meetingReservation.getMeetingSponsorName());
-            memberNamesSummary.append("（发起人）");
-            if (CollectionUtils.isEmpty(meetingInvitations)) {
-                return memberNamesSummary.toString();
+        memberNamesSummary.append(meetingReservation.getMeetingSponsorName());
+        if (meetingReservation.getMeetingSponsorDetailId() != null) {
+            if (meetingReservation.getMeetingManagerDetailId() != null && meetingReservation.getMeetingSponsorDetailId().compareTo(meetingReservation.getMeetingManagerDetailId()) == 0) {
+                memberNamesSummary.append("（发起人、会务人）");
+            } else {
+                memberNamesSummary.append("（发起人）");
             }
-            memberNamesSummary.append(CHINESE_COMMA);
         }
+        if (meetingReservation.getMeetingManagerDetailId() != null) {
+            if (meetingReservation.getMeetingSponsorDetailId() != null && meetingReservation.getMeetingManagerDetailId().compareTo(meetingReservation.getMeetingSponsorDetailId()) != 0) {
+                memberNamesSummary.append(CHINESE_COMMA);
+                memberNamesSummary.append(meetingReservation.getMeetingManagerName());
+                memberNamesSummary.append("（会务人）");
+            }
+        }
+
+        if (CollectionUtils.isEmpty(meetingInvitations)) {
+            return memberNamesSummary.toString();
+        }
+        memberNamesSummary.append(CHINESE_COMMA);
 
         for (EhMeetingInvitations meetingInvitationDTO : meetingInvitations) {
             if (MeetingInvitationRoleType.ATTENDEE == MeetingInvitationRoleType.fromCode(meetingInvitationDTO.getRoleType())) {
                 // 发起人前面已经拼接过了，就不需要重复
                 if (MeetingMemberSourceType.MEMBER_DETAIL == MeetingMemberSourceType.fromCode(meetingInvitationDTO.getSourceType())
-                        && meetingInvitationDTO.getSourceId().compareTo(meetingReservation.getMeetingSponsorDetailId()) != 0) {
-                    memberNamesSummary.append(meetingInvitationDTO.getSourceName());
-                    memberNamesSummary.append(CHINESE_COMMA);
+                        && meetingReservation.getMeetingSponsorDetailId() != null
+                        && meetingInvitationDTO.getSourceId().compareTo(meetingReservation.getMeetingSponsorDetailId()) == 0) {
+                    continue;
                 }
+                if (MeetingMemberSourceType.MEMBER_DETAIL == MeetingMemberSourceType.fromCode(meetingInvitationDTO.getSourceType())
+                        && meetingReservation.getMeetingManagerDetailId() != null
+                        && meetingInvitationDTO.getSourceId().compareTo(meetingReservation.getMeetingManagerDetailId()) == 0) {
+                    continue;
+                }
+                memberNamesSummary.append(meetingInvitationDTO.getSourceName());
+                memberNamesSummary.append(CHINESE_COMMA);
             }
         }
         return memberNamesSummary.substring(0, memberNamesSummary.length() - 1);
@@ -1024,7 +1136,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         if (meetingReservation == null) {
             throw errorWithMeetingReservationNoExist();
         }
-        if (!haveMeetingReservationWritePermission(meetingReservation)) {
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        if (!haveMeetingReservationWritePermission(meetingReservation, memberDetail)) {
             throw errorWithNoPermissionUpdateMeetingReservation();
         }
         if (MeetingReservationStatus.CANCELED == MeetingReservationStatus.fromCode(meetingReservation.getStatus())) {
@@ -1074,20 +1187,26 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         if (meetingReservation == null) {
             return;
         }
-        if (!haveMeetingReservationWritePermission(meetingReservation)) {
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        if (!haveMeetingReservationWritePermission(meetingReservation, memberDetail)) {
             throw errorWithNoPermissionUpdateMeetingReservation();
         }
         if (MeetingReservationStatus.CANCELED == MeetingReservationStatus.fromCode(meetingReservation.getStatus())) {
             return;
         }
+        // 会议已开始不能取消
+        if (checkIsMeetingBegin(meetingReservation)) {
+            throw errorWithUpdateABeginMeetingReservation();
+        }
+        // 会议已结束不能取消
         if (checkIsMeetingEnd(meetingReservation)) {
-            throw errorWithCancelABeginOrEndMeetingReservation();
+            throw errorWithUpdateAEndMeetingReservation();
         }
         meetingReservation.setStatus(MeetingReservationStatus.CANCELED.getCode());
         meetingProvider.updateMeetingReservation(meetingReservation);
 
         List<EhMeetingInvitations> meetingInvitations = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), MeetingInvitationRoleType.ATTENDEE.getCode());
-        String memberNames = buildMeetingReservationMemberNamesSummary(meetingReservation, meetingInvitations, false);
+        String memberNames = buildMeetingReservationMemberNamesSummary(meetingReservation, meetingInvitations);
         sendMessageAfterMeetingCanceled(meetingInvitations, meetingReservation, memberNames);
     }
 
@@ -1136,21 +1255,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             dto.setShowStatus(status.toString());
             dtos.add(dto);
         });
-        Collections.sort(dtos, new Comparator<MeetingReservationSimpleDTO>() {
-            @Override
-            public int compare(MeetingReservationSimpleDTO o1, MeetingReservationSimpleDTO o2) {
-                MeetingReservationShowStatus s2 = MeetingReservationShowStatus.fromCode(o2.getStatus());
-                MeetingReservationShowStatus s1 = MeetingReservationShowStatus.fromCode(o1.getStatus());
-                // 这边空值判断是为了避免意外情况造成空指针，理论上不存在空值
-                if (s2 == null) {
-                    s2 = MeetingReservationShowStatus.COMING_SOON;
-                }
-                if (s1 == null) {
-                    s1 = MeetingReservationShowStatus.COMING_SOON;
-                }
-                return s1.ordinal() - s2.ordinal();
-            }
-        });
+        Collections.sort(dtos, RESERVATION_SIMPLE_COMPARATOR);
         response.setDtos(dtos);
         return response;
     }
@@ -1167,7 +1272,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         if (meetingReservation == null) {
             throw errorWithMeetingReservationNoExist();
         }
-        if (!haveMeetingReservationReadPermission(meetingReservation)) {
+        OrganizationMemberDetails currentMember = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), meetingReservation.getOrganizationId());
+        if (!haveMeetingReservationReadPermission(meetingReservation, currentMember)) {
             throw errorWithMeetingRecordNoReadPermission();
         }
         List<EhMeetingInvitations> meetingInvitations = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), MeetingInvitationRoleType.CC.getCode());
@@ -1183,7 +1289,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         if (meetingReservation == null) {
             throw errorWithMeetingReservationNoExist();
         }
-        if (!haveMeetingReservationWritePermission(meetingReservation)) {
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        if (!haveMeetingReservationWritePermission(meetingReservation, memberDetail)) {
             throw errorWithNoPermissionUpdateMeetingRecord();
         }
 
@@ -1210,18 +1317,18 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }else{
             meetingRecord.setAttachmentFlag(MeetingGeneralFlag.OFF.getCode());
         }
-        
+
         List<EhMeetingInvitations> recordReceivers = buildEhMeetingInvitations(cmd.getMeetingRecordShareDTOS(), meetingReservation.getId(), MeetingInvitationRoleType.CC);
         dbProvider.execute(transactionStatus -> {
             meetingProvider.createMeetingRecord(meetingRecord);
-            //附件 
-            List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingRecord); 
+            //附件
+            List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingRecord);
             meetingProvider.batchCreateMeetingAttachments(newAttachements);
             meetingProvider.batchCreateMeetingInvitations(recordReceivers);
             return null;
         });
 
-        List<EhMeetingInvitations> allRecordReceivers = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), null);
+        List<EhMeetingInvitations> allRecordReceivers = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), MeetingInvitationRoleType.ATTENDEE.getCode(), MeetingInvitationRoleType.CC.getCode());
         sendMessageAfterMeetingRecordReceived(meetingReservation, meetingRecord, allRecordReceivers, false);
 
         List<MeetingInvitationDTO> meetingInvitationDTOS = selectMeetingInvitationDTOs(recordReceivers, MeetingInvitationRoleType.CC);
@@ -1258,7 +1365,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         if (meetingReservation == null) {
             throw errorWithMeetingReservationNoExist();
         }
-        if (!haveMeetingReservationWritePermission(meetingReservation)) {
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), meetingReservation.getOrganizationId());
+        if (!haveMeetingReservationWritePermission(meetingReservation, memberDetail)) {
             throw errorWithNoPermissionUpdateMeetingRecord();
         }
         boolean isContentUpdate = !cmd.getContent().equals(meetingRecord.getContent());
@@ -1271,7 +1379,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         List<MeetingInvitationDTO> addMeetingInvitations = new ArrayList<>();
         List<MeetingInvitationDTO> existMeetingInvitations = new ArrayList<>();
         List<EhMeetingInvitations> unChangedMeetingInvitations = new ArrayList<>();
-        List<EhMeetingInvitations> meetingInvitations = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), null);
+        List<EhMeetingInvitations> meetingInvitations = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), MeetingInvitationRoleType.ATTENDEE.getCode(), MeetingInvitationRoleType.CC.getCode());
         if (!CollectionUtils.isEmpty(meetingInvitations)) {
             for (EhMeetingInvitations ehMeetingInvitation : meetingInvitations) {
                 if (MeetingInvitationRoleType.ATTENDEE == MeetingInvitationRoleType.fromCode(ehMeetingInvitation.getRoleType())) {
@@ -1295,7 +1403,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         addMeetingInvitations.removeAll(existMeetingInvitations);
 
         //附件
-        List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachements(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords.getCode());
+        List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachments(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords.getCode());
         List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingRecord);
         List<MeetingAttachment> existsAttachements = new ArrayList<>();
 		List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements, existsAttachements);
@@ -1333,10 +1441,11 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         if (meetingReservation == null) {
             throw errorWithMeetingReservationNoExist();
         }
-        if (!haveMeetingReservationWritePermission(meetingReservation)) {
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        if (!haveMeetingReservationWritePermission(meetingReservation, memberDetail)) {
             throw errorWithNoPermissionDeleteMeetingRecord();
         }
-        List<MeetingAttachment> deleteAttachements = meetingProvider.listMeetingAttachements(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords.getCode());
+        List<MeetingAttachment> deleteAttachements = meetingProvider.listMeetingAttachments(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords.getCode());
         List<EhMeetingInvitations> recordReceivers = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), MeetingInvitationRoleType.CC.getCode());
         dbProvider.execute(transactionStatus -> {
             meetingProvider.deleteMeetingRecord(meetingRecord);
@@ -1379,6 +1488,284 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             dtos.add(dto);
         });
         response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
+    public void createOrUpdateMeetingTemplate(CreateOrUpdateMeetingTemplateCommand cmd) {
+        OrganizationMemberDetails currentMemberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        cmd.setInvitations(getAndCheckMeetingInvitationDTOs(cmd.getInvitations()));
+        // 不管当前用户是否在参与人列表中，默认添加进去，并做去重处理
+        cmd.setInvitations(addInvitationAndDistinct(cmd.getInvitations(), buildMeetingInvitationDTO(null, currentMemberDetail)));
+
+        MeetingTemplate meetingTemplate = new MeetingTemplate(UserContext.getCurrentNamespaceId(), currentMemberDetail.getOrganizationId(), currentMemberDetail.getTargetId(), currentMemberDetail.getId());
+        if (cmd.getId() != null && cmd.getId() > 0) {
+            meetingTemplate = meetingProvider.findMeetingTemplateById(cmd.getId(), UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), UserContext.currentUserId());
+            if (meetingTemplate == null) {
+                throw RuntimeErrorException.errorWith(MeetingErrorCodeConstants.SCOPE, MeetingErrorCodeConstants.MEETING_TEMPLATE_NOT_EXIST_ERROR, UserContext.current().getUser().getLocale(), "MEETING_TEMPLATE_NOT_EXIST_ERROR");
+            }
+        }
+        meetingTemplate.setSubject(cmd.getSubject());
+        meetingTemplate.setContent(cmd.getContent());
+        meetingTemplate.setAttachmentFlag(CollectionUtils.isEmpty(cmd.getAttachments()) ? MeetingGeneralFlag.OFF.getCode() : MeetingGeneralFlag.ON.getCode());
+        if (cmd.getMeetingManagerDetailId() != null && cmd.getMeetingManagerDetailId() > 0) {
+            OrganizationMemberDetails meetingManager = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getMeetingManagerDetailId());
+            meetingManager = meetingManager != null ? meetingManager : currentMemberDetail;
+            meetingTemplate.setMeetingManagerUserId(meetingManager.getTargetId());
+            meetingTemplate.setMeetingManagerDetailId(meetingManager.getId());
+            meetingTemplate.setMeetingManagerName(meetingManager.getContactName());
+        }
+
+        MeetingTemplate persistMeetingTemplate = meetingTemplate;
+        dbProvider.execute(transactionStatus -> {
+            if (persistMeetingTemplate.getId() != null) {
+                meetingProvider.deleteMeetingInvitationTemplates(persistMeetingTemplate.getNamespaceId(), persistMeetingTemplate.getOrganizationId(), persistMeetingTemplate.getId());
+                meetingProvider.deleteMeetingAttachmentsByOwnerId(persistMeetingTemplate.getNamespaceId(), AttachmentOwnerType.EhMeetingTemplates.getCode(), persistMeetingTemplate.getId());
+                meetingProvider.updateMeetingTemplate(persistMeetingTemplate);
+            } else {
+                meetingProvider.createMeetingTemplate(persistMeetingTemplate);
+            }
+
+            List<MeetingAttachment> attachments = convertDTO2MeetingAttachment(cmd.getAttachments(), persistMeetingTemplate);
+            if (!CollectionUtils.isEmpty(attachments)) {
+                meetingProvider.batchCreateMeetingAttachments(attachments);
+            }
+            if (!CollectionUtils.isEmpty(cmd.getInvitations())) {
+                List<MeetingInvitationTemplate> meetingInvitationTemplates = cmd.getInvitations().stream().map(meetingInvitationDTO -> {
+                    MeetingInvitationTemplate invitationTemplate = ConvertHelper.convert(meetingInvitationDTO, MeetingInvitationTemplate.class);
+                    invitationTemplate.setNamespaceId(persistMeetingTemplate.getNamespaceId());
+                    invitationTemplate.setOrganizationId(persistMeetingTemplate.getOrganizationId());
+                    invitationTemplate.setMeetingTemplateId(persistMeetingTemplate.getId());
+                    return invitationTemplate;
+                }).collect(Collectors.toList());
+                meetingProvider.batchCreateMeetingInvitationTemplate(meetingInvitationTemplates);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public void deleteMeetingTemplate(DeleteMeetingTemplateCommand cmd) {
+        MeetingTemplate meetingTemplate = meetingProvider.findMeetingTemplateById(cmd.getTemplateId(), UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), UserContext.currentUserId());
+        if (meetingTemplate != null) {
+            dbProvider.execute(transactionStatus -> {
+                meetingProvider.deleteMeetingTemplate(meetingTemplate);
+                meetingProvider.deleteMeetingInvitationTemplates(meetingTemplate.getNamespaceId(), meetingTemplate.getOrganizationId(), meetingTemplate.getId());
+                meetingProvider.deleteMeetingAttachmentsByOwnerId(meetingTemplate.getNamespaceId(), AttachmentOwnerType.EhMeetingTemplates.getCode(), meetingTemplate.getId());
+                return null;
+            });
+        }
+    }
+
+    @Override
+    public ListMyMeetingTemplateResponse listMyMeetingTemplates(ListMyMeetingTemplateCommand cmd) {
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        int pageOffset = (cmd.getPageOffset() == null || cmd.getPageOffset() == 0) ? 1 : cmd.getPageOffset();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
+
+        QueryMyMeetingTemplateCondition condition = new QueryMyMeetingTemplateCondition(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), UserContext.currentUserId(), offset, pageSize + 1);
+        List<MeetingTemplate> meetingTemplates = meetingProvider.findMeetingTemplates(condition);
+
+        ListMyMeetingTemplateResponse response = new ListMyMeetingTemplateResponse();
+        if (CollectionUtils.isEmpty(meetingTemplates)) {
+            return response;
+        }
+        if (meetingTemplates.size() > pageSize) {
+            meetingTemplates.remove(pageSize);
+            response.setNextPageOffset(pageOffset + 1);
+        }
+        OrganizationMemberDetails currentMemberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        List<MeetingTemplateDTO> meetingTemplateDTOS = new ArrayList<>();
+        Map<Long, OrganizationMemberDetails> localCache = new HashMap<>();
+        for (MeetingTemplate meetingTemplate : meetingTemplates) {
+            List<MeetingInvitationTemplate> invitationTemplates = meetingProvider.findMeetingInvitationTemplates(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), meetingTemplate.getId());
+            List<MeetingInvitationDTO> invitations = convertToMeetingInvitationDTO(invitationTemplates, localCache, new ArrayList<>());
+            MeetingTemplateDTO meetingTemplateDTO = ConvertHelper.convert(meetingTemplate, MeetingTemplateDTO.class);
+
+            meetingTemplateDTO.setManager(buildMeetingInvitationDTO(meetingTemplate.getMeetingManagerDetailId(), currentMemberDetail));
+            meetingTemplateDTO.setManagerName(meetingTemplateDTO.getManager() != null ? meetingTemplateDTO.getManager().getSourceName() : "");
+            meetingTemplateDTO.setCurrentUser(buildMeetingInvitationDTO(null, currentMemberDetail));
+            meetingTemplateDTO.setInvitations(invitations);
+            meetingTemplateDTO.setInvitationNames(buildMeetingInvitationNames(meetingTemplateDTO.getInvitations()));
+            meetingTemplateDTO.setInvitationCount(meetingTemplateDTO.getInvitations().size());
+            meetingTemplateDTO.setAttachments(listMeetingAttachments(meetingTemplate.getId(), AttachmentOwnerType.EhMeetingTemplates));
+            meetingTemplateDTOS.add(meetingTemplateDTO);
+        }
+
+        response.setTemplates(meetingTemplateDTOS);
+        return response;
+    }
+
+    private String buildMeetingInvitationNames(List<MeetingInvitationDTO> invitationDTOS) {
+        if (CollectionUtils.isEmpty(invitationDTOS)) {
+            return "";
+        }
+        StringBuffer names = new StringBuffer();
+        for (MeetingInvitationDTO dto : invitationDTOS) {
+            names.append(dto.getSourceName()).append('、');
+        }
+        return names.substring(0, names.length() - 1);
+    }
+
+    @Override
+    public MeetingTemplateDTO getMeetingTemplateById(GetMeetingTemplateCommand cmd) {
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        MeetingTemplate meetingTemplate = new MeetingTemplate();
+        MeetingTemplateDTO meetingTemplateDTO = new MeetingTemplateDTO();
+        if (cmd.getTemplateId() != null && cmd.getTemplateId() > 0) {
+            meetingTemplate = meetingProvider.findMeetingTemplateById(cmd.getTemplateId(), UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), UserContext.currentUserId());
+            if (meetingTemplate == null) {
+                throw RuntimeErrorException.errorWith(MeetingErrorCodeConstants.SCOPE, MeetingErrorCodeConstants.MEETING_TEMPLATE_NOT_EXIST_ERROR, UserContext.current().getUser().getLocale(), "MEETING_TEMPLATE_NOT_EXIST_ERROR");
+            }
+            List<MeetingInvitationTemplate> invitationTemplates = meetingProvider.findMeetingInvitationTemplates(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), meetingTemplate.getId());
+            // 记录离职人员，待删除
+            List<MeetingInvitationTemplate> dismissalInvitationTemplates = new ArrayList<>();
+            meetingTemplateDTO = ConvertHelper.convert(meetingTemplate, MeetingTemplateDTO.class);
+            // 返回时移除离职人员
+            meetingTemplateDTO.setInvitations(convertToMeetingInvitationDTO(invitationTemplates, new HashMap<>(), dismissalInvitationTemplates));
+            meetingTemplateDTO.setAttachments(listMeetingAttachments(meetingTemplate.getId(), AttachmentOwnerType.EhMeetingTemplates));
+            // 删除离职人员
+            removeDismissalMembers(meetingTemplate, dismissalInvitationTemplates);
+        }
+        meetingTemplateDTO.setManager(buildMeetingInvitationDTO(meetingTemplate.getMeetingManagerDetailId(), memberDetail));
+        meetingTemplateDTO.setCurrentUser(buildMeetingInvitationDTO(null, memberDetail));
+        return meetingTemplateDTO;
+    }
+
+    /**
+     *  默认添加当前用户到列表中，并做去重处理
+     */
+    private List<MeetingInvitationDTO> addInvitationAndDistinct(List<MeetingInvitationDTO> sourceList, MeetingInvitationDTO addInvitation) {
+        List<MeetingInvitationDTO> result = new ArrayList<>();
+        Set<Long> distinctSet = new HashSet<>();
+        if (addInvitation != null) {
+            result.add(addInvitation);
+            distinctSet.add(addInvitation.getSourceId());
+        }
+        if (CollectionUtils.isEmpty(sourceList)) {
+            return result;
+        }
+        for (MeetingInvitationDTO o : sourceList) {
+            if (distinctSet.add(o.getSourceId())) {
+                result.add(o);
+            }
+        }
+        return result;
+    }
+
+    private void removeDismissalMembers(MeetingTemplate meetingTemplate, List<MeetingInvitationTemplate> dismissalInvitationTemplates) {
+        dbProvider.execute(transactionStatus -> {
+            if (meetingTemplate.getMeetingManagerDetailId() != null) {
+                OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(meetingTemplate.getMeetingManagerDetailId());
+                if (memberDetail == null || EmployeeStatus.DISMISSAL == EmployeeStatus.fromCode(memberDetail.getEmployeeStatus())) {
+                    meetingTemplate.setMeetingManagerName(null);
+                    meetingTemplate.setMeetingManagerDetailId(null);
+                    meetingTemplate.setMeetingManagerUserId(null);
+                    meetingProvider.updateMeetingTemplate(meetingTemplate);
+                }
+            }
+            if (!CollectionUtils.isEmpty(dismissalInvitationTemplates)) {
+                meetingProvider.batchDeleteMeetingInvitationTemplate(dismissalInvitationTemplates);
+            }
+            return null;
+        });
+    }
+
+    private List<MeetingInvitationDTO> convertToMeetingInvitationDTO(List<MeetingInvitationTemplate> invitationTemplates, Map<Long, OrganizationMemberDetails> localCache, List<MeetingInvitationTemplate> dismissalInvitationTemplates) {
+        if (CollectionUtils.isEmpty(invitationTemplates)) {
+            return new ArrayList<>();
+        }
+        List<MeetingInvitationDTO> invitationDTOS = new ArrayList<>();
+        for (MeetingInvitationTemplate invitationTemplate : invitationTemplates) {
+            OrganizationMemberDetails memberDetail = localCache.get(invitationTemplate.getSourceId());
+            if (memberDetail == null) {
+                memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(invitationTemplate.getSourceId());
+                if (memberDetail != null) {
+                    localCache.put(memberDetail.getId(), memberDetail);
+                }
+            }
+            // 返回时移除离职人员
+            if (memberDetail == null || EmployeeStatus.DISMISSAL == EmployeeStatus.fromCode(memberDetail.getEmployeeStatus())) {
+                dismissalInvitationTemplates.add(invitationTemplate);
+                continue;
+            }
+
+            MeetingInvitationDTO dto = new MeetingInvitationDTO();
+            dto.setSourceType(invitationTemplate.getSourceType());
+            dto.setSourceId(invitationTemplate.getSourceId());
+            dto.setSourceName(memberDetail.getContactName());
+            if (memberDetail.getTargetId() > 0) {
+                dto.setContactAvatar(getUserAvatar(memberDetail.getTargetId()));
+            }
+            invitationDTOS.add(dto);
+        }
+        return invitationDTOS;
+    }
+
+    @Override
+    public ListMyUnfinishedMeetingResponse listMyUnfinishedMeetings(ListMyUnfinishedMeetingCommand cmd) {
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        int pageOffset = (cmd.getPageOffset() == null || cmd.getPageOffset() == 0) ? 1 : cmd.getPageOffset();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
+
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        QueryMyMeetingsCondition condition = new QueryMyMeetingsCondition(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), false, memberDetail.getId(), null, null);
+        // 查询当天未结束的会议
+        condition.setBetweenFromDate(new Date(System.currentTimeMillis()));
+        condition.setBetweenToDate(new Date(System.currentTimeMillis()));
+        // cmd.getPageSize== null不分页
+        if (cmd.getPageSize() != null) {
+            condition.setOffset(offset);
+            condition.setPageSize(pageSize + 1);
+        }
+        List<MeetingReservation> meetingReservations = meetingProvider.findMeetingReservationsByDetailId(condition);
+
+        ListMyUnfinishedMeetingResponse response = new ListMyUnfinishedMeetingResponse();
+        if (CollectionUtils.isEmpty(meetingReservations)) {
+            return response;
+        }
+        if (cmd.getPageSize() != null && meetingReservations.size() > pageSize) {
+            meetingReservations.remove(pageSize);
+            response.setNextPageOffset(pageOffset + 1);
+        }
+
+        List<MeetingReservationSimpleDTO> dtos = new ArrayList<>();
+        meetingReservations.forEach(meetingReservation -> {
+            MeetingReservationSimpleDTO dto = new MeetingReservationSimpleDTO();
+            dto.setId(meetingReservation.getId());
+            dto.setSubject(meetingReservation.getSubject());
+            dto.setContent(meetingReservation.getContent());
+            dto.setMeetingRoomId(meetingReservation.getMeetingRoomId());
+            dto.setMeetingRoomName(meetingReservation.getMeetingRoomName());
+            dto.setMeetingDate(getTimeInMillis(meetingReservation.getMeetingDate()));
+            dto.setExpectBeginTime(getTimeInMillis(new Time(meetingReservation.getExpectBeginTime().getTime())));
+            dto.setExpectEndTime(getTimeInMillis(new Time(meetingReservation.getExpectEndTime().getTime())));
+            dto.setAttachmentFlag(meetingReservation.getAttachmentFlag());
+            MeetingReservationShowStatus status = buildMeetingReservationShowStatus(meetingReservation);
+            dto.setStatus(status.getCode());
+            dto.setShowStatus(status.toString());
+            dtos.add(dto);
+        });
+        Collections.sort(dtos, RESERVATION_SIMPLE_COMPARATOR);
+        // 首页会议卡片描述显示规则：1. 进行中的会议，全部显示会议描述。2.未开始的会议，第一个会议显示描述，其余不显示
+        List<MeetingDashboardDTO> results = new ArrayList<>();
+        int showCount = 1;
+        for (MeetingReservationSimpleDTO dto : dtos) {
+            MeetingDashboardDTO result = ConvertHelper.convert(dto, MeetingDashboardDTO.class);
+            result.setMarkLabel(TIME_SDF.get().format(new Timestamp(dto.getMeetingDate() + dto.getExpectBeginTime())));
+            result.setMarkColor("#07A4ED");
+            if (MeetingReservationShowStatus.STARTING.getCode() == dto.getStatus()) {
+                result.setMarkLabel(dto.getShowStatus());
+                result.setMarkColor("#FF5E5E");
+            } else {
+                if (showCount <= 0) {
+                    result.setContent(null);
+                }
+                showCount--;
+            }
+            results.add(result);
+        }
+        response.setDtos(results);
         return response;
     }
 
@@ -1482,7 +1869,6 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 	}
 
 	private File contentUrlToLocalFile(MeetingAttachmentDTO r) {
-		// TODO Auto-generated method stub
 		List<File> list = new ArrayList<File>();
 	    StringBuffer tmpdirBuffer = new StringBuffer(System.getProperty("java.io.tmpdir"));
 	    Long currentMillisecond = System.currentTimeMillis();
@@ -1504,39 +1890,68 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 	    //附件
 	    File file = new File(tempName);
 	    if(naiveDownloadPicture(file, r.getContentUrl())){
+	    	LOGGER.debug("file path is "+file.getAbsolutePath());
 	    	return file;
 	    }
 		return null;
 	}
-	 public static boolean naiveDownloadPicture(File file,String urlstr) {
-        URL url = null;
 
-        try {
-            //生成图片链接的url类
-            url = new URL(urlstr);
-            //将url链接下的图片以字节流的形式存储到 DataInputStream类中
-            DataInputStream dataInputStream = new DataInputStream(url.openStream());
-            //为file生成对应的文件输出流
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            //定义字节数组大小
-            byte[] buffer = new byte[1024];
-            //从所包含的输入流中读取[buffer.length()]的字节，并将它们存储到缓冲区数组buffer 中。
-            //dataInputStream.read()会返回写入到buffer的实际长度,若已经读完 则返回-1                  
-            while (dataInputStream.read(buffer) > 0) { 
-                 fileOutputStream.write(buffer);//将buffer中的字节写入文件中区
-            }
-            dataInputStream.close();//关闭输入流
-            fileOutputStream.close();//关闭输出流
+	public static boolean naiveDownloadPicture(File file,String urlstr) {
+       URL url = null;
+       DataInputStream dataInputStream = null;
+       FileOutputStream fileOutputStream = null;
+       try {
+           //生成图片链接的url类
+           url = new URL(urlstr);
+           HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+           // 设置超时间为3秒
+	   	   conn.setConnectTimeout(3 * 1000);
+	   		// 防止屏蔽程序抓取而返回403错误
+	   	   conn.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+	   		// 得到输入流
+	   	   InputStream inputStream = conn.getInputStream();
+	   		// 之前的获取方法总有意料不到的错误，导致文件不完整，换成一次获取所有数据byte就不会出现问题
+	   	   byte[] getData = readInputStream(inputStream);
+           //为file生成对应的文件输出流
+           fileOutputStream = new FileOutputStream(file);
+           fileOutputStream.write(getData);
+           fileOutputStream.flush();
+           return true;
+       } catch (MalformedURLException e) {
+       	LOGGER.error("获取contentserver的资源到本地文件时出错: URL [{}] 有问题 ", urlstr, e);
+       } catch (IOException e) {
+       	LOGGER.error("获取contentserver的资源到本地文件时出错:  io 有问题 ", e);
+       } finally{
+           try {
+	           	if(fileOutputStream != null){            		
+	           		fileOutputStream.close(); 
+	           	}
+			}  catch (IOException e) {
+	        	LOGGER.error("关闭 fileOutputStream 时出错:  io 有问题 ", e);
+	        }
 
-            return true;
-        } catch (MalformedURLException e) {
-        	LOGGER.error("获取contentserver的资源到本地文件时出错: URL [{}] 有问题 ",urlstr,e);
-        } catch (IOException e) {
-        	LOGGER.error("获取contentserver的资源到本地文件时出错:  io 有问题 ",e);
-        }
-        return false;
+           try {
+	           	if(dataInputStream != null){
+	           		dataInputStream.close(); 
+	           	}
+			}  catch (IOException e) {
+	        	LOGGER.error("关闭 dataInputStream 时出错:  io 有问题 ", e);
+	        }
+       }
+       return false;
 	}
-	 
+
+	public static byte[] readInputStream(InputStream inputStream) throws IOException {  
+       byte[] buffer = new byte[1024];  
+       int len = 0;  
+       ByteArrayOutputStream bos = new ByteArrayOutputStream();  
+       while((len = inputStream.read(buffer)) != -1) {  
+           bos.write(buffer, 0, len);  
+       }  
+       bos.close();  
+       return bos.toByteArray();  
+   }
+	
 	private void sendNotifications(MeetingReservation meetingReservation, List<OrganizationMemberDetails> memberDetails, String account, String subject, String messageContent, String emailContent, String routeUrl, List<String> attachementPaths) {
         if (CollectionUtils.isEmpty(memberDetails)) {
             return;
@@ -1632,14 +2047,23 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             		UserContext.current().setLogin(login);
             	}
                 List<OrganizationMemberDetails> memberDetails = getOrganizationMembersByInvitationSourceIds(meetingInvitations);
-                String subject = localeStringService.getLocalizedString(MeetingMessageLocaleConstants.SCOPE, String.valueOf(MeetingMessageLocaleConstants.CANCEL_A_MEETING_MESSAGE_TITLE), locale, null);
+                String subject = "";
+                if (MeetingReservationStatus.CANCELED == MeetingReservationStatus.fromCode(meetingReservation.getStatus())) {
+                    subject = localeStringService.getLocalizedString(MeetingMessageLocaleConstants.SCOPE, String.valueOf(MeetingMessageLocaleConstants.CANCEL_A_MEETING_MESSAGE_TITLE), locale, null);
+                } else {
+                    subject = localeStringService.getLocalizedString(MeetingMessageLocaleConstants.SCOPE, String.valueOf(MeetingMessageLocaleConstants.MEETING_INVITATION_REMOVE), locale, null);
+                }
                 String messageContent = buildMeetingReservationMessageContent(meetingReservation, locale);
                 String emailContent = buildMeetingReservationMailMessageContent(meetingReservation, memberNamesSummary, MeetingMessageLocaleConstants.MEETING_MAIL_MESSAGE_BODY, locale);
                 List<File> attachmentFiles = buildMeetingReservationAttachemntPaths(meetingReservation.getId());
                 List<String> stringAttementList = new ArrayList<String>();
-                attachmentFiles.stream().forEach(file->{stringAttementList.add(file.getAbsolutePath());});
-                sendNotifications(meetingReservation, memberDetails, account, subject, messageContent, emailContent, emailContent, CollectionUtils.isEmpty(stringAttementList)? null : stringAttementList);
-                attachmentFiles.stream().forEach(file->{file.delete();});
+                attachmentFiles.stream().forEach(file -> {
+                    stringAttementList.add(file.getAbsolutePath());
+                });
+                sendNotifications(meetingReservation, memberDetails, account, subject, messageContent, emailContent, null, CollectionUtils.isEmpty(stringAttementList) ? null : stringAttementList);
+                attachmentFiles.stream().forEach(file -> {
+                    file.delete();
+                });
             }
         });
     }
@@ -1691,6 +2115,34 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
                 sendMessage(memberDetail.getTargetId(), messageContent, routeUrl, subject);
             }
         }
+    }
+
+    // 会议会务人消息提醒
+    private void sendMessageAfterMeetingManagerChanged(MeetingReservation meetingReservation, Long originMeetingManagerUserId, Long currentMeetingManagerUserId) {
+        if (MeetingGeneralFlag.ON != MeetingGeneralFlag.fromCode(meetingReservation.getSystemMessageFlag())) {
+            return;
+        }
+        if (originMeetingManagerUserId == null && currentMeetingManagerUserId == null) {
+            return;
+        }
+        if (originMeetingManagerUserId != null && currentMeetingManagerUserId != null && originMeetingManagerUserId.equals(currentMeetingManagerUserId)) {
+            // 没有变更
+            return;
+        }
+        String locale = UserContext.current().getUser().getLocale();
+        String routeUrl = RouterBuilder.build(Router.MEETING_RESERVATION_DETAIL, new MeetingReservationDetailActionData(meetingReservation.getId(), meetingReservation.getOrganizationId()));
+
+        ExecutorUtil.submit(() -> {
+            String subjectAdd = localeStringService.getLocalizedString(MeetingMessageLocaleConstants.SCOPE, String.valueOf(MeetingMessageLocaleConstants.MEETING_MANAGER_ADD), locale, null);
+            String subjectRemove = localeStringService.getLocalizedString(MeetingMessageLocaleConstants.SCOPE, String.valueOf(MeetingMessageLocaleConstants.MEETING_MANAGER_REMOVE), locale, null);
+            String messageContent = buildMeetingReservationMessageContent(meetingReservation, locale);
+            if (originMeetingManagerUserId != null) {
+                sendMessage(originMeetingManagerUserId, messageContent, null, subjectRemove);
+            }
+            if (currentMeetingManagerUserId != null) {
+                sendMessage(currentMeetingManagerUserId, messageContent, routeUrl, subjectAdd);
+            }
+        });
     }
 
     private void sendEmail(String account, String email, String subject, String content, List<String> attachementPaths) {
@@ -1801,211 +2253,110 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         if (isNameExist) {
             throw RuntimeErrorException.errorWith(
                     MeetingErrorCodeConstants.SCOPE,
-                    MeetingErrorCodeConstants.MEETING_ROOM_NAME_REPEAT_ERROR,
-                    localeStringService.getLocalizedString(
-                            String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                            String.valueOf(MeetingErrorCodeConstants.MEETING_ROOM_NAME_REPEAT_ERROR),
-                            UserContext.current().getUser().getLocale(),
-                            "Ensure that the names are not duplicated"));
+                    MeetingErrorCodeConstants.MEETING_ROOM_NAME_REPEAT_ERROR, "Ensure that the names are not duplicated");
         }
     }
 
     private RuntimeErrorException errorWithMeetingRoomNoExist() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_ROOM_NO_EXIST_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_ROOM_NO_EXIST_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "The meeting room does not exist"));
+                MeetingErrorCodeConstants.MEETING_ROOM_NO_EXIST_ERROR, "The meeting room does not exist");
     }
 
     private RuntimeErrorException errorWithMeetingRoomClosed() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_ROOM_UNAVAILABLE_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_ROOM_UNAVAILABLE_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "The meeting room is currently unavailable"));
+                MeetingErrorCodeConstants.MEETING_ROOM_UNAVAILABLE_ERROR, "The meeting room is currently unavailable");
     }
 
     private RuntimeErrorException errorWithMeetingTimeExpired() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_TIME_HAS_EXPIRED_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_TIME_HAS_EXPIRED_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "Time has expired"));
+                MeetingErrorCodeConstants.MEETING_TIME_HAS_EXPIRED_ERROR, "Time has expired");
     }
 
     private RuntimeErrorException errorWithMeetingTimeBeOccupied() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_TIME_BE_OCCUPIED_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_TIME_BE_OCCUPIED_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "The meeting time is currently unavailable"));
+                MeetingErrorCodeConstants.MEETING_TIME_BE_OCCUPIED_ERROR, "The meeting time is currently unavailable");
     }
 
     private RuntimeErrorException errorWithMeetingReservationNoExist() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RESERVATION_NO_EXIST_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RESERVATION_NO_EXIST_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "The meeting reservation does not exist"));
+                MeetingErrorCodeConstants.MEETING_RESERVATION_NO_EXIST_ERROR, "The meeting reservation does not exist");
     }
 
     private RuntimeErrorException errorWithMeetingReservationCanceled() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RESERVATION_HAS_BEEN_CANCELED_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RESERVATION_HAS_BEEN_CANCELED_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "The meeting reservation has been canceled"));
+                MeetingErrorCodeConstants.MEETING_RESERVATION_HAS_BEEN_CANCELED_ERROR, "The meeting reservation has been canceled");
     }
 
     private RuntimeErrorException errorWithMeetingRecordNoExist() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RECORD_NO_EXIST_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RECORD_NO_EXIST_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "The meeting record does not exist"));
+                MeetingErrorCodeConstants.MEETING_RECORD_NO_EXIST_ERROR, "The meeting record does not exist");
     }
 
     private RuntimeErrorException errorWithMeetingRecordDuplicated() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RECORD_DUPLICATED_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RECORD_DUPLICATED_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "param error"));
+                MeetingErrorCodeConstants.MEETING_RECORD_DUPLICATED_ERROR, "param error");
     }
 
     private RuntimeErrorException errorWithMeetingRecordBeforeMeetingNoCompleted() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RECORD_MEETING_NO_COMPLETE_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RECORD_MEETING_NO_COMPLETE_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "param error"));
+                MeetingErrorCodeConstants.MEETING_RECORD_MEETING_NO_COMPLETE_ERROR, "param error");
     }
 
     private RuntimeErrorException errorWithNoPermissionDeleteMeetingRecord() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RECORD_DELETE_PERMISSION_DENY_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RECORD_DELETE_PERMISSION_DENY_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "Permission denied"));
+                MeetingErrorCodeConstants.MEETING_RECORD_DELETE_PERMISSION_DENY_ERROR, "Permission denied");
     }
 
     private RuntimeErrorException errorWithNoPermissionUpdateMeetingRecord() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RECORD_CREATE_UPDATE_PERMISSION_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RECORD_CREATE_UPDATE_PERMISSION_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "Permission denied"));
+                MeetingErrorCodeConstants.MEETING_RECORD_CREATE_UPDATE_PERMISSION_ERROR, "Permission denied");
     }
 
     private RuntimeErrorException errorWithNoPermissionUpdateMeetingReservation() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RESERVATION_UPDATE_PERMISSION_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RESERVATION_UPDATE_PERMISSION_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "Permission denied"));
-    }
-
-    private RuntimeErrorException errorWithCancelABeginOrEndMeetingReservation() {
-        return RuntimeErrorException.errorWith(
-                MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_BEGIN_OR_END_CANNOT_CANCEL_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_BEGIN_OR_END_CANNOT_CANCEL_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "Permission denied"));
+                MeetingErrorCodeConstants.MEETING_RESERVATION_UPDATE_PERMISSION_ERROR, "Permission denied");
     }
 
     private RuntimeErrorException errorWithMeetingReservationCompletedBeforeBegin() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_COMPLETE_BEFORE_BEGIN_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_COMPLETE_BEFORE_BEGIN_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "Status error"));
+                MeetingErrorCodeConstants.MEETING_COMPLETE_BEFORE_BEGIN_ERROR, "Status error");
     }
 
     private RuntimeErrorException errorWithUpdateAEndMeetingReservation() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RESERVATION_IS_END_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RESERVATION_IS_END_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "Permission denied"));
+                MeetingErrorCodeConstants.MEETING_RESERVATION_IS_END_ERROR, "Permission denied");
     }
 
     private RuntimeErrorException errorWithUpdateABeginMeetingReservation() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RESERVATION_IS_BEGIN_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RESERVATION_IS_BEGIN_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "Permission denied"));
+                MeetingErrorCodeConstants.MEETING_RESERVATION_IS_BEGIN_ERROR, "Permission denied");
     }
 
     private RuntimeErrorException errorWithMeetingReservationNoReadPermission() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RESERVATION_HAS_NO_READ_PERMISSION_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RESERVATION_HAS_NO_READ_PERMISSION_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "Permission denied"));
+                MeetingErrorCodeConstants.MEETING_RESERVATION_HAS_NO_READ_PERMISSION_ERROR, "Permission denied");
     }
 
     private RuntimeErrorException errorWithMeetingRecordNoReadPermission() {
         return RuntimeErrorException.errorWith(
                 MeetingErrorCodeConstants.SCOPE,
-                MeetingErrorCodeConstants.MEETING_RECORD_HAS_NO_READ_PERMISSION_ERROR,
-                localeStringService.getLocalizedString(
-                        String.valueOf(MeetingErrorCodeConstants.SCOPE),
-                        String.valueOf(MeetingErrorCodeConstants.MEETING_RECORD_HAS_NO_READ_PERMISSION_ERROR),
-                        UserContext.current().getUser().getLocale(),
-                        "Permission denied"));
+                MeetingErrorCodeConstants.MEETING_RECORD_HAS_NO_READ_PERMISSION_ERROR, "Permission denied");
     }
 
     private boolean checkIsMeetingEnd(MeetingReservation meetingReservation) {
@@ -2030,19 +2381,24 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         return false;
     }
 
-    private boolean haveMeetingReservationReadPermission(MeetingReservation meetingReservation) {
-        if (haveMeetingReservationWritePermission(meetingReservation)) {
+    private boolean haveMeetingReservationReadPermission(MeetingReservation meetingReservation, OrganizationMemberDetails memberDetail) {
+        if (memberDetail == null) {
+            return false;
+        }
+        if (haveMeetingReservationWritePermission(meetingReservation, memberDetail)) {
             return true;
         }
-        OrganizationMember organizationMember = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(), meetingReservation.getOrganizationId());
-        return meetingProvider.countMeetingInvitation(meetingReservation.getId(), MeetingMemberSourceType.MEMBER_DETAIL.getCode(), organizationMember.getDetailId()) > 0;
+        return meetingProvider.countMeetingInvitation(meetingReservation.getId(), MeetingMemberSourceType.MEMBER_DETAIL.getCode(), memberDetail.getId()) > 0;
     }
 
-    private boolean haveMeetingReservationWritePermission(MeetingReservation meetingReservation) {
-        if (meetingReservation.getMeetingSponsorUserId() != null && UserContext.currentUserId().compareTo(meetingReservation.getMeetingSponsorUserId()) == 0) {
+    private boolean haveMeetingReservationWritePermission(MeetingReservation meetingReservation, OrganizationMemberDetails memberDetail) {
+        if (meetingReservation.getMeetingSponsorDetailId() != null && memberDetail.getId().compareTo(meetingReservation.getMeetingSponsorDetailId()) == 0) {
             return true;
         }
-        if (meetingReservation.getMeetingRecorderUserId() != null && UserContext.currentUserId().compareTo(meetingReservation.getMeetingRecorderUserId()) == 0) {
+        if (meetingReservation.getMeetingManagerDetailId() != null && memberDetail.getId().compareTo(meetingReservation.getMeetingManagerDetailId()) == 0) {
+            return true;
+        }
+        if (meetingReservation.getMeetingRecorderDetailId() != null && memberDetail.getId().compareTo(meetingReservation.getMeetingRecorderDetailId()) == 0) {
             return true;
         }
         return false;
@@ -2155,6 +2511,28 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             }
         });
         return meetingInvitationDTOS;
+    }
+
+    private MeetingInvitationDTO buildMeetingInvitationDTO(Long detailId, OrganizationMemberDetails defaultMember) {
+        OrganizationMemberDetails memberDetail = null;
+        if (detailId != null) {
+            memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        }
+        if (memberDetail == null || EmployeeStatus.DISMISSAL == EmployeeStatus.fromCode(memberDetail.getEmployeeStatus())) {
+            memberDetail = defaultMember;
+        }
+        if (memberDetail == null) {
+            return null;
+        }
+        MeetingInvitationDTO dto = new MeetingInvitationDTO();
+        dto.setSourceType(MeetingMemberSourceType.MEMBER_DETAIL.getCode());
+        dto.setSourceId(memberDetail.getId());
+        dto.setSourceName(memberDetail.getContactName());
+        if (memberDetail.getTargetId() > 0) {
+            dto.setContactAvatar(getUserAvatar(memberDetail.getTargetId()));
+        }
+
+        return dto;
     }
 
     public String getUserAvatar(Long userId) {

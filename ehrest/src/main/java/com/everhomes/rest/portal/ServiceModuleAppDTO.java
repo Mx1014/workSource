@@ -42,6 +42,8 @@ import java.util.List;
  *     <li>serviceModuleEntryDtos: 应用入口信息参考{@link ServiceModuleEntryDTO}</li>
  *     <li>accessControlType: 权限控制类型 参考{@link com.everhomes.rest.module.AccessControlType}</li>
  *     <li>enableEnterprisePayFlag: 支持企业支付标记，0-否，1-是，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>appEntrySettingFlag: 是否自定义应用入口配置，0：否，1：是</li>
+ *     <li>serviceModuleSelfEntryDtos: 应用自定义应用入口配置</li>
  * </ul>
  */
 public class ServiceModuleAppDTO {
@@ -79,6 +81,24 @@ public class ServiceModuleAppDTO {
     private Byte systemAppFlag;
     private Byte defaultAppFlag;
     private List<ServiceModuleEntryDTO> serviceModuleEntryDtos;
+    private Byte appEntrySettingFlag;
+    private List<AppEntryDTO> serviceModuleSelfEntryDtos;
+
+    public List<AppEntryDTO> getServiceModuleSelfEntryDtos() {
+        return serviceModuleSelfEntryDtos;
+    }
+
+    public Byte getAppEntrySettingFlag() {
+        return appEntrySettingFlag;
+    }
+
+    public void setAppEntrySettingFlag(Byte appEntrySettingFlag) {
+        this.appEntrySettingFlag = appEntrySettingFlag;
+    }
+
+    public void setServiceModuleSelfEntryDtos(List<AppEntryDTO> serviceModuleSelfEntryDtos) {
+        this.serviceModuleSelfEntryDtos = serviceModuleSelfEntryDtos;
+    }
 
     private Byte accessControlType;
 

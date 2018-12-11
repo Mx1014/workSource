@@ -14,20 +14,17 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
-import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
 import com.everhomes.rest.acl.WebMenuSelectedFlag;
-import com.everhomes.rest.common.TrueOrFalseFlag;
-import com.everhomes.rest.module.*;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
-import com.everhomes.server.schema.tables.pojos.EhServiceModules;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
-import com.everhomes.rest.community.CommunityFetchType;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.menu.*;
+import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
 import com.everhomes.serviceModuleApp.*;
 import com.everhomes.user.UserContext;
@@ -37,11 +34,11 @@ import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -481,7 +478,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		cmd.setParentId(0L);
 
 		ListAppCategoryResponse categoryResponse = serviceModuleService.listAppCategory(cmd);
-		if(categoryResponse == null && categoryResponse.getDtos() == null && categoryResponse.getDtos().size() == 0){
+		if(categoryResponse == null || categoryResponse.getDtos() == null || categoryResponse.getDtos().size() == 0){
 			return null;
 		}
 
@@ -569,7 +566,17 @@ public class WebMenuServiceImpl implements WebMenuService {
 				//模块和场景都一致
 				if(entry.getModuleId().equals(menu.getModuleId()) && entry.getSceneType().equals(menu.getSceneType())){
 					WebMenuDTO menuDto = ConvertHelper.convert(menu, WebMenuDTO.class);
-					ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
+                    ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
+					List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+							this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(menu.getAppId(),entry.getId(),null,null);
+					if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList) &&
+                            TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                        menuDto.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                        appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+					}else if (!StringUtils.isEmpty(entry.getEntryName())) {
+						menuDto.setName(entry.getEntryName());
+						appDTO.setName(entry.getEntryName());
+					}
 					menuDto.setAppConfig(appDTO);
 					menuDtos.add(menuDto);
 				}

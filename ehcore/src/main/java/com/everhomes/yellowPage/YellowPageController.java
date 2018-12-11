@@ -1266,20 +1266,22 @@ public class YellowPageController  extends ControllerBase {
 		return response;
 	}
 	
+	
 	/**
-	 * <b>URL: /yellowPage/transferApprovalToForm</b>
+	 * <b>URL: /yellowPage/recoveryListCategoryDataDisappearBug</b>
 	 * <p>
 	 * 获取用户服务记录
 	 * </p>
 	 */
-	@RequestMapping("transferApprovalToForm")
-	@RestReturn(value = String.class)
-	public RestResponse transferApprovalToForm(ListServiceTypeNamesCommand cmd) {
-		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+	@RequestMapping("recoveryListCategoryDataDisappearBug")
+	@RestReturn(value = ListUiServiceRecordsResponse.class)
+	public RestResponse recoveryListCategoryDataDisappearBug(UpdateFAQSolveTimesCommand cmd) {
+		
+		if (null == cmd.getOwnerId() || !cmd.getOwnerId().equals(1802L)) {
 			return new RestResponse();
 		}
 		
-		String ret = allianceStandardService.transferApprovalToForm();
+		String ret = yellowPageService.recoveryListCategoryDataDisappearBug();
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription(ret);
@@ -1287,79 +1289,20 @@ public class YellowPageController  extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /yellowPage/transferMainAllianceOwnerType</b>
-	 * <p>
-	 * 更新alliane的ownerType
-	 * </p>
-	 */
-	@RequestMapping("transferMainAllianceOwnerType")
-	@RestReturn(value = String.class)
-	public RestResponse transferMainAllianceOwnerType(UpdateAllianceTagCommand cmd) {
-		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
-			return new RestResponse();
-		}
-		
-		String ret = allianceStandardService.transferMainAllianceOwnerType();
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription(ret);
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /yellowPage/transferAllianceModuleUrl</b>
-	 * <p>
-	 * 更新moduleUrl
-	 * </p>
-	 */
-	@RequestMapping("transferAllianceModuleUrl")
-	@RestReturn(value = String.class)
-	public RestResponse transferAllianceModuleUrl(UpdateAllianceTagCommand cmd) {
-		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
-			return new RestResponse();
-		}
-		
-		String ret = allianceStandardService.transferAllianceModuleUrl();
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription(ret);
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /yellowPage/transferPadItems</b>
+	 * <b>URL: /yellowPage/transferFlowCaseVals</b>
 	 * <p>
 	 * 获取用户服务记录
 	 * </p>
 	 */
-	@RequestMapping("transferPadItems")
+	@RequestMapping("transferFlowCaseVals")
 	@RestReturn(value = String.class)
-	public RestResponse transferPadItems(UpdateAllianceTagCommand cmd) {
-		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+	public RestResponse transferFlowCaseVals(UpdateFAQSolveTimesCommand cmd) {
+		
+		if (null == cmd.getOwnerId() || !cmd.getOwnerId().equals(1802L)) {
 			return new RestResponse();
 		}
 		
-		String ret = allianceStandardService.transferPadItems();
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription(ret);
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /yellowPage/transferApprovalFlowCases</b>
-	 * <p>
-	 * 迁移工作流case
-	 * </p>
-	 */
-	@RequestMapping("transferApprovalFlowCases")
-	@RestReturn(value = String.class)
-	public RestResponse transferApprovalFlowCases(UpdateAllianceTagCommand cmd) {
-		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
-			return new RestResponse();
-		}
-		
-		String ret = allianceStandardService.transferApprovalFlowCases();
+		String ret = yellowPageService.transferFlowCaseVals();
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription(ret);

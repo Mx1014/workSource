@@ -15,9 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.Map;
 
 @RestDoc(value="Flow controller", site="core")
 @RestController
@@ -138,7 +136,7 @@ public class FlowController extends ControllerBase {
      */
     @RequestMapping("listFlowServiceTypes")
     @RestReturn(value=ListFlowServiceTypeResponse.class)
-    public RestResponse listFlowServiceTypes(@Valid ListFlowServiceTypesCommand cmd) {
+    public RestResponse listFlowServiceTypes(@Valid /*ListFlowServiceTypesCommand cmd*/SearchFlowCaseCommand cmd) {
         ListFlowServiceTypeResponse resp = flowService.listFlowServiceTypes(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);

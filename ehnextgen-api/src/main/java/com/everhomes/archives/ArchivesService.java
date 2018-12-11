@@ -83,6 +83,10 @@ public interface ArchivesService {
 
     ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType);
 
+    List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, List<Long> departmentIds, ListingQueryBuilderCallback queryBuilderCallback);
+
+    void addSubDptIds(Long departmentId, List<Long> subDptIds);
+
     List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback);
 
     void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd);
@@ -92,6 +96,12 @@ public interface ArchivesService {
     ArchivesNotificationDTO getArchivesNotification(ArchivesNotificationCommand cmd);
 
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
+
+    boolean checkDismiss(Long userId, Long orgId);
+
+    boolean checkDismiss(OrganizationMemberDetails member);
+
+//    void syncArchivesDismissStatus();
 
     /* 同步数据接口 start */
     void makeArchivesCheckInTime();

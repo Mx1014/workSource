@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -10,11 +11,16 @@ import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -25,6 +31,8 @@ public class VisitorSysController extends ControllerBase {
 
 	@Autowired
 	private VisitorSysService visitorSysService;
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 
 	@Override
 	public void initListBinder(WebDataBinder binder) {
@@ -868,7 +876,7 @@ public class VisitorSysController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /visitorsys/createOrUpdateVisitorForWeb</b>
+	 * <b>URL: /visitorsys/createOrUpdateVisitorForManage</b>
 	 * <p>
 	 * 4.创建临时/预约访客-h5 100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
 	 * </p>
@@ -1004,5 +1012,81 @@ public class VisitorSysController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /visitorsys/syncHKWSUsers</b>
+	 * <p>
+	 * 同步海康威视用户
+	 * </p>
+	 */
+	@RequestMapping("syncHKWSUsers")
+	@RestReturn(value = String.class)
+	@RequireAuthentication(false)
+	public RestResponse syncHKWSUsers(BaseVisitorsysCommand cmd) {
+		visitorSysService.syncHKWSUsers();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("HKWSTest")
+	@RestReturn(value = String.class)
+	@RequireAuthentication(false)
+	public RestResponse HKWSTest(BaseVisitorsysCommand cmd) {
+		visitorSysService.HKWSTest(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <b>URL: /visitorsys/listFreqVisitors</b>
+	 * <p>
+	 * 获取常用访客信息
+	 * </p>
+	 */
+	@RequestMapping("listFreqVisitors")
+	@RestReturn(ListFreqVisitorsResponse.class)
+	public RestResponse listFreqVisitors(ListFreqVisitorsCommand cmd) {
+		ListFreqVisitorsResponse baseResponse = visitorSysService.listFreqVisitors(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/syncFreqVisitors</b>
+	 * <p>
+	 * 更新常用访客信息
+	 * </p>
+	 */
+	@RequestMapping("syncFreqVisitors")
+	@RestReturn(String.class)
+	public RestResponse syncFreqVisitors(BaseVisitorsysCommand cmd) {
+		visitorSysService.syncFreqVisitors(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("v")
+	@RequireAuthentication(false)
+	public Object doorVisitor(GetInvitationUrlCommand cmd) {
+		HttpHeaders httpHeaders = new HttpHeaders();
+		try {
+			if(cmd.getVisitorToken() != null) {
+				String invitationLinkTemp = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITATION_LINK,"/visitor-appointment/build/invitation.html?visitorToken=");
+				httpHeaders.setLocation(new URI(invitationLinkTemp + cmd.getVisitorToken()));
+			}
+		} catch (URISyntaxException e) {
+		}
+		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+	}
 
 }

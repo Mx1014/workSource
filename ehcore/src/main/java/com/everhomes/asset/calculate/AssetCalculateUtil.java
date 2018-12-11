@@ -83,10 +83,12 @@ public class AssetCalculateUtil{
 				int dayOfMonth = beginDate.getActualMaximum(Calendar.DAY_OF_MONTH);//获取当前月份的总天数：如31
 				int daysBetween = daysBetween(aEnd, beginDate);//获取当前日期到月底的天数：如2
 				reductionFactor.append(daysBetween + "/" + dayOfMonth);
-				reductionFactor.append("+");
 				//把时间定位到下一个月的第一天
 				beginDate.setTime(aEnd.getTime());
 				beginDate.add(Calendar.DAY_OF_MONTH, 1);
+				if(endDate.compareTo(beginDate) >= 0) {
+					reductionFactor.append("+");
+				}
 			}else {
 				int dayOfMonth = beginDate.getActualMaximum(Calendar.DAY_OF_MONTH);//获取当前月份的总天数：如31
 				int daysBetween = daysBetween(endDate, beginDate);//获取当前日期到月底的天数：如2

@@ -116,9 +116,10 @@ public class OAuth2ServiceImpl implements OAuth2Service {
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
                     OAuth2ServiceErrorCode.ERROR_INVALID_GRANT, "Invalid authorization code, code offer has expired");
 
-        if(!authorizationCode.getRedirectUri().equals(redirectUri))
-            throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
-                    OAuth2ServiceErrorCode.ERROR_INVALID_GRANT, "Invalid redirect URI, it is different with the one that was originally granted");
+        // TODO 为了让有问题的链接都通过，所以把这个注释掉，以后需要修改这里为只校验不带参数的 uri
+        // if(!authorizationCode.getRedirectUri().equals(redirectUri))
+        //     throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
+        //             OAuth2ServiceErrorCode.ERROR_INVALID_GRANT, "Invalid redirect URI, it is different with the one that was originally granted");
 
         AccessToken accessToken = new AccessToken();
         accessToken.setGrantorUid(authorizationCode.getGrantorUid());

@@ -31,7 +31,7 @@ public interface DoorAccessService {
 
     Long deleteDoorAuth(Long doorAuthId);
 
-    Long deleteDoorAccess(Long doorAccessId);
+    Long deleteDoorAccess(AclinkDeleteByIdCommand cmd);
 
     ListAesUserKeyByUserResponse listAesUserKeyByUser(ListAesUserKeyByUserCommand cmd);
 
@@ -84,6 +84,8 @@ public interface DoorAccessService {
     ListDoorAuthResponse searchVisitorDoorAuth(SearchDoorAuthCommand cmd);
 
     void sendMessageToUser(Long uid, Long doorId, Byte doorType);
+    //临时授权访客来访消息提示 add by liqingyan
+    void sendMessageToAuthCreator(Long authId);
 
     void remoteOpenDoor(Long doorId);
 
@@ -92,10 +94,6 @@ public interface DoorAccessService {
     ListDoorAccessQRKeyResponse updateAndQueryQR(AclinkUpdateLinglingStoreyCommand cmd);
 
     GetShortMessageResponse getShortMessages(GetShortMessageCommand cmd);
-
-    AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmd);
-
-    AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd);
 
     //20180914 add by liqingyan
     CheckMobilePrivilegeResponse checkMobilePrivilege(CheckMobilePrivilegeCommand cmd);
@@ -125,16 +123,6 @@ public interface DoorAccessService {
     void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
 
     void exportTempAuthXls(SearchDoorAuthCommand cmd, HttpServletResponse httpResponse);
-
-    //add by liqingyan
-    void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse);
-
-    //add by liqingyan
-    DoorStatisticResponse doorStatistic(DoorStatisticCommand cmd);
-
-    DoorStatisticByTimeResponse doorStatisticByTime(DoorStatisticByTimeCommand cmd);
-
-    TempStatisticByTimeResponse tempStatisticByTime(TempStatisticByTimeCommand cmd);
 
     String checkAllDoorAuthList();
 
@@ -251,7 +239,7 @@ public interface DoorAccessService {
 
     public ListUserAuthResponse listUserKeys(ListAesUserKeyByUserCommand cmd);
 
-    public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd);
+    public GetUserKeyInfoResponse getUserKeyInfo(GetUserKeyInfoCommand cmd);
 
     public ListAccessGroupRelResponse listDoorGroupRel(ListDoorAccessGroupCommand cmd);
 
@@ -266,7 +254,6 @@ public interface DoorAccessService {
 
     void invalidVistorAuths(InvalidVistorAuthsCommand cmd);
 
-    OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd);
     //门禁v3.0.2 临时授权优先门禁 add by liqingyan
     void createTempAuthPriority (CreateTempAuthPriorityCommand cmd);
 
@@ -306,4 +293,10 @@ public interface DoorAccessService {
     ListSelectDoorsAndGroupsResponse listSelectDoorsAndGroups (ListSelectDoorsAndGroupsCommand cmd);
     //查询门禁关联服务器、摄像头
     SearchDoorServerResponse searchDoorServer (SearchDoorServerCommand cmd);
+    //服务热线
+    QueryServiceHotlineResponse queryServiceHotline (QueryServiceHotlineCommand cmd);
+
+    void updateServiceHotline (UpdateServiceHotlineCommand cmd);
+    //访客来访提示
+    VisitorComingNoticeResponse visitorComingNotice (VisitorComingNoticeCommand cmd);
 }

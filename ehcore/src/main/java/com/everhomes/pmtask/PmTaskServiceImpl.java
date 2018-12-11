@@ -1079,6 +1079,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.error("Copy inputStream error.");
 		}
 
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+
+		String feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel." + cmd.getAppId(),"");
+
 		Sheet sheet = wb.getSheetAt(0);
 		if (null != sheet) {
 			Row defaultRow = sheet.getRow(4);
@@ -1092,7 +1096,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 					PmTaskDTO task = list.get(i);
 					PmTaskCategory category = null;
 					//为科兴与一碑对接
-					ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
 					if(UserContext.getCurrentNamespaceId() == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 						category = createEbeiCategory();
 					} else {
@@ -1190,9 +1193,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 					Cell cell14 = tempRow.createCell(14);
 					cell14.setCellStyle(style);
-					String feeModel = "";
-					if (null != cmd.getTaskCategoryId())
-						feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel." + cmd.getTaskCategoryId(),"");
+
 					if(StringUtils.isNotEmpty(feeModel) && "1".equals(feeModel)){
 						if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
 //						费用确认后导出费用清单
@@ -2381,6 +2382,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
 			List<OrganizationDTO> organizations = new ArrayList<>();
 			if(organizationList != null && organizationList.size() > 0) {
+				System.out.println(communityId);
 				organizationList.forEach(f -> {
 					if(OrganizationMemberStatus.ACTIVE.equals(OrganizationMemberStatus.fromCode(f.getMemberStatus()))) {
 						if(f.getCommunityId() != null && f.getCommunityId().equals(communityId))
@@ -2418,13 +2420,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 					List<OrgAddressDTO> addresses = new ArrayList<OrgAddressDTO>();
 					organizationAddresses.stream().map( r -> {
 						Address address = addressProvider.findAddressById(r.getAddressId());
-						OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
-						if(dto != null) {
-							dto.setOrganizationId(o.getId());
-							dto.setDisplayName(o.getName());
-							dto.setAddressId(address.getId());
-							dto.setCommunityName(o.getCommunityName());
-							addresses.add(dto);
+						if(address != null && address.getCommunityId() != null && address.getCommunityId().equals(communityId)){
+							OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
+							if(dto != null) {
+								dto.setOrganizationId(o.getId());
+								dto.setDisplayName(o.getName());
+								dto.setAddressId(address.getId());
+								dto.setCommunityName(o.getCommunityName());
+								addresses.add(dto);
+							}
 						}
 						return null;
 					}).collect(Collectors.toList());
@@ -3333,7 +3337,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public List<PmTaskEvalStatDTO> getEvalStat(GetEvalStatCommand cmd) {
 		List<PmTaskEvalStatDTO> dtos = new ArrayList<>();
 //		取当前项目启用工作流
-		Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(),20100L,cmd.getModuleType(),cmd.getOwnerId(),cmd.getOwnerType());
+		Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(),20100L,String.valueOf(cmd.getAppId()),cmd.getOwnerId(),cmd.getOwnerType());
 		if(null == flow || !flow.getAllowFlowCaseEndEvaluate().equals((byte) 1)){
 //			不设置评价返回空列表
 			return dtos;

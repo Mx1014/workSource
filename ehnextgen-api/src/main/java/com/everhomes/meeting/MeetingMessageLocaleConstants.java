@@ -7,6 +7,9 @@ public class MeetingMessageLocaleConstants {
     public static final int MEETING_COMING_SOON_MESSAGE_TITLE = 100001; // 您的会议即将开始
     public static final int UPDATE_A_MEETING_MESSAGE_TITLE = 100002;    // 您的会议已调整
     public static final int CANCEL_A_MEETING_MESSAGE_TITLE = 100003;    // 您的会议已取消
+    public static final int MEETING_INVITATION_REMOVE = 100008;    // 您已不是参会人
+    public static final int MEETING_MANAGER_REMOVE = 100009;    // 您已不是会务人
+    public static final int MEETING_MANAGER_ADD = 100010;    // 您已被指定为会务人
     public static final int BE_INVITED_A_MEETING_MESSAGE_TITLE = 1000000; // #发起人#邀请您参加会议 -> ${meetingSponsorName}邀请您参加会议
     public static final int RECEIVE_A_MEETING_RECORD_MESSAGE_TITLE = 1000001;    // #发起人#发布了会议纪要 -> ${meetingRecorderName}发布了会议纪要
     public static final int RECEIVE_A_MODIFY_MEETING_RECORD_MESSAGE_TITLE = 1000007;    // #发起人#修改了会议纪要 -> ${meetingRecorderName}修改了会议纪要

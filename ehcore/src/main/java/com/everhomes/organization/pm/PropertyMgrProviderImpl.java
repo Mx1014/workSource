@@ -2160,6 +2160,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	    LOGGER.info("sdhfsdhfjsdjfsj:   sdfs");
 		this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_PM_RESOUCRE_RESERVATIONS)
 				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS, status)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
 				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
 				.execute();
 		return	this.dbProvider.getDslContext(AccessSpec.readWrite()).select(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID)
@@ -2257,6 +2258,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		long id = this.dbProvider.allocPojoRecordId(EhAddressProperties.class);
 		addressProperties.setId(id);
 		addressProperties.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		addressProperties.setOperatorTime(addressProperties.getCreateTime());
 		addressProperties.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
 		addressProperties.setCreatorUid(UserContext.currentUserId());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddressProperties.class, id));
@@ -2390,6 +2392,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		});
 
 		return result[0];
+	}
+
+	@Override
+	public List<CommunityAddressMapping> findOrganizationAddressMapping(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					  .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+					  .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+					  .fetchInto(CommunityAddressMapping.class);
 	}
 
 

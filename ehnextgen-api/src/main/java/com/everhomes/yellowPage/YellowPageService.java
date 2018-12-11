@@ -148,4 +148,8 @@ public interface YellowPageService {
 	boolean isAllianceOffLine(Integer namespaceId);
 
 	String buildEntryUrl(Integer namespaceId, ServiceAllianceInstanceConfig config, String pageRealDisplayType);
+
+	String recoveryListCategoryDataDisappearBug();
+
+	String transferFlowCaseVals();
 }

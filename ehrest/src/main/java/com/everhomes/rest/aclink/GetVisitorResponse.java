@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>validFromMs: 有效期开始时间</li>
  * <li>validEndMs: 有效期终止时间</li>
  * <li>validAuthAmount: 剩余有效开门次数</li>
+ * <li>hotline: 服务热线</li>
  * </ul>
  * @author janson
  *
@@ -39,7 +40,16 @@ public class GetVisitorResponse {
     String qrIntro;
     private Long validFromMs;
     private Integer validAuthAmount;
-    
+    private String hotline;
+
+    public String getHotline() {
+        return hotline;
+    }
+
+    public void setHotline(String hotline) {
+        this.hotline = hotline;
+    }
+
     public Long getValidFromMs() {
 		return validFromMs;
 	}

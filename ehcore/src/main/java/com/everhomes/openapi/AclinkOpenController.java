@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.aclink.AclinkLogService;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -26,6 +27,8 @@ public class AclinkOpenController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(AclinkOpenController.class); 
     @Autowired
     private DoorAccessService doorAccessService;
+    @Autowired
+    private AclinkLogService aclinkLogService;
 
     /**
      * 
@@ -67,7 +70,7 @@ public class AclinkOpenController extends ControllerBase {
     @RequestMapping("queryLogs")
     @RestReturn(OpenQueryLogResponse.class)
     public RestResponse queryLogs(OpenQueryLogCommand cmd){
-    	RestResponse response = new RestResponse(doorAccessService.openQueryLogs(cmd));
+    	RestResponse response = new RestResponse(aclinkLogService.openQueryLogs(cmd));
     	response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -3035,8 +3035,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public void createOrganizationAddressMapping(CommunityAddressMapping addressMapping) {
-
-        assert (addressMapping.getOrganizationId() != null);
+    	
+    	//CommunityAddressMapping中不再存OrganizationId，兼容标准版的修改
+        //assert (addressMapping.getOrganizationId() != null);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddressMappings.class));
@@ -3050,8 +3051,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public void updateOrganizationAddressMapping(CommunityAddressMapping addressMapping) {
-
-        assert (addressMapping.getOrganizationId() != null);
+    	//CommunityAddressMapping中不再存OrganizationId，兼容标准版的修改
+        //assert (addressMapping.getOrganizationId() != null);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
@@ -7214,4 +7215,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L)).execute();
 	}
+
+	@Override
+    public List<Long> getOrganizationIdsHaveCommunity(){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> ids = context.select(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID)
+                .from(Tables.EH_ORGANIZATION_COMMUNITIES).groupBy(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID)
+                .fetchInto(Long.class);
+        return ids;
+    }
 }

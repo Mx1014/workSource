@@ -25,10 +25,10 @@ public class RentalNearStartMessageJob extends QuartzJobBean {
         LOGGER.info("start RentalNearStartMessageJob ");
         try {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
-            String orderId = jobMap.getString("orderId");
+            Long orderId = jobMap.getLong("orderId");
             String resourceType = jobMap.getString("resourceType");
             RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(resourceType);
-            RentalOrder order = rentalv2Provider.findRentalBillById(Long.valueOf(orderId));
+            RentalOrder order = rentalv2Provider.findRentalBillById(orderId);
             messageHandler.orderNearStartSendMessage(order);
 
         }catch (Exception e) {

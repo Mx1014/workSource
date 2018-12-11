@@ -2,10 +2,7 @@ package com.everhomes.flow;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.flow.FlowOperateLogDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowOperateLogsCommand;
+import com.everhomes.rest.flow.*;
 
 import java.util.List;
 import java.util.Set;
@@ -98,4 +95,8 @@ public interface FlowEventLogProvider {
     FlowEventLog isHistoryProcessors(Long userId, FlowCase flowCase);
 
     Integer countProcessorFlowCases(SearchFlowCaseCommand cmd);
+
+    List<FlowServiceTypeDTO> listProcessorServiceTypes(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd);
+
+    List<FlowModuleAppDTO> listProcessorApps(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd);
 }

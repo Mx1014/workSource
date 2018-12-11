@@ -1808,7 +1808,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalCloseDate> queryRentalCloseDateByOwner(String resourceType, String ownerType,
-			Long ownerId) {
+															 Long ownerId, java.sql.Date startTime, java.sql.Date endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_CLOSE_DATES);
@@ -1818,6 +1818,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerType));
 		condition = condition.and(Tables.EH_RENTALV2_CLOSE_DATES.RESOURCE_TYPE
 				.equal(resourceType));
+		if (null != startTime)
+			condition = condition.and(Tables.EH_RENTALV2_CLOSE_DATES.CLOSE_DATE.ge(startTime));
+		if (null != endTime)
+			condition = condition.and(Tables.EH_RENTALV2_CLOSE_DATES.CLOSE_DATE.lt(endTime));
 		step.where(condition);
 		List<RentalCloseDate> result = step
 				.orderBy(Tables.EH_RENTALV2_CLOSE_DATES.ID.desc()).fetch().map((r) -> {

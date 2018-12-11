@@ -2128,6 +2128,13 @@ public class CommunityProviderImpl implements CommunityProvider {
 						.fetchInto(Long.class);
 	}
 
+
+    @Override
+    public List<Community> listAllBizCommunities() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_COMMUNITIES.ID,Tables.EH_COMMUNITIES.NAMESPACE_ID).from(Tables.EH_COMMUNITIES).where(Tables.EH_COMMUNITIES.NAMESPACE_ID.ne(0)).fetchInto(Community.class);
+    }
+
 	@Override
 	public List<com.everhomes.rest.openapi.CommunityDTO> listCommunitiesForThirdParty(Integer namespaceId,Long communityId, Long pageAnchor,
 			int pageSize, Timestamp updateTime) {
@@ -2173,7 +2180,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 		
 		SelectQuery<Record> selectQuery = context.selectQuery();
 		selectQuery.addFrom(Tables.EH_BUILDINGS);
-		selectQuery.addSelect(Tables.EH_BUILDINGS.ID,Tables.EH_BUILDINGS.NAME,Tables.EH_BUILDINGS.COMMUNITY_ID);
+		selectQuery.addSelect(Tables.EH_BUILDINGS.ID,Tables.EH_BUILDINGS.NAME,
+				Tables.EH_BUILDINGS.COMMUNITY_ID,Tables.EH_BUILDINGS.BUILDING_NUMBER);
 		
 		if (namespaceId != null) {
 			selectQuery.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
@@ -2194,6 +2202,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 				dto.setBuildingId(r.getValue(Tables.EH_BUILDINGS.ID));
 				dto.setBuildingName(r.getValue(Tables.EH_BUILDINGS.NAME));
 				dto.setCommunityId(r.getValue(Tables.EH_BUILDINGS.COMMUNITY_ID));
+				dto.setBuildingNumber(r.getValue(Tables.EH_BUILDINGS.BUILDING_NUMBER));
 				results.add(dto);
 			});
 		}

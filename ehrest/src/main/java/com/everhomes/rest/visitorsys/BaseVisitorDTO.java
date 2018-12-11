@@ -70,6 +70,8 @@ public class BaseVisitorDTO extends BaseVisitorsysCommand{
 
     private Long doorAccessEndTime;
 
+    private Byte communityType;
+
     public Long getId() {
         return id;
     }
@@ -260,6 +262,16 @@ public class BaseVisitorDTO extends BaseVisitorsysCommand{
 
     public void setDoorAccessEndTime(Long doorAccessEndTime) {
         this.doorAccessEndTime = doorAccessEndTime;
+    }
+
+    @Override
+    public Byte getCommunityType() {
+        return communityType;
+    }
+
+    @Override
+    public void setCommunityType(Byte communityType) {
+        this.communityType = communityType;
     }
 
     @Override

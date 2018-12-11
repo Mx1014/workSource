@@ -74,6 +74,8 @@ public class ContractDTO {
 	private Long communityId;
 	private String communityName;
 	private Byte assetPaymentBillStatus;
+	private Byte customerType;
+	private Timestamp updateTime;
 	
 	@ItemType(OrganizationContactDTO.class)
 	private List<OrganizationContactDTO> adminMembers;
@@ -84,12 +86,12 @@ public class ContractDTO {
 	@ItemType(ContractTemplateDTO.class)
     private ContractTemplateDTO contractTemplate;
 	
-	public Long getCommunityId() {
-		return communityId;
+	public Timestamp getUpdateTime() {
+		return updateTime;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setUpdateTime(Timestamp updateTime) {
+		this.updateTime = updateTime;
 	}
 
 	public String getCommunityName() {
@@ -107,6 +109,23 @@ public class ContractDTO {
 	public void setAssetPaymentBillStatus(Byte assetPaymentBillStatus) {
 		this.assetPaymentBillStatus = assetPaymentBillStatus;
 	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Byte getCustomerType() {
+		return customerType;
+	}
+
+	public void setCustomerType(Byte customerType) {
+		this.customerType = customerType;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
 
 	public BigDecimal getDeposit() {
 		return deposit;

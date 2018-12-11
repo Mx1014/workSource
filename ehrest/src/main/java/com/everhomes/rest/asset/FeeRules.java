@@ -2,12 +2,11 @@
 package com.everhomes.rest.asset;
 
 
-import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
-
 import java.util.Date;
 import java.util.List;
+
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * Created by Wentian Wang on 2017/8/22.
@@ -25,6 +24,7 @@ public class FeeRules {
     private List<VariableIdAndValue> variableIdAndValueList;
     private Long lateFeeStandardId;
     private Long billGroupId;//物业缴费V6.3 签合同选择计价条款前，先选择账单组
+    private Byte oneTimeBillStatus;//缺陷 #42424 是否是一次性产生费用 add by 杨崇鑫
 
     public Long getLateFeeStandardId() {
         return lateFeeStandardId;
@@ -93,5 +93,13 @@ public class FeeRules {
 
 	public void setBillGroupId(Long billGroupId) {
 		this.billGroupId = billGroupId;
+	}
+
+	public Byte getOneTimeBillStatus() {
+		return oneTimeBillStatus;
+	}
+
+	public void setOneTimeBillStatus(Byte oneTimeBillStatus) {
+		this.oneTimeBillStatus = oneTimeBillStatus;
 	}
 }

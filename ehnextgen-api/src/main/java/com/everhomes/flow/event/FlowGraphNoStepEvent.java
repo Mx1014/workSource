@@ -1,10 +1,8 @@
 package com.everhomes.flow.event;
 
-import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowSubject;
-import com.everhomes.flow.FlowSubjectProvider;
-import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -17,7 +15,7 @@ public class FlowGraphNoStepEvent extends AbstractFlowGraphEvent {
 
     private FlowAutoStepDTO stepDTO;
     private Long firedUserId;
-    private FlowSubjectProvider subjectProvider;
+    private FlowSubject subject;
 
     public FlowGraphNoStepEvent() {
         this(null);
@@ -29,7 +27,6 @@ public class FlowGraphNoStepEvent extends AbstractFlowGraphEvent {
             firedUserId = o.getOperatorId();
         }
         this.stepDTO = o;
-        this.subjectProvider = PlatformContext.getComponent(FlowSubjectProvider.class);
     }
 
     @Override
@@ -61,12 +58,16 @@ public class FlowGraphNoStepEvent extends AbstractFlowGraphEvent {
         return new ArrayList<>();
     }
 
+    public void setSubject(FlowSubject subject) {
+        this.subject = subject;
+    }
+
     @Override
     public void fire(FlowCaseState ctx) {
     }
 
     @Override
     public FlowSubject getSubject() {
-        return subjectProvider.getFlowSubjectById(stepDTO.getSubjectId());
+        return subject;
     }
 }

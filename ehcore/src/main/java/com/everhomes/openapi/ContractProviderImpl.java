@@ -11,12 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.*;
-import com.everhomes.filedownload.Task;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAptitudeFlag;
-import com.everhomes.server.schema.tables.pojos.EhTasks;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -35,7 +32,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.asset.AppAssetCategory;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
@@ -44,30 +40,39 @@ import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
+import com.everhomes.contract.ContractReportformStatisticCommunitys;
 import com.everhomes.contract.ContractTaskOperateLog;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractChargingItemReportformDTO;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.ContractTemplateStatus;
 import com.everhomes.rest.contract.ContractTrackingTemplateCode;
+import com.everhomes.rest.contract.statistic.ContractStaticsListDTO;
+import com.everhomes.rest.contract.statistic.ContractStatisticDateType;
+import com.everhomes.rest.contract.statistic.TotalContractStaticsDTO;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhContractBuildingMappings;
 import com.everhomes.server.schema.tables.EhContractEvents;
+import com.everhomes.server.schema.tables.EhContractStatisticCommunities;
 import com.everhomes.server.schema.tables.EhContractTemplates;
 import com.everhomes.server.schema.tables.EhContracts;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
+import com.everhomes.server.schema.tables.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
@@ -91,36 +96,12 @@ import com.everhomes.varField.FieldParams;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.JoinType;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DefaultRecordMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
-
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PmResourceReservation;
+import com.everhomes.organization.pm.reportForm.PropertyReportFormStatus;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -166,6 +147,7 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public void updateContract(Contract contract) {
 		assert (contract.getId() != null);
+		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		getReadWriteDao().update(contract);
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContracts.class, contract.getId());
@@ -1681,7 +1663,7 @@ public class ContractProviderImpl implements ContractProvider {
 				       .and(a.STATUS.eq((byte)2))
 				       .fetchAnyInto(BigDecimal.class);
 	}
-
+	//合同4.0
 	@Override
 	public Boolean possibleEnterContractFuture(ContractDetailDTO currentExistContract,ContractBuildingMapping contractBuildingMapping) {
 		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1752,4 +1734,533 @@ public class ContractProviderImpl implements ContractProvider {
         return ConvertHelper.convert(result, ContractTaskOperateLog.class);
     }
 
+	@Override
+	public List<Contract> findAnyStatusContractByAddressId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return 	 context.select()
+						.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+						.leftOuterJoin(Tables.EH_CONTRACTS)
+						.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
+						.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+						.and(
+								Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.APPROVE_QUALITIED.getCode())
+								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.WAITING_FOR_APPROVAL.getCode()))
+								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.EXPIRING.getCode()))
+								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.DRAFT.getCode()))
+								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.WAITING_FOR_LAUNCH.getCode()))
+							)
+						.fetchInto(Contract.class);
+	}
+
+	//合同报表
+	@Override
+	public void deleteCommunityDataByDateStr(String dateStr) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_CONTRACT_STATISTIC_COMMUNITIES)
+				//.where(Tables.EH_CONTRACT_STATISTIC_COMMUNITIES.DATE_STR.eq(dateStr))
+				.execute();
+	}
+	
+	@Override
+	public int getTotalContractCount(Timestamp firstdateUpdateTime, Timestamp lastdateUpdateTime) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectCount()
+				       .from(Tables.EH_CONTRACTS)
+				       .where(Tables.EH_CONTRACTS.NAMESPACE_ID.ne(0))
+				       .and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()).or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.DENUNCIATION.getCode())))
+				       //.and(Tables.EH_CONTRACTS.COMMUNITY_ID.isNotNull())
+				       //.and(Tables.EH_CONTRACTS.UPDATE_TIME.between(firstdateUpdateTime, lastdateUpdateTime))
+				       .fetchAnyInto(Integer.class);
+	}
+	
+	@Override
+	public void createCommunityStatics(ContractReportformStatisticCommunitys communityStatistics) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractStatisticCommunities.class));
+		EhContractStatisticCommunitiesDao dao = new EhContractStatisticCommunitiesDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractStatisticCommunities.class));
+		communityStatistics.setId(id);
+		communityStatistics.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(communityStatistics);
+	}
+	
+	@Override
+	public List<ContractChargingItemReportformDTO> getContractChargingItemInfoList(ContractDTO contract) {
+		List<ContractChargingItemReportformDTO> list = new ArrayList<ContractChargingItemReportformDTO>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPaymentBillItems pbt = Tables.EH_PAYMENT_BILL_ITEMS.as("pbt");
+		list = context.select(pbt.NAMESPACE_ID, pbt.OWNER_ID,pbt.CHARGING_ITEMS_ID,
+	    		DSL.sum(pbt.AMOUNT_RECEIVABLE).as("AMOUNT_RECEIVABLE"), 
+	    		DSL.sum(pbt.AMOUNT_RECEIVED).as("AMOUNT_RECEIVED"), 
+	    		DSL.sum(pbt.AMOUNT_OWED).as("AMOUNT_OWED"),
+	    		DSL.sum(pbt.AMOUNT_RECEIVABLE_WITHOUT_TAX).as("AMOUNT_RECEIVABLE_WITHOUT_TAX"), 
+	    		DSL.sum(pbt.AMOUNT_RECEIVED_WITHOUT_TAX).as("AMOUNT_RECEIVED_WITHOUT_TAX"), 
+	    		DSL.sum(pbt.AMOUNT_OWED_WITHOUT_TAX).as("AMOUNT_OWED_WITHOUT_TAX"),
+	    		DSL.sum(pbt.TAX_AMOUNT).as("TAX_AMOUNT"))
+	        .from(pbt)
+	        .where(pbt.CONTRACT_ID.eq(contract.getId()))
+	        //.and(pbt.DELETE_FLAG.eq(ContractStatus.ACTIVE.getCode()))
+	        .fetchInto(ContractChargingItemReportformDTO.class);
+		return list;
+	}
+	
+	@Override
+	public List<ContractStaticsListDTO> listCommunityContractStaticsList(Integer namespaceId, List<Long> communityIds, String formatDateStr, 
+			String startTimeStr,String endTimeStr,  Byte dateType, Integer pageOffSet, Integer pageSize){
+		
+		List<ContractStaticsListDTO> result = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhCommunities a = Tables.EH_COMMUNITIES;
+		EhContractStatisticCommunities b = Tables.EH_CONTRACT_STATISTIC_COMMUNITIES;
+		
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(a.ID,a.NAME,
+				DSL.sum(b.RENT_AMOUNT),DSL.sum(b.RENTAL_AREA),DSL.sum(b.CONTRACT_COUNT),DSL.sum(b.CUSTOMER_COUNT),
+				DSL.sum(b.ORG_CONTRACT_COUNT),DSL.sum(b.ORG_CONTRACT_AMOUNT),DSL.sum(b.USER_CONTRACT_COUNT),
+				DSL.sum(b.USER_CONTRACT_AMOUNT),DSL.sum(b.DEPOSIT_AMOUNT),b.DATE_STR,DSL.sum(b.DATE_TYPE),
+				DSL.sum(b.NEW_CONTRACT_AMOUNT),DSL.sum(b.NEW_CONTRACT_AREA),DSL.sum(b.NEW_CONTRACT_COUNT),
+				DSL.sum(b.DENUNCIATION_CONTRACT_AMOUNT),DSL.sum(b.DENUNCIATION_CONTRACT_AREA),DSL.sum(b.DENUNCIATION_CONTRACT_COUNT),
+				DSL.sum(b.CHANGE_CONTRACT_AMOUNT),DSL.sum(b.CHANGE_CONTRACT_AREA),DSL.sum(b.CHANGE_CONTRACT_COUNT),
+				DSL.sum(b.RENEW_CONTRACT_AMOUNT),DSL.sum(b.RENEW_CONTRACT_AREA),DSL.sum(b.RENEW_CONTRACT_COUNT));
+		query.addFrom(a);
+		query.addJoin(b, JoinType.LEFT_OUTER_JOIN, a.ID.eq(b.COMMUNITY_ID));
+		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(a.ID.in(communityIds));
+		if (dateType == ContractStatisticDateType.YEARMMSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr)) {
+				query.addConditions(b.DATE_STR.le(endTimeStr));
+				query.addConditions(b.DATE_STR.ge(startTimeStr));
+			}else {
+				query.addConditions(b.DATE_STR.eq(formatDateStr));
+			}
+			
+		}
+		if (dateType == ContractStatisticDateType.YEARSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr)) {
+				query.addConditions(DSL.left(b.DATE_STR, 4).le(endTimeStr));
+				query.addConditions(DSL.left(b.DATE_STR, 4).ge(startTimeStr));
+			}else {
+				query.addConditions(b.DATE_STR.like("%" + formatDateStr + "%"));
+			}
+		}
+		query.addGroupBy(b.COMMUNITY_ID);
+		
+		query.addConditions(b.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		if (pageOffSet != null && pageSize != null) {
+			query.addLimit(pageOffSet, pageSize + 1);
+		}
+		query.fetch().forEach(r->{
+			ContractStaticsListDTO dto = new ContractStaticsListDTO();
+			dto.setCommunityId(r.getValue(a.ID));
+			dto.setCommunityName(r.getValue(a.NAME));
+			//dto.setDateStr(r.getValue(b.DATE_STR));
+			if (dateType != null && dateType == ContractStatisticDateType.YEARSTR.getCode()) {
+				dto.setDateStr((r.getValue(b.DATE_STR)).substring(0,4));
+			}else {
+				dto.setDateStr(r.getValue(b.DATE_STR));
+			}
+			
+			BigDecimal contractCount  = r.getValue(DSL.sum(b.CONTRACT_COUNT));
+			BigDecimal customerCount  = r.getValue(DSL.sum(b.CUSTOMER_COUNT));
+			BigDecimal orgContractCount  = r.getValue(DSL.sum(b.ORG_CONTRACT_COUNT));
+			BigDecimal userContractCount  = r.getValue(DSL.sum(b.USER_CONTRACT_COUNT));
+			BigDecimal newContractCount  = r.getValue(DSL.sum(b.NEW_CONTRACT_COUNT));
+			BigDecimal denunciationContractCount  = r.getValue(DSL.sum(b.DENUNCIATION_CONTRACT_COUNT));
+			BigDecimal changeContractCount  = r.getValue(DSL.sum(b.CHANGE_CONTRACT_COUNT));
+			BigDecimal renewContractCount  = r.getValue(DSL.sum(b.RENEW_CONTRACT_COUNT));
+			
+			dto.setRentAmount(r.getValue(DSL.sum(b.RENT_AMOUNT)));
+			dto.setRentalArea(r.getValue(DSL.sum(b.RENTAL_AREA)));
+			dto.setContractCount(contractCount!=null ? contractCount.intValue() : null);
+			dto.setCustomerCount(customerCount!=null ? customerCount.intValue() : null);
+			dto.setOrgContractCount(orgContractCount!=null ? orgContractCount.intValue() : null);
+			dto.setOrgContractAmount(r.getValue(DSL.sum(b.ORG_CONTRACT_AMOUNT)));
+			dto.setUserContractCount(userContractCount!=null ? userContractCount.intValue() : null);
+			dto.setUserContractAmount(r.getValue(DSL.sum(b.USER_CONTRACT_AMOUNT)));
+			dto.setNewContractCount(newContractCount!=null ? newContractCount.intValue() : null);
+			dto.setNewContractAmount(r.getValue(DSL.sum(b.NEW_CONTRACT_AMOUNT)));
+			dto.setNewContractArea(r.getValue(DSL.sum(b.NEW_CONTRACT_AREA)));
+			dto.setDenunciationContractCount(denunciationContractCount!=null ? denunciationContractCount.intValue() : null);
+			dto.setDenunciationContractAmount(r.getValue(DSL.sum(b.DENUNCIATION_CONTRACT_AMOUNT)));
+			dto.setDenunciationContractArea(r.getValue(DSL.sum(b.DENUNCIATION_CONTRACT_AREA)));
+			dto.setChangeContractCount(changeContractCount!=null ? changeContractCount.intValue() : null);
+			dto.setChangeContractAmount(r.getValue(DSL.sum(b.CHANGE_CONTRACT_AMOUNT)));
+			dto.setChangeContractArea(r.getValue(DSL.sum(b.CHANGE_CONTRACT_AREA)));
+			dto.setRenewContractCount(renewContractCount!=null ? renewContractCount.intValue() : null);
+			dto.setRenewContractAmount(r.getValue(DSL.sum(b.RENEW_CONTRACT_AMOUNT)));
+			dto.setRenewContractArea(r.getValue(DSL.sum(b.RENEW_CONTRACT_AREA)));
+			dto.setDepositAmount(r.getValue(DSL.sum(b.DEPOSIT_AMOUNT)));
+			result.add(dto);
+		});
+		return result;
+	}
+	
+	@Override
+	public TotalContractStaticsDTO getTotalContractStatics(Integer namespaceId, List<Long> communityIds,String formatDateStr, String startTimeStr,String endTimeStr, Byte dateType) {
+		TotalContractStaticsDTO result = new TotalContractStaticsDTO();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhContractStatisticCommunities a = Tables.EH_CONTRACT_STATISTIC_COMMUNITIES;
+		
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(DSL.countDistinct(a.COMMUNITY_ID),DSL.sum(a.RENT_AMOUNT),DSL.sum(a.RENTAL_AREA),DSL.sum(a.CONTRACT_COUNT),DSL.sum(a.CUSTOMER_COUNT),DSL.sum(a.ORG_CONTRACT_COUNT),
+				DSL.sum(a.ORG_CONTRACT_AMOUNT),DSL.sum(a.USER_CONTRACT_COUNT),DSL.sum(a.USER_CONTRACT_AMOUNT),
+				DSL.sum(a.NEW_CONTRACT_COUNT),DSL.sum(a.NEW_CONTRACT_AMOUNT),DSL.sum(a.NEW_CONTRACT_AREA),
+				DSL.sum(a.DENUNCIATION_CONTRACT_COUNT),DSL.sum(a.DENUNCIATION_CONTRACT_AMOUNT),DSL.sum(a.DENUNCIATION_CONTRACT_AREA),
+				DSL.sum(a.CHANGE_CONTRACT_COUNT),DSL.sum(a.CHANGE_CONTRACT_AMOUNT),DSL.sum(a.CHANGE_CONTRACT_AREA),
+				DSL.sum(a.RENEW_CONTRACT_COUNT),DSL.sum(a.RENEW_CONTRACT_AMOUNT),DSL.sum(a.RENEW_CONTRACT_AREA),
+				DSL.sum(a.DEPOSIT_AMOUNT));
+		query.addFrom(a);
+		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
+		if (communityIds != null) {
+			query.addConditions(a.COMMUNITY_ID.in(communityIds));
+		}
+		//处理时间问题
+		if (dateType != null && dateType == ContractStatisticDateType.YEARMMSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr) && startTimeStr != null && endTimeStr != null) {
+				query.addConditions(a.DATE_STR.le(endTimeStr));
+				query.addConditions(a.DATE_STR.ge(startTimeStr));
+			}else {
+				query.addConditions(a.DATE_STR.eq(formatDateStr));
+			}
+		}
+		if (dateType != null && dateType == ContractStatisticDateType.YEARSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr) && startTimeStr != null && endTimeStr != null) {
+				query.addConditions(DSL.left(a.DATE_STR, 4).le(endTimeStr));
+				query.addConditions(DSL.left(a.DATE_STR, 4).ge(startTimeStr));
+			}else {
+				query.addConditions(a.DATE_STR.like("%" + formatDateStr + "%"));
+			}
+		}
+		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		query.fetch().forEach(r->{
+			Integer communityCount = r.getValue(DSL.countDistinct(a.COMMUNITY_ID));
+			BigDecimal contractCount  = r.getValue(DSL.sum(a.CONTRACT_COUNT));
+			BigDecimal customerCount  = r.getValue(DSL.sum(a.CUSTOMER_COUNT));
+			BigDecimal orgContractCount  = r.getValue(DSL.sum(a.ORG_CONTRACT_COUNT));
+			BigDecimal userContractCount  = r.getValue(DSL.sum(a.USER_CONTRACT_COUNT));
+			BigDecimal newContractCount  = r.getValue(DSL.sum(a.NEW_CONTRACT_COUNT));
+			BigDecimal denunciationContractCount  = r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_COUNT));
+			BigDecimal changeContractCount  = r.getValue(DSL.sum(a.CHANGE_CONTRACT_COUNT));
+			BigDecimal renewContractCount  = r.getValue(DSL.sum(a.RENEW_CONTRACT_COUNT));
+			
+			result.setCommunityCount(communityCount!=null ? communityCount : null);
+			result.setRentAmount(r.getValue(DSL.sum(a.RENT_AMOUNT)));
+			result.setRentalArea(r.getValue(DSL.sum(a.RENTAL_AREA)));
+			result.setContractCount(contractCount!=null ? contractCount.intValue() : null);
+			result.setCustomerCount(customerCount!=null ? customerCount.intValue() : null);
+			result.setOrgContractCount(orgContractCount!=null ? orgContractCount.intValue() : null);
+			result.setOrgContractAmount(r.getValue(DSL.sum(a.ORG_CONTRACT_AMOUNT)));
+			result.setUserContractCount(userContractCount!=null ? userContractCount.intValue() : null);
+			result.setUserContractAmount(r.getValue(DSL.sum(a.USER_CONTRACT_AMOUNT)));
+			result.setNewContractCount(newContractCount!=null ? newContractCount.intValue() : null);
+			result.setNewContractAmount(r.getValue(DSL.sum(a.NEW_CONTRACT_AMOUNT)));
+			result.setNewContractArea(r.getValue(DSL.sum(a.NEW_CONTRACT_AREA)));
+			result.setDenunciationContractCount(denunciationContractCount!=null ? denunciationContractCount.intValue() : null);
+			result.setDenunciationContractAmount(r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_AMOUNT)));
+			result.setDenunciationContractArea(r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_AREA)));
+			result.setChangeContractCount(changeContractCount!=null ? changeContractCount.intValue() : null);
+			result.setChangeContractAmount(r.getValue(DSL.sum(a.CHANGE_CONTRACT_AMOUNT)));
+			result.setChangeContractArea(r.getValue(DSL.sum(a.CHANGE_CONTRACT_AREA)));
+			result.setRenewContractCount(renewContractCount!=null ? renewContractCount.intValue() : null);
+			result.setRenewContractAmount(r.getValue(DSL.sum(a.RENEW_CONTRACT_AMOUNT)));
+			result.setRenewContractArea(r.getValue(DSL.sum(a.RENEW_CONTRACT_AREA)));
+			result.setDepositAmount(r.getValue(DSL.sum(a.DEPOSIT_AMOUNT)));
+			
+		});
+		return result;
+	}
+	
+	@Override
+	public List<TotalContractStaticsDTO> listcontractStaticsListTimeDimension(Integer namespaceId, List<Long> communityIds, String formatDateStr, 
+			String startTimeStr,String endTimeStr,  Byte dateType, Integer pageOffSet, Integer pageSize){
+		
+		List<TotalContractStaticsDTO> resultList = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhContractStatisticCommunities a = Tables.EH_CONTRACT_STATISTIC_COMMUNITIES;
+		
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(a.DATE_STR,DSL.countDistinct(a.COMMUNITY_ID),DSL.sum(a.RENT_AMOUNT),DSL.sum(a.RENTAL_AREA),DSL.sum(a.CONTRACT_COUNT),DSL.sum(a.CUSTOMER_COUNT),DSL.sum(a.ORG_CONTRACT_COUNT),
+				DSL.sum(a.ORG_CONTRACT_AMOUNT),DSL.sum(a.USER_CONTRACT_COUNT),DSL.sum(a.USER_CONTRACT_AMOUNT),
+				DSL.sum(a.NEW_CONTRACT_COUNT),DSL.sum(a.NEW_CONTRACT_AMOUNT),DSL.sum(a.NEW_CONTRACT_AREA),
+				DSL.sum(a.DENUNCIATION_CONTRACT_COUNT),DSL.sum(a.DENUNCIATION_CONTRACT_AMOUNT),DSL.sum(a.DENUNCIATION_CONTRACT_AREA),
+				DSL.sum(a.CHANGE_CONTRACT_COUNT),DSL.sum(a.CHANGE_CONTRACT_AMOUNT),DSL.sum(a.CHANGE_CONTRACT_AREA),
+				DSL.sum(a.RENEW_CONTRACT_COUNT),DSL.sum(a.RENEW_CONTRACT_AMOUNT),DSL.sum(a.RENEW_CONTRACT_AREA),
+				DSL.sum(a.DEPOSIT_AMOUNT));
+		query.addFrom(a);
+		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
+		if (communityIds != null) {
+			query.addConditions(a.COMMUNITY_ID.in(communityIds));
+		}
+		//处理时间问题
+		if (dateType != null && dateType == ContractStatisticDateType.YEARMMSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr) && startTimeStr != null && endTimeStr != null) {
+				query.addConditions(a.DATE_STR.le(endTimeStr));
+				query.addConditions(a.DATE_STR.ge(startTimeStr));
+			}else {
+				query.addConditions(a.DATE_STR.eq(formatDateStr));
+			}
+			query.addGroupBy(a.DATE_STR);
+		}
+		if (dateType != null && dateType == ContractStatisticDateType.YEARSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr) && startTimeStr != null && endTimeStr != null) {
+				query.addConditions(DSL.left(a.DATE_STR, 4).le(endTimeStr));
+				query.addConditions(DSL.left(a.DATE_STR, 4).ge(startTimeStr));
+			}else {
+				query.addConditions(a.DATE_STR.like("%" + formatDateStr + "%"));
+			}
+			query.addGroupBy(DSL.left(a.DATE_STR, 4));
+		}
+		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		//query.addGroupBy(a.DATE_STR);
+		//query.addGroupBy(a.COMMUNITY_ID);
+		
+		query.fetch().forEach(r->{
+			TotalContractStaticsDTO result = new TotalContractStaticsDTO();
+			
+			Integer communityCount = r.getValue(DSL.count(a.COMMUNITY_ID));
+			BigDecimal contractCount  = r.getValue(DSL.sum(a.CONTRACT_COUNT));
+			BigDecimal customerCount  = r.getValue(DSL.sum(a.CUSTOMER_COUNT));
+			BigDecimal orgContractCount  = r.getValue(DSL.sum(a.ORG_CONTRACT_COUNT));
+			BigDecimal userContractCount  = r.getValue(DSL.sum(a.USER_CONTRACT_COUNT));
+			BigDecimal newContractCount  = r.getValue(DSL.sum(a.NEW_CONTRACT_COUNT));
+			BigDecimal denunciationContractCount  = r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_COUNT));
+			BigDecimal changeContractCount  = r.getValue(DSL.sum(a.CHANGE_CONTRACT_COUNT));
+			BigDecimal renewContractCount  = r.getValue(DSL.sum(a.RENEW_CONTRACT_COUNT));
+			
+			
+			if (dateType != null && dateType == ContractStatisticDateType.YEARSTR.getCode()) {
+				result.setDateStr((r.getValue(a.DATE_STR)).substring(0,4));
+			}else {
+				result.setDateStr(r.getValue(a.DATE_STR));
+			}
+			//result.setDateStr(r.getValue(a.DATE_STR));
+			result.setCommunityCount(communityCount!=null ? communityCount : null);
+			result.setRentAmount(r.getValue(DSL.sum(a.RENT_AMOUNT)));
+			result.setRentalArea(r.getValue(DSL.sum(a.RENTAL_AREA)));
+			result.setContractCount(contractCount!=null ? contractCount.intValue() : null);
+			result.setCustomerCount(customerCount!=null ? customerCount.intValue() : null);
+			result.setOrgContractCount(orgContractCount!=null ? orgContractCount.intValue() : null);
+			result.setOrgContractAmount(r.getValue(DSL.sum(a.ORG_CONTRACT_AMOUNT)));
+			result.setUserContractCount(userContractCount!=null ? userContractCount.intValue() : null);
+			result.setUserContractAmount(r.getValue(DSL.sum(a.USER_CONTRACT_AMOUNT)));
+			result.setNewContractCount(newContractCount!=null ? newContractCount.intValue() : null);
+			result.setNewContractAmount(r.getValue(DSL.sum(a.NEW_CONTRACT_AMOUNT)));
+			result.setNewContractArea(r.getValue(DSL.sum(a.NEW_CONTRACT_AREA)));
+			result.setDenunciationContractCount(denunciationContractCount!=null ? denunciationContractCount.intValue() : null);
+			result.setDenunciationContractAmount(r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_AMOUNT)));
+			result.setDenunciationContractArea(r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_AREA)));
+			result.setChangeContractCount(changeContractCount!=null ? changeContractCount.intValue() : null);
+			result.setChangeContractAmount(r.getValue(DSL.sum(a.CHANGE_CONTRACT_AMOUNT)));
+			result.setChangeContractArea(r.getValue(DSL.sum(a.CHANGE_CONTRACT_AREA)));
+			result.setRenewContractCount(renewContractCount!=null ? renewContractCount.intValue() : null);
+			result.setRenewContractAmount(r.getValue(DSL.sum(a.RENEW_CONTRACT_AMOUNT)));
+			result.setRenewContractArea(r.getValue(DSL.sum(a.RENEW_CONTRACT_AREA)));
+			result.setDepositAmount(r.getValue(DSL.sum(a.DEPOSIT_AMOUNT)));
+			
+			resultList.add(result);
+		});
+		return resultList;
+	}
+	
+	@Override
+	public List<TotalContractStaticsDTO> listcontractStaticsListCommunityTotal(Integer namespaceId, List<Long> communityIds, String formatDateStr, 
+			String startTimeStr,String endTimeStr,  Byte dateType, Integer pageOffSet, Integer pageSize){
+		
+		List<TotalContractStaticsDTO> resultList = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhContractStatisticCommunities a = Tables.EH_CONTRACT_STATISTIC_COMMUNITIES;
+		EhCommunities b = Tables.EH_COMMUNITIES;
+		
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(b.NAME,a.DATE_STR,DSL.count(a.COMMUNITY_ID),DSL.sum(a.RENT_AMOUNT),DSL.sum(a.RENTAL_AREA),DSL.sum(a.CONTRACT_COUNT),DSL.sum(a.CUSTOMER_COUNT),DSL.sum(a.ORG_CONTRACT_COUNT),
+				DSL.sum(a.ORG_CONTRACT_AMOUNT),DSL.sum(a.USER_CONTRACT_COUNT),DSL.sum(a.USER_CONTRACT_AMOUNT),
+				DSL.sum(a.NEW_CONTRACT_COUNT),DSL.sum(a.NEW_CONTRACT_AMOUNT),DSL.sum(a.NEW_CONTRACT_AREA),
+				DSL.sum(a.DENUNCIATION_CONTRACT_COUNT),DSL.sum(a.DENUNCIATION_CONTRACT_AMOUNT),DSL.sum(a.DENUNCIATION_CONTRACT_AREA),
+				DSL.sum(a.CHANGE_CONTRACT_COUNT),DSL.sum(a.CHANGE_CONTRACT_AMOUNT),DSL.sum(a.CHANGE_CONTRACT_AREA),
+				DSL.sum(a.RENEW_CONTRACT_COUNT),DSL.sum(a.RENEW_CONTRACT_AMOUNT),DSL.sum(a.RENEW_CONTRACT_AREA),
+				DSL.sum(a.DEPOSIT_AMOUNT));
+		query.addFrom(a,b);
+		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
+		if (communityIds != null) {
+			query.addConditions(a.COMMUNITY_ID.in(communityIds));
+		}
+		query.addConditions(b.ID.eq(a.COMMUNITY_ID));
+		//处理时间问题
+		if (dateType != null && dateType == ContractStatisticDateType.YEARMMSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr) && startTimeStr != null && endTimeStr != null) {
+				query.addConditions(a.DATE_STR.le(endTimeStr));
+				query.addConditions(a.DATE_STR.ge(startTimeStr));
+			}else {
+				query.addConditions(a.DATE_STR.eq(formatDateStr));
+			}
+			query.addGroupBy(a.DATE_STR);
+		}
+		if (dateType != null && dateType == ContractStatisticDateType.YEARSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr) && startTimeStr != null && endTimeStr != null) {
+				query.addConditions(DSL.left(a.DATE_STR, 4).le(endTimeStr));
+				query.addConditions(DSL.left(a.DATE_STR, 4).ge(startTimeStr));
+			}else {
+				query.addConditions(a.DATE_STR.like("%" + formatDateStr + "%"));
+			}
+			query.addGroupBy(DSL.left(a.DATE_STR, 4));
+		}
+		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		//query.addGroupBy(a.DATE_STR);
+		query.addGroupBy(a.COMMUNITY_ID);
+		
+		query.fetch().forEach(r->{
+			TotalContractStaticsDTO result = new TotalContractStaticsDTO();
+			
+			Integer communityCount = r.getValue(DSL.count(a.COMMUNITY_ID));
+			BigDecimal contractCount  = r.getValue(DSL.sum(a.CONTRACT_COUNT));
+			BigDecimal customerCount  = r.getValue(DSL.sum(a.CUSTOMER_COUNT));
+			BigDecimal orgContractCount  = r.getValue(DSL.sum(a.ORG_CONTRACT_COUNT));
+			BigDecimal userContractCount  = r.getValue(DSL.sum(a.USER_CONTRACT_COUNT));
+			BigDecimal newContractCount  = r.getValue(DSL.sum(a.NEW_CONTRACT_COUNT));
+			BigDecimal denunciationContractCount  = r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_COUNT));
+			BigDecimal changeContractCount  = r.getValue(DSL.sum(a.CHANGE_CONTRACT_COUNT));
+			BigDecimal renewContractCount  = r.getValue(DSL.sum(a.RENEW_CONTRACT_COUNT));
+			
+			
+			if (dateType != null && dateType == ContractStatisticDateType.YEARSTR.getCode()) {
+				result.setDateStr((r.getValue(a.DATE_STR)).substring(0,4));
+			}else {
+				result.setDateStr(r.getValue(a.DATE_STR));
+			}
+			result.setCommunityName(r.getValue(b.NAME));
+			result.setCommunityCount(communityCount!=null ? communityCount : null);
+			result.setRentAmount(r.getValue(DSL.sum(a.RENT_AMOUNT)));
+			result.setRentalArea(r.getValue(DSL.sum(a.RENTAL_AREA)));
+			result.setContractCount(contractCount!=null ? contractCount.intValue() : null);
+			result.setCustomerCount(customerCount!=null ? customerCount.intValue() : null);
+			result.setOrgContractCount(orgContractCount!=null ? orgContractCount.intValue() : null);
+			result.setOrgContractAmount(r.getValue(DSL.sum(a.ORG_CONTRACT_AMOUNT)));
+			result.setUserContractCount(userContractCount!=null ? userContractCount.intValue() : null);
+			result.setUserContractAmount(r.getValue(DSL.sum(a.USER_CONTRACT_AMOUNT)));
+			result.setNewContractCount(newContractCount!=null ? newContractCount.intValue() : null);
+			result.setNewContractAmount(r.getValue(DSL.sum(a.NEW_CONTRACT_AMOUNT)));
+			result.setNewContractArea(r.getValue(DSL.sum(a.NEW_CONTRACT_AREA)));
+			result.setDenunciationContractCount(denunciationContractCount!=null ? denunciationContractCount.intValue() : null);
+			result.setDenunciationContractAmount(r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_AMOUNT)));
+			result.setDenunciationContractArea(r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_AREA)));
+			result.setChangeContractCount(changeContractCount!=null ? changeContractCount.intValue() : null);
+			result.setChangeContractAmount(r.getValue(DSL.sum(a.CHANGE_CONTRACT_AMOUNT)));
+			result.setChangeContractArea(r.getValue(DSL.sum(a.CHANGE_CONTRACT_AREA)));
+			result.setRenewContractCount(renewContractCount!=null ? renewContractCount.intValue() : null);
+			result.setRenewContractAmount(r.getValue(DSL.sum(a.RENEW_CONTRACT_AMOUNT)));
+			result.setRenewContractArea(r.getValue(DSL.sum(a.RENEW_CONTRACT_AREA)));
+			result.setDepositAmount(r.getValue(DSL.sum(a.DEPOSIT_AMOUNT)));
+			
+			resultList.add(result);
+		});
+		return resultList;
+	}
+	
+	@Override
+	public List<ContractStaticsListDTO> listSearchContractStaticsTimeDimension(Integer namespaceId, List<Long> communityIds, String formatDateStr, 
+			String startTimeStr,String endTimeStr,  Byte dateType, Integer pageOffSet, Integer pageSize){
+		
+		List<ContractStaticsListDTO> resultList = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhContractStatisticCommunities a = Tables.EH_CONTRACT_STATISTIC_COMMUNITIES;
+		EhCommunities b = Tables.EH_COMMUNITIES;
+		
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(b.NAME,a.DATE_STR,DSL.count(a.COMMUNITY_ID),DSL.sum(a.RENT_AMOUNT),DSL.sum(a.RENTAL_AREA),DSL.sum(a.CONTRACT_COUNT),DSL.sum(a.CUSTOMER_COUNT),DSL.sum(a.ORG_CONTRACT_COUNT),
+				DSL.sum(a.ORG_CONTRACT_AMOUNT),DSL.sum(a.USER_CONTRACT_COUNT),DSL.sum(a.USER_CONTRACT_AMOUNT),
+				DSL.sum(a.NEW_CONTRACT_COUNT),DSL.sum(a.NEW_CONTRACT_AMOUNT),DSL.sum(a.NEW_CONTRACT_AREA),
+				DSL.sum(a.DENUNCIATION_CONTRACT_COUNT),DSL.sum(a.DENUNCIATION_CONTRACT_AMOUNT),DSL.sum(a.DENUNCIATION_CONTRACT_AREA),
+				DSL.sum(a.CHANGE_CONTRACT_COUNT),DSL.sum(a.CHANGE_CONTRACT_AMOUNT),DSL.sum(a.CHANGE_CONTRACT_AREA),
+				DSL.sum(a.RENEW_CONTRACT_COUNT),DSL.sum(a.RENEW_CONTRACT_AMOUNT),DSL.sum(a.RENEW_CONTRACT_AREA),
+				DSL.sum(a.DEPOSIT_AMOUNT));
+		//query.addFrom(a);
+		/*query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
+		if (communityIds != null) {
+			query.addConditions(a.COMMUNITY_ID.in(communityIds));
+		}
+		*/
+		query.addFrom(a,b);
+		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
+		if (communityIds != null) {
+			query.addConditions(a.COMMUNITY_ID.in(communityIds));
+		}
+		query.addConditions(b.ID.eq(a.COMMUNITY_ID));
+		//处理时间问题
+		if (dateType != null && dateType == ContractStatisticDateType.YEARMMSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr) && startTimeStr != null && endTimeStr != null) {
+				query.addConditions(a.DATE_STR.le(endTimeStr));
+				query.addConditions(a.DATE_STR.ge(startTimeStr));
+			}else {
+				query.addConditions(a.DATE_STR.eq(formatDateStr));
+			}
+			query.addGroupBy(a.DATE_STR);
+			query.addGroupBy(a.COMMUNITY_ID);
+		}
+		if (dateType != null && dateType == ContractStatisticDateType.YEARSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr) && startTimeStr != null && endTimeStr != null) {
+				query.addConditions(DSL.left(a.DATE_STR, 4).le(endTimeStr));
+				query.addConditions(DSL.left(a.DATE_STR, 4).ge(startTimeStr));
+			}else {
+				query.addConditions(a.DATE_STR.like("%" + formatDateStr + "%"));
+			}
+			query.addGroupBy(DSL.left(a.DATE_STR, 4));
+			query.addGroupBy(a.COMMUNITY_ID);
+		}
+		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		//query.addGroupBy(a.DATE_STR);
+		//query.addGroupBy(a.COMMUNITY_ID);
+		
+		query.fetch().forEach(r->{
+			ContractStaticsListDTO result = new ContractStaticsListDTO();
+			
+			Integer communityCount = r.getValue(DSL.count(a.COMMUNITY_ID));
+			BigDecimal contractCount  = r.getValue(DSL.sum(a.CONTRACT_COUNT));
+			BigDecimal customerCount  = r.getValue(DSL.sum(a.CUSTOMER_COUNT));
+			BigDecimal orgContractCount  = r.getValue(DSL.sum(a.ORG_CONTRACT_COUNT));
+			BigDecimal userContractCount  = r.getValue(DSL.sum(a.USER_CONTRACT_COUNT));
+			BigDecimal newContractCount  = r.getValue(DSL.sum(a.NEW_CONTRACT_COUNT));
+			BigDecimal denunciationContractCount  = r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_COUNT));
+			BigDecimal changeContractCount  = r.getValue(DSL.sum(a.CHANGE_CONTRACT_COUNT));
+			BigDecimal renewContractCount  = r.getValue(DSL.sum(a.RENEW_CONTRACT_COUNT));
+			
+			
+			if (dateType != null && dateType == ContractStatisticDateType.YEARSTR.getCode()) {
+				result.setDateStr((r.getValue(a.DATE_STR)).substring(0,4));
+			}else {
+				result.setDateStr(r.getValue(a.DATE_STR));
+			}
+			//result.setDateStr(r.getValue(a.DATE_STR));
+			//result.setCommunityCount(communityCount!=null ? communityCount : null);
+			result.setCommunityName(r.getValue(b.NAME));
+			result.setRentAmount(r.getValue(DSL.sum(a.RENT_AMOUNT)));
+			result.setRentalArea(r.getValue(DSL.sum(a.RENTAL_AREA)));
+			result.setContractCount(contractCount!=null ? contractCount.intValue() : null);
+			result.setCustomerCount(customerCount!=null ? customerCount.intValue() : null);
+			result.setOrgContractCount(orgContractCount!=null ? orgContractCount.intValue() : null);
+			result.setOrgContractAmount(r.getValue(DSL.sum(a.ORG_CONTRACT_AMOUNT)));
+			result.setUserContractCount(userContractCount!=null ? userContractCount.intValue() : null);
+			result.setUserContractAmount(r.getValue(DSL.sum(a.USER_CONTRACT_AMOUNT)));
+			result.setNewContractCount(newContractCount!=null ? newContractCount.intValue() : null);
+			result.setNewContractAmount(r.getValue(DSL.sum(a.NEW_CONTRACT_AMOUNT)));
+			result.setNewContractArea(r.getValue(DSL.sum(a.NEW_CONTRACT_AREA)));
+			result.setDenunciationContractCount(denunciationContractCount!=null ? denunciationContractCount.intValue() : null);
+			result.setDenunciationContractAmount(r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_AMOUNT)));
+			result.setDenunciationContractArea(r.getValue(DSL.sum(a.DENUNCIATION_CONTRACT_AREA)));
+			result.setChangeContractCount(changeContractCount!=null ? changeContractCount.intValue() : null);
+			result.setChangeContractAmount(r.getValue(DSL.sum(a.CHANGE_CONTRACT_AMOUNT)));
+			result.setChangeContractArea(r.getValue(DSL.sum(a.CHANGE_CONTRACT_AREA)));
+			result.setRenewContractCount(renewContractCount!=null ? renewContractCount.intValue() : null);
+			result.setRenewContractAmount(r.getValue(DSL.sum(a.RENEW_CONTRACT_AMOUNT)));
+			result.setRenewContractArea(r.getValue(DSL.sum(a.RENEW_CONTRACT_AREA)));
+			result.setDepositAmount(r.getValue(DSL.sum(a.DEPOSIT_AMOUNT)));
+			
+			resultList.add(result);
+		});
+		return resultList;
+	}
 }

@@ -167,18 +167,19 @@ public class ActivityButtServiceImpl implements ActivityButtService {
             return entities;
         }
         //将结果按StartTime开始时间 由近及远排序
-        Collections.sort(activitys,new Comparator<ActivityModel>(){
-            public int compare(ActivityModel arg0, ActivityModel arg1) {
-                if(StringUtils.isBlank(arg0.getStartTime())){
-                    arg0.setStartTime("0");
-                }
-                if (StringUtils.isBlank(arg1.getStartTime())){
-                    arg1.setStartTime("0");
-                }
-                //将2018/09/15这种字符串转为＂20180915＂这种来比较
-                return arg1.getStartTime().replace("/","").compareTo(arg0.getStartTime().replace("/",""));
-            }
-        });
+        //不需要排序
+//        Collections.sort(activitys,new Comparator<ActivityModel>(){
+//            public int compare(ActivityModel arg0, ActivityModel arg1) {
+//                if(StringUtils.isBlank(arg0.getStartTime())){
+//                    arg0.setStartTime("0");
+//                }
+//                if (StringUtils.isBlank(arg1.getStartTime())){
+//                    arg1.setStartTime("0");
+//                }
+//                //将2018/09/15这种字符串转为＂20180915＂这种来比较
+//                return arg1.getStartTime().replace("/","").compareTo(arg0.getStartTime().replace("/",""));
+//            }
+//        });
         for(ActivityModel model : activitys){
             //达到设置值即退出
             if(entities.size() == fillterSize ){

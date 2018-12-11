@@ -33,14 +33,20 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_approval.GeneralApprovalVal;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
@@ -199,13 +205,17 @@ import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceAttachmentsDao;
+import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadItems;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
+import com.everhomes.server.schema.tables.records.EhAllianceServiceCategoryMatchRecord;
+import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
 import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAllianceAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.servicehotline.HotlineService;
@@ -253,6 +263,7 @@ import org.jooq.Record;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -405,6 +416,16 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private FlowProvider flowProvider;
 	@Autowired
 	private CoordinationProvider coordinationProvider;
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
+	@Autowired
+	private NamespaceProvider namespaceProvider;
+	@Autowired
+	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	private GeneralApprovalValProvider generalApprovalValProvider;
+	
+	
 	
 	private void populateYellowPage(YellowPage yellowPage) {
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -4355,5 +4376,187 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		return configurationProvider.getBooleanValue(namespaceId, "serviceAlliance.offline.flag", false);
 	} 
+	
+	
+	@Override
+	public String recoveryListCategoryDataDisappearBug() {
+		
+        List<Namespace> namespaces = namespaceProvider.listNamespaces();
+        
+        StringBuilder sb = new StringBuilder();
+        
+        for (Namespace namespace : namespaces) {
+    		int update = 0;
+        	
+        	//获取所有list/policy/filterlist/houseKeeper样式的模块
+    		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(namespace.getId(), 40500L, null,
+    				null, null);
+    		for(ServiceModuleApp app : apps) {
+    			if (!isListCategoryModule(app)) {
+    				continue;
+    			}
+    			
+    			update += dealRecovery(app);
+    		}
+    		if (update > 0) {
+    			sb.append(" ns:"+namespace.getId()+" u:"+update);
+    		}
+        }
+		
+		return sb.toString();
+	}
+
+	private int dealRecovery(ServiceModuleApp app) {
+
+		int update = 0;
+		// 获取所有的样式。
+		List<ServiceAllianceCategories> cags = yellowPageProvider.listCategories(null, null, null, null, app.getNamespaceId(),
+				null, Long.parseLong(app.getCustomTag()), null, true);
+
+		for (ServiceAllianceCategories cag : cags) {
+			update++;
+			dbProvider.execute(r -> {
+				// 更新为删除
+				cag.setStatus((byte) 0);
+				yellowPageProvider.updateServiceAllianceCategory(cag);
+
+				// 相应的match做更新
+				String newCagName = getParentCagName(cag);
+				reNewMatchByCategory(cag, newCagName);
+				return null;
+			});
+		}
+		
+		return update;
+
+	}
+
+	private String getParentCagName(ServiceAllianceCategories cag) {
+		
+		if (StringUtils.isEmpty(cag.getPath())) {
+			return cag.getName();
+		}
+		
+		String[] names = cag.getPath().split("/");
+		if (null == names) {
+			return cag.getName();
+		}
+		
+		return names[0];
+	}
+
+	private boolean isListCategoryModule(ServiceModuleApp app) {
+		ServiceAllianceInstanceConfig config = (ServiceAllianceInstanceConfig) StringHelper
+				.fromJsonString(app.getInstanceConfig(), ServiceAllianceInstanceConfig.class);
+		if (null == config) {
+			return false;
+		}
+		
+		String displayType = config.getDisplayType();
+		if ("list".equals(displayType)
+				||  "filterlist".equals(displayType)
+				||  "policydeclare".equals(displayType)
+				||  "housekeeper".equals(displayType)
+			) {
+			return true;
+		}
+
+		return false;
+	}
+	
+	
+	public void reNewMatchByCategory(ServiceAllianceCategories oldCag, String newCagName) {
+		com.everhomes.server.schema.tables.EhAllianceServiceCategoryMatch MATCH = Tables.EH_ALLIANCE_SERVICE_CATEGORY_MATCH;
+		UpdateQuery<EhAllianceServiceCategoryMatchRecord> updateQuery = dbProvider.getDslContext(AccessSpec.readWrite()).updateQuery(MATCH);
+		updateQuery.addValue(MATCH.OWNER_TYPE, oldCag.getOwnerType());
+		updateQuery.addValue(MATCH.OWNER_ID, oldCag.getOwnerId());
+		updateQuery.addValue(MATCH.CATEGORY_ID, oldCag.getParentId());
+		updateQuery.addValue(MATCH.CATEGORY_NAME, newCagName);
+		updateQuery.addConditions(MATCH.TYPE.eq(oldCag.getType()));
+		updateQuery.addConditions(MATCH.NAMESPACE_ID.eq(oldCag.getNamespaceId()));
+		updateQuery.addConditions(MATCH.CATEGORY_ID.eq(oldCag.getId()));
+		updateQuery.execute();
+	}
+	
+	
+	private List<FlowCase> queryFlowCases() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhFlowCasesRecord> query = context.selectQuery(Tables.EH_FLOW_CASES);
+		query.addConditions(Tables.EH_FLOW_CASES.MODULE_ID.eq(40500L).or(Tables.EH_FLOW_CASES.MODULE_TYPE.eq("service_alliance")));
+		return query.fetchInto(FlowCase.class);
+	}
+	
+	@Override
+	public String transferFlowCaseVals() {
+		int total = 0;
+		int alreadyHave = 0;
+		int noneVal = 0;
+		int update = 0;
+		int noForm = 0;
+		StringBuilder noformstr = new StringBuilder("(");
+		List<FlowCase> flowCases = queryFlowCases();
+
+		for (FlowCase flowCase : flowCases) {
+
+			total++;
+
+			boolean isExist = findFormValByFlowCase(flowCase);
+			if (isExist) {
+				alreadyHave++;
+				continue;
+			}
+
+			List<GeneralApprovalVal> approvalVals = queryApprovalValsByFlowCase(flowCase);
+			if (CollectionUtils.isEmpty(approvalVals)) {
+				noneVal++;
+				continue;
+			}
+
+			// 查表单
+			GeneralForm form = generalFormProvider.getGeneralFormByApproval(approvalVals.get(0).getFormOriginId(),
+					approvalVals.get(0).getFormVersion());
+			if (null == form) {
+				noForm++;
+				noformstr.append(flowCase.getId() + ",");
+				continue;
+			}
+
+			update++;
+			dbProvider.execute(r -> {
+
+				for (GeneralApprovalVal approvalVal : approvalVals) {
+					GeneralFormVal obj = ConvertHelper.convert(form, GeneralFormVal.class);
+					obj.setSourceType(EhFlowCases.class.getSimpleName());
+					obj.setSourceId(approvalVal.getFlowCaseId());
+					obj.setFieldName(approvalVal.getFieldName());
+					obj.setFieldType(approvalVal.getFieldType());
+					obj.setFieldValue(approvalVal.getFieldStr3());
+					generalFormValProvider.createGeneralFormVal(obj);
+				}
+
+				return null;
+			});
+
+		}
+		
+		noformstr.append(")");
+		
+		return "t:"+total+" u:"+update+" ah:"+alreadyHave+" nv:"+noneVal+" nf:"+noForm+" "+noformstr.toString();
+	}
+
+	private List<GeneralApprovalVal> queryApprovalValsByFlowCase(FlowCase flowCase) {
+		return generalApprovalValProvider.queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
+	}
+
+	private boolean findFormValByFlowCase(FlowCase flowCase) {
+		
+        List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(), flowCase.getId());
+		if(CollectionUtils.isEmpty(vals)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
 
 }

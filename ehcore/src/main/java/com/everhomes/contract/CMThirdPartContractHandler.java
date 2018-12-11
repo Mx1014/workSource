@@ -219,6 +219,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }
 
         }
+
         //此方法可以获取当前正在进行同步的数据
         List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
 
@@ -255,6 +256,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
         //String url = "http://183.62.222.87:5902/sf";
 
+        backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
 
         //将同步锁置为失效，此时可以再次创建任务
         zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
@@ -909,7 +911,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         customer.setStatus(CommonStatus.ACTIVE.getCode());
         customer.setOperatorUid(1L);
         customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
-        customer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
+        customer.setLevelItemId(CustomerLevelType.REGISTERED_CUSTOMER.getCode());
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //      customer.setVersion(ebeiCustomer.getVersion());
 //            if(customer.getTrackingUid() == null) {

@@ -12,7 +12,8 @@ public class UserIdentifier extends EhUserIdentifiers {
 
     public void incrementVersion() {
         synchronized (this.getId()) {
-            this.setUpdateVersion(this.getUpdateVersion() + 1);
+            Long ver = this.getUpdateVersion() == null ? 0 : this.getUpdateVersion();
+            this.setUpdateVersion(ver + 1);
         }
     }
 

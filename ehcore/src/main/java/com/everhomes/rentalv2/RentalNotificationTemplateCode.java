@@ -4,7 +4,7 @@ public interface RentalNotificationTemplateCode {
     String SCOPE = "rental.notification";
     //local template table
     int RENTAL_BEGIN_NOTIFY = 1; //预定快开始的推送
-    int RENTAL_ADMIN_NOTIFY = 2; //添加预定给管理员推送 ${userName}预约了${resourceName}使用详情：${useDetail}预约数：${rentalCount}
+    int RENTAL_ADMIN_NOTIFY = 2; //$预订人$（$联系方式$）预约了$资源名称$，使用时间：$预订时间$，需要物资：$物资名称$、$物资名称$，购买商品：$商品名称$*$数量$、$商品名称$*$数量$
     int RENTAL_APPLY_SUCCESS_CODE = 3; // 申请成功短信：预定成功给管理员发推送','您申请预约的${useTime}的${resourceName}已通过审批，为确保您成功预约，请尽快完成支付，支付方式支持：1. 请联系${offlinePayeeName}（${offlinePayeeContact}）上门收费，2. 到${offlineCashierAddress}付款；感谢您的使用。
     int RENTAL_APPLY_FAILURE_CODE = 4; // 申请失败短信：【正在会】您申请预约的{使用时间}的{资源名称}没有通过审批，您可以申请预约其他空闲资源，由此给您造成的不便，敬请谅解，感谢您的使用。
     int RENTAL_PAY_SUCCESS_CODE = 5; // 支付成功推送：您已成功预约了$资源名称$，使用时间：$预订时间$。如需取消，请在预订开始时间前取消，感谢您的使用。
