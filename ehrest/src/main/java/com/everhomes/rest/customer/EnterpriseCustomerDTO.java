@@ -280,6 +280,142 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private CustomerRequirementDTO requirement;
     private CustomerCurrentRentDTO currentRent;
 
+    private String legalAddress;
+    private String legalAddressZip;
+    private String postalAddress;
+    private String postalAddressZip;
+    private String taxpayerIdentificationCode;
+    private String identifyCardNumber;
+    private String openingBank;
+    private String openingName;
+    private String openingAccount;
+    private String stringTag_17;
+    private String stringTag_18;
+    private String stringTag_19;
+    private String stringTag_20;
+    private String stringTag_21;
+    private String corpLegalPersonDuty;
+
+
+    public String getLegalAddress() {
+        return legalAddress;
+    }
+
+    public void setLegalAddress(String legalAddress) {
+        this.legalAddress = legalAddress;
+    }
+
+    public String getLegalAddressZip() {
+        return legalAddressZip;
+    }
+
+    public void setLegalAddressZip(String legalAddressZip) {
+        this.legalAddressZip = legalAddressZip;
+    }
+
+    public String getPostalAddress() {
+        return postalAddress;
+    }
+
+    public void setPostalAddress(String postalAddress) {
+        this.postalAddress = postalAddress;
+    }
+
+    public String getPostalAddressZip() {
+        return postalAddressZip;
+    }
+
+    public void setPostalAddressZip(String postalAddressZip) {
+        this.postalAddressZip = postalAddressZip;
+    }
+
+    public String getTaxpayerIdentificationCode() {
+        return taxpayerIdentificationCode;
+    }
+
+    public void setTaxpayerIdentificationCode(String taxpayerIdentificationCode) {
+        this.taxpayerIdentificationCode = taxpayerIdentificationCode;
+    }
+
+    public String getIdentifyCardNumber() {
+        return identifyCardNumber;
+    }
+
+    public void setIdentifyCardNumber(String identifyCardNumber) {
+        this.identifyCardNumber = identifyCardNumber;
+    }
+
+    public String getOpeningBank() {
+        return openingBank;
+    }
+
+    public void setOpeningBank(String openingBank) {
+        this.openingBank = openingBank;
+    }
+
+    public String getOpeningName() {
+        return openingName;
+    }
+
+    public void setOpeningName(String openingName) {
+        this.openingName = openingName;
+    }
+
+    public String getOpeningAccount() {
+        return openingAccount;
+    }
+
+    public void setOpeningAccount(String openingAccount) {
+        this.openingAccount = openingAccount;
+    }
+
+    public String getStringTag_17() {
+        return stringTag_17;
+    }
+
+    public void setStringTag_17(String stringTag_17) {
+        this.stringTag_17 = stringTag_17;
+    }
+
+    public String getStringTag_18() {
+        return stringTag_18;
+    }
+
+    public void setStringTag_18(String stringTag_18) {
+        this.stringTag_18 = stringTag_18;
+    }
+
+    public String getStringTag_19() {
+        return stringTag_19;
+    }
+
+    public void setStringTag_19(String stringTag_19) {
+        this.stringTag_19 = stringTag_19;
+    }
+
+    public String getStringTag_20() {
+        return stringTag_20;
+    }
+
+    public void setStringTag_20(String stringTag_20) {
+        this.stringTag_20 = stringTag_20;
+    }
+
+    public String getStringTag_21() {
+        return stringTag_21;
+    }
+
+    public void setStringTag_21(String stringTag_21) {
+        this.stringTag_21 = stringTag_21;
+    }
+
+    public String getCorpLegalPersonDuty() {
+        return corpLegalPersonDuty;
+    }
+
+    public void setCorpLegalPersonDuty(String corpLegalPersonDuty) {
+        this.corpLegalPersonDuty = corpLegalPersonDuty;
+    }
 
     public Timestamp getCreateTime() {
         return createTime;
