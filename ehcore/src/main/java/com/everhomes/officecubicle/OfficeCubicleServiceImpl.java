@@ -1839,7 +1839,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
 		List<Rentalv2PriceRule> price = rentalv2PriceRuleProvider.listPriceRuleByOwner("station_booking",
 				PriceRuleType.RESOURCE.getCode(), cmd.getSpaceId());
-		order.setPrice(price.get(0).getWorkdayPrice());
+		BigDecimal amount = new BigDecimal(0);
+		for (Rentalv2PriceRule r : price){
+			if (rentalOrder.getRentalType() == r.getRentalType()){
+				amount = r.getWorkdayPrice();
+			}
+		}
+		order.setPrice(amount);
 		order.setOrderNo(orderNo);
 		order.setOwnerId(cmd.getOwnerId());
 		order.setOwnerType(cmd.getOwnerType());
@@ -1848,7 +1854,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setReserverEnterpriseId(cmd.getReserverEnterpriseId());
 		order.setReserverContactToken(cmd.getReserverContactToken());
 		order.setReserverName(cmd.getReserverName());
-		order.setRentType((byte)0);
+		order.setRentType(OfficeCubicleRentType.SHORT_RENT.getCode());
 		order.setReserverUid(UserContext.currentUserId());
 		order.setRequestType(OfficeCubicleRequestType.CLIENT.getCode());
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -1876,7 +1882,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		AddRentalOrderUsingInfoResponse rentalResponse = rentalv2Service.addRentalOrderUsingInfo(rentalCommand);
 		order.setRentalOrderNo(rentalResponse.getBillId());
 		order.setSpaceName(space.getName());
-		if (price.get(0).getWorkdayPrice().equals(0)){
+		if (amount.compareTo(new BigDecimal(0.00)) == 0){
 			order.setOrderStatus(OfficeCubicleOrderStatus.PAID.getCode());
 			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			order.setOperatorUid(UserContext.currentUserId());
@@ -2278,6 +2284,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
 					"工位数量不足");
 				} 
+				order.setRentType(OfficeCubicleRentType.SHORT_RENT.getCode());
+				officeCubicleProvider.updateCubicleRentOrder(order);
 				return null;
 			});
 		} else {
@@ -2307,6 +2315,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					}
 				}
 			}
+			order.setRentType(OfficeCubicleRentType.LONG_RENT.getCode());
+			officeCubicleProvider.updateCubicleRentOrder(order);
 		}
 		
 		if (cmd.getRentalOrderNo()!=null){
