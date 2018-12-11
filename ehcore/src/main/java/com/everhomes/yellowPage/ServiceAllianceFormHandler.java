@@ -49,7 +49,7 @@ import java.util.Map;
 		+ YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME)
 public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
-	private final long SERVICE_ALLIANCE_MODULE_ID = 40500L;
+	public static final long SERVICE_ALLIANCE_MODULE_ID = 40500L;
 
 	@Autowired
 	private GeneralApprovalProvider generalApprovalProvider;
@@ -177,7 +177,7 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 		} else{
 			// 表单字段配置ID不为空，即为工作流节点提交的表单值，直接修改
 			// 根据sourceId和sourceType查询已提交的表单值
-			List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+			List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(), cmd.getFlowCaseId());
 			if(cmd.getValues() != null && formValues != null){
 				for(PostApprovalFormItem val : cmd.getValues()){
 					for(GeneralFormVal formValue : formValues){
