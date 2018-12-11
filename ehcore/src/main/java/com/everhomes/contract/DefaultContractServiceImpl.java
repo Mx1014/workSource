@@ -4646,7 +4646,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		
 		ContractDocument contractDocument = getContractDocumentFromParent(parentContractDocument);
 		contractDocument.setContractTemplateId(cmd.getTemplateId());
-		
+		 
 		//不是新文件
 		Boolean isNewFile = false;
 		String lastCommit = parentContractDocument.getContent();
@@ -4672,16 +4672,10 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					contract.setDocumentId(contractDocument.getId());
 					contractProvider.updateContract(contract);
 				}
-			} catch (GogsConflictException e) {
+			} catch (Exception e){
 				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
 				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
 						"contractDocumentName is already exist");
-			} catch (GogsNotExistException e) {
-				LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
-				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
-						"contractGogsFileNotExist is already exist");
-			} catch (Exception e){
-				LOGGER.error("Gogs OthersException .", e);
 			}
 		}
 	}
@@ -4710,13 +4704,15 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		linkTemplateWithContract(cmd.getContractId(),cmd.getTemplateId());
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("UserContext", UserContext.current().getUser());
-		// 调用初始化，启动线程
-		ExecutorUtil.submit(new Runnable() {
-			@Override
-			public void run() {
-				generateContractDocuments(cmd, params);
-			}
-		});	
+		//先不采用异步的方式，这样前端能知道什么时候生成文档的过程结束了
+		generateContractDocuments(cmd, params);
+//		// 调用初始化，启动线程
+//		ExecutorUtil.submit(new Runnable() {
+//			@Override
+//			public void run() {
+//				generateContractDocuments(cmd, params);
+//			}
+//		});	
 	}
 	
 	private void linkTemplateWithContract(Long contractId, Long templateId) {
@@ -4758,11 +4754,20 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 	
 	private void saveContractDocumentToGogs(GenerateContractDocumentsCommand cmd, String contractDocumentText) {
-		ContractDocument contractDocument = getContractDocumentFromCommand(cmd);
-		//以name作为文档上传到gogs时的唯一标识
-		if (contractDocument.getName() != null) {
-			saveContractDocument(contractDocument,contractDocumentText);
+		if (cmd.getId() == null) {
+			ContractDocument contractDocument = getContractDocumentFromCommand(cmd);
+			//以name作为文档上传到gogs时的唯一标识
+			if (contractDocument.getName() != null) {
+				saveContractDocument(contractDocument,contractDocumentText);
+			}
+		}else {
+			UpdateContractDocumentsCommand cmd2 = new UpdateContractDocumentsCommand();
+			cmd2.setContent(contractDocumentText);
+			cmd2.setId(cmd.getId());
+			cmd2.setTemplateId(cmd.getTemplateId());
+			updateContractDocuments(cmd2);
 		}
+		
 	}
 	
 	private ContractDocument getContractDocumentFromCommand(GenerateContractDocumentsCommand cmd){
