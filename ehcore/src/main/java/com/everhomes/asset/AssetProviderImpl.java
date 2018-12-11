@@ -6698,4 +6698,11 @@ public class AssetProviderImpl implements AssetProvider {
 		return assetDooraccessLogs;
 	}
 
+	public List<String> findDateStr(List<String> billIds) {
+		return getReadOnlyContext().selectDistinct(Tables.EH_PAYMENT_BILLS.DATE_STR)
+				.from(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .fetchInto(String.class);
+	}
+
 }

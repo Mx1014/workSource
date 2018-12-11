@@ -490,4 +490,6 @@ public interface AssetProvider {
 	
 	void deleteBillItemByBillId(Long billId);
 	
+	List<String> findDateStr(List<String> billIds);
+	
 }
