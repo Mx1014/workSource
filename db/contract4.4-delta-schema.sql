@@ -29,6 +29,31 @@ CREATE TABLE `eh_contract_documents` (
 -- REMARK: 在合同表中添加用于记录合同文档的字段
 ALTER TABLE `eh_contracts` ADD COLUMN `document_id` bigint NULL COMMENT '当前生效的合同文档id';
 
+-- AUTHOR: djm 20181206
+-- REMARK: 合同套打添加动态字段
+SET @id = (SELECT MAX(id) from eh_var_fields);
+INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag1', '预留字段1', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
+INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag2', '预留字段2', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
+INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag3', '预留字段3', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
+INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag4', '预留字段4', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
+INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag5', '预留字段5', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
+INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag6', '预留字段6', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
+INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag7', '预留字段7', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
+INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag8', '预留字段8', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
+INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag9', '预留字段9', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
+INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag10', '预留字段10', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
+
+ALTER TABLE `eh_contracts` ADD COLUMN `string_tag1` VARCHAR (64) DEFAULT NULL COMMENT '预留字段1';
+ALTER TABLE `eh_contracts` ADD COLUMN `string_tag2` VARCHAR (64) DEFAULT NULL COMMENT '预留字段2';
+ALTER TABLE `eh_contracts` ADD COLUMN `string_tag3` VARCHAR (64) DEFAULT NULL COMMENT '预留字段3';
+ALTER TABLE `eh_contracts` ADD COLUMN `string_tag4` VARCHAR (64) DEFAULT NULL COMMENT '预留字段4';
+ALTER TABLE `eh_contracts` ADD COLUMN `string_tag5` VARCHAR (64) DEFAULT NULL COMMENT '预留字段5';
+ALTER TABLE `eh_contracts` ADD COLUMN `string_tag6` VARCHAR (64) DEFAULT NULL COMMENT '预留字段6';
+ALTER TABLE `eh_contracts` ADD COLUMN `string_tag7` VARCHAR (64) DEFAULT NULL COMMENT '预留字段7';
+ALTER TABLE `eh_contracts` ADD COLUMN `string_tag8` VARCHAR (64) DEFAULT NULL COMMENT '预留字段8';
+ALTER TABLE `eh_contracts` ADD COLUMN `string_tag9` VARCHAR (64) DEFAULT NULL COMMENT '预留字段9';
+ALTER TABLE `eh_contracts` ADD COLUMN `string_tag10` VARCHAR (64) DEFAULT NULL COMMENT '预留字段10';
+
 -- AUTHOR: tangcen 2018年12月11日
 -- REMARK: 在合同模板表中添加用于记录合同模板初始化参数的字段
 ALTER TABLE `eh_contract_templates` ADD COLUMN `init_params` varchar(1024) COMMENT '合同模板初始化参数（计价条款、关联资产等的数目），前端会解析这个json';
