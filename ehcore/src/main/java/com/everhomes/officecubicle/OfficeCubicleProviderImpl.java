@@ -849,10 +849,10 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
     }
 	
 	@Override
-	public OfficeCubicleRentOrder findOfficeCubicleRentOrderByGeneralOrderId(Long generalOrderId) {
+	public OfficeCubicleRentOrder findOfficeCubicleRentOrderByBizOrderNo(String bizOrderNo) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleRentOrdersRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.GENERAL_ORDER_ID.eq(generalOrderId));
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.BIZ_ORDER_NO.eq(bizOrderNo));
 		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleRentOrder.class);
 	}
 

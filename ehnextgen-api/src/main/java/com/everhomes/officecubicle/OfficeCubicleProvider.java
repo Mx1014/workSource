@@ -149,6 +149,6 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleStation> getOfficeCubicleStationNotAssociate(Long spaceId);
 
-	OfficeCubicleRentOrder findOfficeCubicleRentOrderByGeneralOrderId(Long generalOrderId);
+	OfficeCubicleRentOrder findOfficeCubicleRentOrderByBizOrderNo(String bizOrderNo);
 
 }
