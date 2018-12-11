@@ -76,12 +76,7 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
             if ("ACTIVITY_ID".equals(item.getFieldName())) {
                 item.setFieldValue(item.getFieldValue().replaceAll("\\\\",""));
                 PostApprovalFormTextValue textValue = JSONObject.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class);
-                try {
-                    JSONObject object = JSON.parseObject(textValue.getText());
-                    activityId = Long.valueOf(object.get("activityId").toString());
-                }catch (Exception exception) {
-                    LOGGER.error("parse activityId error,activityText = {}", textValue.getText());
-                }
+                activityId = Long.valueOf(textValue.getText());
             }
         }
         if (activityId == null || activityId == 0L) {
@@ -160,9 +155,9 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
             generalFormFieldDTO.setRequiredFlag(TrueOrFalseFlag.TRUE.getCode());
             generalFormFieldDTO.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
             generalFormFieldDTO.setFieldDisplayName("活动ID");
-            JSONObject obj = new JSONObject();
-            obj.put("activityId",cmd.getOwnerId().toString());
-            generalFormFieldDTO.setFieldValue(obj.toJSONString());
+            PostApprovalFormTextValue textValue = new PostApprovalFormTextValue();
+            textValue.setText(cmd.getOwnerId().toString());
+            generalFormFieldDTO.setFieldValue(JSONObject.toJSONString(textValue));
             generalFormFieldDTO.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
             generalFormFieldDTO.setDataSourceType(GeneralFormDataSourceType.ACTIVITY_ID.getCode());
             fieldDTOs.add(generalFormFieldDTO);
