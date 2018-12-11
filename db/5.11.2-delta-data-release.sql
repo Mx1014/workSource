@@ -3,6 +3,10 @@
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
 -- AUTHOR:
 -- REMARK:
+-- AUTHOR:马世亨 20181211
+-- REMARK:刷新es映射 visitorsys.sh 调用 /evh/visitorsys/syncVisitor同步数据
+-- REMARK:刷新es映射 freqvisitor.sh 调用 /evh/visitorsys/syncFreqVisitors同步数据
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
