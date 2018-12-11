@@ -18,6 +18,7 @@ import com.everhomes.aclink.*;
 import com.everhomes.aclink.faceplusplus.FacePlusPlusService;
 import com.everhomes.aclink.huarun.*;
 import com.everhomes.aclink.lingling.*;
+import com.everhomes.aclink.uclbrt.EncryptUtil;
 import com.everhomes.aclink.uclbrt.UclbrtHttpClient;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -81,6 +82,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.*;
+import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
@@ -90,7 +92,19 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.yellowPage.YellowPageUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -115,10 +129,12 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Security;
 import java.sql.Timestamp;
 import java.text.Format;
@@ -319,10 +335,154 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
 
     @Override
     public FaceplusLoginResponse faceplusLogin (FaceplusLoginCommand cmd){
-        
+
         return null;
     }
 
+    public String FacePlusPlusRegister (String url, String ip, String port){
+//        String url = "https://" + ip + ":" + port + "/subject";
+        CloseableHttpClient httpClient = null;
+        CloseableHttpResponse response = null;
+        String result = null;
+        try{
+            httpClient = HttpClients.createDefault();
+            HttpPost httpPost = new HttpPost(url);
+            response = httpClient.execute(httpPost);
+
+            int status = response.getStatusLine().getStatusCode();
+            HttpEntity resEntity = response.getEntity();
+            result = EntityUtils.toString(resEntity);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Get http result, url={}, result={}", url, result);
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Failed to get the http result, url={}", url, e);
+        } finally {
+            if(response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    public String facePlusPlusUploadPhoto (){
+        CloseableHttpClient httpClient = null;
+        CloseableHttpResponse response = null;
+        String result = null;
+
+        return null;
+    }
+
+
+//    public String getQRXML(String protocol, String ip, String port,
+//                           String communityNo, String buildNo, String floorNo, String roomNo,
+//                           String acc, String token ,String areaCode ,String mobile,String roomID) {
+//        String result = "";
+//        EncryptUtil eu = new EncryptUtil();
+//        String timeT = dateFormat();
+//        String sig = acc + token + timeT;
+//        String signature;
+//        try {
+//            signature = eu.md5Digest(sig);
+//            String url = protocol + "://" + ip + ":" + port
+//                    + "?c=Qrcode&a=getCard&sig=" + signature.toUpperCase();
+//            CloseableHttpClient closeableHttpClient = createHttpsClient();
+//            // 建立HttpPost对象
+//            HttpPost httppost = new HttpPost(url);
+//
+//            httppost.setHeader("Accept", "application/xml");
+//            httppost.setHeader("Content-Type",
+//                    "application/x-www-form-urlencode;charset=utf-8");
+//
+//            String src = acc + ":" + timeT;
+//            String auth = eu.base64Encoder(src);
+//            httppost.setHeader("Authorization", auth);
+//            //TODO  BEGIN
+//
+//            String reqXml = qrXmlString( protocol,  ip,  port,
+//                    communityNo,  buildNo,  floorNo,  roomNo,
+//                    acc,  token , areaCode,mobile,roomID);
+//
+//            System.out.println("url = "+ url);
+//            System.out.println("xml is :"+reqXml);
+//            BasicHttpEntity bhe = new BasicHttpEntity();
+//            ByteArrayInputStream bis = new ByteArrayInputStream(reqXml.getBytes("UTF-8"));
+//            bhe.setContent(new ByteArrayInputStream(reqXml
+//                    .getBytes("UTF-8")));
+//            bhe.setContentLength(reqXml.getBytes("UTF-8").length);
+//            httppost.setEntity(bhe);
+//
+//
+//            //TODO END
+//            long culTime = System.currentTimeMillis();
+//            org.apache.http.Header h[] =httppost.getAllHeaders();
+//            HttpResponse httpResponse = closeableHttpClient.execute(httppost);
+//            HttpEntity httpEntity1 = httpResponse.getEntity();
+//            result = EntityUtils.toString(httpEntity1);
+//            // 关闭连接
+//            closeableHttpClient.close();
+//        }catch(Exception e){
+//            e.printStackTrace();
+//        }
+//        return result;
+//    }
+
+
+//    private String post(Map<String, String> param, String method) {
+//        CloseableHttpClient httpclient = HttpClients.createDefault();
+//
+//        String serverUrl = configurationProvider.getValue("position.reserver.serverUrl", "");
+//
+//        HttpPost httpPost = new HttpPost(serverUrl + method);
+//        CloseableHttpResponse response = null;
+//
+//        String json = null;
+//        try {
+//            String p = StringHelper.toJsonString(param);
+//            StringEntity stringEntity = new StringEntity(p, StandardCharsets.UTF_8);
+//            httpPost.setEntity(stringEntity);
+//            httpPost.addHeader("content-type", "application/json");
+//
+//            response = httpclient.execute(httpPost);
+//
+//            int status = response.getStatusLine().getStatusCode();
+//            if (status == HttpStatus.SC_OK) {
+//                HttpEntity entity = response.getEntity();
+//
+//                if (entity != null) {
+//                    json = EntityUtils.toString(entity, "utf8");
+//                }
+//            }
+//        } catch (IOException e) {
+//            LOGGER.error("Reserver request error, param={}", param, e);
+//            YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_QUERY_BIZ_MODULE_FAILED, "get biz module failed");
+//        } finally {
+//            if (null != response) {
+//                try {
+//                    response.close();
+//                } catch (IOException e) {
+//                    LOGGER.error("Reserver close instream, response error, param={}", param, e);
+//                }
+//            }
+//        }
+//        if (LOGGER.isDebugEnabled())
+//            LOGGER.debug("Data from business, param={}, json={}", param, json);
+//
+//        return json;
+//    }
 }
 
 
