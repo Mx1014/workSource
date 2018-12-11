@@ -3563,8 +3563,8 @@ public class ParkingServiceImpl implements ParkingService {
 			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
 			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
 			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
-			newPayeeAccount.setMerchantId(oldPayeeAccount.getMerchantId());
-			newPayeeAccount.setPayeeId(oldPayeeAccount.getMerchantId());
+			newPayeeAccount.setMerchantId(cmd.getPayeeId());
+			newPayeeAccount.setPayeeId(cmd.getPayeeId());
 			parkingBusinessPayeeAccountProvider.updateParkingBusinessPayeeAccount(newPayeeAccount);
 		}else{
 			//ParkingBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ParkingBusinessPayeeAccount.class);

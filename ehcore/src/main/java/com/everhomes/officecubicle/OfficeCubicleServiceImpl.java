@@ -1947,7 +1947,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		getPayUserByMerchantIdCommand.setMerchantId(payeeAccounts.get(0).getAccountId());
 		GetPayerInfoByMerchantIdRestResponse getPayerInfoByMerchantIdRestResponse = orderService.getPayerInfoByMerchantId(getPayUserByMerchantIdCommand);
 		createOrderCommand.setAccountCode(sNamespaceId);
-		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.OFFICE_CUBICLE.getPycode(),order.getId()));
 		createOrderCommand.setPayeeUserId(getPayerInfoByMerchantIdRestResponse.getResponse().getId());
 		List<Rentalv2PriceRule> priceRule = rentalv2PriceRuleProvider.listPriceRuleByOwner("station_booking", PriceRuleType.RESOURCE.getCode(), cmd.getSpaceId());
 		createOrderCommand.setAmount(priceRule.get(0).getWorkdayPrice().multiply(new BigDecimal(100)).longValue());
