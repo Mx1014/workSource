@@ -1882,6 +1882,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		AddRentalOrderUsingInfoResponse rentalResponse = rentalv2Service.addRentalOrderUsingInfo(rentalCommand);
 		order.setRentalOrderNo(rentalResponse.getBillId());
 		order.setSpaceName(space.getName());
+		PreOrderDTO preDto = new PreOrderDTO();
 		if (amount.compareTo(new BigDecimal(0.00)) == 0){
 			order.setOrderStatus(OfficeCubicleOrderStatus.PAID.getCode());
 			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
@@ -1899,7 +1900,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				officeCubicleProvider.createCubicleStationRent(rent);
 			}
 			officeCubicleProvider.updateCubicleRentOrder(order);
-			return null;
+			preDto.setOrderId(order.getId());
+			return preDto;
 		}
 		User user = UserContext.current().getUser();
 		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
@@ -1954,7 +1956,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
 
 		OrderCommandResponse response = orderCommandResponse.getPayResponse();
-		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
+		preDto = ConvertHelper.convert(response,PreOrderDTO.class);
 		preDto.setExpiredIntervalTime(response.getExpirationMillis());
 		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
 		String format = "{\"getOrderInfoUrl\":\"%s\"}";
