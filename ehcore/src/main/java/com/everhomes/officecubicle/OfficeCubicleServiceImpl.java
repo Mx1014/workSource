@@ -68,6 +68,7 @@ import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.promotion.merchant.GetPayUserByMerchantIdCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
@@ -697,6 +698,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		orders.forEach((other) -> {
 			OfficeRentOrderDTO dto = ConvertHelper.convert(other, OfficeRentOrderDTO.class);
 			dto.setCreateTime(other.getCreateTime().getTime());
+			if (other.getRentType() == 1){
+				dto.setBeginTime(other.getBeginTime().getTime());
+				dto.setEndTime(other.getEndTime().getTime());
+			} else if(other.getRentType() == 0){
+				dto.setUserDetail(other.getUseDetail());
+			}
 			dtos.add(dto);
 		});
 		URL rootPath = OfficeCubicleServiceImpl.class.getResource("/");
@@ -882,7 +889,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeCubiceRentType rentType = OfficeCubiceRentType.fromCode(dto.getRentType());
 		row.createCell(++i).setCellValue(rentType==null?"":rentType.getDescription());
 		// 预定时间
-		row.createCell(++i).setCellValue(dto.getUserDetail());
+		if (dto.getRentType() == 1){
+			String value = dto.getBeginTime() + "至" + dto.getEndTime();
+			row.createCell(++i).setCellValue(value);
+		} else if(dto.getRentType() == 0){
+			row.createCell(++i).setCellValue(dto.getUserDetail());
+		}
 		// 预订人
 		row.createCell(++i).setCellValue(dto.getReserverName());
 		// 联系电话
@@ -892,6 +904,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		//支付类型
 		GorderPayType gorderPayType = GorderPayType.fromCode(dto.getPaidMode());
 		row.createCell(++i).setCellValue(gorderPayType == null?"":gorderPayType.getDesc());
+		//支付方式
+        VendorType type = VendorType.fromCode(dto.getPaidType());
+		row.createCell(++i).setCellValue(null==type?"":type.getDescribe());
 		// 订单来源
 		OfficeCubicleRequestType requestTpye = OfficeCubicleRequestType.fromCode(dto.getRequestType());
 		row.createCell(++i).setCellValue(requestTpye==null?"":requestTpye.getDesc());
@@ -1129,7 +1144,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		GetOfficeCubicleRefundRuleResponse resp = new GetOfficeCubicleRefundRuleResponse();
 		List<OfficeCubicleRefundRule> rules = officeCubicleProvider.findRefundRule(cmd.getSpaceId());
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
-		resp.setRefundStrategy(space.getRefundStrategy());
+		if (space.getRefundStrategy() != null){
+			resp.setRefundStrategy(space.getRefundStrategy());
+		} else {
+			resp.setRefundStrategy(RentalOrderStrategy.NONE.getCode());
+		}
 		if (rules != null){
 			resp.setRefundStrategies(rules.stream().map(r->{
 				OfficeCubicleRefundRuleDTO dto = ConvertHelper.convert(r,OfficeCubicleRefundRuleDTO.class);
@@ -1751,7 +1770,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					"支付系统订单号不存在");
 		}
 		OfficeCubicleSpace space = this.officeCubicleProvider.getSpaceById(cmd.getSpaceId());
-		if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
+		if(space.getRefundStrategy()!=null){
+			if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
+				order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
+				this.officeCubicleProvider.updateCubicleRentOrder(order);
+				return;
+			}
+		} else {
 			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
@@ -1762,7 +1787,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	        createRefundOrderCommand.setAccountCode("NS"+order.getNamespaceId().toString());
 	        BigDecimal refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space);
 	        createRefundOrderCommand.setBusinessOrderNumber(order.getBizOrderNo());
-	        createRefundOrderCommand.setAmount(refundPrice.longValue());
+	        createRefundOrderCommand.setAmount(refundPrice.multiply(new BigDecimal(100)).longValue());
 	        createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
 	        createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
 	        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
