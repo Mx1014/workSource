@@ -49,7 +49,7 @@ import java.util.Map;
 		+ YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME)
 public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
-	public static final long SERVICE_ALLIANCE_MODULE_ID = 40500L;
+	private final long SERVICE_ALLIANCE_MODULE_ID = 40500L;
 
 	@Autowired
 	private GeneralApprovalProvider generalApprovalProvider;
@@ -80,6 +80,25 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
 	@Override
 	public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
+
+		// 表单字段配置ID不为空，即为工作流节点提交的表单值，修改表单值，然后直接退出方法
+		if(cmd.getFormFieldsConfigId() != null) {
+			// 根据flowCaseId和"EhFlowCases"查询已提交的表单值
+			List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(), cmd.getFlowCaseId());
+			if (cmd.getValues() != null && formValues != null) {
+				for (PostApprovalFormItem val : cmd.getValues()) {
+					for (GeneralFormVal formValue : formValues) {
+						// 根据FieldName来判断两个表单值属于同一字段
+						if (val.getFieldName().equals(formValue.getFieldName())) {
+							formValue.setFieldValue(val.getFieldValue());
+							generalFormValProvider.updateGeneralFormVal(formValue);
+						}
+					}
+				}
+			}
+			return null;
+		}
+
 		User user = UserContext.current().getUser();
 
 		ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(cmd.getSourceId(), null, null);
@@ -162,8 +181,7 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
 		// 把values 存起来
 		List<GeneralFormVal> result = new ArrayList<>();
-		// 表单字段配置ID为空，按原来的逻辑创建表单值
-		if(cmd.getFormFieldsConfigId() == null && cmd.getValues() != null) {
+		if(cmd.getValues() != null) {
 			for (PostApprovalFormItem val : cmd.getValues()) {
 				GeneralFormVal obj = ConvertHelper.convert(form, GeneralFormVal.class);
 				obj.setSourceType(EhFlowCases.class.getSimpleName());
@@ -173,21 +191,6 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 				obj.setFieldValue(val.getFieldValue());
 				generalFormValProvider.createGeneralFormVal(obj);
 				result.add(obj);
-			}
-		} else{
-			// 表单字段配置ID不为空，即为工作流节点提交的表单值，直接修改
-			// 根据sourceId和sourceType查询已提交的表单值
-			List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(), cmd.getFlowCaseId());
-			if(cmd.getValues() != null && formValues != null){
-				for(PostApprovalFormItem val : cmd.getValues()){
-					for(GeneralFormVal formValue : formValues){
-						// 根据FieldName来判断两个表单值属于同一字段
-						if(val.getFieldName().equals(formValue.getFieldName())){
-							formValue.setFieldValue(val.getFieldValue());
-							generalFormValProvider.updateGeneralFormVal(formValue);
-						}
-					}
-				}
 			}
 		}
 

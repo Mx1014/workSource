@@ -1327,40 +1327,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
         // 将form里的templateText从json形式解析为List
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-
-        // 服务联盟需要添加字段
-        if (dto.getModuleId() == ServiceAllianceFormHandler.SERVICE_ALLIANCE_MODULE_ID) {
-            // 添加SOURCE_ID
-            GeneralFormFieldDTO sourceIdField = new GeneralFormFieldDTO();
-            sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
-            sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-            sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
-            sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-            sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-            sourceIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-            sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-            fieldDTOs.add(sourceIdField);
-
-            // 添加ORGANIZATION_ID
-            GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
-            organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
-            organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-            organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
-            organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-            organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-            organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-            organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-            fieldDTOs.add(organizationIdField);
-
-            // 添加CUSTOM_DATA
-            GeneralFormFieldDTO customField = new GeneralFormFieldDTO();
-            customField.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
-            customField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-            customField.setRequiredFlag(NormalFlag.NONEED.getCode());
-            customField.setDynamicFlag(NormalFlag.NONEED.getCode());
-            customField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-            customField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-        }
         dto.setFormFields(fieldDTOs);
         return dto;
     }
