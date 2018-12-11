@@ -6303,17 +6303,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     newLogin.setDeviceIdentifier(cmd.getDeviceIdentifier());
                     accessor.putMapValueObject(String.valueOf(newLogin.getLoginId()), newLogin);
                 }
-
             }
-
-            List<Border> borders = this.borderProvider.listAllBorders();
-            List<String> borderStrs = borders.stream().map((Border border) -> {
-                return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
-            }).collect(Collectors.toList());
-
-            resp.setAccessPoints(borderStrs);
-            resp.setContentServer(contentServerService.getContentServer());
         }
+
+        List<Border> borders = this.borderProvider.listAllBorders();
+        List<String> borderStrs = borders.stream().map((Border border) -> {
+            return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
+        }).collect(Collectors.toList());
+
+        resp.setAccessPoints(borderStrs);
+        resp.setContentServer(contentServerService.getContentServer());
 
         Long l = configurationProvider.getLongValue(namespaceId, ConfigConstants.PAY_PLATFORM, 0L);
         resp.setPaymentPlatform(l);
