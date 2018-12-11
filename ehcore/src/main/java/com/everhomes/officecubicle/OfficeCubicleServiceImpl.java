@@ -396,9 +396,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				halfdailyPrice = priceRule;
 			}
 		}
-		dto.setDailyPrice(dailyPrice.getWorkdayPrice());
-		dto.setHalfdailyPrice(halfdailyPrice.getWorkdayPrice());
-
+		if (dailyPrice!=null){
+			dto.setDailyPrice(dailyPrice.getWorkdayPrice());
+		}
+		if(halfdailyPrice!=null){
+			dto.setHalfdailyPrice(halfdailyPrice.getWorkdayPrice());
+		}
 		return dto;
 	}
 
@@ -2865,18 +2868,25 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd2.setSourceId(r.getId());
 				cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
 				QueryDefaultRuleAdminResponse resp2 = rentalv2Service.queryDefaultRule(cmd2);
-				PriceRuleDTO dailyPrice = new PriceRuleDTO();
-				PriceRuleDTO halfdailyPrice = new PriceRuleDTO();
+				PriceRuleDTO dailyPriceRule = new PriceRuleDTO();
+				PriceRuleDTO halfdailyPriceRule = new PriceRuleDTO();
 				for (PriceRuleDTO priceRule :resp2.getPriceRules()){
 					if (priceRule.getRentalType() ==RentalType.DAY.getCode()){
-						dailyPrice = priceRule;
+						dailyPriceRule = priceRule;
 					}
 					if (priceRule.getRentalType() ==RentalType.HALFDAY.getCode()){
-						halfdailyPrice = priceRule;
+						halfdailyPriceRule = priceRule;
 					}
 				}
-				dto.setMinUnitPrice(dailyPrice.getWorkdayPrice().compareTo(halfdailyPrice.getWorkdayPrice())>0?
-						halfdailyPrice.getWorkdayPrice():dailyPrice.getWorkdayPrice());
+				BigDecimal dailyPrice = new BigDecimal(0.00);
+				BigDecimal halfdailyPrice = new BigDecimal(0.00);
+				if(dailyPriceRule != null){
+					dailyPrice = dailyPriceRule.getWorkdayPrice();
+				}
+				if(halfdailyPriceRule!=null){
+					halfdailyPrice = halfdailyPriceRule.getWorkdayPrice();
+				}
+				dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?halfdailyPrice:dailyPrice);
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null,null);
