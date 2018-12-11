@@ -1,23 +1,20 @@
-ELASTIC=elasticsearch:9200
+ELASTIC=10.1.120.63:9200
 INDEX=everhomesv3
 
-curl -XDELETE http://$ELASTIC/$INDEX/_mapping/visitorsys
-
-curl -XPUT "http://$ELASTIC/$INDEX/_mapping/visitorsys" -d '
+curl -XDELETE http://$ELASTIC/$INDEX/_mapping/freqvisitor
+curl -XPUT "http://$ELASTIC/$INDEX/_mapping/freqvisitor" -d '
 {
-     "visitorsys" : {
+     "freqvisitor" : {
             "properties" : {
             	"namespaceId" : {
-                    "type": "long",
-                    "index": "not_analyzed"
+                    "type": "long"
                 },
                 "ownerType" : {
                     "type": "string",
                     "index": "not_analyzed"
                 },
                 "ownerId" : {
-                    "type": "long",
-                    "index": "not_analyzed"
+                    "type": "long"
                 },
                 "id" : {
                     "type": "long",
@@ -32,8 +29,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/visitorsys" -d '
                     "index": "not_analyzed"
                 },
                 "visitorPhone" : {
-                    "type": "string",
-                    "index": "not_analyzed"
+                    "type": "string"
                 },
                 "visitReasonId" : {
                     "type": "long",
@@ -91,29 +87,10 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/visitorsys" -d '
                     "type": "string",
                     "index": "not_analyzed"
                 },
-               "statsDate" : {
-                    "type": "string",
-                    "index": "not_analyzed"
-                },
-                "statsHour" : {
-                    "type": "string",
-                    "index": "not_analyzed"
-                 },
-                 "statsWeek" : {
-                    "type": "string",
-                    "index": "not_analyzed"
-                 },
                  "idNumber" : {
                      "type": "string",
                      "index": "not_analyzed"
-                  },
-                    "communityId" : {
-                        "type": "long"
-                    },
-                  "communityType" : {
-                      "type": "long",
-                      "index": "not_analyzed"
-                   }
+                  }
 
             }
           }

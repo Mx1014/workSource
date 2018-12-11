@@ -11,6 +11,6 @@ public interface VisitorSysVisitReasonProvider {
 
 	VisitorSysVisitReason findVisitorSysVisitReasonById(Long id);
 
-	List<VisitorSysVisitReason> listVisitorSysVisitReason(Integer namespaceId);
+	List<VisitorSysVisitReason> listVisitorSysVisitReason(Integer namespaceId,Byte communityType);
 
 }
