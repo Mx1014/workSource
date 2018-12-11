@@ -1328,6 +1328,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         // 将form里的templateText从json形式解析为List
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
+        // 服务联盟需要额外添加字段
         if(form.getModuleId() == ServiceAllianceFormHandler.SERVICE_ALLIANCE_MODULE_ID) {
             GeneralFormFieldDTO sourceIdField = new GeneralFormFieldDTO();
             sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
@@ -1358,6 +1359,18 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             customField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
         }
 
+        // 存在表单值则一起返回
+        List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+        if(formValues != null && fieldDTOs != null){
+            for(GeneralFormVal value : formValues){
+                for(GeneralFormFieldDTO fieldDTO : fieldDTOs){
+                    // 根据FieldName来判断两个表单值属于同一字段
+                    if(fieldDTO.getFieldName().equals(value.getFieldName())){
+                        fieldDTO.setFieldValue(value.getFieldValue());
+                    }
+                }
+            }
+        }
         dto.setFormFields(fieldDTOs);
         return dto;
     }
