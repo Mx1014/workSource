@@ -29,4 +29,8 @@ CREATE TABLE `eh_contract_documents` (
 -- REMARK: 在合同表中添加用于记录合同文档的字段
 ALTER TABLE `eh_contracts` ADD COLUMN `document_id` bigint NULL COMMENT '当前生效的合同文档id';
 
+-- AUTHOR: tangcen 2018年12月11日
+-- REMARK: 在合同模板表中添加用于记录合同模板初始化参数的字段
+ALTER TABLE `eh_contract_templates` ADD COLUMN `init_params`  varchar(1024) NULL COMMENT '合同模板初始化参数（计价条款、关联资产等的数目），前端会解析这个json';
+
 

@@ -4617,7 +4617,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					//查询gogs上面的数据
 					String moduleType = "ContractDocument_" + contractDocument.getCategoryId();
 					GogsRepo repo = gogsRepo("contractDocument",contractDocument.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractDocuments", contractDocument.getCommunityId());
-					contractDocument.setContent(gogsGetScript(repo, contractDocument.gogsPath(), contractDocument.getContent()));
+					result.setContent(gogsGetScript(repo, contractDocument.gogsPath(), contractDocument.getContent()));
 				} catch (GogsConflictException e) {
 					LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
 					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
@@ -4725,6 +4725,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 
 	private void generateContractDocuments(GenerateContractDocumentsCommand cmd, Map<String, Object> params) {
+		
+		String userStr = String.valueOf(params.get("UserContext"));
+		User user = (User) StringHelper.fromJsonString(userStr, User.class);
+		user.setNamespaceId(cmd.getNamespaceId());
+		UserContext.setCurrentUser(user);
+		
 		// 1 、 从gogs中获取模板
 		String contractTemplateText = getContractTemplateText(cmd);
 		// 2、循环模板内容,获取要替换的字符串列表
