@@ -4646,7 +4646,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		
 		ContractDocument contractDocument = getContractDocumentFromParent(parentContractDocument);
 		contractDocument.setContractTemplateId(cmd.getTemplateId());
-		
+		 
 		//不是新文件
 		Boolean isNewFile = false;
 		String lastCommit = parentContractDocument.getContent();
@@ -4672,16 +4672,10 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					contract.setDocumentId(contractDocument.getId());
 					contractProvider.updateContract(contract);
 				}
-			} catch (GogsConflictException e) {
+			} catch (Exception e){
 				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
 				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
 						"contractDocumentName is already exist");
-			} catch (GogsNotExistException e) {
-				LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
-				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
-						"contractGogsFileNotExist is already exist");
-			} catch (Exception e){
-				LOGGER.error("Gogs OthersException .", e);
 			}
 		}
 	}
@@ -4710,13 +4704,15 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		linkTemplateWithContract(cmd.getContractId(),cmd.getTemplateId());
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("UserContext", UserContext.current().getUser());
-		// 调用初始化，启动线程
-		ExecutorUtil.submit(new Runnable() {
-			@Override
-			public void run() {
-				generateContractDocuments(cmd, params);
-			}
-		});	
+		//先不采用异步的方式，这样前端能知道什么时候生成文档的过程结束了
+		generateContractDocuments(cmd, params);
+//		// 调用初始化，启动线程
+//		ExecutorUtil.submit(new Runnable() {
+//			@Override
+//			public void run() {
+//				generateContractDocuments(cmd, params);
+//			}
+//		});	
 	}
 	
 	private void linkTemplateWithContract(Long contractId, Long templateId) {
@@ -4758,8 +4754,20 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 	
 	private void saveContractDocumentToGogs(GenerateContractDocumentsCommand cmd, String contractDocumentText) {
-		ContractDocument contractDocument = getContractDocumentFromCommand(cmd);
-		saveContractDocument(contractDocument,contractDocumentText);
+		if (cmd.getId() == null) {
+			ContractDocument contractDocument = getContractDocumentFromCommand(cmd);
+			//以name作为文档上传到gogs时的唯一标识
+			if (contractDocument.getName() != null) {
+				saveContractDocument(contractDocument,contractDocumentText);
+			}
+		}else {
+			UpdateContractDocumentsCommand cmd2 = new UpdateContractDocumentsCommand();
+			cmd2.setContent(contractDocumentText);
+			cmd2.setId(cmd.getId());
+			cmd2.setTemplateId(cmd.getTemplateId());
+			updateContractDocuments(cmd2);
+		}
+		
 	}
 	
 	private ContractDocument getContractDocumentFromCommand(GenerateContractDocumentsCommand cmd){
@@ -4851,76 +4859,30 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			List<String> dataKeys = GetKeywordsUtils.getKeywordsWithoutPattern(replaceKey, "@@", "##");
 			String dataKey = dataKeys.get(0);
 			String[] segments = dataKey.split("\\.");
-
-			switch (segments[0]) {
-				// 计价条款
-				case "chargingItems":
-					handler = geContractTemplateHandler(handlerMap,"chargingItems");
-					if (handler.isValid(contractDetailDTO, segments)) {
-						dataValue = handler.getValue(contractDetailDTO, segments);
-					}
-					dataMap.put(replaceKey, dataValue);
-					break;
-				// 调租(adjusts是chargingChanges的一种)
-				case "adjusts":
-					handler = geContractTemplateHandler(handlerMap,"chargingChanges");
-					if (handler.isValid(contractDetailDTO, segments, "adjusts")) {
-						dataValue = handler.getValue(contractDetailDTO, segments, "adjusts");
-					}
-					dataMap.put(replaceKey, dataValue);	
-					break;
-				// 免租(frees是chargingChanges的一种)
-				case "frees":
-					handler = geContractTemplateHandler(handlerMap,"chargingChanges");
-					if (handler.isValid(contractDetailDTO, segments, "frees")) {
-						dataValue = handler.getValue(contractDetailDTO, segments, "frees");
-					}
-					dataMap.put(replaceKey, dataValue);	
-					break;
-				// 资产
-				case "apartments":
-					handler = geContractTemplateHandler(handlerMap,"apartments");
-					if (handler.isValid(contractDetailDTO, segments)) {
-						dataValue = handler.getValue(contractDetailDTO, segments);
-					}
-					dataMap.put(replaceKey, dataValue);	
-					break;
-				// 租客属性
-				case "enterpriseCustomer":
-					handler = geContractTemplateHandler(handlerMap,"enterpriseCustomer");
-					if (handler.isValid(contractDetailDTO, segments)) {
-						dataValue = handler.getValue(contractDetailDTO, segments);
-					}
-					dataMap.put(replaceKey, dataValue);	
-					break;
-				// 招商客户属性
-				case "investmentPromotion":
-					handler = geContractTemplateHandler(handlerMap,"investmentPromotion");
-					if (handler.isValid(contractDetailDTO, segments)) {
-						dataValue = handler.getValue(contractDetailDTO, segments);
-					}
-					dataMap.put(replaceKey, dataValue);	
-					break;
-				// 合同基本信息
-				default:
-					handler = geContractTemplateHandler(handlerMap,"contract");
-					if (handler.isValid(contractDetailDTO, segments)) {
-						dataValue = handler.getValue(contractDetailDTO, segments);
-					}
-					dataMap.put(replaceKey, dataValue);	
-					break;
+			
+			String type = getHandlerType(segments);
+			handler = handlerMap.get(type);
+			if (handler == null) {
+				handler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + type);
+				handlerMap.put(type, handler);
 			}
+			
+			if (handler.isValid(contractDetailDTO, segments)) {
+				dataValue = handler.getValue(contractDetailDTO, segments);
+			}
+			dataMap.put(replaceKey, dataValue);
 		}
 		return dataMap;
 	}
 	
-	private ContractTemplateHandler geContractTemplateHandler(Map<String, ContractTemplateHandler> handlerMap,String type){
-		ContractTemplateHandler handler = handlerMap.get(type);
-		if (handler == null) {
-			handler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + type);
-			handlerMap.put(type, handler);
+	//如果是合同的字段，那么不会有前缀，segments.length==1，比如合同名称：name
+	//如果是其他模块的字段，会有前缀，segments.length>1，比如客户名称：enterpriseCustomer.name
+	private String getHandlerType(String[] segments){
+		if (segments.length == 1) {
+			return "contract";
+		}else {
+			return segments[0];
 		}
-		return handler;
 	}
 	
 	public static void main(String[] args) {

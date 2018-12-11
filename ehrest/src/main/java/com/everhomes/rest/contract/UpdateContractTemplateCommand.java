@@ -33,7 +33,14 @@ public class UpdateContractTemplateCommand {
 	@NotNull
 	private Long orgId;
 	private String initParams;
+	private Long templateId;
 	
+	public Long getTemplateId() {
+		return templateId;
+	}
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
 	public Long getId() {
 		return id;
 	}
