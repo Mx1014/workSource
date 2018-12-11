@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime: 创建时间</li>
  * <li>createDate: 创建时间界面显示</li>
  * <li>deleteFlag: 控制按钮是否可以删除  0表示可以删除, 1表示关联合同不能删除(已引用),2表示园区下不能删除通用模板</li>
+ * <li>initParams: 合同模板初始化参数（计价条款、关联资产等的数目），前端会解析这个json</li>
  * </ul>
  * Created by jm.ding on 2018/6/27.
  */
@@ -45,7 +46,14 @@ public class ContractTemplateDTO {
 	private String templateOwner;
 	private String createDate;
 	private Byte deleteFlag;
+	private String initParams;
 	
+	public String getInitParams() {
+		return initParams;
+	}
+	public void setInitParams(String initParams) {
+		this.initParams = initParams;
+	}
 	public String getContentType() {
 		return contentType;
 	}

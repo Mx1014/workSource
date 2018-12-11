@@ -54,4 +54,25 @@ ALTER TABLE `eh_contracts` ADD COLUMN `string_tag8` VARCHAR (64) DEFAULT NULL CO
 ALTER TABLE `eh_contracts` ADD COLUMN `string_tag9` VARCHAR (64) DEFAULT NULL COMMENT '预留字段9';
 ALTER TABLE `eh_contracts` ADD COLUMN `string_tag10` VARCHAR (64) DEFAULT NULL COMMENT '预留字段10';
 
+-- AUTHOR: tangcen 2018年12月11日
+-- REMARK: 在合同模板表中添加用于记录合同模板初始化参数的字段
+ALTER TABLE `eh_contract_templates` ADD COLUMN `init_params` varchar(1024) COMMENT '合同模板初始化参数（计价条款、关联资产等的数目），前端会解析这个json';
+
+-- AUTHOR: 黄鹏宇 2018年12月11日
+-- REMARK: 新建字段
+Alter table eh_enterprise_customers add column legal_address varchar(512) comment '法定地址';
+Alter table eh_enterprise_customers add column legal_address_zip varchar(32) comment '法定地址邮编';
+Alter table eh_enterprise_customers add column postal_address varchar(512) comment '通讯地址';
+Alter table eh_enterprise_customers add column postal_address_zip varchar(32) comment '通讯地址邮编';
+Alter table eh_enterprise_customers add column taxpayer_identification_code varchar(32) comment '纳税人识别号';
+Alter table eh_enterprise_customers add column identify_card_number varchar(32) comment '身份证号码';
+Alter table eh_enterprise_customers add column opening_bank varchar(64) comment '开户行';
+Alter table eh_enterprise_customers add column opening_name varchar(64) comment '开户名';
+Alter table eh_enterprise_customers add column opening_account varchar(32) comment '开户行账号';
+Alter table eh_enterprise_customers add column string_tag17 varchar(32) comment '预留字段17';
+Alter table eh_enterprise_customers add column string_tag18 varchar(32) comment '预留字段18';
+Alter table eh_enterprise_customers add column string_tag19 varchar(32) comment '预留字段19';
+Alter table eh_enterprise_customers add column string_tag20 varchar(32) comment '预留字段20';
+Alter table eh_enterprise_customers add column string_tag21 varchar(32) comment '预留字段21';
+Alter table eh_enterprise_customers add column corp_legal_person_duty varchar(32) comment '法人代表职务';
 

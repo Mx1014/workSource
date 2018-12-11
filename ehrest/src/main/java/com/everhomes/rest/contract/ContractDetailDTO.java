@@ -246,8 +246,17 @@ public class ContractDetailDTO {
     private Long communityId;
     private Integer namespaceId;
     private Long categoryId;
+    private Long documentId;
     
-    public Long getCategoryId() {
+    public Long getDocumentId() {
+		return documentId;
+	}
+
+	public void setDocumentId(Long documentId) {
+		this.documentId = documentId;
+	}
+
+	public Long getCategoryId() {
 		return categoryId;
 	}
 
