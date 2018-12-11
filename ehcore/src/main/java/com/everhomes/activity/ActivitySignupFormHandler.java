@@ -74,9 +74,27 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
         Long activityId = 0L;
         for (PostApprovalFormItem item :values) {
             if ("ACTIVITY_ID".equals(item.getFieldName())) {
-                item.setFieldValue(item.getFieldValue().replaceAll("\\\\",""));
-                PostApprovalFormTextValue textValue = JSONObject.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class);
-                activityId = Long.valueOf(textValue.getText());
+                PostApprovalFormTextValue textValue = null;
+                try {
+                     textValue = JSONObject.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class);
+                }catch (Exception exception) {
+                    item.setFieldValue(item.getFieldValue().replaceAll("\\\\",""));
+                    textValue = JSONObject.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class);
+                }
+                if (textValue != null) {
+                    try {
+                        activityId = Long.valueOf(textValue.getText());
+                    }catch (Exception exception) {
+                        PostApprovalFormTextValue tempTextValue = null;
+                        try {
+                           tempTextValue = JSONObject.parseObject(textValue.getText(), PostApprovalFormTextValue.class);
+                        }catch (Exception exp) {
+                            textValue.setText(textValue.getText().replaceAll("\\\\",""));
+                            tempTextValue = JSONObject.parseObject(textValue.getText(), PostApprovalFormTextValue.class);
+                        }
+                        activityId = Long.valueOf(tempTextValue.getText());
+                    }
+                }
             }
         }
         if (activityId == null || activityId == 0L) {
