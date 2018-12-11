@@ -8032,6 +8032,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 
 		ResourcePreviewImageDTO dto = ConvertHelper.convert(rule,ResourcePreviewImageDTO.class);
+		if (StringHelper.hasContent(dto.getPreviewIdleImageUri()))
+			dto.setPreviewIdleImageUrl(contentServerService.parserUri(dto.getPreviewIdleImageUri(),EntityType.USER.getCode(), User.ROOT_UID));
+		if (StringHelper.hasContent(dto.getPreviewUsingImageUri()))
+			dto.setPreviewUsingImageUrl(contentServerService.parserUri(dto.getPreviewUsingImageUri(),EntityType.USER.getCode(), User.ROOT_UID));
 		return dto;
 	}
 

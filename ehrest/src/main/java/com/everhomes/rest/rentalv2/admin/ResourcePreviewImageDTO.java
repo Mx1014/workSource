@@ -31,8 +31,10 @@ public class ResourcePreviewImageDTO {
     private Long sourceId;
 
     private String previewUsingImageUri;
+    private String previewUsingImageUrl;
 
     private String previewIdleImageUri;
+    private String previewIdleImageUrl;
 
     public String getOwnerType() {
         return ownerType;
@@ -96,6 +98,22 @@ public class ResourcePreviewImageDTO {
 
     public void setPreviewIdleImageUri(String previewIdleImageUri) {
         this.previewIdleImageUri = previewIdleImageUri;
+    }
+
+    public String getPreviewUsingImageUrl() {
+        return previewUsingImageUrl;
+    }
+
+    public void setPreviewUsingImageUrl(String previewUsingImageUrl) {
+        this.previewUsingImageUrl = previewUsingImageUrl;
+    }
+
+    public String getPreviewIdleImageUrl() {
+        return previewIdleImageUrl;
+    }
+
+    public void setPreviewIdleImageUrl(String previewIdleImageUrl) {
+        this.previewIdleImageUrl = previewIdleImageUrl;
     }
 
     @Override
