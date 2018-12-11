@@ -1309,6 +1309,19 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(formFieldsConfig, GeneralFormFieldsConfigDTO.class);
         // 将formFieldsConfig里的formFields从json形式解析成List
         List<GeneralFormFieldsConfigFieldDTO> fieldDTOs = JSONObject.parseArray(formFieldsConfig.getFormFields(), GeneralFormFieldsConfigFieldDTO.class);
+
+        // 存在表单值则一起返回
+        List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+        if(formValues != null && fieldDTOs != null){
+            for(GeneralFormVal value : formValues){
+                for(GeneralFormFieldsConfigFieldDTO fieldDTO : fieldDTOs){
+                    // 根据FieldName来判断两个表单值属于同一字段
+                    if(fieldDTO.getFieldName().equals(value.getFieldName())){
+                        fieldDTO.setFieldValue(value.getFieldValue());
+                    }
+                }
+            }
+        }
         dto.setFormFields(fieldDTOs);
         return dto;
     }
