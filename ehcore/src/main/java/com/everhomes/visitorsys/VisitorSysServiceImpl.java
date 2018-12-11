@@ -1893,14 +1893,19 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             row.createCell(0).setCellValue("访客姓名");
             row.createCell(1).setCellValue("手机号码");
             row.createCell(2).setCellValue("访客类型");
-            row.createCell(3).setCellValue("来访事由");
-            row.createCell(4).setCellValue("到访企业时间");
-            row.createCell(5).setCellValue("状态");
+
+            if(communityType != null && communityType == CommunityType.RESIDENTIAL){
+                row.createCell(3).setCellValue("到访公寓");
+            } else {
+                row.createCell(3).setCellValue("到访公司");
+            }
+
+            row.createCell(4).setCellValue("来访事由");
+            row.createCell(5).setCellValue("到访企业时间");
+            row.createCell(6).setCellValue("状态");
         }
 
-        if(communityType != null && communityType == CommunityType.RESIDENTIAL){
-            row.createCell(6).setCellValue("到访公寓");
-        }
+
 
         DateTimeFormatter datetimeSF = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
         for(int i = 0, size = visitorDtoList.size(); i < size; i++){
@@ -1917,14 +1922,17 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             }else{
                 VisitorsysVisitorType type = VisitorsysVisitorType.fromCode((visitorDTO.getVisitorType()));
                 tempRow.createCell(2).setCellValue(type.getDesc());
-                tempRow.createCell(3).setCellValue(visitorDTO.getVisitReason());
-                tempRow.createCell(4).setCellValue(visitorDTO.getVisitTime().toLocalDateTime().format(datetimeSF));
+                if(communityType != null && communityType == CommunityType.RESIDENTIAL){
+                    tempRow.createCell(3).setCellValue(visitorDTO.getOfficeLocationName());
+                } else {
+                    tempRow.createCell(3).setCellValue(visitorDTO.getEnterpriseName());
+                }
+                tempRow.createCell(4).setCellValue(visitorDTO.getVisitReason());
+                tempRow.createCell(5).setCellValue(visitorDTO.getVisitTime().toLocalDateTime().format(datetimeSF));
                 VisitorsysStatus status = VisitorsysStatus.fromCode(visitorDTO.getVisitStatus());
-                tempRow.createCell(5).setCellValue(status==null?"未知":status.getDesc());
+                tempRow.createCell(6).setCellValue(status==null?"未知":status.getDesc());
             }
-            if(communityType != null && communityType == CommunityType.RESIDENTIAL){
-                tempRow.createCell(6).setCellValue(visitorDTO.getOfficeLocationName());
-            }
+
 
         }
 
