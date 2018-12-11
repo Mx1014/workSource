@@ -40,11 +40,11 @@ Alter table eh_enterprise_customers add column identify_card_number varchar(32) 
 Alter table eh_enterprise_customers add column opening_bank varchar(64) comment '开户行';
 Alter table eh_enterprise_customers add column opening_name varchar(64) comment '开户名';
 Alter table eh_enterprise_customers add column opening_account varchar(32) comment '开户行账号';
-Alter table eh_enterprise_customers add column string_tag_17 varchar(128) comment '预留字段17';
-Alter table eh_enterprise_customers add column string_tag_18 varchar(32) comment '预留字段18';
-Alter table eh_enterprise_customers add column string_tag_19 varchar(32) comment '预留字段19';
-Alter table eh_enterprise_customers add column string_tag_20 varchar(32) comment '预留字段20';
-Alter table eh_enterprise_customers add column string_tag_21 varchar(32) comment '预留字段21';
+Alter table eh_enterprise_customers add column string_tag17 varchar(32) comment '预留字段17';
+Alter table eh_enterprise_customers add column string_tag18 varchar(32) comment '预留字段18';
+Alter table eh_enterprise_customers add column string_tag19 varchar(32) comment '预留字段19';
+Alter table eh_enterprise_customers add column string_tag20 varchar(32) comment '预留字段20';
+Alter table eh_enterprise_customers add column string_tag21 varchar(32) comment '预留字段21';
 Alter table eh_enterprise_customers add column corp_legal_person_duty varchar(32) comment '法人代表职务';
 
 

@@ -289,11 +289,11 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String openingBank;
     private String openingName;
     private String openingAccount;
-    private String stringTag_17;
-    private String stringTag_18;
-    private String stringTag_19;
-    private String stringTag_20;
-    private String stringTag_21;
+    private String stringTag17;
+    private String stringTag18;
+    private String stringTag19;
+    private String stringTag20;
+    private String stringTag21;
     private String corpLegalPersonDuty;
 
 
@@ -369,44 +369,44 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
         this.openingAccount = openingAccount;
     }
 
-    public String getStringTag_17() {
-        return stringTag_17;
+    public String getStringTag17() {
+        return stringTag17;
     }
 
-    public void setStringTag_17(String stringTag_17) {
-        this.stringTag_17 = stringTag_17;
+    public void setStringTag17(String stringTag17) {
+        this.stringTag17 = stringTag17;
     }
 
-    public String getStringTag_18() {
-        return stringTag_18;
+    public String getStringTag18() {
+        return stringTag18;
     }
 
-    public void setStringTag_18(String stringTag_18) {
-        this.stringTag_18 = stringTag_18;
+    public void setStringTag18(String stringTag18) {
+        this.stringTag18 = stringTag18;
     }
 
-    public String getStringTag_19() {
-        return stringTag_19;
+    public String getStringTag19() {
+        return stringTag19;
     }
 
-    public void setStringTag_19(String stringTag_19) {
-        this.stringTag_19 = stringTag_19;
+    public void setStringTag19(String stringTag19) {
+        this.stringTag19 = stringTag19;
     }
 
-    public String getStringTag_20() {
-        return stringTag_20;
+    public String getStringTag20() {
+        return stringTag20;
     }
 
-    public void setStringTag_20(String stringTag_20) {
-        this.stringTag_20 = stringTag_20;
+    public void setStringTag20(String stringTag20) {
+        this.stringTag20 = stringTag20;
     }
 
-    public String getStringTag_21() {
-        return stringTag_21;
+    public String getStringTag21() {
+        return stringTag21;
     }
 
-    public void setStringTag_21(String stringTag_21) {
-        this.stringTag_21 = stringTag_21;
+    public void setStringTag21(String stringTag21) {
+        this.stringTag21 = stringTag21;
     }
 
     public String getCorpLegalPersonDuty() {

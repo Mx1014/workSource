@@ -70,5 +70,6 @@ INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',3,'investment_promoti
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',28,'investment_promotion','enterprise_customer');
 
 
+INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (29, 11, 'investment_promotion', 'enterprise_customer');
 set @id = (select max(id) from eh_var_field_group_scopes);
 INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (@id:= @id + 1, 0, 1, 'EhOrganizations', 'investment_promotion', 11, '企业情况', 2, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
