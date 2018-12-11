@@ -15,10 +15,49 @@ public class ChargingChangesContractTemplate implements ContractTemplateHandler{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChargingChangesContractTemplate.class);
 	
+	private List<ContractChargingChangeDTO> chargingChanges;
+	
+	public ChargingChangesContractTemplate() {}
+	
+	public ChargingChangesContractTemplate(List<ContractChargingChangeDTO> chargingChanges) {
+		this.chargingChanges = chargingChanges;
+	}
+
+	public List<ContractChargingChangeDTO> getChargingChanges() {
+		return chargingChanges;
+	}
+
+	public void setChargingChanges(List<ContractChargingChangeDTO> chargingChanges) {
+		this.chargingChanges = chargingChanges;
+	}
+
 	@Override
 	public boolean isValid(ContractDetailDTO contract, String[] segments) {
-		// TODO Auto-generated method stub
-		return false;
+		//入参不能为空
+		if (contract == null || segments == null || segments.length == 0) {
+			return false;
+		}
+		//segments第二位必须是数字
+		Integer index = null;
+		try{
+			index = Integer.parseInt(segments[1]);
+		}catch (Exception e) {
+			LOGGER.info("index is not a number,index is {}. Exception message is {}",segments[1],e.getMessage());
+			return false;
+		}
+		//index不能超出list的范围
+		if (chargingChanges != null && chargingChanges.size() > 0) {
+			if (index >= chargingChanges.size() || index < 0) {
+				return false;
+			}
+		}else {
+			return false;
+		}
+		//是否包含该属性名	
+		if (!PropertyUtils.containsField(ContractChargingChangeDTO.class, segments[2])) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override

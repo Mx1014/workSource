@@ -4703,6 +4703,10 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	//合同模板 生成合同文档
 	@Override
 	public void generateContractDocuments(GenerateContractDocumentsCommand cmd) {
+		if (cmd.getContractId() == null || cmd.getTemplateId() == null) {
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA,"param is null");
+		}
+		linkTemplateWithContract(cmd.getContractId(),cmd.getTemplateId());
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("UserContext", UserContext.current().getUser());
 		// 调用初始化，启动线程
@@ -4714,22 +4718,44 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		});	
 	}
 	
+	private void linkTemplateWithContract(Long contractId, Long templateId) {
+		Contract contract = checkContract(contractId);
+		contract.setTemplateId(templateId);
+		contractProvider.updateContract(contract);
+	}
+
 	private void generateContractDocuments(GenerateContractDocumentsCommand cmd, Map<String, Object> params) {
 		// 1 、 从gogs中获取模板
 		String contractTemplateText = getContractTemplateText(cmd);
 		// 2、循环模板内容,获取要替换的字符串列表
-		List<String> replaceKeys = GetKeywordsUtils.getKeywordsWithPattern(contractTemplateText, "${", "}");
+		List<String> replaceKeys = null;
+		if (contractTemplateText != null ) {
+			replaceKeys = GetKeywordsUtils.getKeywordsWithPattern(contractTemplateText, "${", "}");
+		}
 		// 3、获取合同详情
 		ContractDetailDTO contractDetailDTO = geContractDetail(cmd.getContractId());
 		// 4、通过不同的handler来获取不同种类的字段对应的value。最终获得一个map，key是要替换的字符串，value是该字段对应的值。
-		Map<String, String> dataMap = getContractTemplateDataMap(replaceKeys,contractDetailDTO);
+		Map<String, String> dataMap = new HashMap<>();
+		if (contractDetailDTO != null && replaceKeys != null && replaceKeys.size() > 0) {
+			dataMap = getContractTemplateDataMap(replaceKeys,contractDetailDTO);
+		}
 		// 5、循环模板内容，把模板中的key换成value，获取合同文档
-		String contractDocumentText = GetKeywordsUtils.translate(dataMap,contractTemplateText, "${", "}");
+		String contractDocumentText = null;
+		if (dataMap.size() > 0 && contractTemplateText != null) {
+			contractDocumentText = GetKeywordsUtils.translate(dataMap,contractTemplateText, "${", "}");
+		}
 		// 6、把得到的合同文档存到gogs里去，并记录在数据库中
-		saveContractDocumentToGogs(cmd,contractDocumentText);
+		if (contractDocumentText != null) {
+			saveContractDocumentToGogs(cmd,contractDocumentText);
+		}
 	}
 	
 	private void saveContractDocumentToGogs(GenerateContractDocumentsCommand cmd, String contractDocumentText) {
+		ContractDocument contractDocument = getContractDocumentFromCommand(cmd);
+		saveContractDocument(contractDocument,contractDocumentText);
+	}
+	
+	private ContractDocument getContractDocumentFromCommand(GenerateContractDocumentsCommand cmd){
 		ContractDocument contractDocument = new ContractDocument();
 		contractDocument.setContentType("gogs");
 		contractDocument.setVersion(0);
@@ -4744,36 +4770,35 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		if (contract != null) {
 			contractDocument.setName(contract.getName());
 		}
-		
+		return contractDocument;
+	}
+	
+	private void saveContractDocument(ContractDocument contractDocument,String contractDocumentText){
 		//是否是新增的文件
 		Boolean isNewFile = true;
 		String lastCommit = "";
-		
 		if ("gogs".equals(contractDocument.getContentType())) {
 			//使用gogs存储合同内容
-			//1.建仓库 不同应用建立不同仓库
 			try {
+				//1.建仓库 不同应用建立不同仓库
 				String moduleType = "ContractDocument_" + contractDocument.getCategoryId();
 				GogsRepo repo = gogsRepo("contractDocument",contractDocument.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractDocuments", contractDocument.getCommunityId());
 				//2.提交脚本
 				GogsCommit commit = gogsCommitScript(repo, contractDocument.gogsPath(), lastCommit, contractDocumentText, isNewFile);
 				//3.存储提交脚本返回的id
-				contractDocument.setContent(commit.getId());
-				contractProvider.createContractDocument(contractDocument);
-				if (contract != null) {
-					contract.setDocumentId(contractDocument.getId());
-					contractProvider.updateContract(contract);
+				if (commit != null) {
+					contractDocument.setContent(commit.getId());
+					contractProvider.createContractDocument(contractDocument);
+					Contract contract = contractProvider.findContractById(contractDocument.getContractId());
+					if (contract != null) {
+						contract.setDocumentId(contractDocument.getId());
+						contractProvider.updateContract(contract);
+					}
 				}
-			} catch (GogsConflictException e) {
-				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
+			}catch (Exception e){
+				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), contractDocument.getNamespaceId(),e);
 				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
 						"contractDocumentName is already exist");
-			} catch (GogsNotExistException e) {
-				LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
-				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
-						"contractGogsFileNotExist is already exist");
-			} catch (Exception e){
-				LOGGER.error("Gogs OthersException .", e);
 			}
 		}
 	}

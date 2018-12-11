@@ -77,6 +77,7 @@ public class ContractDTO {
 	private Byte customerType;
 	private Timestamp updateTime;
 	private Long documentId;
+	private Long templateId;
 	
 	@ItemType(OrganizationContactDTO.class)
 	private List<OrganizationContactDTO> adminMembers;
@@ -93,6 +94,14 @@ public class ContractDTO {
 
 	public void setDocumentId(Long documentId) {
 		this.documentId = documentId;
+	}
+	
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
 	}
 
 	public Timestamp getUpdateTime() {
