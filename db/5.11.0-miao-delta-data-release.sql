@@ -20,7 +20,7 @@ INSERT INTO `eh_locale_strings`(`id`,`scope`, `code`, `locale`, `text`) VALUES (
 
 
 UPDATE eh_service_modules SET instance_config = '{"url":"${home.url}/station-booking-web/build/index.html?ns=%s#/home#sign_suffix","currentProjectOnly":0}' WHERE id = 40200;
-UPDATE eh_service_modules SET `host` = 'station-booking-web' WHERE module_id = 40200;
+UPDATE eh_service_modules SET `host` = 'station-booking-web' WHERE id = 40200;
 
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES (40230, '工位管理', 40200, '/200/110000/40200/40230', 1, 4, 2, 0, '2018-03-31 22:18:45', NULL, NULL, '2018-03-31 22:18:45', 0, 1, '1', NULL, '', 1, 1, 'subModule', 1, 0, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES (40240, '订单记录', 40200, '/200/110000/40200/40240', 1, 4, 2, 0, '2018-03-31 22:18:45', NULL, NULL, '2018-03-31 22:18:45', 0, 1, '1', NULL, '', 1, 1, 'subModule', 1, 0, NULL, NULL, NULL, NULL);

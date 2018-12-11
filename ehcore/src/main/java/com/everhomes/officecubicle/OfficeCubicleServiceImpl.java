@@ -2235,68 +2235,61 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			officeCubicleProvider.createCubicleRentOrder(order);
 			return null;
 		});
-		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getId()).enter(()-> {
-			int rentSize = 0;
-			if (stationRent !=null){
-				rentSize = stationRent.size();
-			}
-			int rentCount = 1;
-			if (cmd.getRentCount()!=null){
-				rentCount = cmd.getRentCount();
-			} else {
-				Integer stationSize =0;
-				Integer roomIdSize = 0;
-				if(cmd.getStationId()!=null){
-					stationSize = cmd.getStationId().size();
+		if(cmd.getRentType().equals(OfficeCubicleRentType.SHORT_RENT.getCode())){
+			this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getId()).enter(()-> {
+				int rentSize = 0;
+				if (stationRent !=null){
+					rentSize = stationRent.size();
 				}
-				if (cmd.getRoomId()!=null){
-					roomIdSize = cmd.getRoomId().size();
-				}
-				rentCount = stationSize+roomIdSize;
-			}
-			if (Integer.valueOf(space.getShortRentNums())<(rentSize+rentCount)){
-				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
-				"工位数量不足");
-			} else {
-				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
-				rent.setOrderId(order.getId());
+				int rentCount = 1;
 				if (cmd.getRentCount()!=null){
-					for(int i=0;i< rentCount ;i++){
-						officeCubicleProvider.createCubicleStationRent(rent);
-					}
+					rentCount = cmd.getRentCount();
 				} else {
+					Integer stationSize =0;
+					Integer roomIdSize = 0;
 					if(cmd.getStationId()!=null){
-						for (Long s :cmd.getStationId()){
-							rent.setStationId(s);
-							rent.setStationType((byte)1);
-							OfficeCubicleStation station =officeCubicleProvider.getOfficeCubicleStationById(s);
-							rent.setStationName(station.getStationName());
-							station.setStatus((byte)2);
-							station.setBeginTime(new Timestamp(cmd.getBeginTime()));
-							station.setEndTime(new Timestamp(cmd.getEndTime()));
-							officeCubicleProvider.updateCubicle(station);
-							officeCubicleProvider.createCubicleStationRent(rent);
-
-						}
+						stationSize = cmd.getStationId().size();
 					}
 					if (cmd.getRoomId()!=null){
-						for (Long r :cmd.getRoomId()){
-							rent.setStationId(r);
-							rent.setStationType((byte)0);
-							OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(r);
-							rent.setStationName(room.getRoomName());
-							room.setStatus((byte)2);
-							room.setBeginTime(new Timestamp(cmd.getBeginTime()));
-							room.setEndTime(new Timestamp(cmd.getEndTime()));
-							officeCubicleProvider.updateRoom(room);
-							officeCubicleProvider.createCubicleStationRent(rent);
-
-						}
+						roomIdSize = cmd.getRoomId().size();
+					}
+					rentCount = stationSize+roomIdSize;
+				}
+				if (Integer.valueOf(space.getShortRentNums())<(rentSize+rentCount)){
+					throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
+					"工位数量不足");
+				} 
+				return null;
+			});
+		} else {
+			if(cmd.getStationId()!=null){
+				for (Long s :cmd.getStationId()){
+					OfficeCubicleStation station =officeCubicleProvider.getOfficeCubicleStationById(s);
+					station.setStatus((byte)2);
+					station.setBeginTime(new Timestamp(cmd.getBeginTime()));
+					station.setEndTime(new Timestamp(cmd.getEndTime()));
+					officeCubicleProvider.updateCubicle(station);
+				}
+			}
+			if (cmd.getRoomId()!=null){
+				for (Long r :cmd.getRoomId()){
+					OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(r);
+					room.setStatus((byte)2);
+					room.setBeginTime(new Timestamp(cmd.getBeginTime()));
+					room.setEndTime(new Timestamp(cmd.getEndTime()));
+					officeCubicleProvider.updateRoom(room);
+					List<OfficeCubicleStation> stationList = 
+							officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), space.getId(), r, null, null, null, null);
+					for (OfficeCubicleStation s : stationList){
+						s.setStatus((byte)2);
+						s.setBeginTime(new Timestamp(cmd.getBeginTime()));
+						s.setEndTime(new Timestamp(cmd.getEndTime()));
+						officeCubicleProvider.updateCubicle(s);
 					}
 				}
 			}
-			return null;
-		});
+		}
+		
 		if (cmd.getRentalOrderNo()!=null){
 			rentalCommonService.rentalOrderSuccess(cmd.getRentalOrderNo());
 		}
@@ -2404,9 +2397,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return resp;
 		stationSize = station.size();
 		resp.setCubicleNums(station.size());
-//		List<OfficeCubicleStation> s = 
-//				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), roomId, rentFlag, keyword, status, stationId);
-		List<OfficeCubicleStationRent> longRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)1,(byte)1,null);
+		List<OfficeCubicleStation> longRentStation = 
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)2, null);
 		List<OfficeCubicleStationRent> shortRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)0,(byte)1,null);
 		Integer shortRentStationSize = 0;
 		Integer longRentStationSize =0;
