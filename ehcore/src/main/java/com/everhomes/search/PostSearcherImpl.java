@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.launchpadbase.AppContext;
@@ -20,11 +19,7 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.highlight.HighlightField;
-import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -33,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -42,7 +36,6 @@ import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Forum;
-import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.IteratePostCallback;
@@ -54,7 +47,6 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.address.CommunityDTO;
@@ -64,16 +56,12 @@ import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
-import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.SearchTypes;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -147,6 +135,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("subject", post.getSubject());
             b.field("content", post.getContent());
+            b.field("tag", post.getTag());
             b.field(contentcategory, post.getCategoryPath());
             b.field(actioncategory, post.getActionCategoryPath());
             b.field("appId", post.getAppId());
@@ -398,11 +387,12 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getQueryString())
                     .field("subject", 1.2f)
-                    .field("content", 1.0f).prefixLength(2);
+                    .field("content", 1.0f)
+                    .field("tag", 1.0f).prefixLength(2);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("subject").addHighlightedField("content");
+            builder.addHighlightedField("subject").addHighlightedField("content").addHighlightedField("tag");
             }
         
         PrefixQueryBuilder prefix_a = null;
