@@ -1,5 +1,6 @@
 package com.everhomes.officecubicle;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -126,5 +127,7 @@ public interface OfficeCubicleService {
 	void schedule();
 
 	PreOrderDTO createCubicleOrderV2(CreateOfficeCubicleOrderCommand cmd);
+
+	BigDecimal getLongRentPrice(GetLongRentPriceCommand cmd);
 
 }

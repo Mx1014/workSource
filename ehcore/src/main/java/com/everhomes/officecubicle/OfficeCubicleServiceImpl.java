@@ -1321,7 +1321,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<OfficeCubicleRange> ranges = 
 				officeCubicleRangeProvider.getOfficeCubicleRangeByOwner(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
 		ListRentCubicleResponse resp = new ListRentCubicleResponse();
-		if (ranges == null){
+		if (ranges.size() <= 0){
 			resp.setLongRentFlag((byte)0);
 			resp.setShortRentFlag((byte)0);
 		}else{
@@ -2781,6 +2781,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			resp.setSpaceId(space.getId());
 		}
 		return resp;
+	}
+	
+	@Override
+	public BigDecimal getLongRentPrice(GetLongRentPriceCommand cmd){
+		OfficeCubicleSpace space = this.officeCubicleProvider.getSpaceById(cmd.getSpaceId());
+		if (space.getLongRentPrice() != null){
+			return space.getLongRentPrice();
+		}
+		return new BigDecimal(0.00);
 	}
 	
 	@Override

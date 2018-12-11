@@ -1,5 +1,6 @@
 package com.everhomes.officecubicle;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -481,6 +482,21 @@ public class OfficeCubicleController extends ControllerBase {
     	
     }
     
+    /**
+     * <b>URL: /officecubicle/getLongRentPrice</b> 
+     * <p>获取长租工位价格</p>
+     */
+    @RequestMapping("getLongRentPrice")
+    @RestReturn(BigDecimal.class)
+    public RestResponse getLongRentPrice(GetLongRentPriceCommand cmd) {
+
+    	BigDecimal resp = this.officeCubicleService.getLongRentPrice(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
     /**
      * <b>URL: /officecubicle/listOfficeCubicleStatus</b> 
      * <p>列出空间工位状态</p>
