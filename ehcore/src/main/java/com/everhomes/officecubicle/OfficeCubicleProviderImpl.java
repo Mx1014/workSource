@@ -473,15 +473,12 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	
 	@Override
 	public List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId,
-												 Integer currentNamespaceId, Byte rentType, Byte stationType) {
+												 Integer currentNamespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.NAMESPACE_ID.eq(currentNamespaceId);
-		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.gt(new Timestamp(System.currentTimeMillis())));
-		condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.lt(new Timestamp(System.currentTimeMillis())));
-		if (null != rentType)
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType));
-		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATUS.eq((byte)0));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.lt(new Timestamp(System.currentTimeMillis())));
+		condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.gt(new Timestamp(System.currentTimeMillis())));
 		step.where(condition);
 		List<OfficeCubicleStationRent> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_STATION_RENT.OPERATE_TIME.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleStationRent.class);
@@ -994,38 +991,6 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		SelectQuery<EhOfficeCubicleRoomRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_ROOM);
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.ID.eq(roomId));
 		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleRoom.class);
-	}
-	
-	
-	@Override
-	public List<OfficeCubicleStationRent> getOfficeCubicleStationRent(Long spaceId, Byte rentType,Byte stationType,Long stationId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		SelectQuery<EhOfficeCubicleStationRentRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId));
-		if (rentType!=null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType));
-		if (stationType != null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_TYPE.eq(stationType));
-		if (stationId != null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_ID.eq(stationId));
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.gt(new Timestamp(System.currentTimeMillis())));
-		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStationRent.class));
-	}
-	
-	@Override
-	public List<OfficeCubicleStationRent> getOfficeCubicleStationRentByTime(Long spaceId, Byte rentType,Byte stationType,Long beginDate, Long endDate) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		SelectQuery<EhOfficeCubicleStationRentRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId));
-		if (rentType!=null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType));
-		if (stationType != null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.STATION_TYPE.eq(stationType));
-		if (beginDate != null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.lt(new Timestamp(beginDate)));
-		if (endDate != null)
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.lt(new Timestamp(endDate)));
-		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStationRent.class));
 	}
 	
 	@Override

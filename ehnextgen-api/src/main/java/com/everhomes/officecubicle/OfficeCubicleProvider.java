@@ -77,9 +77,6 @@ public interface OfficeCubicleProvider {
 
 	void createCubicleStationRent(OfficeCubicleStationRent stationRent);
 
-	List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId, Integer currentNamespaceId, Byte rentType,
-			Byte stationType);
-
 	void updateCubicleRentOrder(OfficeCubicleRentOrder order);
 
 	OfficeCubicleRentOrder findOfficeCubicleRentOrderByBizOrderNum(String bizOrderNum);
@@ -106,8 +103,6 @@ public interface OfficeCubicleProvider {
 
 	BigDecimal getStationMaxPrice(Long spaceId);
 
-	List<OfficeCubicleStationRent> getOfficeCubicleStationRent(Long spaceId, Byte rentType,Byte stationType,Long staionId);
-
 	void deleteChargeUsers(Long spaceId);
 
 	void createChargeUsers(OfficeCubicleChargeUser user);
@@ -130,9 +125,6 @@ public interface OfficeCubicleProvider {
 
 	void deleteAttachmentsBySpaceId(Long id, Byte type);
 
-	List<OfficeCubicleStationRent> getOfficeCubicleStationRentByTime(Long spaceId, Byte rentType, Byte stationType,
-			Long beginDate, Long endDate);
-
 	List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType, Long spaceId, Byte rentFlag,
 			Byte status, Long roomId, String keyword);
 
@@ -154,5 +146,7 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleRentOrder> searchCubicleOrdersByUid(CrossShardListingLocator locator, Integer pageSize,
 			Integer currentNamespaceId, Byte rentType, Byte orderStatus, Long reserverUid);
+
+	List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId, Integer currentNamespaceId);
 
 }

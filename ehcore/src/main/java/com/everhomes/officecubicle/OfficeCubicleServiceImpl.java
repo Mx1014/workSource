@@ -1856,7 +1856,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return null;
 		});
 		List<OfficeCubicleStationRent> stationRent = 
-				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(),null, null);
+				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId());
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		Integer rentNums = Integer.valueOf(space.getShortRentNums());
 		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getOrderNo()).enter(()-> {
@@ -2205,7 +2205,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049600L, cmd.getAppId(), null, cmd.getCurrentProjectId());//资源管理权限
 		}
 		List<OfficeCubicleStationRent> stationRent = 
-				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(), cmd.getRentType(), cmd.getStationType());
+				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId());
 
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());	
 		OfficeCubicleRentOrder order = ConvertHelper.convert(cmd, OfficeCubicleRentOrder.class);
@@ -2399,7 +2399,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		resp.setCubicleNums(station.size());
 		List<OfficeCubicleStation> longRentStation = 
 				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)2, null);
-		List<OfficeCubicleStationRent> shortRentStation = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(),(byte)0,(byte)1,null);
+		List<OfficeCubicleStationRent> shortRentStation = officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId());
 		Integer shortRentStationSize = 0;
 		Integer longRentStationSize =0;
 		Integer closeStationSize = 0;
@@ -2530,11 +2530,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					officeCubicleProvider.getOfficeCubicleStation(null, cmd.getOwnerType(), cmd.getSpaceId(),r.getId(),(byte)1,null,null,null);
 			List<AssociateStationDTO> associateStaionList = setAssociateStaion(associateStaion);
 			dto.setAssociateStation(associateStaionList);
-			List<OfficeCubicleStationRent> stationRent = officeCubicleProvider.getOfficeCubicleStationRent(cmd.getSpaceId(), null,(byte)0,r.getId());
 			Long rentDate = System.currentTimeMillis();
-			if (stationRent.size()> 0){
+			if (r.getEndTime() != null){
 		        Calendar c = Calendar.getInstance();
-		        c.setTime(stationRent.get(0).getEndTime());
+		        c.setTime(r.getEndTime());
 		        c.add(Calendar.DAY_OF_MONTH, 1);
 		        rentDate = c.getTime().getTime();
 			}
