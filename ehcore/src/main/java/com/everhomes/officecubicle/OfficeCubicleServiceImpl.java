@@ -1870,6 +1870,31 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			return null;
 		});
+		AddRentalOrderUsingInfoCommand rentalCommand = new AddRentalOrderUsingInfoCommand(); 
+		rentalCommand.setRentalBillId(cmd.getRentalOrderNo());
+		rentalCommand.setRentalType(cmd.getRentalType());
+		AddRentalOrderUsingInfoResponse rentalResponse = rentalv2Service.addRentalOrderUsingInfo(rentalCommand);
+		order.setRentalOrderNo(rentalResponse.getBillId());
+		order.setSpaceName(space.getName());
+		if (price.get(0).getWorkdayPrice().equals(0)){
+			order.setOrderStatus(OfficeCubicleOrderStatus.PAID.getCode());
+			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
+			order.setOperatorUid(UserContext.currentUserId());
+			rentalCommonService.rentalOrderSuccess(order.getRentalOrderNo());
+			int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
+			List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceName());
+			smsProvider.addToTupleList(variables, "reserveTime", order.getUseDetail());
+			smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
+			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
+			OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
+			rent.setOrderId(order.getId());
+			rent.setRentType((byte)0);
+			for(int i=0;i<= order.getRentCount() ;i++){
+				officeCubicleProvider.createCubicleStationRent(rent);
+			}
+			officeCubicleProvider.updateCubicleRentOrder(order);
+			return null;
+		}
 		User user = UserContext.current().getUser();
 		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
@@ -1949,13 +1974,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		preDto.setExpiredIntervalTime(expiredIntervalTime);
 		preDto.setOrderId(order.getId());
 		preDto.setAmount(priceRule.get(0).getWorkdayPrice().multiply(new BigDecimal(100)).longValue());
-		AddRentalOrderUsingInfoCommand rentalCommand = new AddRentalOrderUsingInfoCommand(); 
-		rentalCommand.setRentalBillId(cmd.getRentalOrderNo());
-		rentalCommand.setRentalType(cmd.getRentalType());
-		AddRentalOrderUsingInfoResponse rentalResponse = rentalv2Service.addRentalOrderUsingInfo(rentalCommand);
-		order.setRentalOrderNo(rentalResponse.getBillId());
 		order.setBizOrderNo(response.getBizOrderNum());
-		order.setSpaceName(space.getName());
 		officeCubicleProvider.updateCubicleRentOrder(order);
 		return preDto;
 		
@@ -2505,7 +2524,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public GetCubicleForAppResponse getCubicleForApp(GetCubicleForAppCommand cmd){
 		GetCubicleForAppResponse resp = new GetCubicleForAppResponse();
 		List<OfficeCubicleStation> station = 
-				officeCubicleProvider.getOfficeCubicleStation(null, cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,null,null);
+				officeCubicleProvider.getOfficeCubicleStationNotAssociate(cmd.getSpaceId());
 		List<OfficeCubicleAttachment> stationAttachments = this.officeCubicleProvider.listAttachmentsBySpaceId(cmd.getSpaceId(),(byte)3);
 		if (null != stationAttachments){
 			resp.setStationAttachments(new ArrayList<OfficeAttachmentDTO>());

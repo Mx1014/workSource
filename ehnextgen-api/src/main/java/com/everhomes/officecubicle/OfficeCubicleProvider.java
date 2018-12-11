@@ -149,4 +149,6 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId, Integer currentNamespaceId);
 
+	List<OfficeCubicleStation> getOfficeCubicleStationNotAssociate(Long spaceId);
+
 }

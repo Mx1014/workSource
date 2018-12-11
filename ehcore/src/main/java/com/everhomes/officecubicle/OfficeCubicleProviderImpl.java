@@ -943,6 +943,17 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
+	public List<OfficeCubicleStation> getOfficeCubicleStationNotAssociate(Long spaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOfficeCubicleStationRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_STATION);
+		if (spaceId != null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.SPACE_ID.eq(spaceId));
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.ASSOCIATE_ROOM_ID.isNull());
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.eq((byte)1));
+		return query.fetch().map(r->ConvertHelper.convert(r, OfficeCubicleStation.class));
+	}
+	
+	@Override
 	public List<OfficeCubicleStation> getOfficeCubicleStationByTime(Long spaceId, Byte rentFlag,Long beginDate,Long endDate,String keyword) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         com.everhomes.server.schema.tables.EhOfficeCubicleStation t = Tables.EH_OFFICE_CUBICLE_STATION;
