@@ -59,16 +59,4 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 		return value;
 	}
 
-	@Override
-	public boolean isValid(ContractDetailDTO contract, String[] segments, String type) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public String getValue(ContractDetailDTO contract, String[] segments, String type) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

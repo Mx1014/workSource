@@ -10,8 +10,8 @@ import com.everhomes.rest.contract.ContractChargingChangeDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractTemplateBuildingApartmentDTO;
 
-@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "chargingChanges")
-public class ChargingChangesContractTemplate implements ContractTemplateHandler{
+//@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "chargingChanges")
+public class ChargingChangesContractTemplate{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChargingChangesContractTemplate.class);
 	
@@ -31,7 +31,6 @@ public class ChargingChangesContractTemplate implements ContractTemplateHandler{
 		this.chargingChanges = chargingChanges;
 	}
 
-	@Override
 	public boolean isValid(ContractDetailDTO contract, String[] segments) {
 		//入参不能为空
 		if (contract == null || segments == null || segments.length == 0) {
@@ -60,18 +59,26 @@ public class ChargingChangesContractTemplate implements ContractTemplateHandler{
 		return true;
 	}
 
-	@Override
 	public String getValue(ContractDetailDTO contract, String[] segments) {
-		// TODO Auto-generated method stub
-		return null;
+		String value = "";
+		Object data = null;
+		
+		Integer index = Integer.parseInt(segments[1]);
+		ContractChargingChangeDTO chargingChange = chargingChanges.get(index);
+		
+		String chargingChangeInfoKey = segments[2];
+		data = PropertyUtils.getProperty(chargingChange, chargingChangeInfoKey);
+		if (data != null) {
+			value = data.toString();
+		}
+		return value;
 	}
 
 	/**
 	 * 合法的例子：
 	 * 调整类型：adjusts.0.changeMethod
 	 */
-	@Override
-	public boolean isValid(ContractDetailDTO contract, String[] segments, String type) {
+	protected boolean isValid(ContractDetailDTO contract, String[] segments, String type) {
 		//入参不能为空
 		if (contract == null || segments == null || segments.length == 0 || type == null || "".equals(type)) {
 			return false;
@@ -100,8 +107,7 @@ public class ChargingChangesContractTemplate implements ContractTemplateHandler{
 		return true;
 	}
 
-	@Override
-	public String getValue(ContractDetailDTO contract, String[] segments, String type) {
+	protected String getValue(ContractDetailDTO contract, String[] segments, String type) {
 		String value = "";
 		Object data = null;
 		List<ContractChargingChangeDTO> chargingChanges = null;
