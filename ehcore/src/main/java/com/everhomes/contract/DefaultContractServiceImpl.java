@@ -3509,6 +3509,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		}
 		contractTemplateParent.setParentId(cmd.getId());
 		contractTemplateParent.setVersion(contractTemplateParent.getVersion()+1);
+		contractTemplateParent.setInitParams(cmd.getInitParams());
 		
 		if (contractTemplateParent.getLastCommit() == null) {
 			isNewFile = true;

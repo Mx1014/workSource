@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>name: 模板名称</li>
  * <li>contents: 模板内容</li>
  * <li>version: 版本记录</li>
+ * <li>initParams: 合同模板初始化参数（计价条款、关联资产等的数目），前端会解析这个json</li>
  * </ul>
  * Created by jm.ding on 2018/6/27.
  */
@@ -31,6 +32,8 @@ public class UpdateContractTemplateCommand {
 	private String contents;
 	@NotNull
 	private Long orgId;
+	private String initParams;
+	
 	public Long getId() {
 		return id;
 	}
@@ -79,7 +82,12 @@ public class UpdateContractTemplateCommand {
 	public void setOrgId(Long orgId) {
 		this.orgId = orgId;
 	}
-
+	public String getInitParams() {
+		return initParams;
+	}
+	public void setInitParams(String initParams) {
+		this.initParams = initParams;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
