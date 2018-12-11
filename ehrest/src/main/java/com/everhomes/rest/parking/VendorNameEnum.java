@@ -11,5 +11,6 @@ public class VendorNameEnum {
 	public static final String JIESHUN_DSHCXMall = "JIESHUN_DSHCXMall";// "大沙河创新大厦";
 
 	//海康威视
-	public static final String HKWS_SHJINMAO = "HKWS_SHJINMAO";// 上海金茂停车场;
+	public static final String HKWS_SHJINMAO = "HKWS_SHJINMAO";// 金茂雅苑一期停车场;
+	public static final String HKWS_SHJINMAO2 = "HKWS_SHJINMAO2";// 金茂雅苑二期停车场;
 }

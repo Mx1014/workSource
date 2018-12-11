@@ -87,7 +87,6 @@ public class LaunchPadBaseController extends ControllerBase {
         return response;
     }
 
-
     /**
      * <b>URL: /launchpadbase/listAllLaunchPadApps</b>
      * <p>广场根据组件获取全部应用</p>
@@ -118,8 +117,6 @@ public class LaunchPadBaseController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
-
 
     /**
      * <b>URL: /launchpadbase/listOPPushCards</b>
@@ -152,5 +149,60 @@ public class LaunchPadBaseController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /launchpadbase/listWorkPlatformApps</b>
+     * <p>获取工作台app</p>
+     */
+    @RequestMapping("listWorkPlatformApps")
+    @RestReturn(value=ListWorkPlatformAppResponse.class)
+    public RestResponse listWorkPlatformApps(ListWorkPlatformAppCommand cmd) {
+        ListWorkPlatformAppResponse res = serviceModuleAppService.listWorkPlatformApp(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /launchpadbase/saveWorkPlatformApps</b>
+     * <p>保存工作台app设置</p>
+     */
+    @RequestMapping("saveWorkPlatformApps")
+    @RestReturn(value=String.class)
+    public RestResponse saveWorkPlatformApps(SaveWorkPlatformAppCommand cmd) {
+        serviceModuleAppService.saveWorkPlatformApp(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /launchpadbase/updateWorkPlatformApps</b>
+     * <p>保存工作台app可见性设置</p>
+     */
+    @RequestMapping("updateWorkPlatformApps")
+    @RestReturn(value=String.class)
+    public RestResponse updateWorkPlatformApps(UpdateWorkPlatformAppCommand cmd) {
+        serviceModuleAppService.updateWorkPlatformApp(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /launchpadbase/updateWorkPlatformAppsSort</b>
+     * <p>保存工作台app排序设置</p>
+     */
+    @RequestMapping("updateWorkPlatformAppsSort")
+    @RestReturn(value=String.class)
+    public RestResponse updateWorkPlatformAppsSort(UpdateWorkPlatformAppSortCommand cmd) {
+        serviceModuleAppService.updateWorkPlatformAppSort(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

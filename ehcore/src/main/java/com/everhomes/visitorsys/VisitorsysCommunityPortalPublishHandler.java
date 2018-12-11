@@ -1,6 +1,10 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.module.ServiceModuleEntry;
+import com.everhomes.module.ServiceModuleEntryProvider;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
@@ -10,6 +14,7 @@ import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -24,6 +29,7 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
     private PortalVersionProvider portalVersionProvider;
     @Autowired
     private ServiceModuleAppProvider serviceModuleAppProvider;
+
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
         PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);

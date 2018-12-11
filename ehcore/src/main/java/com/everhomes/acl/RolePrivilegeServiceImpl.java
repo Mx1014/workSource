@@ -511,23 +511,36 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		resp.setPrivileges(infos);
 		return resp;
 	}
+
+	private boolean checkTopAccessInvalid(Long currentOrgId, Long targetOrgId) {
+		if (currentOrgId == null) {
+			currentOrgId = targetOrgId;
+		}
+		if (Objects.equals(currentOrgId, targetOrgId)) {
+			return !checkTopPrivilege(currentOrgId);
+		}
+
+		OrganizationDTO pmOrganization = organizationService.listPmOrganizationsByNamespaceId(UserContext.getCurrentNamespaceId());
+		OrganizationDTO targetOrganization = organizationService.getOrganizationById(targetOrgId);
+
+		return pmOrganization == null || targetOrganization == null
+				|| OrganizationType.PM.getCode().equals(targetOrganization.getOrganizationType())
+				|| Objects.equals(targetOrgId, pmOrganization.getId());
+	}
 	
 	private boolean checkTopPrivilege(long orgId) {
-        if(this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+        if(this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
                 UserContext.current().getUser().getId(), Privilege.Write, null)) {
             return true;
         }
-       Organization org = organizationProvider.findOrganizationById(orgId);
-       if(org == null) {
+        Organization org = organizationProvider.findOrganizationById(orgId);
+        if(org == null) {
            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
                 "organization not find");
         }
-      if(org.getAdminTargetId() != null && org.getAdminTargetId()!= 0
-			  && !org.getAdminTargetId().equals(UserContext.currentUserId())) {
-          return false;
-        }
-      
-      return true;
+		return org.getAdminTargetId() == null
+				|| org.getAdminTargetId() == 0
+				|| org.getAdminTargetId().equals(UserContext.currentUserId());
 	}
 
 	/**
@@ -538,7 +551,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
-      if(!checkTopPrivilege(cmd.getOrganizationId())) {
+      	if(checkTopAccessInvalid(cmd.getCurrentOrganizationId(), cmd.getOrganizationId())) {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
                     "non-privileged.");
         }
@@ -1920,8 +1933,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public void updateTopAdminstrator(CreateOrganizationAdminCommand cmd) {
-	    if(!checkTopPrivilege(cmd.getOrganizationId())) {
+	public GetAdministratorInfosByUserIdResponse updateTopAdminstrator(CreateOrganizationAdminCommand cmd) {
+	    if(checkTopAccessInvalid(cmd.getCurrentOrganizationId(), cmd.getOrganizationId())) {
 	        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 	                "non-privileged.");
 	    }
@@ -2006,6 +2019,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return null;
 		});
 
+		GetAdministratorInfosByUserIdCommand getAdminCmd = new GetAdministratorInfosByUserIdCommand();
+		getAdminCmd.setOrganizationId(cmd.getOrganizationId());
+		getAdminCmd.setUserId(cmd.getUserId());
+		return getAdministratorInfosByUserId(getAdminCmd);
 	}
 
 	private List<OrganizationContactDTO> listOrganizationAdmin(Long organizationId, ActivationFlag activationFlag){
@@ -2138,6 +2155,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void deleteOrganizationSuperAdministrators(DeleteOrganizationAdminCommand cmd) {
+		if (cmd.getCurrentOrganizationId() == null) {
+			cmd.setCurrentOrganizationId(cmd.getOrganizationId());
+		}
 		EntityType entityType = EntityType.fromCode(cmd.getOwnerType());
 		if(null == entityType){
 			LOGGER.error("params ownerType error, cmd="+ cmd.getOwnerType());
@@ -2145,7 +2165,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params ownerType error.");
 		}
 		
-      if(!checkTopPrivilege(cmd.getOrganizationId())) {
+      	if(checkTopAccessInvalid(cmd.getCurrentOrganizationId(), cmd.getOrganizationId())) {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
                     "non-privileged.");
         }
@@ -2154,7 +2174,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,false,false);
 
 			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
-			if(detail != null && detail.getTargetId() != null && detail.getTargetId().equals(UserContext.currentUserId())) {
+			if(detail != null && detail.getTargetId() != null
+					&& detail.getTargetId().equals(UserContext.currentUserId())
+					&& cmd.getOrganizationId().equals(cmd.getCurrentOrganizationId())) {
 	            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 	                    "cannot delete myself");
 			}
@@ -2922,13 +2944,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd) {
 		Long adminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-		if(adminUserId != null){
-			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(null, OrganizationMemberTargetType.USER.getCode(), adminUserId);
+		if(adminUserId != null) {
+			List<OrganizationMember> members = organizationProvider
+					.listOrganizationMembersByOrganizationIdAndMemberGroup(
+							cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
+							OrganizationMemberTargetType.USER.getCode(), adminUserId, -1, new ListingLocator());
+
 			for (OrganizationMember member: members) {
 				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
 					return processOrganizationContactDTO(member);
-				}else{
-					continue;
 				}
 			}
 		}

@@ -341,8 +341,8 @@ public class AclinkLogServiceImpl implements AclinkLogService {
                     query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.eq(cmd.getEventType()));
                 }
                 if(cmd.getKeyword() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.USER_IDENTIFIER.like(cmd.getKeyword() + "%")
-                            .or(Tables.EH_ACLINK_LOGS.USER_NAME.like(cmd.getKeyword()+"%")));
+                    query.addConditions(Tables.EH_ACLINK_LOGS.USER_IDENTIFIER.like("%" + cmd.getKeyword() + "%")
+                            .or(Tables.EH_ACLINK_LOGS.USER_NAME.like("%" + cmd.getKeyword()+"%")));
                 }
                 query.addConditions(Tables.EH_ACLINK_LOGS.DOOR_ID.in(doorIds));
                 //时间比较

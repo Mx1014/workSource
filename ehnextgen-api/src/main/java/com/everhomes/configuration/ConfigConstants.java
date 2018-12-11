@@ -85,8 +85,11 @@ public interface ConfigConstants {
 	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
 	
 	public static final String CLUB_SHARE_URL = "club.share.url";
-
-    String SERVICE_ALLIANCE_DETAIL_URL = "serviceAlliance.serviceDetail.url";
+	
+	@Deprecated
+    String SERVICE_ALLIANCE_DETAIL_URL = "serviceAlliance.serviceDetail.url"; //当前不使用了
+    
+    String SERVICE_DETAIL_URL = "serviceAlliance.detail.url";
 
     String RENTAL_RESOURCE_DETAIL_URL = "rental.resource.detail.url";
 

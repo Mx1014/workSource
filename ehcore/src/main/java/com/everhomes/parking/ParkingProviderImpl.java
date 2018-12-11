@@ -1437,4 +1437,14 @@ public class ParkingProviderImpl implements ParkingProvider {
 		Record record = sql.fetchOne();
 		return ConvertHelper.convert(record, ParkingRechargeOrderDTO.class);
 	}
+	
+    @Override
+	public String findParkingLotNameByVendorName(Integer namespaceId, String vendorName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingLots.class));
+		SelectQuery<EhParkingLotsRecord> query = context.selectQuery(Tables.EH_PARKING_LOTS);
+		query.addConditions(Tables.EH_PARKING_LOTS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PARKING_LOTS.VENDOR_NAME.eq(vendorName));
+		ParkingLot lot =  query.fetchOneInto(ParkingLot.class);
+		return lot == null ? null : lot.getName();
+	}
 }
