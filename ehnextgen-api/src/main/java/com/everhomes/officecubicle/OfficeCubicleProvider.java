@@ -79,8 +79,6 @@ public interface OfficeCubicleProvider {
 
 	void updateCubicleRentOrder(OfficeCubicleRentOrder order);
 
-	OfficeCubicleRentOrder findOfficeCubicleRentOrderByBizOrderNum(String bizOrderNum);
-
 	OfficeCubicleRentOrder findOfficeCubicleRentOrderById(Long orderId);
 
 	void updateCubicle(OfficeCubicleStation station);
@@ -150,5 +148,7 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId, Integer currentNamespaceId);
 
 	List<OfficeCubicleStation> getOfficeCubicleStationNotAssociate(Long spaceId);
+
+	OfficeCubicleRentOrder findOfficeCubicleRentOrderByGeneralOrderId(Long generalOrderId);
 
 }

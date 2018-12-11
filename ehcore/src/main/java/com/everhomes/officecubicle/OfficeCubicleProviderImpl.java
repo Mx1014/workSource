@@ -495,7 +495,6 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		Condition condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId);
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.gt(new Timestamp(System.currentTimeMillis())));
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.ORDER_ID.eq(orderId));
-		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq((byte)1));
 		step.where(condition);
 		List<OfficeCubicleStationRent> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_STATION_RENT.OPERATE_TIME.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleStationRent.class);
@@ -850,10 +849,10 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
     }
 	
 	@Override
-	public OfficeCubicleRentOrder findOfficeCubicleRentOrderByBizOrderNum(String bizOrderNum) {
+	public OfficeCubicleRentOrder findOfficeCubicleRentOrderByGeneralOrderId(Long generalOrderId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleRentOrdersRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS);
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.BIZ_ORDER_NO.eq(bizOrderNum));
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.GENERAL_ORDER_ID.eq(generalOrderId));
 		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleRentOrder.class);
 	}
 

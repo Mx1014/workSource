@@ -1922,7 +1922,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 			OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 			rent.setOrderId(order.getId());
-			rent.setRentType((byte)0);
 			for(int i=0;i<= order.getRentCount() ;i++){
 				officeCubicleProvider.createCubicleStationRent(rent);
 			}
@@ -2009,6 +2008,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		preDto.setOrderId(order.getId());
 		preDto.setAmount(priceRule.get(0).getWorkdayPrice().multiply(new BigDecimal(100)).longValue());
 		order.setBizOrderNo(response.getBizOrderNum());
+		order.setGeneralOrderId(response.getOrderId());
 		officeCubicleProvider.updateCubicleRentOrder(order);
 		return preDto;
 		
@@ -2085,7 +2085,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"invaild ordertype,"+cmd.getOrderType());
 		}
-		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderByBizOrderNum(cmd.getBizOrderNum());
+		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderByGeneralOrderId(cmd.getOrderId());
 		if(cmd.getOrderType() == 3) {
 			coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_ORDER_STATUS.getCode() + order.getId()).enter(()-> {
 				order.setOrderStatus(OfficeCubicleOrderStatus.PAID.getCode());
@@ -2107,7 +2107,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 				rent.setOrderId(order.getId());
-				rent.setRentType((byte)0);
 				for(int i=0;i<= order.getRentCount() ;i++){
 					officeCubicleProvider.createCubicleStationRent(rent);
 				}
