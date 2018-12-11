@@ -221,8 +221,7 @@ public class VisitorSysVisitorProviderImpl implements VisitorSysVisitorProvider 
 		cal.add(cal.DATE,-30);
 		Timestamp time = new Timestamp(cal.getTimeInMillis());
 		return getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISITORS)
-				.where(Tables.EH_VISITOR_SYS_VISITORS.OWNER_TYPE.eq("community"))
-				.and(Tables.EH_VISITOR_SYS_VISITORS.CREATE_TIME.ge(time))
+				.where(Tables.EH_VISITOR_SYS_VISITORS.CREATE_TIME.ge(time))
 				.groupBy(Tables.EH_VISITOR_SYS_VISITORS.VISITOR_PHONE,Tables.EH_VISITOR_SYS_VISITORS.OWNER_ID)
 				.having("COUNT(1) > 1 AND max(create_time)")
 				.fetch().map(r ->ConvertHelper.convert(r,VisitorSysVisitor.class));
