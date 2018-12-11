@@ -263,4 +263,17 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd){
+		List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+		List<GeneralFormValDTO> dtoList = new ArrayList<>();
+		if(formValues != null){
+			for(GeneralFormVal value : formValues){
+				GeneralFormValDTO dto = ConvertHelper.convert(value, GeneralFormValDTO.class);
+				dtoList.add(dto);
+			}
+		}
+		return dtoList;
+	}
 }
