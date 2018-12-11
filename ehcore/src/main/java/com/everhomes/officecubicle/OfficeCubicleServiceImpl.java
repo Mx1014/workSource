@@ -383,25 +383,31 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setHolidayType(resp.getHolidayType());
 		dto.setNeedPay(resp.getNeedPay());
 
-		PriceRuleDTO dailyPrice = new PriceRuleDTO();
-		PriceRuleDTO halfdailyPrice = new PriceRuleDTO();
+		PriceRuleDTO dailyPriceRule = new PriceRuleDTO();
+		PriceRuleDTO halfdailyPriceRule = new PriceRuleDTO();
 		for (PriceRuleDTO priceRule :resp.getPriceRules()){
 			if (priceRule.getRentalType() ==RentalType.DAY.getCode()){
-				dailyPrice = priceRule;
+				dailyPriceRule = priceRule;
 			}
 			if (priceRule.getRentalType() ==RentalType.HALFDAY.getCode()){
-				halfdailyPrice = priceRule;
+				halfdailyPriceRule = priceRule;
 			}
 			if (priceRule.getRentalType() ==RentalType.THREETIMEADAY.getCode()){
-				halfdailyPrice = priceRule;
+				halfdailyPriceRule = priceRule;
 			}
 		}
-		if (dailyPrice!=null){
-			dto.setDailyPrice(dailyPrice.getWorkdayPrice());
+		BigDecimal dailyPrice = new BigDecimal(0.00);
+		BigDecimal halfdailyPrice = new BigDecimal(0.00);
+		if (dailyPriceRule.getWorkdayPrice()!=null){
+			dailyPrice = dailyPriceRule.getWorkdayPrice();
+			
 		}
-		if(halfdailyPrice!=null){
-			dto.setHalfdailyPrice(halfdailyPrice.getWorkdayPrice());
+		if(halfdailyPriceRule.getWorkdayPrice()!=null){
+			halfdailyPrice = halfdailyPriceRule.getWorkdayPrice();
+			
 		}
+		dto.setDailyPrice(dailyPrice);
+		dto.setHalfdailyPrice(halfdailyPrice);
 		return dto;
 	}
 
@@ -2880,10 +2886,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				}
 				BigDecimal dailyPrice = new BigDecimal(0.00);
 				BigDecimal halfdailyPrice = new BigDecimal(0.00);
-				if(dailyPriceRule != null){
+				if(dailyPriceRule.getWorkdayPrice() != null){
 					dailyPrice = dailyPriceRule.getWorkdayPrice();
 				}
-				if(halfdailyPriceRule!=null){
+				if(halfdailyPriceRule.getWorkdayPrice()!=null){
 					halfdailyPrice = halfdailyPriceRule.getWorkdayPrice();
 				}
 				dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?halfdailyPrice:dailyPrice);
