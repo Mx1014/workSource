@@ -1,3 +1,7 @@
+-- AUTHOR:�⺮
+-- REMARK:����ȯ�Խ��ֶ�����
+ALTER TABLE eh_welfare_coupons CHANGE `service_supply_name` `service_supply_name` VARCHAR(4096) COMMENT '���õص�';
+ALTER TABLE eh_welfare_coupons CHANGE `service_range` `service_range` VARCHAR(4096) COMMENT '���÷�Χ';
 -- AUTHOR: 马世亨 20181122
 -- REMARK: 访客1.4 到访类型修改
 ALTER TABLE `eh_visitor_sys_visit_reason` ADD COLUMN `reason_type`  tinyint NULL DEFAULT null COMMENT '类型 0为住宅小区,1为商业小区';
