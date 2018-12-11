@@ -274,6 +274,7 @@ public class WelfareServiceImpl implements WelfareService {
 	        welfareCouponProvider.deleteWelfareCoupons(welfare.getId());
 	        if(welfareDTO.getCoupons() != null){
 	        	for(WelfareCouponDTO couponDto : welfareDTO.getCoupons()){
+	        		checkCouponDTO(couponDto);
 	        		WelfareCoupon coupon = convertDTO2WelfareCoupon(couponDto, welfare.getOrganizationId(), welfare.getId(), welfare.getNamespaceId());
 	        		welfareCouponProvider.createWelfareCoupon(coupon);
 	        	}
@@ -293,7 +294,27 @@ public class WelfareServiceImpl implements WelfareService {
         return welfare;
     }
 
-    private WelfareCoupon convertDTO2WelfareCoupon(WelfareCouponDTO couponDto, Long organizationId, Long welfareId, Integer namespaceId) {
+    private void checkCouponDTO(WelfareCouponDTO couponDto) {
+		if(couponDto.getConsumptionLimit()!=null && couponDto.getConsumptionLimit().length() > 42){
+			couponDto.setConsumptionLimit(couponDto.getConsumptionLimit().substring(0,42));
+		}
+		if(couponDto.getCouponName()!=null && couponDto.getCouponName().length() > 42){
+			couponDto.setCouponName(couponDto.getCouponName().substring(0,42));
+		}
+		if(couponDto.getDenomination()!=null && couponDto.getDenomination().length() > 42){
+			couponDto.setDenomination(couponDto.getDenomination().substring(0,42));
+		}
+		if(couponDto.getServiceRange()!=null && couponDto.getServiceRange().length() > 1000){
+			couponDto.setServiceRange(couponDto.getServiceRange().substring(0,1000));
+		}
+		if(couponDto.getServiceSupplyName()!=null && couponDto.getServiceSupplyName().length() > 1000){
+			couponDto.setServiceSupplyName(couponDto.getServiceSupplyName().substring(0,1000));
+		}
+		
+		
+	}
+
+	private WelfareCoupon convertDTO2WelfareCoupon(WelfareCouponDTO couponDto, Long organizationId, Long welfareId, Integer namespaceId) {
     	WelfareCoupon coupon = ConvertHelper.convert(couponDto, WelfareCoupon.class);
     	coupon.setNamespaceId(namespaceId);
         if (couponDto.getValidDate() != null) {
