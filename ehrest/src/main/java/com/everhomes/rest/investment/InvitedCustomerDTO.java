@@ -314,45 +314,6 @@ public class InvitedCustomerDTO {
         this.openingAccount = openingAccount;
     }
 
-    public String getStringTag_17() {
-        return stringTag_17;
-    }
-
-    public void setStringTag_17(String stringTag_17) {
-        this.stringTag_17 = stringTag_17;
-    }
-
-    public String getStringTag_18() {
-        return stringTag_18;
-    }
-
-    public void setStringTag_18(String stringTag_18) {
-        this.stringTag_18 = stringTag_18;
-    }
-
-    public String getStringTag_19() {
-        return stringTag_19;
-    }
-
-    public void setStringTag_19(String stringTag_19) {
-        this.stringTag_19 = stringTag_19;
-    }
-
-    public String getStringTag_20() {
-        return stringTag_20;
-    }
-
-    public void setStringTag_20(String stringTag_20) {
-        this.stringTag_20 = stringTag_20;
-    }
-
-    public String getStringTag_21() {
-        return stringTag_21;
-    }
-
-    public void setStringTag_21(String stringTag_21) {
-        this.stringTag_21 = stringTag_21;
-    }
 
     public String getCorpLegalPersonDuty() {
         return corpLegalPersonDuty;
@@ -1516,6 +1477,8 @@ public class InvitedCustomerDTO {
         this.trackers = trackers;
     }
 
+
+
     public CustomerRequirementDTO getRequirement() {
         return requirement;
     }
@@ -1531,6 +1494,8 @@ public class InvitedCustomerDTO {
     public void setCurrentRent(CustomerCurrentRentDTO currentRent) {
         this.currentRent = currentRent;
     }
+
+
 
     @Override
     public String toString() {
