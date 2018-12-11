@@ -256,6 +256,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
         //String url = "http://183.62.222.87:5902/sf";
 
+        backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
 
         //将同步锁置为失效，此时可以再次创建任务
         zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
