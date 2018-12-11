@@ -2085,7 +2085,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"invaild ordertype,"+cmd.getOrderType());
 		}
-		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderByGeneralOrderId(cmd.getOrderId());
+		OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderByBizOrderNo(cmd.getBizOrderNum());
 		if(cmd.getOrderType() == 3) {
 			coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_ORDER_STATUS.getCode() + order.getId()).enter(()-> {
 				order.setOrderStatus(OfficeCubicleOrderStatus.PAID.getCode());
@@ -2193,7 +2193,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		preOrderCommand.setAccountCode(cmd.getAccountCode());
 		preOrderCommand.setClientAppName(cmd.getClientAppName());
 
-		preOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+		preOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.OFFICE_CUBICLE.getPycode());
 		// 移到统一订单系统完成
 		// String BizOrderNum  = getOrderNum(orderId, OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
 		// preOrderCommand.setBizOrderNum(BizOrderNum);
