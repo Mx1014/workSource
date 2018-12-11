@@ -24,7 +24,7 @@ public class GenerateContractDocumentsCommand {
 	private Long categoryId;
 	private Long templateId;
 	private String templateName;
-	private Long ownerId = 0L;
+	private Long ownerId;
 	private String ownerType;
 	private Long orgId;
 	private Long communityId;
