@@ -72,6 +72,17 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
         if(null == rs)
             return;
+        //发推送
+
+        Map<String, String> map = new HashMap<>();
+        map.put("userName", rentalBill.getUserName());
+        map.put("phone", rentalBill.getUserPhone());
+        map.put("resourceName", rentalBill.getResourceName());
+        map.put("useDetail", rentalBill.getUseDetail());
+        map.put("freeGoods", processFreeGoods(rentalBill));
+        map.put("paidGoods",  processPaidGoods(rentalBill));
+        rentalCommonService.sendMessageCode(rs.getChargeUid(), map,
+                    RentalNotificationTemplateCode.RENTAL_CANCEL_NOT_PAY);
 
         //发短信
         String templateScope = SmsTemplateCode.SCOPE;

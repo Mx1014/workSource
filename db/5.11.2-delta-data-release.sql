@@ -13,6 +13,9 @@
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 -- AUTHOR:
 -- REMARK:
+-- AUTHOR:郑思挺
+-- REMARK:资源预约消息推送
+update eh_locale_templates set text = '${userName}（${phone}）预约了${resourceName}，使用时间：${useDetail}${freeGoods}${paidGoods}' where scope = 'rental.notification' and `code` = 2;
 
 -- AUTHOR: 马世亨 20181211
 -- REMARK: 访客v1.4 添加住宅小区到访类型
