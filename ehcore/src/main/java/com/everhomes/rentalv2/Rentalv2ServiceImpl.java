@@ -1396,6 +1396,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode())||cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 				List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(cmd.getResourceType(),
 						RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), r);
+				if (halfTimeIntervals.size()<2)
+					halfTimeIntervals.add(halfTimeIntervals.get(0));
 				if (halfTimeIntervals.size()<3)
 					halfTimeIntervals.add(halfTimeIntervals.get(1));
 				startTime += Double.valueOf(halfTimeIntervals.get(cmd.getStartTimeAmOrPm()).getBeginTime()*3600*1000).longValue();
