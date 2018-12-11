@@ -82,6 +82,14 @@ UPDATE eh_service_module_privileges SET remark = '预约参观记录权限' WHER
 -- AUTHOR: 马世亨 20181212
 -- REMARK: 访客v1.4 访客短信优化 url修改
 UPDATE `eh_configurations` SET `value`='/visitor-appointment/build/invitation.html?visitorToken=', `is_readonly`='0' WHERE `name`='visitorsys.invitation.link';
+
+
+-- AUTHOR: 黄明波
+-- REMARK: 更新打印机归属项目
+update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044331058733 where reader_name = 'TC101154727022' ;
+update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044331050362  where reader_name = 'TC101154727294';
+update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044332063596 where reader_name = 'TC100887870538';
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
@@ -132,10 +140,26 @@ UPDATE `eh_configurations` SET `value`='/visitor-appointment/build/invitation.ht
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guanzhouyuekongjian
 -- DESCRIPTION: 此SECTION只在广州越空间-999930执行的脚本
+
+-- AUTHOR: 黄明波
+-- REMARK: 更新打印机归属项目
+update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044332063562 where reader_name = 'TC101152723634';
+update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044332063563 where reader_name = 'TC101152723636';
+
+
 -- --------------------- SECTION END guanzhouyuekongjian -------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
+
+-- AUTHOR: 黄明波
+-- REMARK: 更新打印机归属项目
+update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044332063578  where reader_name = 'TC101152723470';
+update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044332063578  where reader_name = 'TC101152723540';
+update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044332063578  where reader_name = 'TC101152723478';
+
+
+
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
