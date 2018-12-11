@@ -3,25 +3,18 @@ package com.everhomes.rentalv2.resource_handler;
 import com.everhomes.officecubicle.OfficeCubicleProvider;
 import com.everhomes.officecubicle.OfficeCubicleSpace;
 import com.everhomes.parking.ParkingLot;
-import com.everhomes.rentalv2.RentalCommonServiceImpl;
-import com.everhomes.rentalv2.RentalResource;
-import com.everhomes.rentalv2.RentalResourceHandler;
-import com.everhomes.rentalv2.RentalResourceType;
-import com.everhomes.rentalv2.Rentalv2Provider;
+import com.everhomes.rentalv2.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.rentalv2.RentalOwnerType;
 import com.everhomes.rest.rentalv2.RentalType;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
-import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.everhomes.rest.rentalv2.admin.RentalOpenTimeDTO;
-import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +26,8 @@ public class StationBookingRentalResourceHandler implements RentalResourceHandle
     private OfficeCubicleProvider officeCubicleProvider;
     @Autowired
     private Rentalv2Provider rentalv2Provider;
+    @Autowired
+    private Rentalv2Service rentalService;
     @Override
     public RentalResource getRentalResourceById(Long id) {
     	OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(id);
@@ -94,6 +89,12 @@ public class StationBookingRentalResourceHandler implements RentalResourceHandle
 
         //默认关闭节假日
         addCmd.setHolidayOpenFlag((byte)0);
+        addCmd.setHolidayType(RentalHolidayType.NORMAL_WEEKEND.getCode());
+
+        //填写关闭日期
+        GetHolidayCloseDatesCommand cmd = new GetHolidayCloseDatesCommand();
+        cmd.setHolidayType(RentalHolidayType.NORMAL_WEEKEND.getCode());
+        addCmd.setCloseDates(rentalService.getHolidayCloseDates(cmd));
     }
 
     @Override
