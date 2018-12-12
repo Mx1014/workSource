@@ -71,7 +71,6 @@ CREATE TABLE `eh_office_cubicle_station` (
   `owner_type`  VARCHAR(255) COMMENT 'owner type: community',
   `owner_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
   `space_id` BIGINT COMMENT '空间ID',
-  `station_id` BIGINT COMMENT '工位ID',
   `station_name` VARCHAR(127) COMMENT '名称：',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
