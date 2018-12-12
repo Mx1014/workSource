@@ -59,6 +59,7 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldsConfigDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -5664,6 +5665,8 @@ public class FlowServiceImpl implements FlowService {
             // Assert.notNull(form, "form should be not null");
             updateFlowConditionExpressionAfterFlowFormUpdate(flow, entityType.getCode(), cmd.getEntityId(), null, null);
         }
+
+        flowMarkUpdated(flow);
     }
 
     @Override
@@ -7010,6 +7013,27 @@ public class FlowServiceImpl implements FlowService {
             laneLogDTO.setIsAbsortLane(TrueOrFalseFlag.TRUE.getCode());
         }
         return laneLogDTOS;
+    }
+
+    private void parseFlowForm(FlowNode currNode, FlowNodeLogDTO nodeLogDTO) {
+        FlowFormRelationType relationType = FlowFormRelationType.fromCode(currNode.getFormRelationType());
+        if (relationType == FlowFormRelationType.DIRECT_RELATION) {
+            FlowFormRelationDataDirectRelation directRelation = (FlowFormRelationDataDirectRelation)
+                    StringHelper.fromJsonString(currNode.getFormRelationData(), FlowFormRelationDataDirectRelation.class);
+            nodeLogDTO.setFormDirectRelation(directRelation);
+
+            // 客户端是从这两个字段里取值的
+            if (directRelation != null) {
+                nodeLogDTO.setFormOriginId(directRelation.getFormOriginId());
+                nodeLogDTO.setFormVersion(directRelation.getFormVersion());
+            }
+        } else if (relationType == FlowFormRelationType.CUSTOMIZE_FIELD) {
+            nodeLogDTO.setFormConfigDTO((GeneralFormFieldsConfigDTO)
+                    StringHelper.fromJsonString(currNode.getFormRelationData(), GeneralFormFieldsConfigDTO.class));
+        }
+        if (TrueOrFalseFlag.TRUE.getCode().equals(currNode.getFormStatus())) {
+            nodeLogDTO.setFormRelationType(currNode.getFormRelationType());
+        }
     }
 
     private void getFlowNodeLogDTOV2(Long flowCaseId, Set<FlowUserType> flowUserTypes, FlowNode currNode, Long stepCount, FlowNodeLogDTO nodeLogDTO) {

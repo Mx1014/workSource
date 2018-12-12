@@ -2,7 +2,6 @@ package com.everhomes.general_form;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
@@ -23,10 +22,6 @@ import com.everhomes.server.schema.tables.pojos.EhGeneralFormFilterUserMap;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.ValidatorUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.CollectionUtils;
@@ -1307,11 +1302,33 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         // 存在表单值则一起返回
         List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
         if(formValues != null && fieldDTOs != null){
-            for(GeneralFormVal value : formValues){
-                for(GeneralFormFieldsConfigFieldDTO fieldDTO : fieldDTOs){
+            for(GeneralFormFieldsConfigFieldDTO fieldDTO : fieldDTOs){
+                for(GeneralFormVal value : formValues){
                     // 根据FieldName来判断两个表单值属于同一字段
                     if(fieldDTO.getFieldName().equals(value.getFieldName())){
-                        fieldDTO.setFieldValue(value.getFieldValue());
+                        // 子表单
+                        if(fieldDTO.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())){
+                            PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(value.getFieldValue(), PostApprovalFormSubformValue.class);
+//                            List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+//                             if (postSubFormValue.getForms() != null && postSubFormValue.getForms().size() > 0) {
+//                                 String jsonStr = JSON.toJSONString(postSubFormValue.getForms());
+//                                 GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+//                                 subFormValue.setSubForms(JSON.parseObject(jsonStr, new TypeReference<List<GeneralFormSubFormValueDTO>>() {
+//                                 }.getType()));
+//                                 fieldDTO.setFieldValue(subFormValue.toString());
+//                             }
+                            List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+//                            //  解析子表单的值
+                           for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+                               subForms.add(processSubFormItemField(fieldDTO.getFieldExtra(), itemValue, NormalFlag.NEED.getCode()));
+                           }
+                           GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+                           subFormValue.setSubForms(subForms);
+                           fieldDTO.setFieldValue(subFormValue.toString());
+                        } else {
+                            fieldDTO.setFieldValue(value.getFieldValue());
+                        }
+                        break;
                     }
                 }
             }
@@ -1346,11 +1363,24 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                         if(fieldDTO.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())){
                             PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(value.getFieldValue(), PostApprovalFormSubformValue.class);
 //                            List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
-                            String jsonStr = JSON.toJSONString(postSubFormValue.getForms());
-                            GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
-                            subFormValue.setSubForms(JSON.parseObject(jsonStr, new TypeReference<List<GeneralFormSubFormValueDTO>>() {
-                            }.getType()));
-                            fieldDTO.setFieldValue(subFormValue.toString());
+                            if (postSubFormValue.getForms() != null && postSubFormValue.getForms().size() > 0) {
+//                            List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+//                             if (postSubFormValue.getForms() != null && postSubFormValue.getForms().size() > 0) {
+//                                 String jsonStr = JSON.toJSONString(postSubFormValue.getForms());
+//                                 GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+//                                 subFormValue.setSubForms(JSON.parseObject(jsonStr, new TypeReference<List<GeneralFormSubFormValueDTO>>() {
+//                                 }.getType()));
+//                                 fieldDTO.setFieldValue(subFormValue.toString());
+//                             }
+                                List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+//                            //  解析子表单的值
+                                for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+                                    subForms.add(processSubFormItemField(fieldDTO.getFieldExtra(), itemValue, NormalFlag.NEED.getCode()));
+                                }
+                                GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+                                subFormValue.setSubForms(subForms);
+                                fieldDTO.setFieldValue(subFormValue.toString());
+                            }
 
 //                            //  解析子表单的值
 //                            for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
@@ -1362,6 +1392,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                         } else {
                             fieldDTO.setFieldValue(value.getFieldValue());
                         }
+                        break;
                     }
                 }
             }

@@ -7,26 +7,11 @@ import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
-import com.everhomes.general_approval.GeneralApproval;
-import com.everhomes.general_approval.GeneralApprovalFormHandler;
+import com.everhomes.flow.*;
 import com.everhomes.general_approval.GeneralApprovalProvider;
-import com.everhomes.general_approval.GeneralApprovalVal;
-import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.*;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowReferType;
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.rest.flow.GeneralModuleInfo;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
@@ -34,8 +19,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.apache.poi.util.StringUtil;
-import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -82,9 +65,10 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 	public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
 
 		// 表单字段配置ID不为空，即为工作流节点提交的表单值，修改表单值，然后直接退出方法
-		if(cmd.getFormFieldsConfigId() != null) {
-			// 根据flowCaseId和"EhFlowCases"查询已提交的表单值
-			List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(), cmd.getFlowCaseId());
+		// 根据flowCaseId和"EhFlowCases"查询已提交的表单值
+		List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(), cmd.getFlowCaseId());
+		if(cmd.getFormFieldsConfigId() != null
+				|| formValues.size() > 0) {
 			if (cmd.getValues() != null && formValues != null) {
 				for (PostApprovalFormItem val : cmd.getValues()) {
 					for (GeneralFormVal formValue : formValues) {
