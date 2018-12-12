@@ -675,9 +675,10 @@ public class ContractProviderImpl implements ContractProvider {
 		if(categoryId != null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.CATEGORY_ID.eq(categoryId));
 		}
-		if (categoryId == null) {
+		// 导致查询不到数据 不存在 categoryId is null,影响是：合同定时任务执行不了，比如合同过期不了
+		/*if (categoryId == null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.CATEGORY_ID.isNull());
-		}
+		}*/
 		if(communityId != null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(communityId));
 		}
