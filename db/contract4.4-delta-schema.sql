@@ -71,3 +71,6 @@ ALTER table eh_enterprise_customers add column string_tag20 varchar(32) comment 
 ALTER table eh_enterprise_customers add column string_tag21 varchar(32) comment '预留字段21';
 ALTER table eh_enterprise_customers add column corp_legal_person_duty varchar(32) comment '法人代表职务';
 
+-- AUTHOR: tangcen 2018年12月12日
+-- REMARK: 给eh_contract_documents添加合同编号字段
+ALTER TABLE `eh_contract_documents` ADD COLUMN `contract_number` varchar(128) COMMENT '合同编号' AFTER `name`;
