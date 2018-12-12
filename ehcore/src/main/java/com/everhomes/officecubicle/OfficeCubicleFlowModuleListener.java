@@ -100,7 +100,7 @@ public class OfficeCubicleFlowModuleListener implements FlowModuleListener {
     	return null;
     }
     
-    final static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    final static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @Override
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         LOGGER.debug("onFlowCaseDetailRender");
