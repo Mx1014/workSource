@@ -34,6 +34,7 @@ public interface LaunchPadService {
     void deleteLaunchPadLayout(DeleteLaunchPadLayoutAdminCommand cmd);
     void updateLaunchPadLayout(UpdateLaunchPadLayoutAdminCommand cmd);
     LaunchPadLayoutDTO getLaunchPadLayout(GetLaunchPadLayoutCommand cmd);
+    LaunchPadLayoutDTO getLaunchPadBaseLayout(GetLaunchPadLayoutCommand cmd);
     LaunchPadItemDTO getLaunchPadItemById(GetLaunchPadItemByIdCommand cmd);
     void updateLaunchPadItem(UpdateLaunchPadItemAdminCommand cmd);
     GetLaunchPadItemsByKeywordAdminCommandResponse getLaunchPadItemsByKeyword(GetLaunchPadItemsByKeywordAdminCommand cmd);

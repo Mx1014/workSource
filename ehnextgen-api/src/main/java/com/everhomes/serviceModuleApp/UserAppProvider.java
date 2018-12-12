@@ -14,6 +14,10 @@ public interface UserAppProvider {
 
 	List<UserApp> listUserApps(Long userId, Byte locationType, Long locationTargetId);
 
+	List<UserApp> listUserApps(Byte locationType, Long locationTargetId,Long appId);
+
+	Integer getMaxOrder(Long userId, Byte locationType, Long locationTargetId);
+
 	void delete(Long id);
 
 	void delete(List<Long> ids);

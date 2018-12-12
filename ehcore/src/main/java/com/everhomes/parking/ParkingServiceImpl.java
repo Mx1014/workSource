@@ -993,10 +993,22 @@ public class ParkingServiceImpl implements ParkingService {
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			ParkingVendorHandler handler = getParkingVendorHandler(parkingLot.getVendorName());
 
-			List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, order.getPlateNumber());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			String sdate = sdf.format(cards.get(0).getEndTime());
-
+			String sdate = null;
+			if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())){
+				List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, order.getPlateNumber());
+				sdate = sdf.format(cards.get(0).getEndTime());
+			} else if(order.getOrderType().equals(ParkingOrderType.OPEN_CARD.getCode())) {
+				ParkingCardRequest cardRequest = parkingProvider.findParkingCardRequestByPlateNumber( order.getPlateNumber());
+				GetOpenCardInfoCommand cmd = new GetOpenCardInfoCommand();
+				cmd.setOwnerId(order.getOwnerId());
+				cmd.setOwnerType(order.getOwnerType());
+				cmd.setParkingLotId(parkingLot.getId());
+				cmd.setParkingRequestId(cardRequest.getId());
+				cmd.setPlateNumber(order.getPlateNumber());
+				OpenCardInfoDTO cardDTO = handler.getOpenCardInfo(cmd);
+				sdate = sdf.format(cardDTO.getExpireDate());
+			}
 			e = new OrderDescriptionEntity();
 			e.setKey("当前有效期");
 			e.setValue(sdate);
