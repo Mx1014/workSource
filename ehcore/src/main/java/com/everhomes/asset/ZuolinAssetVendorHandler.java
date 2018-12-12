@@ -1278,7 +1278,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             
             // 原来的实现方式是对于每条excel数据，都进行帐单和费项的比较来判断帐单是否需要覆盖，这使得查询、比较、删除、插入次数过多，处理一条数据需要15秒以上，
             // 使得数据很难导进去，故先对已存在的数据进行处理成一个标识（字符串），方便后面比较 by lqs 20181207
-            Map<String, String> existBills = prepareUserBillIdentifiers(createBillCommands);
+            Map<String, String> existBills = null;
+            if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())) {
+                existBills = prepareUserBillIdentifiers(createBillCommands);
+            }
             
             long updateStartTime = System.currentTimeMillis();
             long roundStartTime = updateStartTime;
@@ -1376,6 +1379,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 //        });
     	String identifier = genUserBillIdentifier(command);
     	String billIdStr = existBills.get(identifier);
+//    	if(LOGGER.isDebugEnabled()) {
+//    	    LOGGER.debug("Process bill importing data, duplicated identifiers, identifier={}, existBills={}", identifier, existBills);
+//    	}
     	if(billIdStr != null) {
     	    assetProvider.modifyBillForImport(Long.parseLong(billIdStr), command);
     	    isCreate.set(0, false);
@@ -1558,19 +1564,31 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     }
     
     private void populateUserBillIdentifierWithAddress(Map<Long, String> map, List<Long> billIdList) {
+        List<PaymentBillItems> items = new ArrayList<PaymentBillItems>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         context.select().from(Tables.EH_PAYMENT_BILL_ITEMS).where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.in(billIdList))
         .orderBy(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID, Tables.EH_PAYMENT_BILL_ITEMS.ADDRESS_ID)
         .fetch()
         .forEach(r ->{
-            PaymentBillItems item = ConvertHelper.convert(r, PaymentBillItems.class);
-            String identifier = map.get(item.getBillId());
-            if(identifier != null) {
+            items.add(ConvertHelper.convert(r, PaymentBillItems.class));
+        });
+        
+        // 一个帐单下的多个费项明细所关联的地址，大部分都是相同的，需要过滤掉（注意：查询时，地址已经是排序好的，故不用再排序） by lqs 20181210
+        Map<Long, Long> existAddresses = new HashMap<Long, Long>();
+        for(PaymentBillItems item : items) {
+            Long existAddressId = existAddresses.get(item.getBillId());
+            if(existAddressId == null || !existAddressId.equals(item.getAddressId())) {
+                String identifier = map.get(item.getBillId());
+                if(identifier == null) {
+                    identifier = "unknown";
+                }
                 String addressIdStr = (item.getAddressId() == null) ? "" : String.valueOf(item.getAddressId());
                 identifier = identifier + "_" + addressIdStr;
                 map.put(item.getBillId(), identifier);
+                
+                existAddresses.put(item.getBillId(), item.getAddressId());
             }
-        });
+        }
     }
     
     private String concateUserBillIdentifier(Long billGroupId, String dateStrBegin, String dateStrEnd) {
@@ -1911,34 +1929,36 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             cmd.setOwnerType("community");
             cmd.setOwnerId(ownerId);
             cmd.setIsSettled(billSwitch);
+            // 对于个人客户导帐单时，会有可能出现这样的一个情况：不同门牌的业主名称一样，但实际上他们是不同的人，所以不能把他们当同一个客户来看；
+            // 故需要生成多个帐单，即使客户名称、帐期、门牌一样的时候也生成多个，让用户在界面上确认，如果多了可以删除，但合并了则有问题 by lqs 20181210
             //个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
-            if(targetType.equals(AssetTargetType.USER.getCode())){
-            	for(int m = 0;m < cmds.size();m++) {
-            		CreateBillCommand createBillCommand = cmds.get(m);
-            		if(cmd.getTargetName().equals(createBillCommand.getTargetName()) 
-        				&& cmd.getDateStrBegin().equals(createBillCommand.getDateStrBegin())
-        				&& cmd.getDateStrEnd().equals(createBillCommand.getDateStrEnd())) {
-            			//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
-        				if(createBillCommand.getAddresses().equals(cmd.getAddresses())) {
-        					cmds.set(m, cmd);
-                			continue bill;
-        				}else if(!createBillCommand.getAddresses().contains(cmd.getAddresses())){//未合并为一个账单之前的情况，如：456、457， 新的数据是456，是不同的数据，所以是新增。
-        					//个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
-        					BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
-                			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
-                			List<ExemptionItemDTO> newExemptionItemDTOList = newBillGroupDTO.getExemptionItemDTOList();
-                			newBillItemDTOList.addAll(billItemDTOList);
-                			newExemptionItemDTOList.addAll(exemptionItemDTOList);
-                			newBillGroupDTO.setBillItemDTOList(newBillItemDTOList);
-                			newBillGroupDTO.setExemptionItemDTOList(newExemptionItemDTOList);
-                			createBillCommand.setBillGroupDTO(newBillGroupDTO);
-                			createBillCommand.setAddresses(cmd.getAddresses() + "," + createBillCommand.getAddresses());
-                			cmds.set(m, createBillCommand);
-                			continue bill;
-        				}
-            		}
-            	}
-            }
+//            if(targetType.equals(AssetTargetType.USER.getCode())){
+//            	for(int m = 0;m < cmds.size();m++) {
+//            		CreateBillCommand createBillCommand = cmds.get(m);
+//            		if(cmd.getTargetName().equals(createBillCommand.getTargetName()) 
+//        				&& cmd.getDateStrBegin().equals(createBillCommand.getDateStrBegin())
+//        				&& cmd.getDateStrEnd().equals(createBillCommand.getDateStrEnd())) {
+//            			//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+//        				if(createBillCommand.getAddresses().equals(cmd.getAddresses())) {
+//        					cmds.set(m, cmd);
+//                			continue bill;
+//        				}else if(!createBillCommand.getAddresses().contains(cmd.getAddresses())){//未合并为一个账单之前的情况，如：456、457， 新的数据是456，是不同的数据，所以是新增。
+//        					//个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
+//        					BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
+//                			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
+//                			List<ExemptionItemDTO> newExemptionItemDTOList = newBillGroupDTO.getExemptionItemDTOList();
+//                			newBillItemDTOList.addAll(billItemDTOList);
+//                			newExemptionItemDTOList.addAll(exemptionItemDTOList);
+//                			newBillGroupDTO.setBillItemDTOList(newBillItemDTOList);
+//                			newBillGroupDTO.setExemptionItemDTOList(newExemptionItemDTOList);
+//                			createBillCommand.setBillGroupDTO(newBillGroupDTO);
+//                			createBillCommand.setAddresses(cmd.getAddresses() + "," + createBillCommand.getAddresses());
+//                			cmds.set(m, createBillCommand);
+//                			continue bill;
+//        				}
+//            		}
+//            	}
+//            }
             cmds.add(cmd);
             
             // 打印阶段日志和时间，方便定位性能问题 by lqs 20181206

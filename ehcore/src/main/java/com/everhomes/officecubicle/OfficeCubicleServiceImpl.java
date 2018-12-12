@@ -362,13 +362,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		List<OfficeCubicleChargeUser> chargeUsers = officeCubicleProvider.findChargeUserBySpaceId(other.getId());
 		List<ChargeUserDTO> users = new ArrayList<ChargeUserDTO>();
-		for(OfficeCubicleChargeUser user : chargeUsers){
-			ChargeUserDTO chargeUserDTO = new ChargeUserDTO();
-			chargeUserDTO.setChargeName(user.getChargeName());
-			chargeUserDTO.setChargeUid(user.getChargeUid());
-			users.add(chargeUserDTO);
+		if(chargeUsers != null){
+			for(OfficeCubicleChargeUser user : chargeUsers){
+				ChargeUserDTO chargeUserDTO = new ChargeUserDTO();
+				chargeUserDTO.setChargeName(user.getChargeName());
+				chargeUserDTO.setChargeUid(user.getChargeUid());
+				users.add(chargeUserDTO);
+			}
+			dto.setChargeUserDTO(users);
 		}
-		dto.setChargeUserDTO(users);
 		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
 		dto.setRanges(ranges.stream().map(r->ConvertHelper.convert(r,OfficeRangeDTO.class)).collect(Collectors.toList()));
 		QueryDefaultRuleAdminCommand cmd = new QueryDefaultRuleAdminCommand();
@@ -1765,6 +1767,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049500L, cmd.getAppId(), null, cmd.getCurrentProjectId());//资源管理权限
 		}
 		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(cmd.getRoomId());
+		OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getRoomId());
+		station.setAssociateRoomId(null);
+		officeCubicleProvider.updateCubicle(station);
 		officeCubicleProvider.deleteRoom(room);
 	}
     
@@ -1821,6 +1826,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	            		OfficeCubicleErrorCode.ERROR_REFUND_ERROR,
 	                    "bill refund error");
 	        }
+	        order.setBizOrderNo(refundOrderRestResponse.getResponse().getBusinessOrderNumber());
+	        officeCubicleProvider.updateCubicleRentOrder(order);
 	}
 	
 	@Override
@@ -1832,12 +1839,19 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleRoom room = new OfficeCubicleRoom();
 			if(cmd.getAssociateStation()!= null){
+				List<OfficeCubicleStation> associateStation =
+						officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), cmd.getRoomId(), (byte)1, null, null, null);
+				for(OfficeCubicleStation s : associateStation){
+					s.setAssociateRoomId(null);
+					officeCubicleProvider.updateCubicle(s);
+				}
 				for(AssociateStationDTO dto :cmd.getAssociateStation()){
 					OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(dto.getStationId());
 					station.setAssociateRoomId(cmd.getRoomId());
 					officeCubicleProvider.updateCubicle(station);
 				}
 			}
+			room = ConvertHelper.convert(cmd, OfficeCubicleRoom.class);
 			room.setDescription(cmd.getDescription());
 			room.setNamespaceId(cmd.getNamespaceId());
 			room.setCoverUri(cmd.getCoverUri());
@@ -1859,6 +1873,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getStationId());
+			station = ConvertHelper.convert(cmd, OfficeCubicleStation.class);
 			station.setId(cmd.getStationId());
 			station.setDescription(cmd.getDescription());
 			station.setNamespaceId(cmd.getNamespaceId());
