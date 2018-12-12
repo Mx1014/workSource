@@ -930,8 +930,12 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.SPACE_ID.eq(spaceId));
 		if (roomId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.ASSOCIATE_ROOM_ID.eq(roomId));
-		if (rentFlag != null)
+		if (rentFlag != null){
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.eq(rentFlag));
+		}
+		else{
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.isNotNull());
+		}
 		if (StringUtils.isNotBlank(keyword))
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.STATION_NAME.like("%" + keyword +"%"));
 		if (status != null)
@@ -1007,10 +1011,15 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	public List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType,Long spaceId,Byte rentFlag, Byte status, Long roomId,String keyword) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOfficeCubicleRoomRecord> query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_ROOM);
-		query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.SPACE_ID.eq(spaceId));
-		if (rentFlag != null)
+		if(ownerid!=null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.OWNER_ID.eq(ownerid));
+		if (spaceId!=null)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.SPACE_ID.eq(spaceId));
+		if (rentFlag != null){
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.RENT_FLAG.eq(rentFlag));
-		if (status != null)
+		}else {
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.RENT_FLAG.isNotNull());
+		}
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.STATUS.eq(status));
 		if (roomId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.ID.eq(roomId));
