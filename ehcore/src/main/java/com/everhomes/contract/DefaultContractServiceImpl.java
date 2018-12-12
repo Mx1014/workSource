@@ -3758,30 +3758,27 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		}
 		Boolean print = true;
 		List<Long> functionIds = new ArrayList<Long>();
-		
-		// 如果开关打开，只有审批通过，正常合同、即将到期合同才能进行此操作
-		ContractCategory contractCategory = contractProvider.findContractCategoryById(cmd.getCategoryId());
-        if (contractCategory != null && contractCategory.getPrintSwitchStatus() == ContractSwitchStatus.ON.getCode() ) {
-    		List<Byte> statusList = new ArrayList<Byte>();
-    		statusList.add(ContractStatus.ACTIVE.getCode());
-    		statusList.add(ContractStatus.APPROVE_QUALITIED.getCode());
-    		statusList.add(ContractStatus.EXPIRING.getCode());
-    		
-        	Contract contract = contractProvider.findContractById(cmd.getContractId());
-			if (contract == null) {
-				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_NOT_EXIST,
-						"Contract is not exit");
-			}
-        	if (!statusList.contains(contract.getStatus())) {
-        		print= false;
-			}
-		}
-		
 		try {
 			// 打印
 			print = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(),
 					PrivilegeConstants.CONTRACT_PRINT, ServiceModuleConstants.CONTRACT_MODULE,
 					ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
+			
+			// 如果开关打开，只有审批通过，正常合同、即将到期合同才能进行此操作
+			ContractCategory contractCategory = contractProvider.findContractCategoryById(cmd.getCategoryId());
+	        if (contractCategory != null && contractCategory.getPrintSwitchStatus() == ContractSwitchStatus.ON.getCode() ) {
+	    		List<Byte> statusList = new ArrayList<Byte>();
+	    		statusList.add(ContractStatus.ACTIVE.getCode());
+	    		statusList.add(ContractStatus.APPROVE_QUALITIED.getCode());
+	    		statusList.add(ContractStatus.EXPIRING.getCode());
+	    		
+	        	Contract contract = contractProvider.findContractById(cmd.getContractId());
+				if (contract == null || !statusList.contains(contract.getStatus())) {
+					print= false;
+					/*throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_NOT_EXIST,
+							"Contract is not exit");*/
+				}
+			}
 			
 			if (print) {
 				functionIds.add(PrivilegeConstants.CONTRACT_PRINT);
