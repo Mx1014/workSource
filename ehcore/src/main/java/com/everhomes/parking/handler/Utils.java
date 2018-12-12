@@ -306,7 +306,8 @@ public class Utils {
         calendar.add(Calendar.DAY_OF_MONTH,30*month-1);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.SECOND, 58);
+        calendar.set(Calendar.MILLISECOND, 0);
         return new Timestamp(calendar.getTimeInMillis());
     }
 
