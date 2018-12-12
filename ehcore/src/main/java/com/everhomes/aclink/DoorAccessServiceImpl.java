@@ -1166,12 +1166,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 cmd.setOperatorOrgId(orgDTO.getId());
             }
         }
-        //若是face++门禁
-        if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
 
-
-        }
-        
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
             OrganizationDTO orgDTO = null;
             List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), cmd.getUserId(), OrganizationGroupType.ENTERPRISE);

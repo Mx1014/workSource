@@ -92,6 +92,7 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.util.file.FileUtils;
 import com.everhomes.yellowPage.YellowPageUtils;
 import com.google.gson.JsonObject;
 import com.microsoft.schemas.office.x2006.encryption.CTKeyEncryptor;
@@ -111,6 +112,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.jasper.tagplugins.jstl.core.Url;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -136,6 +138,7 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Security;
@@ -314,10 +317,11 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
 
     //face++对接
     private final static String URL_FACEPLUSPLUS = "27.115.23.218";
-    private final static String FACEPLUSPLUS_USERNAME = "";
-    private final static String FACEPLUSPLUS_PASSWORD = "";
+    private final static String FACEPLUSPLUS_USERNAME = "test@megvii.com";
+    private final static String FACEPLUSPLUS_PASSWORD = "123456";
 
-    public String login (String username, String password){
+    @Override
+    public String login (){
         String url = URL_FACEPLUSPLUS + "/auth/login";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
@@ -330,8 +334,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             httpPost.addHeader("content-type","application/json");
 
             JSONObject jsonParam = new JSONObject();
-            jsonParam.put("username", username);
-            jsonParam.put("password", password);
+            jsonParam.put("username", FACEPLUSPLUS_USERNAME);
+            jsonParam.put("password", FACEPLUSPLUS_PASSWORD);
             StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
             entity.setContentEncoding("UTF-8");
             entity.setContentType("application/json");
@@ -373,6 +377,7 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
         return cookie;
     }
 
+    @Override
     public JSONObject createUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time){
         String url = URL_FACEPLUSPLUS + "/subject";
         CloseableHttpClient httpClient = null;
@@ -432,7 +437,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
         return result;
     }
 
-    public String uploadPhoto (String cookie, String uri, Integer subjectId){
+    @Override
+    public String uploadPhoto (String cookie, String photourl, Integer subjectId){
         String url = URL_FACEPLUSPLUS + "/subject";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
@@ -443,7 +449,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             httpPost.addHeader("cookie",cookie);
             httpPost.addHeader("Content-Type","multipart/form-data");
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-            File file = new File(uri);
+            URL photoUrl = new URL(photourl);
+            File file = new File(photoUrl.getFile());
 //            builder.addBinaryBody("upload_file", fileStream,
 //                    ContentType.APPLICATION_OCTET_STREAM, URLEncoder.encode(fileName, "UTF-8"));
             HttpEntity multipart = builder.build();
@@ -480,103 +487,16 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
         return result;
     }
 
-
-//    public String getQRXML(String protocol, String ip, String port,
-//                           String communityNo, String buildNo, String floorNo, String roomNo,
-//                           String acc, String token ,String areaCode ,String mobile,String roomID) {
-//        String result = "";
-//        EncryptUtil eu = new EncryptUtil();
-//        String timeT = dateFormat();
-//        String sig = acc + token + timeT;
-//        String signature;
-//        try {
-//            signature = eu.md5Digest(sig);
-//            String url = protocol + "://" + ip + ":" + port
-//                    + "?c=Qrcode&a=getCard&sig=" + signature.toUpperCase();
-//            CloseableHttpClient closeableHttpClient = createHttpsClient();
-//            // 建立HttpPost对象
-//            HttpPost httppost = new HttpPost(url);
-//
-//            httppost.setHeader("Accept", "application/xml");
-//            httppost.setHeader("Content-Type",
-//                    "application/x-www-form-urlencode;charset=utf-8");
-//
-//            String src = acc + ":" + timeT;
-//            String auth = eu.base64Encoder(src);
-//            httppost.setHeader("Authorization", auth);
-//            //TODO  BEGIN
-//
-//            String reqXml = qrXmlString( protocol,  ip,  port,
-//                    communityNo,  buildNo,  floorNo,  roomNo,
-//                    acc,  token , areaCode,mobile,roomID);
-//
-//            System.out.println("url = "+ url);
-//            System.out.println("xml is :"+reqXml);
-//            BasicHttpEntity bhe = new BasicHttpEntity();
-//            ByteArrayInputStream bis = new ByteArrayInputStream(reqXml.getBytes("UTF-8"));
-//            bhe.setContent(new ByteArrayInputStream(reqXml
-//                    .getBytes("UTF-8")));
-//            bhe.setContentLength(reqXml.getBytes("UTF-8").length);
-//            httppost.setEntity(bhe);
-//
-//
-//            //TODO END
-//            long culTime = System.currentTimeMillis();
-//            org.apache.http.Header h[] =httppost.getAllHeaders();
-//            HttpResponse httpResponse = closeableHttpClient.execute(httppost);
-//            HttpEntity httpEntity1 = httpResponse.getEntity();
-//            result = EntityUtils.toString(httpEntity1);
-//            // 关闭连接
-//            closeableHttpClient.close();
-//        }catch(Exception e){
-//            e.printStackTrace();
-//        }
-//        return result;
-//    }
-
-
-//    private String post(Map<String, String> param, String method) {
-//        CloseableHttpClient httpclient = HttpClients.createDefault();
-//
-//        String serverUrl = configurationProvider.getValue("position.reserver.serverUrl", "");
-//
-//        HttpPost httpPost = new HttpPost(serverUrl + method);
-//        CloseableHttpResponse response = null;
-//
-//        String json = null;
-//        try {
-//            String p = StringHelper.toJsonString(param);
-//            StringEntity stringEntity = new StringEntity(p, StandardCharsets.UTF_8);
-//            httpPost.setEntity(stringEntity);
-//            httpPost.addHeader("content-type", "application/json");
-//
-//            response = httpclient.execute(httpPost);
-//
-//            int status = response.getStatusLine().getStatusCode();
-//            if (status == HttpStatus.SC_OK) {
-//                HttpEntity entity = response.getEntity();
-//
-//                if (entity != null) {
-//                    json = EntityUtils.toString(entity, "utf8");
-//                }
-//            }
-//        } catch (IOException e) {
-//            LOGGER.error("Reserver request error, param={}", param, e);
-//            YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_QUERY_BIZ_MODULE_FAILED, "get biz module failed");
-//        } finally {
-//            if (null != response) {
-//                try {
-//                    response.close();
-//                } catch (IOException e) {
-//                    LOGGER.error("Reserver close instream, response error, param={}", param, e);
-//                }
-//            }
-//        }
-//        if (LOGGER.isDebugEnabled())
-//            LOGGER.debug("Data from business, param={}, json={}", param, json);
-//
-//        return json;
-//    }
+    @Override
+    public String filetest (String url){
+        File file = null;
+        if(!StringUtils.isEmpty(url)){
+            try {
+                file = FileUtils.getFileFormUrl(url, "name");
+            } catch (Exception e) {}
+        }
+        return file.getPath();
+    }
 }
 
 

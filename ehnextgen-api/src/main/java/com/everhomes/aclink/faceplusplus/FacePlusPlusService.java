@@ -12,17 +12,19 @@ import com.google.gson.JsonObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.util.List;
 
 public interface FacePlusPlusService {
 
-    String login (String username, String password);
+    String login ();
 
     JSONObject createUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time);
 
-    JSONObject updateUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time);
+//    JSONObject updateUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time);
 
-    JSONObject uploadPhoto (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time);
+    String uploadPhoto (String cookie, String uri, Integer subjectId);
 
+    String filetest (String url);
 
 }

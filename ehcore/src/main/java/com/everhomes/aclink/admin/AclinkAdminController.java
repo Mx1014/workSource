@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -1871,9 +1872,24 @@ public class AclinkAdminController extends ControllerBase {
      * @return
      */
     @RequestMapping("faceplusLogin")
-    @RestReturn(value=FaceplusLoginResponse.class)
+    @RestReturn(value=String.class)
     public RestResponse faceplusLogin(FaceplusLoginCommand cmd){
-        RestResponse response = new RestResponse(facePlusPlusService.faceplusLogin(cmd));
+        RestResponse response = new RestResponse(facePlusPlusService.login());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /admin/aclink/filetest</b>
+     * <p>登录face++ </p>
+     * @return
+     */
+    @RequestMapping("filetest")
+    @RestReturn(value= String.class)
+    public RestResponse filetest(FaceplusLoginCommand cmd){
+        RestResponse response = new RestResponse(facePlusPlusService.filetest(cmd.getUrl()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
