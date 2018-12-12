@@ -49,7 +49,7 @@ import java.util.Map;
 		+ YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME)
 public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
-	public static final long SERVICE_ALLIANCE_MODULE_ID = 40500L;
+	private final long SERVICE_ALLIANCE_MODULE_ID = 40500L;
 
 	@Autowired
 	private GeneralApprovalProvider generalApprovalProvider;

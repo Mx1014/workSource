@@ -25,6 +25,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
 import com.everhomes.yellowPage.ServiceAllianceFormHandler;
+import com.everhomes.yellowPage.YellowPageService;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.everhomes.util.ConvertHelper;
@@ -1342,7 +1343,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
         // 服务联盟需要额外添加字段
-        if(form.getModuleId() == ServiceAllianceFormHandler.SERVICE_ALLIANCE_MODULE_ID) {
+        if(form.getModuleType() == YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME) {
             GeneralFormFieldDTO sourceIdField = new GeneralFormFieldDTO();
             sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
             sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
