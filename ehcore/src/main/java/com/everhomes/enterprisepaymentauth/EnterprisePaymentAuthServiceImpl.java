@@ -1456,7 +1456,7 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
      * 每月1号0点自动删除离职员工的额度配置
      */
     @Override
-    @Scheduled(cron = "1 0 0,12 */1 * ?")
+    @Scheduled(cron = "1 0 0,12 1 * ?")
     public void autoDeleteEmployeePaymentLimit() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             this.coordinationProvider.getNamedLock(CoordinationLocks.AUTO_DELETE_EMPLOYEE_PAYMENT_AUTH_LIMIT_OPERATE.getCode()).enter(() -> {
@@ -1537,6 +1537,21 @@ public class EnterprisePaymentAuthServiceImpl implements EnterprisePaymentAuthSe
                 }
                 LOGGER.info("checkPaymentStatusScheduled end, count = {}", count);
             });
+        }
+    }
+
+    @Override
+    public void markAutoDeleteEnterprisePaymentAuth(OrganizationMemberDetails memberDetail) {
+        try {
+            LocalDateTime nextMonth = LocalDateTime.now().plusMonths(1L);
+            String waitAutoDeleteMonth = MONTH_DF.format(nextMonth);
+            dbProvider.execute(transactionStatus -> {
+                enterprisePaymentAuthEmployeeLimitProvider.markAutoDeleteDismissEmployeePaymentAuthLimit(memberDetail.getNamespaceId(), memberDetail.getOrganizationId(), memberDetail.getId(), waitAutoDeleteMonth);
+                enterprisePaymentAuthEmployeeLimitDetailProvider.markAutoDeleteDismissEmployeePaymentAuthLimitDetail(memberDetail.getNamespaceId(), memberDetail.getOrganizationId(), memberDetail.getId(), waitAutoDeleteMonth);
+                return null;
+            });
+        } catch (Exception e) {
+            LOGGER.error(String.format("markAutoDeleteEnterprisePaymentAuth error , detailId = %s", memberDetail.getId()), e);
         }
     }
 
