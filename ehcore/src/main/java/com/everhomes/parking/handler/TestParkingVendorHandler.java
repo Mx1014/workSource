@@ -68,7 +68,7 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			parkingCardDTO.setCardTypeId("普通月卡");
 			if (plateNumber.equals("粤B12345"))
-				parkingCardDTO.setCardStatus(ParkingCardStatus.SUPPORT_EXPIRED_RECHARGE.getCode());
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
 			resultList.add(parkingCardDTO);
 		}
 

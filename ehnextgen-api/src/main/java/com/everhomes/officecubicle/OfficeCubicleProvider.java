@@ -1,7 +1,10 @@
 package com.everhomes.officecubicle;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
+import com.everhomes.community.Community;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleConfigs;
 
@@ -35,8 +38,6 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleOrder> queryOrdersByUser(Long userId, Integer currentNamespaceId);
 
-	void deleteAttachmentsBySpaceId(Long id);
-
 	List<OfficeCubicleOrder> listStationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 			int pageSize);
 
@@ -59,5 +60,95 @@ public interface OfficeCubicleProvider {
 	void updateConfig(OfficeCubicleConfig bean);
 
 	OfficeCubicleConfig findConfigByOwnerId(String ownerType,Long ownerId);
+
+	void createCubicleSite(OfficeCubicleStation station);
+
+	List<OfficeCubicleStation> getOfficeCubicleStation(Long owner, String ownerType, Long spaceId, Long roomId, Byte rentFlag,String keyword, Byte status,Long stationId);
+		
+	List<OfficeCubicleRentOrder> searchCubicleOrders(String ownerType, Long ownerId, Long beginDate, Long endDate,
+			 CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId,
+			String paidType, Byte paidMode, Byte requestType, Byte rentType, Byte orderStatus);
+
+	void createCubicleRoom(OfficeCubicleRoom room);
+
+	void updateRoom(OfficeCubicleRoom room);
+
+	void createCubicleRentOrder(OfficeCubicleRentOrder order);
+
+	void createCubicleStationRent(OfficeCubicleStationRent stationRent);
+
+	void updateCubicleRentOrder(OfficeCubicleRentOrder order);
+
+	OfficeCubicleRentOrder findOfficeCubicleRentOrderById(Long orderId);
+
+	void updateCubicle(OfficeCubicleStation station);
+
+	void deleteRoom(OfficeCubicleRoom room);
+
+	void deleteStation(OfficeCubicleStation station);
+
+	void createAttachments(OfficeCubicleAttachment attachment);
+
+	List<OfficeCubicleAttachment> listAttachmentsBySpaceId(Long id, Byte ownerType);
+
+	OfficeCubicleSpace getSpaceByOwnerId(Long ownerId);
+
+	BigDecimal getRoomMinPrice(Long spaceId);
+
+	BigDecimal getRoomMaxPrice(Long spaceId);
+
+	BigDecimal getStationMinPrice(Long spaceId);
+
+	BigDecimal getStationMaxPrice(Long spaceId);
+
+	void deleteChargeUsers(Long spaceId);
+
+	void createChargeUsers(OfficeCubicleChargeUser user);
+
+	List<OfficeCubicleRefundRule> findRefundRule(Long spaceId);
+
+	void deleteRefundRule(Long spaceId);
+
+	List<OfficeCubicleChargeUser> findChargeUserBySpaceId(Long spaceId);
+
+	void createRefundRule(OfficeCubicleRefundRule refundRule);
+
+	List<OfficeCubicleRefundRule> listRefundRuleBySpaceId(Long spaceId);
+
+	OfficeCubicleStation getOfficeCubicleStationById(Long stationId);
+
+	OfficeCubicleRoom getOfficeCubicleRoomById(Long roomId);
+
+	Map<Long, Community> listCommunitiesByIds(List<Long> ids);
+
+	void deleteAttachmentsBySpaceId(Long id, Byte type);
+
+	List<OfficeCubicleRoom> getOfficeCubicleRoom(Long ownerid, String ownerType, Long spaceId, Byte rentFlag,
+			Byte status, Long roomId, String keyword);
+
+	List<OfficeCubicleRoom> getOfficeCubicleRoomByTime(Long spaceId, Byte rentFlag, Long beginDate, Long endDate,
+			String keyword);
+
+	List<OfficeCubicleStation> getOfficeCubicleStationByTime(Long spaceId, Byte rentFlag, Long beginDate, Long endDate,
+			String keyword);
+
+	void createRefundTip(OfficeCubicleRefundTips tip);
+
+	void deleteRefundTip(Long spaceId);
+
+	List<OfficeCubicleRefundTips> listRefundTips(Long spaceId, Byte refundStrategy);
+
+	List<OfficeCubicleStationRent> searchCubicleStationRentByOrderId(Long spaceId, Long orderId);
+
+	List<OfficeCubicleRentOrder> findOfficeCubicleRentOrderByStatus(Byte[] orderStatus);
+
+	List<OfficeCubicleRentOrder> searchCubicleOrdersByUid(CrossShardListingLocator locator, Integer pageSize,
+			Integer currentNamespaceId, Byte rentType, Byte orderStatus, Long reserverUid);
+
+	List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId, Integer currentNamespaceId);
+
+	List<OfficeCubicleStation> getOfficeCubicleStationNotAssociate(Long spaceId);
+
+	OfficeCubicleRentOrder findOfficeCubicleRentOrderByBizOrderNo(String bizOrderNo);
 
 }

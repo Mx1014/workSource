@@ -78,6 +78,7 @@ public class VisitorsysConstant {
     public final static int ERROR_DOWNLOAD_QRCODE = 1417;//二维码下载失败
     public final static int ERROR_NOT_EXIST = 1418;//对象不存在
     public final static int ERROR_FILE_EXPORT_FAIL = 1419;//文件导出失败
+    public final static int ERROR_REQUEST_THIRD_INTERFACE = 1420;//请求失败
 
 
     //常规常量

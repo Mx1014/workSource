@@ -50,6 +50,8 @@ public interface RentalOrderHandler {
     //获取收款方账户id
     public Long getAccountId(RentalOrder order);
 
+    public void nearHalfHourBegin(RentalOrder order);
+
     default public Long gerMerchantId(RentalOrder order){return null;}
 
     default public void processCreateMerchantOrderCmd(CreateMerchantOrderCommand cmd,RentalOrder order){}

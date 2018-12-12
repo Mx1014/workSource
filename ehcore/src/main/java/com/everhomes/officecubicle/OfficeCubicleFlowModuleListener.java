@@ -108,22 +108,22 @@ public class OfficeCubicleFlowModuleListener implements FlowModuleListener {
         if (order == null)
             return null;
         List<FlowCaseEntity> list = new ArrayList<FlowCaseEntity>();
-        OfficeRentType officeRentType = OfficeRentType.fromCode(order.getRentType());
-
-        list.add(new FlowCaseEntity("申请时间", order.getCreateTime() == null ? null : order.getCreateTime().toLocalDateTime().format(dtf), FlowCaseEntityType.MULTI_LINE.getCode()));
-        list.add(new FlowCaseEntity("工位类型", officeRentType.getMsg(), FlowCaseEntityType.MULTI_LINE.getCode()));
-        if (officeRentType == OfficeRentType.OPENSITE) {
-            list.add(new FlowCaseEntity("预订工位数", order.getPositionNums()+"", FlowCaseEntityType.MULTI_LINE.getCode()));
-        }else if(order.getCategoryName()==null){
-            list.add(new FlowCaseEntity("预订空间", "无", FlowCaseEntityType.MULTI_LINE.getCode()));
-        }else{
-            list.add(new FlowCaseEntity("预订空间", order.getCategoryName(), FlowCaseEntityType.MULTI_LINE.getCode()));
-        }
-    	list.add(new FlowCaseEntity("发起人", order.getReserverName() , FlowCaseEntityType.MULTI_LINE.getCode()));
-    	list.add(new FlowCaseEntity("发起人电话", order.getReserveContactToken(), FlowCaseEntityType.MULTI_LINE.getCode()));
+//        OfficeRentType officeRentType = OfficeRentType.fromCode(order.getRentType());
+    	list.add(new FlowCaseEntity("预约人姓名", order.getReserverName() , FlowCaseEntityType.MULTI_LINE.getCode()));
+    	list.add(new FlowCaseEntity("手机号码", order.getReserveContactToken(), FlowCaseEntityType.MULTI_LINE.getCode()));
     	list.add(new FlowCaseEntity("公司名称", order.getReserveEnterprise(), FlowCaseEntityType.MULTI_LINE.getCode()));
-        OfficeOrderType officeOrderType = OfficeOrderType.fromCode(order.getOrderType());
-        list.add(new FlowCaseEntity("预订类型", officeOrderType==null?"无":officeOrderType.getMsg(), FlowCaseEntityType.MULTI_LINE.getCode()));
+    	list.add(new FlowCaseEntity("预约空间", order.getSpaceName() , FlowCaseEntityType.MULTI_LINE.getCode()));
+        list.add(new FlowCaseEntity("参观时间", order.getReserveTime() == null ? null : order.getReserveTime().toLocalDateTime().format(dtf), FlowCaseEntityType.MULTI_LINE.getCode()));
+//        list.add(new FlowCaseEntity("工位类型", officeRentType.getMsg(), FlowCaseEntityType.MULTI_LINE.getCode()));
+//        if (officeRentType == OfficeRentType.OPENSITE) {
+//            list.add(new FlowCaseEntity("预订工位数", order.getPositionNums()+"", FlowCaseEntityType.MULTI_LINE.getCode()));
+//        }else if(order.getCategoryName()==null){
+//            list.add(new FlowCaseEntity("预订空间", "无", FlowCaseEntityType.MULTI_LINE.getCode()));
+//        }else{
+//            list.add(new FlowCaseEntity("预订空间", order.getCategoryName(), FlowCaseEntityType.MULTI_LINE.getCode()));
+//        }
+//        OfficeOrderType officeOrderType = OfficeOrderType.fromCode(order.getOrderType());
+//        list.add(new FlowCaseEntity("预订类型", officeOrderType==null?"无":officeOrderType.getMsg(), FlowCaseEntityType.MULTI_LINE.getCode()));
     	list.add(new FlowCaseEntity("公司人数", order.getEmployeeNumber()==null?"无":order.getEmployeeNumber()+"", FlowCaseEntityType.MULTI_LINE.getCode()));
     	if(order.getFinancingFlag()==null){
     		list.add(new FlowCaseEntity("是否已融资","否", FlowCaseEntityType.MULTI_LINE.getCode()));

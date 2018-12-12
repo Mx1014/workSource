@@ -724,7 +724,11 @@ public class ForumServiceImpl implements ForumService {
         
         //如果是之前暂存过的帖子，参数中要传oldId，用户删除老数据  add by yanjun 20170515  ----start
         if(cmd.getOldId() != null){
-        	this.deletePost(cmd.getForumId(), cmd.getOldId(), true, null, null, null);
+            Post post = this.forumProvider.findPostById(cmd.getOldId());
+            // 如果post状态不为INACTIVE（已删除）时才去删除，解决重复调用此createTopic方法来创建多个克隆帖时重复删除导致的第二次删除时校验到该帖已删除报错bug
+            if(!(post != null && post.getStatus() != null && post.getStatus().equals(PostStatus.INACTIVE.getCode()))) {
+                this.deletePost(cmd.getForumId(), cmd.getOldId(), true, null, null, null);
+            }
         }
         //如果是之前暂存过的帖子，参数中要传oldId，用户删除老数据  add by yanjun 20170515  ----end
 

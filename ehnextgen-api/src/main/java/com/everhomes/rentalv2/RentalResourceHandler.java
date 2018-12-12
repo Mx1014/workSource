@@ -1,6 +1,7 @@
 package com.everhomes.rentalv2;
 
 import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
+import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.SearchRentalOrdersCommand;
 
@@ -16,6 +17,8 @@ public interface RentalResourceHandler {
     RentalResource getRentalResourceById(Long id);
 
     void updateRentalResource(String resourceJson);
+
+    void buildDefaultRule(AddDefaultRuleAdminCommand addCmd);
 
     void setRuleOwnerTypeByResource(QueryDefaultRuleAdminCommand queryRuleCmd, RentalResource resource);
 
