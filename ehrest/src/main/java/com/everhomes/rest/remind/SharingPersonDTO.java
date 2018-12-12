@@ -32,4 +32,29 @@ public class SharingPersonDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	@Override
+	public boolean equals(Object obj) {
+	    if (this == obj) {
+	        System.out.println("true");
+	        return true;
+	    }
+	    if ((obj == null) || (obj.getClass() != this.getClass())) {
+	        System.out.println("false");
+	        return false;
+	    }
+	    if(this.userId == null){
+	    	return false;
+	    }
+	    if (this.userId.equals(((SharingPersonDTO) obj).getUserId())) {
+	        return true;
+	    } else {
+	        return false;
+	    }
+    }
+
+	@Override
+	public int hashCode() {
+	    return userId==null ? 0 : userId.hashCode();
+	} 
 }
