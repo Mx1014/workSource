@@ -1900,7 +1900,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		BigDecimal amount = new BigDecimal(0);
 		for (Rentalv2PriceRule r : price){
 			if (rentalOrder.getRentalType() == r.getRentalType()){
-				amount = r.getWorkdayPrice();
+				if(r.getWorkdayPrice()!=null){
+					amount = r.getWorkdayPrice();
+				}
 			}
 		}
 		order.setPrice(amount);
