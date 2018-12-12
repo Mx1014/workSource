@@ -12350,7 +12350,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 else{
                 	//始终都要发消息
                     organizationMember.setOrganizationId(enterpriseId);
-                	//2018年10月17日 修改为新注册发消息,其它不发消息
+                	//2018年10月17日 修改为新注册发消息,其它不发消息;18/12/12 注释去掉，
                     sendMessageForContactApproved(organizationMember);
                 }
             }
