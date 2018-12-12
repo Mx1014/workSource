@@ -74,6 +74,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -442,6 +444,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                         app.setOrder(app.getOrder()-1);
                         this.workPlatformAppProvider.updateWorkPlatformApp(app);
                     }
+                }
+                List<UserApp> userApps = this.userAppProvider.listUserApps(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),orgapp.getOrgId(),oldApp.getEntryId());
+                if (!CollectionUtils.isEmpty(userApps)) {
+                    List<Long> ids = userApps.stream().map(UserApp::getId).collect(Collectors.toList());
+                    this.userAppProvider.delete(ids);
                 }
             }
         }
@@ -1083,6 +1090,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                             app.setOrder(app.getOrder()-1);
                             this.workPlatformAppProvider.updateWorkPlatformApp(app);
                         }
+                    }
+                    List<UserApp> userApps = this.userAppProvider.listUserApps(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),orgapp.getOrgId(),oldApp.getEntryId());
+                    if (!CollectionUtils.isEmpty(userApps)) {
+                        List<Long> ids = userApps.stream().map(UserApp::getId).collect(Collectors.toList());
+                        this.userAppProvider.delete(ids);
                     }
                 }
             }
@@ -1751,10 +1763,49 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         if(userAppFlag != null){
             List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
             if (userApps != null && userApps.size() != 0) {
-                for (UserApp userApp : userApps) {
-                    for (AppDTO app : appDTOS) {
+                Integer maxOrder = userAppProvider.getMaxOrder(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
+                if (maxOrder != null) {
+                    for (int i=0;i<maxOrder;i++) {
+                        list.add(null);
+                    }
+                }
+                List<AppDTO> noUserApp = new ArrayList<>();
+                for (AppDTO app : appDTOS) {
+                    //新安装的应用，没有在用户编辑的数据里，但是还是要展示.
+                    boolean flag = false;
+                    for (UserApp userApp : userApps) {
                         if (userApp.getAppId().equals(app.getEntryId())) {
-                            list.add(app);
+                            if (userApp.getOrder() == 0) {
+                                list.set(userApp.getOrder(), app);
+                            }else {
+                                list.set(userApp.getOrder() - 1, app);
+                            }
+                            flag = true;
+                        }
+                    }
+                    if (!flag) {
+                        noUserApp.add(app);
+                    }
+                }
+                Iterator iterator  = list.iterator();
+                while (iterator.hasNext()) {
+                    AppDTO appDTO = (AppDTO) iterator.next();
+                    if (appDTO == null) {
+                        iterator.remove();
+                    }
+                }
+                if (!CollectionUtils.isEmpty(noUserApp)) {
+                    List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(orgId);
+                    if (!CollectionUtils.isEmpty(workPlatformApps)) {
+                        for (WorkPlatformApp workPlatformApp : workPlatformApps) {
+                            if (TrueOrFalseFlag.FALSE.getCode().equals(workPlatformApp.getVisibleFlag())) {
+                                continue;
+                            }
+                            for (AppDTO app : noUserApp) {
+                                if (app.getAppId().equals(workPlatformApp.getAppId()) && app.getEntryId().equals(workPlatformApp.getEntryId())) {
+                                    list.add(app);
+                                }
+                            }
                         }
                     }
                 }

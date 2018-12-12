@@ -184,6 +184,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -7639,6 +7643,53 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
         response.setInfoUrl(StringHelper.interpolate(infoUrl,infoUrlParam));
         return response;
+    }
+
+    @Override
+    public void fixUserSync(FixUserSyncCommand cmd) {
+        new Thread(() -> {
+            CrossShardListingLocator locator = new CrossShardListingLocator();
+
+            int count = 1000;
+            do {
+                if (count < 0) {
+                    break;
+                }
+                count--;
+
+                List<User> users = userProvider.queryUsers(locator, 2000, (locator1, query) -> {
+                    if (cmd.getNamespaceId() != null) {
+                        query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                    }
+                    if (StringUtils.isNotEmpty(cmd.getStartDate())) {
+                        TemporalAccessor startDate = DateTimeFormatter.ofPattern("yyyyMMdd").parse(cmd.getStartDate());
+                        query.addConditions(Tables.EH_USERS.CREATE_TIME.ge(Timestamp.valueOf(LocalDate.from(startDate).atTime(LocalTime.MIN))));
+                    } else {
+                        query.addConditions(Tables.EH_USERS.CREATE_TIME.ge(Timestamp.valueOf(LocalDateTime.of(2018, 10, 29, 0, 0))));
+                    }
+                    if (StringUtils.isNotEmpty(cmd.getEndDate())) {
+                        TemporalAccessor endDate = DateTimeFormatter.ofPattern("yyyyMMdd").parse(cmd.getEndDate());
+                        query.addConditions(Tables.EH_USERS.CREATE_TIME.lt(Timestamp.valueOf(LocalDate.from(endDate).atTime(LocalTime.MAX))));
+                    }
+                    return query;
+                });
+                for (User user : users) {
+                    try {
+                        userProvider.updateUser(user);
+                        List<UserIdentifier> userIdentifiers = userProvider.listUserIdentifiersOfUser(user.getId());
+                        if (userIdentifiers != null) {
+                            userIdentifiers.forEach(iden -> {
+                                userProvider.updateIdentifier(iden);
+                                LOGGER.info("Fix user sync, identifier={}", iden);
+                            });
+                        }
+                        LOGGER.info("Fix user sync, user={}", user);
+                    } catch (Exception e) {
+                        LOGGER.error("fixUserInfoOnceTime error, user="+user, e);
+                    }
+                }
+            } while (locator.getAnchor() != null);
+        }, "fixUserInfoOnceTime").start();
     }
 
     /*******************统一用户同步数据**********************/

@@ -2944,13 +2944,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd) {
 		Long adminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-		if(adminUserId != null){
-			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(null, OrganizationMemberTargetType.USER.getCode(), adminUserId);
+		if(adminUserId != null) {
+			List<OrganizationMember> members = organizationProvider
+					.listOrganizationMembersByOrganizationIdAndMemberGroup(
+							cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
+							OrganizationMemberTargetType.USER.getCode(), adminUserId, -1, new ListingLocator());
+
 			for (OrganizationMember member: members) {
 				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
 					return processOrganizationContactDTO(member);
-				}else{
-					continue;
 				}
 			}
 		}

@@ -4658,6 +4658,14 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				// 插入上一页统计得到的数据
 				if (currentPage != 0) {
 					// 插入园区信息统计数据
+					Iterator<ContractDTO> iterator = contracts.iterator();
+					while(iterator.hasNext()){
+						ContractDTO dto = iterator.next();
+						if (dto.getCommunityId() == null && dto.getUpdateTime() == null ) {
+							iterator.remove();
+						}
+					}
+					
 					if (contracts != null && contracts.size() > 0 && communityResultMap.containsKey(contracts.get(0).getCommunityId()+"_"+sdfMM.format(contracts.get(0).getUpdateTime()))) {
 						ContractReportformStatisticCommunitys remove = communityResultMap.remove(contracts.get(0).getCommunityId()+"_"+sdfMM.format(contracts.get(0).getUpdateTime()));
 						createCommunityStatics(communityResultMap);
@@ -4669,6 +4677,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 				// 生成统计数据
 				for (ContractDTO contract : contracts) {
+					if (contract.getCommunityId() == null || contract.getUpdateTime() == null) {
+						continue ;
+					}
 					// 园区信息统计数据
 					if (communityResultMap.containsKey(contract.getCommunityId()+"_"+sdfMM.format(contract.getUpdateTime()))) {
 						ContractReportformStatisticCommunitys communityStatistics = communityResultMap.get(contract.getCommunityId()+"_"+sdfMM.format(contract.getUpdateTime()));

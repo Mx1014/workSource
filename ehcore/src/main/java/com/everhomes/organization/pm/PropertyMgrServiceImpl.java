@@ -79,6 +79,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -197,11 +198,14 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.FindReservationsCommand;
+import com.everhomes.rest.contract.ContractApplicationScene;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractEventDTO;
 import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.ContractTrackingTemplateCode;
+import com.everhomes.rest.contract.ListApartmentContractsCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.family.ApproveMemberCommand;
@@ -2867,6 +2871,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (latestEndDateContract!=null) {
         	response.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
 		}
+        
+        //关联的正常的租赁合同
+        List<ContractDTO> apartmentRentalContracts = getApartmentRentalContract(address.getId());
+        if (apartmentRentalContracts != null && apartmentRentalContracts.size() > 0) {
+			response.setRentalContractRelated((byte)1);
+		}else {
+			response.setRentalContractRelated((byte)0);
+		}
+        
         //关联的预定计划
         if (propertyMgrProvider.isInvolvedWithReservation(cmd.getId())) {
         	response.setReservationInvolved((byte)1);
@@ -2900,6 +2913,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         return response;
     }
 
+    private List<ContractDTO> getApartmentRentalContract(Long addressId) {
+		List<ContractDTO> results = new ArrayList<>();
+		List<Contract> contracts = contractProvider.listContractsByAddressId(addressId);
+		
+		for(Contract contract : contracts){
+			if (contract.getCategoryId() != null) {
+				ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+				if (contractCategory != null) {
+					if (ContractApplicationScene.RENTAL.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))
+						|| ContractApplicationScene.COMPREHENSIVE.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+						if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))){
+							ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+							results.add(dto);
+						}
+					}
+				}
+			}
+		}
+		return results;
+	}
+    
     private List<OrganizationOwnerDTO> getApartmentRelatedIndividualCustomers(Integer namespaceId, Long addressId) {
     	List<OrganizationOwnerDTO> individualCustomerList = new ArrayList<>();
     	List<OrganizationOwnerAddress> organizationOwnerAddressesMappings = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(namespaceId, addressId);
@@ -9225,11 +9259,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 					filterResults.remove(dto);
 				}
 			}
+			Collections.sort(filterResults);
 			response.setResults(filterResults);
 		}else {
+			Collections.sort(results);
 			response.setResults(results);
 		}
-		
 		return response;
 	}
 

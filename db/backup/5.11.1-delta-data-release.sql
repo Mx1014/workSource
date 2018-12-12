@@ -33,6 +33,13 @@
 -- 3：然后将招商客户的统计所需数据初始化
 -- 最后请执行接口invitedCustomer/initCustomerStatusToDB（此方法每个环境只能执行一次，该方法为异步方法，点击后会立刻返回成功);
 
+-- AUTHOR: 丁建民 20181207
+-- 1.执行 issue-44230(合同报表数据迁移问题)的sql,在下面
+-- 2.同步es /contract/syncContracts
+-- 3.调用接口/contract/reportForm/excuteContractReportFormJob 生成合同统计数据，时间比较长
+-- AUTHOR:梁燕龙20181207
+-- 执行/portal/initAppEntryProfileData
+-- 点击一次即可，在日志没有输出initAppEntryProfileData success 这个日志之前，不要让测试进行测试。
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -296,6 +303,12 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 SET @id = (SELECT MAX(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '10016', 'zh_CN', '调整周期 不能为0');
 
+-- AUTHOR:丁建民 20181207
+-- REMARK: issue-44230(合同报表数据迁移问题)
+UPDATE eh_contracts as aa inner join (
+SELECT t1.id, t1.update_time,t1.create_time from eh_contracts as t1, eh_contracts as t2 WHERE t1.id=t2.id and t1.`status` in (2, 10) and t1.update_time is NULL
+) as tt  ON aa.id=tt.id SET aa.`update_time`=tt.create_time;
+
 -- AUTHOR:梁燕龙
 -- REMARK:修改模块数据
 UPDATE eh_service_modules SET name = '园区电子报-定制' WHERE id = 10500;
@@ -336,12 +349,35 @@ INSERT INTO eh_service_modules(id, name, parent_id, path, type, level, status, d
                                instance_config,operator_uid,creator_uid,description,multiple_flag, module_control_type,access_control_type,
                                menu_auth_flag,category,app_type,client_handler_type)
     VALUES (274000,'同事圈',50000,'/100/50000/274000',1,3,2,100,now(),'',0,0,'',1,'org_control',2,1,'module',0,0);
+
+-- AUTHOR:tangcen
+-- REMARK: issue-43457
+UPDATE eh_service_modules SET module_control_type='community_control' WHERE id='230000';
+
+-- AUTHOR:黄鹏宇
+-- REMAKE: 修复请示单类型错误
+UPDATE eh_service_modules SET client_handler_type = 1 WHERE id = 25000;
+
+
+	
+	
+-- AUTHOR:黄明波
+-- REMARK:修复链接详情问题
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('serviceAlliance.detail.url', '/service-alliance-web/build/index.html?%s#/detail#sign_suffix', '5.11.0后使用这个', 0, NULL, 1);
+
+	
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
--- AUTHOR:
--- REMARK:
+
+-- AUTHOR:马世亨 20181207
+-- REMARK:物业报修住总配置为左邻版
+update eh_configurations set value = 'flow',is_readonly = 0 where name = 'pmtask.handler-999955';
+
+-- AUTHOR:马世亨 20181207
+-- REMARK:物业报修国贸对接域名修改
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pmtask.archibus.url', 'http://maintain.chinaworldservice.cn:8080/archibus/webServices/fmWork?wsdl', '物业报修国贸对接地址', '0', NULL, '0');
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-standard

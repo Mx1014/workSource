@@ -539,22 +539,36 @@ public class PortalServiceImpl implements PortalService {
 	    Collections.sort(list, new Comparator<ServiceModuleEntryDTO>() {
             @Override
             public int compare(ServiceModuleEntryDTO o1, ServiceModuleEntryDTO o2) {
-                if (o1 == null || o2 == null) {
+                if (o1 == null && o2 == null) {
+                    return 0;
+                }
+                if (o1 == null) {
                     return -1;
                 }
-                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
-                    return -1;
+                if (o2 == null) {
+                    return 1;
                 }
-                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
-                    return o2.getTerminalType().compareTo(o1.getTerminalType());
-                }
-                if (o1.getSceneType() == null || o2.getSceneType() == null) {
-                    return -1;
-                }
-                if (!o1.getSceneType().equals(o2.getSceneType())) {
-                    return o1.getSceneType().compareTo(o2.getSceneType());
-                }
-                return 0;
+                StringBuilder o1StringBuilder = new StringBuilder();
+                StringBuilder o2StringBuilder = new StringBuilder();
+                o1StringBuilder.append(o1.getTerminalType()==null?0:o1.getTerminalType()).append(o1.getSceneType()==null?0:100-o1.getSceneType());
+                o2StringBuilder.append(o2.getTerminalType()==null?0:o2.getTerminalType()).append(o2.getSceneType()==null?0:100-o2.getSceneType());
+                return o2StringBuilder.toString().compareTo(o1StringBuilder.toString());
+//                if (o1 == null || o2 == null) {
+//                    return -1;
+//                }
+//                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
+//                    return o2.getTerminalType().compareTo(o1.getTerminalType());
+//                }
+//                if (o1.getSceneType() == null || o2.getSceneType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getSceneType().equals(o2.getSceneType())) {
+//                    return o1.getSceneType().compareTo(o2.getSceneType());
+//                }
+//                return 0;
             }
         });
     }
@@ -563,22 +577,32 @@ public class PortalServiceImpl implements PortalService {
         Collections.sort(list, new Comparator<AppEntryDTO>() {
             @Override
             public int compare(AppEntryDTO o1, AppEntryDTO o2) {
-                if (o1 == null || o2 == null) {
+                if (o1 == null && o2 == null) {
+                    return 0;
+                }
+                if (o1 == null) {
                     return -1;
                 }
-                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
-                    return -1;
+                if (o2 == null) {
+                    return 1;
                 }
-                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
-                    return o2.getTerminalType().compareTo(o1.getTerminalType());
-                }
-                if (o1.getSceneType() == null || o2.getSceneType() == null) {
-                    return -1;
-                }
-                if (!o1.getSceneType().equals(o2.getSceneType())) {
-                    return o1.getSceneType().compareTo(o2.getSceneType());
-                }
-                return 0;
+                StringBuilder o1StringBuilder = new StringBuilder();
+                StringBuilder o2StringBuilder = new StringBuilder();
+                o1StringBuilder.append(o1.getTerminalType()==null?0:o1.getTerminalType()).append(o1.getSceneType()==null?0:100-o1.getSceneType());
+                o2StringBuilder.append(o2.getTerminalType()==null?0:o2.getTerminalType()).append(o2.getSceneType()==null?0:100-o2.getSceneType());
+//                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
+//                    return o2.getTerminalType().compareTo(o1.getTerminalType());
+//                }
+//                if (o1.getSceneType() == null || o2.getSceneType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getSceneType().equals(o2.getSceneType())) {
+//                    return o1.getSceneType().compareTo(o2.getSceneType());
+//                }
+                return o2StringBuilder.toString().compareTo(o1StringBuilder.toString());
             }
         });
     }
@@ -4206,28 +4230,36 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public void initAppEntryProfileData() {
-		List<NamespaceInfoDTO> namespaceInfoDTOS = this.namespacesService.listNamespace();
-		for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
-		    PortalVersion portalVersion = this.portalVersionProvider.findReleaseVersion(namespaceInfoDTO.getId());
-		    List<ServiceModuleApp> serviceModuleApps = this.serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(),portalVersion.getId(),
-                    null,null,null, ServiceModuleAppType.COMMUNITY.getCode(),null,null,null,null);
-		    if (!CollectionUtils.isEmpty(serviceModuleApps)) {
-		        for (ServiceModuleApp serviceModuleApp : serviceModuleApps) {
-		            List<ServiceModuleEntry> serviceModuleEntries = this.serviceModuleEntryProvider.listServiceModuleEntries(serviceModuleApp.getModuleId(),
-                            null,null,null,null);
-		            if (!CollectionUtils.isEmpty(serviceModuleEntries)) {
-		                for (ServiceModuleEntry serviceModuleEntry : serviceModuleEntries) {
-                            ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = new ServiceModuleAppEntryProfile();
-                            serviceModuleAppEntryProfile.setOriginId(serviceModuleApp.getOriginId());
-                            serviceModuleAppEntryProfile.setEntryId(serviceModuleEntry.getId());
-                            serviceModuleAppEntryProfile.setAppEntrySetting(TrueOrFalseFlag.TRUE.getCode());
-                            serviceModuleAppEntryProfile.setEntryName(serviceModuleApp.getName());
-                            serviceModuleAppEntryProfile.setEntryUri(serviceModuleApp.getIconUri());
-                            this.serviceModuleAppProvider.createServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                List<NamespaceInfoDTO> namespaceInfoDTOS = namespacesService.listNamespace();
+                for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
+                    PortalVersion portalVersion = portalVersionProvider.findReleaseVersion(namespaceInfoDTO.getId());
+                    List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(),portalVersion.getId(),
+                            null,null,null, ServiceModuleAppType.COMMUNITY.getCode(),null,null,null,null);
+                    if (!CollectionUtils.isEmpty(serviceModuleApps)) {
+                        for (ServiceModuleApp serviceModuleApp : serviceModuleApps) {
+                            List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(serviceModuleApp.getModuleId(),
+                                    null,null,null,null);
+                            if (!CollectionUtils.isEmpty(serviceModuleEntries)) {
+                                for (ServiceModuleEntry serviceModuleEntry : serviceModuleEntries) {
+                                    ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = new ServiceModuleAppEntryProfile();
+                                    serviceModuleAppEntryProfile.setOriginId(serviceModuleApp.getOriginId());
+                                    serviceModuleAppEntryProfile.setEntryId(serviceModuleEntry.getId());
+                                    serviceModuleAppEntryProfile.setAppEntrySetting(TrueOrFalseFlag.TRUE.getCode());
+                                    serviceModuleAppEntryProfile.setEntryName(serviceModuleApp.getName());
+                                    serviceModuleAppEntryProfile.setEntryUri(serviceModuleApp.getIconUri());
+                                    serviceModuleAppProvider.createServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+                                }
+                            }
                         }
                     }
+                    LOGGER.info("NamespaceId = {}",namespaceInfoDTO.getId());
                 }
+            LOGGER.info("initAppEntryProfileData success!");
             }
-        }
+        });
+
 	}
 }

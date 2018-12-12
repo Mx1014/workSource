@@ -1,5 +1,8 @@
 package com.everhomes.rest.organization.pm;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.everhomes.util.StringHelper;
 /**
 <ul>
@@ -17,8 +20,7 @@ import com.everhomes.util.StringHelper;
 <li>chargeArea: 收费面积</li>
 </ul>
 */
-
-public class ApartmentForAPPDTO {
+public class ApartmentForAPPDTO implements Comparable<ApartmentForAPPDTO>{
 	
 	private Long id;
 	private String apartmentName;
@@ -107,8 +109,38 @@ public class ApartmentForAPPDTO {
 	}
 	
 	@Override
+    public boolean equals(Object obj){
+        if (! (obj instanceof ApartmentForAPPDTO)) {
+            return false;
+        }
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+    
+    @Override
+    public int hashCode(){
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+	@Override
+	public int compareTo(ApartmentForAPPDTO o) {
+		int f1 = parseInt(getApartmentFloor());
+		int f2 = parseInt(o.getApartmentFloor());
+		if (f1 == f2) {
+			return getApartmentName().compareTo(o.getApartmentName());
+		}
+		return f1 - f2;
+	}
+	
+	private int parseInt(String string) {
+		try {
+			return Integer.parseInt(string);
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+	
+	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
 }

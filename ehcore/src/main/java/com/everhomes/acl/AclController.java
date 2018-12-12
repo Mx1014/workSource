@@ -166,8 +166,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteOrganizationSuperAdministrators")
     @RestReturn(value=String.class)
     public RestResponse deleteOrganizationSuperAdministrators(@Valid DeleteOrganizationAdminCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_DELETE);
+        // SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        // resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_DELETE);
         rolePrivilegeService.deleteOrganizationSuperAdministrators(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
