@@ -8,7 +8,7 @@ public class ContractDocument extends EhContractDocuments{
 	private static final long serialVersionUID = 1L;
 
 	public String gogsPath() {
-        return this.getName() + ".txt";
+        return this.getName() + "_" + this.getContractNumber() +".txt";
     }
 	
 	@Override
