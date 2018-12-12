@@ -23,8 +23,9 @@ public interface FacePlusPlusService {
 
 //    JSONObject updateUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time);
 
-    String uploadPhoto (String cookie, String uri, Integer subjectId);
+    String uploadPhoto (String cookie, String url, Integer subjectId);
+
+    void deleteUser (String cookie, String subjectId);
 
     String filetest (String url);
-
 }

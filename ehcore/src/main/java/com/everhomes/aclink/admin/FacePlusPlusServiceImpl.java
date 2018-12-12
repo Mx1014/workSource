@@ -103,6 +103,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BasicHttpEntity;
@@ -449,8 +450,16 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             httpPost.addHeader("cookie",cookie);
             httpPost.addHeader("Content-Type","multipart/form-data");
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-            URL photoUrl = new URL(photourl);
-            File file = new File(photoUrl.getFile());
+
+//            URL photoUrl = new URL(photourl);
+//            File file = new File(photoUrl.getFile());
+            File file = null;
+            if(!StringUtils.isEmpty(url)){
+                try {
+                    file = FileUtils.getFileFormUrl(photourl, "name");
+                } catch (Exception e) {}
+            }
+//            builder.addBinaryBody()
 //            builder.addBinaryBody("upload_file", fileStream,
 //                    ContentType.APPLICATION_OCTET_STREAM, URLEncoder.encode(fileName, "UTF-8"));
             HttpEntity multipart = builder.build();
@@ -485,6 +494,51 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             }
         }
         return result;
+    }
+
+    @Override
+    public void deleteUser (String cookie, String subjectId){
+        String url = URL_FACEPLUSPLUS + "/subject/" + subjectId;
+        CloseableHttpClient httpClient = null;
+        CloseableHttpResponse response = null;
+        JSONObject result = null;
+        try{
+            httpClient = HttpClients.createDefault();
+            HttpDelete httpDelete = new HttpDelete(url);
+            httpDelete.addHeader("cookie",cookie);
+
+            response = httpClient.execute(httpDelete);
+            int status = response.getStatusLine().getStatusCode();
+            if(status != 200){
+                LOGGER.error("Failed to get the http result, url={}, status={}", url, response.getStatusLine());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "Failed to get the http result");
+            }
+            HttpEntity resEntity = response.getEntity();
+            result = JSON.parseObject(resEntity.toString());
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Get http result, url={}, result={}", url, result);
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Failed to get the http result, url={}", url, e);
+        } finally {
+            if(response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     @Override

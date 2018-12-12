@@ -1280,10 +1280,17 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         if(doorAuth.getRightOpen() == (byte)1){
                             String userName = cmd.getUserId().toString();//face++ username 存左邻用户id
                             JSONObject response = facePlusPlusService.createUser(cookie, 0, userName, 0, 0);//subjectType 0 员工，1 访客 正式用户不传时间
-                            Integer userId = response.getInteger("id");//face++用户ID
-                            if(userId != null){
-                                doorAuth.setStringTag2(userId.toString());//face++用户ID存入eh_door_auth.string_tag2
+                            Integer subjectId = response.getInteger("id");//face++用户ID
+                            if(subjectId != null){
+                                doorAuth.setStringTag2(subjectId.toString());//face++用户ID存入eh_door_auth.string_tag2
                                 doorAuthProvider.updateDoorAuth(doorAuth);
+                            }
+                            CrossShardListingLocator locator = new CrossShardListingLocator();
+                            List<FaceRecognitionPhoto> photos = faceRecognitionPhotoProvider. listFacialRecognitionPhotoByUser(locator, custom.getId(), 9999);
+                            if(!ListUtils.isEmpty(photos)){
+                                String photoUrl = photos.get(0).getImgUrl();
+                                //上传照片
+                                facePlusPlusService.uploadPhoto(cookie,photoUrl,subjectId);
                             }
                         }else if(doorAuth.getRightOpen() == (byte)0){
 
