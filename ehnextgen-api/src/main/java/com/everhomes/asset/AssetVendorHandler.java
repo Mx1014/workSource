@@ -57,6 +57,7 @@ import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -295,6 +296,12 @@ public abstract class AssetVendorHandler {
 
 	public PayAssetGeneralOrderResponse createOrderV2(CreatePaymentBillOrderCommand cmd) {
 		LOGGER.error("Insufficient privilege, handler createOrderV2");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
+
+	public void payNotifyV2(MerchantPaymentNotificationCommand cmd) {
+		LOGGER.error("Insufficient privilege, handler payNotifyV2");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
 	}

@@ -108,6 +108,7 @@ import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.util.Tuple;
 
 /**
@@ -357,4 +358,6 @@ public interface AssetService {
 	PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd);
 	
 	PayAssetGeneralOrderResponse payBillsV2(CreatePaymentBillOrderCommand cmd);
+	
+	void payNotifyV2(MerchantPaymentNotificationCommand cmd);
 }

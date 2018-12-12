@@ -6704,5 +6704,24 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
                 .fetchInto(String.class);
 	}
+	
+	public List<PaymentBillOrder> findPaymentBillOrderByGeneralOrderId(Long merchantOrderId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPaymentBillOrdersRecord>  query = context.selectQuery(Tables.EH_PAYMENT_BILL_ORDERS);
+        query.addConditions(Tables.EH_PAYMENT_BILL_ORDERS.GENERAL_ORDER_ID.eq(merchantOrderId));
+        return query.fetchInto(PaymentBillOrder.class);
+	}
+	
+	public void updatePaymentBillOrder(Long merchantOrderId, Integer paymentStatus, Integer paymentType, Timestamp payDatetime, Integer paymentChannel) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		com.everhomes.server.schema.tables.EhPaymentBillOrders t = Tables.EH_PAYMENT_BILL_ORDERS.as("t");
+        context.update(t)
+                .set(t.PAYMENT_STATUS, paymentStatus)
+                .set(t.PAYMENT_TYPE, paymentType)
+                .set(t.PAYMENT_TIME, payDatetime)
+                .set(t.PAYMENT_CHANNEL, paymentChannel)
+                .where(t.GENERAL_ORDER_ID.eq(merchantOrderId))
+                .execute();
+	}
 
 }

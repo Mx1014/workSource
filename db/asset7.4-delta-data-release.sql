@@ -9,7 +9,15 @@
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 -- AUTHOR:孟千翔
 -- REMARK:设置减免金额均为删除
-UPDATE eh_payment_exemption_items SET delete_flag=1
+UPDATE eh_payment_exemption_items SET delete_flag=1;
+
+-- AUTHOR:杨崇鑫 20181212
+-- REMARK:物业缴费V8.0（账单对接卡券） -44680
+SET @id = ifnull((SELECT MAX(id) FROM `eh_configurations`),0);
+INSERT INTO `eh_configurations`(`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES (@id := @id + 1, 'pay.v2.callback.url.assetV2', '/asset/payNotifyV2', '物业缴费新支付回调接口对接最新统一订单', 0, NULL, 1);
+
+	
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base

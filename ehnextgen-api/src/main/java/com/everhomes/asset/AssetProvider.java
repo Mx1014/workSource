@@ -492,4 +492,9 @@ public interface AssetProvider {
 	
 	List<String> findDateStr(List<String> billIds);
 	
+	List<PaymentBillOrder> findPaymentBillOrderByGeneralOrderId(Long merchantOrderId);
+	
+	void updatePaymentBillOrder(Long merchantOrderId, Integer paymentStatus, Integer paymentType,
+			Timestamp paymentSucessTime, Integer paymentChannel);
+	
 }

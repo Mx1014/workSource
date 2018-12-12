@@ -59,6 +59,7 @@ import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.promotion.order.GetPurchaseOrderCommand;
 import com.everhomes.rest.promotion.order.GoodDTO;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.promotion.order.NotifyBillHasBeenPaidCommand;
 import com.everhomes.rest.promotion.order.OrderDescriptionEntity;
 import com.everhomes.rest.promotion.order.OrderErrorCode;
@@ -625,8 +626,6 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
                 LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
             }
         }
-        
-        
     }
     
     public void paySuccess(PurchaseOrderDTO purchaseOrderDTO) {
@@ -879,7 +878,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	}
 	
 	private String getPayCallbackUrlV2(CreatePaymentBillOrderCommand cmd) {
-        String configKey = "pay.v2.callback.url.asset";
+        String configKey = "pay.v2.callback.url.assetV2";
         String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), configKey, "");
         if(backUrl == null || backUrl.trim().length() == 0) {
             LOGGER.error("Payment callback url empty, configKey={}, cmd={}", configKey, cmd);
@@ -887,6 +886,95 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
                     "Payment callback url empty");
         }
         return backUrl;
+    }
+	
+	/**
+     * 支付回调：物业缴费V8.0（账单对接卡券） -44680
+     * @param cmd
+     * @param handler
+     */
+    public void payNotifyV2(MerchantPaymentNotificationCommand cmd) {
+    	if(LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("payNotifyV2-command=" + GsonUtil.toJson(cmd));
+    	}
+    	if(cmd == null) {
+    		LOGGER.error("payNotifyV2 fail, cmd={}", cmd);
+    	}
+    	//检查订单是否存在
+    	List<PaymentBillOrder> paymentBillOrderList = assetProvider.findPaymentBillOrderByGeneralOrderId(cmd.getMerchantOrderId());
+        if(paymentBillOrderList == null || paymentBillOrderList.size() == 0){
+            LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "can not find order record");
+        }
+        
+        GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
+        getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        String accountCode = generateAccountCode(UserContext.getCurrentNamespaceId());
+        getPurchaseOrderCommand.setAccountCode(accountCode);
+        getPurchaseOrderCommand.setBusinessOrderNumber(cmd.getBizOrderNum());
+        
+        if(LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("payNotifyV2-GetPurchaseOrderCommand=" + GsonUtil.toJson(getPurchaseOrderCommand));
+    	}
+        GetPurchaseOrderRestResponse response = orderService.getPurchaseOrder(getPurchaseOrderCommand);
+        if(LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("payNotifyV2-getPurchaseOrder response=" + GsonUtil.toJson(response));
+    	}
+        if(response == null || !response.getErrorCode().equals(200)) {
+        	throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.PAYMENT_PAYEE_NOT_CONFIG,
+                    "payNotifyV2 getPurchaseOrder by bizOrderNum is error!");
+        }
+        PurchaseOrderDTO purchaseOrderDTO = response.getResponse();
+        if(purchaseOrderDTO != null) {
+        	com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(purchaseOrderDTO.getPaymentOrderType());
+            if(orderType != null) {
+                switch (orderType) {
+                    case PURCHACE:
+                        if(purchaseOrderDTO.getPaymentStatus() == PurchaseOrderPaymentStatus.PAID.getCode()){
+                            //支付成功
+                        	paySuccessV2(purchaseOrderDTO, paymentBillOrderList, cmd.getMerchantOrderId());
+                        }
+                        break;
+                    default:
+                        LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
+                }
+            }else {
+                LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
+            }
+        }
+    }
+    
+    public void paySuccessV2(PurchaseOrderDTO purchaseOrderDTO, List<PaymentBillOrder> paymentBillOrderList, Long merchantOrderId) {
+        LOGGER.error("default payment success call back, purchaseOrderDTO={}", purchaseOrderDTO);
+        List<Long> billIds = new ArrayList<>();
+        for(int i = 0; i < paymentBillOrderList.size(); i++){
+        	PaymentBillOrder paymentBillOrder = paymentBillOrderList.get(i); 
+            billIds.add(Long.parseLong(paymentBillOrder.getBillId()));
+        }
+        //这个没有请求第三方，所以直接走
+        this.dbProvider.execute((TransactionStatus status) -> {
+        	//更新eh_payment_bill_orders表
+            assetProvider.updatePaymentBillOrder(merchantOrderId, purchaseOrderDTO.getPaymentStatus(),
+            		purchaseOrderDTO.getPaymentType(), purchaseOrderDTO.getPaymentSucessTime(), purchaseOrderDTO.getPaymentChannel());
+            //更新eh_payment_bills账单表、EH_PAYMENT_BILL_ITEMS账单费项表
+            assetProvider.changeBillStatusAndPaymentTypeOnPaiedOff(billIds, purchaseOrderDTO.getPaymentType());
+            return null;
+        });
+        //物业缴费V6.6统一账单：账单状态改变回调接口
+        for(Long billId : billIds) {
+            //core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
+            //使用billId拿到所有明细，获取每个明细的merchantOrderId并去重，然后回调
+            NotifyBillHasBeenPaidCommand notifyBillHasBeenPaidCommand = new NotifyBillHasBeenPaidCommand();
+            PaymentBillsCommand PBCmd = new PaymentBillsCommand();
+            PBCmd.setBillId(Long.valueOf(billId));
+            NotifyBillHasBeenPaidCommand notifyBillHasBeenPaidCmd = new NotifyBillHasBeenPaidCommand();
+            for (String itemMerchantOrderId: merchantOrderIdHelper.getAllMerchantOrderIdByBillId(PBCmd)){
+                notifyBillHasBeenPaidCommand.setMerchantOrderId(itemMerchantOrderId);
+                orderService.notifyBillHasBeenPaid(notifyBillHasBeenPaidCmd);
+            }
+        }
     }
 
 }
