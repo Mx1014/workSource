@@ -1302,6 +1302,27 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		// Double totalSize = 0.0; 计算精度有问题 --by dingjianmin
 		BigDecimal totalSize = new BigDecimal(0);
 		if (buildingApartments != null && buildingApartments.size() > 0) {
+			// 合同签约判断合同关联的房源状态
+			if (ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus())) && ((contractApplicationScene== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene)))) {
+				// 点击保存并发起走这里，置资产状态，修改合同点保存，不会修改资产状态
+				if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+					FindContractCommand command = new FindContractCommand();
+					command.setId(contract.getId());
+					command.setPartyAId(contract.getPartyAId());
+					command.setCommunityId(contract.getCommunityId());
+					command.setNamespaceId(contract.getNamespaceId());
+					command.setCategoryId(contract.getCategoryId());
+					ContractDetailDTO contractDetailDTO = findContract(command);
+					Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
+					
+					if (!possibleEnterContractStatus) {
+						LOGGER.error("possibleEnterContractStatus is false, Apartments is not free");
+						throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
+								"apartments status is not free for contract!");
+					}
+				}
+			}
+			
 			for (BuildingApartmentDTO buildingApartment : buildingApartments) {
 				// add by tangcen
 				//newApartments.add(buildingApartment.getApartmentName() + " 收费面积：" + buildingApartment.getChargeArea());
@@ -1336,23 +1357,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
 					// 26058 已售的状态不变
 					if (!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
-						// 点击保存并发起走这里，置资产状态，修改合同点保存，不会修改资产状态
-						if(ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
-							FindContractCommand command = new FindContractCommand();
-							command.setId(contract.getId());
-							command.setPartyAId(contract.getPartyAId());
-							command.setCommunityId(contract.getCommunityId());
-							command.setNamespaceId(contract.getNamespaceId());
-							command.setCategoryId(contract.getCategoryId());
-							ContractDetailDTO contractDetailDTO = findContract(command);
-							Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
-							
-							if (!possibleEnterContractStatus) {
-								LOGGER.error("possibleEnterContractStatus is false, Apartments is not free");
-								throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_APARTMENTS_NOT_FREE_ERROR,
-										"apartments status is not free for contract!");
-							}
-						}
 						addressMapping.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
 						addressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
