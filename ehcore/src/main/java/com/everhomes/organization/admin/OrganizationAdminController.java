@@ -898,7 +898,9 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value = OrganizationDetailDTO.class, collection = true)
     public RestResponse listEnterpriseByCommunityId(@Valid ListEnterprisesCommand cmd) {
 //        cmd.setQryAdminRoleFlag(false);
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_LIST, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+        if (cmd.getManageOrganizationId() != null) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_LIST, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+        }
         ListEnterprisesCommandResponse res = organizationService.listEnterprises(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
