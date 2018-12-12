@@ -362,13 +362,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		List<OfficeCubicleChargeUser> chargeUsers = officeCubicleProvider.findChargeUserBySpaceId(other.getId());
 		List<ChargeUserDTO> users = new ArrayList<ChargeUserDTO>();
-		for(OfficeCubicleChargeUser user : chargeUsers){
-			ChargeUserDTO chargeUserDTO = new ChargeUserDTO();
-			chargeUserDTO.setChargeName(user.getChargeName());
-			chargeUserDTO.setChargeUid(user.getChargeUid());
-			users.add(chargeUserDTO);
+		if(chargeUsers != null){
+			for(OfficeCubicleChargeUser user : chargeUsers){
+				ChargeUserDTO chargeUserDTO = new ChargeUserDTO();
+				chargeUserDTO.setChargeName(user.getChargeName());
+				chargeUserDTO.setChargeUid(user.getChargeUid());
+				users.add(chargeUserDTO);
+			}
+			dto.setChargeUserDTO(users);
 		}
-		dto.setChargeUserDTO(users);
 		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
 		dto.setRanges(ranges.stream().map(r->ConvertHelper.convert(r,OfficeRangeDTO.class)).collect(Collectors.toList()));
 		QueryDefaultRuleAdminCommand cmd = new QueryDefaultRuleAdminCommand();
