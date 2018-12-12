@@ -1838,7 +1838,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 
 		this.dbProvider.execute((TransactionStatus status) -> {
-			OfficeCubicleRoom room = new OfficeCubicleRoom();
+			OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(cmd.getRoomId());
 			if(cmd.getAssociateStation()!= null){
 				List<OfficeCubicleStation> associateStation =
 						officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), cmd.getRoomId(), (byte)1, null, null, null);
@@ -1851,7 +1851,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					station.setAssociateRoomId(cmd.getRoomId());
 					officeCubicleProvider.updateCubicle(station);
 				}
-			}
+			}	
 			room.setOwnerId(cmd.getOwnerId());
 			room.setOwnerType(cmd.getOwnerType());
 			room.setNamespaceId(cmd.getNamespaceId());
