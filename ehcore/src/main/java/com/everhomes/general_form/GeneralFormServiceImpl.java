@@ -1303,14 +1303,34 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public GeneralFormFieldsConfigDTO getFormFieldsConfig(GetFormFieldsConfigCommand cmd){
         GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getFormFieldsConfig(cmd.getFormFieldsConfigId());
         if(formFieldsConfig == null){
-            LOGGER.error("The formFieldsConfig gotten is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig gotten is null");
+            return null;
         }
         GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(formFieldsConfig, GeneralFormFieldsConfigDTO.class);
         // 将formFieldsConfig里的formFields从json形式解析成List
         List<GeneralFormFieldsConfigFieldDTO> fieldDTOs = JSONObject.parseArray(formFieldsConfig.getFormFields(), GeneralFormFieldsConfigFieldDTO.class);
 
+        // 服务联盟需要额外添加字段
+        if(dto.getModuleType().equals(YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME)) {
+            GeneralFormFieldsConfigFieldDTO sourceIdField = new GeneralFormFieldsConfigFieldDTO();
+            sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
+            sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+            sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
+            sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+            sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+            sourceIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+            sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+            fieldDTOs.add(sourceIdField);
+
+            GeneralFormFieldsConfigFieldDTO organizationIdField = new GeneralFormFieldsConfigFieldDTO();
+            organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+            organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+            organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+            organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+            organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+            organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+            organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+            fieldDTOs.add(organizationIdField);
+        }
         // 存在表单值则一起返回
         List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
         if(formValues != null && fieldDTOs != null){
@@ -1343,7 +1363,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
         // 服务联盟需要额外添加字段
-        if(form.getModuleType() == YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME) {
+        if(form.getModuleType().equals(YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME)) {
             GeneralFormFieldDTO sourceIdField = new GeneralFormFieldDTO();
             sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
             sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
@@ -1363,14 +1383,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
             organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
             fieldDTOs.add(organizationIdField);
-
-            GeneralFormFieldDTO customField = new GeneralFormFieldDTO();
-            customField.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
-            customField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-            customField.setRequiredFlag(NormalFlag.NONEED.getCode());
-            customField.setDynamicFlag(NormalFlag.NONEED.getCode());
-            customField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-            customField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
         }
 
         // 存在表单值则一起返回
