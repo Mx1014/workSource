@@ -13,6 +13,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -2871,7 +2872,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (list == null){
 			return resp;
 		}
-		resp.setSpace(list.stream().map(r->{
+		Comparator comparator=Collator.getInstance(java.util.Locale.CHINA);
+		List<SpaceForAppDTO> spaceList = new ArrayList<SpaceForAppDTO>();
+		spaceList = list.stream().map(r->{
 			SpaceForAppDTO dto = new SpaceForAppDTO();
 			dto.setAddress(r.getAddress());
 			dto.setSpaceId(r.getId());
@@ -2936,7 +2939,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			dto.setRentType(cmd.getRentType());
 			return dto;
-		}).collect(Collectors.toList()));
+		}).collect(Collectors.toList());
+		spaceList.sort(comparator);
+		resp.setSpace(spaceList);
 		return resp;
 	}
 	
