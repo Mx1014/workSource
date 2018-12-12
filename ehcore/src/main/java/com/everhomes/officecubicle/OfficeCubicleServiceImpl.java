@@ -1821,6 +1821,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	            		OfficeCubicleErrorCode.ERROR_REFUND_ERROR,
 	                    "bill refund error");
 	        }
+	        order.setBizOrderNo(refundOrderRestResponse.getResponse().getBusinessOrderNumber());
+	        officeCubicleProvider.updateCubicleRentOrder(order);
 	}
 	
 	@Override
