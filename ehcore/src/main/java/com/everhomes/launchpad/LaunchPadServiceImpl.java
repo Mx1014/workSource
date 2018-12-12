@@ -1885,7 +1885,37 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 		return ConvertHelper.convert(launchPadLayout, LaunchPadLayoutDTO.class);
 	}
-	@Override
+
+    @Override
+    public LaunchPadLayoutDTO getLaunchPadBaseLayout(GetLaunchPadLayoutCommand cmd) {
+        if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid id paramter.id is null");
+        }
+        LaunchPadLayout launchPadLayout = this.launchPadProvider.findLaunchPadLayoutById(cmd.getId());
+        if(launchPadLayout == null){
+            LOGGER.error("LaunchPad layout is not exits,id=" + cmd.getId());
+            throw RuntimeErrorException.errorWith(LaunchPadServiceErrorCode.SCOPE, LaunchPadServiceErrorCode.ERROR_LAUNCHPAD_LAYOUT_NOT_EXISTS,
+                    "LaunchPad layout is not exists,id=" + cmd.getId());
+        }
+        LaunchPadLayoutDTO launchPadLayoutDTO = ConvertHelper.convert(launchPadLayout, LaunchPadLayoutDTO.class);
+        if (launchPadLayoutDTO != null) {
+            LayoutJsonDTO layoutJsonDTO = (LayoutJsonDTO)StringHelper.fromJsonString(launchPadLayoutDTO.getLayoutJson(), LayoutJsonDTO.class);
+            if (layoutJsonDTO != null && !CollectionUtils.isEmpty(layoutJsonDTO.getGroups())) {
+                for (ItemGroupDTO itemGroupDTO: layoutJsonDTO.getGroups()) {
+                    if (!StringUtils.isBlank(itemGroupDTO.getTitleUri())) {
+                        String url = contentServerService.parserUri(itemGroupDTO.getTitleUri());
+                        itemGroupDTO.setTitleUrl(url);
+                    }
+                }
+            }
+            launchPadLayoutDTO.setLayoutJson(StringHelper.toJsonString(layoutJsonDTO));
+        }
+        return launchPadLayoutDTO;
+
+    }
+
+    @Override
 	public LaunchPadLayoutDTO getLastLaunchPadLayoutByVersionCode(GetLaunchPadLayoutByVersionCodeCommand cmd, ScopeType scopeType, Long scopeId){
 		if(cmd.getName() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
