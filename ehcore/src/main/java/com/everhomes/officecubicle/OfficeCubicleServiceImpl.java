@@ -1769,8 +1769,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(cmd.getRoomId());
 		OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getRoomId());
-		Long id = null;
-		station.setAssociateRoomId(id);
+		station.setAssociateRoomId(0L);
 		officeCubicleProvider.updateCubicle(station);
 		officeCubicleProvider.deleteRoom(room);
 	}
@@ -2713,7 +2712,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
 		for (OfficeCubicleStation s : station){
 			StationDTO dto = new StationDTO();
-			if (s.getAssociateRoomId() != null){
+			if (s.getAssociateRoomId() != null || s.getAssociateRoomId() != 0){
 				continue;
 			}
 			dto = ConvertHelper.convert(s,StationDTO.class);
