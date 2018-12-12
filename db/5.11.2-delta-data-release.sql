@@ -77,6 +77,10 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 
 UPDATE eh_service_modules SET name = '预约参观记录' WHERE id = 40220;
 UPDATE eh_service_module_privileges SET remark = '预约参观记录权限' WHERE privilege_id = '4020040220';
+
+-- AUTHOR: 马世亨 20181212
+-- REMARK: 访客v1.4 访客短信优化 url修改
+UPDATE `eh_configurations` SET `value`='/visitor-appointment/build/invitation.html?visitorToken=', `is_readonly`='0' WHERE `name`='visitorsys.invitation.link';
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
