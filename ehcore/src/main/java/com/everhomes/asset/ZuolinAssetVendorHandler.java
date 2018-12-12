@@ -1495,6 +1495,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     }
 
     private void populateUserBillIdentifierWithAddress(Map<Long, String> map, List<Long> billIdList) {
+    	List<PaymentBillItems> items = new ArrayList<PaymentBillItems>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         context.select().from(Tables.EH_PAYMENT_BILL_ITEMS).where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.in(billIdList))
         .orderBy(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID, Tables.EH_PAYMENT_BILL_ITEMS.ADDRESS_ID)
@@ -1515,8 +1516,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                 String addressIdStr = (item.getAddressId() == null) ? "" : String.valueOf(item.getAddressId());
                 identifier = identifier + "_" + addressIdStr;
                 map.put(item.getBillId(), identifier);
+                
+                existAddresses.put(item.getBillId(), item.getAddressId());
             }
-        });
+        }
     }
 
     private String concateUserBillIdentifier(Long billGroupId, String dateStrBegin, String dateStrEnd) {
