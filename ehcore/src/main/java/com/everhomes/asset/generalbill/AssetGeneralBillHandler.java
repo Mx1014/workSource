@@ -52,8 +52,11 @@ public class AssetGeneralBillHandler implements GeneralBillHandler{
 		good.setTag3(apartmentName);
 		good.setServeType(ServiceModuleConstants.ASSET_MODULE + "");
 		good.setServeApplyName(projectName + "-" + buildingName + "-" + apartmentName);//服务提供方名称
-		good.setGoodTag(billItemDTO.getBillItemId() + "");//商品标识
+		good.setGoodTag(billItemDTO.getChargingItemsId() + "");//商品标识
 		good.setGoodName(billItemDTO.getBillItemName());//商品名称
+		good.setCounts(1);
+		good.setPrice(billItemDTO.getAmountReceivable());
+		good.setTotalPrice(billItemDTO.getAmountReceivable());
 		return good;
 	}
 
