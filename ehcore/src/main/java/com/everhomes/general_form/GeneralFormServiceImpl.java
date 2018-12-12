@@ -2,6 +2,7 @@ package com.everhomes.general_form;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
@@ -12,10 +13,8 @@ import com.everhomes.general_approval.*;
 import com.everhomes.gogs.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.activity.ruian.ActivityCategoryList;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.user.UserInfo;
@@ -24,10 +23,6 @@ import com.everhomes.server.schema.tables.pojos.EhGeneralFormFilterUserMap;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
-import com.everhomes.yellowPage.ServiceAllianceFormHandler;
-import com.everhomes.yellowPage.YellowPageService;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -1347,7 +1342,26 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                 for(GeneralFormFieldDTO fieldDTO : fieldDTOs){
                     // 根据FieldName来判断两个表单值属于同一字段
                     if(fieldDTO.getFieldName().equals(value.getFieldName())){
-                        fieldDTO.setFieldValue(value.getFieldValue());
+                        // 子表单
+                        if(fieldDTO.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())){
+                            PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(value.getFieldValue(), PostApprovalFormSubformValue.class);
+//                            List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+                            String jsonStr = JSON.toJSONString(postSubFormValue.getForms());
+                            GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+                            subFormValue.setSubForms(JSON.parseObject(jsonStr, new TypeReference<List<GeneralFormSubFormValueDTO>>() {
+                            }.getType()));
+                            fieldDTO.setFieldValue(subFormValue.toString());
+
+//                            //  解析子表单的值
+//                            for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+//                                subForms.add(processSubFormItemField(fieldDTO.getFieldExtra(), itemValue, NormalFlag.NEED.getCode()));
+//                            }
+//                            GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+//                            subFormValue.setSubForms(subForms);
+//                            fieldDTO.setFieldValue(subFormValue.toString());
+                        } else {
+                            fieldDTO.setFieldValue(value.getFieldValue());
+                        }
                     }
                 }
             }
