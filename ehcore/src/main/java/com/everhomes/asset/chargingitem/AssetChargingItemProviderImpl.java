@@ -581,8 +581,11 @@ public class AssetChargingItemProviderImpl implements AssetChargingItemProvider 
 
         SelectConditionStep<EhPaymentChargingItemScopesRecord> step = context.selectFrom(t1)
                 .where(t1.OWNER_ID.eq(ownerId))
-                .and(t1.OWNER_TYPE.eq(ownerType))
-                .and(t1.CATEGORY_ID.eq(categoryId));
+                .and(t1.OWNER_TYPE.eq(ownerType));
+        //物业缴费V8.0（账单对接卡券） -44680
+        if(!org.springframework.util.StringUtils.isEmpty(categoryId)) {
+        	step.and(t1.CATEGORY_ID.eq(categoryId));
+        }
         //标准版支持多管理公司，0L是为了兼容历史数据
         if (allScope) {
             step.and(t1.ORG_ID.eq(orgId).or(t1.ORG_ID.eq(0L)));

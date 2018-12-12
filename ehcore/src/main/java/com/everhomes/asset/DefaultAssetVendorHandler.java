@@ -976,5 +976,12 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             }
         }
     }
+    
+    /**
+     * 物业缴费V8.0（账单对接卡券） -44680
+     */
+    
+    
+    
 
 }
