@@ -269,7 +269,7 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
 	@Override
 	public List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd){
-		List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+		List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getTargetType(), cmd.getTargetId());
 		List<GeneralFormValDTO> dtoList = new ArrayList<>();
 		if(formValues != null){
 			for(GeneralFormVal value : formValues){
