@@ -2711,7 +2711,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
 		for (OfficeCubicleStation s : station){
-			Long i = s.getAssociateRoomId();
 			StationDTO dto = new StationDTO();
 			if (s.getAssociateRoomId() != null ){
 				if (s.getAssociateRoomId().compareTo(0L)!=0){
