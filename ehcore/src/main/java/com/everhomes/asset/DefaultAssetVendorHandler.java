@@ -225,7 +225,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 		baseInfo.setGoods(buildGoods(cmd, billGroup));
 		BigDecimal totalAmountCents = calculateBillOrderAmountV2(cmd);
 		baseInfo.setTotalAmount(totalAmountCents);
-		baseInfo.setCallBackUrl(getPayCallbackUrl(cmd));
+		baseInfo.setCallBackUrl(getPayCallbackUrlV2(cmd));
 		baseInfo.setOrderTitle(app.getName());
 		baseInfo.setPaySourceType(cmd.getSourceType());
 		baseInfo.setGoodsDetail(buildGoodsDetails(cmd, totalAmountCents));
@@ -877,5 +877,16 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         }
         return totalAmountCents;
 	}
+	
+	private String getPayCallbackUrlV2(CreatePaymentBillOrderCommand cmd) {
+        String configKey = "pay.v2.callback.url.asset";
+        String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), configKey, "");
+        if(backUrl == null || backUrl.trim().length() == 0) {
+            LOGGER.error("Payment callback url empty, configKey={}, cmd={}", configKey, cmd);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAY_CALLBACK_URL_EMPTY,
+                    "Payment callback url empty");
+        }
+        return backUrl;
+    }
 
 }
