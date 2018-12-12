@@ -13,6 +13,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -1851,7 +1852,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					officeCubicleProvider.updateCubicle(station);
 				}
 			}
-			room = ConvertHelper.convert(cmd, OfficeCubicleRoom.class);
+			room.setOwnerId(cmd.getOwnerId());
+			room.setOwnerType(cmd.getOwnerType());
+			room.setNamespaceId(cmd.getNamespaceId());
+			room.setSpaceId(cmd.getSpaceId());
 			room.setDescription(cmd.getDescription());
 			room.setNamespaceId(cmd.getNamespaceId());
 			room.setCoverUri(cmd.getCoverUri());
@@ -1873,7 +1877,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getStationId());
-			station = ConvertHelper.convert(cmd, OfficeCubicleStation.class);
+			station.setOwnerId(cmd.getOwnerId());
+			station.setOwnerType(cmd.getOwnerType());
+			station.setNamespaceId(cmd.getNamespaceId());
+			station.setSpaceId(cmd.getSpaceId());
 			station.setId(cmd.getStationId());
 			station.setDescription(cmd.getDescription());
 			station.setNamespaceId(cmd.getNamespaceId());
@@ -2629,6 +2636,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setRentDate(rentDate);
 			dto.setCoverUrl(this.contentServerService.parserUri(dto.getCoverUri(), EntityType.USER.getCode(),
 					UserContext.current().getUser().getId()));
+			dto.setStatus(r.getStatus());
 			return dto;
 			}).collect(Collectors.toList()));
 		}
@@ -2864,7 +2872,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (list == null){
 			return resp;
 		}
-		resp.setSpace(list.stream().map(r->{
+		List<SpaceForAppDTO> spaceList = new ArrayList<SpaceForAppDTO>();
+		spaceList = list.stream().map(r->{
 			SpaceForAppDTO dto = new SpaceForAppDTO();
 			dto.setAddress(r.getAddress());
 			dto.setSpaceId(r.getId());
@@ -2929,7 +2938,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			dto.setRentType(cmd.getRentType());
 			return dto;
-		}).collect(Collectors.toList()));
+		}).collect(Collectors.toList());
+		resp.setSpace(spaceList);
 		return resp;
 	}
 	
