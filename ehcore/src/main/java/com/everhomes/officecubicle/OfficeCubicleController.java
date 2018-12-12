@@ -50,9 +50,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.point.pointpool.PreOrderDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.util.RequireAuthentication;
 
