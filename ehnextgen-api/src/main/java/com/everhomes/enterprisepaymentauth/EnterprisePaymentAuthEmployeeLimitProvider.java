@@ -20,5 +20,7 @@ public interface EnterprisePaymentAuthEmployeeLimitProvider {
 
     void autoDeleteDismissEmployeePaymentAuthLimit(String shouldDeleteMonth);
 
+    void markAutoDeleteDismissEmployeePaymentAuthLimit(Integer namespaceId, Long organizationId, Long detailId, String waitAutoDeleteMonth);
+
     void incrHistoricalTotalPayAmountAndPayCount(Integer namespaceId, Long organizationId, Long detailId, BigDecimal payAmount, Integer payCount);
 }

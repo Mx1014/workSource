@@ -223,3 +223,7 @@ ALTER TABLE eh_office_cubicle_spaces ADD COLUMN refund_strategy TINYINT;
 ALTER TABLE eh_office_cubicle_attachments ADD COLUMN type TINYINT COMMENT '1,空间，2短租工位，3开放式工位';
 
 ALTER TABLE eh_office_cubicle_orders MODIFY COLUMN employee_number VARCHAR(64) COMMENT '雇员数量';
+
+-- AUTHOR: 张智伟
+-- REMARK: 一些云部署的mysql没有开启支持TRIGGER脚本，修改实现方式，删除原有的trigger
+DROP TRIGGER IF EXISTS employee_dismiss_trigger_for_auto_remove_payment_limit;
