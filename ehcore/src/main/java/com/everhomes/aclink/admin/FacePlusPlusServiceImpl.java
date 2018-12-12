@@ -93,6 +93,9 @@ import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.yellowPage.YellowPageUtils;
+import com.google.gson.JsonObject;
+import com.microsoft.schemas.office.x2006.encryption.CTKeyEncryptor;
+import com.sun.jndi.toolkit.url.Uri;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -132,10 +135,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Security;
@@ -311,58 +311,41 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
     final Pattern npattern = Pattern.compile("\\d+");
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-    
-    final static String LAST_TICK = "dooraccess:%d:lasttick";
-
-    final static String DOOR_AUTH_ALL_USER = "doorauth:%d:alluser";
-
-    final static long TASK_TICK_TIMEOUT = 5*60*1000;
-    public final static String Manufacturer = "zuolin001";
-    private final static long MAX_KEY_ID = 1024;
-    private static final long KEY_TICK_15_MINUTE = 15*60*1000l;
-//    private static final long KEY_TICK_30_MINUTE = 30*60*1000l;
-    private static final long KEY_TICK_ONE_HOUR = 3600*1000l;
-    private static final long KEY_TICK_ONE_DAY = KEY_TICK_ONE_HOUR*24l;
-    private static final long KEY_TICK_7_DAY = KEY_TICK_ONE_DAY*7;
-    private static Format huarunDateFormatter = FastDateFormat.getInstance("yyyy-MM-dd");
-
-//  大沙河项目 旺龙云对接
-    private final static String WANGLONG_APP_ID = "647984150393028609";
-    private final static String WANGLONG_APP_SECRET = "3A4E0D7F0E5A2C1E";
-
-    private final static String URL_GETAPPINFOS = "http://sdk.api.jia-r.com/projectManage/getAppInfos";
-    private final static String URL_GETKEYU = "http://sdk.api.jia-r.com/projectManage/getKeyU";
 
     //face++对接
-    private final static String URL_FACEPLUSPLUS = "";
+    private final static String URL_FACEPLUSPLUS = "27.115.23.218";
     private final static String FACEPLUSPLUS_USERNAME = "";
     private final static String FACEPLUSPLUS_PASSWORD = "";
 
-    @Override
-    public String faceplusLogin (FaceplusLoginCommand cmd){
-        Map<String, String> params = new HashMap<>();
-        params.put("username", FACEPLUSPLUS_USERNAME);
-        params.put("password", FACEPLUSPLUS_PASSWORD);
-        String url = URL_FACEPLUSPLUS + "/auth/login";
-
-        return null;
-    }
-
-    public String FacePlusPlusRegister (){
+    public String login (String username, String password){
         String url = URL_FACEPLUSPLUS + "/auth/login";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         String result = null;
+        String cookie = null;
         try{
             httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(url);
-            httpPost.addHeader("User-Agent", "Koala Admin");
-//            httpPost.addHeader("cookie",cookie);
+            httpPost.addHeader("user-agent", "Koala Admin");
+            httpPost.addHeader("content-type","application/json");
+
+            JSONObject jsonParam = new JSONObject();
+            jsonParam.put("username", username);
+            jsonParam.put("password", password);
+            StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
+            entity.setContentEncoding("UTF-8");
+            entity.setContentType("application/json");
+            httpPost.setEntity(entity);
             response = httpClient.execute(httpPost);
             int status = response.getStatusLine().getStatusCode();
+            if(status != 200){
+                LOGGER.error("Failed to get the http result, url={}, status={}", url, response.getStatusLine());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "Failed to get the http result");
+            }
             HttpEntity resEntity = response.getEntity();
-            Header[] setCookie = httpPost.getHeaders("Set-Cookie");
-            String a = setCookie[0].getValue();
+            Header[] setCookie = response.getHeaders("set-cookie");//cookie在响应头里
+            cookie = setCookie[0].getValue();
             result = EntityUtils.toString(resEntity);
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Get http result, url={}, result={}", url, result);
@@ -387,30 +370,42 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
                 }
             }
         }
-        return result;
+        return cookie;
     }
 
-    public String facePlusPlusCreateUser (String cookie, Integer subjectType,String name){
+    public JSONObject createUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time){
         String url = URL_FACEPLUSPLUS + "/subject";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
-        String result = null;
+        JSONObject result = null;
         try{
             httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(url);
             httpPost.addHeader("cookie",cookie);
+            httpPost.addHeader("content-type","application/json");
 
-            Map<String, Object> param = new HashMap<>();
-            param.put("subject_type", subjectType);
-            param.put("name", name);
-            String p = StringHelper.toJsonString(param);
-            StringEntity stringEntity = new StringEntity(p, StandardCharsets.UTF_8);
-            httpPost.setEntity(stringEntity);
+            JSONObject jsonParam = new JSONObject();
+            jsonParam.put("subject_type", subjectType);
+            jsonParam.put("name", name);
+            //若为访客设置开始结束时间
+            jsonParam.put("start_time", start_time);
+            jsonParam.put("end_time", end_time);
+            StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
+            entity.setContentEncoding("UTF-8");
+            entity.setContentType("application/json");
+            httpPost.setEntity(entity);
 
             response = httpClient.execute(httpPost);
             int status = response.getStatusLine().getStatusCode();
+            if(status != 200){
+                LOGGER.error("Failed to get the http result, url={}, status={}", url, response.getStatusLine());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "Failed to get the http result");
+            }
             HttpEntity resEntity = response.getEntity();
-            result = EntityUtils.toString(resEntity);
+            // http返回转为json格式
+//            result = (JsonObject)StringHelper.fromJsonString(resEntity.toString(),JSONObject.class);
+            result = JSON.parseObject(resEntity.toString());
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Get http result, url={}, result={}", url, result);
             }
@@ -437,7 +432,7 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
         return result;
     }
 
-    public String facePlusPlusUploadPhoto (String fileName, String cookie){
+    public String uploadPhoto (String cookie, String uri, Integer subjectId){
         String url = URL_FACEPLUSPLUS + "/subject";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
@@ -448,8 +443,9 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             httpPost.addHeader("cookie",cookie);
             httpPost.addHeader("Content-Type","multipart/form-data");
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-            builder.addBinaryBody("upload_file", fileStream,
-                    ContentType.APPLICATION_OCTET_STREAM, URLEncoder.encode(fileName, "UTF-8"));
+            File file = new File(uri);
+//            builder.addBinaryBody("upload_file", fileStream,
+//                    ContentType.APPLICATION_OCTET_STREAM, URLEncoder.encode(fileName, "UTF-8"));
             HttpEntity multipart = builder.build();
 
             httpPost.setEntity(multipart);
