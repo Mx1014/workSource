@@ -45,21 +45,14 @@ import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.CreateLocalVistorCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
-import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.AddArchivesContactCommand;
 import com.everhomes.rest.archives.ArchivesContactDTO;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.enterprise.ListUserOrganizationsCommand;
 import com.everhomes.rest.enterprise.ListUserOrganizationsResponse;
-import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.launchpadbase.AppContext;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -80,8 +73,6 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.rentalv2.SceneType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
@@ -90,12 +81,10 @@ import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
-import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 
 import com.google.gson.Gson;
-import net.greghaines.jesque.Job;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -3109,8 +3098,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		Long orgId = rs.getOrganizationId();
 		if (StringHelper.hasContent(bill.getCustomObject())){//订单有指定退款联系人
 			RentalUseInfoDTO useInfoDTO = JSONObject.parseObject(bill.getCustomObject(), RentalUseInfoDTO.class);
-			offlinePayeeUid = useInfoDTO.getRefundContractUid();
-			orgId = useInfoDTO.getRefundContractOrgId();
+			offlinePayeeUid = useInfoDTO.getRefundContactUid();
+			orgId = useInfoDTO.getRefundContactOrgId();
 		}
 		if (offlinePayeeUid!=null){
 			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(offlinePayeeUid, orgId);

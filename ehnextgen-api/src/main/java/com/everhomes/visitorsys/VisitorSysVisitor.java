@@ -15,7 +15,6 @@ public class VisitorSysVisitor extends EhVisitorSysVisitors {
 	private String statsDate;
 	private Integer statsHour;
 	private Integer statsWeek;
-	private Long communityId;
 
 	private Long doorAccessEndTime;
 
@@ -60,14 +59,6 @@ public class VisitorSysVisitor extends EhVisitorSysVisitors {
 
 	public void setStatsWeek(Integer statsWeek) {
 		this.statsWeek = statsWeek;
-	}
-
-	public Long getCommunityId() {
-		return communityId;
-	}
-
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
 	}
 
 	public static long getSerialVersionUID() {
