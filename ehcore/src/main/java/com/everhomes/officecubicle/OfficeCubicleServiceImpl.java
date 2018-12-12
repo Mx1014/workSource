@@ -2872,7 +2872,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (list == null){
 			return resp;
 		}
-		Comparator comparator=Collator.getInstance(java.util.Locale.CHINA);
 		List<SpaceForAppDTO> spaceList = new ArrayList<SpaceForAppDTO>();
 		spaceList = list.stream().map(r->{
 			SpaceForAppDTO dto = new SpaceForAppDTO();
@@ -2940,7 +2939,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setRentType(cmd.getRentType());
 			return dto;
 		}).collect(Collectors.toList());
-		spaceList.sort(comparator);
 		resp.setSpace(spaceList);
 		return resp;
 	}
