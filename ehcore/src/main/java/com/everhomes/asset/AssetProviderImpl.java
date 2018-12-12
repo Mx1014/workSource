@@ -2186,7 +2186,7 @@ public class AssetProviderImpl implements AssetProvider {
         		, o.GOODS_SERVE_APPLY_NAME, o.GOODS_SERVE_TYPE, o.GOODS_NAMESPACE
         		, o.GOODS_TAG1, o.GOODS_TAG2, o.GOODS_TAG3, o.GOODS_TAG4, o.GOODS_TAG5
         		, o.GOODS_TAG, o.GOODS_NAME, o.GOODS_DESCRIPTION, o.GOODS_COUNTS
-        		, o.GOODS_COUNTS, o.GOODS_PRICE, o.GOODS_TOTALPRICE)
+        		, o.GOODS_COUNTS, o.GOODS_PRICE, o.GOODS_TOTALPRICE, o.OWNER_ID)
                 .from(o)
                 .leftOuterJoin(k)
                 .on(o.CHARGING_ITEMS_ID.eq(k.ID))
@@ -2242,6 +2242,8 @@ public class AssetProviderImpl implements AssetProvider {
                     itemDTO.setGoodsCounts(f.getValue(o.GOODS_COUNTS));
                     itemDTO.setGoodsPrice(f.getValue(o.GOODS_PRICE));
                     itemDTO.setGoodsTotalPrice(f.getValue(o.GOODS_TOTALPRICE));
+                    //物业缴费V8.0（账单对接卡券） -44680
+                    itemDTO.setOwnerId(f.getValue(o.OWNER_ID));
                     list1.add(itemDTO);
                     return null;
                 });
