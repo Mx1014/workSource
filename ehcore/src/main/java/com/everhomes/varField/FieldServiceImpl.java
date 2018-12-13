@@ -614,7 +614,12 @@ public class FieldServiceImpl implements FieldService {
                         //按default order排序
                         items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
                         // service alliance and activity expand items ,we add expand item flag for it
-                        addExpandItems(dto, items, cmd.getNamespaceId());
+                        addExpandItems(dto, items, cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getCommunityId());
+                        dto.setItems(items);
+                    }else{
+                        //2018年12月13日 黄鹏宇 remark：即使查询出来为空，如果需要进行添加选项的话还是会添加的
+                        List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
+                        addExpandItems(dto, items, cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getCommunityId());
                         dto.setItems(items);
                     }
                     dtos.add(dto);
@@ -628,8 +633,10 @@ public class FieldServiceImpl implements FieldService {
 
         return null;
     }
-    
-    private void addExpandItems(FieldDTO dto, List<FieldItemDTO> items, Integer namespaceId) {
+
+
+
+    private void addExpandItems(FieldDTO dto, List<FieldItemDTO> items, Integer namespaceId, Long ownerId, Long communityId) {
         if (dto.getFieldName().equals("sourceItemId")) {
             CustomerConfigurationCommand cccmd = new CustomerConfigurationCommand();
             cccmd.setNamespaceId(namespaceId);
@@ -668,6 +675,27 @@ public class FieldServiceImpl implements FieldService {
                     }
                 }
             }
+        }
+        //2018年12月13日 黄鹏宇 remark：如果查询需要levelItemId但是该表中没有itemdId的话，就手动添加
+        if(dto.getFieldName().equals("levelItemId") && !(items != null && items.size() > 0)){
+            List<FieldItem> fieldItems = fieldProvider.listFieldItems(dto.getFieldId());
+            fieldItems.forEach(r->{
+                ScopeFieldItem scopeFieldItem = new ScopeFieldItem();
+                scopeFieldItem.setItemId(r.getId());
+                scopeFieldItem.setFieldId(dto.getFieldId());
+                scopeFieldItem.setCommunityId(communityId);
+                scopeFieldItem.setNamespaceId(namespaceId);
+                scopeFieldItem.setOwnerId(ownerId);
+                scopeFieldItem.setOwnerType("EhOrganizations");
+                scopeFieldItem.setModuleName("enterprise_customer");
+                scopeFieldItem.setDefaultOrder(r.getDefaultOrder());
+                scopeFieldItem.setItemDisplayName(r.getDisplayName());
+                scopeFieldItem.setCreatorUid(UserContext.currentUserId());
+                fieldProvider.createScopeFieldItem(scopeFieldItem);
+                if (items != null) {
+                    items.add(ConvertHelper.convert(scopeFieldItem, FieldItemDTO.class));
+                }
+            });
         }
     }
 
