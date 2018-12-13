@@ -509,4 +509,11 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
     	assetBillProvider.notifyThirdSign(cmd.getBillIdList());
     }
 
+    /**
+     * 物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 删除从CM同步过来的所有数据，相当于初始化
+     */
+	public void deleteRuiCMSyncData() {
+		assetBillProvider.deleteRuiCMSyncData();
+	}
+
 }

@@ -386,5 +386,19 @@ public class TestAssetController extends ControllerBase {
 		restResponse.setErrorDescription("OK");
 		return restResponse;
 	}
+	
+	/**
+	 * <b>URL: /test/deleteRuiCMSyncData</b>
+	 * <p>删除从CM同步过来的所有数据，相当于初始化</p>
+	 */
+	@RequestMapping("deleteRuiCMSyncData")
+	public RestResponse deleteRuiCMSyncData() {
+		RuiAnCMThirdOpenBillHandler handler = PlatformContext.getComponent(ThirdOpenBillHandler.THIRDOPENBILL_PREFIX + 999929);
+        handler.deleteRuiCMSyncData();
+		RestResponse restResponse = new RestResponse();
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 
 }

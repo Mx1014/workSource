@@ -2263,4 +2263,16 @@ public class ContractProviderImpl implements ContractProvider {
 		});
 		return resultList;
 	}
+	
+	public Timestamp findLastVersionByBackup(Integer namespaceId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_ZJ_SYNCDATA_BACKUP)
+				.where(Tables.EH_ZJ_SYNCDATA_BACKUP.NAMESPACE_ID.eq(namespaceId))
+				.orderBy(Tables.EH_ZJ_SYNCDATA_BACKUP.CREATE_TIME.desc())
+				.limit(1)
+				.fetchOne();
+		if (record != null) {
+			return record.getValue(Tables.EH_ZJ_SYNCDATA_BACKUP.CREATE_TIME);
+		}
+		return null;
+	}
 }

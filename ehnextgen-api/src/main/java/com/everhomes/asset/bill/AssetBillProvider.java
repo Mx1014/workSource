@@ -27,5 +27,7 @@ public interface AssetBillProvider {
 	void deleteBillFromContract(Integer namespaceId, List<Long> contractIdList);
 
 	void notifyThirdSign(List<Long> billIdList);
+
+	void deleteRuiCMSyncData();
 	
 }

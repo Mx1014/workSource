@@ -3030,7 +3030,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			SyncDataTask dataTask = syncDataTaskService.executeTask(() -> {
 				SyncDataResponse response = new SyncDataResponse();
 				contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId(), cmd.getCategoryId(), contractCategory.getContractApplicationScene());
-				contractHandler.syncBillsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId(), cmd.getCategoryId(), contractCategory.getContractApplicationScene());
 				return response;
 			}, task);
 

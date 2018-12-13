@@ -26,6 +26,9 @@ import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
+import com.everhomes.rest.common.AssetModuleNotifyConstants;
+import com.everhomes.rest.contract.NamespaceContractType;
+import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -279,5 +282,39 @@ public class AssetBillProviderImpl implements AssetBillProvider {
                 .execute();
 	}
 
+	public void deleteRuiCMSyncData() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		//删除eh_zj_syncdata_backup备份表
+        context.delete(Tables.EH_ZJ_SYNCDATA_BACKUP)
+                .where(Tables.EH_ZJ_SYNCDATA_BACKUP.NAMESPACE_ID.eq(999929))
+                .execute();
+        //删除同步的客户eh_organizations、eh_enterprise_customers
+        List<Long> organizationIdList = context.select(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID)
+        		.from(Tables.EH_ENTERPRISE_CUSTOMERS)
+        		.where(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(NamespaceCustomerType.CM.getCode()))
+        		.fetchInto(Long.class);
+        context.delete(Tables.EH_ORGANIZATIONS)
+	        .where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(999929))
+	        .and(Tables.EH_ORGANIZATIONS.ID.in(organizationIdList))
+	        .execute();
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMERS)
+	        .where(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(999929))
+	        .and(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(NamespaceCustomerType.CM.getCode()))
+	        .execute();
+        //删除同步的合同
+        context.delete(Tables.EH_CONTRACTS)
+	        .where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(999929))
+	        .and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(NamespaceContractType.RUIAN_CM.getCode()))
+	        .execute();
+        //删除同步的账单
+        context.delete(Tables.EH_PAYMENT_BILLS)
+	        .where(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(999929))
+	        .and(Tables.EH_PAYMENT_BILLS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ASSET_CM_MODULE))
+	        .execute();
+        context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
+	        .where(Tables.EH_PAYMENT_BILL_ITEMS.NAMESPACE_ID.eq(999929))
+	        .and(Tables.EH_PAYMENT_BILL_ITEMS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ASSET_CM_MODULE))
+	        .execute();
+	}
 
 }
