@@ -677,9 +677,9 @@ public class ContractProviderImpl implements ContractProvider {
 		if(categoryId != null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.CATEGORY_ID.eq(categoryId));
 		}
-		if (categoryId == null) {
+		/*if (categoryId == null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.CATEGORY_ID.isNull());
-		}
+		}*/
 		if(communityId != null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(communityId));
 		}

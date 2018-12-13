@@ -2,6 +2,7 @@
 -- AUTHOR: 丁建民 20181210
 -- REMARK: issue-43782 合同套打权限
 UPDATE `eh_service_module_functions` SET  `explain`='打印' WHERE `id`='21216';
+UPDATE `eh_service_module_privileges` SET  `remark`='打印' WHERE `privilege_id`='21216';
 
 SET @id = (SELECT MAX(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 21210, 0, 21226, '生成合同文档', 12, SYSDATE());
