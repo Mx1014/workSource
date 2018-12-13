@@ -8,8 +8,7 @@
 -- REMARK:刷新es映射 freqvisitor.sh 调用 /evh/visitorsys/syncFreqVisitors同步数据
 
 -- AUTHOR:黄鹏宇 20181213
--- REMARK:刷新es映射 visitorsys.sh 调用 /evh/visitorsys/syncVisitor同步数据
--- REMARK:刷新es映射 freqvisitor.sh 调用 /evh/visitorsys/syncFreqVisitors同步数据
+-- REMARK:执行release前请先备份eh_var_field_items,eh_var_field_item_scopes,eh_enterprise_customers表
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
