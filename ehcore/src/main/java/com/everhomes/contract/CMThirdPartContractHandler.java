@@ -894,31 +894,31 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
         syncObjects.forEach(object -> {
             object.getData().forEach(data -> {
-                CMContractUnit cmContractUnit = data.getContractUnit().get(0);
-                Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
-                if(address != null) {
-                    data.setCommunityId(address.getCommunityId());
-                }else{
-                    return;
-                }
-                //进行去重判断
-                Boolean pushFlag = true;
-                for(CMCustomer customer : cmCustomers){
-                    if(customer.getAccountId().equals(data.getContractHeader().getAccountID())){
-                        pushFlag = false;
-                    }
-                }
+            	if(data.getContractUnit() != null && data.getContractUnit().size() != 0) {
+            		CMContractUnit cmContractUnit = data.getContractUnit().get(0);
+                    Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
+                    if(address != null) {
+                        data.setCommunityId(address.getCommunityId());
+                        //进行去重判断
+                        Boolean pushFlag = true;
+                        for(CMCustomer customer : cmCustomers){
+                            if(customer.getAccountId().equals(data.getContractHeader().getAccountID())){
+                                pushFlag = false;
+                            }
+                        }
 
-                if(pushFlag){
-                    CMCustomer customer = new CMCustomer();
-                    customer.setAccountId(data.getContractHeader().getAccountID());
-                    customer.setAccountName(data.getContractHeader().getAccountName());
-                    customer.setConnector(data.getContractHeader().getConnector());
-                    customer.setMail(data.getContractHeader().getMail());
-                    customer.setConnectorPhone(data.getContractHeader().getConnectorPhone());
-                    customer.setCommunityId(address.getCommunityId());
-                    cmCustomers.add(customer);
-                }
+                        if(pushFlag){
+                            CMCustomer customer = new CMCustomer();
+                            customer.setAccountId(data.getContractHeader().getAccountID());
+                            customer.setAccountName(data.getContractHeader().getAccountName());
+                            customer.setConnector(data.getContractHeader().getConnector());
+                            customer.setMail(data.getContractHeader().getMail());
+                            customer.setConnectorPhone(data.getContractHeader().getConnectorPhone());
+                            customer.setCommunityId(address.getCommunityId());
+                            cmCustomers.add(customer);
+                        }
+                    }
+            	}
             });
         });
 
