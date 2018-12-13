@@ -151,7 +151,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 								try{
 									PaymentBills zuolinServiceBill = assetProvider.findBillById(Long.parseLong(cmBill.getBillID()));
 									if(zuolinServiceBill != null) {
-										if(cmBill.getStatus() != null && cmBill.getStatus().equals("已缴账单")) {
+										if(cmBill.getStatus() != null && cmBill.getStatus().equals("已缴")) {
 											if(zuolinServiceBill.getStatus().equals(AssetPaymentBillStatus.UNPAID.getCode())) {
 												//(2)若用户线下一次性全部支付，财务在CM中直接记录结果，正常同步状态给APP。未同步之前，APP端一直显示为“未支付”。
 												zuolinServiceBill.setThirdPaid(AssetPaymentBillStatus.PAID.getCode());//已在第三方支付
@@ -265,19 +265,16 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 							            LOGGER.error(e.toString());
 							        }
 									paymentBills.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
+									paymentBills.setSwitch((byte) 1);//默认为已出
 									if(cmBill.getStatus() != null) {
-										if(cmBill.getStatus().equals("已出账单")) {//已出未缴
-											paymentBills.setSwitch((byte) 1);
-											paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
-										}else if(cmBill.getStatus().equals("已缴账单")){//已出已缴
-											paymentBills.setSwitch((byte) 1);
+										if(cmBill.getStatus().equals("已缴")) {
 											paymentBills.setStatus(AssetPaymentBillStatus.PAID.getCode());
-										}else {//未出未缴
-											paymentBills.setSwitch((byte) 0);
+										}else if(cmBill.getStatus().equals("未缴")){
+											paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
+										}else {
 											paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
 										}
 									}else {
-										paymentBills.setSwitch((byte) 0);//默认为未出
 										paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());//默认为未缴
 									}
 									paymentBills.setAmountReceivable(amountReceivable);
@@ -347,7 +344,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 										Long billId = existCmBill.getId();
 										paymentBills.setId(billId);
 										//支付过程对接逻辑
-										if(cmBill.getStatus() != null && cmBill.getStatus().equals("已缴账单")) {
+										if(cmBill.getStatus() != null && cmBill.getStatus().equals("已缴")) {
 											if(existCmBill.getStatus().equals(AssetPaymentBillStatus.UNPAID.getCode())) {
 												//(2)若用户线下一次性全部支付，财务在CM中直接记录结果，正常同步状态给APP。未同步之前，APP端一直显示为“未支付”。
 												paymentBills.setThirdPaid(AssetPaymentBillStatus.PAID.getCode());//已在第三方支付
