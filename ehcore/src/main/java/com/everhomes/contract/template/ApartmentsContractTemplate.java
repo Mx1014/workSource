@@ -145,24 +145,28 @@ public class ApartmentsContractTemplate implements ContractTemplateHandler{
 		
 		Building building = null;
 		Community comminity = null;
-		Address address = addressProvider.findAddressById(apartment.getAddressId());
-		if (address != null) {
-			result.setAreaSize(address.getAreaSize());
-			result.setSharedArea(address.getSharedArea());
-			if(address.getBuildingId() != null){
-				building = communityProvider.findBuildingById(address.getBuildingId());
+		
+		LOGGER.info("apartment is {}",apartment);
+		if (apartment != null) {
+			Address address = addressProvider.findAddressById(apartment.getAddressId());
+			if (address != null) {
+				result.setAreaSize(address.getAreaSize());
+				result.setSharedArea(address.getSharedArea());
+				if(address.getBuildingId() != null){
+					building = communityProvider.findBuildingById(address.getBuildingId());
+				}
+				if (address.getCommunityId() != null) {
+					comminity = communityProvider.findCommunityById(address.getCommunityId());
+				}
 			}
-			if (address.getCommunityId() != null) {
-				comminity = communityProvider.findCommunityById(address.getCommunityId());
+			if (building != null) {
+				result.setBuildingName(building.getName());
+				result.setBuildingAddress(building.getAddress());
 			}
-		}
-		if (building != null) {
-			result.setBuildingName(building.getName());
-			result.setBuildingAddress(building.getAddress());
-		}
-		if (comminity != null) {
-			result.setCommunityName(comminity.getName());
-			result.setCommunityAddress(comminity.getAddress());
+			if (comminity != null) {
+				result.setCommunityName(comminity.getName());
+				result.setCommunityAddress(comminity.getAddress());
+			}
 		}
 		return result;
 	}
