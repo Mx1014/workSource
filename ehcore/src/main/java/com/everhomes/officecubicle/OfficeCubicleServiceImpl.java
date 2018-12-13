@@ -1909,15 +1909,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setUseDetail(rentalOrder.getUseDetail());
 		order.setRentCount(rentalOrder.getRentalCount().longValue());
 		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
-		List<Rentalv2PriceRule> price = rentalv2PriceRuleProvider.listPriceRuleByOwner("station_booking",
-				PriceRuleType.RESOURCE.getCode(), cmd.getSpaceId());
 		BigDecimal amount = new BigDecimal(0.00);
-		for (Rentalv2PriceRule r : price){
-			if (rentalOrder.getRentalType() == r.getRentalType()){
-				if(r.getWorkdayPrice()!=null){
-					amount = r.getWorkdayPrice();
-				}
-			}
+		if (rentalOrder.getPayTotalMoney() != null){
+			amount = rentalOrder.getPayTotalMoney();
 		}
 		order.setPrice(amount);
 		order.setOrderNo(orderNo);
@@ -1995,7 +1989,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		createOrderCommand.setAccountCode(sNamespaceId);
 		createOrderCommand.setPayeeUserId(getPayerInfoByMerchantIdRestResponse.getResponse().getId());
 		List<Rentalv2PriceRule> priceRule = rentalv2PriceRuleProvider.listPriceRuleByOwner("station_booking", PriceRuleType.RESOURCE.getCode(), cmd.getSpaceId());
-		createOrderCommand.setAmount(priceRule.get(0).getWorkdayPrice().multiply(new BigDecimal(100)).longValue());
+		createOrderCommand.setAmount(amount.multiply(new BigDecimal(100)).longValue());
 		createOrderCommand.setExtendInfo(extendInfo);
 		createOrderCommand.setGoodsName(extendInfo);
 		createOrderCommand.setClientAppName(cmd.getClientAppName());
