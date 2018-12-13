@@ -85,8 +85,9 @@ UPDATE `eh_configurations` SET `value`='/visitor-appointment/build/invitation.ht
 
 -- AUTHOR: xq.tian 20181213
 -- REMARK: 工作流 2.8.1 旧的数据适应新的代码
-UPDATE eh_flows SET form_status = 1 WHERE form_origin_id<>0;
-UPDATE eh_flow_nodes SET form_relation_type=1 WHERE form_origin_id<>0;
+UPDATE eh_flows SET form_status = 1,form_relation_type=1,form_relation_data=CONCAT('{"formOriginId":', form_origin_id,',"formVersion":', form_version, '}') WHERE form_origin_id<>0;
+UPDATE eh_flow_nodes SET form_relation_type=1,form_relation_data=CONCAT('{"formOriginId":', form_origin_id,',"formVersion":', form_version, '}') WHERE form_origin_id<>0;
+
 
 -- AUTHOR: 黄明波
 -- REMARK: 更新打印机归属项目
