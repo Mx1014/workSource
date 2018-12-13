@@ -933,9 +933,6 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		if (rentFlag != null){
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.eq(rentFlag));
 		}
-		else{
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.isNotNull());
-		}
 		if (StringUtils.isNotBlank(keyword))
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.STATION_NAME.like("%" + keyword +"%"));
 		if (status != null)
@@ -1017,8 +1014,6 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.SPACE_ID.eq(spaceId));
 		if (rentFlag != null){
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.RENT_FLAG.eq(rentFlag));
-		}else {
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.RENT_FLAG.isNotNull());
 		}
 		if (status!=null){
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.STATUS.eq(status));
