@@ -1811,6 +1811,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
+		if (order.getRequestType() ==OfficeCubicleRequestType.BACKGROUND.getCode()){
+			order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+			this.officeCubicleProvider.updateCubicleRentOrder(order);
+			return;
+		}
 		 CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
 	        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
 	        createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
@@ -2556,8 +2561,14 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (closeStation != null){
 			closeStationSize = closeStation.size();
 		}
+		List<OfficeCubicleStation> longRentIdleStation = 
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)1, null);
 		resp.setLongRentCloseCubicleNums(closeStationSize);
-		resp.setLongCubicleIdleNums(stationSize-longRentStationSize);
+		Integer longRentIdleStationSize =0;
+		if (longRentIdleStation!=null){
+			longRentIdleStationSize = longRentIdleStation.size();
+		}
+		resp.setLongCubicleIdleNums(stationSize-longRentIdleStationSize);
 
 		resp.setShortCubicleRentedNums(shortRentStationSize);
 		Integer rentRates =((shortRentStationSize+longRentStationSize)*100)/stationSize;
