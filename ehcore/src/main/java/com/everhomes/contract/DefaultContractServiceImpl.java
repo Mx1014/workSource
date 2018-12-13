@@ -4853,23 +4853,27 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		String dataValue = null;
 		Map<String, ContractTemplateHandler> handlerMap = new HashMap<>();
 		ContractTemplateHandler handler = null;
+		String[] segments = null;
 		
 		for (String replaceKey : replaceKeys) {
 			List<String> dataKeys = GetKeywordsUtils.getKeywordsWithoutPattern(replaceKey, "@@", "##");
-			String dataKey = dataKeys.get(0);
-			String[] segments = dataKey.split("\\.");
-			
-			String type = getHandlerType(segments);
-			handler = handlerMap.get(type);
-			if (handler == null) {
-				handler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + type);
-				handlerMap.put(type, handler);
+			if (dataKeys.size() > 0 ) {
+				String dataKey = dataKeys.get(0);
+				segments = dataKey.split("\\.");
 			}
-			
-			if (handler.isValid(contractDetailDTO, segments)) {
-				dataValue = handler.getValue(contractDetailDTO, segments);
+			if (segments != null) {
+				String type = getHandlerType(segments);
+				handler = handlerMap.get(type);
+				if (handler == null) {
+					handler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + type);
+					handlerMap.put(type, handler);
+				}
+				
+				if (handler.isValid(contractDetailDTO, segments)) {
+					dataValue = handler.getValue(contractDetailDTO, segments);
+				}
+				dataMap.put(replaceKey, dataValue);
 			}
-			dataMap.put(replaceKey, dataValue);
 		}
 		return dataMap;
 	}
