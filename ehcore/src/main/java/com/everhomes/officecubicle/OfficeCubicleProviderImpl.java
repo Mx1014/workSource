@@ -933,9 +933,6 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		if (rentFlag != null){
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.eq(rentFlag));
 		}
-		else{
-			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.RENT_FLAG.isNotNull());
-		}
 		if (StringUtils.isNotBlank(keyword))
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_STATION.STATION_NAME.like("%" + keyword +"%"));
 		if (status != null)

@@ -310,7 +310,7 @@ public class OfficeCubicleController extends ControllerBase {
      */
     @RequestMapping("createCubicleOrderV2")
     @RestReturn(PreOrderDTO.class)
-    public RestResponse createCubicleGeneralOrder(CreateOfficeCubicleOrderCommand cmd) {
+    public RestResponse createCubicleOrderV2(CreateOfficeCubicleOrderCommand cmd) {
     	com.everhomes.rest.order.PreOrderDTO  resp = this.officeCubicleService.createCubicleOrderV2(cmd);
     	
         RestResponse response = new RestResponse(resp);
