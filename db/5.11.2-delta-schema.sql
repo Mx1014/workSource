@@ -227,6 +227,33 @@ ALTER TABLE eh_office_cubicle_orders MODIFY COLUMN employee_number VARCHAR(64) C
 -- REMARK: 一些云部署的mysql没有开启支持TRIGGER脚本，修改实现方式，删除原有的trigger
 DROP TRIGGER IF EXISTS employee_dismiss_trigger_for_auto_remove_payment_limit;
 
+
 -- AUTHOR: 莫谋斌 20181213
 -- REMARK: 数据库修改为保存uri
 ALTER TABLE eh_communities  CHANGE background_img_url background_img_uri varchar(500) DEFAULT '' COMMENT '小区或园区项目的图片链接';
+
+-- AUTHOR: 胡琪
+-- REMARK: 工作流-2.8.1，工作流节点关联的全局表单字段配置信息
+CREATE TABLE `eh_general_form_fields_config` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `organization_id` bigint(20) NOT NULL DEFAULT '0',
+  `owner_id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `module_id` bigint(20) DEFAULT NULL COMMENT 'the module id',
+  `module_type` varchar(64) DEFAULT NULL,
+  `project_id` bigint(20) NOT NULL DEFAULT '0',
+  `project_type` varchar(64) NOT NULL DEFAULT 'EhCommunities',
+  `form_origin_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'The id of the original form',
+  `form_version` bigint(20) NOT NULL DEFAULT '0',
+  `config_origin_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'The id of the original form fields config',
+  `config_version` bigint(20) NOT NULL DEFAULT '0',
+  `config_type` varchar(64) NOT NULL COMMENT '表单节点配置类型',
+  `form_fields` text COMMENT 'json 存放表单字段',
+  `status` tinyint(4) NOT NULL COMMENT '0: invalid, 1: config, 2: running',
+  `create_time` datetime(3) NOT NULL COMMENT 'record create time',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `update_time` datetime(3) DEFAULT NULL COMMENT 'record update time',
+  `updater_uid` bigint(20) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

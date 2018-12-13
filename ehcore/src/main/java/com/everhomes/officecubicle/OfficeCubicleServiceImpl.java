@@ -1768,9 +1768,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049500L, cmd.getAppId(), null, cmd.getCurrentProjectId());//资源管理权限
 		}
 		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(cmd.getRoomId());
-		OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getRoomId());
-		station.setAssociateRoomId(0L);
-		officeCubicleProvider.updateCubicle(station);
+		List<OfficeCubicleStation> stationList = 
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), cmd.getRoomId(), null, null, null, null);
+		for(OfficeCubicleStation s :stationList){
+			s.setAssociateRoomId(0L);
+			officeCubicleProvider.updateCubicle(s);
+		}
 		officeCubicleProvider.deleteRoom(room);
 	}
     
@@ -1799,6 +1802,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				return;
 			}
 		} else {
+			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
+			this.officeCubicleProvider.updateCubicleRentOrder(order);
+			return;
+		}
+		if (order.getPrice().compareTo(new BigDecimal(0.00)) == 0){
 			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
@@ -2942,6 +2950,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setRentType(cmd.getRentType());
 			return dto;
 		}).collect(Collectors.toList());
+		Collections.sort(spaceList,new CompartorPinYin());
 		resp.setSpace(spaceList);
 		return resp;
 	}
