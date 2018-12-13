@@ -4648,6 +4648,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public ListRentalBillsCommandResponse listActiveRentalBills(ListRentalBillsCommand cmd) {
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
 		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(Long.MAX_VALUE);
@@ -4655,7 +4658,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<RentalOrder> bills = rentalv2Provider.listActiveBills(cmd.getRentalSiteId(), locator, pageSize, cmd.getStartTime(), cmd.getEndTime());
+		List<RentalOrder> bills = rentalv2Provider.listActiveBills(cmd.getRentalSiteId(), locator, pageSize, cmd.getStartTime(), cmd.getEndTime(),cmd.getResourceType());
 
 		if (bills == null) {
 			return response;
