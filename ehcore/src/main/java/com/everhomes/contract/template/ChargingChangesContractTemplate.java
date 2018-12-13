@@ -6,29 +6,17 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ChangeMethod;
 import com.everhomes.rest.contract.ContractChargingChangeDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.ContractTemplateBuildingApartmentDTO;
 import com.everhomes.rest.contract.PeriodUnit;
-import com.everhomes.rest.contract.template.ContractTemplateCode;
-import com.everhomes.user.UserContext;
-
-import ch.qos.logback.core.joran.conditional.ElseAction;
 
 //@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "chargingChanges")
 public class ChargingChangesContractTemplate{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChargingChangesContractTemplate.class);
-	
-	@Autowired
-	private LocaleStringService localeStringService;
 	
 	private List<ContractChargingChangeDTO> chargingChanges;
 	

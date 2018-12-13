@@ -1,13 +1,22 @@
 package com.everhomes.contract.template;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ChangeMethod;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.PeriodUnit;
 
-@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "contract")
+//@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "contract")
 public class DefaultContractTemplate implements ContractTemplateHandler{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultContractTemplate.class);
@@ -30,15 +39,58 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 
 	@Override
 	public String getValue(ContractDetailDTO contract, String[] segments) {
-		String value = "";
 		Object data = null;
 		
 		String contractsInfoKey = segments[0];
 		data = PropertyUtils.getProperty(contract, contractsInfoKey);
-		if (data != null) {
-			value = data.toString();
+		
+		return formatValue(contractsInfoKey,data);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String formatValue(String key,Object data){
+		if (data == null) {
+			return "";
+		}
+		
+		String value = "";
+		switch (key) {
+			case "contractEndDate":
+			case "contractStartDate":
+				value = formatTimeStamp((Timestamp) data);
+				break;
+			case "changeMethod":
+				value = ChangeMethod.fromStatus((byte) data).getDescription();
+				break;
+			case "periodUnit":
+				value = PeriodUnit.fromStatus((byte) data).getDescription();
+				break;
+			case "apartments":
+				StringBuilder apartmentsSBuilder = new StringBuilder();
+				List<BuildingApartmentDTO> apartments = (List<BuildingApartmentDTO>)data;
+				for(BuildingApartmentDTO apartment : apartments){
+					apartmentsSBuilder.append(apartment.getBuildingName()).append("/").
+									   append(apartment.getApartmentName()).append(",");
+				}
+				if (apartmentsSBuilder.length() > 0) {
+					value = apartmentsSBuilder.substring(0, apartmentsSBuilder.length()-1);
+				}
+				break;
+			default:
+				value = data.toString();
+				break;
 		}
 		return value;
+	}
+	
+	private String formatTimeStamp(Long timeStamp){
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		return simpleDateFormat.format(new Date(timeStamp));
+	}
+	
+	private String formatTimeStamp(Timestamp timeStamp){
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		return simpleDateFormat.format(new Date(timeStamp.getTime()));
 	}
 
 }

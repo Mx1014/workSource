@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.contract.ContractDetailDTO;
 
-@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "adjusts")
+//@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "adjusts")
 public class AdjustsContractTemplate extends ChargingChangesContractTemplate implements ContractTemplateHandler {
 
 	@Override

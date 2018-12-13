@@ -21,7 +21,7 @@ import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractTemplateBuildingApartmentDTO;
 import com.google.zxing.Result;
 
-@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "apartments")
+//@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "apartments")
 public class ApartmentsContractTemplate implements ContractTemplateHandler{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ApartmentsContractTemplate.class);

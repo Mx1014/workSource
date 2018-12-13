@@ -70,6 +70,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.template.ContractDocument;
 import com.everhomes.contract.template.ContractDocumentsStatus;
+import com.everhomes.contract.template.ContractTemplateFactory;
 import com.everhomes.contract.template.ContractTemplateHandler;
 import com.everhomes.contract.template.GetKeywordsUtils;
 import com.everhomes.contract.template.PropertyUtils;
@@ -1772,6 +1773,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		if(cmd.getTemplateId() != null) {
 			contract.setTemplateId(cmd.getTemplateId());
 		}
+		if (cmd.getDocumentId() != null) {
+			contract.setDocumentId(cmd.getDocumentId());
+		}
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 		//by --djm issue-35586
@@ -1849,7 +1853,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		ContractDetailDTO contractDetailDTO = ConvertHelper.convert(contract, ContractDetailDTO.class);
 		
 		return contractDetailDTO;
-				//ConvertHelper.convert(contract, ContractDetailDTO.class);
+		//ConvertHelper.convert(contract, ContractDetailDTO.class);
 	}
 
 	protected Timestamp setToEnd(Long date) {
@@ -4865,14 +4869,24 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				String type = getHandlerType(segments);
 				handler = handlerMap.get(type);
 				if (handler == null) {
-					handler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + type);
-					handlerMap.put(type, handler);
+					handler = ContractTemplateFactory.createContractTemplateHandler(type);
+					if (handler != null) {
+						handlerMap.put(type, handler);
+					}
 				}
 				
-				if (handler.isValid(contractDetailDTO, segments)) {
-					dataValue = handler.getValue(contractDetailDTO, segments);
+//				if (handler == null) {
+//					handler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + type);
+//					handlerMap.put(type, handler);
+//				}
+				if (handler != null) {
+					if (handler.isValid(contractDetailDTO, segments)) {
+						dataValue = handler.getValue(contractDetailDTO, segments);
+					}
+					dataMap.put(replaceKey, dataValue);
+				}else {
+					dataMap.put(replaceKey, "未知字段");
 				}
-				dataMap.put(replaceKey, dataValue);
 			}
 		}
 		return dataMap;
