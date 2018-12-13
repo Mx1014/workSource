@@ -4094,6 +4094,8 @@ public class AssetProviderImpl implements AssetProvider {
             }else{
                 dto.setBillItemGenerationType((byte)2);
             }
+            //物业缴费V8.0（账单对接卡券） -44680：增加费项ID
+            dto.setChargingItemId(rule.getChargingItemId());
             list.add(dto);
         }
         return list;
