@@ -628,33 +628,7 @@ public class FieldServiceImpl implements FieldService {
 
         return null;
     }
-    public static void main(String[] args)
-    {
-        List<Integer> filterLists = new ArrayList<>();
-        for(int i=0;i<1000000;i++)
-        {
-            filterLists.add(i);
-        }
-
-        Long sum = 0L;
-        Date a = new Date();
-        for(int j=0;j<1000000;j++)
-        {
-            sum += filterLists.get(j);
-        }
-        System.out.println(sum);
-        Date b = new Date();
-        sum = 0L;
-        Date c = new Date();
-        sum = filterLists.stream().mapToInt(x->x).summaryStatistics().getSum();
-        System.out.println(sum);
-        Date d = new Date();
-
-        long interval = b.getTime()-a.getTime();
-        long interval2 = d.getTime()-c.getTime();
-        System.out.println("两个时间相差1:"+interval);//6602
-        System.out.println("两个时间相差2:"+interval2);//6824
-    }
+    
     private void addExpandItems(FieldDTO dto, List<FieldItemDTO> items, Integer namespaceId) {
         if (dto.getFieldName().equals("sourceItemId")) {
             CustomerConfigurationCommand cccmd = new CustomerConfigurationCommand();
