@@ -478,10 +478,12 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	
 	@Override
 	public List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId,
-												 Integer currentNamespaceId) {
+												 Integer currentNamespaceId, Byte rentType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.NAMESPACE_ID.eq(currentNamespaceId);
+		if (rentType!=null)
+			condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType);
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.lt(new Timestamp(System.currentTimeMillis())));
 		condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.gt(new Timestamp(System.currentTimeMillis())));
 		step.where(condition);
@@ -494,11 +496,13 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
-	public List<OfficeCubicleStationRent> searchCubicleStationRentByOrderId(Long spaceId,Long orderId) {
+	public List<OfficeCubicleStationRent> searchCubicleStationRentByOrderId(Long spaceId,Long orderId,Byte rentType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId);
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.ORDER_ID.eq(orderId));
+		if(rentType!=null)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType));
 		step.where(condition);
 		List<OfficeCubicleStationRent> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_STATION_RENT.OPERATE_TIME.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleStationRent.class);
