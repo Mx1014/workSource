@@ -1029,9 +1029,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //		if (null == cmd.getOrderType())
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid paramter of OrderType error: null ");
-		if (null == cmd.getReserveEnterprise())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of ReserveEnterprise error: null ");
+//		if (null == cmd.getReserveEnterprise())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of ReserveEnterprise error: null ");
 		if (null == cmd.getReserveContactToken())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of ReserveContactToken error: null ");
@@ -1769,7 +1769,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(cmd.getRoomId());
 		OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getRoomId());
-		station.setAssociateRoomId(null);
+		station.setAssociateRoomId(0L);
 		officeCubicleProvider.updateCubicle(station);
 		officeCubicleProvider.deleteRoom(room);
 	}
@@ -1838,7 +1838,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 
 		this.dbProvider.execute((TransactionStatus status) -> {
-			OfficeCubicleRoom room = new OfficeCubicleRoom();
+			OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(cmd.getRoomId());
 			if(cmd.getAssociateStation()!= null){
 				List<OfficeCubicleStation> associateStation =
 						officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), cmd.getRoomId(), (byte)1, null, null, null);
@@ -1851,7 +1851,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					station.setAssociateRoomId(cmd.getRoomId());
 					officeCubicleProvider.updateCubicle(station);
 				}
-			}
+			}	
 			room.setOwnerId(cmd.getOwnerId());
 			room.setOwnerType(cmd.getOwnerType());
 			room.setNamespaceId(cmd.getNamespaceId());
@@ -2712,8 +2712,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<StationDTO> stationDTO = new ArrayList<StationDTO>();
 		for (OfficeCubicleStation s : station){
 			StationDTO dto = new StationDTO();
-			if (s.getAssociateRoomId() != null){
-				continue;
+			if (s.getAssociateRoomId() != null ){
+				if (s.getAssociateRoomId().compareTo(0L)!=0){
+					continue;
+				}
 			}
 			dto = ConvertHelper.convert(s,StationDTO.class);
 			dto.setStationId(s.getId());
@@ -2833,6 +2835,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			RentalBillDTO rentalDTO = rentalv2Service.getRentalBill(cmd2);
 			dto.setOpenTime(rentalDTO.getOpenTime());
 			dto.setUserDetail(order.getUseDetail());
+			dto.setRentCount(order.getRentCount());
 		}else if (order.getRentType() == 1){
 			dto.setBeginTime(order.getBeginTime().getTime());
 			dto.setEndTime(order.getEndTime().getTime());

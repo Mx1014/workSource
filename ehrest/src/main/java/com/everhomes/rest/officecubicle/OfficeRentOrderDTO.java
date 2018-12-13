@@ -56,7 +56,17 @@ public class OfficeRentOrderDTO {
 	private List<String> rentStation;
 	private Long beginTime;
 	private Long endTime;
+	private Long rentCount;
 	
+	
+	public Long getRentCount() {
+		return rentCount;
+	}
+
+	public void setRentCount(Long rentCount) {
+		this.rentCount = rentCount;
+	}
+
 	public Long getEndTime() {
 		return endTime;
 	}
