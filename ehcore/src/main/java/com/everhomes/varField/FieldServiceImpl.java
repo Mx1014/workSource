@@ -563,36 +563,36 @@ public class FieldServiceImpl implements FieldService {
             Map<Long, ScopeFieldItem> scopeItems = new HashMap<>();
 
             if (globalFlag) {
-                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, cmd.getCategoryId(), cmd.getModuleName());
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, cmd.getCategoryId());
                 if (scopeItems != null && scopeItems.size() < 1) {
-                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, cmd.getCategoryId(), cmd.getModuleName());
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, cmd.getCategoryId());
                     if (scopeItems != null && scopeItems.size() < 1) {
-                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null, cmd.getModuleName());
+                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null);
                     }
                 }
 //                }
             } else if (namespaceFlag) {
-                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                 if (scopeItems != null && scopeItems.size() < 1) {
-                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId(), cmd.getModuleName());
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
                     if (scopeItems != null && scopeItems.size() < 1) {
-                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                     }
                 }
                 //查询表单初始化的数据
                 if (scopeItems != null && scopeItems.size() < 1) {
-                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, null, cmd.getModuleName());
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, null);
                     if (scopeItems != null && scopeItems.size() < 1) {
-                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null, cmd.getModuleName());
+                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null);
                     }
                 }
 
             } else {
-                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                 if (scopeItems != null && scopeItems.size() < 1) {
-                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
                     if (scopeItems != null && scopeItems.size() < 1) {
-                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
+                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
                     }
                 }
             }
@@ -628,7 +628,33 @@ public class FieldServiceImpl implements FieldService {
 
         return null;
     }
+    public static void main(String[] args)
+    {
+        List<Integer> filterLists = new ArrayList<>();
+        for(int i=0;i<1000000;i++)
+        {
+            filterLists.add(i);
+        }
 
+        Long sum = 0L;
+        Date a = new Date();
+        for(int j=0;j<1000000;j++)
+        {
+            sum += filterLists.get(j);
+        }
+        System.out.println(sum);
+        Date b = new Date();
+        sum = 0L;
+        Date c = new Date();
+        sum = filterLists.stream().mapToInt(x->x).summaryStatistics().getSum();
+        System.out.println(sum);
+        Date d = new Date();
+
+        long interval = b.getTime()-a.getTime();
+        long interval2 = d.getTime()-c.getTime();
+        System.out.println("两个时间相差1:"+interval);//6602
+        System.out.println("两个时间相差2:"+interval2);//6824
+    }
     private void addExpandItems(FieldDTO dto, List<FieldItemDTO> items, Integer namespaceId) {
         if (dto.getFieldName().equals("sourceItemId")) {
             CustomerConfigurationCommand cccmd = new CustomerConfigurationCommand();
@@ -680,7 +706,7 @@ public class FieldServiceImpl implements FieldService {
         fieldIds.add(cmd.getFieldId());
         if(cmd.getCommunityId() != null) {
             //only namespace scope ,using organizations id as searching condition
-            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds,null,cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds,null,cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
 
             //查询旧数据，多入口
             /*if (fieldItems != null && fieldItems.size() < 1) {
@@ -693,7 +719,7 @@ public class FieldServiceImpl implements FieldService {
             }
         }
         if(namespaceFlag) {
-            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(),cmd.getNamespaceId(),null, cmd.getCategoryId(), cmd.getModuleName());
+            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(),cmd.getNamespaceId(),null, cmd.getCategoryId());
             //查询旧数据，多入口
             /*if (fieldItems != null && fieldItems.size() < 1) {
             	fieldItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), null,null);
@@ -706,9 +732,9 @@ public class FieldServiceImpl implements FieldService {
 //            }
         }
         if(globalFlag) {
-            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(),0, null, cmd.getCategoryId(), cmd.getModuleName());
+            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(),0, null, cmd.getCategoryId());
             if (fieldItems != null && fieldItems.size() < 1) {
-                fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(),0, null, null, cmd.getModuleName());
+                fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(),0, null, null);
             }
         }
         if(fieldItems != null && fieldItems.size() > 0) {
@@ -2142,7 +2168,7 @@ public class FieldServiceImpl implements FieldService {
         item.setCreatorUid(UserContext.currentUserId());
         item.setStatus(VarFieldStatus.CUSTOMIZATION.getCode());
         fieldProvider.createFieldItem(item);
-
+        List<Long> ids = new ArrayList<>();
 
         scopeFieldItem.setItemId(item.getId());
         scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
@@ -2155,16 +2181,32 @@ public class FieldServiceImpl implements FieldService {
         List<ScopeFieldItemInfo> items = cmd.getItems();
         if(items != null && items.size() > 0) {
             Long userId = UserContext.currentUserId();
-            Map<Long, ScopeFieldItem> existItems = fieldProvider.listScopeFieldsItems(cmd.getFieldIds(),cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(),items.get(0).getModuleName());
+            Map<Long, ScopeFieldItem> existItems = fieldProvider.listScopeFieldsItems(cmd.getFieldIds(),cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
+
+            List<FieldItem> existItemList = fieldProvider.listFieldItems(cmd.getFieldIds());
             items.forEach(item -> {
+                if(item.getModuleType() != null){
+                    item.setModuleName(item.getModuleType());
+                }
+                //如果这个item是新建的则没有item_id，此时在eh_var_field_items表中插入一条新的item，并且status = 3，代表着为非推荐库选项
                 if(item.getItemId() == null) {
                     ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
-                    scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
-                    scopeFieldItem.setCommunityId(cmd.getCommunityId());
+                    //2018年12月12日 黄鹏宇： 在客户新建一个自定义选项前，先确定item表中有没有同名的选项，如果有则不用新建一个新的item，而使用同名的item
+                    FieldItem exist = existItemList.stream().filter(r-> r.getFieldId().equals(item.getFieldId()) && r.getDisplayName().equals(item.getItemDisplayName())).collect(Collectors.toList()).get(0);
+                    if(exist != null){
+                        scopeFieldItem.setItemId(exist.getId());
+                        scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
+                        scopeFieldItem.setCreatorUid(UserContext.currentUserId());
+                        fieldProvider.createScopeFieldItem(scopeFieldItem);
+                    }else{
+                        scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
+                        scopeFieldItem.setCommunityId(cmd.getCommunityId());
 
-                    scopeFieldItem.setCategoryId(cmd.getCategoryId());
+                        scopeFieldItem.setCategoryId(cmd.getCategoryId());
 
-                    insertFieldItems(scopeFieldItem);
+                        insertFieldItems(scopeFieldItem);
+                    }
+
                 } else {
                     ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
                     scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
@@ -2172,6 +2214,7 @@ public class FieldServiceImpl implements FieldService {
 
                     scopeFieldItem.setCategoryId(cmd.getCategoryId());
 
+                    //如果id为空则为scope表中没有创建该item，此时新建item
                     if(scopeFieldItem.getId() == null) {
                         scopeFieldItem.setCreatorUid(userId);
                         fieldProvider.createScopeFieldItem(scopeFieldItem);
@@ -2223,23 +2266,43 @@ public class FieldServiceImpl implements FieldService {
 //            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
 //        }
         FieldItem item = fieldProvider.findFieldItemByItemId(itemId);
+        Field field = fieldProvider.findFieldByItemId(itemId);
         // 三种情况 要求删除的item不显示
         if (item != null) {
-            // check current community has own configuration
-            List<Long> items = fieldProvider.checkCustomerField(namespaceId,null, communityId, item.getModuleName());
-            // community
-            if (items != null && items.size() > 0) {
-                fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId,null, communityId, itemId);
-            } else {
-                //namespace
-                List<Long> fields = fieldProvider.checkCustomerField(namespaceId, ownerId,null, item.getModuleName());
-                if (fields != null && fields.size() > 0) {
-                    fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, ownerId,null, itemId);
+            List<Long> items = fieldProvider.checkCustomerField(namespaceId, null, communityId, item.getModuleName());
+
+            if(field.getMandatoryFlag() != 1) {
+                // check current community has own configuration
+                // community
+                if (items != null && items.size() > 0) {
+                    fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, communityId, itemId);
                 } else {
-                    //global
-                    List<Long> groups = fieldProvider.checkCustomerField(0, null,null, item.getModuleName());
-                    if (groups != null && groups.size() > 0) {
-                        fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null,null, itemId);
+                    //namespace
+                    List<Long> fields = fieldProvider.checkCustomerField(namespaceId, ownerId, null, item.getModuleName());
+                    if (fields != null && fields.size() > 0) {
+                        fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, ownerId, null, itemId);
+                    } else {
+                        //global
+                        List<Long> groups = fieldProvider.checkCustomerField(0, null, null, item.getModuleName());
+                        if (groups != null && groups.size() > 0) {
+                            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, null, itemId);
+                        }
+                    }
+                }
+            }else{
+                if (items != null && items.size() > 0) {
+                    fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, communityId, itemId);
+                    if (null == fieldItem) {
+                        fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, null, itemId);
+                        if (null == fieldItem) {
+                            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, null, itemId);
+                        }
+                    }else {
+                        //global
+                        List<Long> groups = fieldProvider.checkCustomerField(0, null, null, item.getModuleName());
+                        if (groups != null && groups.size() > 0) {
+                            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, null, itemId);
+                        }
                     }
                 }
             }

@@ -40,6 +40,8 @@ public class ScopeFieldItemInfo {
 
 	private String ownerType;
 
+	private String moduleType;
+
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -126,6 +128,14 @@ public class ScopeFieldItemInfo {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public String getModuleType() {
+        return moduleType;
+    }
+
+    public void setModuleType(String moduleType) {
+        this.moduleType = moduleType;
     }
 
     @Override
