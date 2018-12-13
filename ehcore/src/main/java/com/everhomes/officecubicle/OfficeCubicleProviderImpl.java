@@ -1020,7 +1020,9 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		}else {
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.RENT_FLAG.isNotNull());
 		}
+		if (status!=null){
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.STATUS.eq(status));
+		}
 		if (roomId != null)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_ROOM.ID.eq(roomId));
 		if (StringUtils.isNotBlank(keyword))
