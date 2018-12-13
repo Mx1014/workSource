@@ -23,6 +23,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.http.HttpUtils;
@@ -46,6 +47,7 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.enterprise.FindEnterpriseDetailCommand;
+import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.OfficeSiteDTO;
 import com.everhomes.rest.organization.OrganizationAndDetailDTO;
@@ -185,6 +187,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private VisitorSysDingFengHuiUtil DFHUtil;
     @Autowired
     private FreqVisitorSearcher freqVisitorSearcher;
+    @Autowired
+    private FamilyProvider familyProvider;
 
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
@@ -2181,7 +2185,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 break;
             case ENTERPRISE:
                 Organization organization = organizationProvider.findOrganizationById(ownerId);
-                if(organization==null){
+                FamilyDTO family = familyProvider.getFamilyById(ownerId);
+                if(organization==null && family == null){
                     throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_NOT_EXIST,
                             "unknown ownerId "+ownerId);
                 }
