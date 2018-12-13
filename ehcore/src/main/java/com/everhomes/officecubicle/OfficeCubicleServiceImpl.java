@@ -1803,7 +1803,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
-		if (order.getPrice().compareTo(new BigDecimal(0.00)) != 0){
+		if (order.getPrice().compareTo(new BigDecimal(0.00)) == 0){
 			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
