@@ -5307,7 +5307,14 @@ public class CommunityServiceImpl implements CommunityService {
 		List<CommunityInfoDTO> dtos = new ArrayList<>();
 		for (Community com: communities){
 			CommunityInfoDTO dto = ConvertHelper.convert(com, CommunityInfoDTO.class);
-
+			
+			//add by momoubin,2018/12/13,项目uri转url
+			if(StringUtils.isNotBlank(com.getBackgroundImgUri())){
+				String backgroundImgUri = com.getBackgroundImgUri();
+				String backgroundImgUrl = contentServerService.parserUri(backgroundImgUri, EntityType.USER.getCode(), user.getId());
+				dto.setBackgroundImgUrl(backgroundImgUrl);				
+			}
+			
 			if(familyCommunityIdSet.contains(com.getId())){
 				dto.setApartmentFlag(TrueOrFalseFlag.TRUE.getCode());
 			}
