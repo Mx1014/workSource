@@ -124,7 +124,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id);
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.TYPE.equal(ownerType));
 		step.where(condition);
-		List<OfficeCubicleAttachment> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.ID.desc()).fetch().map((r) -> {
+		List<OfficeCubicleAttachment> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.ID.asc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleAttachment.class);
 		});
 		if (null != result && result.size() > 0)
