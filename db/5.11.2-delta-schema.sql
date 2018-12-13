@@ -227,6 +227,11 @@ ALTER TABLE eh_office_cubicle_orders MODIFY COLUMN employee_number VARCHAR(64) C
 -- REMARK: 一些云部署的mysql没有开启支持TRIGGER脚本，修改实现方式，删除原有的trigger
 DROP TRIGGER IF EXISTS employee_dismiss_trigger_for_auto_remove_payment_limit;
 
+
+-- AUTHOR: 莫谋斌 20181213
+-- REMARK: 数据库修改为保存uri
+ALTER TABLE eh_communities  CHANGE background_img_url background_img_uri varchar(500) DEFAULT '' COMMENT '小区或园区项目的图片链接';
+
 -- AUTHOR: xq.tian
 -- REMARK: 工作流 2.8.1 新增字段
 ALTER TABLE eh_flow_nodes ADD COLUMN form_relation_type TINYINT DEFAULT '0' NOT NULL COMMENT '1: 关联自定义表单, 2: 关联eh_flows关联的表单';
@@ -260,3 +265,5 @@ CREATE TABLE `eh_general_form_fields_config` (
   `updater_uid` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
