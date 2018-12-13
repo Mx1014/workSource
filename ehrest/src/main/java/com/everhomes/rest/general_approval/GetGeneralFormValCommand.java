@@ -29,6 +29,12 @@ public class GetGeneralFormValCommand {
     private String moduleType;
     private Long moduleId;
 
+    /**
+     * added by huqi at 20181212 for service-alliance require form field value
+     */
+    private Long targetId;
+    private String targetType;
+
     public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -91,6 +97,22 @@ public class GetGeneralFormValCommand {
 
     public void setCurrentOrganizationId(Long currentOrganizationId) {
         this.currentOrganizationId = currentOrganizationId;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     @Override

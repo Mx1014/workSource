@@ -1,39 +1,7 @@
 package com.everhomes.general_form;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.general_approval.AddGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
-import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
-import com.everhomes.rest.general_approval.DisableProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.DoFormMirrorCommand;
-import com.everhomes.rest.general_approval.EnableProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.GeneralFormIdCommand;
-import com.everhomes.rest.general_approval.GeneralFormPrintTemplateDTO;
-import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
-import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
-import com.everhomes.rest.general_approval.GeneralFormValDTO;
-import com.everhomes.rest.general_approval.GetGeneralFormFilterCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormValCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.general_approval.GetProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
-import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
-import com.everhomes.rest.general_approval.ListDefaultFieldsCommand;
-import com.everhomes.rest.general_approval.ListGeneralFormResponse;
-import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostGeneralFormDTO;
-import com.everhomes.rest.general_approval.PostGeneralFormFilterCommand;
-import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
-import com.everhomes.rest.general_approval.SearchFormValDTO;
-import com.everhomes.rest.general_approval.SearchFormValsCommand;
-import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
-import com.everhomes.rest.general_approval.UpdateGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.VerifyApprovalFormNameCommand;
-import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.*;
 
 import java.util.List;
 
@@ -133,4 +101,19 @@ public interface GeneralFormService {
     GeneralFormPrintTemplateDTO updateGeneralFormPrintTemplate(UpdateGeneralFormPrintTemplateCommand cmd);
 
     GeneralFormPrintTemplateDTO getGeneralFormPrintTemplate(GetGeneralFormPrintTemplateCommand cmd);
+
+	/**
+	 * 工作流节点关联的全局表单字段配置接口
+	 */
+	GeneralFormFieldsConfigDTO createFormFieldsConfig(CreateFormFieldsConfigCommand cmd);
+
+	GeneralFormFieldsConfigDTO updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd);
+
+	GeneralFormFieldsConfigDTO updateFormFieldsConfigStatus(Long formFieldsConfigId);
+
+	void deleteFormFieldsConfig(DeleteFormFieldsConfigCommand cmd);
+
+	GeneralFormFieldsConfigDTO getFormFieldsConfig(GetFormFieldsConfigCommand cmd);
+
+	GeneralFormDTO getGeneralFormByOriginIdAndVersion(GetGeneralFormByOriginIdAndVersionCommand cmd);
 }
