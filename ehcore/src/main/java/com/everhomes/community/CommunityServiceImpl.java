@@ -2249,7 +2249,14 @@ public class CommunityServiceImpl implements CommunityService {
 				List<UserGroup> userGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
 				//添加地址信息
 				addGroupAddressDto(dto, userGroups);
-
+				
+				//用户认证状态的修改：如果搜索条件为“认证中”、“已认证”，根据情况修改dto的isAuth值,add by momoubin,18/12/11
+				if(cmd.getIsAuth() == AuthFlag.PENDING_AUTHENTICATION.getCode()){ //认证中
+					dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+				}else if(cmd.getIsAuth() == AuthFlag.AUTHENTICATED.getCode()){ //已认证
+					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+				}
+				
 				//最新活跃时间 add by sfyan 20170620
 				List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
 				if(userActivities.size() > 0){
