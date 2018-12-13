@@ -3854,6 +3854,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						} else {
 							order.setRefundAmount(orderAmount);
 							order.setStatus(SiteBillStatus.REFUNDING.getCode());//线下支付人工退款
+							messageHandler.cancelOrderNeedRefund(order);
 						}
 					} else {//退款金额过小
 						if (PayMode.ONLINE_PAY.getCode() == (order.getPayMode()) || PayMode.APPROVE_ONLINE_PAY.getCode() == (order.getPayMode()))
@@ -7927,6 +7928,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (SiteBillStatus.REFUNDING.getCode() == order.getStatus()) {
 			order.setStatus(SiteBillStatus.REFUNDED.getCode());
 			this.rentalv2Provider.updateRentalBill(order);
+			RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+			messageHandler.refundOrderSuccessSendMessage(order);
 		}
 	}
 

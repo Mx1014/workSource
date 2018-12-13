@@ -154,12 +154,12 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables, "orderNum", rentalBill.getOrderNo());
 
         String phone = rentalBill.getUserPhone();
-        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(rentalBill.getCreatorUid(),
+        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(rentalBill.getRentalUid(),
                 IdentifierType.MOBILE.getCode());
         if (userIdentifier != null)
             phone = userIdentifier.getIdentifierToken();
         if (null == phone) {
-            LOGGER.error("phone is null...userId = " + rentalBill.getCreatorUid());
+            LOGGER.error("phone is null...userId = " + rentalBill.getRentalUid());
         } else {
             smsProvider.sendSms(rentalBill.getNamespaceId(), phone, templateScope,
                     templateId, templateLocale, variables);
@@ -185,12 +185,12 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables, "aclink", getAclinkInfo(order));
 
         String phone = order.getUserPhone();
-        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
+        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(),
                 IdentifierType.MOBILE.getCode());
         if (userIdentifier != null)
             phone = userIdentifier.getIdentifierToken();
         if (null == phone) {
-            LOGGER.error("phone is null...userId = " + order.getCreatorUid());
+            LOGGER.error("phone is null...userId = " + order.getRentalUid());
         } else {
             smsProvider.sendSms(order.getNamespaceId(), phone, templateScope,
                     templateId, templateLocale, variables);
