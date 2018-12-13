@@ -1,19 +1,21 @@
-package com.everhomes.rest.flow;
+package com.everhomes.rest.general_approval;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>formOriginId: formOriginId</li>
- *     <li>formVersion: formVersion</li>
- *     <li>name: name</li>
+ *     <li>formOriginId: 表单原始ID</li>
+ *     <li>formVersion: 表单版本</li>
  * </ul>
+ * @author huqi
  */
-public class FlowFormDTO {
-
+public class GetGeneralFormByOriginIdAndVersionCommand {
     private Long formOriginId;
     private Long formVersion;
-    private String name;
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
     public Long getFormOriginId() {
         return formOriginId;
@@ -30,18 +32,4 @@ public class FlowFormDTO {
     public void setFormVersion(Long formVersion) {
         this.formVersion = formVersion;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
 }
-

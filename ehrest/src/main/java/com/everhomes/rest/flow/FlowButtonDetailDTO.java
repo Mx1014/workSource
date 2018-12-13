@@ -23,7 +23,7 @@ import java.sql.Timestamp;
  *     <li>subjectRequiredFlag: 填写内容是否必填{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  *     <li>remindCount: ??</li>
  *     <li>description: 描述</li>
- *     <li>param: 按钮参数</li>
+ *     <li>param: 按钮参数, 如果这个值为 flow_node_form_router {@link com.everhomes.rest.flow.FlowPredefinedParamConst}，则为自定义按钮里的表单跳转配置项</li>
  *     <li>evaluateStep: evaluateStep</li>
  *     <li>pushMessage: 发消息动作{@link com.everhomes.rest.flow.FlowActionDTO}</li>
  *     <li>pushSms: 发短信动作{@link com.everhomes.rest.flow.FlowActionDTO}</li>

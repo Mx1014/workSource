@@ -82,6 +82,12 @@ UPDATE eh_service_module_privileges SET remark = '预约参观记录权限' WHER
 -- AUTHOR: 马世亨 20181212
 -- REMARK: 访客v1.4 访客短信优化 url修改
 UPDATE `eh_configurations` SET `value`='/visitor-appointment/build/invitation.html?visitorToken=', `is_readonly`='0' WHERE `name`='visitorsys.invitation.link';
+
+-- AUTHOR: xq.tian 20181213
+-- REMARK: 工作流 2.8.1 旧的数据适应新的代码
+UPDATE eh_flows SET form_status = 1 WHERE form_origin_id<>0;
+UPDATE eh_flow_nodes SET form_relation_type=1 WHERE form_origin_id<>0;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base

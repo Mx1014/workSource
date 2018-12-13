@@ -2,18 +2,20 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
- *     <li>formOriginId: formOriginId</li>
- *     <li>formVersion: formVersion</li>
- *     <li>name: name</li>
+ *     <li>formOriginId: 表单 originId</li>
+ *     <li>formVersion: 表单版本</li>
  * </ul>
  */
-public class FlowFormDTO {
+public class FlowFormRelationDataDirectRelation {
 
+    @NotNull
     private Long formOriginId;
+    @NotNull
     private Long formVersion;
-    private String name;
 
     public Long getFormOriginId() {
         return formOriginId;
@@ -31,17 +33,8 @@ public class FlowFormDTO {
         this.formVersion = formVersion;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 }
-

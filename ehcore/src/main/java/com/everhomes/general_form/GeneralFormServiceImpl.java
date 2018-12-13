@@ -87,6 +87,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private GeneralFormFieldsConfigProvider generalFormFieldsConfigProvider;
+
     @Override
     public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
         GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormId());
@@ -1169,6 +1172,157 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         selectValue = StringHelper.toJsonString(dto);
 
         return selectValue ;
+    }
+
+    /**
+     * 新建表单字段配置信息
+     */
+    @Override
+    public GeneralFormFieldsConfigDTO createFormFieldsConfig(CreateFormFieldsConfigCommand cmd){
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(),cmd.getFormVersion());
+        if(form == null){
+            LOGGER.error("The form using to create formFieldsConfig is null, formOriginId = {}, formVersion = {}",
+                    cmd.getFormOriginId(), cmd.getFormVersion());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The form using to create formFieldsConfig is null is null");
+        }
+        GeneralFormFieldsConfig formFieldsConfig = ConvertHelper.convert(cmd, GeneralFormFieldsConfig.class);
+        formFieldsConfig.setNamespaceId(UserContext.getCurrentNamespaceId());
+        formFieldsConfig.setOrganizationId(form.getOrganizationId());
+        formFieldsConfig.setOwnerId(form.getOwnerId());
+        formFieldsConfig.setOwnerType(form.getOwnerType());
+        formFieldsConfig.setModuleId(form.getModuleId());
+        formFieldsConfig.setModuleType(form.getModuleType());
+        formFieldsConfig.setProjectId(cmd.getProjectId() == null ? form.getProjectId() : cmd.getProjectId());
+        formFieldsConfig.setProjectType(cmd.getProjectType() == null ? form.getProjectType() : cmd.getProjectType());
+        formFieldsConfig.setConfigVersion(0L);
+        if(formFieldsConfig.getConfigType() == null || "".equals(formFieldsConfig.getConfigType())){
+            formFieldsConfig.setConfigType(GeneralFormConstants.FORM_FIELDS_CONFIG_TYPE);
+        }
+        formFieldsConfig.setFormFields(JSON.toJSONString(cmd.getFormFields()));
+        formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.CONFIG.getCode());
+        GeneralFormFieldsConfig result = generalFormFieldsConfigProvider.createFormFieldsConfig(formFieldsConfig);
+
+        GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(result, GeneralFormFieldsConfigDTO.class);
+        dto.setFormFields(cmd.getFormFields());
+        return dto;
+    }
+
+    /**
+     * 修改表单字段配置信息
+     */
+    @Override
+    public GeneralFormFieldsConfigDTO updateFormFieldsConfig(UpdateFormFieldsConfigCommand cmd){
+        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getActiveFormFieldsConfig(cmd.getFormFieldsConfigId());
+        if(formFieldsConfig == null){
+            LOGGER.error("The formFieldsConfig updating is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig updating is null");
+        }
+        GeneralFormFieldsConfig result = new GeneralFormFieldsConfig();
+        if(formFieldsConfig.getStatus().equals(GeneralFormFieldsConfigStatus.CONFIG.getCode())){
+            // 如果配置是config状态，直接修改配置内容
+            formFieldsConfig.setFormOriginId(cmd.getFormOriginId());
+            formFieldsConfig.setFormVersion(cmd.getFormVersion());
+            if(cmd.getConfigType() != null && !"".equals(cmd.getConfigType())){
+                formFieldsConfig.setConfigType(cmd.getConfigType());
+            }
+            formFieldsConfig.setFormFields(JSON.toJSONString(cmd.getFormFields()));
+            result = generalFormFieldsConfigProvider.updateFormFieldsConfig(formFieldsConfig);
+        } else if(formFieldsConfig.getStatus().equals(GeneralFormFieldsConfigStatus.RUNNING.getCode())){
+            // 如果配置是running状态，新建一个版本+1的config状态的配置
+            formFieldsConfig.setFormOriginId(cmd.getFormOriginId());
+            formFieldsConfig.setFormVersion(cmd.getFormVersion());
+            formFieldsConfig.setConfigVersion(formFieldsConfig.getFormVersion() + 1);
+            if(cmd.getConfigType() != null && !"".equals(cmd.getConfigType())){
+                formFieldsConfig.setConfigType(cmd.getConfigType());
+            }
+            formFieldsConfig.setFormFields(JSON.toJSONString(cmd.getFormFields()));
+            formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.CONFIG.getCode());
+            formFieldsConfig.setUpdaterUid(null);
+            formFieldsConfig.setUpdateTime(null);
+            result = generalFormFieldsConfigProvider.createFormFieldsConfig(formFieldsConfig);
+        }
+        GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(result, GeneralFormFieldsConfigDTO.class);
+        dto.setFormFields(cmd.getFormFields());
+        return dto;
+    }
+
+    /**
+     * 将配置状态修改成RUNNING状态，提供给工作流发布新版本时使用
+     * @param formFieldsConfigId 表单字段配置ID
+     * @return 表单字段配置DTO
+     */
+    @Override
+    public GeneralFormFieldsConfigDTO updateFormFieldsConfigStatus(Long formFieldsConfigId){
+        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getActiveFormFieldsConfig(formFieldsConfigId);
+        if(formFieldsConfig == null){
+            LOGGER.error("The formFieldsConfig updating is null, formFieldsConfigId = {}", formFieldsConfigId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig updating is null");
+        }
+        if(!formFieldsConfig.getStatus().equals(GeneralFormFieldsConfigStatus.CONFIG.getCode())){
+            LOGGER.error("The formFieldsConfig updating is not config status, formFieldsConfigId = {}", formFieldsConfigId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig updating is not config status");
+        }
+        formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.RUNNING.getCode());
+        GeneralFormFieldsConfig result = generalFormFieldsConfigProvider.updateFormFieldsConfig(formFieldsConfig);
+        GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(result, GeneralFormFieldsConfigDTO.class);
+        List<GeneralFormFieldsConfigFieldDTO> fieldDTOs = JSONObject.parseArray(result.getFormFields(), GeneralFormFieldsConfigFieldDTO.class);
+        dto.setFormFields(fieldDTOs);
+        return dto;
+    }
+
+    /**
+     * 逻辑删除表单字段配置，状态修改为INVALID
+     */
+    @Override
+    public void deleteFormFieldsConfig(DeleteFormFieldsConfigCommand cmd){
+        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getActiveFormFieldsConfig(cmd.getFormFieldsConfigId());
+        if(formFieldsConfig == null){
+            LOGGER.error("The formFieldsConfig deleting is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig deleting is null");
+        }
+        formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.INVALID.getCode());
+        generalFormFieldsConfigProvider.updateFormFieldsConfig(formFieldsConfig);
+    }
+
+    /**
+     * 根据 配置ID 查询表单字段配置信息，未判断配置的状态
+     */
+    @Override
+    public GeneralFormFieldsConfigDTO getFormFieldsConfig(GetFormFieldsConfigCommand cmd){
+        GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getFormFieldsConfig(cmd.getFormFieldsConfigId());
+        if(formFieldsConfig == null){
+            LOGGER.error("The formFieldsConfig gotten is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig gotten is null");
+        }
+        GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(formFieldsConfig, GeneralFormFieldsConfigDTO.class);
+        // 将formFieldsConfig里的formFields从json形式解析成List
+        List<GeneralFormFieldsConfigFieldDTO> fieldDTOs = JSONObject.parseArray(formFieldsConfig.getFormFields(), GeneralFormFieldsConfigFieldDTO.class);
+        dto.setFormFields(fieldDTOs);
+        return dto;
+    }
+
+    /**
+     * 根据 表单原始ID和版本 查询表单信息
+     */
+    @Override
+    public GeneralFormDTO getGeneralFormByOriginIdAndVersion(GetGeneralFormByOriginIdAndVersionCommand cmd){
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(), cmd.getFormVersion());
+        if (form == null) {
+            LOGGER.error("The form is null, formOriginId = {}, formVersion = {}", cmd.getFormOriginId(), cmd.getFormVersion());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The form is null");
+        }
+        GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+        // 将form里的templateText从json形式解析为List
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+        dto.setFormFields(fieldDTOs);
+        return dto;
     }
 }
 

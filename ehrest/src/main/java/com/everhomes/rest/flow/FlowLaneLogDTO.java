@@ -17,8 +17,9 @@ import java.util.List;
  *     <li>isAbsortLane: 当前节点是终止节点</li>
  *     <li>needSelectNextNode: 下个节点需要处理人选择</li>
  *     <li>laneEnterTime: 进入泳道的时间</li>
- *     <li>currentFormOriginId: 当前节点配置的表单id</li>
- *     <li>currentFormVersion: 当前节点配置的表单 version</li>
+ *     <li>currentFormOriginId: 当前节点的表单 id, 后期会废弃这个字段, 新的见 currentNode 的 formOriginId</li>
+ *     <li>currentFormVersion: 当前节点配置的表单 version, 后期会废弃这个字段, 新的见 currentNode 的 formVersion</li>
+ *     <li>currentNode: 当前节点的一些信息，把当前节点的信息用一个对象来封装，以后可以替代上面的一些和当前节点相关的独立的字段 {@link com.everhomes.rest.flow.FlowNodeLogDTO}</li>
  *     <li>logs: 详细日志信息，目前仅有 logContent 有用 {@link com.everhomes.rest.flow.FlowEventLogDTO}</li>
  * </ul>
  */
@@ -36,6 +37,8 @@ public class FlowLaneLogDTO {
 
     private Long currentFormOriginId;
     private Long currentFormVersion;
+
+    private FlowNodeLogDTO currentNode;
 
     @ItemType(FlowEventLogDTO.class)
     private List<FlowEventLogDTO> logs;
@@ -138,6 +141,14 @@ public class FlowLaneLogDTO {
 
     public void setCurrentFormVersion(Long currentFormVersion) {
         this.currentFormVersion = currentFormVersion;
+    }
+
+    public FlowNodeLogDTO getCurrentNode() {
+        return currentNode;
+    }
+
+    public void setCurrentNode(FlowNodeLogDTO currentNode) {
+        this.currentNode = currentNode;
     }
 
     @Override

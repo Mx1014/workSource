@@ -226,3 +226,11 @@ ALTER TABLE eh_office_cubicle_orders MODIFY COLUMN employee_number VARCHAR(64) C
 -- AUTHOR: 张智伟
 -- REMARK: 一些云部署的mysql没有开启支持TRIGGER脚本，修改实现方式，删除原有的trigger
 DROP TRIGGER IF EXISTS employee_dismiss_trigger_for_auto_remove_payment_limit;
+
+-- AUTHOR: xq.tian
+-- REMARK: 工作流 2.8.1 新增字段
+ALTER TABLE eh_flow_nodes ADD COLUMN form_relation_type TINYINT DEFAULT '0' NOT NULL COMMENT '1: 关联自定义表单, 2: 关联eh_flows关联的表单';
+ALTER TABLE eh_flow_nodes ADD COLUMN form_relation_data TEXT COMMENT '表单关联数据，json格式';
+ALTER TABLE eh_flows ADD COLUMN form_status TINYINT DEFAULT '0' NOT NULL COMMENT '0: disable, 1: enable';
+ALTER TABLE eh_flows ADD COLUMN form_relation_type TINYINT DEFAULT '0' NOT NULL COMMENT '1: 关联自定义表单, 2: 关联eh_flows关联的表单';
+ALTER TABLE eh_flows ADD COLUMN form_relation_data TEXT COMMENT '表单关联数据，json格式';

@@ -25,7 +25,7 @@ import java.util.List;
  * <li>subjectRequiredFlag: 填写内容是否必填{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>remindCount: ??</li>
  * <li>description: 描述</li>
- * <li>param: 参数</li>
+ * <li>param: 按钮参数, 如果这个值为 flow_node_form_router {@link com.everhomes.rest.flow.FlowPredefinedParamConst}，则为自定义按钮里的表单跳转配置项</li>
  * <li>needSelectBranch: 下一个节点是判断节点并且是需要用户选择分支为1，否则为0{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>conditionNodeId: 下一个条件节点id</li>
  * <li>evaluateStep: 评价跳转 no_step:不跳转</li>

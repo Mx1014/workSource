@@ -506,13 +506,13 @@ public interface FlowService {
 
     ListFlowFormsResponse listFlowForms(ListFlowFormsCommand cmd);
 
-    FlowFormDTO updateFlowFormVersion(UpdateFlowFormCommand cmd);
+	FlowFormRelationDTO updateFlowFormVersion(UpdateFlowFormCommand cmd);
 
-    FlowFormDTO createFlowForm(UpdateFlowFormCommand cmd);
+	FlowFormRelationDTO createFlowForm(UpdateFlowFormCommand cmd);
 
     void deleteFlowForm(UpdateFlowFormCommand cmd);
 
-    FlowFormDTO getFlowForm(GetFlowFormCommand cmd);
+	FlowFormRelationDTO getFlowForm(GetFlowFormCommand cmd);
 
     FlowCaseDetailDTOV2 getFlowCaseDetailByRefer(Long moduleId, FlowUserType flowUserType,
                                                  Long userId, String referType, Long referId, boolean needFlowButton);
@@ -556,4 +556,10 @@ public interface FlowService {
     void doFlowMirror(DoFlowMirrorCommand cmd);
 
 	FlowGraphDTO getFlowGraphByFlowVersion(FlowIdVersionCommand cmd);
+
+	List<FlowEventLogDTO> listProcessingFlowCases(FlowCaseIdCommand cmd);
+
+    void transferFlowCaseProcessor(TransferFlowCaseProcessorCommand cmd);
+
+	void abortFlowCase(AbortFlowCaseCommand cmd);
 }

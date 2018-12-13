@@ -246,10 +246,27 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 
                 if (stepDTO instanceof FlowAutoStepTransferDTO) {
                     FlowAutoStepTransferDTO stepDTO = (FlowAutoStepTransferDTO) this.stepDTO;
-
+                    // 转出
+                    if (stepDTO.getTransferOut() != null) {
+                        for (FlowEntitySel sel : stepDTO.getTransferOut()) {
+                            //Remove the old logs
+                            log = flowEventLogProvider.getValidEnterStep(sel.getEntityId(), ctx.getFlowCase());
+                            if (null != log) {
+                                log.setStepCount(-1L); // mark as invalid
+                                ctx.getUpdateLogs().add(log);
+                            }
+                        }
+                        log = null;
+                    }
                     // 转入
                     if (stepDTO.getTransferIn() != null) {
-                        for (FlowEntitySel sel : stepDTO.getTransferIn()) {
+                        List<Long> transferInUserIdList = stepDTO.getTransferIn()
+                                .stream()
+                                .map(FlowEntitySel::getEntityId)
+                                .distinct()
+                                .collect(Collectors.toList());
+
+                        for (Long flowUserId : transferInUserIdList) {
                             log = new FlowEventLog();
                             log.setId(flowEventLogProvider.getNextId());
                             log.setFlowMainId(flowGraph.getFlow().getFlowMainId());
@@ -261,25 +278,12 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
                             log.setFlowNodeId(next.getFlowNode().getId());
                             log.setParentId(0L);
                             log.setFlowCaseId(ctx.getFlowCase().getId());
-                            log.setFlowUserId(sel.getEntityId());
+                            log.setFlowUserId(flowUserId);
                             log.setStepCount(ctx.getFlowCase().getStepCount());
                             log.setLogType(FlowLogType.NODE_ENTER.getCode());
                             log.setLogTitle("");
                             log.setButtonFiredStep(stepType.getCode());//mark as transfer log
                             ctx.getLogs().add(log);
-                        }
-                        log = null;
-                    }
-
-                    // 转出
-                    if (stepDTO.getTransferOut() != null) {
-                        for (FlowEntitySel sel : stepDTO.getTransferOut()) {
-                            //Remove the old logs
-                            log = flowEventLogProvider.getValidEnterStep(sel.getEntityId(), ctx.getFlowCase());
-                            if (null != log) {
-                                log.setStepCount(-1L); // mark as invalid
-                                ctx.getUpdateLogs().add(log);
-                            }
                         }
                         log = null;
                     }

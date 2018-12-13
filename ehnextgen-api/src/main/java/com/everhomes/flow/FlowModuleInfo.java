@@ -56,6 +56,13 @@ public class FlowModuleInfo implements Comparable<FlowModuleInfo> {
         this.meta.put(key, value);
     }
 
+    public Object getMeta(String key) {
+        if (this.meta == null) {
+			return null;
+        }
+        return this.meta.get(key);
+    }
+
 	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
 	}

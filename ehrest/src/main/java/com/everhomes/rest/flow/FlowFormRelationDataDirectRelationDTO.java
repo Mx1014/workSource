@@ -4,15 +4,20 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>formOriginId: formOriginId</li>
- *     <li>formVersion: formVersion</li>
- *     <li>name: name</li>
+ *     <li>formOriginId: 表单 originId</li>
+ *     <li>formVersion: 表单版本</li>
+ *     <li>updateFlag: 是否需要更新的标志</li>
+ *     <li>updateTime: 更新时间</li>
+ *     <li>name: 表单名称</li>
  * </ul>
  */
-public class FlowFormDTO {
+public class FlowFormRelationDataDirectRelationDTO {
 
     private Long formOriginId;
     private Long formVersion;
+
+    private Byte updateFlag;
+    private Long updateTime;
     private String name;
 
     public Long getFormOriginId() {
@@ -31,6 +36,22 @@ public class FlowFormDTO {
         this.formVersion = formVersion;
     }
 
+    public Byte getUpdateFlag() {
+        return updateFlag;
+    }
+
+    public void setUpdateFlag(Byte updateFlag) {
+        this.updateFlag = updateFlag;
+    }
+
+    public Long getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Long updateTime) {
+        this.updateTime = updateTime;
+    }
+
     public String getName() {
         return name;
     }
@@ -44,4 +65,3 @@ public class FlowFormDTO {
         return StringHelper.toJsonString(this);
     }
 }
-

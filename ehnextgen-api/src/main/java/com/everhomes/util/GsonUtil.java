@@ -40,5 +40,4 @@ public class GsonUtil {
                 .setExclusionStrategies(filter).create();
         return skipGson.toJson(obj);
     }
-
 }
