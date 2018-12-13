@@ -1803,6 +1803,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
+		if (order.getPrice().compareTo(new BigDecimal(0.00)) != 0){
+			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
+			this.officeCubicleProvider.updateCubicleRentOrder(order);
+			return;
+		}
 		 CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
 	        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
 	        createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
@@ -2942,6 +2947,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setRentType(cmd.getRentType());
 			return dto;
 		}).collect(Collectors.toList());
+		Collections.sort(spaceList,new CompartorPinYin());
 		resp.setSpace(spaceList);
 		return resp;
 	}
