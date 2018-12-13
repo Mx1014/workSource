@@ -45,7 +45,7 @@ public class RACMContractHandler extends DefaultContractServiceImpl {
         if(cmd.getAllSyncFlag() != null && cmd.getAllSyncFlag() == 1) {
             version = "1970-01-01";
         }else {
-            Timestamp versionTime = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId());
+            Timestamp versionTime = contractProvider.findLastVersionByBackup(cmd.getNamespaceId());
             if(versionTime != null){
                 version = versionTime.toString();
             }else{
@@ -70,6 +70,7 @@ public class RACMContractHandler extends DefaultContractServiceImpl {
 				}
         		LOGGER.debug("RuiAn CM sync start , version is : {} , task is : {} , cmd is : {} , contractApplicationScene is : {} , communityId is : {}" , version, task, cmd, contractApplicationScene, community.getNamespaceCommunityToken());
                 contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId(), cmd.getCategoryId(), contractApplicationScene);
+                contractHandler.syncBillsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId(), cmd.getCategoryId(), contractApplicationScene);
                 return response;
             }, task);
 

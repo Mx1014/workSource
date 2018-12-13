@@ -10,4 +10,6 @@ import java.util.List;
 public interface ThirdPartContractHandler {
     String CONTRACT_PREFIX = "thirdpartcontract-";
     void syncContractsFromThirdPart(String pageOffset, String version, String communityIdentifier, Long taskId, Long categoryId, Byte contractApplicationScene);
+	void syncBillsFromThirdPart(String pageOffset, String date, String communityIdentifier, Long taskId,
+			Long categoryId, Byte contractApplicationScene);
 }

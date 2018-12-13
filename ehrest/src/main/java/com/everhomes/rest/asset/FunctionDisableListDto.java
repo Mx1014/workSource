@@ -11,6 +11,8 @@ public class FunctionDisableListDto {
     private Byte hasUploadCertificate;
     //是否显示能耗
     private Byte hasEnergy;
+    //默认不展示账单的是否确认状态
+    private Byte hasConfirm;
 
     public Byte getHasPay() {
         return hasPay;
@@ -42,6 +44,14 @@ public class FunctionDisableListDto {
 
 	public void setHasEnergy(Byte hasEnergy) {
 		this.hasEnergy = hasEnergy;
+	}
+
+	public Byte getHasConfirm() {
+		return hasConfirm;
+	}
+
+	public void setHasConfirm(Byte hasConfirm) {
+		this.hasConfirm = hasConfirm;
 	}
     
 }
