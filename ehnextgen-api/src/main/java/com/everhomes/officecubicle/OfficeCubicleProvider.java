@@ -138,8 +138,6 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleRefundTips> listRefundTips(Long spaceId, Byte refundStrategy);
 
-	List<OfficeCubicleStationRent> searchCubicleStationRentByOrderId(Long spaceId, Long orderId);
-
 	List<OfficeCubicleRentOrder> findOfficeCubicleRentOrderByStatus(Byte[] orderStatus);
 
 	List<OfficeCubicleRentOrder> searchCubicleOrdersByUid(CrossShardListingLocator locator, Integer pageSize,
@@ -150,5 +148,7 @@ public interface OfficeCubicleProvider {
 	OfficeCubicleRentOrder findOfficeCubicleRentOrderByBizOrderNo(String bizOrderNo);
 
 	List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId, Integer currentNamespaceId, Byte rentType);
+
+	List<OfficeCubicleStationRent> searchCubicleStationRentByOrderId(Long spaceId, Long orderId, Byte rentType);
 
 }
