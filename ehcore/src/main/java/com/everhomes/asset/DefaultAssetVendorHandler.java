@@ -774,6 +774,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
                 if(billDetail != null && billDetail.getBillGroupDTO() != null) {
                 	List<BillItemDTO> billItemDTOList = billDetail.getBillGroupDTO().getBillItemDTOList();
                 	for(BillItemDTO billItemDTO : billItemDTOList) {
+                		//物业缴费V8.0（账单对接卡券） -44680 所有的商品默认是资产类
                 		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(AssetSourceType.ASSET_MODULE);
                 		if(generalBillHandler != null) {
                 			GoodDTO good = generalBillHandler.getGoodsInfo(billItemDTO);
