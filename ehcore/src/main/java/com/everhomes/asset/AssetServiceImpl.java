@@ -1682,7 +1682,37 @@ public class AssetServiceImpl implements AssetService {
             Calendar d = newClearedCalendar();
             if(billingCycle.byteValue() == (byte) 5){
                 // in this case, 5 stands for the one time pay mode
-                d.setTime(dateStrEnd.getTime());
+            	//缺陷 #44466 【智谷汇】【保证金】合同产生的账单时间有误
+            	//缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
+                //缺陷 #42424 如果是一次性产生费用，那么只在第一个收费周期产生费用
+                if(AssetOneTimeBillStatus.TRUE.getCode().equals(rule.getOneTimeBillStatus())) {
+                	d.setTime(a.getTime());
+                	//按照账单组的计费周期分为按月，按季，按年，均有固定和自然两种情况
+                    BillingCycle billGroupBillingCycle = BillingCycle.fromCode(group.getBalanceDateType());
+                    if(!billGroupBillingCycle.isContract()){
+                        //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                        int monthOffset;
+                        if(billGroupBillingCycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                        	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                        	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                        }else {
+                        	monthOffset = billGroupBillingCycle.getMonthOffset();
+                        }
+                        d.add(Calendar.MONTH, monthOffset);
+                        d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+                     }else{
+                        // #32243  check if the next day is beyond the maximum day of the next month
+                        int prevDay = d.get(Calendar.DAY_OF_MONTH);
+                        //修复缺陷 #44139 【保证金】【合同管理】将一次性收费项与其他收费周期放在同一账单组，签合同时添加两条计价条款，费用清单生成不了
+                        d.add(Calendar.MONTH, billGroupBillingCycle.getMonthOffset()+1);
+                        int maximumDay = d.getActualMaximum(Calendar.DAY_OF_MONTH);
+                        if(prevDay <= maximumDay){
+                            d.add(Calendar.DAY_OF_MONTH, -1);
+                        }
+                    }
+                }else {
+                	d.setTime(dateStrEnd.getTime());
+                }
             } else {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 d.setTime(a.getTime());
