@@ -117,7 +117,7 @@ CREATE TABLE `eh_office_cubicle_station_rent` (
   `end_time` DATETIME COMMENT '预定结束时间',
   `station_id` BIGINT COMMENT '工位/办公室Id',
   `station_name` VARCHAR(127),
-  `rentType` TINYINT,
+  `rent_type` TINYINT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
