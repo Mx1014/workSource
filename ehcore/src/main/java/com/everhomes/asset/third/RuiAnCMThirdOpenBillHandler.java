@@ -26,6 +26,7 @@ import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.AssetSourceType;
@@ -103,14 +104,14 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 						}
 						//3、获取左邻楼栋单元地址ID
 						Long addressId = null;
-						if(cmDataObject.getContractUnit() != null && cmDataObject.getContractUnit().size() != 0) {
-							CMContractUnit cmContractUnit = cmDataObject.getContractUnit().get(0);
-							Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
-							if(address != null) {
-								addressId = address.getId();
-								communityId = address.getCommunityId();
-							}
-						}
+//						if(cmDataObject.getContractUnit() != null && cmDataObject.getContractUnit().size() != 0) {
+//							CMContractUnit cmContractUnit = cmDataObject.getContractUnit().get(0);
+//							Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
+//							if(address != null) {
+//								addressId = address.getId();
+//								communityId = address.getCommunityId();
+//							}
+//						}
 
 						//获取左邻合同ID、合同编号
 						Long contractId = null;
@@ -125,6 +126,8 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 								if(contract != null) {
 									contractId = contract.getId();
 									contractNum = contract.getContractNumber();
+									communityId = contract.getCommunityId();
+									addressId = contractProvider.findAddressByContractId(contractId);
 								}
 							}catch (Exception e){
 					            LOGGER.error(e.toString());

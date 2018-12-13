@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.address.Address;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
@@ -2272,6 +2273,17 @@ public class ContractProviderImpl implements ContractProvider {
 				.fetchOne();
 		if (record != null) {
 			return record.getValue(Tables.EH_ZJ_SYNCDATA_BACKUP.CREATE_TIME);
+		}
+		return null;
+	}
+
+	public Long findAddressByContractId(Long contractId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Long> addressList = context.select(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID)
+				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId))
+				.fetchInto(Long.class);
+		if(addressList != null && addressList.size() != 0) {
+			return addressList.get(0);
 		}
 		return null;
 	}

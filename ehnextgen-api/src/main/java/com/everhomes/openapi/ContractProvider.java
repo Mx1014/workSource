@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.address.Address;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractChargingChange;
@@ -169,5 +170,7 @@ public interface ContractProvider {
 	List<ContractStaticsListDTO> listSearchContractStaticsTimeDimension(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr, String endTimeStr, Byte dateType, Integer pageOffSet, Integer pageSize);
 
 	Timestamp findLastVersionByBackup(Integer namespaceId);
+
+	Long findAddressByContractId(Long contractId);
 
 }
