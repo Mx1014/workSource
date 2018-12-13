@@ -30,6 +30,7 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.portal.PlatformContextNoWarnning;
+import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.BillIdAndAmount;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
@@ -773,7 +774,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
                 if(billDetail != null && billDetail.getBillGroupDTO() != null) {
                 	List<BillItemDTO> billItemDTOList = billDetail.getBillGroupDTO().getBillItemDTOList();
                 	for(BillItemDTO billItemDTO : billItemDTOList) {
-                		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(billItemDTO.getSourceType());
+                		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(AssetSourceType.ASSET_MODULE);
                 		if(generalBillHandler != null) {
                 			GoodDTO good = generalBillHandler.getGoodsInfo(billItemDTO);
                 			goods.add(good);
