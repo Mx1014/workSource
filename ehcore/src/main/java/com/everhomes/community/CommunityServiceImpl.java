@@ -2251,9 +2251,9 @@ public class CommunityServiceImpl implements CommunityService {
 				addGroupAddressDto(dto, userGroups);
 				
 				//用户认证状态的修改：如果搜索条件为“认证中”、“已认证”，根据情况修改dto的isAuth值,add by momoubin,18/12/11
-				if(cmd.getIsAuth() == AuthFlag.PENDING_AUTHENTICATION.getCode() && (dto.getIsAuth() != AuthFlag.PENDING_AUTHENTICATION.getCode())){ //认证中
+				if(cmd.getIsAuth() == AuthFlag.PENDING_AUTHENTICATION.getCode()){ //认证中
 					dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
-				}else if(cmd.getIsAuth() == AuthFlag.AUTHENTICATED.getCode() && (dto.getIsAuth() != AuthFlag.AUTHENTICATED.getCode())){ //已认证
+				}else if(cmd.getIsAuth() == AuthFlag.AUTHENTICATED.getCode()){ //已认证
 					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 				}
 				
