@@ -11,6 +11,7 @@ import java.io.Serializable;
  *     <li>organizationId: organizationId</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>serviceName: serviceName</li>
+ *     <li>originAppId: originAppId</li>
  * </ul>
  */
 public class FlowServiceTypeDTO implements Serializable {
@@ -20,6 +21,7 @@ public class FlowServiceTypeDTO implements Serializable {
     private Long organizationId;
     private Integer namespaceId;
     private String serviceName;
+    private Long originAppId;
 
     public Long getId() {
         return id;
@@ -59,6 +61,14 @@ public class FlowServiceTypeDTO implements Serializable {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getOriginAppId() {
+        return originAppId;
+    }
+
+    public void setOriginAppId(Long originAppId) {
+        this.originAppId = originAppId;
     }
 
     @Override
