@@ -54,19 +54,7 @@ import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesCommand;
 import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesResponse;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
-import com.everhomes.rest.flow.CreateFlowCommand;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowEntitySel;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowEventType;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.UpdateFlowFormCommand;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;
@@ -710,8 +698,13 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         UpdateFlowFormCommand flowFormCmd = new UpdateFlowFormCommand();
         flowFormCmd.setEntityId(flowDTO.getId());
         flowFormCmd.setEntityType(FlowEntityType.FLOW.getCode());
-        flowFormCmd.setFormOriginId(form.getFormOriginId());
-        flowFormCmd.setFormVersion(form.getFormVersion());
+
+        FlowFormRelationDataDirectRelation directRelation = new FlowFormRelationDataDirectRelation();
+        directRelation.setFormVersion(form.getFormOriginId());
+        directRelation.setFormVersion(form.getFormVersion());
+        flowFormCmd.setFormRelationType(FlowFormRelationType.DIRECT_RELATION.getCode());
+        flowFormCmd.setDirectRelation(directRelation);
+
         flowService.createFlowForm(flowFormCmd);
     }
 

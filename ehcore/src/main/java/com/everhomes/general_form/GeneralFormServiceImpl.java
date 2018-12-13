@@ -1293,7 +1293,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public GeneralFormFieldsConfigDTO getFormFieldsConfig(GetFormFieldsConfigCommand cmd){
         GeneralFormFieldsConfig formFieldsConfig = generalFormFieldsConfigProvider.getFormFieldsConfig(cmd.getFormFieldsConfigId());
         if(formFieldsConfig == null){
-            return null;
+            LOGGER.error("The formFieldsConfig gotten is null, formFieldsConfigId = {}", cmd.getFormFieldsConfigId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "The formFieldsConfig gotten is null");
         }
         GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(formFieldsConfig, GeneralFormFieldsConfigDTO.class);
         // 将formFieldsConfig里的formFields从json形式解析成List

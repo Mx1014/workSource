@@ -1,17 +1,20 @@
 package com.everhomes.yellowPage;
 
-import static com.everhomes.yellowPage.YellowPageUtils.throwError;
-
-import java.sql.Timestamp;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.flow.*;
+import com.everhomes.general_approval.GeneralApprovalFieldProcessor;
+import com.everhomes.general_form.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.point.constants.TrueOrFalseFlag;
 import com.everhomes.pmtask.PmTask;
 import com.everhomes.pmtask.PmTaskCategory;
 import com.everhomes.pmtask.PmTaskHandle;
@@ -22,11 +25,13 @@ import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.general_approval.GetProjectCustomizeCommand;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.FieldContentType;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
@@ -34,10 +39,14 @@ import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.server.schema.tables.EhOrganizations;
+import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.user.*;
-import com.everhomes.util.RouterBuilder;
-import com.everhomes.util.StringHelper;
-
+import com.everhomes.util.*;
+import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
+import com.everhomes.yellowPage.stat.ClickStatDetail;
+import com.everhomes.yellowPage.stat.ClickStatDetailProvider;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -78,6 +87,13 @@ import com.everhomes.util.pdf.PdfUtils;
 import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
 import com.everhomes.yellowPage.stat.ClickStatDetail;
 import com.everhomes.yellowPage.stat.ClickStatDetailProvider;
+import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 @Component
 public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceFlowModuleListener.class);
@@ -134,7 +150,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
 	@Autowired
 	ClickStatDetailProvider detailProvider;
-	
+
 	@Autowired
 	private SmsProvider smsProvider;
 
@@ -144,6 +160,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
         ServiceModule module = serviceModuleProvider.findServiceModuleById(MODULE_ID);
         moduleInfo.setModuleName(module.getName());
         moduleInfo.setModuleId(MODULE_ID);
+        moduleInfo.addMeta(FlowModuleInfo.META_KEY_FORM_FLAG, String.valueOf(TrueOrFalseFlag.TRUE.getCode()));
         return moduleInfo;
 	}
 
@@ -628,7 +645,6 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	
 	/**
 	 * 根据工作流保存一些业务信息
-	 * @param approvalId
 	 * @return
 	 */
 	private String getCustomObject(FlowCase flowCase, List<FlowCaseEntity> entities) {
@@ -799,5 +815,57 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
             }
         }
     }
-    
+
+    /**
+     * 需要在工作流里使用表单功能，需要实现此方法
+     */
+	@Override
+	public List<FlowFormDTO> listFlowForms(Flow flow) {
+
+		Long projectId = flow.getProjectId();
+
+		//查询当前配置
+		if (flow.getProjectId() > 0) {
+			Byte isProjectConfig = checkFormProjectConfigByFlow(flow);
+			if (TrueOrFalseFlag.FALSE.getCode().equals(isProjectConfig)) {
+				projectId = -1L;
+			}
+		}
+
+		List<FlowFormDTO> dtos = new ArrayList<>();
+		ListGeneralFormsCommand cmd = new ListGeneralFormsCommand();
+		cmd.setProjectId(projectId);
+		cmd.setProjectType(flow.getProjectType());
+		cmd.setModuleId(flow.getOwnerId());
+		cmd.setModuleType("service_alliance");
+		cmd.setOwnerId(flow.getOrganizationId());
+		cmd.setOwnerType(EhOrganizations.class.getSimpleName());
+		ListGeneralFormResponse resp = generalFormService.listGeneralForms(cmd);
+		if (null != resp && !CollectionUtils.isEmpty(resp.getForms())) {
+			dtos = resp.getForms().stream().map(r -> {
+				FlowFormDTO dto = new FlowFormDTO();
+				dto.setFormOriginId(r.getFormOriginId());
+				dto.setFormVersion(r.getFormVersion());
+				dto.setName(r.getFormName());
+				return dto;
+			}).collect(Collectors.toList());
+		}
+
+		return dtos;
+	}
+
+
+	private Byte checkFormProjectConfigByFlow(Flow flow) {
+		GetProjectCustomizeCommand cmd = new GetProjectCustomizeCommand();
+		cmd.setProjectId(flow.getProjectId());
+		cmd.setProjectType(flow.getProjectType());
+		cmd.setModuleId(flow.getOwnerId());
+		cmd.setModuleType("service_alliance");
+		cmd.setOwnerId(flow.getOrganizationId());
+		cmd.setOwnerType(EhOrganizations.class.getSimpleName());
+		return generalFormService.getProjectCustomize(cmd);
+	}
+
+
+
 }

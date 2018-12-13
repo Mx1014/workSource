@@ -83,12 +83,17 @@ UPDATE eh_service_module_privileges SET remark = '预约参观记录权限' WHER
 -- REMARK: 访客v1.4 访客短信优化 url修改
 UPDATE `eh_configurations` SET `value`='/visitor-appointment/build/invitation.html?visitorToken=', `is_readonly`='0' WHERE `name`='visitorsys.invitation.link';
 
+-- AUTHOR: xq.tian 20181213
+-- REMARK: 工作流 2.8.1 旧的数据适应新的代码
+UPDATE eh_flows SET form_status = 1 WHERE form_origin_id<>0;
+UPDATE eh_flow_nodes SET form_relation_type=1 WHERE form_origin_id<>0;
 
 -- AUTHOR: 黄明波
 -- REMARK: 更新打印机归属项目
 update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044331058733 where reader_name = 'TC101154727022' ;
 update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044331050362  where reader_name = 'TC101154727294';
 update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044332063596 where reader_name = 'TC100887870538';
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------

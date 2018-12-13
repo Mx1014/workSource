@@ -232,6 +232,14 @@ DROP TRIGGER IF EXISTS employee_dismiss_trigger_for_auto_remove_payment_limit;
 -- REMARK: 数据库修改为保存uri
 ALTER TABLE eh_communities  CHANGE background_img_url background_img_uri varchar(500) DEFAULT '' COMMENT '小区或园区项目的图片链接';
 
+-- AUTHOR: xq.tian
+-- REMARK: 工作流 2.8.1 新增字段
+ALTER TABLE eh_flow_nodes ADD COLUMN form_relation_type TINYINT DEFAULT '0' NOT NULL COMMENT '1: 关联自定义表单, 2: 关联eh_flows关联的表单';
+ALTER TABLE eh_flow_nodes ADD COLUMN form_relation_data TEXT COMMENT '表单关联数据，json格式';
+ALTER TABLE eh_flows ADD COLUMN form_status TINYINT DEFAULT '0' NOT NULL COMMENT '0: disable, 1: enable';
+ALTER TABLE eh_flows ADD COLUMN form_relation_type TINYINT DEFAULT '0' NOT NULL COMMENT '1: 关联自定义表单, 2: 关联eh_flows关联的表单';
+ALTER TABLE eh_flows ADD COLUMN form_relation_data TEXT COMMENT '表单关联数据，json格式';
+
 -- AUTHOR: 胡琪
 -- REMARK: 工作流-2.8.1，工作流节点关联的全局表单字段配置信息
 CREATE TABLE `eh_general_form_fields_config` (
@@ -257,3 +265,5 @@ CREATE TABLE `eh_general_form_fields_config` (
   `updater_uid` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
