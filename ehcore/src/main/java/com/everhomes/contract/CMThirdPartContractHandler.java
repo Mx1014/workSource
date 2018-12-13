@@ -83,6 +83,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     private static final Integer NAMESPACE_ID = 999929;
 
     private static final String DispContract = "/DispContract";
+    private static final String DispBill = "/DispBill";
 
 
     DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -298,6 +299,77 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }
         }*/
     }
+    
+    @Override
+    public void syncBillsFromThirdPart(String pageOffset, String date, String communityIdentifier, Long taskId, Long categoryId, Byte contractApplicationScene){
+        Map<String, String> params= new HashMap<>();
+        Map<String, String> codeString= new HashMap<>();
+        Integer currentPage = 0;
+        Integer totalPage = 2147483647;
+        List<CMSyncObject> cmSyncObjects = new ArrayList<>();
+        while(currentPage < totalPage){
+            //同步CM数据到物业账单表
+            if(date == null || "".equals(date)) {
+                date = "1970-01-01";
+            }
+            params.put("Date", date);
+            params.put("CurrentPage", pageOffset);
+            String bills = null;
+            String url = configurationProvider.getValue("RuiAnCM.sync.url", "");
+            try {
+                String codeStr = JSONObject.toJSONString(params);
+                codeString.put("CodeStr", codeStr);
+                LOGGER.info("sync customer from RuiAnCM param: {}", codeString);
+                bills = HttpUtils.get(url+DispBill, codeString, 600, "UTF-8");
+            } catch (Exception e) {
+                LOGGER.error("sync customer from RuiAnCM error: {}", e);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_UNKNOW_ERROR, "sync customer from RuiAnCM error");
+            }
+            bills = bills.substring(bills.indexOf(">{")+1, bills.indexOf("</string>"));
+            LOGGER.info("sync from RuiAnCM is complete. ");
+
+            CMSyncObject cmSyncObject =
+                    (CMSyncObject) StringHelper.fromJsonString(bills, CMSyncObject.class);
+
+            if(cmSyncObject != null) {
+                if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
+                    currentPage = Integer.valueOf(cmSyncObject.getCurrentpage());
+                    totalPage = Integer.valueOf(cmSyncObject.getTotalpage());
+                    pageOffset = String.valueOf(currentPage + 1);
+                    cmSyncObjects.add(cmSyncObject);
+                    syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);//同步到记录表
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date now = new Date(System.currentTimeMillis());
+                    String nowStr = sdf.format(now);
+                    if(date.compareTo(nowStr) < 0) {
+                        syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);//同步到记录表
+                        date = getNextDay(date, sdf);
+                    }
+                }else{
+                    LOGGER.error("sync from RuiAnCM error: {}", cmSyncObject.getErrorCode());
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, Integer.valueOf(cmSyncObject.getErrorCode()), cmSyncObject.getErrordetails());
+                }
+            }else{
+                LOGGER.error("sync data from RuiAnCM is fail" );
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_UNKNOW_ERROR, "sync data from RuiAnCM is fail");
+            }
+        }
+        //此方法可以获取当前正在进行同步的数据
+        List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
+        //同步CM数据到物业账单表
+        try{
+        	RuiAnCMThirdOpenBillHandler handler = PlatformContext.getComponent(ThirdOpenBillHandler.THIRDOPENBILL_PREFIX + NAMESPACE_ID);
+            handler.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
+        }catch(Exception e){
+            LOGGER.error("sync data from RuiAnCM is fail cause Bill " ,e);
+            //将同步锁置为失效，此时可以再次创建任务
+            zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_BILL_ERROR, "sync data from RuiAnCM is fail cause Bill");
+        }
+        //将同步锁置为失效，此时可以再次创建任务
+        zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+    }
+    
     public static void main(String[] args) {
         System.out.println(String.valueOf(Integer.valueOf("1") + 1));
     }
