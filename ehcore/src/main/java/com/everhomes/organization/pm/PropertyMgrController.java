@@ -2555,8 +2555,8 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("fixApartmentLivingStatusByNamespaceId")
 	@RestReturn(value=String.class)
-	public RestResponse fixApartmentLivingStatusByNamespaceId(Integer namespaceId) {
-		propertyMgrService.fixApartmentLivingStatusByNamespaceId(namespaceId);
+	public RestResponse fixApartmentLivingStatusByNamespaceId(ListApartmentsByMultiStatusCommand cmd) {
+		propertyMgrService.fixApartmentLivingStatusByNamespaceId(cmd.getNamespaceId());
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
