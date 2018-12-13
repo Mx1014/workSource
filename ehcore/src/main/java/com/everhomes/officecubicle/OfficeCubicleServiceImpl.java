@@ -2561,8 +2561,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (closeStation != null){
 			closeStationSize = closeStation.size();
 		}
+		List<OfficeCubicleStation> longRentIdleStation = 
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)1, null);
 		resp.setLongRentCloseCubicleNums(closeStationSize);
-		resp.setLongCubicleIdleNums(stationSize-longRentStationSize);
+		resp.setLongCubicleIdleNums(stationSize-longRentIdleStation.size());
 
 		resp.setShortCubicleRentedNums(shortRentStationSize);
 		Integer rentRates =((shortRentStationSize+longRentStationSize)*100)/stationSize;
