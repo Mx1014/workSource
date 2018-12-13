@@ -5457,11 +5457,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				if (pricePackages2 != null) {
 					for (Rentalv2PricePackage pricePackage : pricePackages2) {
 						RentalSitePackagesDTO packagesDTO = ConvertHelper.convert(pricePackage, RentalSitePackagesDTO.class);
-						if (pricePackage.getPriceClassification() != null) {
-							List<RentalPriceClassification> cla = rentalv2Provider.listClassification(rsr.getResourceType(), EhRentalv2PricePackages.class.getSimpleName(),
+						List<RentalPriceClassification> cla = rentalv2Provider.listClassification(rsr.getResourceType(), EhRentalv2PricePackages.class.getSimpleName(),
 									pricePackage.getId(), null, null, null, null);
-							packagesDTO.setPriceRules(cla.stream().map(r->ConvertHelper.convert(r,RentalPriceClassificationDTO.class)).collect(Collectors.toList()));
-						}
+						if (cla != null)
+						    packagesDTO.setPriceRules(cla.stream().map(r->ConvertHelper.convert(r,RentalPriceClassificationDTO.class)).collect(Collectors.toList()));
 						sitePackages2.add(packagesDTO);
 					}
 				}
