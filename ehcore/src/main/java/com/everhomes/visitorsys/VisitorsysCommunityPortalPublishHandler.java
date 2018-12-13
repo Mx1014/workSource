@@ -56,6 +56,8 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
             ServiceModuleEntry serviceModuleEntry = this.serviceModuleEntryProvider.findById(cmd.getModuleEntryId());
             if (serviceModuleEntry != null) {
                 String[] urls = url.split("[?]");
+//              去掉原来写死的sceneType
+                urls[1] = urls[1].replaceAll("(&sceneType=[^#]*)", "");
                 if (urls.length > 1) {
                     jsonObject.remove("url");
                     newUrl = urls[0] + "?sceneType=" + serviceModuleEntry.getSceneType() + "&" + urls[1];
@@ -80,5 +82,12 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
     @Override
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
         return null;
+    }
+
+    public static void main(String[] args) {
+        String url = "ns=%s&appId=%s&ownerType=community&sceneType=1#/home#sign_suffix";
+        url = url.replaceAll("(&sceneType=[^#]*)", "");
+        System.out.println(url);
+
     }
 }
