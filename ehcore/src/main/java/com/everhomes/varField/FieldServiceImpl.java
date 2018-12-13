@@ -2185,9 +2185,13 @@ public class FieldServiceImpl implements FieldService {
 
             List<FieldItem> existItemList = fieldProvider.listFieldItems(cmd.getFieldIds());
             items.forEach(item -> {
+                if(item.getModuleType() != null){
+                    item.setModuleName(item.getModuleType());
+                }
                 //如果这个item是新建的则没有item_id，此时在eh_var_field_items表中插入一条新的item，并且status = 3，代表着为非推荐库选项
                 if(item.getItemId() == null) {
                     ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
+                    //2018年12月12日 黄鹏宇： 在客户新建一个自定义选项前，先确定item表中有没有同名的选项，如果有则不用新建一个新的item，而使用同名的item
                     FieldItem exist = existItemList.stream().filter(r-> r.getFieldId().equals(item.getFieldId()) && r.getDisplayName().equals(item.getItemDisplayName())).collect(Collectors.toList()).get(0);
                     if(exist != null){
                         scopeFieldItem.setItemId(exist.getId());
