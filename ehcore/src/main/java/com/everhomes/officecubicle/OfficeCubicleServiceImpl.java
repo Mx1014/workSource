@@ -1768,9 +1768,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049500L, cmd.getAppId(), null, cmd.getCurrentProjectId());//资源管理权限
 		}
 		OfficeCubicleRoom room = officeCubicleProvider.getOfficeCubicleRoomById(cmd.getRoomId());
-		OfficeCubicleStation station = officeCubicleProvider.getOfficeCubicleStationById(cmd.getRoomId());
-		station.setAssociateRoomId(0L);
-		officeCubicleProvider.updateCubicle(station);
+		List<OfficeCubicleStation> stationList = 
+				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), cmd.getRoomId(), null, null, null, null);
+		for(OfficeCubicleStation s :stationList){
+			s.setAssociateRoomId(0L);
+			officeCubicleProvider.updateCubicle(s);
+		}
 		officeCubicleProvider.deleteRoom(room);
 	}
     
