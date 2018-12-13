@@ -5308,7 +5308,7 @@ public class CommunityServiceImpl implements CommunityService {
 		for (Community com: communities){
 			CommunityInfoDTO dto = ConvertHelper.convert(com, CommunityInfoDTO.class);
 			
-			//add by momoubin,2018/12/13,项目uri转url
+			//add by momoubin,2018/12/13,项目图片uri转url
 			if(StringUtils.isNotBlank(com.getBackgroundImgUri())){
 				String backgroundImgUri = com.getBackgroundImgUri();
 				String backgroundImgUrl = contentServerService.parserUri(backgroundImgUri, EntityType.USER.getCode(), user.getId());
