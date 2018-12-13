@@ -478,10 +478,12 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	
 	@Override
 	public List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId,
-												 Integer currentNamespaceId) {
+												 Integer currentNamespaceId, Byte rentType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.NAMESPACE_ID.eq(currentNamespaceId);
+		if (rentType!=null)
+			condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType);
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.lt(new Timestamp(System.currentTimeMillis())));
 		condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.gt(new Timestamp(System.currentTimeMillis())));
 		step.where(condition);

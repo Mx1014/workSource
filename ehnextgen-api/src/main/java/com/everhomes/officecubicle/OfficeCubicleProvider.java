@@ -145,10 +145,10 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleRentOrder> searchCubicleOrdersByUid(CrossShardListingLocator locator, Integer pageSize,
 			Integer currentNamespaceId, Byte rentType, Byte orderStatus, Long reserverUid);
 
-	List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId, Integer currentNamespaceId);
-
 	List<OfficeCubicleStation> getOfficeCubicleStationNotAssociate(Long spaceId);
 
 	OfficeCubicleRentOrder findOfficeCubicleRentOrderByBizOrderNo(String bizOrderNo);
+
+	List<OfficeCubicleStationRent> searchCubicleStationRent(Long spaceId, Integer currentNamespaceId, Byte rentType);
 
 }
