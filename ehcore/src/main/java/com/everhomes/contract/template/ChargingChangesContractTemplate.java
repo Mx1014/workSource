@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ChangeMethod;
@@ -18,17 +19,17 @@ public class ChargingChangesContractTemplate{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChargingChangesContractTemplate.class);
 	
-	private List<ContractChargingChangeDTO> chargingChanges;
-	
-	public ChargingChangesContractTemplate() {}
-	
-	public List<ContractChargingChangeDTO> getChargingChanges() {
-		return chargingChanges;
-	}
-
-	public void setChargingChanges(List<ContractChargingChangeDTO> chargingChanges) {
-		this.chargingChanges = chargingChanges;
-	}
+//	private List<ContractChargingChangeDTO> chargingChanges;
+//	
+//	public ChargingChangesContractTemplate() {}
+//	
+//	public List<ContractChargingChangeDTO> getChargingChanges() {
+//		return chargingChanges;
+//	}
+//
+//	public void setChargingChanges(List<ContractChargingChangeDTO> chargingChanges) {
+//		this.chargingChanges = chargingChanges;
+//	}
 
 	/**
 	 * 合法的例子：
@@ -49,17 +50,13 @@ public class ChargingChangesContractTemplate{
 		}
 		//index不能超出list的范围
 		if ("adjusts".equals(type)) {
-			if (chargingChanges == null) {
-				chargingChanges = contract.getAdjusts();
-			}
-			if (!checkIndexWithinRange(chargingChanges, index)) {
+			List<ContractChargingChangeDTO>	adjusts = contract.getAdjusts();
+			if (!checkIndexWithinRange(adjusts, index)) {
 				return false;
 			}
 		}else if("frees".equals(type)){
-			if (chargingChanges == null) {
-				chargingChanges = contract.getFrees();
-			}
-			if (!checkIndexWithinRange(chargingChanges, index)) {
+			List<ContractChargingChangeDTO>	frees = contract.getFrees();
+			if (!checkIndexWithinRange(frees, index)) {
 				return false;
 			}
 		}
@@ -72,14 +69,11 @@ public class ChargingChangesContractTemplate{
 	protected String getValue(ContractDetailDTO contract, String[] segments, String type) {
 		Object data = null;
 		
+		List<ContractChargingChangeDTO>	chargingChanges = null;
 		if ("adjusts".equals(type)) {
-			if (chargingChanges == null) {
-				chargingChanges = contract.getAdjusts();
-			}
+			chargingChanges = contract.getAdjusts();
 		}else if("frees".equals(type)){
-			if (chargingChanges == null) {
-				chargingChanges = contract.getFrees();
-			}
+			chargingChanges = contract.getFrees();
 		}
 		
 		Integer index = Integer.parseInt(segments[1]);

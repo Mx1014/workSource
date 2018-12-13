@@ -28,7 +28,7 @@ import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import com.mysql.fabric.xmlrpc.base.Array;
 
-//@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "investmentPromotion")
+@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "investmentPromotion")
 public class InvestmentPromotionContractTemplate implements ContractTemplateHandler{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentPromotionContractTemplate.class);
@@ -39,15 +39,15 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 	@Autowired
 	private FieldService fieldService;
 	
-	private InvitedCustomerDTO invitedCustomer;
-	
-	public InvitedCustomerDTO getInvitedCustomer() {
-		return invitedCustomer;
-	}
-
-	public void setInvitedCustomer(InvitedCustomerDTO invitedCustomer) {
-		this.invitedCustomer = invitedCustomer;
-	}
+//	private InvitedCustomerDTO invitedCustomer;
+//	
+//	public InvitedCustomerDTO getInvitedCustomer() {
+//		return invitedCustomer;
+//	}
+//
+//	public void setInvitedCustomer(InvitedCustomerDTO invitedCustomer) {
+//		this.invitedCustomer = invitedCustomer;
+//	}
 
 	/**
 	 * 合法的例子：
@@ -70,26 +70,25 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 		String value = "";
 		Object data = null;
 		
-		if (invitedCustomer == null) {
-			Long customerId = contract.getCustomerId();
-			if (customerId != null) {
-				ViewInvestmentDetailCommand cmd = new ViewInvestmentDetailCommand();
-				cmd.setId(customerId);
-				cmd.setIsAdmin(true);//跳过权限校验
-				invitedCustomer = invitedCustomerService.viewInvestmentDetail(cmd);
-			}
+		InvitedCustomerDTO invitedCustomer = null;
+		Long customerId = contract.getCustomerId();
+		if (customerId != null) {
+			ViewInvestmentDetailCommand cmd = new ViewInvestmentDetailCommand();
+			cmd.setId(customerId);
+			cmd.setIsAdmin(true);//跳过权限校验
+			invitedCustomer = invitedCustomerService.viewInvestmentDetail(cmd);
 		}
 		
 		if (invitedCustomer != null) {
 			String invitedCustomerInfoKey = segments[1];
 			data = PropertyUtils.getProperty(invitedCustomer, invitedCustomerInfoKey);
-			value = formatValue(segments,data);
+			value = formatValue(segments,data,invitedCustomer);
 		}
 		
 		return value;
 	}
 
-	private String formatValue(String[] segments,Object data){
+	private String formatValue(String[] segments,Object data,InvitedCustomerDTO invitedCustomer){
 		if (data == null) {
 			return "";
 		}

@@ -21,7 +21,7 @@ import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractTemplateBuildingApartmentDTO;
 import com.google.zxing.Result;
 
-//@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "apartments")
+@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "apartments")
 public class ApartmentsContractTemplate implements ContractTemplateHandler{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ApartmentsContractTemplate.class);
@@ -33,25 +33,26 @@ public class ApartmentsContractTemplate implements ContractTemplateHandler{
 	private CommunityProvider communityProvider;
 	
 	//声明这种变量，有点类似于redis缓存的那种意思，对于同一个合同文档，获取一次数据就行了，不用老去重复获取合同相关的数据
-	private List<BuildingApartmentDTO> apartments;
-	
-	private List<ContractTemplateBuildingApartmentDTO> apartmentDetails;
-	
-	public List<BuildingApartmentDTO> getApartments() {
-		return apartments;
-	}
-	
-	public void setApartments(List<BuildingApartmentDTO> apartments) {
-		this.apartments = apartments;
-	}
-
-	public List<ContractTemplateBuildingApartmentDTO> getApartmentDetails() {
-		return apartmentDetails;
-	}
-
-	public void setApartmentDetails(List<ContractTemplateBuildingApartmentDTO> apartmentDetails) {
-		this.apartmentDetails = apartmentDetails;
-	}
+	//@Component默认是单例的，搞多例坑太大，放弃这种搞法，后面再研究，毕竟明早就要集成了。。。。2018年12月13日23:55:44
+//	private List<BuildingApartmentDTO> apartments;
+//	
+//	private List<ContractTemplateBuildingApartmentDTO> apartmentDetails;
+//	
+//	public List<BuildingApartmentDTO> getApartments() {
+//		return apartments;
+//	}
+//	
+//	public void setApartments(List<BuildingApartmentDTO> apartments) {
+//		this.apartments = apartments;
+//	}
+//
+//	public List<ContractTemplateBuildingApartmentDTO> getApartmentDetails() {
+//		return apartmentDetails;
+//	}
+//
+//	public void setApartmentDetails(List<ContractTemplateBuildingApartmentDTO> apartmentDetails) {
+//		this.apartmentDetails = apartmentDetails;
+//	}
 
 	/**
 	 * 合法的例子：
@@ -72,9 +73,7 @@ public class ApartmentsContractTemplate implements ContractTemplateHandler{
 			return false;
 		}
 		//index不能超出list的范围
-		if (apartments == null) {
-			apartments = contract.getApartments();
-		}
+		List<BuildingApartmentDTO> apartments = contract.getApartments();
 		if (apartments != null && apartments.size()>0) {
 			if (index >= apartments.size() || index < 0) {
 				return false;
@@ -92,9 +91,8 @@ public class ApartmentsContractTemplate implements ContractTemplateHandler{
 	@Override
 	public String getValue(ContractDetailDTO contract, String[] segments) {
 		Object data = null;
-		if (apartmentDetails == null) {
-			apartmentDetails = getApartmentDetails(contract.getApartments());
-		}
+		
+		List<ContractTemplateBuildingApartmentDTO> apartmentDetails = getApartmentDetails(contract.getApartments());
 		Integer index = Integer.parseInt(segments[1]);
 		ContractTemplateBuildingApartmentDTO apartmentDetail = apartmentDetails.get(index);
 		

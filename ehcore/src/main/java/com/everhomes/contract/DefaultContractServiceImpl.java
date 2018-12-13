@@ -70,10 +70,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.template.ContractDocument;
 import com.everhomes.contract.template.ContractDocumentsStatus;
-import com.everhomes.contract.template.ContractTemplateFactory;
 import com.everhomes.contract.template.ContractTemplateHandler;
 import com.everhomes.contract.template.GetKeywordsUtils;
-import com.everhomes.contract.template.PropertyUtils;
 import com.everhomes.contract.reportForm.ContractReportFormExportHandler;
 import com.everhomes.contract.reportForm.ContractStaticsCommunityHistoryExportHandler;
 import com.everhomes.contract.reportForm.ContractStaticsTotalExportHandler;
@@ -4869,16 +4867,10 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				String type = getHandlerType(segments);
 				handler = handlerMap.get(type);
 				if (handler == null) {
-					handler = ContractTemplateFactory.createContractTemplateHandler(type);
-					if (handler != null) {
-						handlerMap.put(type, handler);
-					}
+					handler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + type);
+					handlerMap.put(type, handler);
 				}
 				
-//				if (handler == null) {
-//					handler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + type);
-//					handlerMap.put(type, handler);
-//				}
 				if (handler != null) {
 					if (handler.isValid(contractDetailDTO, segments)) {
 						dataValue = handler.getValue(contractDetailDTO, segments);
@@ -4903,40 +4895,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 	
 	public static void main(String[] args) {
-//		String contents = "<p>招商客户</p><p><br/></p><p>客户名称：${<span style=\"background:#B8B8B8\">ZS.客户名称<a style=\"display: none\">@@investmentPromotion.name##</a></span>}&nbsp;&nbsp;${<span style=\"background:#B8B8B8\">ZS.客户级别<a style=\"display: none\">@@investmentPromotion.levelItemId##</a></span>}&nbsp;";
-//		
-//		List<String> results = GetKeywordsUtils.getKeywordsWithPattern(contents, "${", "}");
-//		
-//		for (String key : results) {
-//			System.out.println(key);
-//			List<String> values = GetKeywordsUtils.getKeywordsWithoutPattern(key, "@@", "##");
-//			System.out.println(values.get(0));
-//			String[] segments = values.get(0).split("\\.");
-//			for (int i = 0; i < segments.length; i++) {
-//				System.out.print(segments[i] + "  ");
-//			}
-//			System.out.println();
-//		}
-//		
-//		Map<String, String> dataMap = new HashMap<>();
-//		dataMap.put("${<span style=\"background:#B8B8B8\">ZS.客户名称<a style=\"display: none\">@@investmentPromotion.name##</a></span>}", "张三");
-//		dataMap.put("${<span style=\"background:#B8B8B8\">ZS.客户级别<a style=\"display: none\">@@investmentPromotion.levelItemId##</a></span>}", "测试数据");
-//		String contractDocumentText = GetKeywordsUtils.translate(dataMap,contents, "${", "}");
-//		System.out.println(contractDocumentText);
-		BuildingApartmentDTO dto = new BuildingApartmentDTO();
-		dto.setApartmentName("1栋101");
-		if (PropertyUtils.containsField(BuildingApartmentDTO.class, "aaa")) {
-			System.out.println(PropertyUtils.getProperty(dto, "aaa"));
-		}
-		if (PropertyUtils.containsField(BuildingApartmentDTO.class, "buildingName")) {
-			System.out.println(PropertyUtils.getProperty(dto, "buildingName"));
-		}
-		if (PropertyUtils.containsField(BuildingApartmentDTO.class, "apartmentName")) {
-			System.out.println(PropertyUtils.getProperty(dto, "apartmentName"));
-		}
-//		Object property01 = PropertyUtils.getProperty(dto, "aaa");
-//		Object property02 = PropertyUtils.getProperty(dto, "buildingName");
-//		Object property03 = PropertyUtils.getProperty(dto, "apartmentName");
+		
 		
 	}
 

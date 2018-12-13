@@ -16,7 +16,7 @@ import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.PeriodUnit;
 
-//@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "contract")
+@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "contract")
 public class DefaultContractTemplate implements ContractTemplateHandler{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultContractTemplate.class);

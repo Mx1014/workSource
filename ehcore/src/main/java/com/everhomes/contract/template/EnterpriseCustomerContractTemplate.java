@@ -17,8 +17,9 @@ import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.CustomerContactDTO;
 import com.everhomes.rest.investment.CustomerContactType;
+import com.everhomes.rest.investment.CustomerTrackerDTO;
 
-//@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "enterpriseCustomer")
+@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "enterpriseCustomer")
 public class EnterpriseCustomerContractTemplate implements ContractTemplateHandler{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseCustomerContractTemplate.class);
@@ -26,15 +27,15 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 	@Autowired
 	private CustomerService customerService;
 	
-	private EnterpriseCustomerDTO enterpriseCustomer;
-	
-	public EnterpriseCustomerDTO getEnterpriseCustomer() {
-		return enterpriseCustomer;
-	}
-
-	public void setEnterpriseCustomer(EnterpriseCustomerDTO enterpriseCustomer) {
-		this.enterpriseCustomer = enterpriseCustomer;
-	}
+//	private EnterpriseCustomerDTO enterpriseCustomer;
+//	
+//	public EnterpriseCustomerDTO getEnterpriseCustomer() {
+//		return enterpriseCustomer;
+//	}
+//
+//	public void setEnterpriseCustomer(EnterpriseCustomerDTO enterpriseCustomer) {
+//		this.enterpriseCustomer = enterpriseCustomer;
+//	}
 
 	/**
 	 * 合法的例子：
@@ -57,13 +58,12 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 		String value = "";
 		Object data = null;
 		
-		if (enterpriseCustomer == null) {
-			Long customerId = contract.getCustomerId();
-			if (customerId != null) {
-				GetEnterpriseCustomerCommand cmd = new GetEnterpriseCustomerCommand();
-				cmd.setId(customerId);
-				enterpriseCustomer = customerService.getEnterpriseCustomer(cmd);
-			}
+		EnterpriseCustomerDTO enterpriseCustomer = null;
+		Long customerId = contract.getCustomerId();
+		if (customerId != null) {
+			GetEnterpriseCustomerCommand cmd = new GetEnterpriseCustomerCommand();
+			cmd.setId(customerId);
+			enterpriseCustomer = customerService.getEnterpriseCustomer(cmd);
 		}
 		
 		if (enterpriseCustomer != null) {
@@ -75,6 +75,7 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 		return value;
 	}
 
+	@SuppressWarnings("unchecked")
 	private String formatValue(String[] segments,Object data){
 		if (data == null) {
 			return "";
@@ -84,7 +85,7 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 		switch (segments[1]) {
 			case "contacts":
 				if ("customer".equals(segments[2])) {
-					List<CustomerContactDTO> customerContacts = enterpriseCustomer.getContacts()
+					List<CustomerContactDTO> customerContacts = ((List<CustomerContactDTO>) data)
 																.stream()
 																.filter(r->r.getContactType()==CustomerContactType.CUSTOMER_CONTACT.getCode())
 																.collect(Collectors.toList());
@@ -96,7 +97,7 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 						}
 					}											
 				}else if ("channel".equals(segments[2])) {
-					List<CustomerContactDTO> channelContacts = enterpriseCustomer.getContacts()
+					List<CustomerContactDTO> channelContacts = ((List<CustomerContactDTO>) data)
 																.stream()
 																.filter(r->r.getContactType()==CustomerContactType.CHANNEL_CONTACT.getCode())
 																.collect(Collectors.toList());
@@ -110,11 +111,12 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 				}
 				break;
 			case "trackers":
-				if (enterpriseCustomer.getTrackers()!=null && enterpriseCustomer.getTrackers().size()>0) {
+				List<CustomerTrackerDTO> trackers = (List<CustomerTrackerDTO>)data;
+				if (trackers != null && trackers.size()>0) {
 					if ("trackerName".equals(segments[2])) {
-						value = enterpriseCustomer.getTrackers().get(0).getTrackerName();
+						value = trackers.get(0).getTrackerName();
 					}else if ("trackerPhone".equals(segments[2])) {
-						value = enterpriseCustomer.getTrackers().get(0).getTrackerPhone();
+						value = trackers.get(0).getTrackerPhone();
 					}
 				}
 				break;
