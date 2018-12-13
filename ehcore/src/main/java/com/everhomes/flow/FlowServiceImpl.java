@@ -53,6 +53,7 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldsConfigDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.news.NewsCommentContentType;
@@ -5837,6 +5838,8 @@ public class FlowServiceImpl implements FlowService {
             // Assert.notNull(form, "form should be not null");
             updateFlowConditionExpressionAfterFlowFormUpdate(flow, entityType.getCode(), cmd.getEntityId(), null, null);
         }
+
+        flowMarkUpdated(flow);
     }
 
     private void clearFlowNodeCustomizeField(Flow flow) {
@@ -7338,7 +7341,9 @@ public class FlowServiceImpl implements FlowService {
             nodeLogDTO.setFormConfigDTO((GeneralFormFieldsConfigDTO)
                     StringHelper.fromJsonString(currNode.getFormRelationData(), GeneralFormFieldsConfigDTO.class));
         }
-        nodeLogDTO.setFormRelationType(currNode.getFormRelationType());
+        if (TrueOrFalseFlag.TRUE.getCode().equals(currNode.getFormStatus())) {
+            nodeLogDTO.setFormRelationType(currNode.getFormRelationType());
+        }
     }
 
     private void getFlowNodeLogDTOV2(Long flowCaseId, Set<FlowUserType> flowUserTypes, FlowNode currNode, Long stepCount, FlowNodeLogDTO nodeLogDTO) {

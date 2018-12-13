@@ -12,7 +12,6 @@ import com.everhomes.general_approval.*;
 import com.everhomes.gogs.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.activity.ruian.ActivityCategoryList;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.*;
@@ -23,12 +22,6 @@ import com.everhomes.server.schema.tables.pojos.EhGeneralFormFilterUserMap;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.ValidatorUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.CollectionUtils;
@@ -994,7 +987,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
                     "generalFormGogsFileNotExist not exist");
         } catch (Exception e){
-            LOGGER.error("Gogs OthersException .", e);
+            LOGGER.error("Gogs OthersException: ", e);
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Gogs OthersException");
         }
         return ConvertHelper.convert(generalFormPrintTemplate, GeneralFormPrintTemplateDTO.class);
     }
@@ -1050,7 +1045,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
                     "generalFormGogsFileNotExist not exist");
         } catch (Exception e){
-            LOGGER.error("Gogs OthersException .", e);
+            LOGGER.error("Gogs OthersException: ", e);
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Gogs OthersException");
         }
         return ConvertHelper.convert(generalFormPrintTemplate, GeneralFormPrintTemplateDTO.class);
     }
@@ -1197,7 +1194,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         formFieldsConfig.setProjectType(cmd.getProjectType() == null ? form.getProjectType() : cmd.getProjectType());
         formFieldsConfig.setConfigVersion(0L);
         if(formFieldsConfig.getConfigType() == null || "".equals(formFieldsConfig.getConfigType())){
-            formFieldsConfig.setConfigType(GeneralFormConstants.FORM_FIELDS_CONFIG_TYPE);
+            formFieldsConfig.setConfigType(GeneralFormFieldsConfigType.FLOW_NODE_VISIBLE.getCode());
         }
         formFieldsConfig.setFormFields(JSON.toJSONString(cmd.getFormFields()));
         formFieldsConfig.setStatus(GeneralFormFieldsConfigStatus.CONFIG.getCode());
@@ -1249,7 +1246,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     /**
-     * 将配置状态修改成RUNNING状态，提供给工作流发布新版本时使用
+     * 将配置状态修改成RUNNING状态，此方法提供给工作流发布新版本时使用
      * @param formFieldsConfigId 表单字段配置ID
      * @return 表单字段配置DTO
      */
@@ -1303,6 +1300,41 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         GeneralFormFieldsConfigDTO dto = ConvertHelper.convert(formFieldsConfig, GeneralFormFieldsConfigDTO.class);
         // 将formFieldsConfig里的formFields从json形式解析成List
         List<GeneralFormFieldsConfigFieldDTO> fieldDTOs = JSONObject.parseArray(formFieldsConfig.getFormFields(), GeneralFormFieldsConfigFieldDTO.class);
+
+        // 存在表单值则一起返回
+        List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+        if(formValues != null && fieldDTOs != null){
+            for(GeneralFormFieldsConfigFieldDTO fieldDTO : fieldDTOs){
+                for(GeneralFormVal value : formValues){
+                    // 根据FieldName来判断两个表单值属于同一字段
+                    if(fieldDTO.getFieldName().equals(value.getFieldName())){
+                        // 子表单
+                        if(fieldDTO.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())){
+                            PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(value.getFieldValue(), PostApprovalFormSubformValue.class);
+//                            List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+//                             if (postSubFormValue.getForms() != null && postSubFormValue.getForms().size() > 0) {
+//                                 String jsonStr = JSON.toJSONString(postSubFormValue.getForms());
+//                                 GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+//                                 subFormValue.setSubForms(JSON.parseObject(jsonStr, new TypeReference<List<GeneralFormSubFormValueDTO>>() {
+//                                 }.getType()));
+//                                 fieldDTO.setFieldValue(subFormValue.toString());
+//                             }
+                            List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+//                            //  解析子表单的值
+                           for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+                               subForms.add(processSubFormItemField(fieldDTO.getFieldExtra(), itemValue, NormalFlag.NEED.getCode()));
+                           }
+                           GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+                           subFormValue.setSubForms(subForms);
+                           fieldDTO.setFieldValue(subFormValue.toString());
+                        } else {
+                            fieldDTO.setFieldValue(value.getFieldValue());
+                        }
+                        break;
+                    }
+                }
+            }
+        }
         dto.setFormFields(fieldDTOs);
         return dto;
     }
@@ -1321,6 +1353,52 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
         // 将form里的templateText从json形式解析为List
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
+        // 存在表单值则一起返回
+        List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+        if(formValues != null && fieldDTOs != null){
+            for(GeneralFormVal value : formValues){
+                for(GeneralFormFieldDTO fieldDTO : fieldDTOs){
+                    // 根据FieldName来判断两个表单值属于同一字段
+                    if(fieldDTO.getFieldName().equals(value.getFieldName())){
+                        // 子表单
+                        if(fieldDTO.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())){
+                            PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(value.getFieldValue(), PostApprovalFormSubformValue.class);
+//                            List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+                            if (postSubFormValue.getForms() != null && postSubFormValue.getForms().size() > 0) {
+//                            List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+//                             if (postSubFormValue.getForms() != null && postSubFormValue.getForms().size() > 0) {
+//                                 String jsonStr = JSON.toJSONString(postSubFormValue.getForms());
+//                                 GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+//                                 subFormValue.setSubForms(JSON.parseObject(jsonStr, new TypeReference<List<GeneralFormSubFormValueDTO>>() {
+//                                 }.getType()));
+//                                 fieldDTO.setFieldValue(subFormValue.toString());
+//                             }
+                                List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+//                            //  解析子表单的值
+                                for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+                                    subForms.add(processSubFormItemField(fieldDTO.getFieldExtra(), itemValue, NormalFlag.NEED.getCode()));
+                                }
+                                GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+                                subFormValue.setSubForms(subForms);
+                                fieldDTO.setFieldValue(subFormValue.toString());
+                            }
+
+//                            //  解析子表单的值
+//                            for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+//                                subForms.add(processSubFormItemField(fieldDTO.getFieldExtra(), itemValue, NormalFlag.NEED.getCode()));
+//                            }
+//                            GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+//                            subFormValue.setSubForms(subForms);
+//                            fieldDTO.setFieldValue(subFormValue.toString());
+                        } else {
+                            fieldDTO.setFieldValue(value.getFieldValue());
+                        }
+                        break;
+                    }
+                }
+            }
+        }
         dto.setFormFields(fieldDTOs);
         return dto;
     }
