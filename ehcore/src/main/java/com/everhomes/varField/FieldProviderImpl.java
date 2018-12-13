@@ -660,14 +660,12 @@ public class FieldProviderImpl implements FieldProvider {
     public List<FieldItem> listFieldItems(List<Long> fieldIds) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-        List<FieldItem> items = context.select().from(Tables.EH_VAR_FIELD_ITEMS)
-                .where(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.in(fieldIds))
-                .and(Tables.EH_VAR_FIELD_ITEMS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
-                .fetch().map((record)-> {
-                    return ConvertHelper.convert(record, FieldItem.class);
-                });
+        Condition activeItem = Tables.EH_VAR_FIELD_ITEMS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()).or(Tables.EH_VAR_FIELD_ITEMS.STATUS.eq(VarFieldStatus.CUSTOMIZATION.getCode()));
 
-        return items;
+        return context.select().from(Tables.EH_VAR_FIELD_ITEMS)
+                .where(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.in(fieldIds))
+                .and(activeItem)
+                .fetch().map((record)-> ConvertHelper.convert(record, FieldItem.class));
     }
 
     @Override
