@@ -1811,6 +1811,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
+		if (order.getRequestType() ==OfficeCubicleRequestType.BACKGROUND.getCode()){
+			order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+			this.officeCubicleProvider.updateCubicleRentOrder(order);
+			return;
+		}
 		 CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
 	        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
 	        createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
