@@ -153,12 +153,15 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables, "resourceName", rentalBill.getResourceName());
         smsProvider.addToTupleList(variables, "orderNum", rentalBill.getOrderNo());
 
+        String phone = rentalBill.getUserPhone();
         UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(rentalBill.getCreatorUid(),
                 IdentifierType.MOBILE.getCode());
-        if (null == userIdentifier) {
-            LOGGER.error("userIdentifier is null...userId = " + rentalBill.getCreatorUid());
+        if (userIdentifier != null)
+            phone = userIdentifier.getIdentifierToken();
+        if (null == phone) {
+            LOGGER.error("phone is null...userId = " + rentalBill.getCreatorUid());
         } else {
-            smsProvider.sendSms(rentalBill.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
+            smsProvider.sendSms(rentalBill.getNamespaceId(), phone, templateScope,
                     templateId, templateLocale, variables);
         }
     }
@@ -181,12 +184,15 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables, "orderNum", order.getOrderNo());
         smsProvider.addToTupleList(variables, "aclink", getAclinkInfo(order));
 
+        String phone = order.getUserPhone();
         UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
                 IdentifierType.MOBILE.getCode());
-        if (null == userIdentifier) {
-            LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
+        if (userIdentifier != null)
+            phone = userIdentifier.getIdentifierToken();
+        if (null == phone) {
+            LOGGER.error("phone is null...userId = " + order.getCreatorUid());
         } else {
-            smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
+            smsProvider.sendSms(order.getNamespaceId(), phone, templateScope,
                     templateId, templateLocale, variables);
         }
     }
