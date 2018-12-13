@@ -1,77 +1,45 @@
 package com.everhomes.contract.template;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.aclink.AclinkServiceErrorCode;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ChangeMethod;
 import com.everhomes.rest.contract.ContractChargingChangeDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractTemplateBuildingApartmentDTO;
+import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.rest.contract.template.ContractTemplateCode;
+import com.everhomes.user.UserContext;
+
+import ch.qos.logback.core.joran.conditional.ElseAction;
 
 //@Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "chargingChanges")
 public class ChargingChangesContractTemplate{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChargingChangesContractTemplate.class);
 	
+	@Autowired
+	private LocaleStringService localeStringService;
+	
 	private List<ContractChargingChangeDTO> chargingChanges;
 	
 	public ChargingChangesContractTemplate() {}
 	
-	public ChargingChangesContractTemplate(List<ContractChargingChangeDTO> chargingChanges) {
-		this.chargingChanges = chargingChanges;
-	}
-
 	public List<ContractChargingChangeDTO> getChargingChanges() {
 		return chargingChanges;
 	}
 
 	public void setChargingChanges(List<ContractChargingChangeDTO> chargingChanges) {
 		this.chargingChanges = chargingChanges;
-	}
-
-	public boolean isValid(ContractDetailDTO contract, String[] segments) {
-		//入参不能为空
-		if (contract == null || segments == null || segments.length == 0) {
-			return false;
-		}
-		//segments第二位必须是数字
-		Integer index = null;
-		try{
-			index = Integer.parseInt(segments[1]);
-		}catch (Exception e) {
-			LOGGER.info("index is not a number,index is {}. Exception message is {}",segments[1],e.getMessage());
-			return false;
-		}
-		//index不能超出list的范围
-		if (chargingChanges != null && chargingChanges.size() > 0) {
-			if (index >= chargingChanges.size() || index < 0) {
-				return false;
-			}
-		}else {
-			return false;
-		}
-		//是否包含该属性名	
-		if (!PropertyUtils.containsField(ContractChargingChangeDTO.class, segments[2])) {
-			return false;
-		}
-		return true;
-	}
-
-	public String getValue(ContractDetailDTO contract, String[] segments) {
-		String value = "";
-		Object data = null;
-		
-		Integer index = Integer.parseInt(segments[1]);
-		ContractChargingChangeDTO chargingChange = chargingChanges.get(index);
-		
-		String chargingChangeInfoKey = segments[2];
-		data = PropertyUtils.getProperty(chargingChange, chargingChangeInfoKey);
-		if (data != null) {
-			value = data.toString();
-		}
-		return value;
 	}
 
 	/**
@@ -93,11 +61,17 @@ public class ChargingChangesContractTemplate{
 		}
 		//index不能超出list的范围
 		if ("adjusts".equals(type)) {
-			if (!checkIndexWithinRange(contract.getAdjusts(), index)) {
+			if (chargingChanges == null) {
+				chargingChanges = contract.getAdjusts();
+			}
+			if (!checkIndexWithinRange(chargingChanges, index)) {
 				return false;
 			}
 		}else if("frees".equals(type)){
-			if (!checkIndexWithinRange(contract.getFrees(), index)) {
+			if (chargingChanges == null) {
+				chargingChanges = contract.getFrees();
+			}
+			if (!checkIndexWithinRange(chargingChanges, index)) {
 				return false;
 			}
 		}
@@ -108,14 +82,16 @@ public class ChargingChangesContractTemplate{
 	}
 
 	protected String getValue(ContractDetailDTO contract, String[] segments, String type) {
-		String value = "";
 		Object data = null;
-		List<ContractChargingChangeDTO> chargingChanges = null;
 		
 		if ("adjusts".equals(type)) {
-			chargingChanges = contract.getAdjusts();
+			if (chargingChanges == null) {
+				chargingChanges = contract.getAdjusts();
+			}
 		}else if("frees".equals(type)){
-			chargingChanges = contract.getFrees();
+			if (chargingChanges == null) {
+				chargingChanges = contract.getFrees();
+			}
 		}
 		
 		Integer index = Integer.parseInt(segments[1]);
@@ -123,15 +99,54 @@ public class ChargingChangesContractTemplate{
 		
 		String chargingChangeInfoKey = segments[2];
 		data = PropertyUtils.getProperty(chargingChange, chargingChangeInfoKey);
-		if (data != null) {
-			value = data.toString();
+		
+		return formatValue(chargingChangeInfoKey,data);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String formatValue(String key,Object data){
+		if (data == null) {
+			return "";
+		}
+		
+		String value = "";
+		switch (key) {
+			case "changeStartTime":
+			case "changeExpiredTime":
+				value = formatTimeStamp((Long) data);
+				break;
+			case "changeMethod":
+				value = ChangeMethod.fromStatus((byte) data).getDescription();
+				break;
+			case "periodUnit":
+				value = PeriodUnit.fromStatus((byte) data).getDescription();
+				break;
+			case "apartments":
+				StringBuilder apartmentsSBuilder = new StringBuilder();
+				List<BuildingApartmentDTO> apartments = (List<BuildingApartmentDTO>)data;
+				for(BuildingApartmentDTO apartment : apartments){
+					apartmentsSBuilder.append(apartment.getBuildingName()).append("/").
+									   append(apartment.getApartmentName()).append(",");
+				}
+				if (apartmentsSBuilder.length() > 0) {
+					value = apartmentsSBuilder.substring(0, apartmentsSBuilder.length()-1);
+				}
+				break;
+			default:
+				value = data.toString();
+				break;
 		}
 		return value;
 	}
 	
-	private boolean checkIndexWithinRange(List<ContractChargingChangeDTO> chargingChangeDTOs,Integer index){
-		if (chargingChangeDTOs != null && chargingChangeDTOs.size()>0) {
-			if (index >= chargingChangeDTOs.size() || index < 0) {
+	private String formatTimeStamp(Long timeStamp){
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		return simpleDateFormat.format(new Date(timeStamp));
+	}
+	
+	private boolean checkIndexWithinRange(List<ContractChargingChangeDTO> chargingChanges,Integer index){
+		if (chargingChanges != null && chargingChanges.size()>0) {
+			if (index >= chargingChanges.size() || index < 0) {
 				return false;
 			}
 		}else {

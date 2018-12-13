@@ -1,6 +1,10 @@
 package com.everhomes.contract.template;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.validation.constraints.Null;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +19,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractTemplateBuildingApartmentDTO;
+import com.google.zxing.Result;
 
 @Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "apartments")
 public class ApartmentsContractTemplate implements ContractTemplateHandler{
@@ -27,6 +32,27 @@ public class ApartmentsContractTemplate implements ContractTemplateHandler{
 	@Autowired
 	private CommunityProvider communityProvider;
 	
+	//声明这种变量，有点类似于redis缓存的那种意思，对于同一个合同文档，获取一次数据就行了，不用老去重复获取合同相关的数据
+	private List<BuildingApartmentDTO> apartments;
+	
+	private List<ContractTemplateBuildingApartmentDTO> apartmentDetails;
+	
+	public List<BuildingApartmentDTO> getApartments() {
+		return apartments;
+	}
+	
+	public void setApartments(List<BuildingApartmentDTO> apartments) {
+		this.apartments = apartments;
+	}
+
+	public List<ContractTemplateBuildingApartmentDTO> getApartmentDetails() {
+		return apartmentDetails;
+	}
+
+	public void setApartmentDetails(List<ContractTemplateBuildingApartmentDTO> apartmentDetails) {
+		this.apartmentDetails = apartmentDetails;
+	}
+
 	/**
 	 * 合法的例子：
 	 * 项目名称：apartments.0.communityName
@@ -46,7 +72,9 @@ public class ApartmentsContractTemplate implements ContractTemplateHandler{
 			return false;
 		}
 		//index不能超出list的范围
-		List<BuildingApartmentDTO> apartments = contract.getApartments();
+		if (apartments == null) {
+			apartments = contract.getApartments();
+		}
 		if (apartments != null && apartments.size()>0) {
 			if (index >= apartments.size() || index < 0) {
 				return false;
@@ -63,23 +91,53 @@ public class ApartmentsContractTemplate implements ContractTemplateHandler{
 
 	@Override
 	public String getValue(ContractDetailDTO contract, String[] segments) {
-		String value = "";
 		Object data = null;
-		
-		List<BuildingApartmentDTO> buildingApartmentList = contract.getApartments();
-
+		if (apartmentDetails == null) {
+			apartmentDetails = getApartmentDetails(contract.getApartments());
+		}
 		Integer index = Integer.parseInt(segments[1]);
-		BuildingApartmentDTO buildingApartmentDTO = buildingApartmentList.get(index);
-		ContractTemplateBuildingApartmentDTO apartmentDetail = getApartmentDetail(buildingApartmentDTO);
+		ContractTemplateBuildingApartmentDTO apartmentDetail = apartmentDetails.get(index);
 		
 		String apartmentsInfoKey = segments[2];
 		data = PropertyUtils.getProperty(apartmentDetail, apartmentsInfoKey);
-		if (data != null) {
-			value = data.toString();
+		
+		return formatValue(apartmentsInfoKey,data);
+	}
+	
+	private String formatValue(String key,Object data){
+		if (data == null) {
+			return "";
+		}
+		
+		String value = "";
+		switch (key) {
+			case "areaSize":
+			case "chargeArea":
+			case "sharedArea":	
+				value = String.valueOf(doubleRoundHalfUp((double) data,2));
+				break;
+			default:
+				value = data.toString();
+				break;
 		}
 		return value;
 	}
 
+	//四舍五入截断double类型数据
+	private double doubleRoundHalfUp(double input,int scale){
+		BigDecimal digit = new BigDecimal(input);
+		return digit.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+	}
+	
+	private List<ContractTemplateBuildingApartmentDTO> getApartmentDetails(List<BuildingApartmentDTO> buildingApartmentList){
+		List<ContractTemplateBuildingApartmentDTO> result = new ArrayList<>();
+		for(BuildingApartmentDTO dto : buildingApartmentList){
+			ContractTemplateBuildingApartmentDTO apartmentDetail = getApartmentDetail(dto);
+			result.add(apartmentDetail);
+		}
+		return result;
+	}
+	
 	private ContractTemplateBuildingApartmentDTO getApartmentDetail(BuildingApartmentDTO apartment){
 		ContractTemplateBuildingApartmentDTO result = new ContractTemplateBuildingApartmentDTO();
 		result.setChargeArea(apartment.getChargeArea());

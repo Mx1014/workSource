@@ -1,6 +1,8 @@
 package com.everhomes.contract.template;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,9 +11,12 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.asset.ChargingVariable;
 import com.everhomes.rest.asset.ChargingVariables;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ChangeMethod;
 import com.everhomes.rest.contract.ContractChargingChangeDTO;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.PeriodUnit;
 import com.everhomes.util.StringHelper;
 
 @Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "chargingItems")
@@ -71,14 +76,14 @@ public class ChargingItemsContractTemplate implements ContractTemplateHandler{
 
 	@Override
 	public String getValue(ContractDetailDTO contract, String[] segments) {
-		String value = "";
 		Object data = null;
 		
 		List<ContractChargingItemDTO> contractChargingItemList = contract.getChargingItems();
 		Integer index = Integer.parseInt(segments[1]);
 		ContractChargingItemDTO contractChargingItem = contractChargingItemList.get(index);
 		
-		if ("chargingVariables".equals(segments[2])) {
+		String chargingItemInfoKey = segments[2];
+		if ("chargingVariables".equals(chargingItemInfoKey)) {
 			String key = segments[3];
 			String chargingVariables = contractChargingItem.getChargingVariables();
 			ChargingVariables chargingVariableList = (ChargingVariables) StringHelper.fromJsonString(chargingVariables, ChargingVariables.class);
@@ -93,14 +98,46 @@ public class ChargingItemsContractTemplate implements ContractTemplateHandler{
 				}
 			}
 		}else {
-			String chargingItemInfoKey = segments[2];
 			data = PropertyUtils.getProperty(contractChargingItem, chargingItemInfoKey);
 		}
 		
-		if (data != null) {
-			value = data.toString();
+		return formatValue(chargingItemInfoKey, data);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String formatValue(String key,Object data){
+		if (data == null) {
+			return "";
+		}
+		
+		String value = "";
+		switch (key) {
+			case "chargingStartTime":
+			case "chargingExpiredTime":
+				value = formatTimeStamp((Long) data);
+				break;
+			case "apartments":
+				StringBuilder apartmentsSBuilder = new StringBuilder();
+				List<BuildingApartmentDTO> apartments = (List<BuildingApartmentDTO>)data;
+				for(BuildingApartmentDTO apartment : apartments){
+					apartmentsSBuilder.append(apartment.getBuildingName()).append("/").
+									   append(apartment.getApartmentName()).append(",");
+				}
+				if (apartmentsSBuilder.length() > 0) {
+					value = apartmentsSBuilder.substring(0, apartmentsSBuilder.length()-1);
+				}
+				break;
+			//TODO
+			default:
+				value = data.toString();
+				break;
 		}
 		return value;
+	}
+	
+	private String formatTimeStamp(Long timeStamp){
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		return simpleDateFormat.format(new Date(timeStamp));
 	}
 
 }

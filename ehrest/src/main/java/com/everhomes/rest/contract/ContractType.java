@@ -12,7 +12,6 @@ public enum ContractType {
     NEW((byte)0,"新签合同"), RENEW((byte)1,"续约合同"), CHANGE((byte)2,"变更合同"), DENUNCIATION((byte)3,"退约合同");
 
     private byte code;
-
     private String description;
 
     ContractType(byte code, String description) {
