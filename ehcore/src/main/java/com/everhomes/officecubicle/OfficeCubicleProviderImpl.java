@@ -453,7 +453,11 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			if (orderStatus.equals(OfficeCubicleOrderStatus.EFFECTIVE.getCode())){
 				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.in(
 						new Byte[]{OfficeCubicleOrderStatus.IN_USE.getCode(),OfficeCubicleOrderStatus.PAID.getCode()}));
-			} else{
+			}else if(orderStatus.equals(OfficeCubicleOrderStatus.CANCEL.getCode())){
+				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.in(
+						new Byte[]{OfficeCubicleOrderStatus.FAIL.getCode(),OfficeCubicleOrderStatus.REFUNDED.getCode()}));
+			
+			}else{
 				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.eq(orderStatus));
 			}
 		}
