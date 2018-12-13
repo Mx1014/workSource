@@ -452,7 +452,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		if (null != orderStatus){
 			if (orderStatus.equals(OfficeCubicleOrderStatus.EFFECTIVE.getCode())){
 				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.in(
-						new Byte[]{OfficeCubicleOrderStatus.IN_USE.getCode(),OfficeCubicleOrderStatus.PAID.getCode()}));
+						new Byte[]{OfficeCubicleOrderStatus.IN_USE.getCode(),OfficeCubicleOrderStatus.PAID.getCode(),
+								OfficeCubicleOrderStatus.REFUNDING.getCode()}));
 			}else if(orderStatus.equals(OfficeCubicleOrderStatus.CANCEL.getCode())){
 				condition = condition.and(Tables.EH_OFFICE_CUBICLE_RENT_ORDERS.ORDER_STATUS.in(
 						new Byte[]{OfficeCubicleOrderStatus.FAIL.getCode(),OfficeCubicleOrderStatus.REFUNDED.getCode()}));
@@ -497,7 +498,6 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId);
-		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.gt(new Timestamp(System.currentTimeMillis())));
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.ORDER_ID.eq(orderId));
 		step.where(condition);
 		List<OfficeCubicleStationRent> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_STATION_RENT.OPERATE_TIME.desc()).fetch().map((r) -> {
