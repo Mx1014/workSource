@@ -225,6 +225,9 @@ INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_t
 INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag9', '预留字段9', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
 INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'contract', 'stringTag10', '预留字段10', 'String', '15', '/13/15/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 64}');
 
+-- AUTHOR: 梁燕龙  20181214
+-- REMARK: 更新企业账单为企业应用
+UPDATE eh_service_module_apps SET app_type = 0 WHERE module_id = 20500;
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
