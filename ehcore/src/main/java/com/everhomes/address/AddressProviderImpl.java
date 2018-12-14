@@ -1459,4 +1459,16 @@ public class AddressProviderImpl implements AddressProvider {
 			   });
 		return result;
 	}
+	
+	@Override
+	public List<Long> findOrganizationAddressByOrganizationId(Long organizationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		return context.select(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID)
+					  .from(Tables.EH_ORGANIZATION_ADDRESSES)
+					  .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+					  .and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()))
+					  .fetchInto(Long.class);
+	}
+	
 }

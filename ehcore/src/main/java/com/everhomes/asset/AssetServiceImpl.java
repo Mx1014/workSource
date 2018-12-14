@@ -54,12 +54,14 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.bill.PayAssetGeneralOrderResponse;
 import com.everhomes.rest.asset.calculate.AssetOneTimeBillStatus;
 import com.everhomes.rest.asset.calculate.NatualQuarterMonthDTO;
-import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.contract.*;
+import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractExportPaymentBillCode;
+import com.everhomes.rest.contract.ContractTemplateStatus;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -76,6 +78,7 @@ import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.promotion.order.GoodDTO;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
@@ -3878,6 +3881,13 @@ public class AssetServiceImpl implements AssetService {
         handler.payNotify(cmd);
 	}
 	
+	public void payNotifyV2(MerchantPaymentNotificationCommand cmd) {
+		AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        handler.payNotifyV2(cmd);
+	}
+	
 	public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd){
 		//权限校验
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrganizationId(), PrivilegeConstants.ASSET_DEAL_VIEW, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, cmd.getCommunityId());
@@ -4625,6 +4635,7 @@ public class AssetServiceImpl implements AssetService {
 		AssetGeneralBillMappingCmd assetGeneralBillMappingCmd = ConvertHelper.convert(cmd, AssetGeneralBillMappingCmd.class);
 		GeneralBillHandler generalBillHandler = getGeneralBillHandler(cmd.getSourceType());
 		if(generalBillHandler == null) {
+		    LOGGER.error("can not find asset mapping");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "can not find asset mapping");
 		}
@@ -4636,15 +4647,21 @@ public class AssetServiceImpl implements AssetService {
 			Long billGroupId = mapping.getBillGroupId();
 			Long charingItemId = mapping.getChargingItemId();
 			//统一账单不支持重复记账
-			PaymentBills paymentBill = assetProvider.findPaymentBill(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getSourceId(), cmd.getMerchantOrderId());
-			if(paymentBill != null) {
+//            PaymentBills paymentBill = assetProvider.findPaymentBill(cmd.getNamespaceId(), cmd.getSourceType(),
+//            cmd.getSourceId(), cmd.getMerchantOrderId());
+            //统一账单不支持重复记账,在明细中进行查询校验
+            List<PaymentBillItems> paymentBillItemsList = assetProvider.findPaymentBillItems(cmd.getNamespaceId(),
+                    cmd.getSourceType(), cmd.getSourceId(), cmd.getMerchantOrderId());
+			if(paymentBillItemsList != null) {
+			    LOGGER.error("Those billItems are exist, namespaceId={}, sourceType={}, sourceId={}, merchantOrderId={}",
+                        cmd.getNamespaceId(), cmd.getSourceType(), cmd.getSourceId(), cmd.getMerchantOrderId());
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-	                    "This bill is exist, namespaceId={" + cmd.getNamespaceId() + "}, sourceType={" + cmd.getSourceType() + "}, "
-	                    		+ "sourceId={" + cmd.getSourceId() + "}, merchantOrderId={" + cmd.getMerchantOrderId() + "}");
+	                    "Those billItems are exist");
 			}
 			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 			dtos.add(dto);
 		}else {
+		    LOGGER.error("can not find asset mapping");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "can not find asset mapping");
 		}
@@ -4715,8 +4732,10 @@ public class AssetServiceImpl implements AssetService {
 		billGroupDTO.setBillItemDTOList(billItemDTOList);
 		billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
 		createBillCommand.setBillGroupDTO(billGroupDTO);
+		createBillCommand.setCanMergeBillItem(true);
 
-		ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand, null);
+		ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand,null);
+//        ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand,null);
 		//主要是把以前缴费这边为了兼容对接使用的String类型的billId全部换成Long类型的billId，因为创建统一账单都是在缴费这边的表，都是Long
 		ListGeneralBillsDTO convertDTO = ConvertHelper.convert(dto, ListGeneralBillsDTO.class);
 		Long billId = Long.parseLong(dto.getBillId());
@@ -4725,33 +4744,119 @@ public class AssetServiceImpl implements AssetService {
 		return convertDTO;
 	}
 
-	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
-		List<Long> billIdList = cmd.getBillIdList();
-		//1、先校验是否可以正常取消
-		for(Long billId : billIdList) {
-			PaymentBills paymentBill = assetProvider.findPaymentBillById(billId);
-			if(null != paymentBill) {
-				if(null != cmd.getMerchantOrderId()) {
-					if(!cmd.getMerchantOrderId().equals(paymentBill.getMerchantOrderId())) {
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-			                    "merchantOrderId valid error, merchantOrderId={" + cmd.getMerchantOrderId() + "}, "
-			                    		+ "merchantOrderIdFindByBillId={" + paymentBill.getMerchantOrderId() + "}");
-					}
-				}else {
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-		                    "merchantOrderId can not be null");
-				}
-			}else {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-	                    "can not find bill by billId={" + billId + "}");
-			}
-		}
-		//2、校验通过，取消账单
-		for(Long billId : billIdList) {
-			assetProvider.deleteBill(billId);
-		}
-	}
 
+//	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
+//		List<Long> billIdList = cmd.getBillIdList();
+//		//1、先校验是否可以正常取消
+//		for(Long billId : billIdList) {
+//			PaymentBills paymentBill = assetProvider.findPaymentBillById(billId);
+//			if(null != paymentBill) {
+//				if(null != cmd.getMerchantOrderId()) {
+//					if(!cmd.getMerchantOrderId().equals(paymentBill.getMerchantOrderId())) {
+//                        List<PaymentBillItems> billItems =assetProvider.findPaymentBillItems(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),billId);
+//                        if(billItems!=null){
+//                            //当所有的明细MerchantOrderId与入参的MerchantOrderId不能匹配时，flag为false。
+//                            Boolean flag = false;
+//                            for (PaymentBillItems billItem:billItems){
+//                                if (cmd.getMerchantOrderId().equals(billItem.getMerchantOrderId())){
+//                                    flag = true;
+//                                    break;
+//                                }
+//                            }
+//                            //不能匹配时报异常
+//                            if(!flag){
+//                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//                                        "merchantOrderId valid error, merchantOrderId={" + cmd.getMerchantOrderId() + "}, "
+//                                                + "merchantOrderIdFindByBillId={" + paymentBill.getMerchantOrderId() + "}"
+//                                                +(paymentBill.getMerchantOrderId()!=null?"merchantOrderIdFindByBillId={"
+//                                                + paymentBill.getMerchantOrderId() + "}":
+//                                                "can't find the matching getMerchantOrderId in billItems"));
+//                            }
+//                        }
+//					}
+//				}else {
+//					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//		                    "merchantOrderId can not be null");
+//				}
+//			}else {
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//	                    "can not find bill by billId={" + billId + "}");
+//			}
+//		}
+//		//2、校验通过，取消账单
+//		for(Long billId : billIdList) {
+//            PaymentBills paymentBill = assetProvider.findPaymentBillById(billId);
+//            //当MerchantOrderId不为空时，删除相应账单
+//		    if (paymentBill.getMerchantOrderId()!=null&&paymentBill.getMerchantOrderId().length()>0){
+//                assetProvider.deleteBill(billId,cmd.getMerchantOrderId());
+//
+//            }else{
+//		        //当MerchantOrderId为空时，删除相应明细
+//                assetProvider.deleteBillItems(billId,cmd.getMerchantOrderId());
+//                assetProvider.reCalBillById(billId);
+//                List<PaymentBillItems> billItems =assetProvider.findPaymentBillItems(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),billId);
+//                if (billItems==null){
+//                    //当账单明细为空时，删除账单
+//                    assetProvider.deleteBill(billId,cmd.getMerchantOrderId());
+//                }
+//            }
+//
+//		}
+//	}
+
+    public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
+        List<Long> billIdList = cmd.getBillIdList();
+        //1、先校验是否可以正常取消
+        for(Long billId : billIdList) {
+            //卫语句风格
+            PaymentBills paymentBill = assetProvider.findPaymentBillById(billId);
+            if (paymentBill==null){
+                LOGGER.error("can not find bill by billId={}",billId);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "can not find bill by billId={" + billId + "}");
+            }
+            List<PaymentBillItems> billItems =assetProvider.findPaymentBillItems(cmd.getNamespaceId(),cmd.getOwnerId(),
+                    cmd.getOwnerType(),billId);
+            if (billItems==null){
+                LOGGER.error("can not find billItems by billId={}",billId);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "can not find billItems by billId={" + billId + "}");
+            }
+            if (cmd.getMerchantOrderId()==null){
+                LOGGER.error("merchantOrderId can not be null");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "merchantOrderId can not be null");
+            }
+
+            //当所有的明细MerchantOrderId与入参的MerchantOrderId不能匹配时，flag为false。
+            Boolean flag = false;
+            for (PaymentBillItems billItem:billItems){
+                if (cmd.getMerchantOrderId().equals(billItem.getMerchantOrderId())){
+                    flag = true;
+                    break;
+                }
+            }
+            if(!flag){
+                LOGGER.error("merchantOrderId valid error, merchantOrderId={}.Can't find the matched " +
+                        "getMerchantOrderId in billItems that the billId is {}",cmd.getMerchantOrderId(), billId);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "merchantOrderId valid error, merchantOrderId={" + cmd.getMerchantOrderId() + "}, "
+                                + "can't find the matching getMerchantOrderId in billItems");
+            }
+        }
+        //2、校验通过，取消账单明细，当明细为空时，删除账单
+    for(Long preCancleBillId : billIdList) {
+        //取消明细
+        assetProvider.deleteBillItems(preCancleBillId,cmd.getMerchantOrderId());
+        assetProvider.reCalBillById(preCancleBillId);
+        List<PaymentBillItems> preCancleBillItems =assetProvider.findPaymentBillItems(cmd.getNamespaceId(),
+                cmd.getOwnerId(),cmd.getOwnerType(),preCancleBillId);
+        if (preCancleBillItems==null){
+            //当账单明细为空时，删除账单
+            assetProvider.deleteBill(preCancleBillId,cmd.getMerchantOrderId());
+            }
+        }
+    }
 	/**
 	 * 物业缴费V6.6 统一账单：账单状态改变回调各个业务系统接口
 	 * @param sourceType
@@ -4784,231 +4889,6 @@ public class AssetServiceImpl implements AssetService {
             cmd.setCategoryId(0l);
         }
         assetChargingItemProvider.createChargingItem(cmd, communityIds);
-	}
-
-	/**
-	 * 同步瑞安CM的账单数据到左邻的数据库表中
-	 */
-	public void syncRuiAnCMBillToZuolin(List<CMSyncObject> cmSyncObjectList, Integer namespaceId, Long contractCategoryId){
-		if(cmSyncObjectList != null) {
-			for(CMSyncObject cmSyncObject : cmSyncObjectList) {
-				List<CMDataObject> data = cmSyncObject.getData();
-				if(data != null) {
-					for(CMDataObject cmDataObject : data) {
-						CMContractHeader contractHeader = cmDataObject.getContractHeader();
-						//1、根据propertyId获取左邻communityId
-						Long communityId = null;
-//						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());
-//						if(community != null) {
-//							communityId = community.getId();
-//						}
-						//2、获取左邻客户ID
-						Long targetId = null;
-						targetId = cmDataObject.getCustomerId();
-						//3、获取左邻楼栋单元地址ID
-						Long addressId = null;
-						if(cmDataObject.getContractUnit() != null && cmDataObject.getContractUnit().size() != 0) {
-							CMContractUnit cmContractUnit = cmDataObject.getContractUnit().get(0);
-							Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
-							if(address != null) {
-								addressId = address.getId();
-								communityId = address.getCommunityId();
-							}
-						}
-
-						//获取左邻合同ID、合同编号
-						Long contractId = null;
-						String contractNum = null;
-						String rentalID = "";
-						if(cmDataObject.getContractHeader() != null) {
-							rentalID = cmDataObject.getContractHeader().getRentalID();//瑞安CM定义的合同ID
-							try {
-								Long namespaceContractToken = Long.parseLong(rentalID);
-								Contract contract = contractProvider.findContractByNamespaceToken(namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
-										namespaceContractToken, contractCategoryId);
-								if(contract != null) {
-									contractId = contract.getId();
-									contractNum = contract.getContractNumber();
-								}
-							}catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-						}
-						//获取左邻缴费应用categoryId
-						Long categoryId = null;
-						try {
-							List<AssetServiceModuleAppDTO> assetServiceModuleAppDTOs = listAssetModuleApps(namespaceId);
-							if(assetServiceModuleAppDTOs != null && assetServiceModuleAppDTOs.get(0) != null){
-								categoryId = assetServiceModuleAppDTOs.get(0).getCategoryId();
-							}
-						}catch (Exception e){
-				            LOGGER.error(e.toString());
-				        }
-						List<CMBill> cmBills = cmDataObject.getBill();
-						for(CMBill cmBill : cmBills) {
-							BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
-							BigDecimal amountOwedWithoutTax = BigDecimal.ZERO;//待收(不含税 元)
-							BigDecimal amountReceivable = BigDecimal.ZERO;//应收含税
-							BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;//应收不含税
-							BigDecimal amountReceived = BigDecimal.ZERO;//待收含税
-							BigDecimal amountReceivedWithoutTax = BigDecimal.ZERO;//待收不含税
-							BigDecimal taxAmount = BigDecimal.ZERO;//税额
-							try{
-								amountOwed = new BigDecimal(cmBill.getBalanceAmt());
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-							try{
-								amountOwedWithoutTax = new BigDecimal(cmBill.getBalanceAmt());
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-							try{
-								amountReceivable = new BigDecimal(cmBill.getDocumentAmt());
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-							try{
-								amountReceivableWithoutTax = new BigDecimal(cmBill.getChargeAmt());
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-							//已收=账单金额（应收）-账单欠款金额（待收）
-							amountReceived = amountReceivable.subtract(amountOwed);
-							amountReceivedWithoutTax = amountReceived;
-							try{
-								taxAmount = new BigDecimal(cmBill.getTaxAmt());
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-
-							PaymentBills paymentBills = new PaymentBills();
-							paymentBills.setNamespaceId(namespaceId);
-							paymentBills.setOwnerId(communityId);
-							paymentBills.setOwnerType("community");
-							paymentBills.setCategoryId(categoryId);
-							//通过园区ID获取到对应的默认账单组ID
-							PaymentBillGroup group = assetProvider.getBillGroup(namespaceId, communityId, null, null, null, (byte)1);
-							paymentBills.setBillGroupId(group.getId());
-							paymentBills.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
-							paymentBills.setTargetId(targetId);
-							if(cmDataObject.getContractHeader() != null) {
-								paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
-							}
-							paymentBills.setContractId(contractId);
-							paymentBills.setContractNum(contractNum);
-							paymentBills.setDateStrBegin(cmBill.getStartDate());
-							paymentBills.setDateStrEnd(cmBill.getEndDate());
-							String dateStr = "";
-							SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
-							try{
-					            // 如果传递了计费开始时间
-					            if(cmBill.getStartDate() != null){
-					            	dateStr = yyyyMM.format(yyyyMM.parse(cmBill.getStartDate()));//账期取的是账单开始时间的yyyy-MM
-					            }
-					        }catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
-							paymentBills.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
-							if(cmBill.getStatus() != null) {
-								if(cmBill.getStatus().equals("已出账单")) {//已出未缴
-									paymentBills.setSwitch((byte) 1);
-									paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
-								}else if(cmBill.getStatus().equals("已缴账单")){//已出已缴
-									paymentBills.setSwitch((byte) 1);
-									paymentBills.setStatus(AssetPaymentBillStatus.PAID.getCode());
-								}else {//未出未缴
-									paymentBills.setSwitch((byte) 0);
-									paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
-								}
-							}else {
-								paymentBills.setSwitch((byte) 0);//默认为未出
-								paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());//默认为未缴
-							}
-							paymentBills.setAmountReceivable(amountReceivable);
-							paymentBills.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
-							paymentBills.setAmountReceived(amountReceived);
-							paymentBills.setAmountReceivedWithoutTax(amountReceivedWithoutTax);
-							paymentBills.setAmountOwed(amountOwed);
-							paymentBills.setAmountOwedWithoutTax(amountOwedWithoutTax);
-							paymentBills.setTaxAmount(taxAmount);
-							paymentBills.setAddressId(addressId);
-							//物业缴费V6.6（对接统一账单） 账单要增加来源
-							paymentBills.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
-							LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CM_CREATE_CODE, "zh_CN");
-							paymentBills.setSourceName(localeString.getText());
-				            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
-							paymentBills.setCanDelete((byte)0);
-							paymentBills.setCanModify((byte)0);
-				            //物业缴费V6.0 账单、费项表增加是否删除状态字段
-							paymentBills.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
-				            //瑞安CM对接 账单、费项表增加是否是只读字段
-							paymentBills.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
-							//瑞安CM对接 账单表增加第三方唯一标识字段
-							paymentBills.setThirdBillId(cmBill.getBillScheduleID());
-							paymentBills.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-							PaymentBillItems items = new PaymentBillItems();
-							items.setNamespaceId(namespaceId);
-							items.setOwnerId(communityId);
-							items.setOwnerType("community");
-							items.setCategoryId(categoryId);
-							items.setBillGroupId(group.getId());
-							items.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
-							items.setTargetId(targetId);
-							if(cmDataObject.getContractHeader() != null) {
-								items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
-							}
-							items.setContractId(contractId);
-							items.setContractNum(contractNum);
-							items.setDateStrBegin(cmBill.getStartDate());
-							items.setDateStrEnd(cmBill.getEndDate());
-							items.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
-							items.setChargingItemName(cmBill.getBillItemName());
-							items.setAmountReceivable(amountReceivable);
-							items.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
-							items.setAmountReceived(amountReceived);
-							items.setAmountReceivedWithoutTax(amountReceivedWithoutTax);
-							items.setAmountOwed(amountOwed);
-							items.setAmountOwedWithoutTax(amountOwedWithoutTax);
-							items.setTaxAmount(taxAmount);
-							items.setAddressId(addressId);
-							//物业缴费V6.6（对接统一账单） 账单要增加来源
-							items.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
-							items.setSourceName(localeString.getText());
-				            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
-							items.setCanDelete((byte)0);
-							items.setCanModify((byte)0);
-				            //物业缴费V6.0 账单、费项表增加是否删除状态字段
-							items.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
-				            //瑞安CM对接 账单、费项表增加是否是只读字段
-							items.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
-							items.setStatus(paymentBills.getStatus());
-							items.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-							PaymentBills existCmBill = assetProvider.getCMBillByThirdBillId(namespaceId, communityId, cmBill.getBillScheduleID());
-							if(existCmBill != null) {
-								//如果账单的唯一标识存在，那么是更新
-								Long billId = existCmBill.getId();
-								paymentBills.setId(billId);
-								assetProvider.updateCMBill(paymentBills);
-								PaymentBillItems existCmBillItem = assetProvider.getCMBillItemByBillId(billId);
-								if(existCmBillItem != null) {
-									items.setId(existCmBillItem.getId());
-									assetProvider.updateCMBillItem(items);
-								}
-							}else {
-								//如果账单的唯一标识不存在，那么是新增
-								Long billId = assetProvider.createCMBill(paymentBills);//创建账单并返回账单ID
-								items.setBillId(billId);
-								assetProvider.createCMBillItem(items);
-							}
-
-						}
-					}
-				}
-			}
-		}
 	}
 
 	//对接下载中心的导出账单列表
@@ -5894,6 +5774,13 @@ public class AssetServiceImpl implements AssetService {
 
 	public PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd) {
 		return assetProvider.listPaymentBillDetail(cmd.getBillId());
+	}
+
+	public PayAssetGeneralOrderResponse payBillsV2(CreatePaymentBillOrderCommand cmd) {
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        cmd.setSourceType(SourceType.MOBILE.getCode());
+        return handler.createOrderV2(cmd);
 	}
 	
 }

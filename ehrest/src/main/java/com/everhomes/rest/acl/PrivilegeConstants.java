@@ -304,6 +304,8 @@ public interface PrivilegeConstants {
     long CONTRACT_PREVIEW = 21215L;//打印预览 
     long CONTRACT_PRINT = 21216L;//打印
     long CONTRACT_COPY = 21224L;//合同复制
+    long GENERATE_CONTRACT_DOCUMENTS = 21226L;//生成合同文档
+    long VIEW_CONTRACT_DOCUMENTS = 21227L;//查看合同文档
     
 
 
