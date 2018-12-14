@@ -2921,7 +2921,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setBeginTime(order.getBeginTime().getTime());
 			dto.setEndTime(order.getEndTime().getTime());
 		}
-		dto.setRefundPrice(calculateRefundAmount(order,System.currentTimeMillis(),space));
+		dto.setRefundAmount(calculateRefundAmount(order,System.currentTimeMillis(),space));
 		response.setOrders(dto);
 		return response;
 	}

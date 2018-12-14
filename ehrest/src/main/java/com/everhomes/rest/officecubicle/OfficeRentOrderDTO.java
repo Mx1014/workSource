@@ -57,7 +57,7 @@ public class OfficeRentOrderDTO {
 	private Long beginTime;
 	private Long endTime;
 	private Long rentCount;
-	private BigDecimal refundPrice;
+	private BigDecimal refundAmount;
 	private String remark;
 	
 	
@@ -69,12 +69,12 @@ public class OfficeRentOrderDTO {
 		this.remark = remark;
 	}
 
-	public BigDecimal getRefundPrice() {
-		return refundPrice;
+	public BigDecimal getRefundAmount() {
+		return refundAmount;
 	}
 
-	public void setRefundPrice(BigDecimal refundPrice) {
-		this.refundPrice = refundPrice;
+	public void setRefundAmount(BigDecimal refundAmount) {
+		this.refundAmount = refundAmount;
 	}
 
 	public Long getRentCount() {
