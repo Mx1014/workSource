@@ -33,7 +33,7 @@ CREATE TABLE `eh_visitor_sys_third_mapping` (
 -- AUTHOR: 马世亨 20181122
 -- REMARK: 访客1.4 访客管理对接海康威视人员表
 CREATE TABLE `eh_visitor_sys_hkws_user` (
-`person_id` int NULL DEFAULT NULL COMMENT '人员ID',
+`person_id` int NOT NULL COMMENT '人员ID',
 `person_no` varchar(256) NULL DEFAULT NULL COMMENT '人员编号',
 `person_name` varchar(256) NULL DEFAULT NULL COMMENT '姓名',
 `gender` tinyint NULL DEFAULT NULL COMMENT '性别',
