@@ -1060,14 +1060,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 
 			processServiceUrl(dto);
-			this.processDetailUrl(dto);
 			this.processCommentToken(dto);
 			response.getDtos().add(dto);
 
 		}
 		this.processCommentCount(sourceRequestType, cmd.getParentId(), cmd.getOwnerType(), cmd.getOwnerId(),
 				response.getDtos());
-		this.processRange(response.getDtos());
 		
 		return response;
 	}
