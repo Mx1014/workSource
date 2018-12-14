@@ -8,6 +8,8 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.ParkingSpace;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
+import com.everhomes.rentalv2.job.RentalNearEndMessageJob;
+import com.everhomes.rentalv2.job.RentalNearStartMessageJob;
 import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
@@ -17,8 +19,11 @@ import com.everhomes.rest.promotion.merchant.controller.GetPayAccountByMerchantI
 import com.everhomes.rest.promotion.order.*;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +33,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author sw on 2018/1/5.
@@ -50,6 +57,8 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
     protected GeneralOrderService orderService;
     @Autowired
     private ConfigurationProvider configurationProvider;
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Override
     public BigDecimal getRefundAmount(RentalOrder order, Long time) {
@@ -92,6 +101,48 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
                 && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
             return true;
         return false;
+    }
+
+    @Override
+    public void nearHalfHourBegin(RentalOrder order) {
+        Long orderReminderTimeLong = order.getReminderTime()!=null?order.getReminderTime().getTime():0L;
+        Long orderEndTimeLong = order.getEndTime()!=null?order.getEndTime().getTime():0L;
+        Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0L;
+        Long currTime = DateHelper.currentGMTTime().getTime();
+        //时间快到发推送
+        if(SiteBillStatus.SUCCESS.getCode() == order.getStatus() &&
+                currTime<orderReminderTimeLong && currTime + 30*60*1000L >= orderReminderTimeLong){
+            Map<String, Object> messageMap = new HashMap<>();
+            messageMap.put("orderId",order.getId());
+            messageMap.put("resourceType",order.getResourceType());
+            scheduleProvider.scheduleSimpleJob(
+                    "RentalNearStartMessageJob" + order.getId(),
+                    "RentalNearStartMessageJob" + order.getId(),
+                    new java.util.Date(orderReminderTimeLong),
+                    RentalNearStartMessageJob.class,
+                    messageMap
+            );
+        }
+
+        //结束时间快到发推送
+        if(SiteBillStatus.IN_USING.getCode() == order.getStatus() &&
+                currTime<orderReminderEndTimeLong && currTime + 30*60*1000L >= orderReminderEndTimeLong){
+            Map<String, Object> messageMap = new HashMap<>();
+            messageMap.put("orderId",order.getId());
+            messageMap.put("resourceType",order.getResourceType());
+            scheduleProvider.scheduleSimpleJob(
+                    "RentalNearEndMessageJob" + order.getId(),
+                    "RentalNearEndMessageJob" + order.getId(),
+                    new java.util.Date(orderReminderEndTimeLong),
+                    RentalNearEndMessageJob.class,
+                    messageMap
+            );
+        }
+        //使用中
+        if (currTime >= order.getStartTime().getTime() ) {
+            order.setStatus(SiteBillStatus.IN_USING.getCode());
+            rentalv2Provider.updateRentalBill(order);
+        }
     }
 
     @Override

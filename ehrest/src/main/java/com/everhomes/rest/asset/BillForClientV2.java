@@ -11,6 +11,7 @@ package com.everhomes.rest.asset;
  * <li>amountReceivable:应缴金额</li>
  * <li>amountOwed:待缴金额</li>
  * <li>billId:账单ID</li>
+ * <li>thirdPaid:1代表已经在第三方那边支付过，不允许在左邻再次支付；0：代表没在第三方支付过</li>
  *</ul>
  */
 public class BillForClientV2 {
@@ -18,6 +19,7 @@ public class BillForClientV2 {
     private String amountReceivable;
     private String amountOwed;
     private String billId;
+    private Byte thirdPaid;
 
     public String getBillDuration() {
         return billDuration;
@@ -50,4 +52,12 @@ public class BillForClientV2 {
     public void setBillId(String billId) {
         this.billId = billId;
     }
+
+	public Byte getThirdPaid() {
+		return thirdPaid;
+	}
+
+	public void setThirdPaid(Byte thirdPaid) {
+		this.thirdPaid = thirdPaid;
+	}
 }

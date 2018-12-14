@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.address.Address;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
@@ -42,6 +43,7 @@ import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.contract.ContractReportformStatisticCommunitys;
 import com.everhomes.contract.ContractTaskOperateLog;
+import com.everhomes.contract.template.ContractDocument;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
@@ -76,6 +78,7 @@ import com.everhomes.server.schema.tables.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
+import com.everhomes.server.schema.tables.pojos.EhContractDocuments;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
 import com.everhomes.server.schema.tables.pojos.EhContractTaskOperateLogs;
@@ -675,9 +678,10 @@ public class ContractProviderImpl implements ContractProvider {
 		if(categoryId != null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.CATEGORY_ID.eq(categoryId));
 		}
-		if (categoryId == null) {
+		// 导致查询不到数据 不存在 categoryId is null,影响是：合同定时任务执行不了，比如合同过期不了
+		/*if (categoryId == null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.CATEGORY_ID.isNull());
-		}
+		}*/
 		if(communityId != null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(communityId));
 		}
@@ -1358,7 +1362,7 @@ public class ContractProviderImpl implements ContractProvider {
 		     cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.in(communityIds).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
 		}
 
-		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
+		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.ID.desc());
 		
 		if(null != pageSize)
 			query.limit(pageSize);
@@ -1751,6 +1755,43 @@ public class ContractProviderImpl implements ContractProvider {
 								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.WAITING_FOR_LAUNCH.getCode()))
 							)
 						.fetchInto(Contract.class);
+	}
+
+	@Override
+	public ContractDocument findContractDocumentById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContractDocuments.class, id));
+		EhContractDocumentsDao dao = new EhContractDocumentsDao(context.configuration());
+        EhContractDocuments ehContractDocuments = dao.findById(id);
+        if (ehContractDocuments == null) {
+            return null;
+        }
+        return ConvertHelper.convert(ehContractDocuments, ContractDocument.class);
+	}
+
+	@Override
+	public void createContractDocument(ContractDocument contractDocument) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhContractDocumentsDao dao = new EhContractDocumentsDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractDocuments.class));
+		contractDocument.setId(id);
+		contractDocument.setCreatorUid(UserContext.currentUserId());
+		contractDocument.setCreateTime(getCurrentTimeStamp());
+		contractDocument.setUpdateUid(UserContext.currentUserId());
+		contractDocument.setUpdateTime(getCurrentTimeStamp());
+		dao.insert(contractDocument);
+	}
+
+	@Override
+	public void updateContractDocument(ContractDocument contractDocument) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhContractDocumentsDao dao = new EhContractDocumentsDao(context.configuration());
+		contractDocument.setUpdateUid(UserContext.currentUserId());
+		contractDocument.setUpdateTime(getCurrentTimeStamp());
+		dao.update(contractDocument);
+	}
+	
+	private Timestamp getCurrentTimeStamp(){
+		return new Timestamp(DateHelper.currentGMTTime().getTime());
 	}
 
 	//合同报表
@@ -2262,5 +2303,28 @@ public class ContractProviderImpl implements ContractProvider {
 			resultList.add(result);
 		});
 		return resultList;
+	}
+	
+	public Timestamp findLastVersionByBackup(Integer namespaceId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_ZJ_SYNCDATA_BACKUP)
+				.where(Tables.EH_ZJ_SYNCDATA_BACKUP.NAMESPACE_ID.eq(namespaceId))
+				.orderBy(Tables.EH_ZJ_SYNCDATA_BACKUP.CREATE_TIME.desc())
+				.limit(1)
+				.fetchOne();
+		if (record != null) {
+			return record.getValue(Tables.EH_ZJ_SYNCDATA_BACKUP.CREATE_TIME);
+		}
+		return null;
+	}
+
+	public Long findAddressByContractId(Long contractId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Long> addressList = context.select(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID)
+				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId))
+				.fetchInto(Long.class);
+		if(addressList != null && addressList.size() != 0) {
+			return addressList.get(0);
+		}
+		return null;
 	}
 }

@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.flow;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -47,12 +46,16 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.flow.DisableProjectCustomizeCommand;
+import com.everhomes.rest.flow.EnableProjectCustomizeCommand;
+import com.everhomes.rest.flow.GetProjectCustomizeCommand;
+import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldsConfigDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.launchpadbase.AppContext;
-import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -72,9 +75,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.everhomes.util.*;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -84,7 +85,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -102,6 +102,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -3168,7 +3169,6 @@ public class FlowServiceImpl implements FlowService {
         List<FlowEventLog> enterLogs = new ArrayList<>();
         for (FlowCase aCase : allFlowCase) {
             if (organizationId == null) {
-
                 organizationId = aCase.getOrganizationId();
             }
             List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeNotCompleteEnterLogs(aCase.getCurrentNodeId(), aCase.getId(), aCase.getStepCount());
@@ -4642,6 +4642,19 @@ public class FlowServiceImpl implements FlowService {
 
         List<FlowPredefinedParamDTO> dtoList = paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList());
 
+        // 开启了表单则给一个固定表单跳转参数
+        FlowModuleInfo module = flowListenerManager.getModule(cmd.getModuleId());
+        if (module != null) {
+            Object formFlag = module.getMeta(FlowModuleInfo.META_KEY_FORM_FLAG);
+            if (formFlag != null && Byte.valueOf(formFlag.toString()).equals(TrueOrFalseFlag.TRUE.getCode())) {
+                FlowPredefinedParamDTO formParamDTO = new FlowPredefinedParamDTO();
+                formParamDTO.setDisplayName("跳转表单");
+                formParamDTO.setText(FlowPredefinedParamConst.FLOW_NODE_FORM_ROUTER);
+                formParamDTO.setEntityType(FlowEntityType.FLOW_BUTTON.getCode());
+                dtoList.add(formParamDTO);
+            }
+        }
+
         ListFlowPredefinedParamResponse response = new ListFlowPredefinedParamResponse();
         response.setParams(dtoList);
         return response;
@@ -5062,6 +5075,10 @@ public class FlowServiceImpl implements FlowService {
                     if (!Objects.equals(node.getFormStatus(), TrueOrFalseFlag.TRUE.getCode())) {
                         continue;
                     }
+                    FlowFormRelationType formRelationType = FlowFormRelationType.fromCode(node.getFormRelationType());
+                    if (formRelationType == FlowFormRelationType.CUSTOMIZE_FIELD) {
+                        continue;
+                    }
                     list = getConditionVariableFromForm(flow, node.getFormOriginId(), node.getFormVersion());
                     groups.add(new FlowConditionVariableGroup(node.getNodeName(), FlowEntityType.FLOW_NODE.getCode(), node.getId(), list));
                 }
@@ -5113,16 +5130,11 @@ public class FlowServiceImpl implements FlowService {
         return response;
     }
 
-    private FlowFormDTO toFlowFormDTO(GeneralForm r) {
-        FlowFormDTO dto = new FlowFormDTO();
-        dto.setFormOriginId(r.getFormOriginId());
-        dto.setFormVersion(r.getFormVersion());
-        dto.setName(r.getFormName());
-        return dto;
-    }
-
+    /**
+     * 只有直接关联表单的时候会有更新表单版本的情况
+     */
     @Override
-    public FlowFormDTO updateFlowFormVersion(UpdateFlowFormCommand cmd) {
+    public FlowFormRelationDTO updateFlowFormVersion(UpdateFlowFormCommand cmd) {
         FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
         Assert.notNull(entityType, "unknown entity type " + cmd.getEntityType());
 
@@ -5131,65 +5143,36 @@ public class FlowServiceImpl implements FlowService {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flow not exist flowId=%s", cmd.getEntityId());
         }
-        GeneralForm oldForm = getFormByEntity(entityType, cmd.getEntityId());
+
+        FlowFormResolver resolver = new FlowFormResolver(entityType, cmd.getEntityId());
+        FlowFormRelationDataDirectRelation directRelation = resolver.getDirectRelation();
+
+        GeneralForm oldForm = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+                directRelation.getFormOriginId(), directRelation.getFormVersion());
         GeneralForm newForm = generalFormProvider.getActiveGeneralFormByOriginId(oldForm.getFormOriginId());
 
-        updateFlowEntityForm(flow, entityType, cmd.getEntityId(), newForm.getFormOriginId(), newForm.getFormVersion());
+        directRelation.setFormOriginId(newForm.getFormOriginId());
+        directRelation.setFormVersion(newForm.getFormVersion());
+
+        updateFlowEntityForm(flow, entityType, cmd.getEntityId(), FlowFormRelationType.DIRECT_RELATION.getCode(), StringHelper.toJsonString(directRelation));
 
         // 因为这时候工作流记住了表单的字段，所以为了让表单修改后版本号增加，所以改成RUNNING状态
         newForm.setStatus(GeneralFormStatus.RUNNING.getCode());
         generalFormProvider.updateGeneralForm(newForm);
 
         updateFlowConditionExpressionAfterFlowFormUpdate(flow, entityType.getCode(), cmd.getEntityId(), oldForm, newForm);
-        return toFlowFormDTO(newForm);
-    }
-
-    private GeneralForm getFormByEntity(FlowEntityType entityType, Long entityId) {
-        Long formOriginId = null;
-        Long formVersion = null;
-        switch (entityType) {
-            case FLOW:
-                Flow flow = getFlowByEntity(entityId, entityType);
-                formOriginId = flow.getFormOriginId();
-                formVersion = flow.getFormVersion();
-                break;
-            case FLOW_NODE:
-                FlowNode node = flowNodeProvider.getFlowNodeById(entityId);
-                formOriginId = node.getFormOriginId();
-                formVersion = node.getFormVersion();
-                break;
-        }
-        return generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(formOriginId, formVersion);
-    }
-
-    private void updateFlowEntityForm(Flow flow, FlowEntityType entityType, Long entityId, Long formOriginId, Long formVersion) {
-        switch (entityType) {
-            case FLOW:
-                flow.setFormOriginId(formOriginId);
-                flow.setFormVersion(formVersion);
-                flow.setFormUpdateTime(DateUtils.currentTimestamp());
-                break;
-            case FLOW_NODE:
-                FlowNode node = flowNodeProvider.getFlowNodeById(entityId);
-                node.setFormOriginId(formOriginId);
-                node.setFormVersion(formVersion);
-                node.setFormUpdateTime(DateUtils.currentTimestamp());
-                flowNodeProvider.updateFlowNode(node);
-                break;
-            default:
-                throw new IllegalArgumentException("unknown entity type " + entityType.getCode());
-        }
-        flowMarkUpdated(flow);
+        return toFlowFormRelationDTO(entityType, cmd.getEntityId());
     }
 
     private void updateFlowConditionExpressionAfterFlowFormUpdate(
             Flow flow, String entityType, Long entityId, GeneralForm oldForm, GeneralForm newForm) {
-        List<GeneralFormFieldDTO> newFormField = new ArrayList<>();
+        List<FlowConditionVariableDTO> newFormField = new ArrayList<>();
+
         if (newForm != null) {
-            newFormField = JSON.parseArray(newForm.getTemplateText(), GeneralFormFieldDTO.class);
+            newFormField = getConditionVariableFromForm(flow, newForm.getFormOriginId(), newForm.getFormVersion());
         }
 
-        List<String> newFieldNameList = newFormField.stream().map(GeneralFormFieldDTO::getFieldName).collect(Collectors.toList());
+        List<String> newFieldNameList = newFormField.stream().map(FlowConditionVariableDTO::getDisplayName).collect(Collectors.toList());
 
         List<FlowConditionExpression> expressions =
                 flowConditionExpressionProvider.listFlowConditionExpressionByFlow(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
@@ -5228,8 +5211,60 @@ public class FlowServiceImpl implements FlowService {
         }
     }
 
+    private void updateFlowEntityForm(Flow flow, FlowEntityType entityType, Long entityId, Byte formRelationType, String formRelationData) {
+        switch (entityType) {
+            case FLOW:
+                if (formRelationType != null) {
+                    flow.setFormRelationType(formRelationType);
+                    flow.setFormRelationData(formRelationData);
+                    flow.setFormUpdateTime(DateUtils.currentTimestamp());
+
+                    flow.setFormOriginId(0L);
+                    flow.setFormVersion(0L);
+
+                    // 这些其实是为了兼容一下旧的使用方式
+                    updateFormRelation(formRelationType, formRelationData, relation -> {
+                        flow.setFormOriginId(relation.getFormOriginId());
+                        flow.setFormVersion(relation.getFormVersion());
+                    });
+                }
+                break;
+            case FLOW_NODE:
+                FlowNode node = flowNodeProvider.getFlowNodeById(entityId);
+                if (formRelationType != null) {
+                    node.setFormRelationType(formRelationType);
+                    node.setFormRelationData(formRelationData);
+                    node.setFormUpdateTime(DateUtils.currentTimestamp());
+
+                    node.setFormOriginId(0L);
+                    node.setFormVersion(0L);
+
+                    // 这些其实是为了兼容一下旧的使用方式
+                    updateFormRelation(formRelationType, formRelationData, relation -> {
+                        node.setFormOriginId(relation.getFormOriginId());
+                        node.setFormVersion(relation.getFormVersion());
+                    });
+                }
+                flowNodeProvider.updateFlowNode(node);
+                break;
+            default:
+                throw new IllegalArgumentException("unknown entity type " + entityType.getCode());
+        }
+        flowMarkUpdated(flow);
+    }
+
+    private void updateFormRelation(Byte formRelationType, String relationData, Consumer<FlowFormRelationDataDirectRelation> consumer) {
+        if (FlowFormRelationType.DIRECT_RELATION.getCode().equals(formRelationType)) {
+            FlowFormRelationDataDirectRelation directRelation = (FlowFormRelationDataDirectRelation)
+                    StringHelper.fromJsonString(relationData, FlowFormRelationDataDirectRelation.class);
+            if (directRelation != null) {
+                consumer.accept(directRelation);
+            }
+        }
+    }
+
     @Override
-    public FlowFormDTO createFlowForm(UpdateFlowFormCommand cmd) {
+    public FlowFormRelationDTO createFlowForm(UpdateFlowFormCommand cmd) {
         FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
         Assert.notNull(entityType, "unknown entity type " + cmd.getEntityType());
 
@@ -5239,14 +5274,107 @@ public class FlowServiceImpl implements FlowService {
                     "flow not exist flowId=%s", cmd.getEntityId());
         }
 
-        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(), cmd.getFormVersion());
-        Assert.notNull(form, "form not exist");
+        FlowFormRelationType relationType = FlowFormRelationType.fromCode(cmd.getFormRelationType());
+        switch (relationType) {
+            case CUSTOMIZE_FIELD:
+                FlowFormRelationDataCustomizeField customizeField = cmd.getCustomizeField();
+                CreateFormFieldsConfigCommand ffcCmd = new CreateFormFieldsConfigCommand();
+                ffcCmd.setFormOriginId(customizeField.getFormOriginId());
+                ffcCmd.setFormVersion(customizeField.getFormVersion());
+                ffcCmd.setConfigType(GeneralFormConstants.FORM_FIELDS_CONFIG_TYPE);
+                ffcCmd.setModuleId(flow.getModuleId());
+                ffcCmd.setModuleType(flow.getModuleType());
+                ffcCmd.setProjectType(flow.getProjectType());
+                ffcCmd.setProjectId(flow.getProjectId());
+                ffcCmd.setNamespaceId(flow.getNamespaceId());
+                ffcCmd.setOrganizationId(flow.getOrganizationId());
+                ffcCmd.setFormFields(GsonUtil.fromJson(customizeField.getSelectedFormFieldsStr(), new TypeToken<List<GeneralFormFieldsConfigFieldDTO>>() {}.getType()));
 
-        updateFlowEntityForm(flow, entityType, cmd.getEntityId(), cmd.getFormOriginId(), cmd.getFormVersion());
-        // 因为这时候工作流记住了表单的字段，所以为了让表单修改后版本号增加，所以改成RUNNING状态
-        form.setStatus(GeneralFormStatus.RUNNING.getCode());
-        generalFormProvider.updateGeneralForm(form);
-        return toFlowFormDTO(form);
+                GeneralFormFieldsConfigDTO fieldsConfigDTO = generalFormService.createFormFieldsConfig(ffcCmd);
+                generalFormService.updateFormFieldsConfigStatus(fieldsConfigDTO.getId());
+
+                fieldsConfigDTO.setFormFields(null);
+
+                updateFlowEntityForm(flow, entityType, cmd.getEntityId(), relationType.getCode(), StringHelper.toJsonString(fieldsConfigDTO));
+                break;
+            case DIRECT_RELATION:
+                FlowFormRelationDataDirectRelation directRelation = cmd.getDirectRelation();
+                Long formOriginId = directRelation.getFormOriginId();
+                Long formVersion = directRelation.getFormVersion();
+
+                GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(formOriginId, formVersion);
+                Assert.notNull(form, "form not exist");
+
+                updateFlowEntityForm(flow, entityType, cmd.getEntityId(), relationType.getCode(), StringHelper.toJsonString(directRelation));
+                // 因为这时候工作流记住了表单的字段，所以为了让表单修改后版本号增加，所以改成RUNNING状态
+                form.setStatus(GeneralFormStatus.RUNNING.getCode());
+                generalFormProvider.updateGeneralForm(form);
+                break;
+        }
+        return toFlowFormRelationDTO(entityType, cmd.getEntityId());
+    }
+
+    private FlowFormRelationDTO toFlowFormRelationDTO(FlowEntityType entityType, Long entityId) {
+        FlowFormResolver resolver = new FlowFormResolver(entityType, entityId);
+
+        Byte formRelationType = resolver.getFormRelationType();
+        String formRelationData = resolver.getFormRelationData();
+        Byte formStatus = resolver.getFormStatus();
+        Timestamp formUpdateTime = resolver.getFormUpdateTime();
+
+        FlowFormRelationDTO dto = new FlowFormRelationDTO();
+        dto.setFormRelationType(formRelationType);
+        dto.setStatus(formStatus);
+        dto.setEntityType(entityType.getCode());
+        dto.setEntityId(entityId);
+
+        FlowFormRelationType relationType = FlowFormRelationType.fromCode(formRelationType);
+        if (relationType != null && StringUtils.isNotEmpty(formRelationData)) {
+            switch (relationType) {
+                case DIRECT_RELATION:
+                    FlowFormRelationDataDirectRelation directRelation = resolver.getDirectRelation();
+
+                    GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+                            directRelation.getFormOriginId(), directRelation.getFormVersion());
+
+                    FlowFormRelationDataDirectRelationDTO directRelationDTO = new FlowFormRelationDataDirectRelationDTO();
+                    directRelationDTO.setFormOriginId(form.getFormOriginId());
+                    directRelationDTO.setFormVersion(form.getFormVersion());
+                    directRelationDTO.setName(form.getFormName());
+
+                    GeneralForm newVersionForm = generalFormProvider.getActiveGeneralFormByOriginId(directRelation.getFormOriginId());
+                    if (newVersionForm != null && !newVersionForm.getFormVersion().equals(form.getFormVersion())) {
+                        directRelationDTO.setUpdateFlag(TrueOrFalseFlag.TRUE.getCode());
+                    } else {
+                        directRelationDTO.setUpdateFlag(TrueOrFalseFlag.FALSE.getCode());
+                    }
+                    directRelationDTO.setUpdateTime(formUpdateTime != null ? formUpdateTime.getTime() : 0L);
+
+                    dto.setDirectRelation(directRelationDTO);
+                    break;
+                case CUSTOMIZE_FIELD:
+                    GeneralFormFieldsConfigDTO configFieldDTO = (GeneralFormFieldsConfigDTO)
+                            StringHelper.fromJsonString(formRelationData, GeneralFormFieldsConfigDTO.class);
+
+                    GetFormFieldsConfigCommand fccCmd = new GetFormFieldsConfigCommand();
+                    fccCmd.setFormFieldsConfigId(configFieldDTO.getId());
+                    GeneralFormFieldsConfigDTO configDTO = generalFormService.getFormFieldsConfig(fccCmd);
+
+                    FlowFormRelationDataCustomizeFieldDTO customizeFieldDTO = new FlowFormRelationDataCustomizeFieldDTO();
+                    customizeFieldDTO.setFormOriginId(configFieldDTO.getFormOriginId());
+                    customizeFieldDTO.setFormVersion(configFieldDTO.getFormVersion());
+                    customizeFieldDTO.setSelectedFormFieldsStr(StringHelper.toJsonString(configDTO.getFormFields()));
+
+                    form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+                            configFieldDTO.getFormOriginId(), configFieldDTO.getFormVersion());
+                    if (form != null) {
+                        customizeFieldDTO.setName(form.getFormName());
+                    }
+                    dto.setCustomizeField(customizeFieldDTO);
+                    break;
+            }
+        }
+        return dto;
     }
 
     @Override
@@ -5259,59 +5387,17 @@ public class FlowServiceImpl implements FlowService {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flow not exist flowId=%s", cmd.getEntityId());
         }
-        updateFlowEntityForm(flow, entityType, cmd.getEntityId(), 0L, 0L);
+
+        updateFlowEntityForm(flow, entityType, cmd.getEntityId(), FlowFormRelationType.DIRECT_RELATION.getCode(), "");
 
         updateFlowConditionExpressionAfterFlowFormUpdate(flow, entityType.getCode(), cmd.getEntityId(), null, null);
     }
 
     @Override
-    public FlowFormDTO getFlowForm(GetFlowFormCommand cmd) {
+    public FlowFormRelationDTO getFlowForm(GetFlowFormCommand cmd) {
         FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
         Assert.notNull(entityType, "unknown entity type " + cmd.getEntityType());
-
-        Byte formStatus = null;
-        Long formOriginId = null;
-        Long formVersion = null;
-        Timestamp formUpdateTime = null;
-        switch (entityType) {
-            case FLOW:
-                Flow flow = flowProvider.getFlowById(cmd.getEntityId());
-                if (flow == null) {
-                    throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
-                            "flow not exist flowId=%s", cmd.getEntityId());
-                }
-                formOriginId = flow.getFormOriginId();
-                formVersion = flow.getFormVersion();
-                formUpdateTime = flow.getFormUpdateTime();
-                formStatus = TrueOrFalseFlag.TRUE.getCode();
-                break;
-            case FLOW_NODE:
-                FlowNode node = flowNodeProvider.getFlowNodeById(cmd.getEntityId());
-                formOriginId = node.getFormOriginId();
-                formVersion = node.getFormVersion();
-                formUpdateTime = node.getFormUpdateTime();
-                formStatus = node.getFormStatus();
-                break;
-            default:
-                throw new IllegalArgumentException("unknown entity type " + entityType.getCode());
-        }
-
-        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(formOriginId, formVersion);
-        GeneralForm newVersionForm = generalFormProvider.getActiveGeneralFormByOriginId(formOriginId);
-        FlowFormDTO formDTO = null;
-        if (form != null) {
-            formDTO = toFlowFormDTO(form);
-            if (newVersionForm != null && !newVersionForm.getFormVersion().equals(form.getFormVersion())) {
-                formDTO.setUpdateFlag(TrueOrFalseFlag.TRUE.getCode());
-            } else {
-                formDTO.setUpdateFlag(TrueOrFalseFlag.FALSE.getCode());
-            }
-            formDTO.setUpdateTime(formUpdateTime != null ? formUpdateTime.getTime() : 0L);
-        } else {
-            formDTO = new FlowFormDTO();
-        }
-        formDTO.setStatus(formStatus);
-        return formDTO;
+        return toFlowFormRelationDTO(entityType, cmd.getEntityId());
     }
 
     @Override
@@ -5733,6 +5819,15 @@ public class FlowServiceImpl implements FlowService {
                 flowNode.setFormStatus(cmd.getStatus());
                 flowNodeProvider.updateFlowNode(flowNode);
                 break;
+            case FLOW:
+                flow.setFormStatus(cmd.getStatus());
+                flowProvider.updateFlow(flow);
+
+                // 把节点关联的全局表单字段配置属性去掉
+                if (TrueOrFalseFlag.fromCode(cmd.getStatus()) == TrueOrFalseFlag.FALSE) {
+                    clearFlowNodeCustomizeField(flow);
+                }
+                break;
             default:
                 LOGGER.warn("not supported entity type to update status: {}", entityType.getCode());
                 break;
@@ -5742,6 +5837,19 @@ public class FlowServiceImpl implements FlowService {
             // GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(formOriginId, formVersion);
             // Assert.notNull(form, "form should be not null");
             updateFlowConditionExpressionAfterFlowFormUpdate(flow, entityType.getCode(), cmd.getEntityId(), null, null);
+        }
+
+        flowMarkUpdated(flow);
+    }
+
+    private void clearFlowNodeCustomizeField(Flow flow) {
+        List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flow.getTopId(), FlowConstants.FLOW_CONFIG_VER);
+        for (FlowNode node : flowNodes) {
+            if (FlowFormRelationType.fromCode(node.getFormRelationType()) == FlowFormRelationType.CUSTOMIZE_FIELD) {
+                // node.setFormRelationType(Byte.valueOf("0"));
+                node.setFormRelationData(null);
+                flowNodeProvider.updateFlowNode(node);
+            }
         }
     }
 
@@ -6031,6 +6139,106 @@ public class FlowServiceImpl implements FlowService {
 
             doSnapshot(flowGraph, /*isMirror*/true);
         }
+    }
+
+    @Override
+    public List<FlowEventLogDTO> listProcessingFlowCases(FlowCaseIdCommand cmd) {
+        ValidatorUtil.validate(cmd);
+        List<FlowCase> list = this.getProcessingFlowCasesByAnyFlowCaseId(cmd.getFlowCaseId());
+
+        final List<FlowEventLogDTO> dtoList = new ArrayList<>();
+        for (FlowCase flowCase : list) {
+            List<FlowEventLog> enterLogs = flowEventLogProvider.findCurrentNodeNotCompleteEnterLogs(
+                    flowCase.getCurrentNodeId(), flowCase.getId(), flowCase.getStepCount());
+            FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
+
+            for (FlowEventLog enterLog : enterLogs) {
+                FlowEventLogDTO dto = ConvertHelper.convert(enterLog, FlowEventLogDTO.class);
+                if (flowNode != null) {
+                    dto.setFlowNodeName(flowNode.getNodeName());
+                } else {
+                    dto.setFlowNodeName(String.valueOf(flowCase.getCurrentNodeId()));
+                }
+
+                if (dto.getFlowUserName() == null || dto.getFlowUserName().isEmpty()) {
+                    OrganizationMember om = organizationProvider
+                            .findOrganizationMemberByUIdAndOrgId(enterLog.getFlowUserId(), flowCase.getOrganizationId());
+                    if (om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
+                        dto.setFlowUserName(om.getContactName());
+                    }
+                }
+                if (dto.getFlowUserName() == null || dto.getFlowUserName().isEmpty()) {
+                    List<OrganizationMember> memberList = organizationProvider
+                            .findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(flowCase.getOrganizationId(), enterLog.getFlowUserId());
+                    if (memberList != null && memberList.size() > 0) {
+                        dto.setFlowUserName(memberList.iterator().next().getContactName());
+                    }
+                }
+                if (dto.getFlowUserName() == null || dto.getFlowUserName().isEmpty()) {
+                    dto.setFlowUserName(String.valueOf(enterLog.getFlowUserId()));
+                }
+                dtoList.add(dto);
+            }
+        }
+        return dtoList;
+    }
+
+    @Override
+    public void transferFlowCaseProcessor(TransferFlowCaseProcessorCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        Map<Long, List<TransferFlowCaseProcessor>> flowCaseIdToTransfer =
+                cmd.getTransfers().stream().collect(Collectors.groupingBy(TransferFlowCaseProcessor::getFlowCaseId));
+
+        for (Map.Entry<Long, List<TransferFlowCaseProcessor>> entry : flowCaseIdToTransfer.entrySet()) {
+            final Long flowCaseId = entry.getKey();
+            final List<TransferFlowCaseProcessor> processors = entry.getValue();
+
+            FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+
+            FlowAutoStepTransferDTO stepDTO = new FlowAutoStepTransferDTO();
+            stepDTO.setOperatorId(UserContext.currentUserId());
+            stepDTO.setFlowCaseId(flowCaseId);
+            stepDTO.setAutoStepType(FlowStepType.TRANSFER_STEP.getCode());
+            stepDTO.setFlowMainId(flowCase.getFlowMainId());
+            stepDTO.setFlowVersion(flowCase.getFlowVersion());
+            stepDTO.setEventType(FlowEventType.STEP_FLOW.getCode());
+
+            final List<FlowEntitySel> transferIn = new ArrayList<>(processors.size());
+            final List<FlowEntitySel> transferOut = new ArrayList<>(processors.size());
+
+            for (TransferFlowCaseProcessor processor : processors) {
+                stepDTO.setFlowNodeId(processor.getCurrentNodeId());
+                stepDTO.setStepCount(processor.getStepCount());
+
+                transferIn.add(new FlowEntitySel(processor.getTargetUid(), FlowEntityType.FLOW_USER.getCode()));
+                transferOut.add(new FlowEntitySel(processor.getFlowUserId(), FlowEntityType.FLOW_USER.getCode()));
+            }
+
+            stepDTO.setTransferIn(transferIn);
+            stepDTO.setTransferOut(transferOut);
+
+            processAutoStep(stepDTO);
+        }
+    }
+
+    @Override
+    public void abortFlowCase(AbortFlowCaseCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
+
+        FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+        stepDTO.setFlowCaseId(cmd.getFlowCaseId());
+        stepDTO.setFlowNodeId(cmd.getCurrentNodeId());
+        stepDTO.setStepCount(cmd.getStepCount());
+        stepDTO.setEventType(FlowEventType.STEP_FLOW.getCode());
+        stepDTO.setOperatorId(UserContext.currentUserId());
+        stepDTO.setFlowMainId(flowCase.getFlowMainId());
+        stepDTO.setFlowVersion(flowCase.getFlowVersion());
+        stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+
+        processAutoStep(stepDTO);
     }
 
     private FlowServiceMappingDTO toFlowServiceMappingDTO(FlowServiceMapping mapping) {
@@ -6577,6 +6785,10 @@ public class FlowServiceImpl implements FlowService {
             }
         }
 
+        serviceTypes = serviceTypes.stream()
+                .filter(r -> StringUtils.isNotEmpty(r.getServiceName()))
+                .collect(Collectors.toList());
+
         ListFlowServiceTypeResponse response = new ListFlowServiceTypeResponse();
         response.setServiceTypes(serviceTypes);
         return response;
@@ -6595,6 +6807,7 @@ public class FlowServiceImpl implements FlowService {
                     dto.setServiceName(r.getServiceType());
                     dto.setModuleId(r.getModuleId());
                     dto.setOrganizationId(r.getOrganizationId());
+                    dto.setOriginAppId(-1L);
                     return dto;
                 }).collect(Collectors.toList());
         return serviceTypes;
@@ -6914,11 +7127,8 @@ public class FlowServiceImpl implements FlowService {
     /**
      * step_tracker_log 经过的节点列表
      * @param allFlowCase   所有的任务列表
-<<<<<<< HEAD
      * @see FlowServiceImpl#getAllFlowCase(Long)
-=======
      * @see com.everhomes.flow.FlowServiceImpl#getAllFlowCase(java.lang.Long)
->>>>>>> 5.10.1
      */
     @Override
     public List<FlowNodeLogDTO> getStepTrackerLogs(List<FlowCase> allFlowCase) {
@@ -6989,8 +7199,8 @@ public class FlowServiceImpl implements FlowService {
                 nodeLogDTO.setParams(currNode.getParams());
                 nodeLogDTO.setLaneId(currNode.getFlowLaneId());
                 nodeLogDTO.setNodeEnterTime(eventLog.getCreateTime().getTime());
-                nodeLogDTO.setFormOriginId(currNode.getFormOriginId());
-                nodeLogDTO.setFormVersion(currNode.getFormVersion());
+
+                parseFlowForm(currNode, nodeLogDTO);
 
                 for (FlowCase aCase : allFlowCase) {
                     if (eventLog.getFlowCaseId().equals(aCase.getId()) && aCase.getStepCount().equals(eventLog.getStepCount())) {
@@ -7062,6 +7272,8 @@ public class FlowServiceImpl implements FlowService {
                     prefixLane.setCurrNodeParams(nodeLogDTO.getParams());
                     prefixLane.setCurrentFormOriginId(nodeLogDTO.getFormOriginId());
                     prefixLane.setCurrentFormVersion(nodeLogDTO.getFormVersion());
+
+                    prefixLane.setCurrentNode(nodeLogDTO);
                 }
                 if (nodeLogDTO.getIsRejectNode() != null) {
                     prefixLane.setIsRejectLane(nodeLogDTO.getIsRejectNode());
@@ -7095,6 +7307,8 @@ public class FlowServiceImpl implements FlowService {
                     prefixLane.setCurrNodeParams(nodeLogDTO.getParams());
                     prefixLane.setCurrentFormOriginId(nodeLogDTO.getFormOriginId());
                     prefixLane.setCurrentFormVersion(nodeLogDTO.getFormVersion());
+
+                    prefixLane.setCurrentNode(nodeLogDTO);
                 }
             }
         }
@@ -7128,6 +7342,27 @@ public class FlowServiceImpl implements FlowService {
             laneLogDTO.setIsAbsortLane(TrueOrFalseFlag.TRUE.getCode());
         }
         return laneLogDTOS;
+    }
+
+    private void parseFlowForm(FlowNode currNode, FlowNodeLogDTO nodeLogDTO) {
+        FlowFormRelationType relationType = FlowFormRelationType.fromCode(currNode.getFormRelationType());
+        if (relationType == FlowFormRelationType.DIRECT_RELATION) {
+            FlowFormRelationDataDirectRelation directRelation = (FlowFormRelationDataDirectRelation)
+                    StringHelper.fromJsonString(currNode.getFormRelationData(), FlowFormRelationDataDirectRelation.class);
+            nodeLogDTO.setFormDirectRelation(directRelation);
+
+            // 客户端是从这两个字段里取值的
+            if (directRelation != null) {
+                nodeLogDTO.setFormOriginId(directRelation.getFormOriginId());
+                nodeLogDTO.setFormVersion(directRelation.getFormVersion());
+            }
+        } else if (relationType == FlowFormRelationType.CUSTOMIZE_FIELD) {
+            nodeLogDTO.setFormConfigDTO((GeneralFormFieldsConfigDTO)
+                    StringHelper.fromJsonString(currNode.getFormRelationData(), GeneralFormFieldsConfigDTO.class));
+        }
+        if (TrueOrFalseFlag.TRUE.getCode().equals(currNode.getFormStatus())) {
+            nodeLogDTO.setFormRelationType(currNode.getFormRelationType());
+        }
     }
 
     private void getFlowNodeLogDTOV2(Long flowCaseId, Set<FlowUserType> flowUserTypes, FlowNode currNode, Long stepCount, FlowNodeLogDTO nodeLogDTO) {
@@ -7478,4 +7713,56 @@ public class FlowServiceImpl implements FlowService {
             }
         }
     }*/
+
+    private class FlowFormResolver {
+        private Byte formRelationType;
+        private String formRelationData;
+        private Byte formStatus;
+        private Timestamp formUpdateTime;
+
+        public FlowFormResolver(FlowEntityType entityType, Long entityId) {
+            switch (entityType) {
+                case FLOW:
+                    Flow flow = flowProvider.getFlowById(entityId);
+                    formRelationData = flow.getFormRelationData();
+                    formRelationType = flow.getFormRelationType();
+                    formStatus = flow.getFormStatus();
+                    formUpdateTime = flow.getFormUpdateTime();
+                    break;
+                case FLOW_NODE:
+                    FlowNode node = flowNodeProvider.getFlowNodeById(entityId);
+                    formRelationData = node.getFormRelationData();
+                    formRelationType = node.getFormRelationType();
+                    formStatus = node.getFormStatus();
+                    formUpdateTime = node.getFormUpdateTime();
+                    break;
+                default:
+                    throw new IllegalArgumentException("unknown entity type " + entityType.getCode());
+            }
+        }
+
+        public Byte getFormRelationType() {
+            return formRelationType;
+        }
+
+        public String getFormRelationData() {
+            return formRelationData;
+        }
+
+        public Byte getFormStatus() {
+            return formStatus;
+        }
+
+        public Timestamp getFormUpdateTime() {
+            return formUpdateTime;
+        }
+
+        public FlowFormRelationDataDirectRelation getDirectRelation() {
+            if (FlowFormRelationType.DIRECT_RELATION.getCode().equals(formRelationType)) {
+                return (FlowFormRelationDataDirectRelation)
+                        StringHelper.fromJsonString(formRelationData, FlowFormRelationDataDirectRelation.class);
+            }
+            return null;
+        }
+    }
 }

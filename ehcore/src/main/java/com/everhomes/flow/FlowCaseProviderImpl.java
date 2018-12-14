@@ -160,12 +160,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
                 .fetch(record -> {
                     FlowServiceTypeDTO dto = RecordHelper.convert(record, FlowServiceTypeDTO.class);
                     dto.setServiceName(record.getServiceType());
-                    if (dto.getServiceName() == null || dto.getServiceName().isEmpty()) {
-                        dto.setServiceName(record.getValue(t.TITLE));
-                    }
-                    if (dto.getServiceName() == null || dto.getServiceName().isEmpty()) {
-                        dto.setServiceName(record.getValue(t.MODULE_NAME));
-                    }
+                    dto.setOriginAppId(record.getOriginAppId());
                     return dto;
                 });
     }
@@ -394,7 +389,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
             cond = cond.and(
                     Tables.EH_FLOW_CASES.TITLE.like(keyword)
                     .or(Tables.EH_FLOW_CASES.SERVICE_TYPE.like(keyword))
-                    .or(Tables.EH_FLOW_CASES.CONTENT.like(keyword))
+                    // .or(Tables.EH_FLOW_CASES.CONTENT.like(keyword))
                     .or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(keyword))
                     .or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(keyword))
             );
@@ -530,12 +525,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
                     FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
                     dto.setModuleId(record.getValue(t.MODULE_ID));
                     dto.setServiceName(record.getValue(t.SERVICE_TYPE));
-                    if (dto.getServiceName() == null || dto.getServiceName().isEmpty()) {
-                        dto.setServiceName(record.getValue(t.TITLE));
-                    }
-                    if (dto.getServiceName() == null || dto.getServiceName().isEmpty()) {
-                        dto.setServiceName(record.getValue(t.MODULE_NAME));
-                    }
+                    dto.setOriginAppId(record.getValue(t.ORIGIN_APP_ID));
                     dto.setNamespaceId(record.getValue(t.NAMESPACE_ID));
                     return dto;
                 });

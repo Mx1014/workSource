@@ -10,6 +10,7 @@ import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.portal.PlatformContextNoWarnning;
+import com.everhomes.print.siyin.Brocadesoft;
 import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
@@ -38,6 +39,7 @@ import com.everhomes.rest.order.*;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.print.*;
 import com.everhomes.user.*;
+import com.everhomes.user.sdk.SdkQRCodeService;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -100,9 +102,10 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.print.*;
 import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
 import com.everhomes.rest.qrcode.NewQRCodeCommand;
-import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.rest.user.qrcode.GetQRCodeInfoCommand;
+import com.everhomes.rest.user.qrcode.QRCodeDTO;
 import com.everhomes.server.schema.tables.EhRentalv2Orders;
 import com.everhomes.server.schema.tables.EhSiyinPrintOrders;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
@@ -114,6 +117,8 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.util.xml.XMLToJSON;
+import com.everhomes.util.xml.XMLToObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,6 +138,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -163,6 +170,19 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 //	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "-";
 	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "_";
 	public static final String PRINT_COMPANY_SPLIT = ",";
+	
+	//redis key prefix
+	public static final String REDIS_PREFIX_PRINT_QRCODE = "print.qrcode-";//redis前缀
+	
+	//请求url
+	public static final String ROUTER_CARD_LISTENER = "/console/cardListener";
+	public static final String ROUTER_OAUTH_LOGIN = "/authagent/oauthLogin";
+	public static final String ROUTER_DELETE_QUEUE_JOBS = "/console/jobHandler";
+	public static final String ROUTER_UNLOCK_PRINTER = ROUTER_OAUTH_LOGIN;
+	public static final String ROUTER_LIST_QUEUE_JOBS = ROUTER_CARD_LISTENER;
+	public static final String ROUTER_RELEASE_QUEUE_JOBS = ROUTER_CARD_LISTENER;
+	
+	
 	
 
 	@Autowired
@@ -223,7 +243,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Autowired
 	private QRCodeController qrController;
 	@Autowired
-	private QRCodeService qrcodeService;
+	private QRCodeService qrcodeService;	
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
@@ -244,6 +264,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private ServiceModuleAppService serviceModuleAppService;
 	@Autowired
 	private CommunityProvider communityProvider;
+    @Autowired
+    private SdkQRCodeService sdkDelegate;
 
 
 
@@ -1096,7 +1118,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private UnlockPrinterResponse unlockByOauthLogin(UnlockPrinterCommand cmd) {
 		Map<String, String> params = new HashMap<>();
 		User user = UserContext.current().getUser();
-		QRCodeDTO dto = qrcodeService.getQRCodeInfoById(cmd.getQrid(), null);
+		QRCodeDTO dto = getQrCodeInfoById(cmd.getQrid());
 		if(dto==null){
 			LOGGER.error("QRCodeDTO is null, qrid = "+cmd.getQrid());
 			throwError(PrintErrorCode.ERROR_QRCODE_INVALID, "QRCode invalid");
@@ -1108,19 +1130,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		params.put("qrcode_param", dto.getExtra());
 		params.put("copy_mono_limit", String.valueOf(configurationProvider.getIntValue("print.siyin.copy_mono_limit", 50)));
 		params.put("copy_color_limit", String.valueOf(configurationProvider.getIntValue("print.siyin.copy_color_limit", 50)));
-		StringBuffer buffer = new StringBuffer();
-		String siyinUrl =  getSiyinServerUrl();
 
-		String url = buffer.append(siyinUrl).append("/authagent/oauthLogin").toString();
-		try {
-			String result = HttpUtils.post(url, params, 30);
-			if(!result.equals("OK")){
-				LOGGER.error("siyin api:"+url+"request failed : "+result);
-				throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
-			}
-		} catch (IOException e) {
-			LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
-			throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
+		String result = postSiyinRequest(ROUTER_UNLOCK_PRINTER, params);
+		if (!result.equals("OK")) {
+			throwError(PrintErrorCode.ERROR_UNLOCK_PRINTER_ERROR, "unlock failed("+result+")");
 		}
 		
 		UnlockPrinterResponse response = new UnlockPrinterResponse();
@@ -1847,7 +1860,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return siyinPrintEmail;
 	}
 	private String getSiyinCode(String result){
-		LOGGER.info("result = "+result);
         return result.substring(0, result.indexOf(":"));
     }
 
@@ -1858,83 +1870,123 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public ListQueueJobsResponse listQueueJobs(ListQueueJobsCommand cmd) {
-        String siyinUrl =  getSiyinServerUrl();
 		Integer namespaceId = cmd.getNamespaceId();
 		if(namespaceId == null){
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-        List<SiyinUserPrinterMapping> mappings = siyinUserPrinterMappingProvider.listSiyinUserPrinterMappingByUserId(UserContext.current().getUser().getId(), namespaceId);
-        List<String> readers = new ArrayList<>(5);
-        if(mappings == null || mappings.size() == 0){
-        	List<SiyinPrintPrinter> lists = siyinPrintPrinterProvider.listSiyinPrintPrinter(namespaceId);
-        	for (SiyinPrintPrinter printer : lists) {
-				readers.add(printer.getReaderName());
-			}
-        }else{
-        	for (SiyinUserPrinterMapping mapping : mappings) {
-        		readers.add(mapping.getReaderName());
-			}
-        }
-        List<ListQueueJobsDTO> jobs = getQueueJobs(readers,siyinUrl,cmd.getOwnerId());
+		
+		List<String> readerNames = null;
+		QRCodeDTO dto = getQrCodeInfoById(cmd.getQrid());
+		String readerName = getReaderNameByQrCode(dto, cmd.getQrid());
+		if (null != readerName) {
+			readerNames = Arrays.asList(readerName);
+		} else {
+			readerNames = getDefaultReaderNames(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
+		}
+		
+        List<ListQueueJobsDTO> jobs = getQueueJobs(readerNames, cmd.getOwnerId());
         return new ListQueueJobsResponse(jobs);
 	}
 
 
-	private List<ListQueueJobsDTO> getQueueJobs(List<String> printers, String siyinUrl, Long communityId) {
+	private List<String> getDefaultReaderNames(Integer namespaceId, String ownerType, Long ownerId) {
+		List<String> readerNames = new ArrayList<>(5);
+		List<SiyinPrintPrinter> lists = siyinPrintPrinterProvider.listSiyinPrintPrinter(namespaceId, ownerType, ownerId);
+		for (SiyinPrintPrinter printer : lists) {
+			readerNames.add(printer.getReaderName());
+		}
+
+		return readerNames;
+	}
+
+
+	private String getReaderNameByQrCode(QRCodeDTO dto, String requestQrid) {
+		if (null == dto) {
+			return null;
+		}
+		
+		String paramStr = dto.getExtra();
+		JSONObject json = JSONObject.parseObject(paramStr);
+		if (null == json) {
+			return null;
+		}
+		
+		String readerName = json.getString("readerName");
+		if (StringUtils.isEmpty(readerName)) {
+			return null;
+		}
+		
+		//缓存打印机的qridDto，请求qrid和返回的不一致，这里使用请求qrid
+		setRedisValue(REDIS_PREFIX_PRINT_QRCODE + requestQrid, dto.toString(), 1, TimeUnit.DAYS);
+		
+		return readerName;
+	}
+
+	private List<ListQueueJobsDTO> getQueueJobs(List<String> printers, Long communityId) {
 		List<ListQueueJobsDTO> list = new ArrayList<>();
-		readerLoop:
 		for (String printer : printers) {
 			Map<String, String> params = new HashMap<>();
-	        params.put("host_name", printer);
-	        params.put("mode", "USERLIST");
-	        params.put("card_id", new StringBuffer().append(UserContext.current().getUser().getId()).append(PRINT_LOGON_ACCOUNT_SPLIT).append(communityId).toString());
-//	        params.put("card_id", "310183-240111044331058733");
-	        params.put("language", "zh-cn");
-	        String result;
-			try {
-				result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
-				String siyinCode = getSiyinCode(result);
-				if(siyinCode!=null && siyinCode.startsWith("INF")){
-					if(siyinCode.equals("INF0008") || siyinCode.equals("INF0009") || siyinCode.equals("INF0001")){
-						continue readerLoop;
-					}else{
-						LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
-						throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "error third response");
-					}
-				}else if(siyinCode!=null){
-					addjobs(list,result,printer);
-				}else{
-					LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
-					throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "error third response");
+			params.put("host_name", printer);
+			params.put("mode", "USERLIST");
+			params.put("card_id", new StringBuffer().append(UserContext.current().getUser().getId())
+					.append(PRINT_LOGON_ACCOUNT_SPLIT).append(communityId).toString());
+			params.put("language", "zh-cn");
+
+			// 请求第三方
+			String result = postSiyinRequest(ROUTER_LIST_QUEUE_JOBS, params);
+			String siyinCode = getSiyinCode(result);
+			if (siyinCode != null && siyinCode.startsWith("INF")) {
+				if (siyinCode.equals("INF0008") || siyinCode.equals("INF0009") || siyinCode.equals("INF0001")) {
+					continue;
 				}
-			} catch (IOException e) {
-				LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
-				throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "error third response");
+				throwError(PrintErrorCode.ERROR_QUERY_PRINT_TASK_ERROR, "query print task failed("+result+")");
 			}
+
+			if (siyinCode != null) {
+				addjobs(list, result, printer);
+				continue;
+			}
+			
+			throwError(PrintErrorCode.ERROR_QUERY_PRINT_TASK_ERROR, "query print task failed(null)");
 		}
-		return list;
+		
+		return filterJobsByJobId(list);
+	}
+
+
+	private List<ListQueueJobsDTO> filterJobsByJobId(List<ListQueueJobsDTO> list) {
+		if (CollectionUtils.isEmpty(list)) {
+			return list;
+		}
+		
+		Set<String> jobIdSet = new HashSet<>();
+		List<ListQueueJobsDTO> newList = new ArrayList<>(5);
+		for (ListQueueJobsDTO dto: list) {
+			if (jobIdSet.contains(dto.getJobId())) {
+				continue;
+			}
+			newList.add(dto);
+			jobIdSet.add(dto.getJobId());
+		}
+		
+		return newList;
 	}
 
 
 	private void addjobs(List<ListQueueJobsDTO> list, String result,String printer) {
-		Map<String, Object> object = XMLToJSON.convertOriginalMap(result);
-		Map<?, ?> data = (Map<?,?>)object.get("brocadesoft");
-		Object job_list = data.get("job_list");
-		List<Map<?,?>> jobList = new ArrayList<>();
-		if(job_list instanceof Map){
-			@SuppressWarnings("unchecked")
-			Map<String,Map<?,?>> map = (Map<String,Map<?,?>>)job_list;
-			jobList.add(map.get("job"));
-		}else{
-		    jobList = (List<Map<?,?>>)job_list;
+		
+		Brocadesoft ret = XMLToObject.parseObject(Brocadesoft.class, result);
+		if (null == ret || ret.isEmpty()) {
+			return;
 		}
-		list.addAll(jobList.stream().map(map->{
+		
+		list.addAll(ret.getBrocadesoft().getJobList().stream().map(r->{
 			ListQueueJobsDTO dto = new ListQueueJobsDTO();
-			dto.setJobId(map.get("job_id").toString());
-			dto.setJobName(map.get("job_name").toString());
-			dto.setPrintTime(map.get("print_time").toString());
+			dto.setJobId(r.getJobId());
+			dto.setJobName(r.getJobName());
+			dto.setPrintTime(r.getPrintTime());
 			dto.setReaderName(printer);
-			dto.setTotalPage(map.get("total_page").toString());
+			dto.setTotalPage(r.getTotalPage());
         	return dto;
         }).collect(Collectors.toList()));
 	}
@@ -1943,26 +1995,33 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public void releaseQueueJobs(ReleaseQueueJobsCommand cmd) {
 		checkPrinters(cmd.getJobs());
+		if (null == cmd.getQrid()) {
+			throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "qrid not valid");
+		}
+		
+		QRCodeDTO dto = getQrCodeInfoById(cmd.getQrid());
+		String readerName = getReaderNameByQrCode(dto, cmd.getQrid());
+		if (null == readerName) {
+			throwError(PrintErrorCode.ERROR_GET_PRINT_READER_NAME, "not found reader name");
+		}
+		
 		Map<String,String> rmjobsMap = generateXmlData(cmd.getJobs());
-		releaseQueueJobs(rmjobsMap,cmd.getOwnerId());
+		releaseQueueJobs(rmjobsMap,cmd.getOwnerId(), readerName);
 	}
 
-	private void releaseQueueJobs(Map<String, String> rmjobsMap, Long communityId) {
-		String siyinUrl =  getSiyinServerUrl();
+	private void releaseQueueJobs(Map<String, String> rmjobsMap, Long communityId, String readerName) {
+		
 		rmjobsMap.entrySet().forEach(r->{
 			Map<String, String> params = new HashMap<>();
-	        params.put("host_name", r.getKey());
+	        params.put("host_name", readerName);
 	        params.put("mode", "USERLIST");
 	        params.put("card_id", new StringBuffer().append(UserContext.current().getUser().getId()).append(PRINT_LOGON_ACCOUNT_SPLIT).append(communityId).toString());
 //	        params.put("card_id", "310183-240111044331058733");
 	        params.put("language", "zh-cn");
 	        params.put("data", r.getValue());
-			try {
-				String result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
-			} catch (IOException e) {
-				LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
-				throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "error third response");
-			}
+	        
+	        //请求第三方
+	        postSiyinRequest(ROUTER_RELEASE_QUEUE_JOBS, params);
 		});
 	}
 
@@ -1993,7 +2052,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	private void checkPrinters(List<ListQueueJobsDTO> jobs) {
 		for (ListQueueJobsDTO job : jobs) {
-			if(job.getJobId() == null || job.getReaderName() == null){
+			if(job.getJobId() == null){
 				LOGGER.error("jobs data error");
 				throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 			}
@@ -2004,7 +2063,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public void deleteQueueJobs(DeleteQueueJobsCommand cmd) {
 		checkPrinters(cmd.getJobs());
-		String siyinUrl =  getSiyinServerUrl();
 		Map<String, String> params = new HashMap<>();
         params.put("format", "String");
         params.put("action", "Cancel");
@@ -2013,13 +2071,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         	buffer.append(r.getJobId()).append(',');
         });
         params.put("job_data", buffer.substring(0,buffer.length()-1));
-		try {
-			String result = HttpUtils.post(siyinUrl + "/console/jobHandler", params, 30);
-		} catch (IOException e) {
-			LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
-			throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "error third response");
-		}
-	
+		
+        //发送请求
+		postSiyinRequest(ROUTER_DELETE_QUEUE_JOBS, params);
 	}
 	
 	@Override
@@ -2033,7 +2087,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		nQRCmd.setExtra(cmd.getData());
 		nQRCmd.setHandler(QRCodeHandler.PRINT.getCode());
 
-		QRCodeDTO dto = qrcodeService.createQRCode(nQRCmd);
+		com.everhomes.rest.qrcode.QRCodeDTO dto = qrcodeService.createQRCode(nQRCmd);
 
 		GetQRCodeImageCommand gQRcmd = new GetQRCodeImageCommand();
 		gQRcmd.setHeight(cmd.getHeight()==null?300:cmd.getHeight());
@@ -2493,20 +2547,43 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			return dto;
 		}).collect(Collectors.toList());
 	}
-
-	private List<BillGroupDTO> listBillGroups(ListBillGroupsCommand cmd) {
-//		OwnerIdentityCommand cmd2 = new OwnerIdentityCommand();
-//		cmd2.setNamespaceId(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
-//		cmd2.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
-//		cmd2.setCategoryId(cmd.getChargeAppToken());
-//		cmd2.setModuleId(ServiceModuleConstants.ASSET_MODULE);
-//		List<ListBillGroupsDTO> dtos = assetService.listBillGroups(cmd2);
-//		return dtos.stream().map(r -> {
-//			BillGroupDTO dto = new BillGroupDTO();
-//			dto.setBillGroupName(r.getBillGroupName());
-//			dto.setBillGroupToken(r.getBillGroupId());
-//			return dto;
-//		}).collect(Collectors.toList());
-		return null;
+	
+	private QRCodeDTO getQrCodeInfoById(String qrid) {
+		if (null == qrid) {
+			return null;
+		}
+		
+		String QRCodeInfo = getRedisValue(REDIS_PREFIX_PRINT_QRCODE+qrid);
+		if (!StringUtils.isEmpty(QRCodeInfo)) {
+			return JSONObject.parseObject(QRCodeInfo, QRCodeDTO.class);
+		}
+		
+		GetQRCodeInfoCommand cmd = new GetQRCodeInfoCommand();
+		cmd.setQrid(qrid);
+		return sdkDelegate.getQRCodeInfo(cmd);
 	}
+	
+	private String getRedisValue(String key) {
+		return  getValueOperations(key).get(key);
+	}
+	
+	private void setRedisValue(String key, String value, long time, TimeUnit timeUnit) {
+		getValueOperations(key).set(key, value, time, timeUnit);
+	}
+	
+	private String postSiyinRequest(String router, Map<String, String> params) {
+		String requestUrl = getSiyinServerUrl()+router;
+		LOGGER.info("post to siyin req, url={}, params={}", requestUrl, params);
+		String result = null;
+		try {
+			result = HttpUtils.post(requestUrl, params, 30);
+		} catch (IOException e) {
+			LOGGER.info("from siyin error, e={}", e);
+			throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
+		}
+		
+		LOGGER.info("from siyin resp, result={}", result);
+		return result;
+	}
+	
 }

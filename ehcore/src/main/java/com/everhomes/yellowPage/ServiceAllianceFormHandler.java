@@ -7,46 +7,12 @@ import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
-import com.everhomes.general_approval.GeneralApproval;
-import com.everhomes.general_approval.GeneralApprovalFormHandler;
+import com.everhomes.flow.*;
 import com.everhomes.general_approval.GeneralApprovalProvider;
-import com.everhomes.general_approval.GeneralApprovalVal;
-import com.everhomes.general_approval.GeneralApprovalValProvider;
-import com.everhomes.general_form.GeneralForm;
-import com.everhomes.general_form.GeneralFormModuleHandler;
-import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormVal;
-import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.general_form.*;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowReferType;
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.rest.flow.GeneralModuleInfo;
-import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
-import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
-import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
-import com.everhomes.rest.general_approval.GeneralFormRenderType;
-import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
-import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostGeneralFormDTO;
-import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.user.User;
@@ -92,8 +58,31 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 	@Autowired
 	private FlowProvider flowProvider;
 
+	@Autowired
+	private GeneralFormService generalFormService;
+
 	@Override
 	public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
+
+		// 表单字段配置ID不为空，即为工作流节点提交的表单值，修改表单值，然后直接退出方法
+		// 根据flowCaseId和"EhFlowCases"查询已提交的表单值
+		List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(), cmd.getFlowCaseId());
+		if(cmd.getFormFieldsConfigId() != null
+				|| formValues.size() > 0) {
+			if (cmd.getValues() != null && formValues != null) {
+				for (PostApprovalFormItem val : cmd.getValues()) {
+					for (GeneralFormVal formValue : formValues) {
+						// 根据FieldName来判断两个表单值属于同一字段
+						if (val.getFieldName().equals(formValue.getFieldName())) {
+							formValue.setFieldValue(val.getFieldValue());
+							generalFormValProvider.updateGeneralFormVal(formValue);
+						}
+					}
+				}
+			}
+			return null;
+		}
+
 		User user = UserContext.current().getUser();
 
 		ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(cmd.getSourceId(), null, null);
@@ -176,15 +165,17 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
 		// 把values 存起来
 		List<GeneralFormVal> result = new ArrayList<>();
-		for (PostApprovalFormItem val : cmd.getValues()) {
-			GeneralFormVal obj = ConvertHelper.convert(form, GeneralFormVal.class);
-			obj.setSourceType(EhFlowCases.class.getSimpleName());
-			obj.setSourceId(flowCaseId);
-			obj.setFieldName(val.getFieldName());
-			obj.setFieldType(val.getFieldType());
-			obj.setFieldValue(val.getFieldValue());
-			generalFormValProvider.createGeneralFormVal(obj);
-			result.add(obj);
+		if(cmd.getValues() != null) {
+			for (PostApprovalFormItem val : cmd.getValues()) {
+				GeneralFormVal obj = ConvertHelper.convert(form, GeneralFormVal.class);
+				obj.setSourceType(EhFlowCases.class.getSimpleName());
+				obj.setSourceId(flowCaseId);
+				obj.setFieldName(val.getFieldName());
+				obj.setFieldType(val.getFieldType());
+				obj.setFieldValue(val.getFieldValue());
+				generalFormValProvider.createGeneralFormVal(obj);
+				result.add(obj);
+			}
 		}
 
 		// add by jiarui 20180705
@@ -199,7 +190,6 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 			event.setParams(map);
 			event.setEventName(SystemEvent.SERVICE_ALLIANCE_CREATE.dft());
 		});
-
 	}
 
 	@Override
@@ -259,5 +249,18 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 	public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd){
+		List<GeneralFormVal> formValues = generalFormValProvider.queryGeneralFormVals(cmd.getTargetType(), cmd.getTargetId());
+		List<GeneralFormValDTO> dtoList = new ArrayList<>();
+		if(formValues != null){
+			for(GeneralFormVal value : formValues){
+				GeneralFormValDTO dto = ConvertHelper.convert(value, GeneralFormValDTO.class);
+				dtoList.add(dto);
+			}
+		}
+		return dtoList;
 	}
 }

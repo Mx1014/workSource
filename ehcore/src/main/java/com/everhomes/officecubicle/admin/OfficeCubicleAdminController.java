@@ -76,6 +76,7 @@ public class OfficeCubicleAdminController extends ControllerBase {
 
     }
 
+    
 
     /**
      * <b>URL: /officecubicle/listCities</b>

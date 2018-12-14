@@ -2,8 +2,10 @@ package com.everhomes.asset.group;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -36,6 +38,9 @@ import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ModifyBillGroupCommand;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.print.PrintErrorCode;
+import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
+import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhContractChargingItems;
@@ -49,6 +54,7 @@ import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 /**
  * @author created by ycx
  * @date 下午8:42:50
@@ -64,8 +70,10 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
  
+//    @Autowired
+//    private com.everhomes.paySDK.api.PayService payServiceV2;
     @Autowired
-    private com.everhomes.paySDK.api.PayService payServiceV2;
+    private com.everhomes.gorder.sdk.order.GeneralOrderService payServiceV2;
     
     private DSLContext getReadOnlyContext(){
         return this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -82,7 +90,7 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
     
     public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId, Long organizationId, Boolean allScope) {
         List<ListBillGroupsDTO> list = new ArrayList<>();
-        List<Long> userIds = new ArrayList<Long>();
+        //List<Long> userIds = new ArrayList<Long>();
         DSLContext context = getReadOnlyContext();
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         SelectQuery<Record> query = context.selectQuery();
@@ -111,37 +119,40 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
             dto.setBillDayType(r.getValue(t.BILLS_DAY_TYPE));
             dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
             dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
-            userIds.add(r.getValue(t.BIZ_PAYEE_ID));
+            if(r.getValue(t.BIZ_PAYEE_ID) != null) {
+            	//由于收款方账户名称可能存在修改的情况，故重新请求电商
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("listBillGroups(request), cmd={}", r.getValue(t.BIZ_PAYEE_ID));
+                }
+                //List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
+                ListPayUsersByMerchantIdsCommand cmd = new ListPayUsersByMerchantIdsCommand();
+        		cmd.setIds(Arrays.asList(r.getValue(t.BIZ_PAYEE_ID)));
+        		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd);
+        		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
+        			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+        			//throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_MERCHANT_ID_NOT_FOUND, "merchant id not found");
+        		}else {
+        			List<PayUserDTO> payUserDTOs = resp.getResponse();
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
+                    }
+                    if(payUserDTOs != null && payUserDTOs.size() != 0) {
+                    	PayUserDTO payUserDTO = payUserDTOs.get(0);
+                    	dto.setAccountName(payUserDTO.getRemark());// 用户向支付系统注册帐号时填写的帐号名称
+                    	dto.setAccountAliasName(payUserDTO.getUserAliasName());//企业名称（认证企业）
+            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                        Integer registerStatus = payUserDTO.getRegisterStatus();
+                        if(registerStatus != null && registerStatus.intValue() == 1) {
+                        	dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                        } else {
+                        	dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                        }
+                    }
+        		}
+            }
             list.add(dto);
             return null;
         });
-        //由于收款方账户名称可能存在修改的情况，故重新请求电商
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listBillGroups(request), cmd={}", userIds);
-        }
-        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
-        }
-        if(payUserDTOs != null && payUserDTOs.size() != 0) {
-        	for(int i = 0;i < payUserDTOs.size();i++) {
-            	for(int j = 0;j < list.size();j++) {
-            		if(payUserDTOs.get(i) != null && list.get(j) != null &&
-            			payUserDTOs.get(i).getId() != null && list.get(j).getBizPayeeId() != null &&
-            			payUserDTOs.get(i).getId().equals(list.get(j).getBizPayeeId())){
-            			list.get(j).setAccountName(payUserDTOs.get(i).getRemark());// 用户向支付系统注册帐号时填写的帐号名称
-            			list.get(j).setAccountAliasName(payUserDTOs.get(i).getUserAliasName());//企业名称（认证企业）
-            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
-                        Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
-                        if(registerStatus != null && registerStatus.intValue() == 1) {
-                        	list.get(j).setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
-                        } else {
-                        	list.get(j).setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-                        }
-            		}
-            	}
-            }
-        }
         return list;
     }
 

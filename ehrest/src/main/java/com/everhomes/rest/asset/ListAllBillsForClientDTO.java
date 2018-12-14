@@ -15,6 +15,7 @@ import java.util.Date;
  * <li>amountReceivable：应收</li>
  * <li>amountOwed：欠收</li>
  * <li>chargeStatus：0：未付款；1：已付款</li>
+ * <li>confirmFlag：支付状态是否已确认字段，1：已确认；0：待确认</li>
  *</ul>
  */
 public class ListAllBillsForClientDTO {
@@ -26,6 +27,7 @@ public class ListAllBillsForClientDTO {
     private Byte chargeStatus;
     private String dateStr;
     private Date date;
+    private Byte confirmFlag;
 
     public Date getDate() {
         return date;
@@ -100,5 +102,13 @@ public class ListAllBillsForClientDTO {
     public void setChargeStatus(Byte chargeStatus) {
         this.chargeStatus = chargeStatus;
     }
+
+	public Byte getConfirmFlag() {
+		return confirmFlag;
+	}
+
+	public void setConfirmFlag(Byte confirmFlag) {
+		this.confirmFlag = confirmFlag;
+	}
 
 }

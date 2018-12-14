@@ -55,7 +55,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             "visitorName", "followUpNumbers", "visitorPhone", "visitReasonId", "visitReason",
             "inviterId", "inviterName", "plannedVisitTime", "visitTime", "createTime", "visitStatus", "bookingStatus",
             "visitorType", "enterpriseId", "enterpriseName", "officeLocationId", "officeLocationName",
-            "statsDate", "statsHour", "statsWeek","idNumber"};
+            "statsDate", "statsHour", "statsWeek","idNumber","communityId","communityType"};
     private static final DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @Autowired
     public VisitorSysVisitorProvider visitorSysVisitorProvider;
@@ -620,7 +620,12 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
                 Object idNumber = source.get("idNumber");
                 if(null != idNumber)
                     dto.setIdNumber(String.valueOf(idNumber));
-
+                Object communityId = source.get("communityId");
+                if(null != communityId)
+                    dto.setCommunityId(Long.valueOf(communityId.toString()));
+                Object communityType = source.get("communityType");
+                if(null != communityType)
+                    dto.setCommunityType(Byte.valueOf(communityType.toString()));
                 dtos.add(dto);
             }
             catch(Exception ex) {

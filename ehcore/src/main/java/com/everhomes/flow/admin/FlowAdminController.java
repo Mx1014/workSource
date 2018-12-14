@@ -714,9 +714,9 @@ public class FlowAdminController extends ControllerBase {
      * <p>更新表单版本号</p>
      */
     @RequestMapping("updateFlowFormVersion")
-    @RestReturn(value = FlowFormDTO.class)
+    @RestReturn(value = FlowFormRelationDTO.class)
     public RestResponse updateFlowFormVersion(@Valid UpdateFlowFormCommand cmd) {
-        FlowFormDTO resp = flowService.updateFlowFormVersion(cmd);
+        FlowFormRelationDTO resp = flowService.updateFlowFormVersion(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -742,9 +742,9 @@ public class FlowAdminController extends ControllerBase {
      * <p>建立表单关联</p>
      */
     @RequestMapping("createFlowForm")
-    @RestReturn(value = FlowFormDTO.class)
+    @RestReturn(value = FlowFormRelationDTO.class)
     public RestResponse createFlowForm(@Valid UpdateFlowFormCommand cmd) {
-        FlowFormDTO resp = flowService.createFlowForm(cmd);
+        FlowFormRelationDTO resp = flowService.createFlowForm(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -770,9 +770,9 @@ public class FlowAdminController extends ControllerBase {
      * <p>获取工作流关联的表单</p>
      */
     @RequestMapping("getFlowForm")
-    @RestReturn(value = FlowFormDTO.class)
+    @RestReturn(value = FlowFormRelationDTO.class)
     public RestResponse getFlowForm(@Valid GetFlowFormCommand cmd) {
-        FlowFormDTO flowFormDTO = flowService.getFlowForm(cmd);
+        FlowFormRelationDTO flowFormDTO = flowService.getFlowForm(cmd);
         RestResponse response = new RestResponse(flowFormDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1009,6 +1009,48 @@ public class FlowAdminController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse doFlowMirror(@Valid DoFlowMirrorCommand cmd) {
         flowService.doFlowMirror(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/listProcessingFlowCases</b>
+     * <p> 根据任务 id 获取任务的当前节点列表 </p>
+     */
+    @RequestMapping("listProcessingFlowCases")
+    @RestReturn(value = FlowCaseDTO.class, collection = true)
+    public RestResponse listProcessingFlowCases(@Valid FlowCaseIdCommand cmd) {
+        List<FlowEventLogDTO> dtos = flowService.listProcessingFlowCases(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/transferFlowCaseProcessor</b>
+     * <p> 后台管理员转交任务 </p>
+     */
+    @RequestMapping("transferFlowCaseProcessor")
+    @RestReturn(value = String.class)
+    public RestResponse transferFlowCaseProcessor(@Valid TransferFlowCaseProcessorCommand cmd) {
+        flowService.transferFlowCaseProcessor(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/abortFlowCase</b>
+     * <p> 后台管理员终止任务 </p>
+     */
+    @RequestMapping("abortFlowCase")
+    @RestReturn(value = String.class)
+    public RestResponse abortFlowCase(@Valid AbortFlowCaseCommand cmd) {
+        flowService.abortFlowCase(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

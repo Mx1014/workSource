@@ -29,7 +29,8 @@ public class OrderType {
 	public static final int WUYE_CODE = 10000088;
 	public static final int WITHDRAW_CODE = 10000012;
 	public static final int PMTASK_CODE = 10000013;
-
+	public static final int OFFICE_CUBICLE = 10000014;
+	
 	public static enum OrderTypeEnum{
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用",""),
 		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付","PAK"),
@@ -44,7 +45,8 @@ public class OrderType {
 		VIDEOCONF_CODE(OrderType.VIDEOCONF_CODE,"videoConf","视频会议","VMT"),
 		WUYE_CODE(OrderType.WUYE_CODE,"wuyeCode","物业缴费","WUF"),
 		WITHDRAW_CODE(OrderType.WITHDRAW_CODE,"withdrawCode","提现","WDW"),
-		PMTASK_CODE(OrderType.PMTASK_CODE,"pmtask","物业报修","PMT");
+		PMTASK_CODE(OrderType.PMTASK_CODE,"pmtask","物业报修","PMT"),
+		OFFICE_CUBICLE(OrderType.OFFICE_CUBICLE,"officecubicle","工位预定","OFC");
 
 		private int code;
 		private String pycode;

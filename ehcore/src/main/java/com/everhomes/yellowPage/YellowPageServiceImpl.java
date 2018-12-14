@@ -1406,7 +1406,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			} else {
 				ServiceAlliances sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 				if (serviceAlliance.getLatitude() != null && serviceAlliance.getLongitude() != null) {
-					serviceAlliance.setGeohash(GeoHashUtils.encode(sa.getLatitude(), sa.getLongitude()));
+					serviceAlliance.setGeohash(GeoHashUtils.encode(serviceAlliance.getLatitude(), serviceAlliance.getLongitude()));
 				}
 
 				serviceAlliance.setOwnerType(sa.getOwnerType());

@@ -12,10 +12,6 @@ public class ChargingVariable {
 	private String variableName;
 	private String variableValue;
 	
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
 	public String getVariableIdentifier() {
 		return variableIdentifier;
 	}
@@ -34,5 +30,10 @@ public class ChargingVariable {
 	public void setVariableValue(String variableValue) {
 		this.variableValue = variableValue;
 	}
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	
 }

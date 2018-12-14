@@ -1,4 +1,4 @@
-package com.everhomes.bus;
+package com.everhomes.kafka;
 
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

@@ -1,5 +1,6 @@
 package com.everhomes.rest.officecubicle;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
@@ -56,7 +57,17 @@ public class OfficeOrderDTO {
     private String reserveEnterprise;
 	private Byte workFlowStatus;
 	private Long flowCaseId;
+	private Long createTime;
+
 	
+	public Long getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
+	}
+
 	public Long getFlowCaseId() {
 		return flowCaseId;
 	}
@@ -232,5 +243,5 @@ public class OfficeOrderDTO {
 	public void setCoverUrl(String coverUrl) {
 		this.coverUrl = coverUrl;
 	}
- 
+	
 }

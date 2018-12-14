@@ -2,27 +2,27 @@ package com.everhomes.rest.rentalv2;
 
 /**
  * <ul>
- * <li>refundContractUid: 退款联系人id</li>
- * <li>refundContractOrgId: 退款联系人公司id</li>
+ * <li>refundContactUid: 退款联系人id</li>
+ * <li>refundContactOrgId: 退款联系人公司id</li>
  * </ul>
  */
 public class RentalUseInfoDTO {
-    private Long refundContractUid;
-    private Long refundContractOrgId;
+    private Long refundContactUid;
+    private Long refundContactOrgId;
 
-    public Long getRefundContractUid() {
-        return refundContractUid;
+    public Long getRefundContactUid() {
+        return refundContactUid;
     }
 
-    public void setRefundContractUid(Long refundContractUid) {
-        this.refundContractUid = refundContractUid;
+    public void setRefundContactUid(Long refundContactUid) {
+        this.refundContactUid = refundContactUid;
     }
 
-    public Long getRefundContractOrgId() {
-        return refundContractOrgId;
+    public Long getRefundContactOrgId() {
+        return refundContactOrgId;
     }
 
-    public void setRefundContractOrgId(Long refundContractOrgId) {
-        this.refundContractOrgId = refundContractOrgId;
+    public void setRefundContactOrgId(Long refundContactOrgId) {
+        this.refundContactOrgId = refundContactOrgId;
     }
 }

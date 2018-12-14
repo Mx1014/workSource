@@ -110,6 +110,7 @@ public class AssetAppServiceImpl implements AssetAppService {
         //是否显示上传凭证按钮（add by tangcen）
         Byte hasUploadCertificate = 0;
         Byte hasEnergy = 0;//默认不展示能耗
+        Byte hasConfirm = 0;//默认不展示账单的是否确认状态
 
         Boolean[] remarkCheckList = new Boolean[3];
         remarkCheckList[0] = false;
@@ -142,12 +143,15 @@ public class AssetAppServiceImpl implements AssetAppService {
                 hasUploadCertificate = view.getHasView();
             }else if(view.getViewItem().equals(PaymentViewItems.ENERGY.getCode())){
             	hasEnergy = view.getHasView();
+            }else if(view.getViewItem().equals(PaymentViewItems.CONFIRM.getCode())){
+            	hasConfirm = view.getHasView();
             }
         }
         dto.setHasPay(hasPay);
         dto.setHasContractView(hasContractView);
         dto.setHasUploadCertificate(hasUploadCertificate);
         dto.setHasEnergy(hasEnergy);
+        dto.setHasConfirm(hasConfirm);
         return dto;
     }
 

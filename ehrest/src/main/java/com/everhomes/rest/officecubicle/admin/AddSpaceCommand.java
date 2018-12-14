@@ -3,6 +3,7 @@ package com.everhomes.rest.officecubicle.admin;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.officecubicle.ChargeUserDTO;
 import com.everhomes.rest.officecubicle.OfficeAttachmentDTO;
 import com.everhomes.rest.officecubicle.OfficeCategoryDTO;
 import com.everhomes.rest.officecubicle.OfficeRangeDTO;
@@ -25,13 +26,16 @@ import com.everhomes.util.StringHelper;
 *<li>contactPhone  : 咨询电话	</li>
 *<li> chargeUid : 负责人uid	</li>
 *<li> description : 详情-html片	</li>
-*<li> coverUri : 封面图片uri</li>
- * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
+ * <li>spaceAttachments: 空间banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
+ * <li> stationCoverUri : 开放式工位图片uri</li>
+ * <li> shortRentUri : 短租封面图片uri</li>
+ * <li>shortRentAttachments: 短租banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
  * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
  * <li>ranges: 空间可见范围{@link OfficeRangeDTO}</li>
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
+ * <li>chargeUserDTO:负责人列表{@link com.everhomes.rest.officecubicle.ChargeUserDTO}</li>
  * </ul>
  */
 public class AddSpaceCommand { 
@@ -49,9 +53,12 @@ public class AddSpaceCommand {
 	private String contactPhone;
 	private Long managerUid; 
 	private String description;
-	private String coverUri; 
 	@ItemType(OfficeAttachmentDTO.class)
-	private List<OfficeAttachmentDTO> attachments;
+	private List<OfficeAttachmentDTO> spaceAttachments;
+	@ItemType(OfficeAttachmentDTO.class)
+	private List<OfficeAttachmentDTO> shortRentAttachments;
+	@ItemType(OfficeAttachmentDTO.class)
+	private List<OfficeAttachmentDTO> stationAttachments; 
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
 	@ItemType(OfficeRangeDTO.class)
@@ -59,10 +66,34 @@ public class AddSpaceCommand {
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
+	@ItemType(ChargeUserDTO.class)
+	private List<ChargeUserDTO> chargeUserDTO;
+	private Byte openFlag;
 
 	public Long getCurrentPMId() {
 		return currentPMId;
 	}
+
+	
+	public List<ChargeUserDTO> getChargeUserDTO() {
+		return chargeUserDTO;
+	}
+
+
+	public void setChargeUserDTO(List<ChargeUserDTO> chargeUserDTO) {
+		this.chargeUserDTO = chargeUserDTO;
+	}
+
+
+	public Byte getOpenFlag() {
+		return openFlag;
+	}
+
+
+	public void setOpenFlag(Byte openFlag) {
+		this.openFlag = openFlag;
+	}
+
 
 	public void setCurrentPMId(Long currentPMId) {
 		this.currentPMId = currentPMId;
@@ -160,18 +191,36 @@ public class AddSpaceCommand {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public String getCoverUri() {
-		return coverUri;
+
+
+
+	public List<OfficeAttachmentDTO> getStationAttachments() {
+		return stationAttachments;
 	}
-	public void setCoverUri(String coverUri) {
-		this.coverUri = coverUri;
+
+	public void setStationAttachments(List<OfficeAttachmentDTO> stationAttachments) {
+		this.stationAttachments = stationAttachments;
 	}
-	public List<OfficeAttachmentDTO> getAttachments() {
-		return attachments;
+
+	public List<OfficeAttachmentDTO> getSpaceAttachments() {
+		return spaceAttachments;
 	}
-	public void setAttachments(List<OfficeAttachmentDTO> attachments) {
-		this.attachments = attachments;
+
+	public void setSpaceAttachments(List<OfficeAttachmentDTO> spaceAttachments) {
+		this.spaceAttachments = spaceAttachments;
 	}
+
+
+
+	public List<OfficeAttachmentDTO> getShortRentAttachments() {
+		return shortRentAttachments;
+	}
+
+	public void setShortRentAttachments(List<OfficeAttachmentDTO> shortRentAttachments) {
+		this.shortRentAttachments = shortRentAttachments;
+	}
+
+
 	public List<OfficeCategoryDTO> getCategories() {
 		return categories;
 	}

@@ -2,6 +2,7 @@ package com.everhomes.portal;
 
 import com.everhomes.acl.WebMenu;
 import com.everhomes.acl.WebMenuPrivilegeProvider;
+import com.everhomes.rentalv2.RentalCommonServiceImpl;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.acl.WebMenuType;
@@ -33,6 +34,8 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     private Rentalv2Provider rentalv2Provider;
     @Autowired
     private WebMenuPrivilegeProvider webMenuProvider;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
 
 
     @Override
@@ -57,29 +60,14 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     }
 
     private RentalResourceType createRentalResourceType(Integer namespaceId, String name,RentalInstanceConfig rentalInstanceConfig){
-        RentalResourceType rentalResourceType = new RentalResourceType();
-        rentalResourceType.setNamespaceId(namespaceId);
-        rentalResourceType.setName(name);
-        if(null == rentalInstanceConfig.getPageType()){
-            rentalInstanceConfig.setPageType((byte)0);
-        }
-        if (null == rentalInstanceConfig.getPayMode())
-            rentalInstanceConfig.setPayMode((byte)0);
+        RentalResourceType rentalResourceType = rentalCommonService.createRentalResourceType(namespaceId,name,
+                rentalInstanceConfig.getPageType(),rentalInstanceConfig.getPayMode(),rentalInstanceConfig.getIdentify(),
+                rentalInstanceConfig.getUnauthVisible(),rentalInstanceConfig.getCrossCommuFlag());
 
-        if (StringUtils.isBlank(rentalInstanceConfig.getIdentify()))
-            rentalInstanceConfig.setIdentify(RentalV2ResourceType.DEFAULT.getCode());
-        if (null == rentalInstanceConfig.getUnauthVisible())
-            rentalInstanceConfig.setUnauthVisible((byte)0);
-        if (null == rentalInstanceConfig.getCrossCommuFlag())
-            rentalInstanceConfig.setCrossCommuFlag((byte)1);
-
-        rentalResourceType.setPageType(rentalInstanceConfig.getPageType());
-        rentalResourceType.setPayMode(rentalInstanceConfig.getPayMode());
-        rentalResourceType.setIdentify(rentalInstanceConfig.getIdentify());
-        rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
-        rentalResourceType.setUnauthVisible(rentalInstanceConfig.getUnauthVisible());
-        rentalResourceType.setCrossCommuFlag(rentalInstanceConfig.getCrossCommuFlag());
-        rentalv2Provider.createRentalResourceType(rentalResourceType);
+        rentalInstanceConfig.setPageType(rentalResourceType.getPageType());
+        rentalInstanceConfig.setPayMode(rentalResourceType.getPayMode());
+        rentalInstanceConfig.setIdentify(rentalResourceType.getIdentify());
+        rentalInstanceConfig.setUnauthVisible(rentalResourceType.getUnauthVisible());
         rentalInstanceConfig.setResourceTypeId(rentalResourceType.getId());
         return rentalResourceType;
     }

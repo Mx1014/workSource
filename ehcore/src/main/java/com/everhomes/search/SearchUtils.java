@@ -77,6 +77,7 @@ public class SearchUtils {
     public static final String PAYMENT_APPLICATION= "paymentApplication";
 	public static final String MESSAGE_RECORD= "messageRecord";
     public static final String VISITORSYS= "visitorsys";
+    public static final String FREQVISITOR= "freqvisitor";
 
     public static final String GENERAL_FORM_VALS = "generalFormVals";
 
