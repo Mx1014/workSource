@@ -5069,7 +5069,9 @@ public class FlowServiceImpl implements FlowService {
         switch (varType) {
             case FORM:
                 List<FlowConditionVariableDTO> list = getConditionVariableFromForm(flow, flow.getFormOriginId(), flow.getFormVersion());
-                groups.add(new FlowConditionVariableGroup("全局表单", FlowEntityType.FLOW.getCode(), flow.getTopId(), list));
+                if (list != null && list.size() > 0) {
+                    groups.add(new FlowConditionVariableGroup("全局表单", FlowEntityType.FLOW.getCode(), flow.getTopId(), list));
+                }
                 List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flow.getTopId(), FlowConstants.FLOW_CONFIG_VER);
                 for (FlowNode node : nodes) {
                     if (!Objects.equals(node.getFormStatus(), TrueOrFalseFlag.TRUE.getCode())) {
