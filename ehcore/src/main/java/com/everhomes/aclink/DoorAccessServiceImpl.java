@@ -3190,7 +3190,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				Long t4 = DateHelper.currentGMTTime().getTime();
 
 				LOGGER.info("拿一个uclbrt 的二维码" + (t4 - t3));
-			} else {
+			} else if (auth.getDriver().equals(DoorAccessDriverType.FACEPLUSPLUS.getCode())) {
+			    continue;
+            } else {
 				//左邻门禁
 				resp.setQrTimeout(this.getQrTimeout() / 1000l);
 				doZuolinQRKey(generate, user, doorAccess, auth, qrKeys);

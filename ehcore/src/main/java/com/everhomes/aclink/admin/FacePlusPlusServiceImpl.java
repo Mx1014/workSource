@@ -583,7 +583,7 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())){
                 response = this.createUser(cookie, 0, userName, 0L, 0L);//subjectType 0 员工，1 访客 正式用户不传时间
             }else{
-                response = this.createUser(cookie, 1, userName, cmd.getValidFromMs()/1000, cmd.getValidEndMs()/1000);//subjectType 0 员工，1 访客 正式用户不传时间
+                response = this.createUser(cookie, 1, userName, cmd.getValidFromMs()/1000L, cmd.getValidEndMs()/1000L);//subjectType 0 员工，1 访客 正式用户不传时间
             }
             String subjectId = response.getJSONObject("data").getString("id");//face++用户ID
             if(subjectId != null){
