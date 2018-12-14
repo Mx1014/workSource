@@ -1487,6 +1487,8 @@ public class AssetServiceImpl implements AssetService {
                         d.add(Calendar.MONTH,1);
                         due.setTime(d.getTime());
                     }
+                    //周期结束时间还原
+                    d.setTime(periodStopTime);
                     break ;
                 default:
                     LOGGER.error("unexpeced bills day type when cal due day, day type = {}, group id ={}", group.getBillsDayType(), group.getId());
@@ -1505,7 +1507,16 @@ public class AssetServiceImpl implements AssetService {
             else if(group.getDueDayType() == 2){
                 deadline.add(Calendar.MONTH,group.getDueDay());
             }else if(group.getDueDayType() == 3){
-                Date billsDay = new Date(d.getTimeInMillis());
+                //获取周期结束时间
+                Date periodStopTime = new Date(d.getTimeInMillis());
+                //获取出明细时间
+                Date billDateDue = null;
+                try {
+                    billDateDue = yyyyMMdd.parse(obj.getBillDateDue());
+                }catch (ParseException e){
+                    LOGGER.error("billDateDue parse error,{}",billDateDue);
+                    e.printStackTrace();
+                }
                 //月底处理
                 if (expressionParseConfig.getDueDayDate()==-1){
                     d.add(Calendar.MONTH,1);
@@ -1514,12 +1525,13 @@ public class AssetServiceImpl implements AssetService {
                 }else {
                     d.set(Calendar.DAY_OF_MONTH,expressionParseConfig.getDueDayDate());
                 }
-                if (d.getTime().compareTo(billsDay)>=0){
+                if (d.getTime().compareTo(billDateDue)>=0){
                     deadline.setTime(d.getTime());
                 }else {
                     d.add(Calendar.MONTH,1);
                     deadline.setTime(d.getTime());
                 }
+                d.setTime(periodStopTime);
             }else {
                 LOGGER.info("Group due day type can only be 1 or 2, but now type = {}",group.getBalanceDateType());
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
@@ -1760,7 +1772,8 @@ public class AssetServiceImpl implements AssetService {
             } else {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 //兼容方案：11和12是自定义自然周期和自定义合同周期
-                if (cmd.getBillingCycle()==11||cmd.getBillingCycle()==12){
+                if (cmd.getBillingCycle()==BillingCycle.CUSTOM_NATURAL_PERIOD.getCode()||
+                        cmd.getBillingCycle()==BillingCycle.CUSTOM_CONTRACT_PERIOD.getCode()){
                     if (firstPeriodFlag){
                         Date firstPeriodStopTime = expressionParseProcess.calculateFirstPeriodStoptTime(a.getTime());
                         d.setTime(firstPeriodStopTime);
@@ -1775,7 +1788,8 @@ public class AssetServiceImpl implements AssetService {
                     d.setTime(a.getTime());
                 }
                 //兼容方案：11和12是自定义自然周期和自定义合同周期
-                if (cmd.getBillingCycle()==11||cmd.getBillingCycle()==12){
+                if (cmd.getBillingCycle()==BillingCycle.CUSTOM_NATURAL_PERIOD.getCode()||
+                        cmd.getBillingCycle()==BillingCycle.CUSTOM_CONTRACT_PERIOD.getCode()){
                     ;
                 }else {
                     //第一个周期计算
@@ -1864,6 +1878,8 @@ public class AssetServiceImpl implements AssetService {
                         d.add(Calendar.MONTH,1);
                         due.setTime(d.getTime());
                     }
+                    //周期结束时间还原
+                    d.setTime(periodStopTime);
                     break;
                 default:
                     LOGGER.error("unexpeced bills day type when cal due day, day type = {}, group id ={}", group.getBillsDayType(), group.getId());
@@ -1884,7 +1900,16 @@ public class AssetServiceImpl implements AssetService {
             }
             //固定某日为最晚还款日
             else if (group.getDueDayType() == 3){
-                Date billsDay = new Date(d.getTimeInMillis());
+                //获取周期结束时间
+                Date periodStopTime = new Date(d.getTimeInMillis());
+                //获取出明细时间
+                Date billDateDue = null;
+                try {
+                    billDateDue = yyyyMMdd.parse(obj.getBillDateDue());
+                }catch (ParseException e){
+                    LOGGER.error("billDateDue parse error,{}",billDateDue);
+                    e.printStackTrace();
+                }
                 //月底处理
                 if (expressionParseConfig.getDueDayDate()==-1){
                     d.add(Calendar.MONTH,1);
@@ -1893,12 +1918,13 @@ public class AssetServiceImpl implements AssetService {
                 }else {
                     d.set(Calendar.DAY_OF_MONTH,expressionParseConfig.getDueDayDate());
                 }
-                if (d.getTime().compareTo(billsDay)>=0){
+                if (d.getTime().compareTo(billDateDue)>=0){
                     deadline.setTime(d.getTime());
                 }else {
                     d.add(Calendar.MONTH,1);
                     deadline.setTime(d.getTime());
                 }
+                d.setTime(periodStopTime);
             }else{
                 LOGGER.info("Group due day type can only be 1 or 2, but now type = {}",group.getBalanceDateType());
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
@@ -1909,28 +1935,32 @@ public class AssetServiceImpl implements AssetService {
             obj.setBillCycleStart(yyyyMMdd.format(a.getTime()));
             obj.setBillCycleEnd(yyyyMMdd.format(d.getTime()));
 
-            if(!uniqueRecorder.containsKey(dag)){
-                //未存在改账单（未更新价格），就加入
-                uniqueRecorder.put(dag,obj);
-            }else{
-                //已存在，则更新为时间范围更广的
-                BillItemsExpectancy prev = uniqueRecorder.get(dag);
-                if(prev.getDateStrBegin().compareTo(obj.getDateStrBegin()) == 1){
-                    prev.setDateStrBegin(obj.getDateStrBegin());
-                    prev.setBillCycleStart(obj.getBillCycleStart());
+
+           if(!uniqueRecorder.containsKey(dag)){
+               //未存在改账单（未更新价格），就加入
+               uniqueRecorder.put(dag,obj);
+           }else{
+
+               //已存在，则更新为时间范围更广的
+               BillItemsExpectancy prev = uniqueRecorder.get(dag);
+               if(prev.getDateStrBegin().compareTo(obj.getDateStrBegin()) == 1){
+                   prev.setDateStrBegin(obj.getDateStrBegin());
+                   prev.setBillCycleStart(obj.getBillCycleStart());
+               }
+               if(prev.getDateStrEnd().compareTo(obj.getDateStrEnd()) == -1){
+                   prev.setDateStrEnd(obj.getDateStrEnd());
+                   prev.setBillCycleEnd(obj.getBillCycleEnd());
+                   prev.setBillDateDeadline(obj.getBillDateDeadline());
+                   prev.setBillDateDue(obj.getBillDateDue());
                 }
-                if(prev.getDateStrEnd().compareTo(obj.getDateStrEnd()) == -1){
-                    prev.setDateStrEnd(obj.getDateStrEnd());
-                    prev.setBillCycleEnd(obj.getBillCycleEnd());
-                    prev.setBillDateDeadline(obj.getBillDateDeadline());
-                    prev.setBillDateDue(obj.getBillDateDue());
-                }
-            }
+           }
+
             if(billingCycle == 5){
                 break timeLoop;
             }
             d.add(Calendar.DAY_OF_MONTH,1);
-            if (cmd.getBillingCycle()==11||cmd.getBillingCycle()==12){
+            if (cmd.getBillingCycle()==BillingCycle.CUSTOM_NATURAL_PERIOD.getCode()||
+                    cmd.getBillingCycle()==BillingCycle.CUSTOM_CONTRACT_PERIOD.getCode()){
                 Date PeriodStartTime = expressionParseProcess.calculateNextPeriodStartTime(d.getTime());
                 a.setTime(PeriodStartTime);
             }else {

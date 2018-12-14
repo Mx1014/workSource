@@ -71,7 +71,7 @@ public class CustomNaturalPeriod extends ExpressionParseProcess {
         CustomNaturalPeriod CNP = new CustomNaturalPeriod();
         Date dateStrBegin = new Date();
         ExpressionParseCommand cmd = new ExpressionParseCommand();
-        cmd.setBillingCycleExpression("{\"billingCustomStartDate\":\"-1\",\"billingCustomCycle\":1,\"billingCustomCycleOffset\":\"1\"}");
+        cmd.setBillingCycleExpression("{\"billingCustomCycle\":\"1\",\"billingCustomStartDate\":15,\"billingCustomCycleOffset\":1}");
         ExpressionParseConfig expressionParseConfig = new ExpressionParseConfig();
         expressionParseConfig.init(ExpressionParseUtil.parse(cmd.getBillingCycleExpression()));
         expressionParseProcess.calculatePeriod(expressionParseConfig,dateStrBegin);
