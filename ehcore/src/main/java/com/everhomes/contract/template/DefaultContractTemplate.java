@@ -1,5 +1,6 @@
 package com.everhomes.contract.template;
 
+import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -8,8 +9,11 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ChangeMethod;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
@@ -20,6 +24,9 @@ import com.everhomes.rest.contract.PeriodUnit;
 public class DefaultContractTemplate implements ContractTemplateHandler{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultContractTemplate.class);
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
 	
 	/**
 	 * 合法的例子：
@@ -58,6 +65,13 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 			case "contractEndDate":
 			case "contractStartDate":
 			case "signedTime":
+			case "apartmentDeliveryTime":
+			case "downPaymentRentTime":
+			case "decorateBeginDate":
+			case "decorateEndDate": 
+			case "downpaymentTime":
+			case "depositTime":
+			case "denunciationTime":	
 				value = formatTimeStamp((Timestamp) data);
 				break;
 			case "changeMethod":
@@ -77,6 +91,12 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 					value = apartmentsSBuilder.substring(0, apartmentsSBuilder.length()-1);
 				}
 				break;
+			case "partyAId":
+				Organization organization = organizationProvider.findOrganizationById((Long)data);
+				if (organization != null) {
+					value = organization.getName();
+				}
+				break;
 			default:
 				value = data.toString();
 				break;
@@ -85,8 +105,11 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 	}
 	
 	private String formatTimeStamp(Timestamp timeStamp){
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
-		return simpleDateFormat.format(new Date(timeStamp.getTime()));
+		if (timeStamp != null) {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+			return simpleDateFormat.format(new Date(timeStamp.getTime()));
+		}
+		return "";
 	}
 
 }

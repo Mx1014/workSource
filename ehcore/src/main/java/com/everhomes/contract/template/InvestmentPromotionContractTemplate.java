@@ -162,6 +162,9 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 			case "dropBox10ItemId":
 				value = getItemDisplayName(invitedCustomer,(Long) data);
 				break;
+			case "expectedSignDate": 
+				value = formatTimeStamp((Long) data);
+				break;
 			default:
 				value = data.toString();
 				break;
@@ -178,6 +181,14 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 		    }
 		}
 		return itemDisplayName;
+	}
+	
+	private String formatTimeStamp(Long timeStamp){
+		if (timeStamp != null) {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+			return simpleDateFormat.format(new Date(timeStamp));
+		}
+		return "";
 	}
 	
 }

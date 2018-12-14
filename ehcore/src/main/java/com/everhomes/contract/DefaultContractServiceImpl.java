@@ -4875,14 +4875,14 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					if (handler.isValid(contractDetailDTO, segments)) {
 						dataValue = handler.getValue(contractDetailDTO, segments);
 					}else{
-						dataValue = "无数据";
+						dataValue = "";
 					}
-					if (dataValue == null || "".equals(dataValue)) {
-						dataValue = "无数据";
+					if (dataValue == null ) {
+						dataValue = "";
 					}
 					dataMap.put(replaceKey, dataValue);
 				}else {
-					dataMap.put(replaceKey, "非法字段");
+					dataMap.put(replaceKey, "");
 				}
 			}
 		}
