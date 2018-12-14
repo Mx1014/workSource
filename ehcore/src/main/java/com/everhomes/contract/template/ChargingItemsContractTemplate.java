@@ -133,7 +133,7 @@ public class ChargingItemsContractTemplate implements ContractTemplateHandler{
 	}
 	
 	private String formatTimeStamp(Long timeStamp){
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
 		return simpleDateFormat.format(new Date(timeStamp));
 	}
 
