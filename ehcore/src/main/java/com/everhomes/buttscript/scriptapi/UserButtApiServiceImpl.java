@@ -106,6 +106,10 @@ public class UserButtApiServiceImpl implements NashornModuleApiService {
         String locale = "zh_CN";
         if (user != null) {
             locale = user.getLocale();
+            if (levelName.equals(user.getVipLevelText())) {
+                LOGGER.info("vip level is the same, can not send message to user, user={}", user);
+                return;
+            }
         }
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString("ruian.message", 1, locale, map, "您已成为" + levelName +"会员");
         MessageDTO messageDto = new MessageDTO();
