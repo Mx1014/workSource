@@ -4624,6 +4624,8 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	
 	@Override
 	public ContractDocumentDTO getContractDocuments(GetContractDocumentsCommand cmd) {
+		// 校验查看合同文档权限
+		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.VIEW_CONTRACT_DOCUMENTS, cmd.getOrgId(), cmd.getCommunityId());
 		ContractDocumentDTO result = new ContractDocumentDTO();
 		ContractDocument contractDocument = contractProvider.findContractDocumentById(cmd.getId());
 		if (contractDocument != null) {
@@ -4715,6 +4717,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		if (cmd.getContractId() == null || cmd.getTemplateId() == null) {
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA,"param is null");
 		}
+		
+		// 校验生成合同文档权限
+		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.GENERATE_CONTRACT_DOCUMENTS, cmd.getOrgId(), cmd.getCommunityId());
 		linkTemplateWithContract(cmd.getContractId(),cmd.getTemplateId());
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("UserContext", UserContext.current().getUser());
