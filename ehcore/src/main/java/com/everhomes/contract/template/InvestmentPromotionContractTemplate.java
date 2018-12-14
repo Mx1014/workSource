@@ -14,19 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.investment.InvitedCustomerService;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ChangeMethod;
 import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.PeriodUnit;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.CustomerContactDTO;
 import com.everhomes.rest.investment.CustomerContactType;
 import com.everhomes.rest.investment.InvitedCustomerDTO;
 import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 @Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "investmentPromotion")
 public class InvestmentPromotionContractTemplate implements ContractTemplateHandler{

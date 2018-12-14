@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.contract.BuildingApartmentDTO;
@@ -15,11 +16,16 @@ import com.everhomes.rest.contract.ChangeMethod;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.ScopeFieldItem;
 
 @Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "contract")
 public class DefaultContractTemplate implements ContractTemplateHandler{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultContractTemplate.class);
+	
+	@Autowired
+	private FieldProvider fieldProvider;
 	
 	/**
 	 * 合法的例子：
@@ -44,11 +50,11 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 		String contractsInfoKey = segments[0];
 		data = PropertyUtils.getProperty(contract, contractsInfoKey);
 		
-		return formatValue(contractsInfoKey,data);
+		return formatValue(contractsInfoKey,data,contract);
 	}
 	
 	@SuppressWarnings("unchecked")
-	private String formatValue(String key,Object data){
+	private String formatValue(String key,Object data,ContractDetailDTO contract){
 		if (data == null) {
 			return "";
 		}
@@ -75,6 +81,12 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 				}
 				if (apartmentsSBuilder.length() > 0) {
 					value = apartmentsSBuilder.substring(0, apartmentsSBuilder.length()-1);
+				}
+				break;
+			case "categoryItemId":
+				ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(),null, contract.getCommunityId(),contract.getCategoryItemId());
+				if (categoryItem != null) {
+					value = categoryItem.getItemDisplayName();
 				}
 				break;
 			default:
