@@ -5206,6 +5206,10 @@ public class AssetServiceImpl implements AssetService {
     //对接下载中心
 	@Override
     public OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Export payment bill, exporting start, taskId={}", taskId);
+        }
 		//公用字段
 		Long communityId;
 		List<ListBillsDTO> dtos ;
@@ -5215,6 +5219,7 @@ public class AssetServiceImpl implements AssetService {
 		Long categoryId = null;
 		String moduleName = "";
 		taskService.updateTaskProcess(taskId, 10);
+        long billQryStartTime = System.currentTimeMillis();
 		if (cmd instanceof ListBillsCommand) {
 			//缴费下载
 			ListBillsCommand ListBillsCMD = (ListBillsCommand) cmd;
@@ -5247,12 +5252,19 @@ public class AssetServiceImpl implements AssetService {
 			moduleName="对公转账";
 
 		} else {
-			LOGGER.error("exportAssetListByParams is error.");
-			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
+			LOGGER.error("Export payment bill, unsupported command type, taskId={}, command={}", taskId, cmd.getClass().getName());
+			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "Unsupported command type");
 		}
 
 		taskService.updateTaskProcess(taskId, 25);
 
+        if(LOGGER.isInfoEnabled()) {
+            long billQryEndTime = System.currentTimeMillis();
+            int billSize = (dtos == null) ? 0 : dtos.size();
+            LOGGER.info("Export payment bill, query bills by conditions, taskId={}, billSize={}, elapse={}", taskId, billSize, (billQryEndTime - billQryStartTime));
+        }        
+
+        long itemProcessStartTime = System.currentTimeMillis();
 		//初始化 字段信息
         List<String> propertyNames = new ArrayList<String>();
         List<String> titleName = new ArrayList<String>();
@@ -5313,6 +5325,13 @@ public class AssetServiceImpl implements AssetService {
         	}
         }
         taskService.updateTaskProcess(taskId, 40);
+        if(LOGGER.isInfoEnabled()) {
+            long itemProcessEndTime = System.currentTimeMillis();
+            int size = (billItemDTOList == null) ? 0 : billItemDTOList.size();
+            LOGGER.info("Export payment bill, process bill items, taskId={}, itemSize={}, elapse={}", 
+                    taskId, size, (itemProcessEndTime - itemProcessStartTime));
+        }
+        
         propertyNames.add("addresses");
         titleName.add("楼栋/门牌");
         titleSize.add(20);
@@ -5338,6 +5357,9 @@ public class AssetServiceImpl implements AssetService {
         List<Map<String, String>> dataList = new ArrayList<>();
         taskService.updateTaskProcess(taskId, 65);
         //组装datalist来确定propertyNames的值
+        long processStartTime = System.currentTimeMillis();
+        long roundStartTime = System.currentTimeMillis();
+        int itemCount = 0;
         for(int i = 0; i < dtos.size(); i++) {
             ListBillsDTO dto = (ListBillsDTO)dtos.get(i);
             Map<String, String> detail = new HashMap<String, String>();
@@ -5368,6 +5390,7 @@ public class AssetServiceImpl implements AssetService {
             	BigDecimal lateFineAmount = BigDecimal.ZERO;
             	BigDecimal energyConsume = BigDecimal.ZERO;//增加用量
         		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
+        		    itemCount++;
         			//如果费项ID相等
         			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
         				//如果费项ID相等，并且费项名称相等，那么说明是费项本身，如果不相等，则说明是费项产生的滞纳金
@@ -5437,7 +5460,21 @@ public class AssetServiceImpl implements AssetService {
             }
             detail.put("invoiceNum", dto.getInvoiceNum());
             dataList.add(detail);
+            if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
+                long roundEndTime = System.currentTimeMillis();
+                LOGGER.info("Export payment bill, process bill data, taskId={}, index={}, billSize={}, currBillId={}, itemCount={}, elapse={}", 
+                        taskId, i, dtos.size(), dto.getBillId(), itemCount, (roundEndTime - roundStartTime));
+                roundStartTime = roundEndTime;
+            }
         }
+
+        // 后面是直接输出文件流，暂不观察这些文件流的时间 by lqs 20181214
+        if (LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Export payment bill, process data end, taskId={}, itemCount={}, billSize={}, elapse={}, processElapse={}", 
+                    taskId, itemCount, dtos.size(), (endTime - startTime), (endTime - processStartTime));
+        }
+        
 		Community community = communityProvider.findCommunityById(communityId);
 		taskService.updateTaskProcess(taskId, 90);
 		if (community == null) {
@@ -5460,7 +5497,7 @@ public class AssetServiceImpl implements AssetService {
     public OutputStream exportOutputStreamListPaymentBill(ListPaymentBillCmd cmd, Long taskId) {
         long startTime = System.currentTimeMillis();
         if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Export payment bill, exporting start, taskId={}", taskId);
+            LOGGER.info("Export payment bill order, exporting start, taskId={}", taskId);
         }
         
         //表头信息初及数据标签始化
@@ -5493,7 +5530,7 @@ public class AssetServiceImpl implements AssetService {
         if(LOGGER.isInfoEnabled()) {
             long billQryEndTime = System.currentTimeMillis();
             int billSize = (paymentOrderBillDTOs == null) ? 0 : paymentOrderBillDTOs.size();
-            LOGGER.info("Export payment bill, query bills by conditions, taskId={}, billSize={}, elapse={}", taskId, billSize, (billQryEndTime - billQryStartTime));
+            LOGGER.info("Export payment bill order, query bills by conditions, taskId={}, billSize={}, elapse={}", taskId, billSize, (billQryEndTime - billQryStartTime));
         }        
 
         List<Map<String, String>> dataList = new ArrayList<>();
@@ -5549,8 +5586,9 @@ public class AssetServiceImpl implements AssetService {
                 
                 if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
                     long roundEndTime = System.currentTimeMillis();
-                    LOGGER.info("Export payment bill, query bills by conditions, taskId={}, index={}, billSize={}, currBillId={}, elapse={}", 
+                    LOGGER.info("Export payment bill order, query bills by conditions, taskId={}, index={}, billSize={}, currBillId={}, elapse={}", 
                             taskId, i, dtos.size(), dto.getBillId(), (roundEndTime - roundStartTime));
+                    roundStartTime = roundEndTime;
                 }
             }
         }
@@ -5558,14 +5596,14 @@ public class AssetServiceImpl implements AssetService {
         // 后面是直接输出文件流，暂不观察这些文件流的时间 by lqs 20181214
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
-            LOGGER.info("Export payment bill, exporting start, taskId={}, elapse={}, processElapse={}", 
+            LOGGER.info("Export payment bill order, exporting start, taskId={}, elapse={}, processElapse={}", 
                     taskId, (endTime - startTime), (endTime - processStartTime));
         }
 
         Community community = communityProvider.findCommunityById(communityId);
         taskService.updateTaskProcess(taskId, 90);
         if (community == null) {
-            LOGGER.error("Export payment bill, community not found, taskId={}, communityId={}", taskId, communityId);
+            LOGGER.error("Export payment bill order, community not found, taskId={}, communityId={}", taskId, communityId);
             throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
                     "Community not found");
         }
