@@ -1804,6 +1804,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(space.getRefundStrategy()!=null){
 			if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
 				order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
 				this.officeCubicleProvider.updateCubicleRentOrder(order);
 				return;
 			}
@@ -1814,11 +1815,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		if (order.getPrice().compareTo(new BigDecimal(0)) == 0){
 			order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+			rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
 		if (order.getRequestType() ==OfficeCubicleRequestType.BACKGROUND.getCode()){
 			order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+			rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
