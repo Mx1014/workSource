@@ -853,8 +853,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		row.createCell(++i).setCellValue("序号");
 		row.createCell(++i).setCellValue("订单提交时间");
 		row.createCell(++i).setCellValue("订单类型");
-		row.createCell(++i).setCellValue("预定时间");
-		row.createCell(++i).setCellValue("预定人");
+		row.createCell(++i).setCellValue("预订时间");
+		row.createCell(++i).setCellValue("预订人");
 		row.createCell(++i).setCellValue("联系方式");
 		row.createCell(++i).setCellValue("订单金额（元）");
 		row.createCell(++i).setCellValue("支付类型");
@@ -1990,7 +1990,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
 			List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceName());
 			smsProvider.addToTupleList(variables, "reserveTime", order.getUseDetail());
-			smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
+			smsProvider.addToTupleList(variables, "orderNo", String.valueOf(order.getOrderNo()));
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 			OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 			rent.setOrderId(order.getId());
