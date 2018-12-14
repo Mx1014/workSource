@@ -2194,8 +2194,10 @@ public class FieldServiceImpl implements FieldService {
                 if(item.getItemId() == null) {
                     ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
                     //2018年12月12日 黄鹏宇： 在客户新建一个自定义选项前，先确定item表中有没有同名的选项，如果有则不用新建一个新的item，而使用同名的item
-                    FieldItem exist = existItemList.stream().filter(r-> r.getFieldId().equals(item.getFieldId()) && r.getDisplayName().equals(item.getItemDisplayName())).collect(Collectors.toList()).get(0);
-                    if(exist != null){
+                    List<FieldItem> exists = existItemList.stream().filter(r-> r.getFieldId().equals(item.getFieldId()) && r.getDisplayName().equals(item.getItemDisplayName())).collect(Collectors.toList());
+                    FieldItem exist = null;
+                    if(exists != null && exists.size() > 0){
+                        exist = exists.get(0);
                         scopeFieldItem.setItemId(exist.getId());
                         scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
                         scopeFieldItem.setCreatorUid(UserContext.currentUserId());
