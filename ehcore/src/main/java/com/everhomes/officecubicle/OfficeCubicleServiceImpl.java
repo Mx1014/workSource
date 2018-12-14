@@ -2080,6 +2080,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		preDto.setOrderId(order.getId());
 		preDto.setAmount(priceRule.get(0).getWorkdayPrice().multiply(new BigDecimal(100)).longValue());
 		order.setBizOrderNo(response.getBizOrderNum());
+		order.setOrderStatus(OfficeCubicleOrderStatus.UNPAID.getCode());
 		officeCubicleProvider.updateCubicleRentOrder(order);
 		return preDto;
 		
