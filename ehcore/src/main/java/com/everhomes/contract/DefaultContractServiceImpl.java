@@ -1740,6 +1740,14 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTNUMBER_EXIST,
 					"contractNumber is already exist");
 		}
+		
+		if(cmd.getApartmentDeliveryTime() != null) {
+			contract.setApartmentDeliveryTime(setToBegin(cmd.getApartmentDeliveryTime()));
+		}
+		if(cmd.getDownPaymentRentTime() != null) {
+			contract.setDownPaymentRentTime(setToBegin(cmd.getDownPaymentRentTime()));
+		}
+		
 		if(cmd.getContractStartDate() != null) {
 			contract.setContractStartDate(setToBegin(cmd.getContractStartDate()));
 		}
