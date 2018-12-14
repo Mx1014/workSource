@@ -2,8 +2,6 @@ package com.everhomes.openapi.ruian;
 
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.rest.openapi.ruian.MallcooAutoLoginCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,8 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/openapi/ruian")
 public class RuianOpenController extends ControllerBase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RuianOpenController.class);
-
     @Autowired
     private RuianOpenService ruianOpenService;
     
@@ -32,7 +28,7 @@ public class RuianOpenController extends ControllerBase {
      * <b>URL: /openapi/ruian/autoLogin2Mallcoo</b>
      * <p>转跳到猫酷并自动登录</p>
      */
-    @RequestMapping(value = "autoLogin2Mallcoo", method = RequestMethod.GET)
+    @RequestMapping(value = "autoLogin2Mallcoo")
 	public Object autoLogin2Mallcoo(MallcooAutoLoginCommand mallcooAutoLoginCommand, HttpServletRequest request, HttpServletResponse response) {
     	String communityId = mallcooAutoLoginCommand.getCommunityId();
     	assert (communityId != null && !communityId.isEmpty());

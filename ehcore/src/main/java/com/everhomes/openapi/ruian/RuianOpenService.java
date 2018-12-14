@@ -1,7 +1,6 @@
 package com.everhomes.openapi.ruian;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.activity.ruian.MD5;
 import com.everhomes.activity.ruian.WebApiRuianHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
@@ -16,8 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +25,7 @@ public class RuianOpenService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RuianOpenService.class);
 
     // 我们的communityId(key)和mallcooId(value)的映射表
-    public static final Map<String, String> PROJECT_MAPPING = new HashMap(){{put("240111044332063000","10776");}};
+    public static final Map<String, String> PROJECT_MAPPING = new HashMap(){{put("240111044332063000","10776");put("default","10764");}};
 
     // 去mallcoo获取ticket的url
     public static final String TICKET_GET_RUL = "https://openapi10.mallcoo.cn/User/MallCard/v2/Open/ByMallCardTypeID/";
@@ -38,9 +35,6 @@ public class RuianOpenService {
     public static final String CALLBACK_URL = "https://m.mallcoo.cn/a/home/MALLID_PLACEHOLDER";
     public static final String MALLID_PLACEHOLDER = "MALLID_PLACEHOLDER";
     public static final Integer RUIAN_NAMESPACE_ID = 999929;
-    private static String PUBLIC_KEY = "d2NP2Z";
-    private static String PRIVATE_KEY = "a6cfff2c4aa370f8";
-    private static String APP_ID = "5b5046c988ce7e5ad49c9b10";
 
     @Autowired
     private UserService userService;
@@ -52,7 +46,8 @@ public class RuianOpenService {
 
         String mallId = PROJECT_MAPPING.get(communityId);
         if ( mallId == null ) {
-            LOGGER.error("no mallId mapping 4 communityId: [" + communityId + "]");
+            mallId = PROJECT_MAPPING.get("default");
+            LOGGER.error("no mallId mapping 4 communityId: [" + communityId + "] and default mallId used to avoid error");
         }
 
         String redirectToLoginUrl = REDIRECT_TO_LOGIN_URL.replaceAll(MALLID_PLACEHOLDER, mallId);
@@ -63,10 +58,10 @@ public class RuianOpenService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //仅瑞安域空间允许用此接口
-//      if ( namespaceId == null || RUIAN_NAMESPACE_ID.compareTo(namespaceId) != 0 ) {
-//          LOGGER.error("user in namespace[" + namespaceId + "] is not allowed to redirect to ruian");
-//          return null;
-//      }
+      if ( namespaceId == null || RUIAN_NAMESPACE_ID.compareTo(namespaceId) != 0 ) {
+          LOGGER.error("user in namespace[" + namespaceId + "] is not allowed to redirect to ruian");
+          return null;
+      }
 
         String ticket = getTicketFromMallcoo(userId, ticketGetUrl);
         try {
@@ -88,20 +83,6 @@ public class RuianOpenService {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-
-        // mallcoo要带一堆头信息
-        org.json.simple.JSONObject object = new org.json.simple.JSONObject();
-        object.put("ticket",ticket);
-        object.put("callbackurl1",callbackUrl);
-        String jsonStr = object.toString();
-        String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String encryptString = "{publicKey:" + PUBLIC_KEY + ",timeStamp:" + timeStamp + ",data:" + jsonStr + ",privateKey:" + PRIVATE_KEY + "}";
-        String sign = MD5.md5EncryptTo16(encryptString);
-
-        httpHeaders.add("AppID", APP_ID);
-        httpHeaders.add("TimeStamp", timeStamp);
-        httpHeaders.add("PublicKey", PUBLIC_KEY);
-        httpHeaders.add("Sign", sign);
 
         return httpHeaders;
     }
