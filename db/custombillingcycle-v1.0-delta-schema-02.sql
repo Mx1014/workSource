@@ -364,22 +364,3 @@ ALTER table eh_enterprise_customers add column corp_legal_person_token varchar(3
 -- REMARK: 给eh_contract_documents添加合同编号字段
 ALTER TABLE `eh_contract_documents` ADD COLUMN `contract_number` varchar(128) COMMENT '合同编号' AFTER `name`;
 
--- AUTHOR: 杨崇鑫 2018-12-05
--- REMARK: 物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
-ALTER TABLE `eh_payment_bills` ADD COLUMN `third_sign` TINYINT COMMENT '一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输（0：不传输）';
-
--- AUTHOR: 杨崇鑫 2018-12-05
--- REMARK: 物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 增加一个支付状态是否已确认字段
-ALTER TABLE `eh_payment_bills` ADD COLUMN `confirm_flag` TINYINT COMMENT '支付状态是否已确认字段，1：已确认；0：待确认';
-
--- AUTHOR: mengqianxiang
--- REMARK: 增加eh_payment_exemption_items表的状态字段
-ALTER TABLE eh_payment_exemption_items ADD `merchant_order_id` BIGINT  COMMENT "账单明细ID";
-ALTER TABLE eh_payment_exemption_items ADD `delete_flag` TINYINT NOT NULL DEFAULT 1 COMMENT "删除状态：0：已删除；1：正常使用";
-
--- AUTHOR: 孟千翔
--- REMARK: eh_payment_bill_groups表添加字段，作用自定义账单周期
-ALTER TABLE eh_payment_bill_groups ADD `billing_cycle_expression` VARCHAR(100) COMMENT "账单周期表达式";
-ALTER TABLE eh_payment_bill_groups ADD `bills_day_expression` VARCHAR(100) COMMENT "出账单日表达式";
-ALTER TABLE eh_payment_bill_groups ADD `due_day_expression` VARCHAR(100) COMMENT "最晚还款日表达式";
-

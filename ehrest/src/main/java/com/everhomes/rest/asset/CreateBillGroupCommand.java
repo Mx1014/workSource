@@ -22,6 +22,9 @@ import javax.validation.constraints.NotNull;
  * <li>categoryId: 缴费多应用ID</li>
  * <li>organizationId:管理公司ID</li>
  * <li>appId:应用ID</li>
+ * <li>billingCycleExpression:生成账单周期表达式</li>
+ * <li>billDayExpression:出账单日表达式</li>
+ * <li>dueDayExpression:最晚还款日表达式</li>
  *</ul>
  */
 public class CreateBillGroupCommand {
@@ -52,6 +55,37 @@ public class CreateBillGroupCommand {
     private Long organizationId;
     private Long appId;
     private Boolean allScope;//标准版增加的allScope参数，true：默认/全部，false：具体项目
+
+    //生成账单周期表达式
+    private String billingCycleExpression;
+    //出账单日表达式
+    private String billDayExpression;
+    //最晚还款日表达式
+    private String dueDayExpression;
+
+    public String getBillingCycleExpression() {
+        return billingCycleExpression;
+    }
+
+    public void setBillingCycleExpression(String billingCycleExpression) {
+        this.billingCycleExpression = billingCycleExpression;
+    }
+
+    public String getBillDayExpression() {
+        return billDayExpression;
+    }
+
+    public void setBillDayExpression(String billDayExpression) {
+        this.billDayExpression = billDayExpression;
+    }
+
+    public String getDueDayExpression() {
+        return dueDayExpression;
+    }
+
+    public void setDueDayExpression(String dueDayExpression) {
+        this.dueDayExpression = dueDayExpression;
+    }
 
     public Long getCategoryId() {
         return categoryId;

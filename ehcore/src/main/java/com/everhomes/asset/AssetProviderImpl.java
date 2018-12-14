@@ -2543,7 +2543,6 @@ public class AssetProviderImpl implements AssetProvider {
         //bill exemption已经减到bill中了
     }
 
-    @Override
     public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId, Long billGroupId) {
         List<ListChargingStandardsDTO> list = new ArrayList<>();
 
@@ -2565,34 +2564,66 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))//issue-35467 【物业缴费6.3】选择账单组的计费周期为“合同月”，选择收费项后，计费周期要过滤掉非“合同月”的计费标准
                 .fetch(Tables.EH_PAYMENT_BILL_GROUPS.BALANCE_DATE_TYPE);
         // limiteCycles
-        context.select()
-                .from(standardScopeT,standardT)
-                .where(standardT.ID.eq(standardScopeT.CHARGING_STANDARD_ID))
-                .and(standardScopeT.OWNER_ID.eq(ownerId))
-                .and(standardScopeT.OWNER_TYPE.eq(ownerType))
-                .and(standardT.CHARGING_ITEMS_ID.eq(chargingItemId))
-                // add category id constraint
-                .and(standardScopeT.CATEGORY_ID.eq(categoryId))
-                .and(standardT.BILLING_CYCLE.in(limitCyclses).or(standardT.BILLING_CYCLE.eq(BillingCycle.ONE_DEAL.getCode())))
-                .fetch()
-                .map(r -> {
-                    ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
-                    dto.setChargingStandardName(r.getValue(standardT.NAME));
-                    dto.setBillingCycle(r.getValue(standardT.BILLING_CYCLE));
-                    dto.setFormula(r.getValue(standardT.FORMULA));
-                    dto.setFormulaType(r.getValue(standardT.FORMULA_TYPE));
-                    dto.setChargingStandardId(r.getValue(standardT.ID));
-                    Byte priceUnitType = r.getValue(standard.PRICE_UNIT_TYPE);
-                    if(priceUnitType != null){
-                        //fixed as using day unit price
-                        dto.setUseUnitPrice((byte)1);
-                    }else{
-                        dto.setUseUnitPrice((byte)0);
-                    }
-                    suggestPrices.add(r.getValue(standardT.SUGGEST_UNIT_PRICE)==null?null:r.getValue(standardT.SUGGEST_UNIT_PRICE).longValue());
-                    list.add(dto);
-                    return null;
-                });
+        if (limitCyclses.get(0)<11) {
+            context.select()
+                    .from(standardScopeT,standardT)
+                    .where(standardT.ID.eq(standardScopeT.CHARGING_STANDARD_ID))
+                    .and(standardScopeT.OWNER_ID.eq(ownerId))
+                    .and(standardScopeT.OWNER_TYPE.eq(ownerType))
+                    .and(standardT.CHARGING_ITEMS_ID.eq(chargingItemId))
+                    // add category id constraint
+                    .and(standardScopeT.CATEGORY_ID.eq(categoryId))
+                    .and(standardT.BILLING_CYCLE.in(limitCyclses).or(standardT.BILLING_CYCLE.eq(BillingCycle.ONE_DEAL.getCode())))
+                    .fetch()
+                    .map(r -> {
+                        ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
+                        dto.setChargingStandardName(r.getValue(standardT.NAME));
+                        dto.setBillingCycle(r.getValue(standardT.BILLING_CYCLE));
+                        dto.setFormula(r.getValue(standardT.FORMULA));
+                        dto.setFormulaType(r.getValue(standardT.FORMULA_TYPE));
+                        dto.setChargingStandardId(r.getValue(standardT.ID));
+                        Byte priceUnitType = r.getValue(standard.PRICE_UNIT_TYPE);
+                        if(priceUnitType != null){
+                            //fixed as using day unit price
+                            dto.setUseUnitPrice((byte)1);
+                        }else{
+                            dto.setUseUnitPrice((byte)0);
+                        }
+                        suggestPrices.add(r.getValue(standardT.SUGGEST_UNIT_PRICE)==null?null:r.getValue(standardT.SUGGEST_UNIT_PRICE).longValue());
+                        list.add(dto);
+                        return null;
+                    });
+        }else {
+            //自定义自然周期和自定义合同周期放开限制
+            context.select()
+                    .from(standardScopeT,standardT)
+                    .where(standardT.ID.eq(standardScopeT.CHARGING_STANDARD_ID))
+                    .and(standardScopeT.OWNER_ID.eq(ownerId))
+                    .and(standardScopeT.OWNER_TYPE.eq(ownerType))
+                    .and(standardT.CHARGING_ITEMS_ID.eq(chargingItemId))
+                    // add category id constraint
+                    .and(standardScopeT.CATEGORY_ID.eq(categoryId))
+//                        .and(standardT.BILLING_CYCLE.in(limitCyclses).or(standardT.BILLING_CYCLE.eq(BillingCycle.ONE_DEAL.getCode())))
+                    .fetch()
+                    .map(r -> {
+                        ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
+                        dto.setChargingStandardName(r.getValue(standardT.NAME));
+                        dto.setBillingCycle(r.getValue(standardT.BILLING_CYCLE));
+                        dto.setFormula(r.getValue(standardT.FORMULA));
+                        dto.setFormulaType(r.getValue(standardT.FORMULA_TYPE));
+                        dto.setChargingStandardId(r.getValue(standardT.ID));
+                        Byte priceUnitType = r.getValue(standard.PRICE_UNIT_TYPE);
+                        if(priceUnitType != null){
+                            //fixed as using day unit price
+                            dto.setUseUnitPrice((byte)1);
+                        }else{
+                            dto.setUseUnitPrice((byte)0);
+                        }
+                        suggestPrices.add(r.getValue(standardT.SUGGEST_UNIT_PRICE)==null?null:r.getValue(standardT.SUGGEST_UNIT_PRICE).longValue());
+                        list.add(dto);
+                        return null;
+                    });
+        }
         List<List<String>> formus = new ArrayList<>();
         List<List<String>> conditionVarIdens = new ArrayList<>();
         for(int i =0; i < list.size(); i++){
@@ -2654,28 +2685,28 @@ public class AssetProviderImpl implements AssetProvider {
                 var.setVariableIdentifier(varIden);
                 var.setVariableName(varName);
                 if(varIden.equals("dj") || varIden.equals("gdje")){
-                	var.setVariableName(varName+"含税(元)");
-                	var.setVariablePlaceholder("请输入"+varName+"(含税)");
+                    var.setVariableName(varName+"含税(元)");
+                    var.setVariablePlaceholder("请输入"+varName+"(含税)");
                 }
                 if(varIden.equals("dj")){
                     var.setVariableValue(suggestPrices.get(j)==null?null:new BigDecimal(suggestPrices.get(j)));
                 }
                 vars.add(var);
                 if(varIden.equals("dj") || varIden.equals("gdje")){
-                	PaymentVariable varRate = new PaymentVariable();
+                    PaymentVariable varRate = new PaymentVariable();
                     varRate.setVariableIdentifier("taxRate");
                     varRate.setVariableName("税率(%)");
                     vars.add(varRate);
                 }
                 if(varIden.equals("gdje")){
-                	PaymentVariable var1 = new PaymentVariable();
+                    PaymentVariable var1 = new PaymentVariable();
                     var1.setVariableIdentifier("gdjebhs");
                     var1.setVariableName("固定金额不含税(元)");
                     var1.setVariablePlaceholder("请输入固定金额(不含税)");
                     vars.add(var1);
                 }
                 if(varIden.equals("dj")){
-                	PaymentVariable var2 = new PaymentVariable();
+                    PaymentVariable var2 = new PaymentVariable();
                     var2.setVariableIdentifier("djbhs");
                     var2.setVariableName("单价不含税(元)");
                     var2.setVariablePlaceholder("请输入单价(不含税)");
@@ -2714,6 +2745,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
         return list;
     }
+
 
     private String getNameByVariableIdenfitier(String varIden) {
         DSLContext context = getReadOnlyContext();

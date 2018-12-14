@@ -14,6 +14,8 @@ package com.everhomes.rest.asset;
  * <li>CONTRACT_YEAR(8): 按合同年</li>
  * <li>CONTRACT_TWOMONTH(9): 按合同两个月</li>
  * <li>CONTRACT_SIXMONTH(10): 按合同6个月</li>
+ * <li>CUSTOM_NATURAL_PERIOD(11):自定义账单自然周期</li>
+ * <li>CUSTOM_CONTRACT_PERIOD(12):自定义账单合同周期</li>
  * </ul>
  */
 public enum BillingCycle {
@@ -26,7 +28,9 @@ public enum BillingCycle {
     CONTRACT_QUARTER((byte)7, 2, true),
     CONTRACT_YEAR((byte)8, 11, true),
 	CONTRACT_TWOMONTH((byte)9, 1, true),//新增按合同两个月
-	CONTRACT_SIXMONTH((byte)10, 5, true);//新增按合同6个月
+	CONTRACT_SIXMONTH((byte)10, 5, true),//新增按合同6个月
+    CUSTOM_NATURAL_PERIOD((byte)11,null,false),//自定义账单自然周期
+    CUSTOM_CONTRACT_PERIOD((byte)12,null,true);//自定义账单合同周期
 	
     private byte code;
     private Integer monthOffset;
