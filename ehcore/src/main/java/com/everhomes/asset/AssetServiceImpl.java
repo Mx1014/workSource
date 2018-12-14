@@ -6,6 +6,7 @@ import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.ExpressionParse.*;
 import com.everhomes.asset.calculate.AssetCalculateUtil;
 import com.everhomes.asset.chargingitem.AssetChargingItemProvider;
 import com.everhomes.asset.group.AssetGroupProvider;
@@ -833,6 +834,15 @@ public class AssetServiceImpl implements AssetService {
                     	throw new RuntimeException("group rule is null, billGroupId=" + rule.getBillGroupId());
                     }
                     Byte balanceDateType = group.getBalanceDateType();
+
+                    //表达式解析参数设置
+                    ExpressionParseCommand EPcmd = new ExpressionParseCommand();
+                    EPcmd.setBillingCycleExpression(group.getBillingCycleExpression());
+                    EPcmd.setBillingCycle(group.getBalanceDateType());
+                    EPcmd.setBillDayExpression(group.getBillsDayExpression());
+                    EPcmd.setBillDayType(group.getBillsDayType());
+                    EPcmd.setDueDayExpression(group.getDueDayExpression());
+                    EPcmd.setDueDayType(group.getDueDayType());
                     
                     //缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
                     //缺陷 #42424 如果是一次性产生费用，那么只在第一个收费周期产生费用
@@ -847,7 +857,7 @@ public class AssetServiceImpl implements AssetService {
                         }
                         //calculate the bill items expectancies for each of the address
                         assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,null
-                                ,standard,formulaCondition,billingCycle,itemScope);
+                                ,standard,formulaCondition,billingCycle,itemScope,EPcmd);
                         billItemsExpectancies.addAll(billItemsExpectancies_inner);
                     }else {
                     	//开始循环地址包裹
@@ -878,7 +888,7 @@ public class AssetServiceImpl implements AssetService {
         					}
                             //calculate the bill items expectancies for each of the address
                             assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,property
-                                    ,standard,formulaCondition,billingCycle,itemScope);
+                                    ,standard,formulaCondition,billingCycle,itemScope,EPcmd);
                             billItemsExpectancies.addAll(billItemsExpectancies_inner);
                         }
                     }
@@ -891,7 +901,7 @@ public class AssetServiceImpl implements AssetService {
                             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
                             		"目前计费周期只支持按月，按季，按年");
                     }
-                    assetFeeHandlerForBillCycles(uniqueRecorder,groupRule,group,rule,balanceBillingCycle,standard,billingCycle,itemScope);
+                    assetFeeHandlerForBillCycles(uniqueRecorder,groupRule,group,rule,balanceBillingCycle,standard,billingCycle,itemScope,EPcmd);
                 }
                 //先算出所有的item
                 for(int g = 0; g < billItemsExpectancies.size(); g++){
@@ -1263,7 +1273,11 @@ public class AssetServiceImpl implements AssetService {
         assetProvider.autoNoticeConfig(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCategoryId(), toSaveConfigs);
     }
 
-    private void assetFeeHandler(List<BillItemsExpectancy> list,List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,BillingCycle cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition,Byte billingCycle,PaymentChargingItemScope itemScope) {
+    private void assetFeeHandler(List<BillItemsExpectancy> list,List<VariableIdAndValue> var2, String formula,
+                                 PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,BillingCycle cycle,
+                                 PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,
+                                 List<PaymentFormula> formulaCondition,Byte billingCycle,PaymentChargingItemScope itemScope,
+                                 ExpressionParseCommand EPcmd) {
         SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
         SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
         //计算的时间区间, it's the overall time period in which several bill cycles exists
@@ -1277,35 +1291,41 @@ public class AssetServiceImpl implements AssetService {
         }else{
             dateStrEnd.setTime(rule.getDateStrEnd());
         }
+        //自定义周期参数初始化
+        ExpressionParseConfig expressionParseConfig= new ExpressionParseConfig();
+        expressionParseConfig.init(ExpressionParseUtil.parse(EPcmd.getBillingCycleExpression()));
+        expressionParseConfig.init(ExpressionParseUtil.parse(EPcmd.getBillDayExpression()));
+        expressionParseConfig.init(ExpressionParseUtil.parse(EPcmd.getDueDayExpression()));
+
         //先算开始a which stands for the start of one cycle
         Calendar a = newClearedCalendar(Calendar.DATE);
         a.setTime(dateStrBegin.getTime());
         timeLoop:while(a.compareTo(dateStrEnd)<0){
             //d stands for the end of a cycle i.e. d = a+cycle
             Calendar d = newClearedCalendar();
-             // without limit, a full cycle should have a end of time - dWithoutLimit
+            // without limit, a full cycle should have a end of time - dWithoutLimit
             Calendar dWithoutLimit = newClearedCalendar();
             Calendar aWithoutLimit = newClearedCalendar();
             if(billingCycle.byteValue() == (byte) 5){
                 // in this case, 5 stands for the one time pay mode
-            	//缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
+                //缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
                 //缺陷 #42424 如果是一次性产生费用，那么只在第一个收费周期产生费用
                 if(AssetOneTimeBillStatus.TRUE.getCode().equals(rule.getOneTimeBillStatus())) {
-                	d.setTime(a.getTime());
-                	//按照账单组的计费周期分为按月，按季，按年，均有固定和自然两种情况
+                    d.setTime(a.getTime());
+                    //按照账单组的计费周期分为按月，按季，按年，均有固定和自然两种情况
                     BillingCycle billGroupBillingCycle = BillingCycle.fromCode(group.getBalanceDateType());
                     if(!billGroupBillingCycle.isContract()){
                         //issue-40616 缴费管理V7.2（修正自然季的计算规则）
                         int monthOffset;
                         if(billGroupBillingCycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
-                        	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
-                        	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                            NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                            monthOffset = natualQuarterMonthDTO.getMonthOffset();
                         }else {
-                        	monthOffset = billGroupBillingCycle.getMonthOffset();
+                            monthOffset = billGroupBillingCycle.getMonthOffset();
                         }
                         d.add(Calendar.MONTH, monthOffset);
                         d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
-                     }else{
+                    }else{
                         // #32243  check if the next day is beyond the maximum day of the next month
                         int prevDay = d.get(Calendar.DAY_OF_MONTH);
                         //修复缺陷 #44139 【保证金】【合同管理】将一次性收费项与其他收费周期放在同一账单组，签合同时添加两条计价条款，费用清单生成不了
@@ -1316,7 +1336,7 @@ public class AssetServiceImpl implements AssetService {
                         }
                     }
                 }else {
-                	d.setTime(dateStrEnd.getTime());
+                    d.setTime(dateStrEnd.getTime());
                 }
             } else {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
@@ -1328,21 +1348,21 @@ public class AssetServiceImpl implements AssetService {
                     //issue-40616 缴费管理V7.2（修正自然季的计算规则）
                     int monthOffset;
                     if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
-                    	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
-                    	monthOffset = natualQuarterMonthDTO.getMonthOffset();
-                    	//设置自然季的开始时间
-                    	try {
-							aWithoutLimit.setTime(yyyyMMdd.parse(natualQuarterMonthDTO.getDateStrBegin()));
-						} catch (ParseException e) {
-							LOGGER.info("assetFeeHandler set aWithoutLimit error, e = {}", e);
-						}
+                        NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                        monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                        //设置自然季的开始时间
+                        try {
+                            aWithoutLimit.setTime(yyyyMMdd.parse(natualQuarterMonthDTO.getDateStrBegin()));
+                        } catch (ParseException e) {
+                            LOGGER.info("assetFeeHandler set aWithoutLimit error, e = {}", e);
+                        }
                     }else {
-                    	monthOffset = cycle.getMonthOffset();
+                        monthOffset = cycle.getMonthOffset();
                     }
                     d.add(Calendar.MONTH, monthOffset);
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                     dWithoutLimit.setTime(d.getTime());
-                 }else{
+                }else{
                     // #32243  check if the next day is beyond the maximum day of the next month
                     int prevDay = d.get(Calendar.DAY_OF_MONTH);
                     d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
@@ -1392,16 +1412,16 @@ public class AssetServiceImpl implements AssetService {
                 days = divided;
                 if(!b){
                     // period of this cycle
-                	/**
-                	 * issue-40616 缴费管理V7.2（修正自然季的计算规则）
-                	 * 比如签了一个合同，计价条款为：自然季、2018-08-30至2018-12-31，固定金额9000
-                	 * 2018-08-30至2018-09-30 ： 计算系数r = (1 + 2/31) / 3
-                	 * 2018-10-01至2018-12-31 ：计算系数r = 1
-                	 */
+                    /**
+                     * issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                     * 比如签了一个合同，计价条款为：自然季、2018-08-30至2018-12-31，固定金额9000
+                     * 2018-08-30至2018-09-30 ： 计算系数r = (1 + 2/31) / 3
+                     * 2018-10-01至2018-12-31 ：计算系数r = 1
+                     */
                     if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
-                    	r = assetCalculateUtil.getReductionFactor(d, a);
+                        r = assetCalculateUtil.getReductionFactor(d, a);
                     }else {
-                    	int divider = daysBetween(d, a);
+                        int divider = daysBetween(d, a);
                         r = String.valueOf(divider+"/" + divided);
                     }
                 }
@@ -1451,10 +1471,27 @@ public class AssetServiceImpl implements AssetService {
                 case END_THIS_PERIOD:
                     due.setTime(d.getTime());
                     break;
+                case NEXT_PERIOD_FIRST_MONTH:
+                    Date periodStopTime = new Date(d.getTimeInMillis());
+                    //月底处理
+                    if (expressionParseConfig.getBillDate()==-1){
+                        d.add(Calendar.MONTH,1);
+                        d.set(Calendar.DAY_OF_MONTH,1);
+                        d.add(Calendar.DAY_OF_MONTH,-1);
+                    }else {
+                        d.set(Calendar.DAY_OF_MONTH,expressionParseConfig.getBillDate());
+                    }
+                    if (d.getTime().compareTo(periodStopTime)>=0){
+                        due.setTime(d.getTime());
+                    }else {
+                        d.add(Calendar.MONTH,1);
+                        due.setTime(d.getTime());
+                    }
+                    break ;
                 default:
                     LOGGER.error("unexpeced bills day type when cal due day, day type = {}, group id ={}", group.getBillsDayType(), group.getId());
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER
-                    , "unexpeced bills day type when cal due day, day type = {}, group id ={}", group.getBillsDayType(), group.getId());
+                            , "unexpeced bills day type when cal due day, day type = {}, group id ={}", group.getBillsDayType(), group.getId());
             }
             obj.setBillDateDue(yyyyMMdd.format(due.getTime()));
             // calculate the dealine of the bill. Deadline according to the design (by jinlan wang), showld after the due day a specific months or days, usually in day.
@@ -1467,7 +1504,23 @@ public class AssetServiceImpl implements AssetService {
             //月
             else if(group.getDueDayType() == 2){
                 deadline.add(Calendar.MONTH,group.getDueDay());
-            }else{
+            }else if(group.getDueDayType() == 3){
+                Date billsDay = new Date(d.getTimeInMillis());
+                //月底处理
+                if (expressionParseConfig.getDueDayDate()==-1){
+                    d.add(Calendar.MONTH,1);
+                    d.set(Calendar.DAY_OF_MONTH,1);
+                    d.add(Calendar.DAY_OF_MONTH,-1);
+                }else {
+                    d.set(Calendar.DAY_OF_MONTH,expressionParseConfig.getDueDayDate());
+                }
+                if (d.getTime().compareTo(billsDay)>=0){
+                    deadline.setTime(d.getTime());
+                }else {
+                    d.add(Calendar.MONTH,1);
+                    deadline.setTime(d.getTime());
+                }
+            }else {
                 LOGGER.info("Group due day type can only be 1 or 2, but now type = {}",group.getBalanceDateType());
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
                         ,"due day type is wrong!, group id ={}",group.getId());
@@ -1497,7 +1550,7 @@ public class AssetServiceImpl implements AssetService {
                 Long rentBillGroupId = rent.getBillGroupId();
                 Long feeBillGroupId = rule.getBillGroupId();
                 if(!rentBillGroupId.equals(feeBillGroupId)){
-                	continue outter;
+                    continue outter;
                 }
                 Long rentChargingItemId = rent.getChargingItemId();
                 Long feeChargingItemId = rule.getChargingItemId();
@@ -1604,7 +1657,7 @@ public class AssetServiceImpl implements AssetService {
                 Long rentBillGroupId = rent.getBillGroupId();
                 Long feeBillGroupId = rule.getBillGroupId();
                 if(!rentBillGroupId.equals(feeBillGroupId)){
-                	continue outter;
+                    continue outter;
                 }
                 Long rentChargingItemId = rent.getChargingItemId();
                 Long feeChargingItemId = rule.getChargingItemId();
@@ -1658,8 +1711,9 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void assetFeeHandlerForBillCycles(Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder
-            , PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,BillingCycle cycle
-            , EhPaymentChargingStandards standard,Byte billingCycle,PaymentChargingItemScope itemScope ) {
+            , PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule, BillingCycle cycle
+            , EhPaymentChargingStandards standard, Byte billingCycle, PaymentChargingItemScope itemScope,
+                                              ExpressionParseCommand cmd) {
         SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
         SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -1675,10 +1729,27 @@ public class AssetServiceImpl implements AssetService {
             dateStrEnd.setTime(rule.getDateStrEnd());
         }
 
-
         //先算开始a
         Calendar a = newClearedCalendar(Calendar.DATE);
         a.setTime(dateStrBegin.getTime());
+
+        ExpressionParseProcess expressionParseProcess = null;
+        ExpressionParseConfig expressionParseConfig= new ExpressionParseConfig();
+        expressionParseConfig.init(ExpressionParseUtil.parse(cmd.getBillingCycleExpression()));
+        expressionParseConfig.init(ExpressionParseUtil.parse(cmd.getBillDayExpression()));
+        expressionParseConfig.init(ExpressionParseUtil.parse(cmd.getDueDayExpression()));
+        //判断是自定义自然周期还是自定义合同周期
+        if (BillingCycle.fromCode(cmd.getBillingCycle())==BillingCycle.CUSTOM_CONTRACT_PERIOD){
+            expressionParseProcess = new CustomContractPeriod();
+            expressionParseProcess.calculatePeriod(expressionParseConfig,dateStrBegin.getTime());
+        }else if(BillingCycle.fromCode(cmd.getBillingCycle())==BillingCycle.CUSTOM_NATURAL_PERIOD){
+            expressionParseProcess = new CustomNaturalPeriod();
+            expressionParseProcess.calculatePeriod(expressionParseConfig,dateStrBegin.getTime());
+        }else {
+            expressionParseProcess = new DefaultExpressionParse();
+        }
+        //第一个账单周期标识
+        Boolean firstPeriodFlag = true;
 
         timeLoop:while(a.compareTo(dateStrEnd)<0){
             //d stands for the end of a cycle i.e. d = a+cycle
@@ -1688,31 +1759,51 @@ public class AssetServiceImpl implements AssetService {
                 d.setTime(dateStrEnd.getTime());
             } else {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
-                d.setTime(a.getTime());
-                if(!cycle.isContract()){
-                	//issue-40616 缴费管理V7.2（修正自然季的计算规则）
-                    int monthOffset;
-                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
-                    	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
-                    	monthOffset = natualQuarterMonthDTO.getMonthOffset();
-                    	//设置自然季的开始时间
+                //兼容方案：11和12是自定义自然周期和自定义合同周期
+                if (cmd.getBillingCycle()==11||cmd.getBillingCycle()==12){
+                    if (firstPeriodFlag){
+                        Date firstPeriodStopTime = expressionParseProcess.calculateFirstPeriodStoptTime(a.getTime());
+                        d.setTime(firstPeriodStopTime);
+                        firstPeriodFlag = false;
+                    }else {
+                        Date periodStartTime = a.getTime();
+                        Date PeriodStopTime = expressionParseProcess.calculateNextPeriodStopTime(periodStartTime,
+                                expressionParseConfig.getBillingCustomStartDate(),expressionParseConfig.getBillingCustomCycle());
+                        d.setTime(PeriodStopTime);
+                    }
+                }else {
+                    d.setTime(a.getTime());
+                }
+                //兼容方案：11和12是自定义自然周期和自定义合同周期
+                if (cmd.getBillingCycle()==11||cmd.getBillingCycle()==12){
+                    ;
+                }else {
+                    //第一个周期计算
+                    if(!cycle.isContract()){
+                        //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                        int monthOffset;
+                        if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                            NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                            monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                            //设置自然季的开始时间
 //                    	try {
 //							aWithoutLimit.setTime(yyyyMMdd.parse(natualQuarterMonthDTO.getDateStrBegin()));
 //						} catch (ParseException e) {
 //							LOGGER.info("assetFeeHandler set aWithoutLimit error, e = {}", e);
 //						}
-                    }else {
-                    	monthOffset = cycle.getMonthOffset();
-                    }
-                    d.add(Calendar.MONTH, monthOffset);
-                    d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
-                }else{
-                    // #32243  check if the next day is beyond the maximum day of the next month
-                    int prevDay = d.get(Calendar.DAY_OF_MONTH);
-                    d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
-                    int maximumDay = d.getActualMaximum(Calendar.DAY_OF_MONTH);
-                    if(prevDay <= maximumDay){
-                        d.add(Calendar.DAY_OF_MONTH, -1);
+                        }else {
+                            monthOffset = cycle.getMonthOffset();
+                        }
+                        d.add(Calendar.MONTH, monthOffset);
+                        d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+                    }else{
+                        // #32243  check if the next day is beyond the maximum day of the next month
+                        int prevDay = d.get(Calendar.DAY_OF_MONTH);
+                        d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
+                        int maximumDay = d.getActualMaximum(Calendar.DAY_OF_MONTH);
+                        if(prevDay <= maximumDay){
+                            d.add(Calendar.DAY_OF_MONTH, -1);
+                        }
                     }
                 }
             }
@@ -1757,6 +1848,23 @@ public class AssetServiceImpl implements AssetService {
                 case END_THIS_PERIOD:
                     due.setTime(d.getTime());
                     break;
+                case NEXT_PERIOD_FIRST_MONTH:
+                    Date periodStopTime = new Date(d.getTimeInMillis());
+                    //月底处理
+                    if (expressionParseConfig.getBillDate()==-1){
+                        d.add(Calendar.MONTH,1);
+                        d.set(Calendar.DAY_OF_MONTH,1);
+                        d.add(Calendar.DAY_OF_MONTH,-1);
+                    }else {
+                        d.set(Calendar.DAY_OF_MONTH,expressionParseConfig.getBillDate());
+                    }
+                    if (d.getTime().compareTo(periodStopTime)>=0){
+                        due.setTime(d.getTime());
+                    }else {
+                        d.add(Calendar.MONTH,1);
+                        due.setTime(d.getTime());
+                    }
+                    break;
                 default:
                     LOGGER.error("unexpeced bills day type when cal due day, day type = {}, group id ={}", group.getBillsDayType(), group.getId());
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER
@@ -1773,6 +1881,24 @@ public class AssetServiceImpl implements AssetService {
             //月
             else if(group.getDueDayType() == 2){
                 deadline.add(Calendar.MONTH,group.getDueDay());
+            }
+            //固定某日为最晚还款日
+            else if (group.getDueDayType() == 3){
+                Date billsDay = new Date(d.getTimeInMillis());
+                //月底处理
+                if (expressionParseConfig.getDueDayDate()==-1){
+                    d.add(Calendar.MONTH,1);
+                    d.set(Calendar.DAY_OF_MONTH,1);
+                    d.add(Calendar.DAY_OF_MONTH,-1);
+                }else {
+                    d.set(Calendar.DAY_OF_MONTH,expressionParseConfig.getDueDayDate());
+                }
+                if (d.getTime().compareTo(billsDay)>=0){
+                    deadline.setTime(d.getTime());
+                }else {
+                    d.add(Calendar.MONTH,1);
+                    deadline.setTime(d.getTime());
+                }
             }else{
                 LOGGER.info("Group due day type can only be 1 or 2, but now type = {}",group.getBalanceDateType());
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
@@ -1804,9 +1930,142 @@ public class AssetServiceImpl implements AssetService {
                 break timeLoop;
             }
             d.add(Calendar.DAY_OF_MONTH,1);
-            a.setTime(d.getTime());
+            if (cmd.getBillingCycle()==11||cmd.getBillingCycle()==12){
+                Date PeriodStartTime = expressionParseProcess.calculateNextPeriodStartTime(d.getTime());
+                a.setTime(PeriodStartTime);
+            }else {
+                a.setTime(d.getTime());
+            }
             //继续循环
         }
+
+//        timeLoop:while(a.compareTo(dateStrEnd)<0){
+//            //d stands for the end of a cycle i.e. d = a+cycle
+//            Calendar d = newClearedCalendar();
+//            if(billingCycle.byteValue() == (byte) 5){
+//                // in this case, 5 stands for the one time pay mode
+//                d.setTime(dateStrEnd.getTime());
+//            } else {
+//                // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
+//                d.setTime(a.getTime());
+//                if(!cycle.isContract()){
+//                	//issue-40616 缴费管理V7.2（修正自然季的计算规则）
+//                    int monthOffset;
+//                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+//                    	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+//                    	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+//                    	//设置自然季的开始时间
+////                    	try {
+////							aWithoutLimit.setTime(yyyyMMdd.parse(natualQuarterMonthDTO.getDateStrBegin()));
+////						} catch (ParseException e) {
+////							LOGGER.info("assetFeeHandler set aWithoutLimit error, e = {}", e);
+////						}
+//                    }else {
+//                    	monthOffset = cycle.getMonthOffset();
+//                    }
+//                    d.add(Calendar.MONTH, monthOffset);
+//                    d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+//                }else{
+//                    // #32243  check if the next day is beyond the maximum day of the next month
+//                    int prevDay = d.get(Calendar.DAY_OF_MONTH);
+//                    d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
+//                    int maximumDay = d.getActualMaximum(Calendar.DAY_OF_MONTH);
+//                    if(prevDay <= maximumDay){
+//                        d.add(Calendar.DAY_OF_MONTH, -1);
+//                    }
+//                }
+//            }
+//
+//            //the end of a cycle -- d cannot beyond the upper limit of its fee rule
+//            if(d.compareTo(dateStrEnd)>0){
+//                d.setTime(dateStrEnd.getTime());
+//            }
+//            //组装对象
+//            BillItemsExpectancy obj = new BillItemsExpectancy();
+//            obj.setGroupRule(groupRule);
+//            obj.setGroup(group);
+//            obj.setStandard(standard);
+//            obj.setItemScope(itemScope);
+//            //滞纳金id跟着细项
+//            obj.setDateStrBegin(a.getTime());
+//            obj.setDateStrEnd(d.getTime());
+//            obj.setBillGroupId(group.getId());
+//            obj.setBillDateStr(yyyyMM.format(a.getTime()));
+//            BillDateAndGroupId dag = new BillDateAndGroupId();
+//            dag.setBillGroupId(group.getId());
+//            dag.setDateStr(obj.getBillDateStr());
+//            // calculate due day. Due day stands for the day in witch bill will ben switched to be validate(switch = 1)
+//            Calendar due = newClearedCalendar();
+//            BillsDayType billsDayType = BillsDayType.fromCode(group.getBillsDayType());
+//            if(billsDayType == null){
+//                billsDayType = BillsDayType.FIRST_MONTH_NEXT_PERIOD;
+//            }
+//            switch (billsDayType){
+//                case FIRST_MONTH_NEXT_PERIOD:
+//                    due.setTime(d.getTime());
+//                    due.add(Calendar.DAY_OF_MONTH,group.getBillsDay());
+//                    break;
+//                case BEFORE_THIS_PERIOD:
+//                    due.setTime(a.getTime());
+//                    due.add(Calendar.DAY_OF_MONTH, -group.getBillsDay());
+//                    break;
+//                case AFTER_THIS_PERIOD:
+//                    due.setTime(a.getTime());
+//                    due.add(Calendar.DAY_OF_MONTH, group.getBillsDay() - 1);
+//                    break;
+//                case END_THIS_PERIOD:
+//                    due.setTime(d.getTime());
+//                    break;
+//                default:
+//                    LOGGER.error("unexpeced bills day type when cal due day, day type = {}, group id ={}", group.getBillsDayType(), group.getId());
+//                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER
+//                            , "unexpeced bills day type when cal due day, day type = {}, group id ={}", group.getBillsDayType(), group.getId());
+//            }
+//            obj.setBillDateDue(yyyyMMdd.format(due.getTime()));
+//            // calculate the dealine of the bill. Deadline according to the design (by jinlan wang), showld after the due day a specific months or days, usually in day.
+//            Calendar deadline = newClearedCalendar();
+//            deadline.setTime(due.getTime());
+//            //日
+//            if(group.getDueDayType()==1){
+//                deadline.add(Calendar.DAY_OF_MONTH,group.getDueDay());
+//            }
+//            //月
+//            else if(group.getDueDayType() == 2){
+//                deadline.add(Calendar.MONTH,group.getDueDay());
+//            }else{
+//                LOGGER.info("Group due day type can only be 1 or 2, but now type = {}",group.getBalanceDateType());
+//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
+//                        ,"due day type is wrong!, group id ={}",group.getId());
+//            }
+//
+//            obj.setBillDateDeadline(yyyyMMdd.format(deadline.getTime()));
+//            obj.setBillCycleStart(yyyyMMdd.format(a.getTime()));
+//            obj.setBillCycleEnd(yyyyMMdd.format(d.getTime()));
+//
+//            if(!uniqueRecorder.containsKey(dag)){
+//                //未存在改账单（未更新价格），就加入
+//                uniqueRecorder.put(dag,obj);
+//            }else{
+//                //已存在，则更新为时间范围更广的
+//                BillItemsExpectancy prev = uniqueRecorder.get(dag);
+//                if(prev.getDateStrBegin().compareTo(obj.getDateStrBegin()) == 1){
+//                    prev.setDateStrBegin(obj.getDateStrBegin());
+//                    prev.setBillCycleStart(obj.getBillCycleStart());
+//                }
+//                if(prev.getDateStrEnd().compareTo(obj.getDateStrEnd()) == -1){
+//                    prev.setDateStrEnd(obj.getDateStrEnd());
+//                    prev.setBillCycleEnd(obj.getBillCycleEnd());
+//                    prev.setBillDateDeadline(obj.getBillDateDeadline());
+//                    prev.setBillDateDue(obj.getBillDateDue());
+//                }
+//            }
+//            if(billingCycle == 5){
+//                break timeLoop;
+//            }
+//            d.add(Calendar.DAY_OF_MONTH,1);
+//            a.setTime(d.getTime());
+//            //继续循环
+//        }
     }
 
     private void reCalFee(List<BillItemsExpectancy> list, int k, RentAdjust rent) {

@@ -4,7 +4,12 @@ package com.everhomes.rest.asset;
  * Created by Wentian on 2018/5/14.
  */
 public enum BillsDayType {
-    BEFORE_THIS_PERIOD((byte)1), AFTER_THIS_PERIOD((byte)2), END_THIS_PERIOD((byte)3), FIRST_MONTH_NEXT_PERIOD((byte)4);
+    BEFORE_THIS_PERIOD((byte)1),
+    AFTER_THIS_PERIOD((byte)2),
+    END_THIS_PERIOD((byte)3),
+    FIRST_MONTH_NEXT_PERIOD((byte)4),
+    NEXT_PERIOD_FIRST_MONTH((byte)5);
+
     private Byte code;
     BillsDayType(byte code){
         this.code = code;
