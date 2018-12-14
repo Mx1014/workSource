@@ -4877,6 +4877,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					}else{
 						dataValue = "无数据";
 					}
+					if (dataValue == null || "".equals(dataValue)) {
+						dataValue = "无数据";
+					}
 					dataMap.put(replaceKey, dataValue);
 				}else {
 					dataMap.put(replaceKey, "非法字段");

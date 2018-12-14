@@ -84,13 +84,8 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 		return value;
 	}
 	
-	private String formatTimeStamp(Long timeStamp){
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return simpleDateFormat.format(new Date(timeStamp));
-	}
-	
 	private String formatTimeStamp(Timestamp timeStamp){
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
 		return simpleDateFormat.format(new Date(timeStamp.getTime()));
 	}
 

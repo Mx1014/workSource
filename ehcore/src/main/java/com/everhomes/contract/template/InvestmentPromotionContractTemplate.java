@@ -131,53 +131,36 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 					}
 				}
 				break;
-			case "levelItemId":
-				ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getLevelItemId());
-			    if (levelItem != null) {
-			    	value = levelItem.getItemDisplayName();
-			    }
-				break;
 			case "categoryItemId":
-				ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCategoryItemId());
-			    if (categoryItem != null) {
-			    	value = categoryItem.getItemDisplayName();
-			    }
-				break;
+			case "levelItemId":
 			case "contactGenderItemId":
-				ScopeFieldItem contactGenderItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getContactGenderItemId());
-			    if (contactGenderItem != null) {
-			    	value = contactGenderItem.getItemDisplayName();
-			    }
-				break;
 			case "corpProductCategoryItemId":
-				ScopeFieldItem corpProductCategoryItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpProductCategoryItemId());
-			    if (corpProductCategoryItem != null) {
-			    	value = corpProductCategoryItem.getItemDisplayName();
-			    }
-				break;
 			case "propertyType":
-				ScopeFieldItem propertyType = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getPropertyType());
-			    if (propertyType != null) {
-			    	value = propertyType.getItemDisplayName();
-			    }
-				break;
 			case "corpNatureItemId":
-				ScopeFieldItem corpNatureItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpNatureItemId());
-			    if (corpNatureItem != null) {
-			    	value = corpNatureItem.getItemDisplayName();
-			    }
-				break;
 			case "corpPurposeItemId":
-				ScopeFieldItem corpPurposeItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpPurposeItemId());
-			    if (corpPurposeItem != null) {
-			    	value = corpPurposeItem.getItemDisplayName();
-			    }
-				break;
 			case "corpQualificationItemId":
-				ScopeFieldItem corpQualificationItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpQualificationItemId());
-			    if (corpQualificationItem != null) {
-			    	value = corpQualificationItem.getItemDisplayName();
-			    }
+			case "corpIndustryItemId":
+			case "sourceItemId":
+			case "registrationTypeId":
+			case "technicalFieldId":
+			case "taxpayerTypeId":
+			case "relationWillingId":
+			case "highAndNewTechId":
+			case "entrepreneurialCharacteristicsId":
+			case "serialEntrepreneurId":
+			case "buyOrLeaseItemId":
+			case "financingDemandItemId":
+			case "dropBox1ItemId":
+			case "dropBox2ItemId":
+			case "dropBox3ItemId":
+			case "dropBox4ItemId":
+			case "dropBox5ItemId":
+			case "dropBox6ItemId":
+			case "dropBox7ItemId":
+			case "dropBox8ItemId":
+			case "dropBox9ItemId":
+			case "dropBox10ItemId":
+				value = getItemDisplayName(invitedCustomer,(Long) data);
 				break;
 			default:
 				value = data.toString();
@@ -186,14 +169,15 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 		return value;
 	}
 	
-	private String formatTimeStamp(Long timeStamp){
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return simpleDateFormat.format(new Date(timeStamp));
-	}
-	
-	private String formatTimeStamp(Timestamp timeStamp){
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return simpleDateFormat.format(new Date(timeStamp.getTime()));
+	private String getItemDisplayName(InvitedCustomerDTO invitedCustomer,Long itemId){
+		String itemDisplayName = "";
+		if (itemId != null && invitedCustomer != null) {
+			ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), itemId);
+		    if (scopeFieldItem != null) {
+		    	itemDisplayName = scopeFieldItem.getItemDisplayName();
+		    }
+		}
+		return itemDisplayName;
 	}
 	
 }
