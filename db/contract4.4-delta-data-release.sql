@@ -31,6 +31,7 @@ INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12132, 'enterprise_customer', 'stringTag20', '预留字段20', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 128}');
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12133, 'enterprise_customer', 'stringTag21', '预留字段21', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 128}');
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12134, 'enterprise_customer', 'corpLegalPersonDuty', '法人代表职务', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12135, 'enterprise_customer', 'corpLegalPersonToken', '法人代表职务', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
 SET @id = IFNULL((select max(id) from eh_var_field_ranges), 1);
@@ -44,6 +45,7 @@ INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12126,'enterprise_cus
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12127,'enterprise_customer','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12128,'enterprise_customer','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12134,'enterprise_customer','enterprise_customer');
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12135,'enterprise_customer','enterprise_customer');
 
 
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12120,'investment_promotion','enterprise_customer');
@@ -61,6 +63,7 @@ INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12131,'investment_pro
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12132,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12133,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12134,'investment_promotion','enterprise_customer');
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',12135,'investment_promotion','enterprise_customer');
 
 
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/11/',14,'investment_promotion','enterprise_customer');
