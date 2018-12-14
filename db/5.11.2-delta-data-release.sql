@@ -241,6 +241,10 @@ INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_t
 -- REMARK: 更新企业账单为企业应用
 UPDATE eh_service_module_apps SET app_type = 0 WHERE module_id = 20500;
 
+-- AUTHOR: 黄明波  20181214
+-- REMARK: 修复物业报修跳转bug
+delete from eh_service_alliance_jump_module where  module_id = 20100 and (module_name = '投诉建议' or instance_config like '%"taskCategoryId":9%');
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
