@@ -36,7 +36,8 @@ public abstract class ExpressionParseProcess {
     public Date calculateNextPeriodStartTime(Date stopTime){
         Calendar startTimeCalendar = Calendar.getInstance();
         startTimeCalendar.setTime(stopTime);
-        startTimeCalendar.add(Calendar.DAY_OF_MONTH,1);
+//        因为外部循环已经+1了，传进来的参数不是结束时间，而是开始时间。
+//        startTimeCalendar.add(Calendar.DAY_OF_MONTH,1);
         return startTimeCalendar.getTime();
     }
 

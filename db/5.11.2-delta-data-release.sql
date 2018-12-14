@@ -56,8 +56,10 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 -- AUTHOR: 缪洲 20181211
 -- REMARK: 工位预定V2.4
-DELETE FROM eh_office_cubicle_spaces; --工位预定重做，旧数据无法兼容，因此删掉
-DELETE FROM eh_office_cubicle_orders; --工位预定重做，以前旧参观记录作废
+--工位预定重做，旧数据无法兼容，因此删掉
+DELETE FROM eh_office_cubicle_spaces; 
+--工位预定重做，以前旧参观记录作废
+DELETE FROM eh_office_cubicle_orders; 
 SET @id = (SELECT MAX(id) from eh_locale_templates);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1,'sms.default', 94, 'zh_CN', '工会预定成功付款短信', '您已成功预定了${spaceName}短租工位，预定时间：${reserveTime}，订单编号：${orderNo}.如需取消，请在预定开始时间前取消，感谢您的使用。', 0);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1,'sms.default', 95, 'zh_CN', '工会预定成功退款短信', '尊敬的用户，您预定的${spaceName}短租工位已退款成功，订单编号：${orderNo}，订单金额${price}元，退款金额：${refundPrice}元，期待下次为您服务。', 0);
@@ -240,6 +242,10 @@ INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_t
 -- AUTHOR: 梁燕龙  20181214
 -- REMARK: 更新企业账单为企业应用
 UPDATE eh_service_module_apps SET app_type = 0 WHERE module_id = 20500;
+
+-- AUTHOR: 黄明波  20181214
+-- REMARK: 修复物业报修跳转bug
+delete from eh_service_alliance_jump_module where  module_id = 20100 and (module_name = '投诉建议' or instance_config like '%"taskCategoryId":9%');
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
