@@ -2629,7 +2629,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetCubicleForOrderResponse getCubicleForOrder (GetCubicleForOrderCommand cmd){
 		GetCubicleForOrderResponse resp = new GetCubicleForOrderResponse();
-		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId())
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		String keyword = "";
 		if (StringUtils.isNotBlank(cmd.getKeyword())){
 			keyword = cmd.getKeyword();
