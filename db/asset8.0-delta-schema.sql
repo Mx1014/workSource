@@ -84,6 +84,8 @@ ALTER table eh_enterprise_customers add column string_tag19 varchar(32) comment 
 ALTER table eh_enterprise_customers add column string_tag20 varchar(32) comment '预留字段20';
 ALTER table eh_enterprise_customers add column string_tag21 varchar(32) comment '预留字段21';
 ALTER table eh_enterprise_customers add column corp_legal_person_duty varchar(32) comment '法人代表职务';
+ALTER table eh_enterprise_customers add column corp_legal_person_token varchar(32) comment '法人联系电话';
+
 
 -- AUTHOR: tangcen 2018年12月12日
 -- REMARK: 给eh_contract_documents添加合同编号字段
