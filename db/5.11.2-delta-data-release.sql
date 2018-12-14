@@ -1,4 +1,4 @@
--- --------------------- SECTION BEGIN -------------------------------------------------------
+﻿-- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
 -- AUTHOR:
@@ -95,6 +95,19 @@ update eh_siyin_print_printers set owner_type = 'community', owner_id = 24011104
 update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044331050362  where reader_name = 'TC101154727294';
 update eh_siyin_print_printers set owner_type = 'community', owner_id = 240111044332063596 where reader_name = 'TC100887870538';
 
+-- AUTHOR: 吴寒
+-- REMARK: 修改bug:之前的菜单表和模块表id搞错了
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79881000','企业支付授权','70000010',NULL,'enterprise-payment-auth','1','2','/70000010/79881000','zuolin','8','271000','3','system','module','2','1');
+UPDATE eh_web_menus SET id = 79880000 , module_id =271000 WHERE id = 271000;
+UPDATE eh_service_modules SET id = 270000 , path ='/100/270000' WHERE id = 79870000;
+UPDATE eh_service_modules SET id = 271000 , parent_id = 270000 , path ='/100/270000/271000' WHERE id = 79880000;
+UPDATE eh_service_modules SET id = 271000 , parent_id = 270000 , path ='/100/270000/271000' WHERE id = 79880000;
+UPDATE eh_service_module_apps SET module_id = 271000 WHERE module_id = 79880000;
+UPDATE eh_service_module_entries SET module_id = 271000 WHERE module_id = 79880000;
+UPDATE eh_service_module_functions SET module_id = 271000 WHERE module_id = 79880000;
+UPDATE eh_service_module_privileges SET module_id = 271000 WHERE module_id = 79880000;
+UPDATE eh_service_module_scopes SET module_id = 271000 WHERE module_id = 79880000;
+UPDATE eh_service_module_securities SET module_id = 271000 WHERE module_id = 79880000; 
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
