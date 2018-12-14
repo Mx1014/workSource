@@ -62,6 +62,7 @@ import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -552,18 +553,24 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd.getSpaceAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)1);
 				});
+			} else {
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)1);
 			}
 			if (null != cmd.getShortRentAttachments()){
 				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)2);
 				cmd.getShortRentAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)2);
 				});
+			} else {
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)2);
 			}
 			if (null != cmd.getStationAttachments()){
 				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)3);
 				cmd.getStationAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)3);
 				});
+			} else {
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)3);
 			}
 //			this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
 //			if (null != cmd.getCategories()) {
@@ -856,7 +863,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		row.createCell(++i).setCellValue("订单状态");
 	}
 	
-	
+
 	private void setNewRentalBillsBookRow(Sheet sheet, OfficeOrderDTO dto) {
 		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 		int i = -1;
@@ -932,7 +939,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		//订单状态
 		OfficeCubicleOrderStatus orderStatus = OfficeCubicleOrderStatus.fromCode(dto.getOrderStatus());
 		row.createCell(++i).setCellValue(orderStatus==null?"":orderStatus.getDescription());
-		
 	}
 	
 	@Override
@@ -1368,10 +1374,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			resp.setLongRentFlag((byte)1);
 			resp.setShortRentFlag((byte)0);
 			for(OfficeCubicleRange range : ranges){
-				List<OfficeCubicleStation> station = 
-						officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), range.getSpaceId(),null, null,null,null,null);
-				if (station !=null){
-					resp.setShortRentFlag((byte)1);
+				OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(range.getSpaceId());
+				if(space.getShortRentNums()!=null){
+					if(Integer.valueOf(space.getShortRentNums())>0){
+						resp.setShortRentFlag((byte)1);
+					}
 				}
 			}
 		}
@@ -1797,16 +1804,33 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(space.getRefundStrategy()!=null){
 			if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
 				order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+				if(order.getRentalOrderNo()!=null){
+					rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+				}
 				this.officeCubicleProvider.updateCubicleRentOrder(order);
 				return;
 			}
 		} else {
+			if(order.getRentalOrderNo()!=null){
+				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			}
 			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
 		if (order.getPrice().compareTo(new BigDecimal(0)) == 0){
 			order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+			if(order.getRentalOrderNo()!=null){
+				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			}
+			this.officeCubicleProvider.updateCubicleRentOrder(order);
+			return;
+		}
+		if (order.getRequestType() ==OfficeCubicleRequestType.BACKGROUND.getCode()){
+			order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+			if(order.getRentalOrderNo()!=null){
+				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			}
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
@@ -1931,7 +1955,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return null;
 		});
 		List<OfficeCubicleStationRent> stationRent = 
-				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId());
+				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(),OfficeCubicleRentType.SHORT_RENT.getCode());
 		Integer rentNums = Integer.valueOf(space.getShortRentNums());
 		this.coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_STATION_RENT.getCode() + order.getOrderNo()).enter(()-> {
 			int rentSize = 0;
@@ -1941,6 +1965,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (rentNums<(rentSize+rentalOrder.getRentalCount().longValue())){
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
 				"工位数量不足");
+			}
+			for (int i=0;i<rentalOrder.getRentalCount();i++){
+				OfficeCubicleStationRent sr = new OfficeCubicleStationRent();
+				sr.setOrderId(order.getId());
+				sr.setSpaceId(space.getId());
+				sr.setRentType(OfficeCubicleRentType.SHORT_RENT.getCode());
+				officeCubicleProvider.createCubicleStationRent(sr);
 			}
 			return null;
 		});
@@ -1975,7 +2006,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		List<OfficeCubiclePayeeAccount> payeeAccounts = officeCubiclePayeeAccountProvider.findRepeatOfficeCubiclePayeeAccounts(null, UserContext.getCurrentNamespaceId(),
-				cmd.getOwnerType(), cmd.getOwnerId(),cmd.getSpaceId());
+				space.getOwnerType(), space.getOwnerId(),cmd.getSpaceId());
 		if(payeeAccounts==null || payeeAccounts.size()==0){
 			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_NO_PAYEE_ACCOUNT,
 					"");
@@ -2049,7 +2080,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		preDto.setOrderId(order.getId());
 		preDto.setAmount(priceRule.get(0).getWorkdayPrice().multiply(new BigDecimal(100)).longValue());
 		order.setBizOrderNo(response.getBizOrderNum());
-		order.setGeneralOrderId(response.getOrderId());
 		officeCubicleProvider.updateCubicleRentOrder(order);
 		return preDto;
 		
@@ -2144,7 +2174,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
 				List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceName());
 				smsProvider.addToTupleList(variables, "reserveTime", order.getUseDetail());
-				smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
+				smsProvider.addToTupleList(variables, "orderNo", String.valueOf(order.getOrderNo()));
 				sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 				rent.setOrderId(order.getId());
@@ -2159,11 +2189,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			order.setOperatorUid(UserContext.currentUserId());
 			officeCubicleProvider.updateCubicleRentOrder(order);
 			rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(order.getSpaceId());
+			BigDecimal refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space);
 			int templateId = SmsTemplateCode.OFFICE_CUBICLE_REFUND;
 			List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
-			smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
+			smsProvider.addToTupleList(variables, "orderNo", String.valueOf(order.getOrderNo()));
 			smsProvider.addToTupleList(variables, "price", order.getPrice());
-			smsProvider.addToTupleList(variables, "refundPrice", order.getId());
+			smsProvider.addToTupleList(variables, "refundPrice", refundPrice);
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 		}
 	}
@@ -2298,10 +2330,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049600L, cmd.getAppId(), null, cmd.getCurrentProjectId());//资源管理权限
 		}
 		List<OfficeCubicleStationRent> stationRent = 
-				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId());
+				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(),OfficeCubicleRentType.SHORT_RENT.getCode());
 
 		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());	
 		OfficeCubicleRentOrder order = ConvertHelper.convert(cmd, OfficeCubicleRentOrder.class);
+		order.setOwnerId(space.getOwnerId());
+		order.setOwnerType(space.getOwnerType());
 		order.setBeginTime(new Timestamp(cmd.getBeginTime()));
 		order.setEndTime(new Timestamp(cmd.getEndTime()));
 		order.setRentType(cmd.getRentType());
@@ -2354,6 +2388,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					"工位数量不足");
 				} 
 				order.setRentType(OfficeCubicleRentType.SHORT_RENT.getCode());
+				for (int i=0;i<rentCount;i++){
+					OfficeCubicleStationRent sr = new OfficeCubicleStationRent();
+					sr.setOrderId(order.getId());
+					sr.setSpaceId(space.getId());
+					sr.setBeginTime(new Timestamp(cmd.getBeginTime()));
+					sr.setEndTime(new Timestamp(cmd.getEndTime()));
+					sr.setRentType(OfficeCubicleRentType.SHORT_RENT.getCode());
+					officeCubicleProvider.createCubicleStationRent(sr);
+				}
 				officeCubicleProvider.updateCubicleRentOrder(order);
 			} else if (cmd.getRentType().equals(OfficeCubicleRentType.LONG_RENT.getCode())){
 				if(cmd.getStationId()!=null){
@@ -2370,6 +2413,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 						sr.setSpaceId(space.getId());
 						sr.setBeginTime(new Timestamp(cmd.getBeginTime()));
 						sr.setEndTime(new Timestamp(cmd.getEndTime()));
+						sr.setRentType(OfficeCubicleRentType.LONG_RENT.getCode());
 						officeCubicleProvider.createCubicleStationRent(sr);
 					}
 				}
@@ -2389,7 +2433,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 						sr.setEndTime(new Timestamp(cmd.getEndTime()));
 						officeCubicleProvider.createCubicleStationRent(sr);
 						List<OfficeCubicleStation> stationList = 
-								officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), space.getId(), r, null, null, null, null);
+								officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(), space.getId(), r, null, null, null, null);
 						for (OfficeCubicleStation s : stationList){
 							s.setStatus((byte)2);
 							s.setBeginTime(new Timestamp(cmd.getBeginTime()));
@@ -2472,21 +2516,27 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(null == resp || null == resp.getResponse()){
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
-		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
-		return payUserList.stream().map(r->{
-			ListOfficeCubicleAccountDTO dto = new ListOfficeCubicleAccountDTO();
-			dto.setAccountId(r.getId());
-			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
-			dto.setAccountName(r.getRemark());
-			dto.setAccountAliasName(r.getUserAliasName());
-	        if (r.getRegisterStatus() != null && r.getRegisterStatus().intValue() == 1) {
-	            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
-	        } else {
-	            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-	        }
-			return dto;
-		}).collect(Collectors.toList());
+        List<GetPayUserListByMerchantDTO> merchantDTOS = resp.getResponse();
+		List<ListOfficeCubicleAccountDTO> payUserList = new ArrayList<ListOfficeCubicleAccountDTO>();
+		if (payUserList != null){
+            for (GetPayUserListByMerchantDTO merchantDTO : merchantDTOS) {
+                PayUserDTO payUserDTO = ConvertHelper.convert(merchantDTO,PayUserDTO.class);
+                ListOfficeCubicleAccountDTO dto = new ListOfficeCubicleAccountDTO();
+				dto.setAccountId(payUserDTO.getId());
+				dto.setAccountType(payUserDTO.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+				dto.setAccountName(payUserDTO.getRemark());
+				dto.setAccountAliasName(payUserDTO.getUserAliasName());
+		        if (payUserDTO.getRegisterStatus() != null && payUserDTO.getRegisterStatus().intValue() == 1) {
+		            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+		        } else {
+		            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+		        }
+                payUserList.add(dto);
+            }
+		}
+		return payUserList;
 	}
+	
 	
 	@Override
 	public void createOrUpdateOfficeCubiclePayeeAccount(CreateOrUpdateOfficeCubiclePayeeAccountCommand cmd) {
@@ -2505,16 +2555,18 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public ListOfficeCubicleStatusResponse listOfficeCubicleStatus(ListOfficeCubicleStatusCommand cmd) {
 		ListOfficeCubicleStatusResponse resp = new ListOfficeCubicleStatusResponse();
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		Integer stationSize = 0;
 		List<OfficeCubicleStation> station = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, null,null,null,null);
+				officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(),cmd.getSpaceId(), null, null,null,null,null);
 		if (station.size() == 0)
 			return resp;
 		stationSize = station.size();
 		resp.setCubicleNums(station.size());
 		List<OfficeCubicleStation> longRentStation = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)2, null);
-		List<OfficeCubicleStationRent> shortRentStation = officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId());
+				officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)2, null);
+		List<OfficeCubicleStationRent> shortRentStation = 
+				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(),OfficeCubicleRentType.SHORT_RENT.getCode());
 		Integer shortRentStationSize = 0;
 		Integer longRentStationSize =0;
 		Integer closeStationSize = 0;
@@ -2524,7 +2576,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (shortRentStation != null){
 			shortRentStationSize = shortRentStation.size();
 		}
-		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		Integer shortRentNums = 0;
 		if (space.getShortRentNums()!=null){
 			shortRentNums = Integer.valueOf(space.getShortRentNums());
@@ -2532,12 +2583,18 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		resp.setShortCubicleIdleNums(shortRentNums-shortRentStationSize);
 		resp.setLongCubicleRentedNums(longRentStationSize);
 		List<OfficeCubicleStation> closeStation = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, (byte)0,null,null,null);
+				officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(),cmd.getSpaceId(), null, (byte)0,null,null,null);
 		if (closeStation != null){
 			closeStationSize = closeStation.size();
 		}
+		List<OfficeCubicleStation> longRentIdleStation = 
+				officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)1, null);
 		resp.setLongRentCloseCubicleNums(closeStationSize);
-		resp.setLongCubicleIdleNums(stationSize-longRentStationSize);
+		Integer longRentIdleStationSize =0;
+		if (longRentIdleStation!=null){
+			longRentIdleStationSize = longRentIdleStation.size();
+		}
+		resp.setLongCubicleIdleNums(longRentIdleStationSize);
 
 		resp.setShortCubicleRentedNums(shortRentStationSize);
 		Integer rentRates =((shortRentStationSize+longRentStationSize)*100)/stationSize;
@@ -2584,16 +2641,17 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetCubicleForOrderResponse getCubicleForOrder (GetCubicleForOrderCommand cmd){
 		GetCubicleForOrderResponse resp = new GetCubicleForOrderResponse();
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		String keyword = "";
 		if (StringUtils.isNotBlank(cmd.getKeyword())){
 			keyword = cmd.getKeyword();
 		}
 		List<OfficeCubicleStation> station = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
+				officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
 		List<OfficeCubicleStation> rentStation = 
 				officeCubicleProvider.getOfficeCubicleStationByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),keyword);
 		List<OfficeCubicleRoom> room = 
-				officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,cmd.getKeyword());
+				officeCubicleProvider.getOfficeCubicleRoom(space.getOwnerId(), space.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,cmd.getKeyword());
 		List<OfficeCubicleRoom> rentRoom = 
 				officeCubicleProvider.getOfficeCubicleRoomByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),keyword);
 		station.addAll(rentStation);
@@ -2841,7 +2899,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setBeginTime(rentalOrder.getStartTime().getTime());
 		}
 		List<OfficeCubicleStationRent> stationRent = 
-				officeCubicleProvider.searchCubicleStationRentByOrderId(order.getSpaceId(),order.getId());
+				officeCubicleProvider.searchCubicleStationRentByOrderId(order.getSpaceId(),order.getId(),OfficeCubicleRentType.LONG_RENT.getCode());
 		
 		List<String> rentStation = new ArrayList<String>();
 		if (stationRent!=null){
@@ -2926,6 +2984,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd2.setSourceId(r.getId());
 				cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
 				QueryDefaultRuleAdminResponse resp2 = rentalv2Service.queryDefaultRule(cmd2);
+
 				PriceRuleDTO dailyPriceRule = new PriceRuleDTO();
 				PriceRuleDTO halfdailyPriceRule = new PriceRuleDTO();
 				for (PriceRuleDTO priceRule :resp2.getPriceRules()){
@@ -2944,7 +3003,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				if(halfdailyPriceRule.getWorkdayPrice()!=null){
 					halfdailyPrice = halfdailyPriceRule.getWorkdayPrice();
 				}
-				dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?halfdailyPrice:dailyPrice);
+				dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?
+						halfdailyPrice:dailyPrice);
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null,null);

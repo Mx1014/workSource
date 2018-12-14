@@ -17,6 +17,7 @@ import java.util.List;
  * <li>addressStr:包含的地址</li>
  * <li>contractId:合同id</li>
  * <li>contractNum:合同编号</li>
+ * <li>thirdPaid:1代表已经在第三方那边支付过，不允许在左邻再次支付；0：代表没在第三方支付过</li>
  *</ul>
  */
 public class ShowBillForClientV2DTO {
@@ -32,6 +33,7 @@ public class ShowBillForClientV2DTO {
     private Long bizPayeeId;
     private Byte registerStatus;
     private Long categoryId;
+    private Byte thirdPaid;
 
     public Long getCategoryId() {
 		return categoryId;
@@ -153,6 +155,14 @@ public class ShowBillForClientV2DTO {
 
 	public void setRegisterStatus(Byte registerStatus) {
 		this.registerStatus = registerStatus;
+	}
+
+	public Byte getThirdPaid() {
+		return thirdPaid;
+	}
+
+	public void setThirdPaid(Byte thirdPaid) {
+		this.thirdPaid = thirdPaid;
 	}
 
 }

@@ -4212,7 +4212,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		Map<String, Object> messageMap = new HashMap<>();
 		messageMap.put("orderId", bill.getId());
 		scheduleProvider.scheduleSimpleJob(
-				queueName,
+                "cancelBill" + bill.getId(),
 				"cancelBill" + bill.getId(),
 				new java.util.Date(bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME),
 				RentalCancelOrderJob.class,

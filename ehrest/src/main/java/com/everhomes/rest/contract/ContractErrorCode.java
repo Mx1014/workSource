@@ -34,6 +34,7 @@ public interface ContractErrorCode {
     int ERROR_CONTRACT_SYNC_CONTRACT_ERROR = 20003;//同步数据失败因为同步合同
     int ERROR_CONTRACT_SYNC_BILL_ERROR = 20004;//同步数据失败因为账单
 
+	int ERROR_CONTRACT_DOCUMENT_NAME_EXIST = 10201;//合同文档已存在
     //合同报表模块
     int CONTRACT_STATICS_TIME_DIMENSION_ERROR = 30001;//合同报表查询时间错误
     int CONTRACT_STATICS_COMMUNITYS_ERROR = 30002;//合同报表查询园区错误

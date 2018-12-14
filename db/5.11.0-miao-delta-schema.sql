@@ -1,10 +1,13 @@
+
+
+-- AUTHOR: 缪洲 20181211
+-- REMARK: 工位预定V2.4
 CREATE TABLE `eh_office_cubicle_station` (
   `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
   `namespace_id` INTEGER NOT NULL,
   `owner_type`  VARCHAR(255) COMMENT 'owner type: community',
   `owner_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
   `space_id` BIGINT COMMENT '空间ID',
-  `station_id` BIGINT COMMENT '工位ID',
   `station_name` VARCHAR(127) COMMENT '名称：',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
@@ -51,6 +54,7 @@ CREATE TABLE `eh_office_cubicle_station_rent` (
   `end_time` DATETIME COMMENT '预定结束时间',
   `station_id` BIGINT COMMENT '工位/办公室Id',
   `station_name` VARCHAR(127),
+  `rent_type` TINYINT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -156,3 +160,7 @@ ALTER TABLE eh_office_cubicle_spaces ADD COLUMN refund_strategy TINYINT;
 ALTER TABLE eh_office_cubicle_attachments ADD COLUMN type TINYINT COMMENT '1,空间，2短租工位，3开放式工位';
 
 ALTER TABLE eh_office_cubicle_orders MODIFY COLUMN employee_number VARCHAR(64) COMMENT '雇员数量';
+
+-- AUTHOR: 张智伟
+-- REMARK: 一些云部署的mysql没有开启支持TRIGGER脚本，修改实现方式，删除原有的trigger
+DROP TRIGGER IF EXISTS employee_dismiss_trigger_for_auto_remove_payment_limit;

@@ -15,6 +15,7 @@ import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.bill.NotifyThirdSignCommand;
 
 /**
  * @author created by ycx
@@ -52,6 +53,20 @@ public class AssetOpenController extends ControllerBase {
 	public RestResponse changeChargeStatus(ChangeChargeStatusCommand cmd) {
     	ListBillsDTO dto = assetBillService.changeChargeStatus(cmd);
 		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+    
+    /**
+     * <b>URL: /openapi/asset/notifyThirdSign</b>
+     * <p>物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输 </p>
+     */
+    @RequestMapping("notifyThirdSign")
+    @RestReturn(value = RestResponse.class)
+	public RestResponse notifyThirdSign(NotifyThirdSignCommand cmd) {
+		assetBillService.notifyThirdSign(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
