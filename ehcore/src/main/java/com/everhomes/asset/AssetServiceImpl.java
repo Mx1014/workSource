@@ -5456,7 +5456,11 @@ public class AssetServiceImpl implements AssetService {
 	//对接下载中心,下载交易明细。
     @Override
     public OutputStream exportOutputStreamListPaymentBill(ListPaymentBillCmd cmd, Long taskId) {
-
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Export payment bill, exporting start, taskId={}", taskId);
+        }
+        
         //表头信息初及数据标签始化
         ExportExcelnitUtil excelInfo = exportPaymentBillExcelInit(new ExportExcelnitUtil());
         //公用字段
@@ -5467,6 +5471,7 @@ public class AssetServiceImpl implements AssetService {
         taskService.updateTaskProcess(taskId, 10);
         //交易明细下载
 
+        long billQryStartTime = System.currentTimeMillis();
         communityId = cmd.getCommunityId();
         cmd.setPageSize(10000l);
         ListPaymentBillResp result = listPaymentBill(cmd);
@@ -5483,9 +5488,17 @@ public class AssetServiceImpl implements AssetService {
 
         taskService.updateTaskProcess(taskId, 25);
 
+        if(LOGGER.isInfoEnabled()) {
+            long billQryEndTime = System.currentTimeMillis();
+            int billSize = (paymentOrderBillDTOs == null) ? 0 : paymentOrderBillDTOs.size();
+            LOGGER.info("Export payment bill, query bills by conditions, taskId={}, billSize={}, elapse={}", taskId, billSize, (billQryEndTime - billQryStartTime));
+        }        
+
         List<Map<String, String>> dataList = new ArrayList<>();
         taskService.updateTaskProcess(taskId, 65);
         //组装datalist来确定propertyNames的值
+        long processStartTime = System.currentTimeMillis();
+        long roundStartTime = System.currentTimeMillis();
         for(int i = 0; i < dtos.size(); i++) {
             PaymentOrderBillDTO dto = dtos.get(i);
             if(dto != null) {
@@ -5531,16 +5544,28 @@ public class AssetServiceImpl implements AssetService {
                 detail.put("payerName",dto.getPayerName());
                 detail.put("addresses",dto.getAddresses());
                 dataList.add(detail);
+                
+                if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
+                    long roundEndTime = System.currentTimeMillis();
+                    LOGGER.info("Export payment bill, query bills by conditions, taskId={}, index={}, billSize={}, currBillId={}, elapse={}", 
+                            taskId, i, dtos.size(), dto.getBillId(), (roundEndTime - roundStartTime));
+                }
             }
         }
 
+        // 后面是直接输出文件流，暂不观察这些文件流的时间 by lqs 20181214
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Export payment bill, exporting start, taskId={}, elapse={}, processElapse={}", 
+                    taskId, (endTime - startTime), (endTime - processStartTime));
+        }
 
         Community community = communityProvider.findCommunityById(communityId);
         taskService.updateTaskProcess(taskId, 90);
         if (community == null) {
-            LOGGER.error("Community is not exist.");
+            LOGGER.error("Export payment bill, community not found, taskId={}, communityId={}", taskId, communityId);
             throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
-                    "Community is not exist.");
+                    "Community not found");
         }
         if (dtos != null && dtos.size() > 0) {
             String fileName = String.format(moduleName+"信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
