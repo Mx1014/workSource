@@ -552,18 +552,24 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd.getSpaceAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)1);
 				});
+			} else {
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)1);
 			}
 			if (null != cmd.getShortRentAttachments()){
 				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)2);
 				cmd.getShortRentAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)2);
 				});
+			} else {
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)2);
 			}
 			if (null != cmd.getStationAttachments()){
 				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)3);
 				cmd.getStationAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)3);
 				});
+			}else {
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)3);
 			}
 //			this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
 //			if (null != cmd.getCategories()) {
@@ -2171,11 +2177,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			order.setOperatorUid(UserContext.currentUserId());
 			officeCubicleProvider.updateCubicleRentOrder(order);
 			rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(order.getSpaceId());
+			BigDecimal refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space);
 			int templateId = SmsTemplateCode.OFFICE_CUBICLE_REFUND;
 			List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
 			smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
 			smsProvider.addToTupleList(variables, "price", order.getPrice());
-			smsProvider.addToTupleList(variables, "refundPrice", order.getId());
+			smsProvider.addToTupleList(variables, "refundPrice", refundPrice);
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 		}
 	}
@@ -2496,20 +2504,26 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(null == resp || null == resp.getResponse()){
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
-		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
-		return payUserList.stream().map(r->{
-			ListOfficeCubicleAccountDTO dto = new ListOfficeCubicleAccountDTO();
-			dto.setAccountId(r.getId());
-			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
-			dto.setAccountName(r.getRemark());
-			dto.setAccountAliasName(r.getUserAliasName());
-	        if (r.getRegisterStatus() != null && r.getRegisterStatus().intValue() == 1) {
-	            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
-	        } else {
-	            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-	        }
-			return dto;
-		}).collect(Collectors.toList());
+        List<GetPayUserListByMerchantDTO> merchantDTOS = resp.getResponse();
+		List<ListOfficeCubicleAccountDTO> payUserList = new ArrayList<ListOfficeCubicleAccountDTO>();
+		if (payUserList != null){
+            for (GetPayUserListByMerchantDTO merchantDTO : merchantDTOS) {
+                PayUserDTO payUserDTO = ConvertHelper.convert(merchantDTO,PayUserDTO.class);
+                ListOfficeCubicleAccountDTO dto = new ListOfficeCubicleAccountDTO();
+				dto.setAccountId(payUserDTO.getId());
+				dto.setAccountType(payUserDTO.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+				dto.setAccountName(payUserDTO.getRemark());
+				dto.setAccountAliasName(payUserDTO.getUserAliasName());
+		        if (payUserDTO.getRegisterStatus() != null && payUserDTO.getRegisterStatus().intValue() == 1) {
+		            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+		        } else {
+		            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+		        }
+                payUserList.add(dto);
+            }
+		}
+		return payUserList;
+	}
 	}
 	
 	@Override
