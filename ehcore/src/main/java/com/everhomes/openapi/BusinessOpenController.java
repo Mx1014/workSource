@@ -1,36 +1,6 @@
 
 package com.everhomes.openapi;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.rest.wx.GetAccessTokenCommand;
-import com.everhomes.rest.wx.GetJsapiTicketCommand;
-import com.everhomes.wx.WeChatService;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetVendor;
@@ -50,30 +20,16 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.ApartmentFloorDTO;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.ListApartmentFloorCommand;
-import com.everhomes.rest.address.ListBuildingsByKeywordAndNameSpaceCommand;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.CheckPaymentUserCommand;
 import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.asset.PushUsersCommand;
 import com.everhomes.rest.asset.PushUsersResponse;
-import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
-import com.everhomes.rest.business.GetReceivedCouponCountCommand;
-import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
-import com.everhomes.rest.business.ListUserByIdentifierCommand;
-import com.everhomes.rest.business.ListUserByKeywordCommand;
-import com.everhomes.rest.business.ReSyncBusinessCommand;
-import com.everhomes.rest.business.SyncBusinessCommand;
-import com.everhomes.rest.business.SyncDeleteBusinessCommand;
-import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
-import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
-import com.everhomes.rest.business.UserFavoriteCommand;
-import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
+import com.everhomes.rest.business.*;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
@@ -83,29 +39,8 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.openapi.BizMessageType;
-import com.everhomes.rest.openapi.BusinessMessageCommand;
-import com.everhomes.rest.openapi.BusinessMessageCustomCommand;
-import com.everhomes.rest.openapi.BusinessMessageV2Command;
-import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
-import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
-import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
-import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
-import com.everhomes.rest.openapi.OpenApiRedirectHandler;
-import com.everhomes.rest.openapi.OrganizationDTO;
-import com.everhomes.rest.openapi.RedirectCommand;
-import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
-import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
-import com.everhomes.rest.openapi.UserAddressDTO;
-import com.everhomes.rest.openapi.UserCouponsCommand;
-import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.openapi.ValidateUserPassCommand;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.openapi.*;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
@@ -116,36 +51,33 @@ import com.everhomes.rest.reserver.CreateReserverOrderCommand;
 import com.everhomes.rest.ui.user.ListAnBangRelatedScenesCommand;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
-import com.everhomes.rest.user.AnBangTokenCommand;
-import com.everhomes.rest.user.FindTokenByUserIdCommand;
-import com.everhomes.rest.user.GetUserByUuidResponse;
-import com.everhomes.rest.user.GetUserDefaultAddressCommand;
-import com.everhomes.rest.user.GetUserDetailByUuidResponse;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.GetUserInfoByUuid;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.ListUserCommand;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.LogonCommand;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserDtoForBiz;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.SignupToken;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.EtagHelper;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.rest.user.*;
+import com.everhomes.rest.wx.GetAccessTokenCommand;
+import com.everhomes.rest.wx.GetJsapiTicketCommand;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import com.everhomes.wx.WeChatService;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestDoc(value = "Business open Constroller", site = "core")
 @RestController
@@ -368,6 +300,38 @@ public class BusinessOpenController extends ControllerBase {
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
+    // add by momoubin,18/12/14,发送系统消息
+    private void sendSystemMessageToUser(Long userId, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()),
+                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        if (null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+        }
+
+        LOGGER.debug("sendMessageToUser-systemId=" + User.BIZ_UID);
+        LOGGER.debug("sendMessageToUser-SYSTEM_USER_LOGIN=" + StringHelper.toJsonString(User.SYSTEM_UID));
+
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+
+    // add by momoubin,18/12/14,发送系统消息
+    @RequestMapping("sendSystemMessageToUser")
+    @RestReturn(value = String.class)
+    public RestResponse sendSystemMessageToUser(BusinessMessageCommand cmd) {
+        cmd.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        sendSystemMessageToUser(cmd.getUserId(), cmd.getContent(), cmd.getMeta());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     @RequestMapping("sendMessageToUser")
     @RestReturn(value = String.class)
     public RestResponse sendMessageToUser(BusinessMessageCommand cmd) {
