@@ -7,6 +7,7 @@ import com.everhomes.aclink.DoorAccess;
 import com.everhomes.aclink.DoorAuth;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
 import com.google.gson.JsonObject;
 
@@ -19,13 +20,18 @@ public interface FacePlusPlusService {
 
     String login ();
 
-    JSONObject createUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time);
+    JSONObject createUser (String cookie, Integer subjectType, String name, Long start_time, Long end_time);
 
 //    JSONObject updateUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time);
 
-    String uploadPhoto (String cookie, String url, Integer subjectId);
+    String uploadPhoto (String cookie, String url, String subjectId);
 
     void deleteUser (String cookie, String subjectId);
 
     String filetest (String url);
+
+    DoorAuth createAuth (DoorAuth doorAuth, CreateDoorAuthCommand cmd, UserInfo custom);
+
+    void addPhoto(String url,Long authId,Long userId);
+
 }

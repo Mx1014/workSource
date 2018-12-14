@@ -1883,7 +1883,7 @@ public class AclinkAdminController extends ControllerBase {
     /**
      *
      * <b>URL: /admin/aclink/filetest</b>
-     * <p>登录face++ </p>
+     * <p>上传文件测试 </p>
      * @return
      */
     @RequestMapping("filetest")

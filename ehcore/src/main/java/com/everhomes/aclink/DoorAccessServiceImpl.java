@@ -1153,6 +1153,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        //face++组内门禁授权
+        List<DoorAccess> doors = doorAccessProvider.listDoorAccessByGroupId(doorAcc.getId(),9999);
+        if(!ListUtils.isEmpty(doors)){
+            for(DoorAccess door :doors){
+                if(door.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
+                    CreateDoorAuthCommand cmdx = cmd;
+                    cmdx.setDoorId(door.getId());
+                    this.createDoorAuth(cmdx);
+                }
+            }
+        }
+
         UserInfo custom = userService.getUserSnapshotInfoWithPhone(cmd.getUserId());//被授权人
         
         if(custom == null) {
@@ -1222,15 +1234,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                             doorAuth.setKeyU(cmd.getKeyU());
                         }
                         doorAuthProvider.updateDoorAuth(doorAuth);
+
+                        //face++对接，已有授权记录
+                        if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
+                            return facePlusPlusService.createAuth(doorAuth,cmd,custom);
+                        }
                         //by liuyilin 20180502 同步信息到内网服务器
                         if(doorAcc.getLocalServerId() != null){
-                        	SyncLocalPhotoByUserIdCommand syncCmd = new SyncLocalPhotoByUserIdCommand();
-                    		syncCmd.setOwnerId(doorAcc.getOwnerId());
-                    		syncCmd.setOwnerType(doorAcc.getOwnerType());
-                    		syncCmd.setUserId(doorAuth.getUserId());
-                    		faceRecognitionPhotoService.syncLocalPhotoByUserId(syncCmd);
+                            SyncLocalPhotoByUserIdCommand syncCmd = new SyncLocalPhotoByUserIdCommand();
+                            syncCmd.setOwnerId(doorAcc.getOwnerId());
+                            syncCmd.setOwnerType(doorAcc.getOwnerType());
+                            syncCmd.setUserId(doorAuth.getUserId());
+                            faceRecognitionPhotoService.syncLocalPhotoByUserId(syncCmd);
                         }
-                		//---
+                        //---
                         return doorAuth;
                         }
                     
@@ -1276,26 +1293,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
                     //face++门禁，若有开门权限且有照片，发送照片到face++服务器
                     if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
-                        String cookie = facePlusPlusService.login();
-                        if(doorAuth.getRightOpen() == (byte)1){
-                            String userName = cmd.getUserId().toString();//face++ username 存左邻用户id
-                            JSONObject response = facePlusPlusService.createUser(cookie, 0, userName, 0, 0);//subjectType 0 员工，1 访客 正式用户不传时间
-                            Integer subjectId = response.getInteger("id");//face++用户ID
-                            if(subjectId != null){
-                                doorAuth.setStringTag2(subjectId.toString());//face++用户ID存入eh_door_auth.string_tag2
-                                doorAuthProvider.updateDoorAuth(doorAuth);
-                            }
-                            CrossShardListingLocator locator = new CrossShardListingLocator();
-                            List<FaceRecognitionPhoto> photos = faceRecognitionPhotoProvider. listFacialRecognitionPhotoByUser(locator, custom.getId(), 9999);
-                            if(!ListUtils.isEmpty(photos)){
-                                String photoUrl = photos.get(0).getImgUrl();
-                                //上传照片
-                                facePlusPlusService.uploadPhoto(cookie,photoUrl,subjectId);
-                            }
-                        }else if(doorAuth.getRightOpen() == (byte)0){
-
-                        }
-                        return doorAuth;
+                        return facePlusPlusService.createAuth(doorAuth,cmd,custom);
                     }
 
                     //by liuyilin 20180502 同步信息到内网服务器
@@ -1333,6 +1331,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         			doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
             } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_UCLBRT_DOOR.getCode())) {
         		doorAuth.setDriver(DoorAccessDriverType.UCLBRT.getCode());
+            }else if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
+                doorAuth.setDriver(DoorAccessDriverType.FACEPLUSPLUS.getCode());
             } else {
                 doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
             }
@@ -1345,6 +1345,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             doorAuth.setNickname(getRealName(tmpUser));
 
             Long authId = doorAuthProvider.createDoorAuth(doorAuth);
+            //face++访客
+            if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
+                doorAuth = facePlusPlusService.createAuth(doorAuth,cmd,custom);
+            }
+
             //访客来访消息提醒
             User user = UserContext.current().getUser();
             Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -5932,7 +5937,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()));
                 }
                 if(null != cmd.getOwnerName() && cmd.getOwnerName().length() >0 ){
-                    query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(cmd.getOwnerName() + "%"));
+                    query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" + cmd.getOwnerName() + "%"));
                 }
                 if(cmd.getNamespaceId() != null){
                     query.addConditions(Tables.EH_DOOR_ACCESS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
@@ -5948,11 +5953,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     query.addConditions(Tables.EH_DOOR_ACCESS.DEVICE_ID.eq(cmd.getDeviceId()));
                 }
                 if(cmd.getDoor() != null && !cmd.getDoor().isEmpty()) {
-                    query.addConditions(Tables.EH_DOOR_ACCESS.NAME.like(cmd.getDoor() + "%")
-                            .or(Tables.EH_DOOR_ACCESS.DISPLAY_NAME.like(cmd.getDoor()+"%")));
+                    query.addConditions(Tables.EH_DOOR_ACCESS.NAME.like("%" + cmd.getDoor() + "%")
+                            .or(Tables.EH_DOOR_ACCESS.DISPLAY_NAME.like("%" + cmd.getDoor()+"%")));
                 }
                 if(cmd.getBluetoothMAC() != null && !cmd.getBluetoothMAC().isEmpty()){
-                    query.addConditions(Tables.EH_DOOR_ACCESS.HARDWARE_ID.like(cmd.getBluetoothMAC()+ "%"));
+                    query.addConditions(Tables.EH_DOOR_ACCESS.HARDWARE_ID.like("%" + cmd.getBluetoothMAC()+ "%"));
                 }
                 return query;
             }

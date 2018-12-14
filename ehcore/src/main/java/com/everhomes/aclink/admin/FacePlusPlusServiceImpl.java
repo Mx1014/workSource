@@ -79,6 +79,7 @@ import com.everhomes.rest.openapi.FamilyAddressDTO;
 import com.everhomes.rest.openapi.OrganizationAddressDTO;
 import com.everhomes.rest.openapi.UserAddressDTO;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.*;
@@ -89,6 +90,7 @@ import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.tachikoma.commons.util.json.JsonHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
@@ -110,6 +112,9 @@ import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -141,6 +146,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Security;
 import java.sql.Timestamp;
@@ -317,7 +323,7 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     //face++对接
-    private final static String URL_FACEPLUSPLUS = "27.115.23.218";
+    private final static String URL_FACEPLUSPLUS = "http://27.115.13.218:8867";
     private final static String FACEPLUSPLUS_USERNAME = "test@megvii.com";
     private final static String FACEPLUSPLUS_PASSWORD = "123456";
 
@@ -379,7 +385,7 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
     }
 
     @Override
-    public JSONObject createUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time){
+    public JSONObject createUser (String cookie, Integer subjectType, String name, Long start_time, Long end_time){
         String url = URL_FACEPLUSPLUS + "/subject";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
@@ -397,11 +403,12 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             jsonParam.put("start_time", start_time);
             jsonParam.put("end_time", end_time);
             StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
-            entity.setContentEncoding("UTF-8");
-            entity.setContentType("application/json");
+//            entity.setContentEncoding("UTF-8");
+//            entity.setContentType("application/json");
             httpPost.setEntity(entity);
 
             response = httpClient.execute(httpPost);
+            String json = EntityUtils.toString(response.getEntity(),"utf8");
             int status = response.getStatusLine().getStatusCode();
             if(status != 200){
                 LOGGER.error("Failed to get the http result, url={}, status={}", url, response.getStatusLine());
@@ -410,8 +417,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             }
             HttpEntity resEntity = response.getEntity();
             // http返回转为json格式
-//            result = (JsonObject)StringHelper.fromJsonString(resEntity.toString(),JSONObject.class);
-            result = JSON.parseObject(resEntity.toString());
+            result = JSONObject.parseObject(json);
+
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Get http result, url={}, result={}", url, result);
             }
@@ -437,10 +444,29 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
         }
         return result;
     }
+    private List<InputStream> downloadImags(String url){
+        List<InputStream> photo = new ArrayList<>();
+        if (url!=null && url.length()>0){
+            try {
+                CloseableHttpClient httpClient = null;
+                httpClient = HttpClients.createDefault();
+                HttpGet httpGet = new HttpGet(url);
+                CloseableHttpResponse response = httpClient.execute(httpGet);
+                HttpEntity httpEntity = response.getEntity();
+                InputStream is = httpEntity.getContent();
+                photo.add(is);
+            }catch (IOException e){
+                LOGGER.error("Pmtask request error, param={}", url, e);
+                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
+                            "Pmtask download imgs error.");
+            }
+        }
+        return  photo;
+    }
 
     @Override
-    public String uploadPhoto (String cookie, String photourl, Integer subjectId){
-        String url = URL_FACEPLUSPLUS + "/subject";
+    public String uploadPhoto (String cookie, String photourl, String subjectId){
+        String url = URL_FACEPLUSPLUS + "/subject/photo";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         String result = null;
@@ -448,20 +474,26 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(url);
             httpPost.addHeader("cookie",cookie);
-            httpPost.addHeader("Content-Type","multipart/form-data");
+            //httpPost.addHeader("Content-Type","multipart/form-data");
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-
+            ContentType contentType=ContentType.create("text/plain", Charset.forName("UTF-8"));
 //            URL photoUrl = new URL(photourl);
 //            File file = new File(photoUrl.getFile());
-            File file = null;
-            if(!StringUtils.isEmpty(url)){
-                try {
-                    file = FileUtils.getFileFormUrl(photourl, "name");
-                } catch (Exception e) {}
-            }
-//            builder.addBinaryBody()
-//            builder.addBinaryBody("upload_file", fileStream,
-//                    ContentType.APPLICATION_OCTET_STREAM, URLEncoder.encode(fileName, "UTF-8"));
+
+//            File file = null;
+//            if(!StringUtils.isEmpty(url)){
+//                try {
+//                    file = FileUtils.getFileFormUrl(photourl, "name");
+//                } catch (Exception e) {}
+//            }
+//            builder.addPart("photo", new FileBody(file));
+            List<InputStream> photo = this.downloadImags(photourl);
+            //builder.addBinaryBody()
+
+            ContentType ct = ContentType.create("image/jpeg");
+            builder.addBinaryBody("photo", photo.get(0),
+                    ct, URLEncoder.encode("img.jpg", "UTF-8"));
+            builder.addPart("subject_id",new StringBody(subjectId,contentType) );
             HttpEntity multipart = builder.build();
 
             httpPost.setEntity(multipart);
@@ -469,7 +501,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             response = httpClient.execute(httpPost);
             int status = response.getStatusLine().getStatusCode();
             HttpEntity resEntity = response.getEntity();
-            result = EntityUtils.toString(resEntity);
+            result = EntityUtils.toString(response.getEntity(),"utf8");
+//            result = JSONObject.parseObject(json);
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Get http result, url={}, result={}", url, result);
             }
@@ -537,6 +570,65 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+    }
+
+    @Override
+    public DoorAuth createAuth (DoorAuth doorAuth, CreateDoorAuthCommand cmd,UserInfo custom){
+        String cookie = this.login();
+        if(cmd.getRightOpen() == (byte)1){
+            String userName = cmd.getUserId().toString();//face++ username 存左邻用户id
+            JSONObject response = null;
+            if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())){
+                response = this.createUser(cookie, 0, userName, 0L, 0L);//subjectType 0 员工，1 访客 正式用户不传时间
+            }else{
+                response = this.createUser(cookie, 1, userName, cmd.getValidFromMs()/1000, cmd.getValidEndMs()/1000);//subjectType 0 员工，1 访客 正式用户不传时间
+            }
+            String subjectId = response.getJSONObject("data").getString("id");//face++用户ID
+            if(subjectId != null){
+                doorAuth.setStringTag2(subjectId);//face++用户ID存入eh_door_auth.string_tag2
+                doorAuthProvider.updateDoorAuth(doorAuth);
+            }
+            CrossShardListingLocator locator = new CrossShardListingLocator();
+            List<FaceRecognitionPhoto> photos = faceRecognitionPhotoProvider. listFacialRecognitionPhotoByUser(locator, custom.getId(), 9999);
+            if(!ListUtils.isEmpty(photos)){
+                String photoUrl = photos.get(0).getImgUrl();
+                //上传照片
+                this.uploadPhoto(cookie,photoUrl,subjectId);
+            }
+        }else if(cmd.getRightOpen() == (byte)0){
+            this.deleteUser(cookie, doorAuth.getStringTag2());
+            doorAuth.setStringTag2(null);
+            doorAuthProvider.updateDoorAuth(doorAuth);
+        }
+        return doorAuth;
+    }
+
+    @Override
+    public void addPhoto(String url,Long authId,Long userId){
+        String cookie = this.login();
+        if(authId != null){
+            DoorAuth auth = doorAuthProvider.getDoorAuthById(authId);
+            if(auth != null && auth.getStringTag2() != null){
+                this.uploadPhoto(cookie,url,auth.getStringTag2());
+            }
+        }
+        if(userId != null){
+            List<DoorAuth> auths = new ArrayList<>();
+            ListingLocator locator = new ListingLocator();
+            auths = doorAuthProvider.queryDoorAuth(locator, 9999, new ListingQueryBuilderCallback() {
+                @Override
+                public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                    SelectQuery<? extends Record> query) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+                    query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(DoorAccessDriverType.FACEPLUSPLUS.getCode()));
+                    query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte)1));
+                    return query;
+                }
+            });
+            if(!ListUtils.isEmpty(auths) && !auths.get(0).getStringTag2().isEmpty()){
+                this.uploadPhoto(cookie,url,auths.get(0).getStringTag2());
             }
         }
     }
