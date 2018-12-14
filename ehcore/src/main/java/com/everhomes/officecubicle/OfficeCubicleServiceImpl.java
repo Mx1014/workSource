@@ -2421,7 +2421,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 						sr.setEndTime(new Timestamp(cmd.getEndTime()));
 						officeCubicleProvider.createCubicleStationRent(sr);
 						List<OfficeCubicleStation> stationList = 
-								officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), space.getId(), r, null, null, null, null);
+								officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(), space.getId(), r, null, null, null, null);
 						for (OfficeCubicleStation s : stationList){
 							s.setStatus((byte)2);
 							s.setBeginTime(new Timestamp(cmd.getBeginTime()));
@@ -2543,15 +2543,16 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public ListOfficeCubicleStatusResponse listOfficeCubicleStatus(ListOfficeCubicleStatusCommand cmd) {
 		ListOfficeCubicleStatusResponse resp = new ListOfficeCubicleStatusResponse();
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		Integer stationSize = 0;
 		List<OfficeCubicleStation> station = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, null,null,null,null);
+				officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(),cmd.getSpaceId(), null, null,null,null,null);
 		if (station.size() == 0)
 			return resp;
 		stationSize = station.size();
 		resp.setCubicleNums(station.size());
 		List<OfficeCubicleStation> longRentStation = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)2, null);
+				officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)2, null);
 		List<OfficeCubicleStationRent> shortRentStation = 
 				officeCubicleProvider.searchCubicleStationRent(cmd.getSpaceId(),UserContext.getCurrentNamespaceId(),OfficeCubicleRentType.SHORT_RENT.getCode());
 		Integer shortRentStationSize = 0;
@@ -2563,7 +2564,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (shortRentStation != null){
 			shortRentStationSize = shortRentStation.size();
 		}
-		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		Integer shortRentNums = 0;
 		if (space.getShortRentNums()!=null){
 			shortRentNums = Integer.valueOf(space.getShortRentNums());
@@ -2571,12 +2571,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		resp.setShortCubicleIdleNums(shortRentNums-shortRentStationSize);
 		resp.setLongCubicleRentedNums(longRentStationSize);
 		List<OfficeCubicleStation> closeStation = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getSpaceId(), null, (byte)0,null,null,null);
+				officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(),cmd.getSpaceId(), null, (byte)0,null,null,null);
 		if (closeStation != null){
 			closeStationSize = closeStation.size();
 		}
 		List<OfficeCubicleStation> longRentIdleStation = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)1, null);
+				officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(), cmd.getSpaceId(), null, (byte)1, null, (byte)1, null);
 		resp.setLongRentCloseCubicleNums(closeStationSize);
 		Integer longRentIdleStationSize =0;
 		if (longRentIdleStation!=null){
@@ -2629,16 +2629,17 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetCubicleForOrderResponse getCubicleForOrder (GetCubicleForOrderCommand cmd){
 		GetCubicleForOrderResponse resp = new GetCubicleForOrderResponse();
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId())
 		String keyword = "";
 		if (StringUtils.isNotBlank(cmd.getKeyword())){
 			keyword = cmd.getKeyword();
 		}
 		List<OfficeCubicleStation> station = 
-				officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
+				officeCubicleProvider.getOfficeCubicleStation(space.getOwnerId(), space.getOwnerType(), cmd.getSpaceId(), null, (byte)1, cmd.getKeyword(), (byte)1, null);
 		List<OfficeCubicleStation> rentStation = 
 				officeCubicleProvider.getOfficeCubicleStationByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),keyword);
 		List<OfficeCubicleRoom> room = 
-				officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,cmd.getKeyword());
+				officeCubicleProvider.getOfficeCubicleRoom(space.getOwnerId(), space.getOwnerType(), cmd.getSpaceId(),null,(byte)1,null,cmd.getKeyword());
 		List<OfficeCubicleRoom> rentRoom = 
 				officeCubicleProvider.getOfficeCubicleRoomByTime(cmd.getSpaceId(),(byte)1,cmd.getBeginTime(),cmd.getEndTime(),keyword);
 		station.addAll(rentStation);
