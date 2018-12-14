@@ -2524,7 +2524,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		return payUserList;
 	}
-	}
+	
 	
 	@Override
 	public void createOrUpdateOfficeCubiclePayeeAccount(CreateOrUpdateOfficeCubiclePayeeAccountCommand cmd) {
