@@ -319,6 +319,9 @@ INSERT INTO `eh_payment_app_views`(`id`, `namespace_id`, `community_id`, `has_vi
 -- REMARK: 瑞安CM对接：开启支付权限
 update eh_payment_app_views set has_view = 1 where namespace_id=999929 and view_item = 'PAY';	
 
+-- AUTHOR: 梁燕龙 20181214
+-- REMARK: 企业账单菜单表数据修改
+UPDATE eh_web_menus SET type  ='park' WHERE id = 78000003;
 
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
