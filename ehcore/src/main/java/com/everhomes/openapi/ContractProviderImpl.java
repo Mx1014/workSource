@@ -1315,61 +1315,71 @@ public class ContractProviderImpl implements ContractProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractTemplates.class, contractTemplate.getId());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,Long orgId,
-			Long categoryId, String name, Long pageAnchor, Integer pageSize, Long appId) {
+			Long categoryId, String name, CrossShardListingLocator locator, Integer pageSize, Long appId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class));
         EhContractTemplates t1 = Tables.EH_CONTRACT_TEMPLATES.as("t1");
         EhContractTemplates t2 = Tables.EH_CONTRACT_TEMPLATES.as("t2");
-        SelectJoinStep<Record> query = context.select(Tables.EH_CONTRACT_TEMPLATES.fields()).from(Tables.EH_CONTRACT_TEMPLATES);
+        EhContractTemplates t3 = Tables.EH_CONTRACT_TEMPLATES.as("t3");
+        SelectJoinStep<Record> query = context.select(t3.fields()).from(t3);
         
-		Condition cond = Tables.EH_CONTRACT_TEMPLATES.NAMESPACE_ID.eq(namespaceId);
-		cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		Condition cond = t3.NAMESPACE_ID.eq(namespaceId);
+		cond = cond.and(t3.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
 		
-		if(null != pageAnchor && pageAnchor != 0){
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID.gt(pageAnchor));
-		}
+		if(locator.getAnchor() != null) {
+			cond = cond.and(t3.ID.gt(locator.getAnchor()));
+        }
+		
 		if(null != name && !"".equals(name)){
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.NAME.like('%'+name+'%'));
+			cond = cond.and(t3.NAME.like('%'+name+'%'));
 		}
 		if(null != categoryId){
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CATEGORY_ID.eq(categoryId));
+			cond = cond.and(t3.CATEGORY_ID.eq(categoryId));
 		}
 		//取到最大的versionid
 		if (null != ownerId && ownerId != -1) {
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(ownerId).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+			cond = cond.and(t3.OWNER_ID.eq(ownerId).or(t3.OWNER_ID.eq(0L)));
+			cond = cond.and(t3.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
 			
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+			cond = cond.and(t3.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.eq(ownerId)))));
 			
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).or(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(0L)));
+			cond = cond.and(t3.ORG_ID.eq(orgId).or(t3.ORG_ID.eq(0L)));
 		}else {
 			//查询所有的通用模板
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+			cond = cond.and(t3.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+			cond = cond.and(t3.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.notEqual(0L)))));
 			// get all communities data and all organization owner general data
 			if (orgId != null) {
-				cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).or(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(0L)));
-				//cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.ne(0L)));
+				cond = cond.and(t3.ORG_ID.eq(orgId).or(t3.ORG_ID.eq(0L)));
+				//cond = cond.and(t3.ORG_ID.eq(orgId).and(t3.OWNER_ID.eq(0L)).or(t3.OWNER_ID.ne(0L)));
 			}
 			
 			 List<Long> communityIds = new ArrayList<>();
 		     communityIds =  organizationService.getOrganizationProjectIdsByAppId(orgId, appId);
-		     cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.in(communityIds).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
+		     cond = cond.and(t3.OWNER_ID.in(communityIds).or(t3.OWNER_ID.eq(0L)));
 		}
 
-		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.ID.desc());
+		query.orderBy(t3.ID.asc());
+		
+		LOGGER.debug("query sql:{}", query.getSQL());
+		LOGGER.debug("query param:{}", query.getBindValues());
 		
 		if(null != pageSize)
-			query.limit(pageSize);
+			query.limit(pageSize+1);
 		
 		List<ContractTemplate> contracttemplates = query.where(cond).fetch().
-				map(new DefaultRecordMapper(Tables.EH_CONTRACT_TEMPLATES.recordType(), ContractTemplate.class));
-
+				map(new DefaultRecordMapper(t3.recordType(), ContractTemplate.class));
+		
+		if(contracttemplates.size() > 0) {
+            locator.setAnchor(contracttemplates.get(contracttemplates.size() -1).getId());
+        }
+		
 		return contracttemplates;
 	}
 
