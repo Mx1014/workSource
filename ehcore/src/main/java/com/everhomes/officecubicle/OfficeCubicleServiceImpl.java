@@ -62,6 +62,7 @@ import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -568,7 +569,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd.getStationAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)3);
 				});
-			}else {
+			} else {
 				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)3);
 			}
 //			this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
@@ -862,7 +863,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		row.createCell(++i).setCellValue("订单状态");
 	}
 	
-	
+
 	private void setNewRentalBillsBookRow(Sheet sheet, OfficeOrderDTO dto) {
 		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 		int i = -1;
@@ -938,7 +939,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		//订单状态
 		OfficeCubicleOrderStatus orderStatus = OfficeCubicleOrderStatus.fromCode(dto.getOrderStatus());
 		row.createCell(++i).setCellValue(orderStatus==null?"":orderStatus.getDescription());
-		
 	}
 	
 	@Override
@@ -1994,7 +1994,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		List<OfficeCubiclePayeeAccount> payeeAccounts = officeCubiclePayeeAccountProvider.findRepeatOfficeCubiclePayeeAccounts(null, UserContext.getCurrentNamespaceId(),
-				cmd.getOwnerType(), cmd.getOwnerId(),cmd.getSpaceId());
+				space.getOwnerType(), space.getOwnerId(),cmd.getSpaceId());
 		if(payeeAccounts==null || payeeAccounts.size()==0){
 			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_NO_PAYEE_ACCOUNT,
 					"");
@@ -2971,6 +2971,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd2.setSourceId(r.getId());
 				cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
 				QueryDefaultRuleAdminResponse resp2 = rentalv2Service.queryDefaultRule(cmd2);
+
 				PriceRuleDTO dailyPriceRule = new PriceRuleDTO();
 				PriceRuleDTO halfdailyPriceRule = new PriceRuleDTO();
 				for (PriceRuleDTO priceRule :resp2.getPriceRules()){
@@ -2989,7 +2990,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				if(halfdailyPriceRule.getWorkdayPrice()!=null){
 					halfdailyPrice = halfdailyPriceRule.getWorkdayPrice();
 				}
-				dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?halfdailyPrice:dailyPrice);
+				dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?
+						halfdailyPrice:dailyPrice);
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null,null);
