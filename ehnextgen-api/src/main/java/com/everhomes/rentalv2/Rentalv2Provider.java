@@ -67,7 +67,7 @@ public interface Rentalv2Provider {
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
 			Byte invoiceFlag,Long userId,String payChannel,Byte source);
 	List<RentalOrder> listRentalBillsByUserOrgId(Long organizationId ,ListingLocator locator, Integer pageSize );
-	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime);
+	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime,String resourceType);
 
 	List<RentalOrder> listActiveBillsByInterval(Long rentalSiteId,Long startTime, Long endTime);
 

@@ -3854,6 +3854,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						} else {
 							order.setRefundAmount(orderAmount);
 							order.setStatus(SiteBillStatus.REFUNDING.getCode());//线下支付人工退款
+							messageHandler.cancelOrderNeedRefund(order);
 						}
 					} else {//退款金额过小
 						if (PayMode.ONLINE_PAY.getCode() == (order.getPayMode()) || PayMode.APPROVE_ONLINE_PAY.getCode() == (order.getPayMode()))
@@ -4647,6 +4648,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public ListRentalBillsCommandResponse listActiveRentalBills(ListRentalBillsCommand cmd) {
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
 		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(Long.MAX_VALUE);
@@ -4654,7 +4658,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<RentalOrder> bills = rentalv2Provider.listActiveBills(cmd.getRentalSiteId(), locator, pageSize, cmd.getStartTime(), cmd.getEndTime());
+		List<RentalOrder> bills = rentalv2Provider.listActiveBills(cmd.getRentalSiteId(), locator, pageSize, cmd.getStartTime(), cmd.getEndTime(),cmd.getResourceType());
 
 		if (bills == null) {
 			return response;
@@ -5457,11 +5461,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				if (pricePackages2 != null) {
 					for (Rentalv2PricePackage pricePackage : pricePackages2) {
 						RentalSitePackagesDTO packagesDTO = ConvertHelper.convert(pricePackage, RentalSitePackagesDTO.class);
-						if (pricePackage.getPriceClassification() != null) {
-							List<RentalPriceClassification> cla = rentalv2Provider.listClassification(rsr.getResourceType(), EhRentalv2PricePackages.class.getSimpleName(),
+						List<RentalPriceClassification> cla = rentalv2Provider.listClassification(rsr.getResourceType(), EhRentalv2PricePackages.class.getSimpleName(),
 									pricePackage.getId(), null, null, null, null);
-							packagesDTO.setPriceRules(cla.stream().map(r->ConvertHelper.convert(r,RentalPriceClassificationDTO.class)).collect(Collectors.toList()));
-						}
+						if (cla != null)
+						    packagesDTO.setPriceRules(cla.stream().map(r->ConvertHelper.convert(r,RentalPriceClassificationDTO.class)).collect(Collectors.toList()));
 						sitePackages2.add(packagesDTO);
 					}
 				}
@@ -7928,6 +7931,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (SiteBillStatus.REFUNDING.getCode() == order.getStatus()) {
 			order.setStatus(SiteBillStatus.REFUNDED.getCode());
 			this.rentalv2Provider.updateRentalBill(order);
+			RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+			messageHandler.refundOrderSuccessSendMessage(order);
 		}
 	}
 

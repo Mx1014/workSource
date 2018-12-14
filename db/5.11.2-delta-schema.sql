@@ -117,6 +117,7 @@ CREATE TABLE `eh_office_cubicle_station_rent` (
   `end_time` DATETIME COMMENT '预定结束时间',
   `station_id` BIGINT COMMENT '工位/办公室Id',
   `station_name` VARCHAR(127),
+  `rent_type` TINYINT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -239,6 +240,10 @@ ALTER TABLE eh_flow_nodes ADD COLUMN form_relation_data TEXT COMMENT '表单关�
 ALTER TABLE eh_flows ADD COLUMN form_status TINYINT DEFAULT '0' NOT NULL COMMENT '0: disable, 1: enable';
 ALTER TABLE eh_flows ADD COLUMN form_relation_type TINYINT DEFAULT '0' NOT NULL COMMENT '1: 关联自定义表单, 2: 关联eh_flows关联的表单';
 ALTER TABLE eh_flows ADD COLUMN form_relation_data TEXT COMMENT '表单关联数据，json格式';
+
+ALTER TABLE eh_flow_cases ADD INDEX i_eh_ns_org_module_id(namespace_id, organization_id, module_id);
+ALTER TABLE eh_flows ADD INDEX i_eh_flow_main_id_flow_version(flow_main_id, flow_version);
+ALTER TABLE eh_flows ADD INDEX i_eh_ns_org_module_id(namespace_id, organization_id, module_id);
 
 -- AUTHOR: 胡琪
 -- REMARK: 工作流-2.8.1，工作流节点关联的全局表单字段配置信息
