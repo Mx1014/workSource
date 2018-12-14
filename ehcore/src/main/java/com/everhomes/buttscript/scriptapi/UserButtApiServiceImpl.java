@@ -99,6 +99,7 @@ public class UserButtApiServiceImpl implements NashornModuleApiService {
     }
 
     private void sendVipLevelMessageToUser(Long userId, String levelName) {
+        LOGGER.info("the script call the api sendVipLevelMessageToUser, userId= {}, levelName={}",userId,levelName);
         Map<String, String> map = new HashMap<String, String>();
         map.put("levelName", levelName);
         User user = this.userProvider.findUserById(userId);
