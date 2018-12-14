@@ -1,9 +1,12 @@
 package com.everhomes.rest.contract;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.NewCommentCommand;
+import com.everhomes.rest.user.Contact;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -117,7 +120,14 @@ public class UpdateContractCommand {
     private Byte costGenerationMethod;
     private Long templateId;
     private Long documentId;
-
+    private Long apartmentDeliveryTime; 
+    private Long downPaymentRentTime; 
+	private Integer monthlyMargin; 
+	private BigDecimal marginAmount; 
+	private BigDecimal preAmount; 
+	private String contractingPlace; 
+    
+    
 	@ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
 
@@ -132,7 +142,56 @@ public class UpdateContractCommand {
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
     
-    public Long getDocumentId() {
+    
+    public Long getApartmentDeliveryTime() {
+		return apartmentDeliveryTime;
+	}
+
+	public void setApartmentDeliveryTime(Long apartmentDeliveryTime) {
+		this.apartmentDeliveryTime = apartmentDeliveryTime;
+	}
+
+	public Long getDownPaymentRentTime() {
+		return downPaymentRentTime;
+	}
+
+	public void setDownPaymentRentTime(Long downPaymentRentTime) {
+		this.downPaymentRentTime = downPaymentRentTime;
+	}
+
+	public Integer getMonthlyMargin() {
+		return monthlyMargin;
+	}
+
+	public void setMonthlyMargin(Integer monthlyMargin) {
+		this.monthlyMargin = monthlyMargin;
+	}
+
+	public BigDecimal getMarginAmount() {
+		return marginAmount;
+	}
+
+	public void setMarginAmount(BigDecimal marginAmount) {
+		this.marginAmount = marginAmount;
+	}
+
+	public BigDecimal getPreAmount() {
+		return preAmount;
+	}
+
+	public void setPreAmount(BigDecimal preAmount) {
+		this.preAmount = preAmount;
+	}
+
+	public String getContractingPlace() {
+		return contractingPlace;
+	}
+
+	public void setContractingPlace(String contractingPlace) {
+		this.contractingPlace = contractingPlace;
+	}
+
+	public Long getDocumentId() {
 		return documentId;
 	}
 

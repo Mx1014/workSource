@@ -247,8 +247,62 @@ public class ContractDetailDTO {
     private Integer namespaceId;
     private Long categoryId;
     private Long documentId;
-    
-    public Long getDocumentId() {
+    private Timestamp apartmentDeliveryTime; 
+    private Timestamp downPaymentRentTime; 
+	private Integer monthlyMargin; 
+	private BigDecimal marginAmount; 
+	private BigDecimal preAmount; 
+	private String contractingPlace; 
+	
+    public Timestamp getApartmentDeliveryTime() {
+		return apartmentDeliveryTime;
+	}
+
+	public void setApartmentDeliveryTime(Timestamp apartmentDeliveryTime) {
+		this.apartmentDeliveryTime = apartmentDeliveryTime;
+	}
+
+	public Timestamp getDownPaymentRentTime() {
+		return downPaymentRentTime;
+	}
+
+	public void setDownPaymentRentTime(Timestamp downPaymentRentTime) {
+		this.downPaymentRentTime = downPaymentRentTime;
+	}
+
+	public Integer getMonthlyMargin() {
+		return monthlyMargin;
+	}
+
+	public void setMonthlyMargin(Integer monthlyMargin) {
+		this.monthlyMargin = monthlyMargin;
+	}
+
+	public BigDecimal getMarginAmount() {
+		return marginAmount;
+	}
+
+	public void setMarginAmount(BigDecimal marginAmount) {
+		this.marginAmount = marginAmount;
+	}
+
+	public BigDecimal getPreAmount() {
+		return preAmount;
+	}
+
+	public void setPreAmount(BigDecimal preAmount) {
+		this.preAmount = preAmount;
+	}
+
+	public String getContractingPlace() {
+		return contractingPlace;
+	}
+
+	public void setContractingPlace(String contractingPlace) {
+		this.contractingPlace = contractingPlace;
+	}
+
+	public Long getDocumentId() {
 		return documentId;
 	}
 
