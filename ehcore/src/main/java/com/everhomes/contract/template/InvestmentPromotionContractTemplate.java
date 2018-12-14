@@ -14,19 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.investment.InvitedCustomerService;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ChangeMethod;
 import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.PeriodUnit;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.CustomerContactDTO;
 import com.everhomes.rest.investment.CustomerContactType;
 import com.everhomes.rest.investment.InvitedCustomerDTO;
 import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 @Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "investmentPromotion")
 public class InvestmentPromotionContractTemplate implements ContractTemplateHandler{
@@ -95,12 +89,6 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 		
 		String value = "";
 		switch (segments[1]) {
-			case "levelItemId":
-				ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getLevelItemId());
-			    if (levelItem != null) {
-			    	value = levelItem.getItemDisplayName();
-			    }
-				break;
 			case "contacts":
 				if ("customer".equals(segments[2])) {
 					List<CustomerContactDTO> customerContacts = invitedCustomer.getContacts()
@@ -136,6 +124,54 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 						value = invitedCustomer.getTrackers().get(0).getTrackerPhone();
 					}
 				}
+				break;
+			case "levelItemId":
+				ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getLevelItemId());
+			    if (levelItem != null) {
+			    	value = levelItem.getItemDisplayName();
+			    }
+				break;
+			case "categoryItemId":
+				ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCategoryItemId());
+			    if (categoryItem != null) {
+			    	value = categoryItem.getItemDisplayName();
+			    }
+				break;
+			case "contactGenderItemId":
+				ScopeFieldItem contactGenderItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getContactGenderItemId());
+			    if (contactGenderItem != null) {
+			    	value = contactGenderItem.getItemDisplayName();
+			    }
+				break;
+			case "corpProductCategoryItemId":
+				ScopeFieldItem corpProductCategoryItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpProductCategoryItemId());
+			    if (corpProductCategoryItem != null) {
+			    	value = corpProductCategoryItem.getItemDisplayName();
+			    }
+				break;
+			case "propertyType":
+				ScopeFieldItem propertyType = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getPropertyType());
+			    if (propertyType != null) {
+			    	value = propertyType.getItemDisplayName();
+			    }
+				break;
+			case "corpNatureItemId":
+				ScopeFieldItem corpNatureItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpNatureItemId());
+			    if (corpNatureItem != null) {
+			    	value = corpNatureItem.getItemDisplayName();
+			    }
+				break;
+			case "corpPurposeItemId":
+				ScopeFieldItem corpPurposeItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpPurposeItemId());
+			    if (corpPurposeItem != null) {
+			    	value = corpPurposeItem.getItemDisplayName();
+			    }
+				break;
+			case "corpQualificationItemId":
+				ScopeFieldItem corpQualificationItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpQualificationItemId());
+			    if (corpQualificationItem != null) {
+			    	value = corpQualificationItem.getItemDisplayName();
+			    }
 				break;
 			default:
 				value = data.toString();

@@ -4882,10 +4882,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				if (handler != null) {
 					if (handler.isValid(contractDetailDTO, segments)) {
 						dataValue = handler.getValue(contractDetailDTO, segments);
+					}else{
+						dataValue = "无数据";
 					}
 					dataMap.put(replaceKey, dataValue);
 				}else {
-					dataMap.put(replaceKey, "未知字段");
+					dataMap.put(replaceKey, "非法字段");
 				}
 			}
 		}

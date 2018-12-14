@@ -136,6 +136,7 @@ public class GetKeywordsUtils {
 				textSB.append(value);
 				textSB.append(textArray[i]);
 				key = null;
+				value = null;
 			}
         	
         	//判断是否开始匹配
