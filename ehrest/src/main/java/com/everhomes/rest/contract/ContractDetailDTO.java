@@ -254,6 +254,7 @@ public class ContractDetailDTO {
 	private BigDecimal preAmount; 
 	private String contractingPlace; 
 	
+	
     public Timestamp getApartmentDeliveryTime() {
 		return apartmentDeliveryTime;
 	}
