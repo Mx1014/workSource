@@ -2179,6 +2179,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		String suffix = json.getString("suffix"); // 业务后缀
 
 		// 对当前应用进行匹配
+		List<JumpModuleDTO> dtos = new ArrayList<>(5);
 		for (ServiceModuleApp app : apps) {
 			String appConfig = app.getInstanceConfig();
 			if (StringUtils.isEmpty(appConfig)) {
@@ -2187,38 +2188,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 			JSONObject appJson = JSONObject.parseObject(appConfig);
 			Long appId = appJson.getLong(APP_ID);
-			String url = appJson.getString("url");
 			if (null == appId) {
-				if (StringUtils.isEmpty(url)) {
-					continue;
-				}
-
-//				// 截取url的参数部分
-//				int index = url.indexOf("?");
-//				if (index < 0) {
-//					continue;
-//				}
-//
-//				// 获取特定参数
-//				url = url.substring(index + 1);
-//				String[] items = url.split("&");
-//				String findStr = APP_ID + "=";
-//				for (String item : items) {
-//					if (item.startsWith(findStr)) {
-//						appId = Long.parseLong(item.substring(findStr.length()));
-//					}
-//				}
-//
-//				// 如果未找到，继续
-//				if (null == appId) {
-//					continue;
-//				}
+				continue;
 			}
-
-			// 比较两者是否相同
-//			if (!jumpCheckId.equals(appId)) {
-//				continue;
-//			}
 
 			Map<String, String> normalParams = new HashMap<>(10);
 			normalParams.put("appId", appId + "");
@@ -2233,12 +2205,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 			dto.setModuleUrl(finalModuleUrl);
 			dto.setModuleName(app.getName());
-			List<JumpModuleDTO> dtos = new ArrayList<>(1);
 			dtos.add(dto);
-			return dtos;
 		}
 
-		return null;
+		return dtos;
 	}
 
 	/**
