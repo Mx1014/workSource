@@ -324,6 +324,12 @@ update eh_payment_app_views set has_view = 1 where namespace_id=999929 and view_
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
+
+-- AUTHOR: 黄明波
+-- REMARK: 升级万智汇服务联盟离线包版本
+update eh_version_urls set target_version = '1.2.1', download_url = replace(download_url, '-1-2-0', '-1-2-1'), info_url = replace(info_url, '-1-2-0', '-1-2-1'), publish_time = now() where download_url like '%/nar/serviceAlliance/offline/serviceAlliance%';
+
+
 -- --------------------- SECTION END wanzhihui ------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: jinmao
