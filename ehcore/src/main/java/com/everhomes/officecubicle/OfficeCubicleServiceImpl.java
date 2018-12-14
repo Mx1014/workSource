@@ -1804,24 +1804,33 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(space.getRefundStrategy()!=null){
 			if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
 				order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
-				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+				if(order.getRentalOrderNo()!=null){
+					rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+				}
 				this.officeCubicleProvider.updateCubicleRentOrder(order);
 				return;
 			}
 		} else {
+			if(order.getRentalOrderNo()!=null){
+				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			}
 			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
 		if (order.getPrice().compareTo(new BigDecimal(0)) == 0){
 			order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
-			rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			if(order.getRentalOrderNo()!=null){
+				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			}
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
 		if (order.getRequestType() ==OfficeCubicleRequestType.BACKGROUND.getCode()){
 			order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
-			rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			if(order.getRentalOrderNo()!=null){
+				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			}
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
