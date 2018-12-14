@@ -118,7 +118,7 @@ public interface ContractProvider {
 	void createContractTemplate(ContractTemplate contractTemplate);
 	void updateContractTemplate(ContractTemplate contractTemplate);
 	ContractTemplate findContractTemplateById(Long id);
-	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,Long orgId, Long categoryId, String name, Long pageAnchor, Integer pageSize, Long appId);
+	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,Long orgId, Long categoryId, String name, CrossShardListingLocator locator, Integer pageSize, Long appId);
 	void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId, Long templateId);
 	//void deletePrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId);
 	Boolean getContractTemplateById(Long id);

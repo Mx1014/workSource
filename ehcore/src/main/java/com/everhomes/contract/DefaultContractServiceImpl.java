@@ -28,6 +28,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.everhomes.investment.InvitedCustomerService;
+import com.everhomes.listing.CrossShardListingLocator;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
@@ -3567,12 +3569,19 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		// this module request param ownerId means communityId
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int namespaceId =UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
 		
 		List<ContractTemplate> list = contractProvider.listContractTemplates(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getOrgId(),
-				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize, cmd.getAppId());
+				cmd.getCategoryId(), cmd.getName(), locator, pageSize, cmd.getAppId());
 		
 		ListContractTemplatesResponse response = new ListContractTemplatesResponse();
-
+		Long nextPageAnchor = null;
+		if(list.size() > pageSize) {
+			list.remove(list.size() - 1);
+            response.setNextPageAnchor(list.get(list.size() - 1).getId());
+        }
+		
 		if(list.size() > 0){
 			List<ContractTemplateDTO> resultList = list.stream().map((c) -> {
 				ContractTemplateDTO dto = ConvertHelper.convert(c, ContractTemplateDTO.class);
@@ -3626,11 +3635,6 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				return dto;
 			}).collect(Collectors.toList());
     		response.setRequests(resultList);
-    		if(list.size() != pageSize){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getId());
-        	}
     	}
 		return response;
 	}
