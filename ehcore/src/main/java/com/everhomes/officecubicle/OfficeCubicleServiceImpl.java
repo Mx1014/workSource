@@ -2162,7 +2162,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
 				List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceName());
 				smsProvider.addToTupleList(variables, "reserveTime", order.getUseDetail());
-				smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
+				smsProvider.addToTupleList(variables, "orderNo", String.valueOf(order.getOrderNo()));
 				sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 				rent.setOrderId(order.getId());
@@ -2181,7 +2181,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			BigDecimal refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space);
 			int templateId = SmsTemplateCode.OFFICE_CUBICLE_REFUND;
 			List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
-			smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
+			smsProvider.addToTupleList(variables, "orderNo", String.valueOf(order.getOrderNo()));
 			smsProvider.addToTupleList(variables, "price", order.getPrice());
 			smsProvider.addToTupleList(variables, "refundPrice", refundPrice);
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
