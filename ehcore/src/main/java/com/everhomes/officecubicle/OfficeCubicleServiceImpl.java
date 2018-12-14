@@ -1804,21 +1804,33 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(space.getRefundStrategy()!=null){
 			if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
 				order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+				if(order.getRentalOrderNo()!=null){
+					rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+				}
 				this.officeCubicleProvider.updateCubicleRentOrder(order);
 				return;
 			}
 		} else {
+			if(order.getRentalOrderNo()!=null){
+				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			}
 			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
 		if (order.getPrice().compareTo(new BigDecimal(0)) == 0){
 			order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+			if(order.getRentalOrderNo()!=null){
+				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			}
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
 		if (order.getRequestType() ==OfficeCubicleRequestType.BACKGROUND.getCode()){
 			order.setOrderStatus(OfficeCubicleOrderStatus.FAIL.getCode());
+			if(order.getRentalOrderNo()!=null){
+				rentalCommonService.rentalOrderCancel(order.getRentalOrderNo());
+			}
 			this.officeCubicleProvider.updateCubicleRentOrder(order);
 			return;
 		}
@@ -2162,7 +2174,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				int templateId = SmsTemplateCode.OFFICE_CUBICLE_NOT_USE;
 				List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceName());
 				smsProvider.addToTupleList(variables, "reserveTime", order.getUseDetail());
-				smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
+				smsProvider.addToTupleList(variables, "orderNo", String.valueOf(order.getOrderNo()));
 				sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
 				rent.setOrderId(order.getId());
@@ -2181,7 +2193,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			BigDecimal refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space);
 			int templateId = SmsTemplateCode.OFFICE_CUBICLE_REFUND;
 			List<Tuple<String, Object>> variables =  smsProvider.toTupleList("spaceName", order.getSpaceId());
-			smsProvider.addToTupleList(variables, "orderNo", order.getOrderNo());
+			smsProvider.addToTupleList(variables, "orderNo", String.valueOf(order.getOrderNo()));
 			smsProvider.addToTupleList(variables, "price", order.getPrice());
 			smsProvider.addToTupleList(variables, "refundPrice", refundPrice);
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
@@ -2629,7 +2641,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public GetCubicleForOrderResponse getCubicleForOrder (GetCubicleForOrderCommand cmd){
 		GetCubicleForOrderResponse resp = new GetCubicleForOrderResponse();
-		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId())
+		OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getSpaceId());
 		String keyword = "";
 		if (StringUtils.isNotBlank(cmd.getKeyword())){
 			keyword = cmd.getKeyword();
