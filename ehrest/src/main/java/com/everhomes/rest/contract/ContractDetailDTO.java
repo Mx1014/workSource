@@ -2,7 +2,6 @@ package com.everhomes.rest.contract;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -151,65 +150,49 @@ public class ContractDetailDTO {
     private Byte paymentFlag;
     private Long templateId;
     private String templateName;
-    //add by tangcen 2018年6月13日21:16:10
     private Byte costGenerationMethod;
     private String startTime;
 	private String endTimeByPeriod;
 	private String endTimeByDay;
+    private Long communityId;
+    private Integer namespaceId;
+    private Long categoryId;
+    private Long documentId;
+	private Timestamp apartmentDeliveryTime; //房屋交付日期
+    private Timestamp downPaymentRentTime; //首期租金开始日期
+	private Integer monthlyMargin; //保证金月数
+	private BigDecimal marginAmount; //保证金金额
+	private BigDecimal monthlyServiceCharge; //月服务费金额
+	private BigDecimal preAmount; //预付金额
+	private String contractingPlace; //签约地点
+	private String stringTag1; //预留字段1
+	private String stringTag2; //预留字段2
+	private String stringTag3; //预留字段3
+	private String stringTag4; //预留字段4
+	private String stringTag5; //预留字段5
+	private String stringTag6; //预留字段6
+	private String stringTag7; //预留字段7
+	private String stringTag8; //预留字段8
+	private String stringTag9; //预留字段9
+	private String stringTag10; //'预留字段10
+	
+	//List<FlowCaseEntity> entities = new ArrayList<>();
 	
 	@ItemType(ChargingItemVariables.class)
     private List<ChargingItemVariables> chargingPaymentTypeVariables;
 	
-    public List<ChargingItemVariables> getChargingPaymentTypeVariables() {
-		return chargingPaymentTypeVariables;
-	}
-
     @ItemType(FlowCaseEntity.class)
     private List<FlowCaseEntity> price;
     
-	public void setChargingPaymentTypeVariables(List<ChargingItemVariables> chargingPaymentTypeVariables) {
-		this.chargingPaymentTypeVariables = chargingPaymentTypeVariables;
-	}
-
-	public String getEndTimeByPeriod() {
-		return endTimeByPeriod;
-	}
-
-	public void setEndTimeByPeriod(String endTimeByPeriod) {
-		this.endTimeByPeriod = endTimeByPeriod;
-	}
-
-	public String getEndTimeByDay() {
-		return endTimeByDay;
-	}
-
-	public void setEndTimeByDay(String endTimeByDay) {
-		this.endTimeByDay = endTimeByDay;
-	}
-
-	public String getStartTime() {
-		return startTime;
-	}
-
-	public void setStartTime(String startTime) {
-		this.startTime = startTime;
-	}
-
-	public Byte getCostGenerationMethod() {
-		return costGenerationMethod;
-	}
-
-	public void setCostGenerationMethod(Byte costGenerationMethod) {
-		this.costGenerationMethod = costGenerationMethod;
-	}
-
 	@ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> adjusts;
+	
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
     
-    List<FlowCaseEntity> entities = new ArrayList<>();
-
+    @ItemType(FlowCaseEntity.class)
+    private List<FlowCaseEntity> entities;
+    
 	public List<FlowCaseEntity> getEntities() {
 		return entities;
 	}
@@ -241,14 +224,55 @@ public class ContractDetailDTO {
 	public void setTemplateId(Long templateId) {
 		this.templateId = templateId;
 	}
-		
-    //add by tangcen
-    private Long communityId;
-    private Integer namespaceId;
-    private Long categoryId;
-    private Long documentId;
-    
-    public Long getDocumentId() {
+    public Timestamp getApartmentDeliveryTime() {
+		return apartmentDeliveryTime;
+	}
+
+	public void setApartmentDeliveryTime(Timestamp apartmentDeliveryTime) {
+		this.apartmentDeliveryTime = apartmentDeliveryTime;
+	}
+
+	public Timestamp getDownPaymentRentTime() {
+		return downPaymentRentTime;
+	}
+
+	public void setDownPaymentRentTime(Timestamp downPaymentRentTime) {
+		this.downPaymentRentTime = downPaymentRentTime;
+	}
+
+	public Integer getMonthlyMargin() {
+		return monthlyMargin;
+	}
+
+	public void setMonthlyMargin(Integer monthlyMargin) {
+		this.monthlyMargin = monthlyMargin;
+	}
+
+	public BigDecimal getMarginAmount() {
+		return marginAmount;
+	}
+
+	public void setMarginAmount(BigDecimal marginAmount) {
+		this.marginAmount = marginAmount;
+	}
+
+	public BigDecimal getPreAmount() {
+		return preAmount;
+	}
+
+	public void setPreAmount(BigDecimal preAmount) {
+		this.preAmount = preAmount;
+	}
+
+	public String getContractingPlace() {
+		return contractingPlace;
+	}
+
+	public void setContractingPlace(String contractingPlace) {
+		this.contractingPlace = contractingPlace;
+	}
+
+	public Long getDocumentId() {
 		return documentId;
 	}
 
@@ -955,5 +979,133 @@ public class ContractDetailDTO {
     public void setApplicationTheme(String applicationTheme) {
         this.applicationTheme = applicationTheme;
     }
+
+	public Byte getCostGenerationMethod() {
+		return costGenerationMethod;
+	}
+
+	public void setCostGenerationMethod(Byte costGenerationMethod) {
+		this.costGenerationMethod = costGenerationMethod;
+	}
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getEndTimeByPeriod() {
+		return endTimeByPeriod;
+	}
+
+	public void setEndTimeByPeriod(String endTimeByPeriod) {
+		this.endTimeByPeriod = endTimeByPeriod;
+	}
+
+	public String getEndTimeByDay() {
+		return endTimeByDay;
+	}
+
+	public void setEndTimeByDay(String endTimeByDay) {
+		this.endTimeByDay = endTimeByDay;
+	}
+
+	public BigDecimal getMonthlyServiceCharge() {
+		return monthlyServiceCharge;
+	}
+
+	public void setMonthlyServiceCharge(BigDecimal monthlyServiceCharge) {
+		this.monthlyServiceCharge = monthlyServiceCharge;
+	}
+
+	public String getStringTag1() {
+		return stringTag1;
+	}
+
+	public void setStringTag1(String stringTag1) {
+		this.stringTag1 = stringTag1;
+	}
+
+	public String getStringTag2() {
+		return stringTag2;
+	}
+
+	public void setStringTag2(String stringTag2) {
+		this.stringTag2 = stringTag2;
+	}
+
+	public String getStringTag3() {
+		return stringTag3;
+	}
+
+	public void setStringTag3(String stringTag3) {
+		this.stringTag3 = stringTag3;
+	}
+
+	public String getStringTag4() {
+		return stringTag4;
+	}
+
+	public void setStringTag4(String stringTag4) {
+		this.stringTag4 = stringTag4;
+	}
+
+	public String getStringTag5() {
+		return stringTag5;
+	}
+
+	public void setStringTag5(String stringTag5) {
+		this.stringTag5 = stringTag5;
+	}
+
+	public String getStringTag6() {
+		return stringTag6;
+	}
+
+	public void setStringTag6(String stringTag6) {
+		this.stringTag6 = stringTag6;
+	}
+
+	public String getStringTag7() {
+		return stringTag7;
+	}
+
+	public void setStringTag7(String stringTag7) {
+		this.stringTag7 = stringTag7;
+	}
+
+	public String getStringTag8() {
+		return stringTag8;
+	}
+
+	public void setStringTag8(String stringTag8) {
+		this.stringTag8 = stringTag8;
+	}
+
+	public String getStringTag9() {
+		return stringTag9;
+	}
+
+	public void setStringTag9(String stringTag9) {
+		this.stringTag9 = stringTag9;
+	}
+
+	public String getStringTag10() {
+		return stringTag10;
+	}
+
+	public void setStringTag10(String stringTag10) {
+		this.stringTag10 = stringTag10;
+	}
+
+	public List<ChargingItemVariables> getChargingPaymentTypeVariables() {
+		return chargingPaymentTypeVariables;
+	}
+
+	public void setChargingPaymentTypeVariables(List<ChargingItemVariables> chargingPaymentTypeVariables) {
+		this.chargingPaymentTypeVariables = chargingPaymentTypeVariables;
+	}
 
 }

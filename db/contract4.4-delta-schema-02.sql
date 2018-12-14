@@ -352,3 +352,5 @@ CREATE TABLE `eh_service_module_app_entries` (
   PRIMARY KEY (`id`)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '应用的入口数据';
+
+ALTER TABLE eh_office_cubicle_orders MODIFY COLUMN employee_number VARCHAR(64) COMMENT '雇员数量';

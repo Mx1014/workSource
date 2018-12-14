@@ -1362,7 +1362,7 @@ public class ContractProviderImpl implements ContractProvider {
 		     cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.in(communityIds).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
 		}
 
-		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
+		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.ID.desc());
 		
 		if(null != pageSize)
 			query.limit(pageSize);

@@ -57,6 +57,7 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 		switch (key) {
 			case "contractEndDate":
 			case "contractStartDate":
+			case "signedTime":
 				value = formatTimeStamp((Timestamp) data);
 				break;
 			case "changeMethod":
