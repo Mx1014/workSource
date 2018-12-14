@@ -4629,24 +4629,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040420L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
 		}
 		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
-		if (cmd.getPageAnchor() == null)
-			cmd.setPageAnchor(Long.MAX_VALUE);
+		if (cmd.getPageNumber() == null)
+			cmd.setPageNumber(0);
 		Integer pageSize = PaginationConfigHelper.getPageSize(
 				configurationProvider, cmd.getPageSize());
-		CrossShardListingLocator locator = new CrossShardListingLocator();
-		locator.setAnchor(cmd.getPageAnchor());
+		Integer anchor = cmd.getPageSize() * cmd.getPageNumber();
+		Long counts = rentalv2Provider.countRentalBills(cmd.getResourceTypeId(),cmd.getOrganizationId(),cmd.getCommunityId(),
+				cmd.getRentalSiteId(),cmd.getBillStatus(),cmd.getVendorType(),cmd.getStartTime(),cmd.getEndTime(),
+				null,null,cmd.getPayChannel(),cmd.getSource());
+		response.setTotalNum(counts);
 
 		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
-				cmd.getRentalSiteId(), locator, cmd.getBillStatus(), cmd.getVendorType(), pageSize+1, cmd.getStartTime(), cmd.getEndTime(),
+				cmd.getRentalSiteId(), anchor, cmd.getBillStatus(), cmd.getVendorType(), pageSize, cmd.getStartTime(), cmd.getEndTime(),
 				null, null,cmd.getPayChannel(),cmd.getSource());
 
 		if (bills == null) {
 			return response;
-		}
-
-		if (bills.size() > pageSize) {
-			bills.remove(bills.size() - 1);
-			response.setNextPageAnchor(bills.get(bills.size() - 1).getReserveTime().getTime());
 		}
 
 		if (cmd.getBillStatus() != null)

@@ -896,14 +896,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		step.execute();
 	}
 
-	@Override
-	public List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId,
-											 ListingLocator locator, Byte billStatus, String vendorType , Integer pageSize,
-											 Long startTime, Long endTime, Byte invoiceFlag,Long userId,String payChannel,Byte source){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
-
-
+	private Condition buildListRentalBillsCondition(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId,
+													Byte billStatus, String vendorType , Long startTime, Long endTime,
+													Byte invoiceFlag,Long userId,String payChannel,Byte source){
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode());
 		if (null != organizationId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.ORGANIZATION_ID.equal( organizationId));
@@ -933,6 +928,19 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.SOURCE.eq(source));
 		if (StringUtils.isNotEmpty(payChannel))
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.PAY_CHANNEL.like(payChannel+"%"));
+
+		return condition;
+	}
+
+	@Override
+	public List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId,
+											 ListingLocator locator, Byte billStatus, String vendorType , Integer pageSize,
+											 Long startTime, Long endTime, Byte invoiceFlag,Long userId,String payChannel,Byte source){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
+
+		Condition condition = buildListRentalBillsCondition(resourceTypeId,organizationId,communityId,rentalSiteId,
+				billStatus,vendorType,startTime,endTime,invoiceFlag,userId,payChannel,source);
 		if(null!=locator && locator.getAnchor() != null)
 			condition=condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(locator.getAnchor())));
 
@@ -945,6 +953,40 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				});
 
 		return result;
+	}
+
+	@Override
+	public Long countRentalBills(Long resourceTypeId, Long organizationId, Long communityId, Long rentalSiteId,
+								 Byte billStatus, String vendorType, Long startTime, Long endTime, Byte invoiceFlag,
+								 Long userId, String payChannel, Byte source) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_RENTALV2_ORDERS);
+
+        Condition condition = buildListRentalBillsCondition(resourceTypeId,organizationId,communityId,rentalSiteId,
+				billStatus,vendorType,startTime,endTime,invoiceFlag,userId,payChannel,source);
+        return step.where(condition).fetchOneInto(Long.class);
+	}
+
+	@Override
+	public List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId, Long communityId, Long rentalSiteId,
+											 Integer anchor, Byte billStatus, String vendorType, Integer pageSize, Long startTime,
+											 Long endTime, Byte invoiceFlag, Long userId, String payChannel, Byte source) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
+
+        Condition condition = buildListRentalBillsCondition(resourceTypeId,organizationId,communityId,rentalSiteId,
+                billStatus,vendorType,startTime,endTime,invoiceFlag,userId,payChannel,source);
+        step.orderBy(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.desc());
+        if (pageSize != null && anchor != null)
+            step.limit(anchor,pageSize);
+        step.where(condition);
+
+        List<RentalOrder> result = step
+                .orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
+                    return ConvertHelper.convert(r, RentalOrder.class);
+                });
+
+        return result;
 	}
 
 	@Override

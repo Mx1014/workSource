@@ -66,6 +66,15 @@ public interface Rentalv2Provider {
 	List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
 			Byte invoiceFlag,Long userId,String payChannel,Byte source);
+
+	Long countRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId,  Byte billStatus,
+									  String vendorType , Long startTime, Long endTime,
+									  Byte invoiceFlag,Long userId,String payChannel,Byte source);
+
+	List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId, Integer anchor, Byte billStatus,
+									  String vendorType , Integer pageSize, Long startTime, Long endTime,
+									  Byte invoiceFlag,Long userId,String payChannel,Byte source);
+
 	List<RentalOrder> listRentalBillsByUserOrgId(Long organizationId ,ListingLocator locator, Integer pageSize );
 	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime);
 

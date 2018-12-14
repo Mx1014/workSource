@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
 public class ListRentalBillsCommandResponse {
 
 	private Long nextPageAnchor;
+	private Long totalNum;
     @ItemType(RentalBillDTO.class)
 	private List<RentalBillDTO> rentalBills; 
 	@Override
@@ -37,5 +38,13 @@ public class ListRentalBillsCommandResponse {
 	}
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
-	} 
+	}
+
+	public Long getTotalNum() {
+		return totalNum;
+	}
+
+	public void setTotalNum(Long totalNum) {
+		this.totalNum = totalNum;
+	}
 }
