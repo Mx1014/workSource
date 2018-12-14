@@ -1,10 +1,12 @@
+
+-- AUTHOR: 缪洲 20181211
+-- REMARK: 工位预定V2.4
 CREATE TABLE `eh_office_cubicle_station` (
   `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
   `namespace_id` INTEGER NOT NULL,
   `owner_type`  VARCHAR(255) COMMENT 'owner type: community',
   `owner_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
   `space_id` BIGINT COMMENT '空间ID',
-  `station_id` BIGINT COMMENT '工位ID',
   `station_name` VARCHAR(127) COMMENT '名称：',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
@@ -51,6 +53,7 @@ CREATE TABLE `eh_office_cubicle_station_rent` (
   `end_time` DATETIME COMMENT '预定结束时间',
   `station_id` BIGINT COMMENT '工位/办公室Id',
   `station_name` VARCHAR(127),
+  `rent_type` TINYINT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -146,6 +149,7 @@ CREATE TABLE `eh_office_cubicle_refund_tips` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN open_flag TINYINT COMMENT '是否开启空间，1是，0否';
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN short_rent_nums VARCHAR(32) COMMENT '短租工位数量';
 ALTER TABLE eh_office_cubicle_spaces ADD COLUMN long_rent_price DECIMAL(10,2) COMMENT '长租工位价格';
@@ -155,3 +159,4 @@ ALTER TABLE eh_office_cubicle_spaces ADD COLUMN refund_strategy TINYINT;
 ALTER TABLE eh_office_cubicle_attachments ADD COLUMN type TINYINT COMMENT '1,空间，2短租工位，3开放式工位';
 
 ALTER TABLE eh_office_cubicle_orders MODIFY COLUMN employee_number VARCHAR(64) COMMENT '雇员数量';
+

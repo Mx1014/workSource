@@ -20,6 +20,9 @@ import javax.validation.constraints.NotNull;
  * <li>organizationId: 标准版新增的管理公司ID</li>
  * <li>allScope: 标准版增加的allScope参数，true：默认/全部，false：具体项目</li>
  * <li>appId:应用ID</li>
+ * <li>billingCycleExpression:生成账单周期表达式</li>
+ * <li>billDayExpression:出账单日表达式</li>
+ * <li>dueDayExpression:最晚还款日表达式</li>
  *</ul>
  */
 public class ModifyBillGroupCommand {
@@ -48,6 +51,37 @@ public class ModifyBillGroupCommand {
     private Long organizationId;//标准版新增的管理公司ID
     private Boolean allScope;//标准版增加的allScope参数，true：默认/全部，false：具体项目
     private Long appId;
+
+    //生成账单周期表达式
+    private String billingCycleExpression;
+    //出账单日表达式
+    private String billDayExpression;
+    //最晚还款日表达式
+    private String dueDayExpression;
+
+    public String getBillingCycleExpression() {
+        return billingCycleExpression;
+    }
+
+    public void setBillingCycleExpression(String billingCycleExpression) {
+        this.billingCycleExpression = billingCycleExpression;
+    }
+
+    public String getBillDayExpression() {
+        return billDayExpression;
+    }
+
+    public void setBillDayExpression(String billDayExpression) {
+        this.billDayExpression = billDayExpression;
+    }
+
+    public String getDueDayExpression() {
+        return dueDayExpression;
+    }
+
+    public void setDueDayExpression(String dueDayExpression) {
+        this.dueDayExpression = dueDayExpression;
+    }
 
     public Byte getBillDayType() {
         return billDayType;

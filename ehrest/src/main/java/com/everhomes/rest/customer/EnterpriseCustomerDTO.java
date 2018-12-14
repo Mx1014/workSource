@@ -96,7 +96,16 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String ownerType;
     private Long enterpriseId;
     private Long organizationId;
-    private Long communityId;
+    private Integer namespaceId;
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	private Long communityId;
     private String customerNumber;
     private String name;
     private String nickName;

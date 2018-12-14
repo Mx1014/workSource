@@ -57,6 +57,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- AUTHOR: 缪洲 20181211
 -- REMARK: 工位预定V2.4
 DELETE FROM eh_office_cubicle_spaces;
+DELETE FROM eh_office_cubicle_orders;
 SET @id = (SELECT MAX(id) from eh_locale_templates);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1,'sms.default', 94, 'zh_CN', '工会预定成功付款短信', '您已成功预定了${spaceName}短租工位，预定时间：${reserveTime}，订单编号：${orderNo}.如需取消，请在预定开始时间前取消，感谢您的使用。', 0);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1,'sms.default', 95, 'zh_CN', '工会预定成功退款短信', '尊敬的用户，您预定的${spaceName}短租工位已退款成功，订单编号：${orderNo}，订单金额${price}元，退款金额：${refundPrice}元，期待下次为您服务。', 0);
@@ -165,7 +166,7 @@ INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12132, 'enterprise_customer', 'stringTag20', '预留字段20', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 128}');
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12133, 'enterprise_customer', 'stringTag21', '预留字段21', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 128}');
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12134, 'enterprise_customer', 'corpLegalPersonDuty', '法人代表职务', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 32}');
-INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12135, 'enterprise_customer', 'corpLegalPersonToken', '法人代表职务', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12135, 'enterprise_customer', 'corpLegalPersonToken', '法人联系电话', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
 SET @id = IFNULL((select max(id) from eh_var_field_ranges), 1);
