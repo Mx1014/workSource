@@ -82,7 +82,7 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 
 	@SuppressWarnings("unchecked")
 	private String formatValue(String[] segments,Object data,EnterpriseCustomerDTO enterpriseCustomer){
-		if (data == null) {
+		if (data == null && !"contacts".equals(segments[1]) && !"trackers".equals(segments[1])) {
 			return "";
 		}
 		
@@ -91,41 +91,20 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 			case "contacts":
 				if (segments.length >= 4) {
 					if ("customer".equals(segments[2])) {
-						List<CustomerContactDTO> customerContacts = ((List<CustomerContactDTO>) data)
-																	.stream()
-																	.filter(r->r.getContactType()==CustomerContactType.CUSTOMER_CONTACT.getCode())
-																	.collect(Collectors.toList());
-						if (customerContacts != null && customerContacts.size()>0) {
-							if ("name".equals(segments[3])) {
-								value = customerContacts.get(0).getName();
-							}else if ("phoneNumber".equals(segments[3])) {
-								value = customerContacts.get(0).getPhoneNumber();
-							}
-						}											
-					}else if ("channel".equals(segments[2])) {
-						List<CustomerContactDTO> channelContacts = ((List<CustomerContactDTO>) data)
-																	.stream()
-																	.filter(r->r.getContactType()==CustomerContactType.CHANNEL_CONTACT.getCode())
-																	.collect(Collectors.toList());
-						if (channelContacts != null && channelContacts.size()>0) {
-							if ("name".equals(segments[3])) {
-								value = channelContacts.get(0).getName();
-							}else if ("phoneNumber".equals(segments[3])) {
-								value = channelContacts.get(0).getPhoneNumber();
-							}
-						}	
+						if ("name".equals(segments[3])) {
+							value = enterpriseCustomer.getContactName();
+						}else if ("phoneNumber".equals(segments[3])) {
+							value = enterpriseCustomer.getContactPhone();
+						}
 					}
 				}
 				break;
 			case "trackers":
 				if (segments.length >= 3) {
-					List<CustomerTrackerDTO> trackers = (List<CustomerTrackerDTO>)data;
-					if (trackers != null && trackers.size()>0) {
-						if ("trackerName".equals(segments[2])) {
-							value = trackers.get(0).getTrackerName();
-						}else if ("trackerPhone".equals(segments[2])) {
-							value = trackers.get(0).getTrackerPhone();
-						}
+					if ("trackerName".equals(segments[2])) {
+						value = enterpriseCustomer.getTrackingName();
+					}else if ("trackerPhone".equals(segments[2])) {
+						value = enterpriseCustomer.getTrackingPhone();
 					}
 				}
 				break;
