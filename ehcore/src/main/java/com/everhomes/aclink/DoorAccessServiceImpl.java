@@ -3019,6 +3019,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qrKeys.add(qr);
     }
 
+    private void doDingxinQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys){
+
+    }
+
     /**
      * 锁管家的app请求参数拼接
      * @auther wh
@@ -3167,7 +3171,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				Long t4 = DateHelper.currentGMTTime().getTime();
 
 				LOGGER.info("拿一个uclbrt 的二维码" + (t4 - t3));
-			} else {
+			} else if (auth.getDriver().equals(DoorAccessDriverType.DINGXIN.getCode())) {
+			    //港湾一号智慧园区对接鼎芯门禁
+                doDingxinQRKey(user, doorAccess, auth, qrKeys);
+            } else {
 				//左邻门禁
 				resp.setQrTimeout(this.getQrTimeout() / 1000l);
 				doZuolinQRKey(generate, user, doorAccess, auth, qrKeys);
