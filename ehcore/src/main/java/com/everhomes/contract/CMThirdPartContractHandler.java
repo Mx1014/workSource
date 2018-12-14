@@ -7,20 +7,14 @@ import com.everhomes.asset.AssetService;
 import com.everhomes.asset.third.RuiAnCMThirdOpenBillHandler;
 import com.everhomes.asset.third.ThirdOpenBillHandler;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
-import com.everhomes.customer.SyncDataTaskProvider;
-import com.everhomes.customer.SyncDataTaskService;
-import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
@@ -51,7 +45,6 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
-import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.util.*;
 
 import org.apache.commons.lang.StringUtils;
@@ -97,9 +90,6 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     private AssetService assetService;
 
     @Autowired
-    private CommunityProvider communityProvider;
-
-    @Autowired
     private ContractProvider contractProvider;
 
     @Autowired
@@ -124,9 +114,6 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     private PropertyMgrProvider propertyMgrProvider;
 
     @Autowired
-    private DbProvider dbProvider;
-
-    @Autowired
     private OrganizationProvider organizationProvider;
 
     @Autowired
@@ -136,19 +123,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     private OrganizationService organizationService;
 
     @Autowired
-    private UserOrganizationProvider userOrganizationProvider;
-
-    @Autowired
     private OrganizationSearcher organizationSearcher;
-
-    @Autowired
-    private DoorAccessService doorAccessService;
-
-    @Autowired
-    private SyncDataTaskProvider syncDataTaskProvider;
-
-    @Autowired
-    private SyncDataTaskService syncDataTaskService;
 
     @Autowired
     protected UserProvider userProvider;
@@ -589,6 +564,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     
     private void insertContract(Integer namespaceId, CMDataObject cmContractData, Long categoryId) {
         Contract contract = new Contract();
+        if (!"".equals(cmContractData.getContractHeader().getRentalType())) {
+        	contract.setContractType(convertContractType(cmContractData.getContractHeader().getRentalType()));
+		}
         contract.setNamespaceId(namespaceId);
         contract.setCommunityId(cmContractData.getCommunityId());
         contract.setNamespaceContractType(NamespaceContractType.RUIAN_CM.getCode());
@@ -725,6 +703,10 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         contract.setName("瑞安合同");
         //contract.setBuildingRename(cmContractData.getBuildingRename());
         contract.setCategoryId(categoryId);
+        if (!"".equals(cmContractData.getContractHeader().getRentalType())) {
+        	contract.setContractType(convertContractType(cmContractData.getContractHeader().getRentalType()));
+		}
+        //contract.setContractType(contractType);
 
         if(StringUtils.isNotBlank(cmContractData.getContractHeader().getStartDate())) {
             contract.setContractStartDate(dateStrToTimestamp(cmContractData.getContractHeader().getStartDate()));
@@ -855,6 +837,19 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                 case "已驳回": return ContractStatus.APPROVE_NOT_QUALITIED.getCode();
                 case "已作废": return ContractStatus.INACTIVE.getCode();
                 default: return null;
+            }
+        }
+        return null;
+    }
+    
+    private Byte convertContractType(String ebeiContractStatus) {
+        if(ebeiContractStatus != null) {
+            switch (ebeiContractStatus) {
+            	case "新租": return ContractType.NEW.getCode();
+            	case "续租": return ContractType.RENEW.getCode();
+            	case "变更": return ContractType.CHANGE.getCode();
+                case "转租": return ContractType.CHANGE.getCode();
+                default: return ContractType.NEW.getCode();
             }
         }
         return null;
