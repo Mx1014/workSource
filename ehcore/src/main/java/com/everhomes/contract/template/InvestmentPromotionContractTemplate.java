@@ -95,12 +95,6 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 		
 		String value = "";
 		switch (segments[1]) {
-			case "levelItemId":
-				ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getLevelItemId());
-			    if (levelItem != null) {
-			    	value = levelItem.getItemDisplayName();
-			    }
-				break;
 			case "contacts":
 				if ("customer".equals(segments[2])) {
 					List<CustomerContactDTO> customerContacts = invitedCustomer.getContacts()
@@ -136,6 +130,54 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 						value = invitedCustomer.getTrackers().get(0).getTrackerPhone();
 					}
 				}
+				break;
+			case "levelItemId":
+				ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getLevelItemId());
+			    if (levelItem != null) {
+			    	value = levelItem.getItemDisplayName();
+			    }
+				break;
+			case "categoryItemId":
+				ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCategoryItemId());
+			    if (categoryItem != null) {
+			    	value = categoryItem.getItemDisplayName();
+			    }
+				break;
+			case "contactGenderItemId":
+				ScopeFieldItem contactGenderItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getContactGenderItemId());
+			    if (contactGenderItem != null) {
+			    	value = contactGenderItem.getItemDisplayName();
+			    }
+				break;
+			case "corpProductCategoryItemId":
+				ScopeFieldItem corpProductCategoryItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpProductCategoryItemId());
+			    if (corpProductCategoryItem != null) {
+			    	value = corpProductCategoryItem.getItemDisplayName();
+			    }
+				break;
+			case "propertyType":
+				ScopeFieldItem propertyType = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getPropertyType());
+			    if (propertyType != null) {
+			    	value = propertyType.getItemDisplayName();
+			    }
+				break;
+			case "corpNatureItemId":
+				ScopeFieldItem corpNatureItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpNatureItemId());
+			    if (corpNatureItem != null) {
+			    	value = corpNatureItem.getItemDisplayName();
+			    }
+				break;
+			case "corpPurposeItemId":
+				ScopeFieldItem corpPurposeItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpPurposeItemId());
+			    if (corpPurposeItem != null) {
+			    	value = corpPurposeItem.getItemDisplayName();
+			    }
+				break;
+			case "corpQualificationItemId":
+				ScopeFieldItem corpQualificationItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getCorpQualificationItemId());
+			    if (corpQualificationItem != null) {
+			    	value = corpQualificationItem.getItemDisplayName();
+			    }
 				break;
 			default:
 				value = data.toString();
