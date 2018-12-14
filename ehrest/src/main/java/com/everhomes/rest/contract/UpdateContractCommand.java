@@ -1,12 +1,9 @@
 package com.everhomes.rest.contract;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.forum.NewCommentCommand;
-import com.everhomes.rest.user.Contact;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -120,14 +117,24 @@ public class UpdateContractCommand {
     private Byte costGenerationMethod;
     private Long templateId;
     private Long documentId;
-    private Long apartmentDeliveryTime; 
-    private Long downPaymentRentTime; 
-	private Integer monthlyMargin; 
-	private BigDecimal marginAmount; 
-	private BigDecimal preAmount; 
-	private String contractingPlace; 
-    
-    
+    private Long apartmentDeliveryTime; //房屋交付日期
+    private Long downPaymentRentTime; //首期租金开始日期
+	private Integer monthlyMargin; //保证金月数
+	private BigDecimal marginAmount; //保证金金额
+	private BigDecimal monthlyServiceCharge; //月服务费金额
+	private BigDecimal preAmount; //预付金额
+	private String contractingPlace; //签约地点
+	private String stringTag1; //预留字段1
+	private String stringTag2; //预留字段2
+	private String stringTag3; //预留字段3
+	private String stringTag4; //预留字段4
+	private String stringTag5; //预留字段5
+	private String stringTag6; //预留字段6
+	private String stringTag7; //预留字段7
+	private String stringTag8; //预留字段8
+	private String stringTag9; //预留字段9
+	private String stringTag10; //'预留字段10
+	
 	@ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
 
@@ -142,8 +149,95 @@ public class UpdateContractCommand {
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
     
-    
-    public Long getApartmentDeliveryTime() {
+    public BigDecimal getMonthlyServiceCharge() {
+		return monthlyServiceCharge;
+	}
+
+	public void setMonthlyServiceCharge(BigDecimal monthlyServiceCharge) {
+		this.monthlyServiceCharge = monthlyServiceCharge;
+	}
+
+	public String getStringTag1() {
+		return stringTag1;
+	}
+
+	public void setStringTag1(String stringTag1) {
+		this.stringTag1 = stringTag1;
+	}
+
+	public String getStringTag2() {
+		return stringTag2;
+	}
+
+	public void setStringTag2(String stringTag2) {
+		this.stringTag2 = stringTag2;
+	}
+
+	public String getStringTag3() {
+		return stringTag3;
+	}
+
+	public void setStringTag3(String stringTag3) {
+		this.stringTag3 = stringTag3;
+	}
+
+	public String getStringTag4() {
+		return stringTag4;
+	}
+
+	public void setStringTag4(String stringTag4) {
+		this.stringTag4 = stringTag4;
+	}
+
+	public String getStringTag5() {
+		return stringTag5;
+	}
+
+	public void setStringTag5(String stringTag5) {
+		this.stringTag5 = stringTag5;
+	}
+
+	public String getStringTag6() {
+		return stringTag6;
+	}
+
+	public void setStringTag6(String stringTag6) {
+		this.stringTag6 = stringTag6;
+	}
+
+	public String getStringTag7() {
+		return stringTag7;
+	}
+
+	public void setStringTag7(String stringTag7) {
+		this.stringTag7 = stringTag7;
+	}
+
+	public String getStringTag8() {
+		return stringTag8;
+	}
+
+	public void setStringTag8(String stringTag8) {
+		this.stringTag8 = stringTag8;
+	}
+
+	public String getStringTag9() {
+		return stringTag9;
+	}
+
+	public void setStringTag9(String stringTag9) {
+		this.stringTag9 = stringTag9;
+	}
+
+	public String getStringTag10() {
+		return stringTag10;
+	}
+
+	public void setStringTag10(String stringTag10) {
+		this.stringTag10 = stringTag10;
+	}
+
+	public Long getApartmentDeliveryTime() {
 		return apartmentDeliveryTime;
 	}
 
