@@ -43,6 +43,7 @@ import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.contract.ContractReportformStatisticCommunitys;
 import com.everhomes.contract.ContractTaskOperateLog;
+import com.everhomes.contract.template.ContractDocument;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
@@ -77,6 +78,7 @@ import com.everhomes.server.schema.tables.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
+import com.everhomes.server.schema.tables.pojos.EhContractDocuments;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
 import com.everhomes.server.schema.tables.pojos.EhContractTaskOperateLogs;
@@ -1753,6 +1755,43 @@ public class ContractProviderImpl implements ContractProvider {
 								.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.WAITING_FOR_LAUNCH.getCode()))
 							)
 						.fetchInto(Contract.class);
+	}
+
+	@Override
+	public ContractDocument findContractDocumentById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContractDocuments.class, id));
+		EhContractDocumentsDao dao = new EhContractDocumentsDao(context.configuration());
+        EhContractDocuments ehContractDocuments = dao.findById(id);
+        if (ehContractDocuments == null) {
+            return null;
+        }
+        return ConvertHelper.convert(ehContractDocuments, ContractDocument.class);
+	}
+
+	@Override
+	public void createContractDocument(ContractDocument contractDocument) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhContractDocumentsDao dao = new EhContractDocumentsDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractDocuments.class));
+		contractDocument.setId(id);
+		contractDocument.setCreatorUid(UserContext.currentUserId());
+		contractDocument.setCreateTime(getCurrentTimeStamp());
+		contractDocument.setUpdateUid(UserContext.currentUserId());
+		contractDocument.setUpdateTime(getCurrentTimeStamp());
+		dao.insert(contractDocument);
+	}
+
+	@Override
+	public void updateContractDocument(ContractDocument contractDocument) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhContractDocumentsDao dao = new EhContractDocumentsDao(context.configuration());
+		contractDocument.setUpdateUid(UserContext.currentUserId());
+		contractDocument.setUpdateTime(getCurrentTimeStamp());
+		dao.update(contractDocument);
+	}
+	
+	private Timestamp getCurrentTimeStamp(){
+		return new Timestamp(DateHelper.currentGMTTime().getTime());
 	}
 
 	//合同报表

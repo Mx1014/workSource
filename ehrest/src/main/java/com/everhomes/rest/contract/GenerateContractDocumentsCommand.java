@@ -1,100 +1,114 @@
 package com.everhomes.rest.contract;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: id</li>
+ * <li>id: 合同文档id</li>
  * <li>namespaceId: 域空间id</li>
+ * <li>contractId: 合同id</li>
  * <li>categoryId: 合同类型多入口</li>
- * <li>ownerId: 所有者id</li>
- * <li>ownerType: 所有者类型，通用配置为空</li>
- * <li>name: 模板名称</li>
- * <li>contents: 模板内容</li>
- * <li>version: 版本记录</li>
- * <li>initParams: 合同模板初始化参数（计价条款、关联资产等的数目），前端会解析这个json</li>
+ * <li>templateId: 合同模板id</li>
+ * <li>templateName: 合同模板名称</li>
+ * <li>ownerId: 所有者id(园区id)</li>
+ * <li>ownerType: 所有者类型，通用配置为空，项目下配置为"community"</li>
+ * <li>orgId: 公司id</li>
+ * <li>communityId: 园区id</li>
  * </ul>
- * Created by jm.ding on 2018/6/27.
  */
-public class UpdateContractTemplateCommand {
-
-	@NotNull
+public class GenerateContractDocumentsCommand {
+	
 	private Long id;
-	@NotNull
 	private Integer namespaceId;
-	@NotNull
+	private Long contractId;
 	private Long categoryId;
+	private Long templateId;
+	private String templateName;
 	private Long ownerId;
 	private String ownerType;
-	private String name;
-	private String contents;
-	@NotNull
 	private Long orgId;
-	private String initParams;
-	private Long templateId;
+	private Long communityId;
 	
-	public Long getTemplateId() {
-		return templateId;
-	}
-	public void setTemplateId(Long templateId) {
-		this.templateId = templateId;
-	}
 	public Long getId() {
 		return id;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
+
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
+	
+	public Long getContractId() {
+		return contractId;
+	}
+	
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
+	}
+	
 	public Long getCategoryId() {
 		return categoryId;
 	}
+	
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getTemplateName() {
+		return templateName;
+	}
+
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
+	}
+
 	public Long getOwnerId() {
 		return ownerId;
 	}
+
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
+
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
 	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getContents() {
-		return contents;
-	}
-	public void setContents(String contents) {
-		this.contents = contents;
-	}
+
 	public Long getOrgId() {
 		return orgId;
 	}
+
 	public void setOrgId(Long orgId) {
 		this.orgId = orgId;
 	}
-	public String getInitParams() {
-		return initParams;
+
+	public Long getCommunityId() {
+		return communityId;
 	}
-	public void setInitParams(String initParams) {
-		this.initParams = initParams;
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

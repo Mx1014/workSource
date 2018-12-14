@@ -16,6 +16,8 @@ import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.contract.ContractReportformStatisticCommunitys;
 import com.everhomes.contract.ContractTaskOperateLog;
+import com.everhomes.contract.template.ContractDocument;
+import com.everhomes.filedownload.Task;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractChargingItemReportformDTO;
@@ -172,5 +174,10 @@ public interface ContractProvider {
 	Timestamp findLastVersionByBackup(Integer namespaceId);
 
 	Long findAddressByContractId(Long contractId);
+	ContractDocument findContractDocumentById(Long id);
+
+	void createContractDocument(ContractDocument contractDocument);
+
+	void updateContractDocument(ContractDocument contractDocument);
 
 }

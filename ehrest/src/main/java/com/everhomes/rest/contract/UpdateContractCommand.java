@@ -116,6 +116,7 @@ public class UpdateContractCommand {
     private Long categoryId;
     private Byte costGenerationMethod;
     private Long templateId;
+    private Long documentId;
 
 	@ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
@@ -130,8 +131,16 @@ public class UpdateContractCommand {
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
+    
+    public Long getDocumentId() {
+		return documentId;
+	}
 
-    public Long getTemplateId() {
+	public void setDocumentId(Long documentId) {
+		this.documentId = documentId;
+	}
+
+	public Long getTemplateId() {
 		return templateId;
 	}
 
