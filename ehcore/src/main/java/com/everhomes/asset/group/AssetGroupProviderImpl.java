@@ -74,13 +74,12 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
 
     public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId, Long organizationId, Boolean allScope) {
         List<ListBillGroupsDTO> list = new ArrayList<>();
-        List<Long> userIds = new ArrayList<Long>();
+        //List<Long> userIds = new ArrayList<Long>();
         DSLContext context = getReadOnlyContext();
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(t.ID,t.NAME,t.DEFAULT_ORDER,t.BALANCE_DATE_TYPE,t.BALANCE_DATE_TYPE,t.BILLS_DAY,
-                t.DUE_DAY,t.DUE_DAY_TYPE,t.BILLS_DAY_TYPE,t.BILLS_DAY_TYPE,t.BIZ_PAYEE_TYPE,t.BIZ_PAYEE_ID,
-                t.BILLING_CYCLE_EXPRESSION,t.BILLS_DAY_EXPRESSION,t.DUE_DAY_EXPRESSION);
+        		t.DUE_DAY,t.DUE_DAY_TYPE,t.BILLS_DAY_TYPE,t.BILLS_DAY_TYPE,t.BIZ_PAYEE_TYPE,t.BIZ_PAYEE_ID);
         query.addFrom(t);
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
@@ -93,10 +92,10 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
         }
         query.addOrderBy(t.DEFAULT_ORDER);
         query.fetch().map(r -> {
-            ListBillGroupsDTO dto = new ListBillGroupsDTO();
+        	ListBillGroupsDTO dto = new ListBillGroupsDTO();
             dto.setBillGroupId(r.getValue(t.ID));
             dto.setBillGroupName(r.getValue(t.NAME));
-            dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER));
+            dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER)); 
             dto.setBillingCycle(r.getValue(t.BALANCE_DATE_TYPE));
             dto.setBillingDay(r.getValue(t.BILLS_DAY));
             dto.setDueDay(r.getValue(t.DUE_DAY));
@@ -107,37 +106,40 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
             dto.setBillingCycleExpression(r.getValue(t.BILLING_CYCLE_EXPRESSION));//添加账单周期表达式
             dto.setBillDayExpression(r.getValue(t.BILLS_DAY_EXPRESSION));//添加出账单日表达式
             dto.setDueDayExpression(r.getValue(t.DUE_DAY_EXPRESSION));//添加最晚还款日表达式
-            userIds.add(r.getValue(t.BIZ_PAYEE_ID));
+            if(r.getValue(t.BIZ_PAYEE_ID) != null) {
+            	//由于收款方账户名称可能存在修改的情况，故重新请求电商
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("listBillGroups(request), cmd={}", r.getValue(t.BIZ_PAYEE_ID));
+                }
+                //List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
+                ListPayUsersByMerchantIdsCommand cmd = new ListPayUsersByMerchantIdsCommand();
+        		cmd.setIds(Arrays.asList(r.getValue(t.BIZ_PAYEE_ID)));
+        		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd);
+        		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
+        			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+        			//throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_MERCHANT_ID_NOT_FOUND, "merchant id not found");
+        		}else {
+        			List<PayUserDTO> payUserDTOs = resp.getResponse();
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
+                    }
+                    if(payUserDTOs != null && payUserDTOs.size() != 0) {
+                    	PayUserDTO payUserDTO = payUserDTOs.get(0);
+                    	dto.setAccountName(payUserDTO.getRemark());// 用户向支付系统注册帐号时填写的帐号名称
+                    	dto.setAccountAliasName(payUserDTO.getUserAliasName());//企业名称（认证企业）
+            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                        Integer registerStatus = payUserDTO.getRegisterStatus();
+                        if(registerStatus != null && registerStatus.intValue() == 1) {
+                        	dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                        } else {
+                        	dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                        }
+                    }
+        		}
+            }
             list.add(dto);
             return null;
         });
-        //由于收款方账户名称可能存在修改的情况，故重新请求电商
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listBillGroups(request), cmd={}", userIds);
-        }
-        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
-        }
-        if(payUserDTOs != null && payUserDTOs.size() != 0) {
-            for(int i = 0;i < payUserDTOs.size();i++) {
-                for(int j = 0;j < list.size();j++) {
-                    if(payUserDTOs.get(i) != null && list.get(j) != null &&
-                            payUserDTOs.get(i).getId() != null && list.get(j).getBizPayeeId() != null &&
-                            payUserDTOs.get(i).getId().equals(list.get(j).getBizPayeeId())){
-                        list.get(j).setAccountName(payUserDTOs.get(i).getRemark());// 用户向支付系统注册帐号时填写的帐号名称
-                        list.get(j).setAccountAliasName(payUserDTOs.get(i).getUserAliasName());//企业名称（认证企业）
-                        // 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
-                        Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
-                        if(registerStatus != null && registerStatus.intValue() == 1) {
-                            list.get(j).setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
-                        } else {
-                            list.get(j).setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-                        }
-                    }
-                }
-            }
-        }
         return list;
     }
 
