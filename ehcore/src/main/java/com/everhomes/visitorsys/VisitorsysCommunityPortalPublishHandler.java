@@ -12,6 +12,8 @@ import com.everhomes.rest.portal.*;
 import com.everhomes.rest.visitorsys.VisitorsysConstant;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -25,6 +27,9 @@ import java.util.List;
  */
 @Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + VisitorsysConstant.COMMUNITY_MODULE_ID)
 public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHandler{
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VisitorsysCommunityPortalPublishHandler.class);
+
     @Autowired
     private PortalVersionProvider portalVersionProvider;
     @Autowired
@@ -57,7 +62,29 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
             if (serviceModuleEntry != null) {
                 String[] urls = url.split("[?]");
 //              去掉原来写死的sceneType
-                urls[1] = urls[1].replaceAll("(&sceneType=[^#]*)", "");
+                StringBuffer sb = new StringBuffer();
+                if(urls[1].indexOf("#/") > -1){
+                    String[] subUrls = urls[1].split("#/");
+                    if(subUrls.length > 1){
+                        String[] params = subUrls[0].split("[&]");
+                        for(String param : params){
+                            if(param.indexOf("sceneType") == -1){
+                                sb.append(param);
+                                sb.append("&");
+                            }
+                        }
+                        int idx = sb.lastIndexOf("&") + 1;
+                        if(idx == sb.length()){
+                            sb.deleteCharAt(sb.length() - 1);
+                        }
+                        sb.append("#/");
+                        sb.append(subUrls[1]);
+                        urls[1] = sb.toString();
+                    }else{
+                        LOGGER.error("VisitorsysCommunityPortalPublishHandler,url is lack of suffix");
+                    }
+                }
+
                 if (urls.length > 1) {
                     jsonObject.remove("url");
                     newUrl = urls[0] + "?sceneType=" + serviceModuleEntry.getSceneType() + "&" + urls[1];
@@ -85,9 +112,31 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
     }
 
     public static void main(String[] args) {
-        String url = "ns=%s&appId=%s&ownerType=community&sceneType=1#/home#sign_suffix";
-        url = url.replaceAll("(&sceneType=[^#]*)", "");
-        System.out.println(url);
+//        String url = "ns=%s&appId=%s&ownerType=community&sceneType=1#/home#sign_suffix";
+        String url = "sceneType=1&ns=%s&appId=%s&ownerType=community#/home#sign_suffix";
+//        url = url.replaceAll("(&sceneType=[^#]*)", "");
+        StringBuffer sb = new StringBuffer();
+        if(url.indexOf("#/") > -1){
+            String[] subUrls = url.split("#/");
+            if(subUrls.length > 1){
+                String[] params = subUrls[0].split("[&]");
+                for(String param : params){
+                    if(param.indexOf("sceneType") == -1){
+                        sb.append(param);
+                        sb.append("&");
+                    }
+                }
+                int idx = sb.lastIndexOf("&") + 1;
+                if(idx == sb.length()){
+                    sb.deleteCharAt(sb.length() - 1);
+                }
+                sb.append("#/");
+                sb.append(subUrls[1]);
+            }else{
+                LOGGER.error("VisitorsysCommunityPortalPublishHandler,url is lack of suffix");
+            }
+        }
+        System.out.println(sb.toString());
 
     }
 }

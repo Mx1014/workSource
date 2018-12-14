@@ -8197,7 +8197,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
 		//add by moubinmo；特殊情况：创建的管理员是没有注册激活的用户，添加需要添加一条 groupType 为  DIRECT_UNDER_ENTERPRISE 的部门信息到 eh_organization_members 表，否则从管理后台查出的人事记录没有部门记录。
-		createOrganiztionMemberOfDirectUnderEnterprise(member, organizationId);
+        //由于这处修改引发较多的bug，故注释之
+//		createOrganiztionMemberOfDirectUnderEnterprise(member, organizationId);
 
         return member;
     }

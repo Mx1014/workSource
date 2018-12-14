@@ -1,8 +1,14 @@
 // @formatter:off
 package com.everhomes.flow.vars;
 
-import com.everhomes.flow.*;
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowUserSelection;
+import com.everhomes.flow.FlowVariableUserResolver;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -31,6 +37,9 @@ public class FlowVariableApplierOrganizationManagerResolver implements FlowVaria
     @Autowired
     private OrganizationService organizationService;
 
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+
     @Override
     public List<Long> variableUserResolve(FlowCaseState ctx, Map<String, Long> processedEntities,
                                           FlowEntityType fromEntity, Long entityId,
@@ -49,9 +58,13 @@ public class FlowVariableApplierOrganizationManagerResolver implements FlowVaria
         }
 
         if (organizationId != null) {
-            List<OrganizationContactDTO> admins = organizationService.getAdmins(organizationId);
-            if (admins != null) {
-                return admins.stream().map(OrganizationContactDTO::getTargetId).distinct().collect(Collectors.toList());
+            ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
+            cmd.setOrganizationId(organizationId);
+            cmd.setActivationFlag(ActivationFlag.YES.getCode());
+
+            List<OrganizationContactDTO> administrators = rolePrivilegeService.listOrganizationSuperAdministrators(cmd);
+            if (administrators != null) {
+                return administrators.stream().map(OrganizationContactDTO::getTargetId).distinct().collect(Collectors.toList());
             }
         }
         return new ArrayList<>();
