@@ -4947,6 +4947,8 @@ public class AssetServiceImpl implements AssetService {
 		for(GoodDTO goodDTO : cmd.getGoodDTOList()) {
 			BillItemDTO billItemDTO = new BillItemDTO();
 			billItemDTO.setBillItemId(charingItemId);
+			//修复缺陷 #45063 【缴费管理V8.0】资源预订通过企业支付后在物业缴费产生的账单，App支付时，收费项目显示有误，且发放的卡券不能用
+			billItemDTO.setChargingItemsId(charingItemId);
 			billItemDTO.setBillItemName(billItemName);
 			BigDecimal amountReceivable = BigDecimal.ZERO;
 			if(goodDTO.getTotalPrice() != null) {
