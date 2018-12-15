@@ -1257,7 +1257,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         doorAuth.setDriver(DoorAccessDriverType.WANG_LONG.getCode());
                     }else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_BUS.getCode())){
                     	doorAuth.setDriver(DoorAccessDriverType.BUS.getCode());
-                    }else {
+                    }else if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
+                        doorAuth.setDriver(DoorAccessDriverType.FACEPLUSPLUS.getCode());
+                    }else if(doorAcc.getDoorType().equals(DoorAccessType.DINGXIN.getCode())) {
+                        doorAuth.setDriver(DoorAccessDriverType.DINGXIN.getCode());
+                    }else{
                         doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
                     }
                     
@@ -1319,6 +1323,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         			doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
             } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_UCLBRT_DOOR.getCode())) {
         		doorAuth.setDriver(DoorAccessDriverType.UCLBRT.getCode());
+            } else if(doorAcc.getDoorType().equals(DoorAccessType.DINGXIN.getCode())){
+                doorAuth.setDriver(DoorAccessDriverType.DINGXIN.getCode());
             } else {
                 doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
             }
@@ -3029,10 +3035,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
         if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
             qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
-            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getUserId().toString() + "&userType" + "user");
+            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getUserId().toString() + "&userType=" + "user");
         } else {
             qr.setExpireTimeMs(auth.getValidEndMs());
-            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getId() + "&userType" + "visitor");
+            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getId() + "&userType=" + "visitor");
         }
         qr.setId(auth.getId());
         qr.setQrDriver(DoorAccessDriverType.DINGXIN.getCode());
