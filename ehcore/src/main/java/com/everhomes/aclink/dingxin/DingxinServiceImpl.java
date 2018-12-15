@@ -33,10 +33,8 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
+import com.everhomes.user.*;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -52,6 +50,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -136,7 +135,10 @@ public class DingxinServiceImpl implements DingxinService {
     
     @Autowired
     private AddressProvider addressProvider;
-    
+
+    @Autowired
+    private AclinkLogService aclinkLogService;
+
     @Autowired
     private AclinkLogProvider aclinkLogProvider;
     
@@ -250,6 +252,21 @@ public class DingxinServiceImpl implements DingxinService {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth is not found");
         } else{
             JSONObject response = this.openDoor(cmd.getUid());
+            if(response.getInteger("code").equals(200)){
+                //生成日志
+                AclinkLogCreateCommand logCmd = new AclinkLogCreateCommand();
+                AclinkLogItem item = new AclinkLogItem();
+                item.setEventType(1L); //二维码开门
+                item.setDoorId(door.getId());
+                item.setLogTime(DateHelper.currentGMTTime().getTime());
+                item.setNamespaceId(UserContext.getCurrentNamespaceId());
+                item.setAuthId(auths.get(0).getId());
+                item.setUserId(auths.get(0).getUserId());
+                List<AclinkLogItem> items = new ArrayList<>();
+                items.add(item);
+                logCmd.setItems(items);
+                aclinkLogService.createAclinkLog(logCmd);
+            }
             result = response.getString("msg");
         }
         return result;
