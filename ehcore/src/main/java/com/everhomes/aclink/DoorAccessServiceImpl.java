@@ -3020,7 +3020,30 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
     private void doDingxinQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys){
-
+        DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
+        qr.setCreateTimeMs(auth.getCreateTime().getTime());
+        qr.setCreatorUid(auth.getApproveUserId());
+        qr.setDoorGroupId(doorAccess.getId());
+        qr.setDoorName(doorAccess.getName());
+        qr.setDoorDisplayName(doorAccess.getDisplayNameNotEmpty());
+        if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+            qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
+        } else {
+            qr.setExpireTimeMs(auth.getValidEndMs());
+        }
+        qr.setId(auth.getId());
+        qr.setQrDriver(DoorAccessDriverType.DINGXIN.getCode());
+        qr.setCreateTimeMs(auth.getCreateTime().getTime());
+        qr.setCurrentTime(DateHelper.currentGMTTime().getTime());
+        qr.setDoorOwnerId(doorAccess.getOwnerId());
+        qr.setDoorOwnerType(doorAccess.getOwnerType());
+        //设置timeout吗？
+        //未设置hardwareId
+        Long qrImageTimeout = this.configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 1*60);
+        qr.setQrImageTimeout(qrImageTimeout*1000l);
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
+        qr.setQrCodeKey(homeUrl + "?authId=" + auth.getId());
+        qrKeys.add(qr);
     }
 
     /**
@@ -3173,6 +3196,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				LOGGER.info("拿一个uclbrt 的二维码" + (t4 - t3));
 			} else if (auth.getDriver().equals(DoorAccessDriverType.DINGXIN.getCode())) {
 			    //港湾一号智慧园区对接鼎芯门禁
+                resp.setQrTimeout(this.getQrTimeout() / 1000l);
                 doDingxinQRKey(user, doorAccess, auth, qrKeys);
             } else {
 				//左邻门禁
