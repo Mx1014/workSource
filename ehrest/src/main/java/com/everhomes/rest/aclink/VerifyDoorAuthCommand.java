@@ -11,15 +11,24 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class VerifyDoorAuthCommand {
-    private Long authId;
+    private Long userId;
+    private String authType;
     private String uid;
 
-    public Long getAuthId() {
-        return authId;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setAuthId(Long authId) {
-        this.authId = authId;
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getAuthType() {
+        return authType;
+    }
+
+    public void setAuthType(String authType) {
+        this.authType = authType;
     }
 
     public String getUid() {

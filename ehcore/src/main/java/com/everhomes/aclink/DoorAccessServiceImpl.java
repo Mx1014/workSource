@@ -3026,10 +3026,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setDoorGroupId(doorAccess.getId());
         qr.setDoorName(doorAccess.getName());
         qr.setDoorDisplayName(doorAccess.getDisplayNameNotEmpty());
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
         if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
             qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
+            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getUserId().toString() + "&userType" + "user");
         } else {
             qr.setExpireTimeMs(auth.getValidEndMs());
+            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getId() + "&userType" + "visitor");
         }
         qr.setId(auth.getId());
         qr.setQrDriver(DoorAccessDriverType.DINGXIN.getCode());
@@ -3041,8 +3044,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         //未设置hardwareId
         Long qrImageTimeout = this.configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 1*60);
         qr.setQrImageTimeout(qrImageTimeout*1000l);
-        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
-        qr.setQrCodeKey(homeUrl + "?authId=" + auth.getId());
         qrKeys.add(qr);
     }
 

@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.aclink.dingxin;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayClient;
 import com.everhomes.acl.RolePrivilegeService;
@@ -23,9 +22,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
@@ -35,9 +32,6 @@ import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.aclink.*;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -45,34 +39,19 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.file.FileUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -248,12 +227,28 @@ public class DingxinServiceImpl implements DingxinService {
 
     @Override
     public String verifyDoorAuth(VerifyDoorAuthCommand cmd){
-        DoorAuth auth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
-        DoorAccess door = doorAccessProvider.getDoorAccessById(auth.getDoorId());
-        String result = null;
-        if(auth.getStatus().equals(DoorAuthStatus.INVALID.getCode())){
+        List<DoorAuth> auths = new ArrayList<>();
+        if(cmd.getAuthType().equals("user")){
+           auths = doorAuthProvider.listValidDoorAuthByUser(cmd.getUserId(), DoorAccessDriverType.DINGXIN.getCode());
+        } else if(cmd.getAuthType().equals("visitor")){
+            DoorAuth auth = doorAuthProvider.getDoorAuthById(cmd.getUserId());
+            if(auth.getStatus().equals(DoorAuthStatus.VALID.getCode()) && auth.getRightOpen().equals(DoorAuthStatus.VALID.getCode())){
+                auths.add(auth);
+            }
+        }
+        List<Long> doorIds = new ArrayList<>();
+        if(ListUtils.isEmpty(auths)){
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth is not found");
-        } else if(auth.getStatus().equals(DoorAuthStatus.VALID.getCode()) && door.getUuid().equals(cmd.getUid())){
+        } else {
+            auths.stream().forEach(n -> doorIds.add(n.getDoorId()));
+        }
+        DoorAccess door = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getUid());
+        String result = null;
+        if(door == null){
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "door is not found");
+        } else if(!doorIds.contains(door.getId())){
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth is not found");
+        } else{
             JSONObject response = this.openDoor(cmd.getUid());
             result = response.getString("msg");
         }
