@@ -1,4 +1,4 @@
-package com.everhomes.bus;
+package com.everhomes.kafka;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
@@ -33,9 +33,9 @@ public class KafkaAutoConfiguration {
             ProducerFactory<Object, Object> kafkaProducerFactory,
             ProducerListener<Object, Object> kafkaProducerListener,
             Collection<NewTopic> newTopicCollection) {
-        KafkaTemplate<Object, Object> kafkaTemplate = new KafkaTemplate<Object, Object>(
-                kafkaProducerFactory);
+
         if (properties.isEnabled()) {
+            KafkaTemplate<Object, Object> kafkaTemplate = new KafkaTemplate<>(kafkaProducerFactory);
             kafkaTemplate.setProducerListener(kafkaProducerListener);
             kafkaTemplate.setDefaultTopic(this.properties.getTemplate().getDefaultTopic());
 
@@ -55,28 +55,26 @@ public class KafkaAutoConfiguration {
 
     @Bean
     public ProducerListener<Object, Object> kafkaProducerListener() {
-        return new LoggingProducerListener<Object, Object>();
+        return new LoggingProducerListener<>();
     }
 
     @Bean
     public ConsumerFactory<?, ?> kafkaConsumerFactory() {
         if (properties.isEnabled()) {
-            return new DefaultKafkaConsumerFactory<Object, Object>(
+            return new DefaultKafkaConsumerFactory<>(
                     properties.buildConsumerProperties());
         } else {
-            return new DefaultKafkaConsumerFactory<Object, Object>(
-                    new ExtendKafkaProperties().buildConsumerProperties());
+            return new NoopKafkaConsumerFactory();
         }
     }
 
     @Bean
     public ProducerFactory<?, ?> kafkaProducerFactory() {
         if (properties.isEnabled()) {
-            return new DefaultKafkaProducerFactory<Object, Object>(
+            return new DefaultKafkaProducerFactory<>(
                     properties.buildProducerProperties());
         } else {
-            return new DefaultKafkaProducerFactory<Object, Object>(
-                    new ExtendKafkaProperties().buildProducerProperties());
+            return new NoopKafkaProducerFactory();
         }
     }
 

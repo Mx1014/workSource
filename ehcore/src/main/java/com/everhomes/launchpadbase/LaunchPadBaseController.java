@@ -35,7 +35,7 @@ public class LaunchPadBaseController extends ControllerBase {
     @RestReturn(value=LaunchPadLayoutDTO.class)
     @RequireAuthentication(false)
     public RestResponse getLaunchPadLayout(@Valid GetLaunchPadLayoutCommand cmd) {
-        LaunchPadLayoutDTO dto = launchPadService.getLaunchPadLayout(cmd);
+        LaunchPadLayoutDTO dto = launchPadService.getLaunchPadBaseLayout(cmd);
         RestResponse response =  new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

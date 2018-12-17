@@ -152,6 +152,22 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
+	public ParkingCardRequest findParkingCardRequestByPlateNumber(String plateNumber) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardRequests.class));
+		SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
+
+		query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
+		query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.desc());
+		List<ParkingCardRequest> result = query.fetch().map((r)->{
+			return ConvertHelper.convert(query.fetchAny(), ParkingCardRequest.class);
+		});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
+
+	}
+	
+	@Override
 	public ParkingRechargeOrder findParkingRechargeOrderByGeneralOrderId(Long gorderId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
 		SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);

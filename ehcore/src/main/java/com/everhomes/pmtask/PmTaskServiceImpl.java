@@ -1079,6 +1079,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.error("Copy inputStream error.");
 		}
 
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+
+		String feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel." + cmd.getAppId(),"");
+
 		Sheet sheet = wb.getSheetAt(0);
 		if (null != sheet) {
 			Row defaultRow = sheet.getRow(4);
@@ -1092,7 +1096,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 					PmTaskDTO task = list.get(i);
 					PmTaskCategory category = null;
 					//为科兴与一碑对接
-					ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
 					if(UserContext.getCurrentNamespaceId() == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 						category = createEbeiCategory();
 					} else {
@@ -1190,9 +1193,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 					Cell cell14 = tempRow.createCell(14);
 					cell14.setCellStyle(style);
-					String feeModel = "";
-					if (null != cmd.getTaskCategoryId())
-						feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel." + cmd.getTaskCategoryId(),"");
+
 					if(StringUtils.isNotEmpty(feeModel) && "1".equals(feeModel)){
 						if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
 //						费用确认后导出费用清单

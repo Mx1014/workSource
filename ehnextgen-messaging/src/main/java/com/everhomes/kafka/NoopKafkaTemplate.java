@@ -1,12 +1,10 @@
-package com.everhomes.bus;
+package com.everhomes.kafka;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.PartitionInfo;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.ProducerListener;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.kafka.support.converter.MessageConverter;
@@ -23,15 +21,7 @@ import java.util.Map;
 public class NoopKafkaTemplate extends KafkaTemplate {
 
     public NoopKafkaTemplate() {
-        super(new DefaultKafkaProducerFactory(new HashMap<>(1)));
-    }
-
-    public NoopKafkaTemplate(ProducerFactory producerFactory) {
-        super(producerFactory);
-    }
-
-    public NoopKafkaTemplate(ProducerFactory producerFactory, boolean autoFlush) {
-        super(producerFactory, autoFlush);
+        super(new NoopKafkaProducerFactory());
     }
 
     @Override

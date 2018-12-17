@@ -1749,12 +1749,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
 
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
-            try {
-                // 这个代码只是为了修复错误的数据，后期删除
-                LOGGER.debug("Fetch user: {}", fetchUser(login.getUserId(), login.getNamespaceId()));
-            } catch (Exception e) {
-                LOGGER.error("Fetch user error", e);
-            }
             return true;
         } else {
             // 去统一用户那边检查登录状态
@@ -6309,17 +6303,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     newLogin.setDeviceIdentifier(cmd.getDeviceIdentifier());
                     accessor.putMapValueObject(String.valueOf(newLogin.getLoginId()), newLogin);
                 }
-
             }
-
-            List<Border> borders = this.borderProvider.listAllBorders();
-            List<String> borderStrs = borders.stream().map((Border border) -> {
-                return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
-            }).collect(Collectors.toList());
-
-            resp.setAccessPoints(borderStrs);
-            resp.setContentServer(contentServerService.getContentServer());
         }
+
+        List<Border> borders = this.borderProvider.listAllBorders();
+        List<String> borderStrs = borders.stream().map((Border border) -> {
+            return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
+        }).collect(Collectors.toList());
+
+        resp.setAccessPoints(borderStrs);
+        resp.setContentServer(contentServerService.getContentServer());
 
         Long l = configurationProvider.getLongValue(namespaceId, ConfigConstants.PAY_PLATFORM, 0L);
         resp.setPaymentPlatform(l);

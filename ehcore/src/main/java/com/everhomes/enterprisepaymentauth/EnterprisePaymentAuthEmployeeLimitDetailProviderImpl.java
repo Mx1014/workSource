@@ -1,14 +1,11 @@
 // @formatter:off
 package com.everhomes.enterprisepaymentauth;
 
-import ch.qos.logback.classic.Logger;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.organization.EmployeeStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterprisePaymentAuthEmployeeLimitDetailsDao;
@@ -17,15 +14,12 @@ import com.everhomes.server.schema.tables.records.EhEnterprisePaymentAuthEmploye
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.hp.hpl.sparta.xpath.Step;
-
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.jooq.SelectSeekStep1;
 import org.jooq.UpdateQuery;
-import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -124,6 +118,19 @@ public class EnterprisePaymentAuthEmployeeLimitDetailProviderImpl implements Ent
 		updateQuery.addValue(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.OPERATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()));
 		updateQuery.execute();
 	}
+
+	@Override
+	public void markAutoDeleteDismissEmployeePaymentAuthLimitDetail(Integer namespaceId, Long organizationId, Long detailId, String waitAutoDeleteMonth) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterprisePaymentAuthEmployeeLimitDetails.class));
+		UpdateQuery<EhEnterprisePaymentAuthEmployeeLimitDetailsRecord> updateQuery = context.updateQuery(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS);
+		updateQuery.addConditions(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.NAMESPACE_ID.eq(namespaceId));
+		updateQuery.addConditions(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.ORGANIZATION_ID.eq(organizationId));
+		updateQuery.addConditions(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.DETAIL_ID.eq(detailId));
+		updateQuery.addValue(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.WAIT_AUTO_DELETE_MONTH, waitAutoDeleteMonth);
+		updateQuery.addValue(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS.OPERATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()));
+		updateQuery.execute();
+	}
+
 	@Override
 	public List<EnterprisePaymentAuthEmployeeLimitDetail> listEnterprisePaymentAuthEmployeeLimitDetailByScene(Integer currentNamespaceId, Long organizationId, Long sceneAppId, int pageSize, int pageOffSet) {
 		SelectSeekStep1<Record, Long> step = getReadOnlyContext().select().from(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_DETAILS)

@@ -18,4 +18,6 @@ public interface OfficeCubicleRangeProvider {
 	void deleteRangesBySpaceId(Long rangeId);
 
     OfficeCubicleRange findOfficeCubicleRangeByOwner(Long ownerId, String ownerType, Long spaceId, Integer namespaceId);
+
+	List<OfficeCubicleRange> getOfficeCubicleRangeByOwner(Long ownerId, String ownerType, Integer namespaceId);
 }
