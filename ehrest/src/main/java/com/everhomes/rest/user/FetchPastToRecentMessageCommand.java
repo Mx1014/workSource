@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>anchor: 消息游标</li>
  * <li>count: 获取消息的数量</li>
  * <li>removeOld: 是否删除旧的消息</li>
+ * <li>userId: 测试专用，默认为 null</li>
+ * <li>loginId: 测试专用，默认为 null</li>
  * </ul>
  *
  */
@@ -19,6 +21,9 @@ public class FetchPastToRecentMessageCommand {
     private Long anchor;
     private Integer count;
     private Byte removeOld;
+
+    private Long userId;
+    private Integer loginId;
 
     public FetchPastToRecentMessageCommand() {
     }
@@ -61,6 +66,22 @@ public class FetchPastToRecentMessageCommand {
 
     public void setRemoveOld(Byte removeOld) {
         this.removeOld = removeOld;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Integer getLoginId() {
+        return loginId;
+    }
+
+    public void setLoginId(Integer loginId) {
+        this.loginId = loginId;
     }
 
     @Override

@@ -28,7 +28,6 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
@@ -66,10 +65,8 @@ public class ContractScheduleJob extends QuartzJobBean {
     public static final String SCHEDELE_NAME = "contract-";
 
     //public static String CRON_EXPRESSION = "0 0 2 * * ?";
-    public static String CRON_EXPRESSION = "0 10 * * * ?";
-
-    @Autowired
-    private ScheduleProvider scheduleProvider;
+    public static String CRON_EXPRESSION = "0 30 2 * * ? ";
+    //public static String CRON_EXPRESSION = "0/10 * *  * * ?";
 
     @Autowired
     private ContractProvider contractProvider;

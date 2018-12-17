@@ -29,6 +29,8 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
     private PortalVersionProvider portalVersionProvider;
     @Autowired
     private ServiceModuleAppProvider serviceModuleAppProvider;
+    @Autowired
+    private ServiceModuleEntryProvider serviceModuleEntryProvider;
 
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
@@ -47,6 +49,23 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
 
     @Override
     public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
+        JSONObject jsonObject = JSON.parseObject(instanceConfig);
+        if (!StringUtils.isEmpty(jsonObject.getString("url")) && cmd.getModuleEntryId() != null) {
+            String url = jsonObject.getString("url");
+            String newUrl = "";
+            ServiceModuleEntry serviceModuleEntry = this.serviceModuleEntryProvider.findById(cmd.getModuleEntryId());
+            if (serviceModuleEntry != null) {
+                String[] urls = url.split("[?]");
+//              去掉原来写死的sceneType
+                urls[1] = urls[1].replaceAll("(&sceneType=[^#]*)", "");
+                if (urls.length > 1) {
+                    jsonObject.remove("url");
+                    newUrl = urls[0] + "?sceneType=" + serviceModuleEntry.getSceneType() + "&" + urls[1];
+                    jsonObject.put("url",newUrl);
+                    return jsonObject.toJSONString();
+                }
+            }
+        }
         return instanceConfig;
     }
 
@@ -63,5 +82,12 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
     @Override
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
         return null;
+    }
+
+    public static void main(String[] args) {
+        String url = "ns=%s&appId=%s&ownerType=community&sceneType=1#/home#sign_suffix";
+        url = url.replaceAll("(&sceneType=[^#]*)", "");
+        System.out.println(url);
+
     }
 }

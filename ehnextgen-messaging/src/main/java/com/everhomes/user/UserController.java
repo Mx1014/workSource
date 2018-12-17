@@ -746,6 +746,29 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /user/fetchPastToRecentMessageWithoutUserLogin</b>
+	 * <p>获取过去到现在的消息</p>
+	 */
+	@RequestMapping("fetchPastToRecentMessageWithoutUserLogin")
+	@RestReturn(FetchMessageCommandResponse.class)
+	public RestResponse fetchPastToRecentMessageWithoutUserLogin(@Valid FetchPastToRecentMessageCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		try {
+			long startTime = System.currentTimeMillis();
+			FetchMessageCommandResponse cmdResponse = this.messagingService.fetchPastToRecentMessageWithoutUserLogin(cmd);
+			long endTime = System.currentTimeMillis();
+			LOGGER.info("fetchPastToRecentMessages took=" + (endTime - startTime) + " milliseconds");
+			response.setResponseObject(cmdResponse);
+			return response;
+		} catch(Exception ex) {
+			LOGGER.error("fetchPastToRecentMessages error:", ex);
+		}
+		return response;
+	}
+
+	/**
 	 * <b>URL: /user/fetchRecentToPastMessages</b>
 	 * <p>获取现在到过去的消息</p>
 	 */

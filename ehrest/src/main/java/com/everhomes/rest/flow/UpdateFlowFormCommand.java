@@ -2,20 +2,30 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  *     <li>entityType: 实体类型, 工作流实体为 flow, 节点实体为 flow_node</li>
  *     <li>entityId: 实体 id</li>
- *     <li>formOriginId: formOriginId</li>
- *     <li>formVersion: formVersion</li>
+ *     <li>formRelationType: 表单的关联类型 {@link com.everhomes.rest.flow.FlowFormRelationType}</li>
+ *     <li>directRelation: 直接关联表单 {@link com.everhomes.rest.flow.FlowFormRelationDataDirectRelation}</li>
+ *     <li>customizeField: 全局表单,自定义字段 {@link com.everhomes.rest.flow.FlowFormRelationDataCustomizeField}</li>
  * </ul>
  */
 public class UpdateFlowFormCommand {
 
+    @NotNull
     private String entityType;
+    @NotNull
     private Long entityId;
-    private Long formOriginId;
-    private Long formVersion;
+
+    @NotNull
+    private Byte formRelationType;
+    @NotNull
+    private FlowFormRelationDataDirectRelation directRelation;
+    @NotNull
+    private FlowFormRelationDataCustomizeField customizeField;
 
     public String getEntityType() {
         return entityType;
@@ -33,20 +43,28 @@ public class UpdateFlowFormCommand {
         this.entityId = entityId;
     }
 
-    public Long getFormOriginId() {
-        return formOriginId;
+    public Byte getFormRelationType() {
+        return formRelationType;
     }
 
-    public void setFormOriginId(Long formOriginId) {
-        this.formOriginId = formOriginId;
+    public void setFormRelationType(Byte formRelationType) {
+        this.formRelationType = formRelationType;
     }
 
-    public Long getFormVersion() {
-        return formVersion;
+    public FlowFormRelationDataDirectRelation getDirectRelation() {
+        return directRelation;
     }
 
-    public void setFormVersion(Long formVersion) {
-        this.formVersion = formVersion;
+    public void setDirectRelation(FlowFormRelationDataDirectRelation directRelation) {
+        this.directRelation = directRelation;
+    }
+
+    public FlowFormRelationDataCustomizeField getCustomizeField() {
+        return customizeField;
+    }
+
+    public void setCustomizeField(FlowFormRelationDataCustomizeField customizeField) {
+        this.customizeField = customizeField;
     }
 
     @Override

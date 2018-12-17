@@ -31,8 +31,12 @@ public class FlowEventLogDTO {
     private Long flowButtonId;
     private Timestamp createTime;
     private Byte isEvaluate;
+    private Long stepCount;
 
     private String extra;
+
+    private String flowNodeName;
+    private String flowUserName;
 
     public Long getId() {
         return id;
@@ -184,6 +188,30 @@ public class FlowEventLogDTO {
 
     public void setExtra(String extra) {
         this.extra = extra;
+    }
+
+    public String getFlowNodeName() {
+        return flowNodeName;
+    }
+
+    public void setFlowNodeName(String flowNodeName) {
+        this.flowNodeName = flowNodeName;
+    }
+
+    public String getFlowUserName() {
+        return flowUserName;
+    }
+
+    public void setFlowUserName(String flowUserName) {
+        this.flowUserName = flowUserName;
+    }
+
+    public Long getStepCount() {
+        return stepCount;
+    }
+
+    public void setStepCount(Long stepCount) {
+        this.stepCount = stepCount;
     }
 
     @Override

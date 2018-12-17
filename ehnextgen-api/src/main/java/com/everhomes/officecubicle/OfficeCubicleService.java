@@ -1,11 +1,15 @@
 package com.everhomes.officecubicle;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.parking.ListPayeeAccountCommand;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 
 public interface OfficeCubicleService {
 
@@ -59,4 +63,71 @@ public interface OfficeCubicleService {
 	Byte getProjectCustomize(GetCustomizeCommand cmd);
 
 	Byte getCurrentProjectOnlyFlag(GetCurrentProjectOnlyFlagCommand cmd);
+
+	void addCubicle(AddCubicleAdminCommand cmd);
+
+	void createOrUpdateOfficeCubiclePayeeAccount(CreateOrUpdateOfficeCubiclePayeeAccountCommand cmd);
+
+	List<ListOfficeCubicleAccountDTO> listOfficeCubicleAccount(ListOfficeCubicleAccountCommand cmd);
+
+	SearchCubicleOrdersResponse searchCubicleOrders(SearchCubicleOrdersCommand cmd);
+
+	CreateCubicleOrderBackgroundResponse createCubicleOrderBackground(CreateCubicleOrderBackgroundCommand cmd);
+
+	void addRoom(AddRoomAdminCommand cmd);
+
+	void updateRoom(AddRoomAdminCommand cmd);
+
+	ListOfficeCubicleStatusResponse listOfficeCubicleStatus(ListOfficeCubicleStatusCommand cmd);
+
+	void payNotify(MerchantPaymentNotificationCommand cmd);
+
+	ListRentCubicleResponse listRentCubicle(ListRentCubicleCommand cmd);
+
+	GetOfficeCubicleRentOrderResponse getOfficeCubicleRentOrder(GetOfficeCubicleRentOrderCommand cmd);
+
+	void updateCubicle(AddCubicleAdminCommand cmd);
+
+	void deleteRoom(DeleteRoomAdminCommand cmd);
+
+	void deleteCubicle(DeleteCubicleAdminCommand cmd);
+
+	void refundOrder(RefundOrderCommand cmd);
+
+	HttpServletResponse exportCubicleOrders(SearchCubicleOrdersCommand cmd, HttpServletResponse response);
+
+	ListCitiesByOrgIdAndCommunitIdResponse listCitiesByOrgIdAndCommunitId(ListCitiesByOrgIdAndCommunitIdCommand cmd);
+
+	GetSpaceResponse getSpace(GetSpaceCommand cmd);
+
+	ListSpaceByCityResponse listSpaceByCity(ListSpaceByCityCommand cmd);
+
+	GetRoomDetailResponse getRoomDetail(GetRoomDetailCommand cmd);
+
+	GetStationDetailResponse getCubicleDetail(GetStationDetailCommand cmd);
+
+	GetStationForRoomResponse getStationForRoom(GetStationForRoomCommand cmd);
+
+	GetCubicleForOrderResponse getCubicleForOrder(GetCubicleForOrderCommand cmd);
+
+	void updateOfficeCubicleRefundRule(UpdateOfficeCubicleRefundRuleCommand cmd);
+
+	GetOfficeCubicleRefundRuleResponse getOfficeCubicleRefundRule(GetOfficeCubicleRefundRuleCommand cmd);
+
+	GetRoomByStatusResponse getRoomByStatus(GetRoomByStatusCommand cmd);
+
+	GetCubicleByStatusResponse getCubicleByStatus(GetCubicleByStatusCommand cmd);
+
+	ListOfficeCubicleAccountDTO getOfficeCubiclePayeeAccount(GetOfficeCubiclePayeeAccountCommand cmd);
+
+	GetCubicleForAppResponse getCubicleForApp(GetCubicleForAppCommand cmd);
+
+	ListRentOrderForAppResponse listRentOrderForApp(ListRentOrderForAppCommand cmd);
+
+	void schedule();
+
+	PreOrderDTO createCubicleOrderV2(CreateOfficeCubicleOrderCommand cmd);
+
+	BigDecimal getLongRentPrice(GetLongRentPriceCommand cmd);
+
 }

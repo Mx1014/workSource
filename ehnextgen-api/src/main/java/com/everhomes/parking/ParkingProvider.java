@@ -176,4 +176,6 @@ public interface ParkingProvider {
 
 	String findParkingLotNameByVendorName(Integer namespaceId, String vendorName);
 
+	ParkingCardRequest findParkingCardRequestByPlateNumber(String plateNumber);
+
 }

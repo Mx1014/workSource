@@ -17,41 +17,6 @@ logging.level.: INFO
 #server.sessionTimeout:
 
 #server.port: 8443
-#server.ssl.key-store:keystore.p12
-#server.ssl.key-store-password: password
-#server.ssl.keyStoreType: PKCS12
-#server.ssl.keyAlias: tomcat
-
-#
-# Uncommit follow to use a different context path other than /
-#
-server.contextPath: /evh
-
-
-upload.max.size: 10000000
-heartbeat.interval: 10000
-scheduler.pool.size: 100
-
-#
-# Server production management/monitoring configuration
-# server management URL
-#   http://<management.address>:<management.port>/<mangement.context_path>/<endpoint name>
-# JMX management URL
-#   http://<management.address>:<management.port>/<mangement.context_path>/jolokia
-#
-security.basic.enabled: false
-security.user.name: admin
-security.user.password: password
-
-endpoint.health.enabled: true
-endpoint.autoconfig: true
-endpoint.dump: true
-endpoint.metrics: true
-endpoint.configprops: true
-endpoint.beans: true
-endpoint.trace: true
-endpoint.mappings: true
-            
 management.security.enabled: false
 management.security.role: SUPERUSER
 management.context-path: /manage
@@ -59,20 +24,6 @@ management.port: 8082
 
 spring.jmx.enabled: true
 endpoints.jmx.domain: ehcore
-endpoints.jmx.uniqueNames: true
-
-jolokia.config.debug: true
-endpoints.jolokia.enabled: true
-
-spring.freemarker.check-template-location: false
-
-#
-# Messaging
-#
-messaging.msgbox.size: 1000
-messaging.batch.size: 1000
-messaging.routing.block.size: 1000
-
 #
 # iOS cert
 #
@@ -117,10 +68,6 @@ elastic:
 #
 # for API code generation
 #
-serialization.serializable: EvhJsonSerializable
-serialization.helper: EvhJsonSerializationHelper
-
-objc.header.ext: .h
 objc.source.ext: .m
 objc.response.base: EvhRestResponseBase
 
@@ -167,17 +114,6 @@ spring.kafka:
   properties:
     request.timeout.ms: 20000
   producer:
-    retries: 0
-    batch-size: 16384
-    buffer-memory: 33554432
-    key-serializer: org.apache.kafka.common.serialization.StringSerializer
-    value-serializer: org.apache.kafka.common.serialization.StringSerializer
-  consumer:
-    group-id: ${spring.application.name}-group
-    auto-offset-reset: earliest
-    enable-auto-commit: true
-    auto-commit-interval: 100
-    key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 spring:

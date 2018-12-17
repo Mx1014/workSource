@@ -394,7 +394,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
             cond = cond.and(
                     Tables.EH_FLOW_CASES.TITLE.like(keyword)
                     .or(Tables.EH_FLOW_CASES.SERVICE_TYPE.like(keyword))
-                    .or(Tables.EH_FLOW_CASES.CONTENT.like(keyword))
+                    // .or(Tables.EH_FLOW_CASES.CONTENT.like(keyword))
                     .or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(keyword))
                     .or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(keyword))
             );
