@@ -37,6 +37,7 @@ import com.everhomes.user.*;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -226,14 +227,33 @@ public class DingxinServiceImpl implements DingxinService {
     //鼎芯对接
     private final static String URL_DINGXIN = "http://smart.dchiptech.com/door/api/access/openLockForGWYH";
 
+//    public static void main(String[] args) {
+//        String s = WebTokenGenerator.getInstance().toWebToken("01");
+//        System.out.println(s);
+//        System.out.println(WebTokenGenerator.getInstance().fromWebToken("d3JlYue7yMxO2ZxjwBh9d6ioevgA8uTU1fT52dxEknfm41q_juKua1ohUErO6RzGMtk_gENC6_Ur6_xsrcFKVA", String.class));
+//        // gDNryJMR8scqDzAlNRaB0VlQ8hIJgEqL2n9UQN_c2KY
+//    }
 
     @Override
     public String verifyDoorAuth(VerifyDoorAuthCommand cmd){
         List<DoorAuth> auths = new ArrayList<>();
-        if(cmd.getAuthType().equals("user")){
-           auths = doorAuthProvider.listValidDoorAuthByUser(cmd.getUserId(), DoorAccessDriverType.DINGXIN.getCode());
-        } else if(cmd.getAuthType().equals("visitor")){
-            DoorAuth auth = doorAuthProvider.getDoorAuthById(cmd.getUserId());
+//        if(cmd.getAuthType().equals("user")){
+//           auths = doorAuthProvider.listValidDoorAuthByUser(cmd.getUserId(), DoorAccessDriverType.DINGXIN.getCode());
+//        } else if(cmd.getAuthType().equals("visitor")){
+//            DoorAuth auth = doorAuthProvider.getDoorAuthById(cmd.getUserId());
+//            if(auth.getStatus().equals(DoorAuthStatus.VALID.getCode()) && auth.getRightOpen().equals(DoorAuthStatus.VALID.getCode())){
+//                auths.add(auth);
+//            }
+//        }
+        //token加密
+        String s = WebTokenGenerator.getInstance().fromWebToken(cmd.getUserId(), String.class);
+        String[] ss = s.split(",");
+        String userType = ss[0];
+        String userId = ss[1];
+        if(userType.equals("1")){
+           auths = doorAuthProvider.listValidDoorAuthByUser(Long.parseLong(userId), DoorAccessDriverType.DINGXIN.getCode());
+        } else if(userType.equals("0")){
+            DoorAuth auth = doorAuthProvider.getDoorAuthById(Long.parseLong(userId));
             if(auth.getStatus().equals(DoorAuthStatus.VALID.getCode()) && auth.getRightOpen().equals(DoorAuthStatus.VALID.getCode())){
                 auths.add(auth);
             }
@@ -275,17 +295,18 @@ public class DingxinServiceImpl implements DingxinService {
     @Override
     public JSONObject openDoor(String uid){
         String url = URL_DINGXIN;
+//        configurationProvider.getValue()
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         JSONObject result = null;
         try{
             httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(url);
-//            httpPost.addHeader("content-type","application/json");
+            httpPost.addHeader("content-type","application/json");
             JSONObject jsonParam = new JSONObject();
             jsonParam.put("uid", uid);
             StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
-//            entity.setContentType("application/json");
+            entity.setContentType("application/json");
             httpPost.setEntity(entity);
             response = httpClient.execute(httpPost);
             String json = EntityUtils.toString(response.getEntity(),"utf8");
