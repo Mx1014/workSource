@@ -197,4 +197,7 @@ public interface AddressProvider {
 	List<ApartmentBriefInfoDTO> listApartmentsByMultiStatus(Integer namespaceId, Long communityId, String buildingName,
 			String apartment, List<Byte> livingStatus, Long pageAnchor, int pageSize);
 	List<Address> findActiveAddress(int startIndex, int pageSize);
+	
+	int getTotalApartmentCount(Integer namespaceId);
+	List<Address> findActiveAddress(int startIndex, int pageSize, Integer namespaceId);
 }

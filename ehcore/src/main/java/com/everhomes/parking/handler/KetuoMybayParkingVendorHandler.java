@@ -118,6 +118,104 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 	}
 
 	@Override
+	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
+
+		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getParkingRequestId());
+
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+
+		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
+				cmd.getParkingLotId(), flowCase.getFlowMainId());
+
+		Integer requestMonthCount = REQUEST_MONTH_COUNT;
+		Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
+		
+		if(null != parkingFlow) {
+			requestMonthCount = parkingFlow.getRequestMonthCount();
+			requestRechargeType = parkingFlow.getRequestRechargeType();
+		}
+		
+		OpenCardInfoDTO dto = new OpenCardInfoDTO();
+		String cardTypeId = parkingCardRequest.getCardTypeId();
+		if (StringUtils.isBlank(cardTypeId)) {
+			List<ParkingCardRequestType> types = parkingProvider.listParkingCardTypes(parkingCardRequest.getOwnerType(),
+					parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId());
+			cardTypeId = types.get(0).getCardTypeId();
+		}
+
+		//月租车
+		List<KetuoCardRate> rates = getCardRule(cardTypeId);
+		if(null != rates && !rates.isEmpty()) {
+			
+			KetuoCardRate rate = null;
+			for(KetuoCardRate r: rates) {
+				if(Integer.valueOf(r.getRuleAmount()) == 1) {
+					rate = r;
+					break;
+				}
+			}
+
+			if (null == rate) {
+				//TODO:
+				return null;
+			}
+
+			List<KetuoCardType> types = getCardType();
+			String typeName = null;
+			for(KetuoCardType kt: types) {
+				if(CAR_TYPE.equals(kt.getCarType())) {
+					typeName = kt.getTypeName();
+					break;
+				}
+			}
+
+			dto.setOwnerId(cmd.getOwnerId());
+			dto.setOwnerType(cmd.getOwnerType());
+			dto.setParkingLotId(cmd.getParkingLotId());
+			dto.setRateToken(rate.getRuleId());
+			Map<String, Object> map = new HashMap<String, Object>();
+		    map.put("count", rate.getRuleAmount());
+			String scope = ParkingNotificationTemplateCode.SCOPE;
+			int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
+			String locale = "zh_CN";
+			String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			dto.setRateName(rateName);
+			dto.setCardType(typeName);
+			dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
+			dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+
+			dto.setPlateNumber(cmd.getPlateNumber());
+			long now = configProvider.getLongValue("parking.opencard.now",System.currentTimeMillis());
+			dto.setOpenDate(now);
+			dto.setExpireDate(Utils.getTimestampByAddDistanceMonthV2(now, requestMonthCount).getTime());
+			if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
+				dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
+			}else {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTimeInMillis(now);
+				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+				int today = calendar.get(Calendar.DAY_OF_MONTH);
+
+				BigDecimal firstMonthPrice = dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
+						.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP);
+				if(firstMonthPrice.compareTo(dto.getPrice())>0){
+					firstMonthPrice = dto.getPrice();
+				}
+				BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
+						.add(firstMonthPrice);
+				dto.setPayMoney(price);
+			}
+			if(configProvider.getBooleanValue("parking.ketuo.debug",false)){
+				LOGGER.debug("parking.ketuo.debug is true, pay 0.01 RMB");
+				dto.setPayMoney(new BigDecimal(0.01));
+			}
+			dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
+		}
+
+		return dto;
+	}
+
+	@Override
 	protected boolean rechargeMonthlyCard(ParkingRechargeOrder order) {
 		return rechargeMonthlyCard(order,KetuoParkingVendorHandler.ADD_DISTANCE_MONTH);
 	}
