@@ -59,8 +59,18 @@ public class CMContractHeader {
     private String ModifyDate;
     
     private String CreateUserName;
+    
+    private String ParentID;
 
-    public String getCreateUserName() {
+    public String getParentID() {
+		return ParentID;
+	}
+
+	public void setParentID(String parentID) {
+		ParentID = parentID;
+	}
+
+	public String getCreateUserName() {
 		return CreateUserName;
 	}
 

@@ -83,6 +83,10 @@ public interface ContractService {
 	default SearchProgressDTO findContractOperateTaskById(SearchProgressCommand cmd){return null;};
 	default void autoGeneratingBill(AutoGeneratingBillCommand cmd){};
 	
+	// 合同模板
+	default void generateContractDocuments(GenerateContractDocumentsCommand cmd){};
+	default ContractDocumentDTO getContractDocuments(GetContractDocumentsCommand cmd){return null;};
+	default void updateContractDocuments(UpdateContractDocumentsCommand cmd){};
 	//合同报表
 	default void generateReportFormStatics(GetTotalContractStaticsCommand dateStr){};
 	default ListCommunityContractReportFormResponse searchContractStaticsList(SearchContractStaticsListCommand cmd){return null;};

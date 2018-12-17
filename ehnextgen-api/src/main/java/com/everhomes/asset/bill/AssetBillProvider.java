@@ -23,5 +23,11 @@ public interface AssetBillProvider {
 	void changeChargeStatus(Integer currentNamespaceId, Long billId, BigDecimal amountReceived, BigDecimal amountOwed,
 			Integer paymentType, Byte billStatus);
 	List<PaymentBills> findCannotDeleteBill(List<Long> billIdList);
+	
+	void deleteBillFromContract(Integer namespaceId, List<Long> contractIdList);
 
+	void notifyThirdSign(List<Long> billIdList);
+
+	void deleteRuiCMSyncData();
+	
 }

@@ -17,6 +17,9 @@ import com.everhomes.util.StringHelper;
  * <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
  * <li>bizPayeeId:收款方账户id</li>
  * <li>accountAliasName:收款方名称</li>
+ * <li>billingCycleExpression:生成账单周期表达式</li>
+ * <li>billDayExpression:出账单日表达式</li>
+ * <li>dueDayExpression:最晚还款日表达式</li>
  *</ul>
  */
 public class ListBillGroupsDTO {
@@ -36,6 +39,37 @@ public class ListBillGroupsDTO {
     private Byte accountStatus;
     
     private Long brotherGroupId;
+
+    //生成账单周期表达式
+    private String billingCycleExpression;
+    //出账单日表达式
+    private String billDayExpression;
+    //最晚还款日表达式
+    private String dueDayExpression;
+
+    public String getBillingCycleExpression() {
+        return billingCycleExpression;
+    }
+
+    public void setBillingCycleExpression(String billingCycleExpression) {
+        this.billingCycleExpression = billingCycleExpression;
+    }
+
+    public String getBillDayExpression() {
+        return billDayExpression;
+    }
+
+    public void setBillDayExpression(String billDayExpression) {
+        this.billDayExpression = billDayExpression;
+    }
+
+    public String getDueDayExpression() {
+        return dueDayExpression;
+    }
+
+    public void setDueDayExpression(String dueDayExpression) {
+        this.dueDayExpression = dueDayExpression;
+    }
 
     public Byte getBillDayType() {
         return billDayType;

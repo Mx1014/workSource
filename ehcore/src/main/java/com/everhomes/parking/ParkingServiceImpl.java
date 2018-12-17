@@ -1131,7 +1131,7 @@ public class ParkingServiceImpl implements ParkingService {
 		createOrderCommand.setGoodsName(extendInfo);
 		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
         String homeurl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-		//String homeurl = "http://10.1.110.79:8080";
+//		String homeurl = "http://10.1.110.79:8080";
 		//String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
 		String callbackurl = homeurl + contextPath + configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.pay.callBackUrl", "/parking/notifyParkingRechargeOrderPaymentV2");
 		createOrderCommand.setBackUrl(callbackurl);

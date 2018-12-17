@@ -13,7 +13,8 @@ package com.everhomes.rest.officecubicle;
  */
 public enum OfficeCubicleOrderStatus {
     /*INACTIVE((byte)0, "无效"), */UNPAID((byte)1, "待付款"), PAID((byte)2, "待使用"), IN_USE((byte)3, "使用中"),
-    COMPLETE((byte)4, "已完成"), REFUNDING((byte)5, "退款中"), REFUNDED((byte)6, "已退款"),EFFECTIVE((byte)11,"有效订单");
+    COMPLETE((byte)4, "已完成"), REFUNDING((byte)5, "退款中"), REFUNDED((byte)6, "已退款"),FAIL((byte)7,"已取消"),
+    EFFECTIVE((byte)11,"有效订单"),CANCEL((byte)12,"无效订单");
     
     private byte code;
     private String description;
