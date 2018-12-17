@@ -10,9 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>ENTERPRISE_VISITOR(3): 访客预约</li>
  * <li>PARKING(4): 停车缴费</li>
  * <li>ASSET(5): 物业缴费</li>
- * <li>ASSET(6): 品质核查</li>
- * <li>ASSET(7): 社区活动</li>
- * <li>ASSET(8): 资源预约</li>
+ * <li>QUALITY(6): 品质核查</li>
+ * <li>ACTIVITY(7): 社区活动</li>
+ * <li>RENTAL(8): 资源预约</li>
  * <li>MY_APPLY(10000): 我的工单</li>
  * <li>YOULINYUEXUAN(10001): 悦邻优选</li>
  * </ul>
@@ -22,7 +22,7 @@ public enum RouterTypeEnum {
 
 	PM_TASK(1, ServiceModuleConstants.PM_TASK_MODULE, "物业报修"), 
 	HOTLINE(2, ServiceModuleConstants.HOTLINE_MODULE, "物业客服"), 
-	ENTERPRISE_VISITOR(3, ServiceModuleConstants.ENTERPRISE_VISITOR_MODULE, "访客预约"),
+	ENTERPRISE_VISITOR(3, ServiceModuleConstants.COMMUNITY_VISITOR_MODULE, "访客预约"),
 	PARKING(4,ServiceModuleConstants.PARKING_MODULE, "停车缴费"),
 	ASSET(5,ServiceModuleConstants.ASSET_MODULE, "物业缴费"),
 	QUALITY(6,ServiceModuleConstants.QUALITY_MODULE, "品质核查"),

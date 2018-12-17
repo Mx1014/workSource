@@ -4,33 +4,33 @@ package com.everhomes.rest.aclink;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
- * <li>userId:用户id</li>
+ * <li>authId:授权id</li>
  * <li>keySecret: aesUserKey</li>
- * <li>Mac: 门禁mac地址</li>
+ * <li>macAddress: 门禁mac地址</li>
  * </ul>
  */
 public class AclinkAppUserKeyDTO {
-	Long userId;
+	Long authId;
 	String keySecret;
-	String Mac;
+	String macAddress;
 	
-	public Long getUserId() {
-		return userId;
-	}
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
 	public String getKeySecret() {
 		return keySecret;
 	}
 	public void setKeySecret(String keySecret) {
 		this.keySecret = keySecret;
 	}
-	public String getMac() {
-		return Mac;
+	public Long getAuthId() {
+		return authId;
 	}
-	public void setMac(String mac) {
-		Mac = mac;
+	public void setAuthId(Long authId) {
+		this.authId = authId;
+	}
+	public String getMacAddress() {
+		return macAddress;
+	}
+	public void setMacAddress(String macAddress) {
+		this.macAddress = macAddress;
 	}
 	
 	@Override

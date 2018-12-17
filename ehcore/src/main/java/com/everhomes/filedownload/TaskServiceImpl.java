@@ -164,6 +164,8 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         parameters.put("process", task.getProcess() == null ? 0: task.getProcess());
         parameters.put("className", task.getClassName());
         parameters.put("params", task.getParams());
+        parameters.put("ns", task.getNamespaceId());
+        parameters.put("userId", task.getUserId());
         String taskName = "task_" + task.getType() + "_" + task.getId();
         scheduleProvider.scheduleSimpleJob(taskName, taskName, new Date(), TaskScheduleJob.class, parameters);
     }

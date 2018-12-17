@@ -45,6 +45,10 @@ public class AssetExportHandler  implements FileDownloadTaskHandler {
 
     @Override
     public void execute(Map<String, Object> params) {
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Export payment bill, handler start, params={}", params);
+        }
     	//前端传过来的所有数据信息
         //String userStr =  String.valueOf(params.get("UserContext"));
         //User user = (User) StringHelper.fromJsonString(userStr, User.class);
@@ -66,12 +70,17 @@ public class AssetExportHandler  implements FileDownloadTaskHandler {
             
         	outputStream = assetService.exportOutputStreamAssetListByContractList(cmd, taskId);
 		}else {
-			LOGGER.error("exportAssetListByParams is error.");
-			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
+            LOGGER.error("Export payment bill, ListPaymentBillsCMD not found in params, taskId={}, params={}", taskId, params);
+			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "Export payment bill error");
 		}
         
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
+
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Export payment bill, handler end, taskId={}, elapse={}, params={}", taskId, (endTime - startTime), params);
+        }
     }
 
     @Override

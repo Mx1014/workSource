@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.portal;
 
+import com.everhomes.acl.ServiceModuleAppProfileProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -27,6 +28,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
 import com.everhomes.rest.acl.ListServiceModuleEntriesCommand;
 import com.everhomes.rest.acl.ListServiceModuleEntriesResponse;
+import com.everhomes.rest.acl.ServiceModuleEntryDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.*;
 import com.everhomes.rest.community.CommunityDoc;
@@ -38,6 +40,8 @@ import com.everhomes.rest.launchpadbase.indexconfigjson.Application;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
 import com.everhomes.rest.module.AccessControlType;
 import com.everhomes.rest.module.RouterInfo;
+import com.everhomes.rest.module.ServiceModuleAppType;
+import com.everhomes.rest.module.TerminalType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
@@ -59,6 +63,7 @@ import com.everhomes.server.schema.tables.pojos.EhPortalItemGroups;
 import com.everhomes.server.schema.tables.pojos.EhPortalItems;
 import com.everhomes.server.schema.tables.pojos.EhPortalLayouts;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppEntryProfile;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -72,6 +77,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -184,7 +191,11 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private LaunchPadService launchPadService;
-	
+
+	@Autowired
+    private ServiceModuleEntryProvider serviceModuleEntryProvider;
+	@Autowired
+    private ServiceModuleAppProfileProvider serviceModuleAppProfileProvider;
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
 
@@ -339,11 +350,45 @@ public class PortalServiceImpl implements PortalService {
 			moduleApp.setEnableEnterprisePayFlag(cmd.getEnableEnterprisePayFlag());
 		}
 
-
 		moduleApp.setInstanceConfig(cmd.getInstanceConfig());
 		serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
+        updateServiceModuleAppEntryProfile(cmd,moduleApp);
 		return processServiceModuleAppDTO(moduleApp);
 	}
+
+	//更新应用自定义配置应用入口信息
+	private void updateServiceModuleAppEntryProfile(UpdateServiceModuleAppCommand cmd, ServiceModuleApp moduleApp) {
+        if (TrueOrFalseFlag.FALSE.getCode().equals(cmd.getAppEntrySettingFlag())) {
+            List<ServiceModuleAppEntryProfile> appEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(moduleApp.getOriginId(),
+                    null,null,null);
+            if(!CollectionUtils.isEmpty(appEntryProfiles)) {
+                for (ServiceModuleAppEntryProfile serviceModuleAppEntryProfile : appEntryProfiles) {
+                    serviceModuleAppEntryProfile.setAppEntrySetting(cmd.getAppEntrySettingFlag());
+                    this.serviceModuleAppProvider.updateServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+                }
+            }
+        }else if (!CollectionUtils.isEmpty(cmd.getAppEntryDtos())) {
+            for (AppEntryDTO appEntryDTO : cmd.getAppEntryDtos()) {
+                List<ServiceModuleAppEntryProfile> appEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(moduleApp.getOriginId(),
+                        appEntryDTO.getEntryId(),null,null);
+                if(!CollectionUtils.isEmpty(appEntryProfiles)) {
+                    ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = appEntryProfiles.get(0);
+                    serviceModuleAppEntryProfile.setAppEntrySetting(cmd.getAppEntrySettingFlag());
+                    serviceModuleAppEntryProfile.setEntryName(appEntryDTO.getEntryName());
+                    serviceModuleAppEntryProfile.setEntryUri(appEntryDTO.getIconUri());
+                    this.serviceModuleAppProvider.updateServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+                }else {
+                    ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = new ServiceModuleAppEntryProfile();
+                    serviceModuleAppEntryProfile.setOriginId(moduleApp.getOriginId());
+                    serviceModuleAppEntryProfile.setEntryId(appEntryDTO.getEntryId());
+                    serviceModuleAppEntryProfile.setAppEntrySetting(cmd.getAppEntrySettingFlag());
+                    serviceModuleAppEntryProfile.setEntryName(appEntryDTO.getEntryName());
+                    serviceModuleAppEntryProfile.setEntryUri(appEntryDTO.getIconUri());
+                    this.serviceModuleAppProvider.createServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+                }
+            }
+        }
+    }
 
 
 	@Override
@@ -455,6 +500,7 @@ public class PortalServiceImpl implements PortalService {
 		ListServiceModuleEntriesCommand cmd = new ListServiceModuleEntriesCommand();
 		cmd.setModuleId(moduleApp.getModuleId());
 		ListServiceModuleEntriesResponse response = serviceModuleService.listServiceModuleEntries(cmd);
+		sortModuleEntryDto(response.getDtos());
 		dto.setServiceModuleEntryDtos(response.getDtos());
 
 
@@ -463,9 +509,103 @@ public class PortalServiceImpl implements PortalService {
 			List<AppEntryInfoDTO> entryInfos = GsonUtil.fromJson(moduleApp.getAppEntryInfos(), new TypeToken<List<AppEntryInfoDTO>>(){}.getType());
 			dto.setAppEntryInfos(entryInfos);
 		}
-
+		List<ServiceModuleAppEntryProfile> appEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(moduleApp.getOriginId(),
+				null,null,null);
+		List<AppEntryDTO> appEntryDTOS = new ArrayList<>();
+		if (!CollectionUtils.isEmpty(appEntryProfiles)) {
+		    dto.setAppEntrySettingFlag(appEntryProfiles.get(0).getAppEntrySetting());
+			for (ServiceModuleAppEntryProfile serviceModuleAppEntryProfile : appEntryProfiles) {
+                AppEntryDTO appEntryDTO = ConvertHelper.convert(serviceModuleAppEntryProfile, AppEntryDTO.class);
+                appEntryDTO.setIconUri(serviceModuleAppEntryProfile.getEntryUri());
+                String url = contentServerService.parserUri(appEntryDTO.getIconUri(), ServiceModuleAppEntryProfile.class.getSimpleName(), serviceModuleAppEntryProfile.getId());
+                appEntryDTO.setIconUrl(url);
+                ServiceModuleEntry entry = this.serviceModuleEntryProvider.findById(serviceModuleAppEntryProfile.getEntryId());
+                if (entry != null) {
+                    appEntryDTO.setTerminalType(entry.getTerminalType());
+                    appEntryDTO.setSceneType(entry.getSceneType());
+                    appEntryDTO.setLocationType(entry.getLocationType());
+                }
+                appEntryDTOS.add(appEntryDTO);
+            }
+		}else {
+			dto.setAppEntrySettingFlag(TrueOrFalseFlag.FALSE.getCode());
+		}
+		sortAppEntryDto(appEntryDTOS);
+		dto.setServiceModuleSelfEntryDtos(appEntryDTOS);
 		return dto;
 	}
+
+	private void sortModuleEntryDto(List<ServiceModuleEntryDTO> list) {
+	    Collections.sort(list, new Comparator<ServiceModuleEntryDTO>() {
+            @Override
+            public int compare(ServiceModuleEntryDTO o1, ServiceModuleEntryDTO o2) {
+                if (o1 == null && o2 == null) {
+                    return 0;
+                }
+                if (o1 == null) {
+                    return -1;
+                }
+                if (o2 == null) {
+                    return 1;
+                }
+                StringBuilder o1StringBuilder = new StringBuilder();
+                StringBuilder o2StringBuilder = new StringBuilder();
+                o1StringBuilder.append(o1.getTerminalType()==null?0:o1.getTerminalType()).append(o1.getSceneType()==null?0:100-o1.getSceneType());
+                o2StringBuilder.append(o2.getTerminalType()==null?0:o2.getTerminalType()).append(o2.getSceneType()==null?0:100-o2.getSceneType());
+                return o2StringBuilder.toString().compareTo(o1StringBuilder.toString());
+//                if (o1 == null || o2 == null) {
+//                    return -1;
+//                }
+//                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
+//                    return o2.getTerminalType().compareTo(o1.getTerminalType());
+//                }
+//                if (o1.getSceneType() == null || o2.getSceneType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getSceneType().equals(o2.getSceneType())) {
+//                    return o1.getSceneType().compareTo(o2.getSceneType());
+//                }
+//                return 0;
+            }
+        });
+    }
+
+    private void sortAppEntryDto(List<AppEntryDTO> list) {
+        Collections.sort(list, new Comparator<AppEntryDTO>() {
+            @Override
+            public int compare(AppEntryDTO o1, AppEntryDTO o2) {
+                if (o1 == null && o2 == null) {
+                    return 0;
+                }
+                if (o1 == null) {
+                    return -1;
+                }
+                if (o2 == null) {
+                    return 1;
+                }
+                StringBuilder o1StringBuilder = new StringBuilder();
+                StringBuilder o2StringBuilder = new StringBuilder();
+                o1StringBuilder.append(o1.getTerminalType()==null?0:o1.getTerminalType()).append(o1.getSceneType()==null?0:100-o1.getSceneType());
+                o2StringBuilder.append(o2.getTerminalType()==null?0:o2.getTerminalType()).append(o2.getSceneType()==null?0:100-o2.getSceneType());
+//                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
+//                    return o2.getTerminalType().compareTo(o1.getTerminalType());
+//                }
+//                if (o1.getSceneType() == null || o2.getSceneType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getSceneType().equals(o2.getSceneType())) {
+//                    return o1.getSceneType().compareTo(o2.getSceneType());
+//                }
+                return o2StringBuilder.toString().compareTo(o1StringBuilder.toString());
+            }
+        });
+    }
 
 	private PortalLayoutDTO processPortalLayoutDTO(PortalLayout portalLayout){
 		PortalLayoutDTO dto = ConvertHelper.convert(portalLayout, PortalLayoutDTO.class);
@@ -639,7 +779,7 @@ public class PortalServiceImpl implements PortalService {
 		return ConvertHelper.convert(portalLayout, PortalLayoutDTO.class);
 	}
 
-	@Override
+    @Override
 	public void deletePortalLayout(DeletePortalLayoutCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
@@ -1551,7 +1691,8 @@ public class PortalServiceImpl implements PortalService {
 		if(null != oType){
 			List<String> groupTypes = new ArrayList<>();
 			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, cmd.getKeywords(), oType.getCode(), locator, pageSize);
+			//将管理公司和普通公司合并 addby yanlong.liang 20181213
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, cmd.getKeywords(),"", locator, pageSize);
 			for (Organization organization: organizations) {
 				dtos.add(ConvertHelper.convert(organization, ScopeDTO.class));
 			}
@@ -1571,7 +1712,8 @@ public class PortalServiceImpl implements PortalService {
 			List<Community> communities = communityProvider.listCommunities(namespaceId, locator, pageSize, new ListingQueryBuilderCallback() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-					query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType.getCode()));
+				    //将园区和小区合并 addby yanlong.liang 20181213
+//					query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType.getCode()));
 					if(!StringUtils.isEmpty(cmd.getKeywords())){
 						query.addConditions(Tables.EH_COMMUNITIES.NAME.like(cmd.getKeywords() + "%").or(Tables.EH_COMMUNITIES.ALIAS_NAME.like(cmd.getKeywords() + "%")));
 
@@ -1609,7 +1751,8 @@ public class PortalServiceImpl implements PortalService {
 		if(null != oType){
 			SearchOrganizationCommand command = new SearchOrganizationCommand();
 			command.setNamespaceId(namespaceId);
-			command.setOrganizationType(oType.getCode());
+			//不需要区分管理公司和普通公司  add by yanlong.liang 20181213
+//			command.setOrganizationType(oType.getCode());
 			command.setPageAnchor(cmd.getAnchor());
 			command.setPageSize(pageSize);
 			command.setKeyword(cmd.getKeywords());
@@ -1629,7 +1772,8 @@ public class PortalServiceImpl implements PortalService {
 		}
 		CommunityType communityType = cType;
 		if(null != communityType){
-			List<CommunityDoc> communities = communitySearcher.searchDocs(cmd.getKeywords(), cType.getCode(), null, null, cmd.getAnchor().intValue(), cmd.getPageSize());
+		    //不需要区分园区和小区 add by yanlong.liang 20181213
+			List<CommunityDoc> communities = communitySearcher.searchDocs(cmd.getKeywords(), null, null, null, cmd.getAnchor().intValue(), cmd.getPageSize());
 			for (CommunityDoc communityDoc: communities) {
 				dtos.add(ConvertHelper.convert(communityDoc, ScopeDTO.class));
 			}
@@ -1775,6 +1919,36 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
+    @Override
+    public void initAppEntryData() {
+        List<NamespaceInfoDTO> namespaceInfoDTOS = this.namespacesService.listNamespace();
+        List<ServiceModuleAppEntry> list = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(namespaceInfoDTOS)) {
+            for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
+                PortalVersion version = findReleaseVersion(namespaceInfoDTO.getId());
+                if (version != null) {
+                    List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(), version.getId(), null);
+                    if (!CollectionUtils.isEmpty(apps)) {
+                        for (ServiceModuleApp app : apps) {
+                            List<ServiceModuleEntry> moduleEntries = this.serviceModuleEntryProvider.listServiceModuleEntries(app.getModuleId(),null,
+                                    TerminalType.MOBILE.getCode(),null,null);
+                            if (!CollectionUtils.isEmpty(moduleEntries)) {
+                                for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                                    ServiceModuleAppEntry appEntry = ConvertHelper.convert(moduleEntry, ServiceModuleAppEntry.class);
+                                    appEntry.setAppId(app.getOriginId());
+                                    appEntry.setAppName(app.getName());
+                                    appEntry.setId(null);
+                                    list.add(appEntry);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        this.serviceModuleEntryProvider.batchCreateAppEntry(list);
+    }
+
 	/**
 	 * 正式版本保护机制，不能对正式版本做编辑和发布。
 	 * @param versionId
@@ -1865,6 +2039,8 @@ public class PortalServiceImpl implements PortalService {
 				app.setCustomTag(customTag);
 				serviceModuleAppProvider.updateServiceModuleApp(app);
 			}
+			//发布应用时，同时同步应用入口信息
+            publishAppEntries(app);
 		}
 
 		/**
@@ -1881,6 +2057,77 @@ public class PortalServiceImpl implements PortalService {
 		}
 
 	}
+
+	private void publishAppEntries(ServiceModuleApp app) {
+        List<ServiceModuleAppEntry> appEntries = this.serviceModuleEntryProvider.listServiceModuleAppEntries(app.getOriginId(), null,
+                TerminalType.MOBILE.getCode(), null, null);
+
+        List<ServiceModuleEntry> moduleEntries = this.serviceModuleEntryProvider.listServiceModuleEntries(app.getModuleId(), null,
+                TerminalType.MOBILE.getCode(), null, null);
+        if (appEntries.size() > moduleEntries.size()) {
+            if (CollectionUtils.isEmpty(moduleEntries)) {
+                for (ServiceModuleAppEntry appEntry : appEntries) {
+                    this.serviceModuleEntryProvider.deleteAppEntry(appEntry.getId());
+                }
+            } else {
+                ServiceModuleEntry moduleEntry = moduleEntries.get(0);
+                for (ServiceModuleAppEntry appEntry : appEntries) {
+                    if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
+                        appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
+                        appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
+                        appEntry.setEntryName(moduleEntry.getEntryName());
+                        appEntry.setIconUri(moduleEntry.getIconUri());
+                        this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
+                    } else {
+                        this.serviceModuleEntryProvider.deleteAppEntry(appEntry.getId());
+                    }
+                }
+
+            }
+
+        } else if (appEntries.size() < moduleEntries.size()) {
+            if (CollectionUtils.isEmpty(appEntries)) {
+                for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                    ServiceModuleAppEntry appEntry = ConvertHelper.convert(moduleEntry, ServiceModuleAppEntry.class);
+                    appEntry.setAppId(app.getOriginId());
+                    appEntry.setAppName(app.getName());
+                    appEntry.setId(null);
+                    this.serviceModuleEntryProvider.createAppEntry(appEntry);
+                }
+            } else {
+                ServiceModuleAppEntry appEntry = appEntries.get(0);
+                for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                    if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
+                        appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
+                        appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
+                        appEntry.setEntryName(moduleEntry.getEntryName());
+                        appEntry.setIconUri(moduleEntry.getIconUri());
+                        this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
+                    } else {
+                        ServiceModuleAppEntry newAppEntry = ConvertHelper.convert(moduleEntry, ServiceModuleAppEntry.class);
+                        newAppEntry.setAppId(app.getOriginId());
+                        newAppEntry.setAppName(app.getName());
+                        newAppEntry.setId(null);
+                        this.serviceModuleEntryProvider.createAppEntry(newAppEntry);
+                    }
+                }
+            }
+        } else {
+            if (!CollectionUtils.isEmpty(appEntries) && !CollectionUtils.isEmpty(moduleEntries)) {
+                for (ServiceModuleAppEntry appEntry : appEntries) {
+                    for (ServiceModuleEntry moduleEntry : moduleEntries) {
+                        if (appEntry.getLocationType().equals(moduleEntry.getLocationType()) && appEntry.getSceneType().equals(moduleEntry.getSceneType())) {
+                            appEntry.setAppCategoryId(moduleEntry.getAppCategoryId());
+                            appEntry.setDefaultOrder(moduleEntry.getDefaultOrder());
+                            appEntry.setEntryName(moduleEntry.getEntryName());
+                            appEntry.setIconUri(moduleEntry.getIconUri());
+                            this.serviceModuleEntryProvider.udpateAppEntry(appEntry);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 	private void cleanOldVersion(Integer namespaceId){
 		List<PortalVersion> list = portalVersionProvider.listPortalVersion(namespaceId, null);
@@ -2478,7 +2725,7 @@ public class PortalServiceImpl implements PortalService {
 				item.setActionType(moduleApp.getActionType());
 				item.setActionData(moduleApp.getInstanceConfig());
 			}
-			setItemModuleAppActionData(item, instanceConfig.getModuleAppId());
+			setItemModuleAppActionData(item, instanceConfig.getModuleAppId(), null);
 		}
 		for (SceneType sceneType: SceneType.values()) {
 			if(sceneType == SceneType.DEFAULT ||
@@ -2747,10 +2994,10 @@ public class PortalServiceImpl implements PortalService {
 
 	private void setItemModuleAppActionData(LaunchPadItem item, String actionData){
 		ModuleAppActionData data = (ModuleAppActionData)StringHelper.fromJsonString(actionData, ModuleAppActionData.class);
-		setItemModuleAppActionData(item, data.getModuleAppId());
+		setItemModuleAppActionData(item, data.getModuleAppId(), data.getModuleEntryId());
 	}
 
-	private void setItemModuleAppActionData(LaunchPadItem item, Long moduleAppId){
+	private void setItemModuleAppActionData(LaunchPadItem item, Long moduleAppId, Long moduleEntryId){
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(moduleAppId);
 		if(null != moduleApp){
 			item.setAppId(moduleApp.getOriginId());
@@ -2767,7 +3014,7 @@ public class PortalServiceImpl implements PortalService {
 				HandlerGetItemActionDataCommand handlerCmd = new HandlerGetItemActionDataCommand();
 				handlerCmd.setAppOriginId(moduleApp.getOriginId());
 				handlerCmd.setAppId(moduleApp.getId());
-
+				handlerCmd.setModuleEntryId(moduleEntryId);
 				item.setActionData(handler.getItemActionData(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), handlerCmd));
 			}else{
 				item.setActionData(moduleApp.getInstanceConfig());
@@ -3985,4 +4232,38 @@ public class PortalServiceImpl implements PortalService {
 
 	}
 
+	@Override
+	public void initAppEntryProfileData() {
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                List<NamespaceInfoDTO> namespaceInfoDTOS = namespacesService.listNamespace();
+                for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
+                    PortalVersion portalVersion = portalVersionProvider.findReleaseVersion(namespaceInfoDTO.getId());
+                    List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(),portalVersion.getId(),
+                            null,null,null, ServiceModuleAppType.COMMUNITY.getCode(),null,null,null,null);
+                    if (!CollectionUtils.isEmpty(serviceModuleApps)) {
+                        for (ServiceModuleApp serviceModuleApp : serviceModuleApps) {
+                            List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(serviceModuleApp.getModuleId(),
+                                    null,null,null,null);
+                            if (!CollectionUtils.isEmpty(serviceModuleEntries)) {
+                                for (ServiceModuleEntry serviceModuleEntry : serviceModuleEntries) {
+                                    ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = new ServiceModuleAppEntryProfile();
+                                    serviceModuleAppEntryProfile.setOriginId(serviceModuleApp.getOriginId());
+                                    serviceModuleAppEntryProfile.setEntryId(serviceModuleEntry.getId());
+                                    serviceModuleAppEntryProfile.setAppEntrySetting(TrueOrFalseFlag.TRUE.getCode());
+                                    serviceModuleAppEntryProfile.setEntryName(serviceModuleApp.getName());
+                                    serviceModuleAppEntryProfile.setEntryUri(serviceModuleApp.getIconUri());
+                                    serviceModuleAppProvider.createServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+                                }
+                            }
+                        }
+                    }
+                    LOGGER.info("NamespaceId = {}",namespaceInfoDTO.getId());
+                }
+            LOGGER.info("initAppEntryProfileData success!");
+            }
+        });
+
+	}
 }

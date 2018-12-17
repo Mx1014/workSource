@@ -5179,7 +5179,14 @@ public class GroupServiceImpl implements GroupService {
 	        return new ArrayList<GroupMember>();
 	    //modify by sfyan, 20160429
 	    } else if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.ENTERPRISE) {
-	        cache = this.organizationProvider.listGroupMessageMembers(namespaceId, group.getId(), pageSize);
+
+            //TODO 荣超要求仅仅禁聊对应的那家公司
+            Long blockedCompany = configProvider.getLongValue(namespaceId, "message.rongchao.company.block", 0l);
+            if(blockedCompany.equals(group.getId())) {
+                return new ArrayList<GroupMember>();
+            }
+
+            cache = this.organizationProvider.listGroupMessageMembers(namespaceId, group.getId(), pageSize);
 	        long now = System.currentTimeMillis() - TIMEOUT;
 	        if(cache.getSize() > 0 && now > cache.getTick()) {
 	            //timeout

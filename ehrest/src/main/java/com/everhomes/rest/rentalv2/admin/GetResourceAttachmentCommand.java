@@ -4,6 +4,8 @@ import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  * <li>ownerType: ownerType {@link com.everhomes.rest.rentalv2.RentalOwnerType}</li>
@@ -20,6 +22,7 @@ public class GetResourceAttachmentCommand {
 
     private Long ownerId;
 
+    @NotNull
     private Long resourceTypeId;
 
     private String resourceType;

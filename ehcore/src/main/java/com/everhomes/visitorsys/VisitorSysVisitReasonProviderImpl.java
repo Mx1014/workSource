@@ -59,17 +59,19 @@ public class VisitorSysVisitReasonProviderImpl implements VisitorSysVisitReasonP
 	}
 	
 	@Override
-	@Cacheable(value="listVisitorSysVisitReason", key="#namespaceId", unless="#result.size() == 0")
-	public List<VisitorSysVisitReason> listVisitorSysVisitReason(Integer namespaceId) {
+	@Cacheable(value="listVisitorSysVisitReason", key="{#namespaceId,#communityType}", unless="#result.size() == 0")
+	public List<VisitorSysVisitReason> listVisitorSysVisitReason(Integer namespaceId,Byte communityType) {
 		List<VisitorSysVisitReason> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISIT_REASON)
 				.where(Tables.EH_VISITOR_SYS_VISIT_REASON.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_VISITOR_SYS_VISIT_REASON.STATUS.eq((byte)2))
+                .and(Tables.EH_VISITOR_SYS_VISIT_REASON.REASON_TYPE.eq(communityType))
 				.orderBy(Tables.EH_VISITOR_SYS_VISIT_REASON.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitReason.class));
 		if(list==null || list.size()==0){
 			return  getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_VISIT_REASON)
 					.where(Tables.EH_VISITOR_SYS_VISIT_REASON.NAMESPACE_ID.eq(0))
 					.and(Tables.EH_VISITOR_SYS_VISIT_REASON.STATUS.eq((byte)2))
+					.and(Tables.EH_VISITOR_SYS_VISIT_REASON.REASON_TYPE.eq(communityType))
 					.orderBy(Tables.EH_VISITOR_SYS_VISIT_REASON.ID.asc())
 					.fetch().map(r -> ConvertHelper.convert(r, VisitorSysVisitReason.class));
 		}

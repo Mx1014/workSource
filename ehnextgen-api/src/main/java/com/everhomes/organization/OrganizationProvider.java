@@ -1008,4 +1008,7 @@ public interface OrganizationProvider {
 	void updateOrganizationMemberDetailsContactToken(Integer namespaceId, Long userId, String newContactToken);
 
 	void updateOrganizationMembersContactToken(Integer namespaceId, Long userId, String newContactToken);
+
+	List<Long> getOrganizationIdsHaveCommunity();
+
 }

@@ -93,4 +93,8 @@ public interface MessagingService {
 
     String signalBlockingEvent(String subjectId, String message, Integer timeOut);
 
+    FetchMessageCommandResponse fetchPastToRecentMessageWithoutUserLogin(
+            FetchPastToRecentMessageCommand cmd);
+
+
 }

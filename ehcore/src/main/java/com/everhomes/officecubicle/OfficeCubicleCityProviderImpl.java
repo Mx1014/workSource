@@ -17,10 +17,17 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.officecubicle.DeleteRoomAdminCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhOfficeCubicleRoom;
+import com.everhomes.server.schema.tables.EhOfficeCubicleStation;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleCitiesDao;
+import com.everhomes.server.schema.tables.daos.EhOfficeCubicleRoomDao;
+import com.everhomes.server.schema.tables.daos.EhOfficeCubicleStationDao;
+import com.everhomes.server.schema.tables.daos.EhParkingRechargeRatesDao;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleCities;
+import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -215,4 +222,5 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
 	}
+    
 }

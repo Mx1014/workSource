@@ -205,6 +205,72 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
         return response;
     }
 
+    /**
+     * 这个是一个测试代码，任何其它接口都不能调用。为了不影响现网的环境，现在先复制代码，并不进行二次封装。下一步要封装成更好的接口
+     * TODO 未来要把这个接口删除！
+     */
+    @Override
+    public FetchMessageCommandResponse fetchPastToRecentMessageWithoutUserLogin(FetchPastToRecentMessageCommand cmd) {
+
+        UserLogin userLogin;
+        if(cmd.getLoginId() == null || cmd.getUserId() == null) {
+            userLogin = UserContext.current().getLogin();
+            cmd.setLoginId(userLogin.getLoginId());
+        } else {
+            String appVersion = UserContext.current().getVersion();
+            userLogin = new UserLogin(cmd.getNamespaceId(), cmd.getUserId(), cmd.getLoginId(), "", "", appVersion);
+        }
+
+        String messageBoxKey = UserMessageRoutingHandler.getMessageBoxKey(userLogin,
+                cmd.getNamespaceId() != null ? cmd.getNamespaceId().intValue() : 0, cmd.getAppId());
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Fetch messages(past to recent), messageBoxKey=" + messageBoxKey + ", cmd=" + cmd);
+        }
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getCount());
+        boolean removeOld = false;
+        if(cmd.getRemoveOld() != null && cmd.getRemoveOld().byteValue() != 0)
+            removeOld = true;
+
+        FetchMessageCommandResponse response = new FetchMessageCommandResponse();
+
+        MessageLocator locator = new MessageLocator(messageBoxKey);
+        locator.setAnchor(cmd.getAnchor());
+        List<Message> messages = this.messageBoxProvider.getPastToRecentMessages(locator, pageSize + 1, removeOld);
+        if(messages.size() > pageSize) {
+            messages.remove(messages.size() - 1);
+            response.setNextPageAnchor(messages.get(messages.size() - 1).getStoreSequence());
+        }
+
+        List<MessageDTO> dtoMessages = new ArrayList<MessageDTO>();
+        for(Message r : messages) {
+            if(r.getChannelToken() == null || r.getChannelToken().isEmpty()) {
+                LOGGER.warn("channel is empty!" + r.getStoreSequence());
+            } else {
+                dtoMessages.add(toMessageDto(r));
+                MessageRecordDto record = new MessageRecordDto();
+                record.setAppId(r.getAppId());
+                record.setNamespaceId(r.getNamespaceId());
+                record.setMessageSeq(r.getMessageSequence());
+                record.setSenderUid(r.getSenderUid());
+                record.setSenderTag(MessageRecordSenderTag.FETCH_PASTTORECENT_MESSAGES.getCode());
+                record.setDstChannelType(r.getChannelType());
+                record.setDstChannelToken(r.getChannelToken());
+                record.setBodyType(r.getContextType());
+                record.setBody(r.getContent());
+                record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
+                record.setIndexId(r.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(r.getMeta().get(MESSAGE_INDEX_ID)) : 0);
+                record.setMeta(r.getMeta());
+                record.setCreateTime(new Timestamp(System.currentTimeMillis()));
+                MessagePersistWorker.getQueue().offer(record);
+            }
+        }
+
+        response.setMessages(dtoMessages);
+        return response;
+    }
+
+
     @Override
     public FetchMessageCommandResponse fetchRecentToPastMessages(FetchRecentToPastMessageCommand cmd) {
         FetchRecentToPastMessageAdminCommand adminCmd = ConvertHelper.convert(cmd, FetchRecentToPastMessageAdminCommand.class);

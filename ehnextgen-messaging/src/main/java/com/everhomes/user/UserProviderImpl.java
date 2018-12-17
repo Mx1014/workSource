@@ -134,7 +134,7 @@ public class UserProviderImpl implements UserProvider {
         dao.insert(user);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUsers.class, null);
-        kafkaTemplate.send("user-create-core-event", 0, String.valueOf(0), StringHelper.toJsonString(user));
+        kafkaTemplate.send("user-create-core-event", String.valueOf(System.nanoTime()), StringHelper.toJsonString(user));
     }
 
     @Override
@@ -174,7 +174,7 @@ public class UserProviderImpl implements UserProvider {
         dao.update(user);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
-        kafkaTemplate.send("user-update-core-event", 0, String.valueOf(0), StringHelper.toJsonString(user));
+        kafkaTemplate.send("user-update-core-event", String.valueOf(System.nanoTime()), StringHelper.toJsonString(user));
 
     }
 
@@ -398,7 +398,7 @@ public class UserProviderImpl implements UserProvider {
         dao.insert(userIdentifier);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserIdentifiers.class, null);
-        kafkaTemplate.send("userIdentifier-create-core-event", 0, String.valueOf(0), StringHelper.toJsonString(userIdentifier));
+        kafkaTemplate.send("userIdentifier-create-core-event", String.valueOf(System.nanoTime()), StringHelper.toJsonString(userIdentifier));
 
     }
 
@@ -419,7 +419,7 @@ public class UserProviderImpl implements UserProvider {
         dao.update(userIdentifier);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());
-        kafkaTemplate.send("userIdentifier-update-core-event", 0, String.valueOf(0), StringHelper.toJsonString(userIdentifier));
+        kafkaTemplate.send("userIdentifier-update-core-event", String.valueOf(System.nanoTime()), StringHelper.toJsonString(userIdentifier));
 
     }
 
@@ -438,7 +438,7 @@ public class UserProviderImpl implements UserProvider {
         dao.delete(userIdentifier);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());
-        kafkaTemplate.send("userIdentifier-delete-core-event", 0, String.valueOf(0), StringHelper.toJsonString(userIdentifier));
+        kafkaTemplate.send("userIdentifier-delete-core-event", String.valueOf(System.nanoTime()), StringHelper.toJsonString(userIdentifier));
 
     }
 

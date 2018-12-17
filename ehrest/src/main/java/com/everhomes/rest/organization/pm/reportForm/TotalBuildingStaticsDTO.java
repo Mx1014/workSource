@@ -43,7 +43,21 @@ public class TotalBuildingStaticsDTO {
 	private BigDecimal amountOwed;
 	private BigDecimal dueDayCount;
 	private BigDecimal collectionRate;
+	private Integer signedupApartmentCount;
+	private Integer waitingroomApartmentCount;
 	
+	public Integer getSignedupApartmentCount() {
+		return signedupApartmentCount;
+	}
+	public void setSignedupApartmentCount(Integer signedupApartmentCount) {
+		this.signedupApartmentCount = signedupApartmentCount;
+	}
+	public Integer getWaitingroomApartmentCount() {
+		return waitingroomApartmentCount;
+	}
+	public void setWaitingroomApartmentCount(Integer waitingroomApartmentCount) {
+		this.waitingroomApartmentCount = waitingroomApartmentCount;
+	}
 	public Integer getBuildingCount() {
 		return buildingCount;
 	}

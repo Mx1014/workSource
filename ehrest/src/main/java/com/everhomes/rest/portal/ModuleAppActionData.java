@@ -7,13 +7,24 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>moduleAppId: 模块应用id</li>
+ * <li>moduleEntryId: 应用入口ID</li>
  * </ul>
  */
 public class ModuleAppActionData {
 
 	private Long moduleAppId;
 
-	public Long getModuleAppId() {
+    private Long moduleEntryId;
+
+    public Long getModuleEntryId() {
+        return moduleEntryId;
+    }
+
+    public void setModuleEntryId(Long moduleEntryId) {
+        this.moduleEntryId = moduleEntryId;
+    }
+
+    public Long getModuleAppId() {
 		return moduleAppId;
 	}
 

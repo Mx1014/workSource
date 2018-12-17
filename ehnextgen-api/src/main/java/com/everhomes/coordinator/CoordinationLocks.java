@@ -103,6 +103,8 @@ public enum CoordinationLocks {
     UNION_GROUP_LOCK("union.group"),
     UNION_GROUP_CLONE_LOCK("union_group_clone"),
 
+    WELFARE_EDIT_LOCK("welfare.edit"),
+
     PAY_CREATE_PREORDER("pay.create.preorder"),
 
     BILL_STATUS_UPDATE("bill.status.update"),
@@ -178,7 +180,14 @@ public enum CoordinationLocks {
     CHECK_ENTERPRISE_PAYMENT_STATUS("check_enterprise_payment_status"),
 
     SYNC_USER_MODIFY("sync_user_modify"),
-    SYNC_USER_IDEN_MODIFY("sync_user_iden_modify");
+    SYNC_USER_IDEN_MODIFY("sync_user_iden_modify"),
+	
+	OFFICE_CUBICLE_STATION_RENT("office_cubicle_station_rent"),
+	OFFICE_CUBICLE_ORDER_STATUS("office_cubicle_order_status"),
+	
+
+    INVITED_CUSTOMER_STATISTIC("invited_customer_statistic");
+
 
     private String code;
 

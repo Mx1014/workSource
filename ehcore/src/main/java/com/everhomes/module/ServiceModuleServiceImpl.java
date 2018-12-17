@@ -19,8 +19,10 @@ import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalService;
+import com.everhomes.portal.PortalVersion;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.portal.*;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
@@ -1534,13 +1536,23 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
         }
 
+
         serviceModuleEntry.setEntryName(cmd.getEntryName());
         serviceModuleEntry.setIconUri(cmd.getIconUri());
-        serviceModuleEntry.setTerminalType(cmd.getTerminalType());
         serviceModuleEntry.setLocationType(cmd.getLocationType());
         serviceModuleEntry.setSceneType(cmd.getSceneType());
         serviceModuleEntry.setAppCategoryId(cmd.getAppCategoryId());
-
+//        //在修改terminalType之前，先修改应用入口详细信息
+//        if (!cmd.getTerminalType().equals(serviceModuleEntry.getTerminalType())) {
+//            if (cmd.getTerminalType().equals(TerminalType.MOBILE.getCode())) {
+//                createAppEntry(serviceModuleEntry);
+//            }else {
+//                deleteAppEntry(serviceModuleEntry);
+//            }
+//        }else {
+//            updateAppEntry(serviceModuleEntry);
+//        }
+        serviceModuleEntry.setTerminalType(cmd.getTerminalType());
         serviceModuleEntryProvider.udpate(serviceModuleEntry);
 
     }
@@ -1846,6 +1858,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
 
         serviceModuleEntryProvider.delete(serviceModuleEntry.getId());
+//        //删除入口时，同时删除应用入口详细信息
+//        if (TerminalType.MOBILE.getCode() == serviceModuleEntry.getTerminalType()) {
+//            deleteAppEntry(serviceModuleEntry);
+//        }
     }
 
     @Override
@@ -1869,7 +1885,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         ServiceModuleEntry serviceModuleEntry = ConvertHelper.convert(cmd, ServiceModuleEntry.class);
 
         serviceModuleEntry.setDefaultOrder(1000);
-
+        serviceModuleEntry.setModuleName(module.getName());
         serviceModuleEntryProvider.create(serviceModuleEntry);
 
         ServiceModuleEntryDTO dto = ConvertHelper.convert(serviceModuleEntry, ServiceModuleEntryDTO.class);
@@ -1884,9 +1900,88 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 dto.setAppCategoryName(appCategory.getName());
             }
         }
-
+//        //新增入口时，同时新增应用入口数据
+//        if (TerminalType.MOBILE.getCode() == serviceModuleEntry.getTerminalType()) {
+//            createAppEntry(serviceModuleEntry);
+//        }
         return dto;
 
+    }
+
+    private void createAppEntry (ServiceModuleEntry serviceModuleEntry) {
+        List<NamespaceInfoDTO> namespaceInfoDTOS = this.namespacesService.listNamespace();
+        List<ServiceModuleAppEntry> list = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(namespaceInfoDTOS)) {
+            for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
+                PortalVersion version = this.portalService.findReleaseVersion(namespaceInfoDTO.getId());
+                if (version != null) {
+                    List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(), version.getId(), serviceModuleEntry.getModuleId());
+                    if (!CollectionUtils.isEmpty(apps)) {
+                        for (ServiceModuleApp app : apps) {
+                            ServiceModuleAppEntry appEntry = ConvertHelper.convert(serviceModuleEntry, ServiceModuleAppEntry.class);
+                            appEntry.setAppId(app.getOriginId());
+                            appEntry.setAppName(app.getName());
+                            appEntry.setId(null);
+                            list.add(appEntry);
+                        }
+                    }
+                }
+            }
+        }
+        this.serviceModuleEntryProvider.batchCreateAppEntry(list);
+    }
+
+    private void deleteAppEntry(ServiceModuleEntry serviceModuleEntry) {
+        List<NamespaceInfoDTO> namespaceInfoDTOS = this.namespacesService.listNamespace();
+        List<ServiceModuleAppEntry> list = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(namespaceInfoDTOS)) {
+            for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
+                PortalVersion version = this.portalService.findReleaseVersion(namespaceInfoDTO.getId());
+                if (version != null) {
+                    List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(), version.getId(), serviceModuleEntry.getModuleId());
+                    if (!CollectionUtils.isEmpty(apps)) {
+                        for (ServiceModuleApp app : apps) {
+                            List<ServiceModuleAppEntry> serviceModuleAppEntries = this.serviceModuleEntryProvider.listServiceModuleAppEntries(app.getOriginId(),null,null,null,null);
+                            if (!CollectionUtils.isEmpty(serviceModuleAppEntries)) {
+                                list.addAll(serviceModuleAppEntries);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!CollectionUtils.isEmpty(list)) {
+            this.serviceModuleEntryProvider.batchDeleteAppEntry(list);
+        }
+    }
+
+    private void updateAppEntry(ServiceModuleEntry serviceModuleEntry) {
+        List<NamespaceInfoDTO> namespaceInfoDTOS = this.namespacesService.listNamespace();
+        List<ServiceModuleAppEntry> list = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(namespaceInfoDTOS)) {
+            for (NamespaceInfoDTO namespaceInfoDTO : namespaceInfoDTOS) {
+                PortalVersion version = this.portalService.findReleaseVersion(namespaceInfoDTO.getId());
+                if (version != null) {
+                    List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleApp(namespaceInfoDTO.getId(), version.getId(), serviceModuleEntry.getModuleId());
+                    if (!CollectionUtils.isEmpty(apps)) {
+                        for (ServiceModuleApp app : apps) {
+                            List<ServiceModuleAppEntry> serviceModuleAppEntries = this.serviceModuleEntryProvider.listServiceModuleAppEntries(app.getOriginId(),null,null,null,null);
+                            if (!CollectionUtils.isEmpty(serviceModuleAppEntries)) {
+                                for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntries) {
+                                    serviceModuleAppEntry.setEntryName(serviceModuleEntry.getEntryName());
+                                    serviceModuleAppEntry.setSceneType(serviceModuleEntry.getSceneType());
+                                    serviceModuleAppEntry.setAppCategoryId(serviceModuleAppEntry.getAppCategoryId());
+                                    list.add(serviceModuleAppEntry);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!CollectionUtils.isEmpty(list)) {
+            this.serviceModuleEntryProvider.batchUpdateAppEntry(list);
+        }
     }
 
     @Override

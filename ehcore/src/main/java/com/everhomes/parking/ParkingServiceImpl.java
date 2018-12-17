@@ -991,12 +991,23 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(order.getRechargeType());
 		if(rechargeType == ParkingRechargeType.MONTHLY){
+			ParkingVendorHandler handler = getParkingVendorHandler(parkingLot.getVendorName());
+
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			String sdate = null;
-			if (order.getEndPeriod() == null){
-				sdate = sdf.format(new Date());
-			} else {
-				sdate =  sdf.format(order.getEndPeriod());
+			if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())){
+				List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, order.getPlateNumber());
+				sdate = sdf.format(cards.get(0).getEndTime());
+			} else if(order.getOrderType().equals(ParkingOrderType.OPEN_CARD.getCode())) {
+				ParkingCardRequest cardRequest = parkingProvider.findParkingCardRequestByPlateNumber( order.getPlateNumber());
+				GetOpenCardInfoCommand cmd = new GetOpenCardInfoCommand();
+				cmd.setOwnerId(order.getOwnerId());
+				cmd.setOwnerType(order.getOwnerType());
+				cmd.setParkingLotId(parkingLot.getId());
+				cmd.setParkingRequestId(cardRequest.getId());
+				cmd.setPlateNumber(order.getPlateNumber());
+				OpenCardInfoDTO cardDTO = handler.getOpenCardInfo(cmd);
+				sdate = sdf.format(cardDTO.getExpireDate());
 			}
 			e = new OrderDescriptionEntity();
 			e.setKey("当前有效期");
@@ -1120,7 +1131,7 @@ public class ParkingServiceImpl implements ParkingService {
 		createOrderCommand.setGoodsName(extendInfo);
 		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
         String homeurl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-		//String homeurl = "http://10.1.110.79:8080";
+//		String homeurl = "http://10.1.110.79:8080";
 		//String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
 		String callbackurl = homeurl + contextPath + configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.pay.callBackUrl", "/parking/notifyParkingRechargeOrderPaymentV2");
 		createOrderCommand.setBackUrl(callbackurl);
@@ -3565,8 +3576,8 @@ public class ParkingServiceImpl implements ParkingService {
 			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
 			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
 			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
-			newPayeeAccount.setMerchantId(oldPayeeAccount.getMerchantId());
-			newPayeeAccount.setPayeeId(oldPayeeAccount.getMerchantId());
+			newPayeeAccount.setMerchantId(cmd.getPayeeId());
+			newPayeeAccount.setPayeeId(cmd.getPayeeId());
 			parkingBusinessPayeeAccountProvider.updateParkingBusinessPayeeAccount(newPayeeAccount);
 		}else{
 			//ParkingBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ParkingBusinessPayeeAccount.class);

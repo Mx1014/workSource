@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>meetingRoomId: 会议室ID</li>
  * <li>meetingRoomName: 会议室名称</li>
  * <li>subject: 会议主题</li>
+ * <li>content: 会议内容</li>
  * <li>meetingDate: 会议日期，不包含时分秒</li>
  * <li>expectBeginTime: 会议预定开始时间戳(毫秒数)，仅包含时分秒，如8:30等于8*3600*1000+30*60*1000</li>
  * <li>expectEndTime: 会议预定结束时间戳(毫秒数)，仅包含时分秒，如8:30等于8*3600*1000+30*60*1000</li>
@@ -25,6 +26,7 @@ public class MeetingReservationSimpleDTO {
     private Long meetingRoomId;
     private String meetingRoomName;
     private String subject;
+    private String content;
     private Long meetingDate;
     private Long expectBeginTime;
     private Long expectEndTime;
@@ -131,16 +133,25 @@ public class MeetingReservationSimpleDTO {
         this.showStatus = showStatus;
     }
 
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Byte getAttachmentFlag() {
+        return attachmentFlag;
+    }
+
+    public void setAttachmentFlag(Byte attachmentFlag) {
+        this.attachmentFlag = attachmentFlag;
+    }
+
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
-	public Byte getAttachmentFlag() {
-		return attachmentFlag;
-	}
-
-	public void setAttachmentFlag(Byte attachmentFlag) {
-		this.attachmentFlag = attachmentFlag;
-	}
 }

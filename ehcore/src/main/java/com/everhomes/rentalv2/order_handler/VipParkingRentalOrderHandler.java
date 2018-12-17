@@ -9,6 +9,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.*;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
+import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
 import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
@@ -22,11 +23,13 @@ import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.promotion.order.PayerInfoDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2PriceRules;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +39,9 @@ import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -63,6 +68,8 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
     private CommunityProvider communityProvider;
     @Autowired
     protected GeneralOrderService orderService;
+    @Autowired
+    private ScheduleProvider scheduleProvider;
     @Override
     public BigDecimal getRefundAmount(RentalOrder order, Long now) {
 
@@ -192,6 +199,32 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
             order.setStatus(SiteBillStatus.IN_USING.getCode());
             rentalv2Provider.updateRentalBill(order);
             lockOrderResourceStatus(order);
+        }
+    }
+
+    @Override
+    public void nearHalfHourBegin(RentalOrder order) {
+        Long currTime = DateHelper.currentGMTTime().getTime();
+        //订单开始 置为使用中的状态
+        if (SiteBillStatus.SUCCESS.getCode() == order.getStatus() && currTime >= order.getStartTime().getTime() ) {
+            this.autoUpdateOrder(order);
+        }
+        Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0L;
+
+        if(SiteBillStatus.IN_USING.getCode() == order.getStatus() &&
+                currTime<orderReminderEndTimeLong && currTime + 30*60*1000L >= orderReminderEndTimeLong){
+
+            Map<String, Object> messageMap = new HashMap<>();
+            messageMap.put("orderId",order.getId());
+            messageMap.put("methodName", "endReminderSendMessage");
+            scheduleProvider.scheduleSimpleJob(
+                    "RentalMessageQuartzJob" + order.getId(),
+                    "RentalMessageQuartzJob" + order.getId(),
+                    new java.util.Date(orderReminderEndTimeLong),
+                    RentalMessageQuartzJob.class,
+                    messageMap
+            );
+
         }
     }
 

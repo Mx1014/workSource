@@ -6,13 +6,16 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModuleService;
@@ -21,11 +24,16 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.ListCommunitiesCommand;
+import com.everhomes.rest.community.ListCommunitiesResponse;
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -34,9 +42,11 @@ import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -48,27 +58,44 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
 @Component
-public class InvitedCustomerServiceImpl implements InvitedCustomerService {
+public class InvitedCustomerServiceImpl implements InvitedCustomerService , ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvitedCustomerServiceImpl.class);
     private static final String CreateCustomer = "/CreateCustomer";
     private static final Integer SUCCESS_CODE = 0;
     private static final String CreateContract = "/CreateContract";
+
+    @Autowired
+    private CommunityService communityService;
 
     @Autowired
     private EnterpriseCustomerSearcher customerSearcher;
@@ -120,6 +147,31 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Autowired
     private ServiceModuleService serviceModuleService;
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
+
+
+
+
+    public void setup(){
+        String triggerName = CustomerStatisticsScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
+        String jobName = triggerName;
+        String cronExpression = CustomerStatisticsScheduleJob.CRON_EXPRESSION;
+        //启动定时任务
+        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, CustomerStatisticsScheduleJob.class, null);
+    }
+
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+
+
 
 
 
@@ -432,6 +484,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             if (itemsMap != null && itemsMap.size() > 0) {
 
                 statistics = invitedCustomerProvider.getInvitedCustomerStatistics(isAdmin, cmd.getKeyword(), cmd.getRequirementMinArea(), cmd.getRequirementMaxArea(), itemsMap.keySet(), itemsMap, (locator, query) -> {
+
                     query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
                     query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(cmd.getCommunityId()));
                     if (cmd.getCorpIndustryItemId() != null) {
@@ -443,16 +496,33 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     if (cmd.getCustomerSource() != null) {
                         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CUSTOMER_SOURCE.eq(cmd.getCustomerSource()));
                     }
+                    Condition rangeCreateTime = null;
+                    Condition rangeLastTime = null;
                     if (cmd.getMinTrackingPeriod() != null) {
-                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod())));
+                        rangeCreateTime = Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod()));
+                        rangeLastTime = Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod()));
                     }
                     if (cmd.getMaxTrackingPeriod() != null) {
-                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())));
+                        if(rangeCreateTime != null){
+                            rangeCreateTime = rangeCreateTime.and(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())));
+                        }else{
+                            rangeCreateTime = Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod()));
+                        }
+
+                        if(rangeLastTime != null){
+                            rangeLastTime = rangeLastTime.and(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())));
+                        }else{
+                            rangeLastTime = Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod()));
+                        }
+                    }
+                    if(rangeCreateTime != null && rangeLastTime != null) {
+                        query.addConditions(rangeCreateTime.or(rangeLastTime));
                     }
 
                     return query;
                 });
             }
+
             // add transfer Rate  infos
             addExtendInfo(statistics);
             response.setStatistics(statistics);
@@ -672,9 +742,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     }
                 });
             }
-            invitedCustomerDTO.setTrackers(trackers);
-            EnterpriseCustomer customer = ConvertHelper.convert(invitedCustomerDTO, EnterpriseCustomer.class);
-            customerSearcher.feedDoc(customer);
+            customerSearcher.syncSingleCustomer(invitedCustomerDTO.getId());
 
         }
 
@@ -916,6 +984,1115 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     }
 
+    @Override
+    public List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsDaily(GetAllCommunityCustomerStatisticsDailyCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsMonthly(GetAllCommunityCustomerStatisticsMonthlyCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public GetCustomerStatisticResponse getCustomerStatisticsDaily(GetCustomerStatisticsCommand cmd) {
+        List<CommunityCustomerStatisticDTO> result = new ArrayList<>();
+
+        java.sql.Date startQueryTime = null;
+        java.sql.Date endQueryTime = null;
+        if(cmd.getStartQueryTime() != null){
+            startQueryTime = getDateByTimestamp(new Timestamp(cmd.getStartQueryTime()));
+        }
+        if(cmd.getEndQueryTime() != null){
+            endQueryTime = getDateByTimestamp(new Timestamp(cmd.getEndQueryTime()));
+        }
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0);
+        }
+        //如果传了园区ID，则根据园区ID筛选数据，此时为分园区的查询
+        List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), cmd.getCommunities(),
+                startQueryTime, endQueryTime, cmd.getPageSize(), cmd.getPageAnchor());
+
+        Integer nextPageAnchor = null;
+        if(dailies.size() == cmd.getPageSize() + 1){
+            nextPageAnchor = cmd.getPageAnchor() + 1;
+            dailies.remove(dailies.size() - 1);
+        }
+        GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
+        List<CustomerStatisticsDTO> dtos = dailies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList());
+        for(CustomerStatisticsDTO dto: dtos){
+            if(dto.getDateStr() != null){
+                SimpleDateFormat haveDay = new SimpleDateFormat("yyyy-MM-dd");
+                dto.setDateString(haveDay.format(dto.getDateStr()));
+            }
+            dto.setCommunityName(communityProvider.findCommunityById(dto.getCommunityId()).getName());
+        }
+        response.setDtos(dtos);
+        response.setNextPageAnchor(nextPageAnchor);
+        return response;
+    }
+
+
+    @Override
+    public GetCustomerStatisticResponse getCustomerStatisticsDailyTotal(GetCustomerStatisticsCommand cmd) {
+        java.sql.Date startQueryTime = null;
+        java.sql.Date endQueryTime = null;
+        if(cmd.getStartQueryTime() != null){
+            startQueryTime = getDateByTimestamp(new Timestamp(cmd.getStartQueryTime()));
+        }
+        if(cmd.getEndQueryTime() != null){
+            endQueryTime = getDateByTimestamp(new Timestamp(cmd.getEndQueryTime()));
+        }
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0);
+        }
+        List<CustomerStatisticDailyTotal> dailies = invitedCustomerProvider.listCustomerStatisticDailyTotal(cmd.getNamespaceId(), cmd.getOrgId(),
+                startQueryTime, endQueryTime, cmd.getPageSize(), cmd.getPageAnchor());
+
+        GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
+        Integer nextPageAnchor = null;
+        if(dailies.size() == cmd.getPageSize() + 1){
+            nextPageAnchor = cmd.getPageAnchor() + 1;
+            dailies.remove(dailies.size() - 1);
+        }
+        List<CustomerStatisticsDTO> dtos = dailies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList());
+        for(CustomerStatisticsDTO dto: dtos){
+            if(dto.getDateStr() != null){
+                SimpleDateFormat haveDay = new SimpleDateFormat("yyyy-MM-dd");
+                dto.setDateString(haveDay.format(dto.getDateStr()));
+            }
+        }
+        response.setDtos(dtos);
+        response.setNextPageAnchor(nextPageAnchor);
+        return response;
+    }
+
+    @Override
+    public GetCustomerStatisticResponse getCustomerStatisticsMonthly(GetCustomerStatisticsCommand cmd) {
+        java.sql.Date startQueryTime = null;
+        java.sql.Date endQueryTime = null;
+        if(cmd.getStartQueryTime() != null){
+            startQueryTime = getDateByTimestamp(new Timestamp(cmd.getStartQueryTime()));
+        }
+        if(cmd.getEndQueryTime() != null){
+            endQueryTime = getDateByTimestamp(new Timestamp(cmd.getEndQueryTime()));
+        }
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0);
+        }
+        List<CommunityCustomerStatisticDTO> result = new ArrayList<>();
+        List<CustomerStatisticMonthly> monthlies = invitedCustomerProvider.listCustomerStatisticMonthly(cmd.getNamespaceId(), cmd.getCommunities(),
+                startQueryTime, endQueryTime, cmd.getPageSize(), cmd.getPageAnchor());
+
+        Integer nextPageAnchor = null;
+        if(monthlies.size() == cmd.getPageSize() + 1){
+            nextPageAnchor =  cmd.getPageAnchor() + 1;
+            monthlies.remove(monthlies.size() - 1);
+        }
+        GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
+        List<CustomerStatisticsDTO> dtos = monthlies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList());
+        for(CustomerStatisticsDTO dto: dtos){
+            if(dto.getDateStr() != null){
+                SimpleDateFormat haveDay = new SimpleDateFormat("yyyy-MM");
+                dto.setDateString(haveDay.format(dto.getDateStr()));
+            }
+            dto.setCommunityName(communityProvider.findCommunityById(dto.getCommunityId()).getName());
+        }
+        response.setDtos(dtos);
+        response.setNextPageAnchor(nextPageAnchor);
+        return response;
+    }
+
+    @Override
+    public GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsCommand cmd) {
+
+        java.sql.Date startQueryTime = null;
+        java.sql.Date endQueryTime = null;
+        if(cmd.getStartQueryTime() != null){
+            startQueryTime = getDateByTimestamp(new Timestamp(cmd.getStartQueryTime()));
+        }
+        if(cmd.getEndQueryTime() != null){
+            endQueryTime = getDateByTimestamp(new Timestamp(cmd.getEndQueryTime()));
+        }
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0);
+        }
+        List<CustomerStatisticMonthlyTotal> monthlyTotals = invitedCustomerProvider.listCustomerStatisticMonthlyTotal(cmd.getNamespaceId(), cmd.getOrgId(),
+                startQueryTime, endQueryTime, cmd.getPageSize(), cmd.getPageAnchor());
+
+        GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
+        Integer nextPageAnchor = null;
+        if(monthlyTotals.size() == cmd.getPageSize() + 1){
+            nextPageAnchor = cmd.getPageAnchor() + 1;
+            monthlyTotals.remove(monthlyTotals.size() - 1);
+        }
+        List<CustomerStatisticsDTO> dtos = monthlyTotals.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList());
+        for(CustomerStatisticsDTO dto: dtos){
+            if(dto.getDateStr() != null){
+                SimpleDateFormat haveDay = new SimpleDateFormat("yyyy-MM");
+                dto.setDateString(haveDay.format(dto.getDateStr()));
+            }
+        }
+        response.setDtos(dtos);
+        response.setNextPageAnchor(nextPageAnchor);
+        return response;
+    }
+
+    @Override
+    public StatisticDataDTO getCustomerStatisticsTotal(GetCustomerStatisticsCommand cmd) {
+        StatisticTime time = getBeforeForStatistic(new Date(), Calendar.DAY_OF_MONTH);
+        java.sql.Date startQueryTime = new java.sql.Date(getDateByTimestamp(time.getStatisticStartTime()).getTime());
+        CustomerStatisticTotal total = invitedCustomerProvider.getCustomerStatisticsTotal(cmd.getNamespaceId(), cmd.getOrgId(), startQueryTime);
+        return ConvertHelper.convert(total, StatisticDataDTO.class);
+    }
+
+    @Override
+    public GetCustomerStatisticResponse getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void initCustomerStatusToDB(){
+        Map<String, Object> params = new HashMap<>();
+        params.put("pageSize" , 500);
+        taskService.createTask("initCustomerStatusToDB", TaskType.FILEDOWNLOAD.getCode(), InitCustomerStatisticsHandle.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+
+    }
+
+    @Override
+    public void recordCustomerLevelChange(Long oldLevelItemId, Long newLevelItemId, Integer namespaceId, Long communityId, Long customerId, Timestamp changeDate) {
+        if(newLevelItemId != null) {
+            if (!newLevelItemId.equals(oldLevelItemId)) {
+                CustomerLevelChangeRecord record = new CustomerLevelChangeRecord();
+                record.setCustomerId(customerId);
+                record.setCommunityId(communityId);
+                record.setOldStatus(oldLevelItemId);
+                record.setNewStatus(newLevelItemId);
+                record.setChangeDate(changeDate);
+                record.setNamespaceId(namespaceId);
+                invitedCustomerProvider.createCustomerLevelChangeRecord(record);
+            }
+        }
+    }
+    @Override
+    public void changeCustomerLevel(EnterpriseCustomer customer, Long newLevelItemId){
+        recordCustomerLevelChange(customer.getLevelItemId(), newLevelItemId, customer.getNamespaceId(), customer.getCommunityId(), customer.getId(), null);
+        //customer.setLevelItemId(levelItemId);
+        //还未确定是否改变客户状态就会改变客户类型
+
+        /*if(levelItemId.equals(CustomerLevelType.REGISTERED_CUSTOMER.getCode())){
+            customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+        }else{
+            customer.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
+        }*/
+    }
+
+    @Override
+    public void changeCustomerLevelByCustomerId(Long customerId, Long newLevelItemId){
+        EnterpriseCustomer customer = customerProvider.findById(customerId);
+        changeCustomerLevel(customer, newLevelItemId);
+    }
+
+    @Override
+    public void createCustomerLevelByCustomerId(Long customerId, Long newLevelItemId){
+        EnterpriseCustomer customer = customerProvider.findById(customerId);
+        customer.setLevelItemId(null);
+        changeCustomerLevel(customer, newLevelItemId);
+    }
+
+
+    //开始进行统计，将所有的管理公司取出，并根据其下的园区进行统计
+    @Override
+    public List<StatisticDataDTO> startCustomerStatisticTotal(StatisticTime time){
+        List<Long> orgIds = organizationProvider.getOrganizationIdsHaveCommunity();
+        List<Organization> orgs = organizationProvider.listOrganizationsByIds(orgIds);
+        Timestamp statisticStartTime = time.getStatisticStartTime();
+        Timestamp statisticEndTime = time.getStatisticEndTime();
+
+
+        List<StatisticDataDTO> result = new ArrayList<>();
+
+        for(Organization org : orgs){
+            ListCommunitiesCommand cmd2 = new ListCommunitiesCommand();
+            cmd2.setNamespaceId(org.getNamespaceId());
+            cmd2.setOrgId(org.getId());
+            ListCommunitiesResponse response = communityService.listCommunities(cmd2);
+            List<CommunityDTO> communities = response.getList();
+
+            List<StatisticDataDTO> tempResult = new ArrayList<>();
+            for(CommunityDTO community : communities) {
+
+                tempResult.add(statisticCustomerNum(org.getNamespaceId(), community.getId(), statisticStartTime, statisticEndTime));
+            }
+
+            StatisticDataDTO data = new StatisticDataDTO();
+            data.setNamespaceId(org.getNamespaceId());
+            data.setOrganizationId(org.getId());
+            data.setCommunityNum(communities.size());
+            data.setNewCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getNewCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+            data.setTrackingNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getTrackingNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+            data.setLossCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getLossCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+            data.setHistoryCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getHistoryCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+            data.setRegisteredCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getRegisteredCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+            data.setDeleteCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getDeleteCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+            result.add(data);
+
+        }
+        return result;
+    }
+
+
+    @Override
+    public List<StatisticDataDTO> startCustomerStatistic(StatisticTime time){
+        List<Community>  allCommunities = communityProvider.listAllBizCommunities();
+        Timestamp statisticStartTime = time.getStatisticStartTime();
+        Timestamp statisticEndTime = time.getStatisticEndTime();
+
+
+        List<StatisticDataDTO> result = new ArrayList<>();
+
+        for(Community community : allCommunities){
+
+            result.add(statisticCustomerNum(community.getNamespaceId(), community.getId(), statisticStartTime, statisticEndTime));
+
+        }
+        return result;
+    }
+
+    @Override
+    public StatisticTime getBeforeForStatistic(Date date, int type) {
+
+        /*
+         * 支持两种计算
+         * Calendar. DAY_OF_MONTH：获取当前传入时间的前一天的一整天的时间
+         * Calendar. MONTH ： 获取当前传入时间的前一月的一整月的时间
+         *
+         */
+        if(type == Calendar. DAY_OF_MONTH) {
+            //Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.add(Calendar.DAY_OF_MONTH, -1);
+            date = calendar.getTime();
+
+            Timestamp statisticStartTime = new Timestamp(date.getTime());
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            date = calendar.getTime();
+            Timestamp statisticEndTime = new Timestamp(date.getTime());
+
+            StatisticTime result = new StatisticTime();
+            result.setStatisticEndTime(statisticEndTime);
+            result.setStatisticStartTime(statisticStartTime);
+            return result;
+        }
+        if(type == Calendar. MONTH){
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar. HOUR_OF_DAY, 0);
+            calendar.set(Calendar. MINUTE, 0);
+            calendar.set(Calendar. SECOND, 0);
+            calendar.add(Calendar. MONTH, -1);
+            calendar.set(Calendar. MILLISECOND, 0);
+            calendar.set(Calendar. DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+            date = calendar.getTime();
+
+            Timestamp statisticStartTime = new Timestamp(date.getTime());
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            calendar.set(Calendar. DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+            date = calendar.getTime();
+            Timestamp statisticEndTime = new Timestamp(date.getTime());
+
+            StatisticTime result = new StatisticTime();
+            result.setStatisticEndTime(statisticEndTime);
+            result.setStatisticStartTime(statisticStartTime);
+            return result;
+        }
+        if(type == Calendar. YEAR){
+            //Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            calendar.add(Calendar.DAY_OF_MONTH, -1);
+            date = calendar.getTime();
+            Timestamp statisticEndTime = new Timestamp(date.getTime());
+
+            StatisticTime result = new StatisticTime();
+            result.setStatisticEndTime(statisticEndTime);
+            result.setStatisticStartTime(null);
+            return result;
+        }
+        return null;
+
+    }
+
+    @Override
+    public StatisticTime getNowForStatistic(Date date, int type) {
+
+        /*
+         * 支持两种计算
+         * Calendar. DAY_OF_MONTH：获取当前传入时间的当天的一整天的时间
+         * Calendar. MONTH ： 获取当前传入时间的当月的一整月的时间
+         *
+         */
+        if(type == Calendar. DAY_OF_MONTH) {
+            //Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            date = calendar.getTime();
+
+            Timestamp statisticStartTime = new Timestamp(date.getTime());
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            date = calendar.getTime();
+            Timestamp statisticEndTime = new Timestamp(date.getTime());
+
+            StatisticTime result = new StatisticTime();
+            result.setStatisticEndTime(statisticEndTime);
+            result.setStatisticStartTime(statisticStartTime);
+            return result;
+        }
+        if(type == Calendar. MONTH){
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar. HOUR_OF_DAY, 0);
+            calendar.set(Calendar. MINUTE, 0);
+            calendar.set(Calendar. SECOND, 0);
+            calendar.set(Calendar. MILLISECOND, 0);
+            calendar.set(Calendar. DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+            date = calendar.getTime();
+
+            Timestamp statisticStartTime = new Timestamp(date.getTime());
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            calendar.set(Calendar. DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+            date = calendar.getTime();
+            Timestamp statisticEndTime = new Timestamp(date.getTime());
+
+            StatisticTime result = new StatisticTime();
+            result.setStatisticEndTime(statisticEndTime);
+            result.setStatisticStartTime(statisticStartTime);
+            return result;
+        }
+        return null;
+
+    }
+
+
+    @Override
+    public void statisticCustomerDailyTotal(Date date){
+        LOGGER.info("the scheduleJob of customer daily total by organization statistics is start!");
+        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. DAY_OF_MONTH);
+        List<StatisticDataDTO> datas = startCustomerStatisticTotal(statisticTime);
+
+        invitedCustomerProvider.deleteCustomerStatisticDailyTotal(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
+        if(datas != null && datas.size() > 0) {
+            for (StatisticDataDTO data : datas) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                String str = format.format(statisticTime.getStatisticStartTime());
+                try {
+                    data.setDateStr(new java.sql.Date(format.parse(str).getTime()));
+                    CustomerStatisticDailyTotal dailyTotal = ConvertHelper.convert(data, CustomerStatisticDailyTotal.class);
+                    invitedCustomerProvider.createCustomerStatisticsDailyTotal(dailyTotal);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+        LOGGER.info("the scheduleJob of customer daily statistics is end!, result = {}" , datas);
+
+    }
+
+    @Override
+    public void statisticCustomerDaily(Date date){
+        LOGGER.info("the scheduleJob of customer daily statistics is start!");
+        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. DAY_OF_MONTH);
+        List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
+
+        invitedCustomerProvider.deleteCustomerStatisticDaily(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
+        if(datas != null && datas.size() > 0) {
+            for (StatisticDataDTO data : datas) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                String str = format.format(statisticTime.getStatisticStartTime());
+                try {
+                    data.setDateStr(new java.sql.Date(format.parse(str).getTime()));
+                    CustomerStatisticDaily daily = ConvertHelper.convert(data, CustomerStatisticDaily.class);
+                    invitedCustomerProvider.createCustomerStatisticsDaily(daily);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+        LOGGER.info("the scheduleJob of customer daily statistics is end!, result = {}" , datas);
+
+    }
+
+    @Override
+    public void statisticCustomerMonthlyTotal(Date date){
+        LOGGER.info("the scheduleJob of customer monthly total by organization statistics is start!");
+        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. MONTH);
+        List<StatisticDataDTO> datas = startCustomerStatisticTotal(statisticTime);
+
+        invitedCustomerProvider.deleteCustomerStatisticMonthlyTotal(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
+        if(datas != null && datas.size() > 0) {
+            for (StatisticDataDTO data : datas) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                String str = format.format(statisticTime.getStatisticStartTime());
+                try {
+                    data.setDateStr(new java.sql.Date(format.parse(str).getTime()));
+                    CustomerStatisticMonthlyTotal monthlyTotal = ConvertHelper.convert(data, CustomerStatisticMonthlyTotal.class);
+                    invitedCustomerProvider.createCustomerStatisticsMonthlyTotal(monthlyTotal);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+        LOGGER.info("the scheduleJob of customer daily statistics is end!, result = {}" , datas);
+
+    }
+
+    @Override
+    public void statisticCustomerMonthly(Date date){
+        LOGGER.info("the scheduleJob of customer monthly statistics is start!");
+        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. MONTH);
+        List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
+
+        invitedCustomerProvider.deleteCustomerStatisticMonthly(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
+        if(datas != null && datas.size() > 0) {
+            for (StatisticDataDTO data : datas) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                String str = format.format(statisticTime.getStatisticStartTime());
+                try {
+                    data.setDateStr(new java.sql.Date(format.parse(str).getTime()));
+                    CustomerStatisticMonthly monthly = ConvertHelper.convert(data, CustomerStatisticMonthly.class);
+                    invitedCustomerProvider.createCustomerStatisticsMonthly(monthly);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        LOGGER.info("the scheduleJob of customer monthly statistics is end!, result = {}" , datas);
+
+    }
+
+    @Override
+    public void statisticCustomerTotal(Date date){
+        LOGGER.info("the scheduleJob of customer total statistics is start!");
+        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. YEAR);
+        List<StatisticDataDTO> datas = startCustomerStatisticTotal(statisticTime);
+
+        Timestamp endTime = statisticTime.getStatisticEndTime();
+        invitedCustomerProvider.deleteCustomerStatisticTotal(null, null, getDateByTimestamp(endTime));
+        if(datas != null && datas.size() > 0) {
+            for (StatisticDataDTO data : datas) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                String str = format.format(statisticTime.getStatisticEndTime());
+                try {
+                    data.setDateStr(new java.sql.Date(format.parse(str).getTime()));
+                    CustomerStatisticTotal total = ConvertHelper.convert(data, CustomerStatisticTotal.class);
+                    invitedCustomerProvider.createCustomerStatisticTotal(total);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        LOGGER.info("the scheduleJob of customer total statistics is end!, result = {}" , datas);
+    }
+
+    @Override
+    public void statisticCustomerAll(Date date){
+        LOGGER.info("the scheduleJob of customer monthly statistics is start!");
+        StatisticTime statisticTime = getBeforeForStatistic(date , Calendar. YEAR);
+        List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
+    }
+
+    @Override
+    public void testCustomerStatistic(TestCreateCustomerStatisticCommand cmd){
+        CustomerStatisticType type = CustomerStatisticType.fromCode(cmd.getType());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+        switch (type) {
+            case STATISTIC_DAILY:
+                try {
+                    Date date = format.parse(cmd.getDate());
+                    statisticCustomerDaily(date);
+                    statisticCustomerDailyTotal(date);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case STATISTIC_MONTHLY:
+                try {
+                    Date date = format.parse(cmd.getDate());
+                    statisticCustomerMonthly(date);
+                    statisticCustomerMonthlyTotal(date);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case STATISTIC_ALL:
+                try {
+                    Date date = format.parse(cmd.getDate());
+                    statisticCustomerTotal(date);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            default:
+        }
+    }
+
+    @Override
+    public java.sql.Date getDateByTimestamp(Timestamp time){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date = format.parse(time.toString());
+            java.sql.Date result = new java.sql.Date(date.getTime());
+            return result;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public GetCustomerStatisticNowResponse queryCustomerStatisticMonthlyNow(GetCustomerStatisticNowCommand cmd) {
+        StatisticTime time = getNowForStatistic(new Date(), Calendar.MONTH);
+        GetCustomerStatisticNowResponse response = communityCustomerStatistic(time, cmd.getOrgId(), cmd.getNamespaceId(), cmd.getPageSize(), cmd.getPageAnchor());
+
+        return response;
+    }
+
+    @Override
+    public CustomerStatisticsDTO queryCustomerStatisticMonthlyTotalNow(GetCustomerStatisticsCommand cmd) {
+        StatisticTime time = getNowForStatistic(new Date(), Calendar.MONTH);
+        StatisticDataDTO datas = organizationCustomerStatisticTotal(time, cmd.getOrgId(), cmd.getNamespaceId());
+
+        return ConvertHelper.convert(datas, CustomerStatisticsDTO.class);
+    }
+
+    @Override
+    public GetCustomerStatisticNowResponse queryCustomerStatisticDailyNow(GetCustomerStatisticNowCommand cmd) {
+        StatisticTime time = getNowForStatistic(new Date(), Calendar.DAY_OF_MONTH);
+        GetCustomerStatisticNowResponse response = communityCustomerStatistic(time, cmd.getOrgId(), cmd.getNamespaceId(), cmd.getPageSize(), cmd.getPageAnchor());
+
+        return response;
+    }
+
+    @Override
+    public CustomerStatisticsDTO queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsCommand cmd) {
+        StatisticTime time = getNowForStatistic(new Date(), Calendar.DAY_OF_MONTH);
+        StatisticDataDTO datas = organizationCustomerStatisticTotal(time, cmd.getOrgId(), cmd.getNamespaceId());
+
+        return ConvertHelper.convert(datas, CustomerStatisticsDTO.class);
+    }
+
+    @Override
+    public CustomerStatisticsDTO queryCustomerStatisticTotal(GetCustomerStatisticsCommand cmd){
+        StatisticTime time = getNowForStatistic(new Date(), Calendar.DAY_OF_MONTH);
+        StatisticDataDTO datas = organizationCustomerStatisticTotal(time, cmd.getOrgId(), cmd.getNamespaceId());
+        StatisticDataDTO datas2 = getCustomerStatisticsTotal(cmd);
+
+        if(datas != null && datas2 != null) {
+            datas.setNewCustomerNum(datas.getNewCustomerNum() + datas2.getNewCustomerNum());
+            datas.setLossCustomerNum(datas.getLossCustomerNum() + datas2.getLossCustomerNum());
+            datas.setHistoryCustomerNum(datas.getHistoryCustomerNum() + datas2.getHistoryCustomerNum());
+            datas.setDeleteCustomerNum(datas.getDeleteCustomerNum() + datas2.getDeleteCustomerNum());
+            datas.setTrackingNum(datas.getTrackingNum() + datas2.getTrackingNum());
+        }
+
+        return ConvertHelper.convert(datas, CustomerStatisticsDTO.class);
+
+    }
+
+    private GetCustomerStatisticNowResponse communityCustomerStatistic(StatisticTime time, Long orgId, Integer namespaceId, Integer pageSize, Long pageAnchor){
+        Timestamp statisticStartTime = time.getStatisticStartTime();
+        Timestamp statisticEndTime = time.getStatisticEndTime();
+
+
+        List<StatisticDataDTO> dtos = new ArrayList<>();
+
+        ListCommunitiesCommand cmd2 = new ListCommunitiesCommand();
+        cmd2.setNamespaceId(namespaceId);
+        cmd2.setOrgId(orgId);
+        cmd2.setPageAnchor(pageAnchor);
+        cmd2.setPageSize(pageSize);
+        ListCommunitiesResponse response = communityService.listCommunities(cmd2);
+        List<CommunityDTO> communities = response.getList();
+
+
+        for(CommunityDTO community: communities) {
+            StatisticDataDTO dto = statisticCustomerNum(namespaceId, community.getId(), statisticStartTime, statisticEndTime);
+            dto.setCommunityName(community.getName());
+            dtos.add(dto);
+        }
+
+        GetCustomerStatisticNowResponse result = new GetCustomerStatisticNowResponse();
+        result.setDtos(dtos.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
+        result.setNextPageAnchor(response.getNextPageAnchor());
+
+        return result;
+    }
+
+
+    private StatisticDataDTO organizationCustomerStatisticTotal(StatisticTime time, Long orgId, Integer namespaceId){
+        Timestamp statisticStartTime = time.getStatisticStartTime();
+        Timestamp statisticEndTime = time.getStatisticEndTime();
+
+
+        List<StatisticDataDTO> result = new ArrayList<>();
+
+        ListCommunitiesCommand cmd2 = new ListCommunitiesCommand();
+        cmd2.setNamespaceId(namespaceId);
+        cmd2.setOrgId(orgId);
+        ListCommunitiesResponse response = communityService.listCommunities(cmd2);
+        List<CommunityDTO> communities = response.getList();
+
+        List<StatisticDataDTO> tempResult = new ArrayList<>();
+        for(CommunityDTO community : communities) {
+            tempResult.add(statisticCustomerNum(namespaceId, community.getId(), statisticStartTime, statisticEndTime));
+        }
+
+        StatisticDataDTO data = new StatisticDataDTO();
+        data.setNamespaceId(namespaceId);
+        data.setOrganizationId(orgId);
+        data.setCommunityNum(communities.size());
+        data.setNewCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getNewCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        data.setTrackingNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getTrackingNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        data.setLossCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getLossCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        data.setHistoryCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getHistoryCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        data.setRegisteredCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getRegisteredCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        data.setDeleteCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getDeleteCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+
+        return data;
+    }
+
+    private StatisticDataDTO statisticCustomerNum(Integer namespaceId, Long communityId, Timestamp statisticStartTime, Timestamp statisticEndTime){
+        LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}", communityId, statisticStartTime, statisticEndTime);
+
+        /*List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime);
+        Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime);
+        LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, add customer num : {}", communityId, statisticStartTime, statisticEndTime, addCustomerNum);
+*/
+
+        Integer lossNum = invitedCustomerProvider.countCustomerLevelLossChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime, CustomerLevelType.LOSS_CUSTOMER.getCode());
+
+        Integer historyNum = invitedCustomerProvider.countCustomerLevelLossChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime, CustomerLevelType.HISTORY_CUSTOMER.getCode());
+
+        Integer registeredNum = invitedCustomerProvider.countCustomerLevelLossChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime, CustomerLevelType.REGISTERED_CUSTOMER.getCode());
+
+        Integer deleteNum = invitedCustomerProvider.countCustomerLevelLossChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime, CustomerLevelType.DELETE_CUSTOMER.getCode());
+
+        StatisticDataDTO data = new StatisticDataDTO();
+        data.setNamespaceId(namespaceId);
+        data.setCommunityId(communityId);
+        data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime));
+        data.setTrackingNum(invitedCustomerProvider.countTrackingNumByTrackingDate(communityId, statisticStartTime, statisticEndTime));
+        data.setLossCustomerNum(lossNum);
+        data.setHistoryCustomerNum(historyNum);
+        data.setRegisteredCustomerNum(registeredNum);
+        data.setDeleteCustomerNum(deleteNum);
+        return data;
+    }
+
+    @Override
+    public void exportCustomerStatistic(ExportCustomerStatisticsCommand cmd) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("ExportCustomerStatisticsCommand", cmd);
+        String exportFileNamePrefix = cmd.getPrefixFileName();
+        String fileName = String.format(exportFileNamePrefix,"") + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH) + ".xlsx";
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CustomerStatisticExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+
+    @SuppressWarnings("deprecation")
+    public OutputStream exportOutputStreamCustomerStatistic(ExportCustomerStatisticsCommand cmd, Long taskId, Byte exportType){
+        OutputStream outputStream = new ByteArrayOutputStream();
+        //每一条数据
+        Integer pageOffSet = 0;
+        Integer pageSize = 100000;
+
+        List<CustomerStatisticsDTO> dtos = new ArrayList<>();
+        Workbook wb = null;
+        InputStream in = null;
+        switch(exportType){
+            case 1:
+                GetCustomerStatisticsCommand cmd2 = ConvertHelper.convert(cmd, GetCustomerStatisticsCommand.class);
+                cmd2.setPageSize(pageSize);
+                cmd2.setPageAnchor(pageOffSet);
+                GetCustomerStatisticResponse response = getCustomerStatisticsDaily(cmd2);
+                in = this.getClass().getResourceAsStream("/excels/customer/daily.xlsx");
+                dtos = response.getDtos();
+                break;
+            case 2:
+                GetCustomerStatisticsCommand cmd3 = ConvertHelper.convert(cmd, GetCustomerStatisticsCommand.class);
+                cmd3.setPageSize(pageSize);
+                cmd3.setPageAnchor(pageOffSet);
+                GetCustomerStatisticResponse response2 = getCustomerStatisticsDailyTotal(cmd3);
+                in = this.getClass().getResourceAsStream("/excels/customer/dailyTotal.xlsx");
+                dtos = response2.getDtos();
+                break;
+            case 3:
+                GetCustomerStatisticNowCommand cmd4 = ConvertHelper.convert(cmd, GetCustomerStatisticNowCommand.class);
+                cmd4.setPageSize(pageSize);
+                GetCustomerStatisticNowResponse response3 = queryCustomerStatisticDailyNow(cmd4);
+                in = this.getClass().getResourceAsStream("/excels/customer/dailyNow.xlsx");
+                dtos = response3.getDtos();
+                break;
+            case 4:
+                GetCustomerStatisticsCommand cmd5 = ConvertHelper.convert(cmd, GetCustomerStatisticsCommand.class);
+                cmd5.setPageSize(pageSize);
+                cmd5.setPageAnchor(pageOffSet);
+                GetCustomerStatisticResponse response4 = getCustomerStatisticsMonthly(cmd5);
+                in = this.getClass().getResourceAsStream("/excels/customer/monthly.xlsx");
+                dtos = response4.getDtos();
+                break;
+            case 5:
+                GetCustomerStatisticsCommand cmd6 = ConvertHelper.convert(cmd, GetCustomerStatisticsCommand.class);
+                cmd6.setPageSize(pageSize);
+                cmd6.setPageAnchor(pageOffSet);
+                GetCustomerStatisticResponse response5 = getCustomerStatisticsMonthlyTotal(cmd6);
+                in = this.getClass().getResourceAsStream("/excels/customer/monthlyTotal.xlsx");
+                dtos = response5.getDtos();
+                break;
+            case 6:
+                GetCustomerStatisticNowCommand cmd7 = ConvertHelper.convert(cmd, GetCustomerStatisticNowCommand.class);
+                cmd7.setPageSize(pageSize);
+                GetCustomerStatisticNowResponse response6 = queryCustomerStatisticDailyNow(cmd7);
+                in = this.getClass().getResourceAsStream("/excels/customer/monthlyNow.xlsx");
+                dtos = response6.getDtos();
+                break;
+            case 7:
+                GetCustomerStatisticsCommand cmd8 = ConvertHelper.convert(cmd, GetCustomerStatisticsCommand.class);
+                cmd8.setPageSize(pageSize);
+                CustomerStatisticsDTO dto = queryCustomerStatisticTotal(cmd8);
+                in = this.getClass().getResourceAsStream("/excels/customer/total.xlsx");
+                dtos.add(dto);
+                break;
+            default:
+                //in = this.getClass().getResourceAsStream("/excels/customer/daily.xlsx");
+                break;
+        }
+
+
+        taskService.updateTaskProcess(taskId, 20);
+        try {
+            wb = new XSSFWorkbook(copyInputStream(in));
+        } catch (IOException e) {
+            LOGGER.error("exportOutputStreamCustomerStatistic copy inputStream error.");
+        }
+        Sheet sheet = wb.getSheetAt(0);
+        if (null != sheet) {
+
+            if(exportType == 1 || exportType == 2 || exportType == 4 || exportType == 5 ) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                Row firstRow = sheet.getRow(0);
+                Cell title = firstRow.getCell(0);
+                if(cmd.getStartQueryTime() != null && cmd.getEndQueryTime() != null) {
+                    Date startDate = new Date(cmd.getStartQueryTime());
+                    Date endDate = new Date(cmd.getEndQueryTime());
+                    title.setCellValue(title.getStringCellValue() + "（" + format.format(startDate) + "~" + format.format(endDate) + "）");
+                }else if(cmd.getStartQueryTime() != null && cmd.getEndQueryTime() == null){
+                    Date startDate = new Date(cmd.getStartQueryTime());
+                    Date endDate = new Date();
+                    title.setCellValue(title.getStringCellValue() + "（" + format.format(startDate) + "~" + format.format(endDate) + "）");
+                }else if(cmd.getStartQueryTime() == null && cmd.getEndQueryTime() != null){
+                    Date endDate = new Date(cmd.getEndQueryTime());
+                    title.setCellValue(title.getStringCellValue() + "（" + " " + "~" + format.format(endDate) + "）");
+                }
+
+            }else{
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                Date nowDate = new Date();
+                Row firstRow = sheet.getRow(0);
+                Cell title = firstRow.getCell(0);
+                title.setCellValue(title.getStringCellValue() + "（" + format.format(nowDate) + "）");
+            }
+
+
+            Row defaultRow = sheet.getRow(1);
+            Cell cell = defaultRow.getCell(1);
+            CellStyle style = cell.getCellStyle();
+            style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中
+            int size = 0;
+            if(null != dtos){
+                size = dtos.size();
+                taskService.updateTaskProcess(taskId, 30);
+                for(int i = 0;i < size;i++){
+                    Row tempRow = sheet.createRow(i + 2);
+                    CustomerStatisticsDTO dto = dtos.get(i);
+                    int orderNum = i + 1;//序号
+                    boolean isLastRow = false;
+                    if(exportType == 1 || exportType == 4){
+                        fillRowCellCustomerStatistic(tempRow, style, isLastRow, orderNum, dto);
+                    }else if(exportType == 2 || exportType == 5){
+                        fillRowCellCustomerStatisticTotal(tempRow, style, isLastRow, orderNum, dto);
+                    }else if(exportType == 3 || exportType == 6){
+                        fillRowCellCustomerStatisticNowWithTotal(tempRow, style, isLastRow, orderNum, dto);
+                    }else if(exportType == 7){
+                        fillRowCellCustomerStatisticNowTotal(tempRow, style, isLastRow, orderNum, dto);
+                    }
+                }
+                taskService.updateTaskProcess(taskId, 70);
+                //最后的一行总计
+                if(exportType == 3 || exportType == 6){
+                    GetCustomerStatisticsCommand cmdLast = ConvertHelper.convert(cmd, GetCustomerStatisticsCommand.class);
+                    CellStyle totalStyle = getTotalStyle(wb, style);
+                    Row tempRow = sheet.createRow(dtos.size() + 2);
+                    int orderNum = dtos.size() + 1;//序号
+                    boolean isLastRow = true;
+                    CustomerStatisticsDTO totalDTO = queryCustomerStatisticDailyTotalNow(cmdLast);
+                    fillRowCellCustomerStatisticNowWithTotal(tempRow, totalStyle, isLastRow, orderNum, totalDTO );
+                }
+
+                taskService.updateTaskProcess(taskId, 80);
+                //设置自适应列宽
+				for(int i = 0; i < 10;i++) {
+                    sheet.setColumnWidth(i, "汉字".getBytes().length*2*256);
+				}
+                try {
+                    wb.write(outputStream);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return outputStream;
+            }else {
+                throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+            }
+        }
+        return outputStream;
+    }
+
+    private InputStream copyInputStream(InputStream source) {
+        if(null == source)
+            return null;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+        int len;
+        try {
+            while ((len = source.read(buffer)) > -1 ) {
+                baos.write(buffer, 0, len);
+            }
+            baos.flush();
+        } catch (IOException e) {
+            LOGGER.error("ExportTasks is fail, cmd={}");
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_FLIE_EXPORT_FAIL,
+                    "ExportTasks is fail.");
+        }
+        // 打开一个新的输入流
+        return new ByteArrayInputStream(baos.toByteArray());
+    }
+
+    /**
+     * @param tempRow ： Excel的行
+     * @param style
+     * @param isLastRow ： 是否是最后一行
+     * @param orderNum ： 序号
+     * @param dto
+     */
+    private void fillRowCellCustomerStatistic(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, CustomerStatisticsDTO dto) {
+        //序号
+        SimpleDateFormat format  = new SimpleDateFormat("yyyy-MM-dd");
+        Cell cell1 = tempRow.createCell(0);
+        cell1.setCellStyle(style);
+        if(isLastRow) {
+            cell1.setCellValue(dto.getDateString() != null ? dto.getDateString() : "");
+        }else {
+            cell1.setCellValue(dto.getDateString() != null ? dto.getDateString() : "");
+        }
+        Cell cell2 = tempRow.createCell(1);
+        cell2.setCellStyle(style);
+        cell2.setCellValue(dto.getCommunityName()!= null ? dto.getCommunityName() : "");
+        //项目名称
+        Cell cell3 = tempRow.createCell(2);
+        cell3.setCellStyle(style);
+        cell3.setCellValue(dto.getNewCustomerNum()!= null ? dto.getNewCustomerNum().toString() : "0");
+        //项目分类
+        Cell cell4 = tempRow.createCell(3);
+        cell4.setCellStyle(style);
+        cell4.setCellValue(dto.getLossCustomerNum() != null ? dto.getLossCustomerNum().toString() : "0");
+        //楼宇总数
+        Cell cell5 = tempRow.createCell(4);
+        cell5.setCellStyle(style);
+        cell5.setCellValue(dto.getRegisteredCustomerNum() != null ? dto.getRegisteredCustomerNum().toString() : "0");
+        //建筑面积
+        Cell cell6 = tempRow.createCell(5);
+        cell6.setCellStyle(style);
+        cell6.setCellValue(dto.getHistoryCustomerNum() != null ? dto.getHistoryCustomerNum().toString() : "0");
+        //应收含税金额(元)
+        Cell cell7 = tempRow.createCell(6);
+        cell7.setCellStyle(style);
+        cell7.setCellValue(dto.getDeleteCustomerNum() != null ? dto.getDeleteCustomerNum().toString() : "0");
+        //已收金额(元)
+        Cell cell8 = tempRow.createCell(7);
+        cell8.setCellStyle(style);
+        cell8.setCellValue(dto.getTrackingNum() != null ? dto.getTrackingNum().toString() : "0");
+
+    }
+
+
+    private void fillRowCellCustomerStatisticTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, CustomerStatisticsDTO dto) {
+        //SimpleDateFormat format  = new SimpleDateFormat("yyyy-MM-dd");
+        //序号
+        Cell cell1 = tempRow.createCell(0);
+        cell1.setCellStyle(style);
+        if(isLastRow) {
+            cell1.setCellValue(dto.getDateString() != null ? dto.getDateString() : "");
+        }else {
+            cell1.setCellValue(dto.getDateString() != null ? dto.getDateString() : "");
+        }
+        Cell cell2 = tempRow.createCell(1);
+        cell2.setCellStyle(style);
+        cell2.setCellValue(dto.getCommunityNum()!= null ? dto.getCommunityNum() : 0);
+        //项目名称
+        Cell cell3 = tempRow.createCell(2);
+        cell3.setCellStyle(style);
+        cell3.setCellValue(dto.getNewCustomerNum()!= null ? dto.getNewCustomerNum() : 0);
+        //项目分类
+        Cell cell4 = tempRow.createCell(3);
+        cell4.setCellStyle(style);
+        cell4.setCellValue(dto.getLossCustomerNum() != null ? dto.getLossCustomerNum() : 0);
+        //楼宇总数
+        Cell cell5 = tempRow.createCell(4);
+        cell5.setCellStyle(style);
+        cell5.setCellValue(dto.getRegisteredCustomerNum() != null ? dto.getRegisteredCustomerNum() : 0);
+        //建筑面积
+        Cell cell6 = tempRow.createCell(5);
+        cell6.setCellStyle(style);
+        cell6.setCellValue(dto.getHistoryCustomerNum() != null ? dto.getHistoryCustomerNum() : 0);
+        //应收含税金额(元)
+        Cell cell7 = tempRow.createCell(6);
+        cell7.setCellStyle(style);
+        cell7.setCellValue(dto.getDeleteCustomerNum() != null ? dto.getDeleteCustomerNum() : 0);
+        //已收金额(元)
+        Cell cell8 = tempRow.createCell(7);
+        cell8.setCellStyle(style);
+        cell8.setCellValue(dto.getTrackingNum() != null ? dto.getTrackingNum() : 0);
+
+    }
+
+    private void fillRowCellCustomerStatisticNowWithTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, CustomerStatisticsDTO dto) {
+        SimpleDateFormat format  = new SimpleDateFormat("yyyy-MM-dd");
+
+        //序号
+        Cell cell1 = tempRow.createCell(0);
+        cell1.setCellStyle(style);
+        if(isLastRow) {
+            cell1.setCellValue("合计");
+        }else {
+            cell1.setCellValue(orderNum);
+        }
+        Cell cell2 = tempRow.createCell(1);
+        cell2.setCellStyle(style);
+        if(isLastRow) {
+            cell2.setCellValue(dto.getCommunityNum()!= null ? dto.getCommunityNum() : 0);
+        }else {
+            cell2.setCellValue(dto.getCommunityName()!= null ? dto.getCommunityName() : "");
+        }
+        //项目名称
+        Cell cell3 = tempRow.createCell(2);
+        cell3.setCellStyle(style);
+        cell3.setCellValue(dto.getNewCustomerNum()!= null ? dto.getNewCustomerNum() : 0);
+        //项目分类
+        Cell cell4 = tempRow.createCell(3);
+        cell4.setCellStyle(style);
+        cell4.setCellValue(dto.getLossCustomerNum() != null ? dto.getLossCustomerNum() : 0);
+        //楼宇总数
+        Cell cell5 = tempRow.createCell(4);
+        cell5.setCellStyle(style);
+        cell5.setCellValue(dto.getRegisteredCustomerNum() != null ? dto.getRegisteredCustomerNum() : 0);
+        //建筑面积
+        Cell cell6 = tempRow.createCell(5);
+        cell6.setCellStyle(style);
+        cell6.setCellValue(dto.getHistoryCustomerNum() != null ? dto.getHistoryCustomerNum() : 0);
+        //应收含税金额(元)
+        Cell cell7 = tempRow.createCell(6);
+        cell7.setCellStyle(style);
+        cell7.setCellValue(dto.getDeleteCustomerNum() != null ? dto.getDeleteCustomerNum() : 0);
+        //已收金额(元)
+        Cell cell8 = tempRow.createCell(7);
+        cell8.setCellStyle(style);
+        cell8.setCellValue(dto.getTrackingNum() != null ? dto.getTrackingNum() : 0);
+
+    }
+
+    private void fillRowCellCustomerStatisticNowTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, CustomerStatisticsDTO dto) {
+        SimpleDateFormat format  = new SimpleDateFormat("yyyy-MM-dd");
+
+        Cell cell2 = tempRow.createCell(0);
+        cell2.setCellStyle(style);
+        cell2.setCellValue(dto.getCommunityNum()!= null ? dto.getCommunityNum() : 0);
+
+        //项目名称
+        Cell cell3 = tempRow.createCell(1);
+        cell3.setCellStyle(style);
+        cell3.setCellValue(dto.getNewCustomerNum()!= null ? dto.getNewCustomerNum() : 0);
+        //项目分类
+        Cell cell4 = tempRow.createCell(2);
+        cell4.setCellStyle(style);
+        cell4.setCellValue(dto.getLossCustomerNum() != null ? dto.getLossCustomerNum() : 0);
+        //楼宇总数
+        Cell cell5 = tempRow.createCell(3);
+        cell5.setCellStyle(style);
+        cell5.setCellValue(dto.getRegisteredCustomerNum() != null ? dto.getRegisteredCustomerNum() : 0);
+        //建筑面积
+        Cell cell6 = tempRow.createCell(4);
+        cell6.setCellStyle(style);
+        cell6.setCellValue(dto.getHistoryCustomerNum() != null ? dto.getHistoryCustomerNum() : 0);
+        //应收含税金额(元)
+        Cell cell7 = tempRow.createCell(5);
+        cell7.setCellStyle(style);
+        cell7.setCellValue(dto.getDeleteCustomerNum() != null ? dto.getDeleteCustomerNum() : 0);
+        //已收金额(元)
+        Cell cell8 = tempRow.createCell(6);
+        cell8.setCellStyle(style);
+        cell8.setCellValue(dto.getTrackingNum() != null ? dto.getTrackingNum() : 0);
+
+    }
+
+    @SuppressWarnings("deprecation")
+    private CellStyle getTotalStyle(Workbook wb, CellStyle style) {
+        //生成一个字体
+        Font font = wb.createFont();
+        font.setColor(HSSFColor.BLUE.index);//字体颜色
+        font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);//字体增粗
+        //把字体应用到当前的样式
+        CellStyle totalStyle = wb.createCellStyle();
+        totalStyle.cloneStyleFrom(style);
+        totalStyle.setFont(font);
+        totalStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        totalStyle.setFillForegroundColor(HSSFColor.YELLOW.index);
+        return totalStyle;
+    }
 }
 
 

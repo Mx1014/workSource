@@ -121,9 +121,11 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.insertQuery(Tables.EH_RENTALV2_CELLS);
 		query.setRecord(record);
 		query.execute();
-
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2Cells.class,
 				null);
+		Long tmp = rsr.getId();
+		rsr.setId(rsr.getCellId());
+		rsr.setCellId(tmp);
 
 	}
 
@@ -1008,11 +1010,12 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator, Integer pageSize, Long startTime, Long endTime) {
+	public List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator, Integer pageSize, Long startTime, Long endTime,String resourceType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.SUCCESS.getCode(),SiteBillStatus.REFUNDING.getCode(),
 				SiteBillStatus.PAYINGFINAL.getCode(),SiteBillStatus.APPROVING.getCode(),SiteBillStatus.IN_USING.getCode());
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(resourceType));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
 		if (null != startTime) {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.START_TIME.gt(new Timestamp(startTime)));
@@ -1517,13 +1520,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return null;
 	}
 	@Override
-	public List<RentalOrder> listTargetRentalBills(Byte status) {
+	public List<RentalOrder> listTargetRentalBills(Byte[] status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_ORDERS);
 		//TODO：
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS
-				.eq(status);
+				.in(status);
 		step.where(condition);
 		List<RentalOrder> result = step
 				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
@@ -2082,6 +2085,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		dao.update(rsr);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2Cells.class,
 				rsr.getId());
+
+		tmp = rsr.getId();
+		rsr.setId(rsr.getCellId());
+		rsr.setCellId(tmp);
 	}
 
 	@Override

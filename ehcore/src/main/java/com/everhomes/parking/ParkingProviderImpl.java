@@ -152,6 +152,22 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
+	public ParkingCardRequest findParkingCardRequestByPlateNumber(String plateNumber) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardRequests.class));
+		SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
+
+		query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
+		query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.desc());
+		List<ParkingCardRequest> result = query.fetch().map((r)->{
+			return ConvertHelper.convert(query.fetchAny(), ParkingCardRequest.class);
+		});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
+
+	}
+	
+	@Override
 	public ParkingRechargeOrder findParkingRechargeOrderByGeneralOrderId(Long gorderId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
 		SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
@@ -1436,5 +1452,15 @@ public class ParkingProviderImpl implements ParkingProvider {
 				.where(Tables.EH_PARKING_RECHARGE_ORDERS.ORDER_NO.eq(orderNo));
 		Record record = sql.fetchOne();
 		return ConvertHelper.convert(record, ParkingRechargeOrderDTO.class);
+	}
+	
+    @Override
+	public String findParkingLotNameByVendorName(Integer namespaceId, String vendorName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingLots.class));
+		SelectQuery<EhParkingLotsRecord> query = context.selectQuery(Tables.EH_PARKING_LOTS);
+		query.addConditions(Tables.EH_PARKING_LOTS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PARKING_LOTS.VENDOR_NAME.eq(vendorName));
+		ParkingLot lot =  query.fetchOneInto(ParkingLot.class);
+		return lot == null ? null : lot.getName();
 	}
 }

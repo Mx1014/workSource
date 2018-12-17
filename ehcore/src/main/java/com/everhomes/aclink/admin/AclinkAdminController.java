@@ -30,9 +30,6 @@ public class AclinkAdminController extends ControllerBase {
     private DoorAccessService doorAccessService;
     
     @Autowired
-    private AesServerKeyProvider aesServerKeyProvider;
-    
-    @Autowired
     private AclinkLogProvider aclinkLogProvider;
     
     @Autowired
@@ -52,6 +49,9 @@ public class AclinkAdminController extends ControllerBase {
     
     @Autowired
     private FaceRecognitionPhotoService faceRecognitionPhotoService;
+    
+    @Autowired
+    private AclinkLogService aclinkLogService;
     
     /**
      * <b>URL: /admin/aclink/searchDoorAccess</b>
@@ -850,7 +850,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("queryLogs")
     @RestReturn(value=AclinkQueryLogResponse.class)
     public RestResponse queryLogs(@Valid AclinkQueryLogCommand cmd) {
-        RestResponse response = new RestResponse(doorAccessService.queryLogs(cmd));
+        RestResponse response = new RestResponse(aclinkLogService.queryLogs(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -863,7 +863,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("exportAclinkLogsXls")
     @RestReturn(value=String.class)
     public RestResponse exportAclinkLogsXls(@Valid AclinkQueryLogCommand cmd, HttpServletResponse httpResponse) {
-        doorAccessService.exportAclinkLogsXls(cmd, httpResponse);
+    	aclinkLogService.exportAclinkLogsXls(cmd, httpResponse);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -939,7 +939,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("doorStatistic")
     @RestReturn(value=DoorStatisticResponse.class)
     public RestResponse doorStatistic(@Valid DoorStatisticCommand cmd) {
-        DoorStatisticResponse obj = doorAccessService.doorStatistic(cmd);
+        DoorStatisticResponse obj = aclinkLogService.doorStatistic(cmd);
         RestResponse response = new RestResponse(obj);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1190,7 +1190,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("doorStatisticByTime")
     @RestReturn(value=DoorStatisticByTimeResponse.class)
     public RestResponse doorStatisticByTime(@Valid DoorStatisticByTimeCommand cmd) {
-        DoorStatisticByTimeResponse obj = doorAccessService.doorStatisticByTime(cmd);
+        DoorStatisticByTimeResponse obj = aclinkLogService.doorStatisticByTime(cmd);
         RestResponse response = new RestResponse(obj);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1220,7 +1220,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("tempStatisticByTime")
     @RestReturn(value=TempStatisticByTimeResponse.class)
     public RestResponse TempStatisticByTime(@Valid TempStatisticByTimeCommand cmd) {
-        TempStatisticByTimeResponse obj = doorAccessService.tempStatisticByTime(cmd);
+        TempStatisticByTimeResponse obj = aclinkLogService.tempStatisticByTime(cmd);
         RestResponse response = new RestResponse(obj);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.asset.AppAssetCategory;
+import com.everhomes.address.Address;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractChargingChange;
@@ -14,16 +14,18 @@ import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
+import com.everhomes.contract.ContractReportformStatisticCommunitys;
 import com.everhomes.contract.ContractTaskOperateLog;
+import com.everhomes.contract.template.ContractDocument;
 import com.everhomes.filedownload.Task;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractChargingItemReportformDTO;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractLogDTO;
-
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
+import com.everhomes.rest.contract.statistic.ContractStaticsListDTO;
+import com.everhomes.rest.contract.statistic.TotalContractStaticsDTO;
 
 public interface ContractProvider {
 
@@ -116,7 +118,7 @@ public interface ContractProvider {
 	void createContractTemplate(ContractTemplate contractTemplate);
 	void updateContractTemplate(ContractTemplate contractTemplate);
 	ContractTemplate findContractTemplateById(Long id);
-	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,Long orgId, Long categoryId, String name, Long pageAnchor, Integer pageSize, Long appId);
+	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,Long orgId, Long categoryId, String name, CrossShardListingLocator locator, Integer pageSize, Long appId);
 	void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId, Long templateId);
 	//void deletePrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId);
 	Boolean getContractTemplateById(Long id);
@@ -149,16 +151,33 @@ public interface ContractProvider {
 
 	BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames, List<String> apartmentNames);
 
+	//合同4.0
 	Boolean possibleEnterContractFuture(ContractDetailDTO contractDetailDTO,ContractBuildingMapping contractBuildingMapping);
-
 	Boolean resoucreReservationsFuture(ContractDetailDTO contractDetailDTO,BuildingApartmentDTO apartment);
-
 	void createContractOperateTask(ContractTaskOperateLog job);
-
 	void updateContractOperateTask(ContractTaskOperateLog job);
-
 	ContractTaskOperateLog findContractOperateTaskById(Long id);
-
+	
 	List<Contract> findAnyStatusContractByAddressId(Long addressId);
+	
+	//合同报表Date firstdateUpdateTime = null;Date lastdateUpdateTime = null;
+	int getTotalContractCount(Timestamp firstdateUpdateTime, Timestamp lastdateUpdateTime);
+	void createCommunityStatics(ContractReportformStatisticCommunitys communityStatistics);
+	void deleteCommunityDataByDateStr(String todayDateStr);
+	List<ContractChargingItemReportformDTO> getContractChargingItemInfoList(ContractDTO contract);
+	List<ContractStaticsListDTO> listCommunityContractStaticsList(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr,String endTimeStr,  Byte dateType, Integer pageOffSet, Integer pageSize);
+	TotalContractStaticsDTO getTotalContractStatics(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr,String endTimeStr,  Byte dateType);
+	List<TotalContractStaticsDTO> listcontractStaticsListTimeDimension(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr,String endTimeStr,  Byte dateType, Integer pageOffSet, Integer pageSize);
+	List<TotalContractStaticsDTO> listcontractStaticsListCommunityTotal(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr, String endTimeStr, Byte dateType, Integer pageOffSet, Integer pageSize);
+	List<ContractStaticsListDTO> listSearchContractStaticsTimeDimension(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr, String endTimeStr, Byte dateType, Integer pageOffSet, Integer pageSize);
+
+	Timestamp findLastVersionByBackup(Integer namespaceId);
+
+	Long findAddressByContractId(Long contractId);
+	ContractDocument findContractDocumentById(Long id);
+
+	void createContractDocument(ContractDocument contractDocument);
+
+	void updateContractDocument(ContractDocument contractDocument);
 
 }

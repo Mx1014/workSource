@@ -31,7 +31,10 @@ import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
+import com.everhomes.rest.asset.bill.NotifyThirdSignCommand;
+import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 
 /**
  * @author created by ycx
@@ -51,13 +54,20 @@ public class AssetBillServiceImpl implements AssetBillService {
 	@Autowired
 	private AssetService assetService;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
 	/**
 	 * 缴费V7.3(账单组规则定义)：批量删除“非已缴”账单接口
 	 * 批量删除只支持删除只支持：手动新增 、 批量导入 、合同产生的账单
 	 * 第三方或对接其他模块不管是已缴还是未缴都不允许删除
 	 */
 	public BatchDeleteBillResponse batchDeleteBill(BatchDeleteBillCommand cmd) {
-		assetService.checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_BATCH_DELETE_BILL,cmd.getOrganizationId());
+	    // 虽然前端已经传了appId，但并没有往下传，导致公共平台的权限校验接口校验不通过，经过与公共平台沟通，接口可能已经改了，推荐使用下面方式，
+	    // 但由于改得比较仓促，所以并没有在封装的方法里改，而是拷贝一份来使用，减少影响范围，后期再总体评估再修改(TODO) by lqs 20181207
+		// assetService.checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_BATCH_DELETE_BILL,cmd.getOrganizationId());
+	    userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOrganizationId(), 
+	            PrivilegeConstants.ASSET_MANAGEMENT_BATCH_DELETE_BILL, cmd.getAppId(), cmd.getOrganizationId(), cmd.getOwnerId());
 		BatchDeleteBillResponse response = new BatchDeleteBillResponse();
 		List<Long> billIdList = cmd.getBillIdList();
 		Integer selectCount, deleteFail, deleteSuccess;
@@ -169,6 +179,14 @@ public class AssetBillServiceImpl implements AssetBillService {
 	public ListBillsDTO changeChargeStatus(ChangeChargeStatusCommand cmd) {
 		ThirdOpenBillHandler handler = getThirdOpenBillHandler(UserContext.getCurrentNamespaceId());
 		return handler.changeChargeStatus(cmd);
+	}
+
+	/**
+	 * 物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+	 */
+	public void notifyThirdSign(NotifyThirdSignCommand cmd) {
+		ThirdOpenBillHandler handler = getThirdOpenBillHandler(UserContext.getCurrentNamespaceId());
+		handler.notifyThirdSign(cmd);
 	}
 	
 }

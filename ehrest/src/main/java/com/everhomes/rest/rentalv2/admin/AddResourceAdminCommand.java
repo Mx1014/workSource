@@ -74,7 +74,7 @@ public class AddResourceAdminCommand {
 	private Byte status;
 	private String confirmationPrompt;
     private String offlineCashierAddress;
-    private String offlinePayeeUid;
+	private Long offlinePayeeUid;
     private String aclinkId;
 	private Byte multiUnit;
 	private java.lang.Byte       autoAssign;
@@ -265,11 +265,11 @@ public class AddResourceAdminCommand {
 		this.offlineCashierAddress = offlineCashierAddress;
 	}
 
-	public String getOfflinePayeeUid() {
+	public Long getOfflinePayeeUid() {
 		return offlinePayeeUid;
 	}
 
-	public void setOfflinePayeeUid(String offlinePayeeUid) {
+	public void setOfflinePayeeUid(Long offlinePayeeUid) {
 		this.offlinePayeeUid = offlinePayeeUid;
 	}
 
