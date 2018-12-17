@@ -94,6 +94,8 @@ public class BillItemDTO {
     private Integer goodsCounts;
     private BigDecimal goodsPrice;
     private BigDecimal goodsTotalPrice;
+    //物业缴费V8.0（账单对接卡券） -44680
+    private Long ownerId;
 
     @Override
     public String toString() {
@@ -415,5 +417,13 @@ public class BillItemDTO {
 
 	public void setBillId(Long billId) {
 		this.billId = billId;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 }

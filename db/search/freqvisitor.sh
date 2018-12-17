@@ -1,4 +1,4 @@
-ELASTIC=10.1.120.63:9200
+ELASTIC=elasticsearch:9200
 INDEX=everhomesv3
 
 curl -XDELETE http://$ELASTIC/$INDEX/_mapping/freqvisitor

@@ -9,16 +9,23 @@ import com.everhomes.util.StringHelper;
  * Created by ying.xiong on 2017/8/2.
  */
 public enum PeriodUnit {
-    MINUTE((byte)0), HOUR((byte)1), DAY((byte)2), MONTH((byte)3), YEAR((byte)4);
-    private byte code;
+    MINUTE((byte)0,"分"), HOUR((byte)1,"小时"), DAY((byte)2,"天"), MONTH((byte)3,"月"), YEAR((byte)4,"年");
+    
+	private byte code;
+	private String description;
 
-    private PeriodUnit(byte code){
+    private PeriodUnit(byte code,String description){
         this.code = code;
+        this.description = description;
     }
 
     public byte getCode() {
         return code;
     }
+    
+    public String getDescription() {
+		return description;
+	}
 
     public static PeriodUnit fromStatus(byte code) {
         for(PeriodUnit v : PeriodUnit.values()) {
