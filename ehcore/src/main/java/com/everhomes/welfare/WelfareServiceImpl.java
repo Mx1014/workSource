@@ -582,10 +582,7 @@ public class WelfareServiceImpl implements WelfareService {
         int pageOffset =(cmd.getPageOffset()==null || cmd.getPageOffset()<1) ? 1 : cmd.getPageOffset();
         int	offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
 
-		List<Long> welfareIds = welfareReceiverProvider.listWelfareIdsByUser(cmd.getOrganizationId(),UserContext.currentUserId(), offset, pageSize +1);
-		if(CollectionUtils.isEmpty(welfareIds))
-			return response;
-        List<Welfare> results = welfareProvider.listWelfareByIds(welfareIds);
+        List<Welfare> results = welfareProvider.listSendedWelfareByReciver(cmd.getOrganizationId(),UserContext.currentUserId(), offset, pageSize +1);
         if (null == results || results.size() == 0) {
             return response;
         }

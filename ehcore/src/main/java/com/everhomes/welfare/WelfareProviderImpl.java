@@ -8,8 +8,10 @@ import com.everhomes.listing.CrossShardListingLocator;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.welfare.WelfareStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhWelfaresDao;
@@ -112,10 +116,17 @@ public class WelfareProviderImpl implements WelfareProvider {
 	}
 
 	@Override
-	public List<Welfare> listWelfareByIds(List<Long> welfaeIds) {
+	public List<Welfare> listSendedWelfareByReciver(Long organizationId, Long currentUserId, Integer offset, Integer pageSize) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_WELFARES)
-				.where(Tables.EH_WELFARES.ID.in(welfaeIds))
-				.and(Tables.EH_WELFARES.IS_DELETE.ne((byte) 1));
+				.where(Tables.EH_WELFARES.IS_DELETE.ne(TrueOrFalseFlag.TRUE.getCode()))
+				.and(Tables.EH_WELFARES.STATUS.eq(WelfareStatus.SENDED.getCode()))
+				.and(DSL.exists(DSL.selectOne().from(Tables.EH_WELFARE_RECEIVERS)
+					.where(Tables.EH_WELFARE_RECEIVERS.ORGANIZATION_ID.eq(organizationId))
+					.and(Tables.EH_WELFARE_RECEIVERS.RECEIVER_UID.eq(currentUserId))
+					.and(Tables.EH_WELFARE_RECEIVERS.WELFARE_ID.eq(Tables.EH_WELFARES.ID))));
+		if(offset != null &&pageSize != null){
+			step.limit(offset, pageSize);
+		}
 		Result<Record> records = step.orderBy(Tables.EH_WELFARES.SEND_TIME.desc()).fetch();
 		if(null == records){
 			return null;
