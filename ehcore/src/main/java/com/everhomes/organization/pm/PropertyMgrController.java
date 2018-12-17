@@ -2548,5 +2548,18 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
+	
+	/**
+	 * <b>URL: /pm/fixApartmentLivingStatusByNamespaceId</b>
+	 * <p>纠正eh_addresses与eh_organization_address_mapping表之间的对应关系</p>
+	 */
+	@RequestMapping("fixApartmentLivingStatusByNamespaceId")
+	@RestReturn(value=String.class)
+	public RestResponse fixApartmentLivingStatusByNamespaceId(ListApartmentsByMultiStatusCommand cmd) {
+		propertyMgrService.fixApartmentLivingStatusByNamespaceId(cmd.getNamespaceId());
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
