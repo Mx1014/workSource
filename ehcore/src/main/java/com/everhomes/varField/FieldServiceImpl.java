@@ -634,6 +634,106 @@ public class FieldServiceImpl implements FieldService {
         return null;
     }
 
+    @Override
+    public List<FieldDTO> listActiveNoUsedItem(ListActiveNoUsedItemCommand cmd){
+        List<Field> fields = new ArrayList<>();
+
+        if(StringUtils.isNotBlank(cmd.getModuleType())) {
+            List<Long> ids = fieldProvider.listFieldRanges(cmd.getModuleName(), cmd.getModuleType(), cmd.getGroupPath());
+            if(ids != null && ids.size() != 0) {
+                fields = fieldProvider.listFields(ids);
+            }
+        }
+
+        if(fields.size() == 0) {
+            fields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+        }
+
+        for (Field systemField : fields) {
+            systemField.setModuleName(cmd.getModuleName());
+        }
+        fields = fields.stream().filter(r -> r.getFieldType().equals("Long")).collect(Collectors.toList());
+
+        List<Long> fieldIds = fields.stream().map(Field::getId).collect(Collectors.toList());
+
+        Map<Long, ScopeFieldItem> scopeItems = new HashMap<>();
+
+        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
+        if (scopeItems != null && scopeItems.size() < 1) {
+            scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
+            if (scopeItems != null && scopeItems.size() < 1) {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
+            }
+        }
+
+
+        if (scopeItems != null && scopeItems.size() < 1) {
+            scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
+            if (scopeItems != null && scopeItems.size() < 1) {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
+                if (scopeItems != null && scopeItems.size() < 1) {
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
+                }
+            }
+            //查询表单初始化的数据
+            if (scopeItems != null && scopeItems.size() < 1) {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, null);
+                if (scopeItems != null && scopeItems.size() < 1) {
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null);
+                }
+            }
+
+        }
+
+        if (scopeItems != null && scopeItems.size() < 1) {
+            scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, cmd.getCategoryId());
+            if (scopeItems != null && scopeItems.size() < 1) {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, cmd.getCategoryId());
+                if (scopeItems != null && scopeItems.size() < 1) {
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null);
+                }
+            }
+        }
+
+        Map<Long, FieldDTO> dtoMap = new HashMap<>();
+        fields.forEach(field -> dtoMap.put(field.getId(), ConvertHelper.convert(field, FieldDTO.class)));
+
+        Map<Long, ScopeFieldItem> fieldItems = scopeItems;
+        if (fields != null && fields.size() > 0) {
+            List<FieldDTO> dtos = new ArrayList<>();
+            fields.forEach(field -> {
+                FieldDTO dto = dtoMap.get(field.getId());
+                dto.setFieldId(field.getId());
+                dto.setFieldType(field.getFieldType());
+                dto.setFieldName(field.getName());
+                if (fieldItems != null && fieldItems.size() > 0) {
+                    List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
+                    fieldItems.forEach((id, item) -> {
+                        if (field.getId().equals(item.getFieldId())) {
+                            FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
+                            items.add(fieldItem);
+                        }
+                    });
+                    //按default order排序
+                    items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
+                    // service alliance and activity expand items ,we add expand item flag for it
+                    addExpandItems(dto, items, cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getCommunityId());
+                    dto.setItems(items);
+                }else{
+                    //2018年12月13日 黄鹏宇 remark：即使查询出来为空，如果需要进行添加选项的话还是会添加的
+                    List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
+                    addExpandItems(dto, items, cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getCommunityId());
+                    dto.setItems(items);
+                }
+                dtos.add(dto);
+            });
+            dtos.forEach((r) -> r.setOwnerId(cmd.getOwnerId()));
+            //按default order排序
+            //dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
+            return dtos;
+        }
+        return null;
+    }
 
 
     private void addExpandItems(FieldDTO dto, List<FieldItemDTO> items, Integer namespaceId, Long ownerId, Long communityId) {
@@ -2063,12 +2163,15 @@ public class FieldServiceImpl implements FieldService {
 
                 fieldProvider.updateScopeField(field);
                 //删除字段的选项 如果有
-                List<ScopeFieldItem> scopeFieldItems = fieldProvider.listScopeFieldItems(field.getFieldId(), field.getNamespaceId(), field.getCommunityId(),field.getOwnerId(), field.getCategoryId());
-                scopeFieldItems.forEach(item -> {
-                    item.setStatus(VarFieldStatus.INACTIVE.getCode());
-                    item.setCategoryId(categoryId);
-                    fieldProvider.updateScopeFieldItem(item);
-                });
+                ScopeField scopeField = fieldProvider.findScopeField(field.getNamespaceId(), field.getCommunityId(),field.getFieldId());
+                if(scopeField == null) {
+                    List<ScopeFieldItem> scopeFieldItems = fieldProvider.listScopeFieldItems(field.getFieldId(), field.getNamespaceId(), field.getCommunityId(), field.getOwnerId(), field.getCategoryId());
+                    scopeFieldItems.forEach(item -> {
+                        item.setStatus(VarFieldStatus.INACTIVE.getCode());
+                        item.setCategoryId(categoryId);
+                        fieldProvider.updateScopeFieldItem(item);
+                    });
+                }
             });
         }
     }
@@ -2536,6 +2639,8 @@ public class FieldServiceImpl implements FieldService {
             });
         }
     }
+
+
 
     @Override
     public List<FieldDTO> listFieldScopeFilter(ListFieldScopeFilterCommand cmd) {

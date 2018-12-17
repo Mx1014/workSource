@@ -17,6 +17,9 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.configurations.Configurations;
+import com.everhomes.configurations.ConfigurationsProvider;
+import com.everhomes.configurations.ConfigurationsService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -34,6 +37,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
@@ -118,6 +122,7 @@ import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.tachikoma.commons.util.json.JsonHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -139,6 +144,10 @@ import com.everhomes.varField.ScopeFieldItem;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.YellowPageProvider;
 import com.everhomes.yellowPage.YellowPageService;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -328,6 +337,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
+
+    @Autowired
+    private ConfigurationsProvider configurationsProvider;
 
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -4154,7 +4166,7 @@ public class CustomerServiceImpl implements CustomerService {
         administratorsCommand.setOwnerType(cmd.getOwnerType());
         ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse = rolePrivilegeService.listServiceModuleAppsAdministrators(administratorsCommand);
         List<OrganizationContactDTO> superAdmins = rolePrivilegeService.listOrganizationSuperAdministrators(administratorsCommand);
-        List<OrganizationMemberDTO> admins = getAdminUsers(moduleAppsAdministratorResponse,superAdmins,cmd.getCommunityId());
+        List<OrganizationMemberDTO> admins = getAdminUsers(moduleAppsAdministratorResponse, superAdmins, cmd.getCommunityId(), cmd.getNamespaceId(), cmd.getModuleId());
 
         if(admins!=null && admins.size()>0){
             relatedMembers.addAll(admins);
@@ -4194,21 +4206,67 @@ public class CustomerServiceImpl implements CustomerService {
         return new ArrayList<>();
     }
 
-    private List<OrganizationMemberDTO> getAdminUsers(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId) {
+    private List<OrganizationMemberDTO> getAdminUsers(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId, Integer namespaceId, Long moduleId) {
         List<OrganizationMemberDTO> users = new ArrayList<>();
-        if (superAdmins != null && superAdmins.size() > 0) {
-            superAdmins.forEach(s -> {
-                OrganizationMemberDTO dto = new OrganizationMemberDTO();
-                dto.setTargetId(s.getTargetId());
-                dto.setTargetType(s.getTargetType());
-                dto.setContactName(s.getContactName());
-                dto.setGender(s.getGender());
-                dto.setContactToken(s.getContactToken());
-                dto.setOrganizationId(s.getOrganizationId());
-                users.add(dto);
-            });
+        String configName = "";
+        if(moduleId.equals(CustomerModuleType.ENTERPRISE_CUSTOMER)){
+            configName = "chooseTrackerEnterprise";
+        }else if(moduleId.equals(CustomerModuleType.INVITED_CUSTOMER)){
+            configName = "chooseTrackerInvited";
         }
-        List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();
+        List<Configurations> configs = configurationsProvider.listConfigurations(namespaceId,
+                configName, null, null, null,true);
+        if(configs != null && configs.size() > 0){
+            Configurations config = configs.get(0);
+            JsonParser parser = new JsonParser();
+            JsonElement element = parser.parse(config.getValue());
+            JsonObject obj = element.getAsJsonObject();
+            JsonArray array = obj.get("value").getAsJsonArray();
+            OrganizationContactDTO topAdmin = null;
+            if(superAdmins != null && superAdmins.size() > 0){
+                Organization org = organizationProvider.findOrganizationById(superAdmins.get(0).getOrganizationId());
+                List<OrganizationContactDTO> topAdmins = superAdmins.stream().filter(r->r.getId().equals(org.getAdminTargetId())).collect(Collectors.toList());
+                if(topAdmins != null && topAdmins.size() > 0){
+                    topAdmin = topAdmins.get(0);
+                }
+            }
+            OrganizationContactDTO finalTopAdmin = topAdmin;
+            List<OrganizationContactDTO> exTopSuperAdmins = null;
+            if(superAdmins != null && superAdmins.size() > 0 && topAdmin != null) {
+                exTopSuperAdmins = superAdmins.stream().filter(admin -> !admin.getId().equals(finalTopAdmin.getId())).collect(Collectors.toList());
+            }
+            List<OrganizationContactDTO> finalExTopSuperAdmins = exTopSuperAdmins;
+            array.forEach(r->{
+                if(r.getAsInt() == 1){
+                    if(finalTopAdmin != null) {
+                        OrganizationMemberDTO dto = new OrganizationMemberDTO();
+                        dto.setTargetId(finalTopAdmin.getTargetId());
+                        dto.setTargetType(finalTopAdmin.getTargetType());
+                        dto.setContactName(finalTopAdmin.getContactName());
+                        dto.setGender(finalTopAdmin.getGender());
+                        dto.setContactToken(finalTopAdmin.getContactToken());
+                        dto.setOrganizationId(finalTopAdmin.getOrganizationId());
+                        users.add(dto);
+                    }
+                }
+                if(r.getAsInt() == 2){
+                    addSuperAdminToUsers(finalExTopSuperAdmins, users);
+                }
+                if(r.getAsInt() == 3){
+                    List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();
+                    addModuleAdminToUsers(communityId, users, moduleAdmins);
+                }
+            });
+        }else {
+            addSuperAdminToUsers(superAdmins, users);
+            List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();
+            addModuleAdminToUsers(communityId, users, moduleAdmins);
+        }
+
+        return users;
+    }
+
+    private void addModuleAdminToUsers(Long communityId, List<OrganizationMemberDTO> users, List<ServiceModuleAppsAuthorizationsDto> moduleAdmins) {
         if (moduleAdmins != null && moduleAdmins.size() > 0) {
             moduleAdmins.forEach((r) -> {
                 //这里权限那边并不会返回null  getCommunityControlIds
@@ -4229,7 +4287,21 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             });
         }
-        return users;
+    }
+
+    private void addSuperAdminToUsers(List<OrganizationContactDTO> superAdmins, List<OrganizationMemberDTO> users) {
+        if (superAdmins != null && superAdmins.size() > 0) {
+            superAdmins.forEach(s -> {
+                OrganizationMemberDTO dto = new OrganizationMemberDTO();
+                dto.setTargetId(s.getTargetId());
+                dto.setTargetType(s.getTargetType());
+                dto.setContactName(s.getContactName());
+                dto.setGender(s.getGender());
+                dto.setContactToken(s.getContactToken());
+                dto.setOrganizationId(s.getOrganizationId());
+                users.add(dto);
+            });
+        }
     }
 
     @Override
