@@ -111,7 +111,7 @@ update eh_siyin_print_printers set owner_type = 'community', owner_id = 24011104
 
 -- AUTHOR: 吴寒
 -- REMARK: 修改bug:之前的菜单表和模块表id搞错了
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79881000','企业支付授权','70000010',NULL,'enterprise-payment-auth','1','2','/70000010/79881000','zuolin','8','271000','3','system','module','2','1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79881000','企业支付授权','16040000',NULL,'enterprise-payment-auth','1','2','/23000000/16040000/79881000','zuolin','8','271000','3','system','module','2','1');
 UPDATE eh_web_menus SET id = 79880000 , module_id =271000 WHERE id = 271000;
 UPDATE eh_service_modules SET id = 270000 , path ='/100/270000' WHERE id = 79870000;
 UPDATE eh_service_modules SET id = 271000 , parent_id = 270000 , path ='/100/270000/271000' WHERE id = 79880000;
