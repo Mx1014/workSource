@@ -162,17 +162,18 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 	//@PostConstruct
 	public void init() {
 		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_QUALITY_INSPECTION_TASK_CORN, "0 30 2 * * ? ");
 		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
 		if(taskServer.equals(equipmentIp)) {
 			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_TASK.getCode()).enter(()-> {
 				String qualityInspectionTriggerName = "QualityInspection" + System.currentTimeMillis();
 				scheduleProvider.scheduleCronJob(qualityInspectionTriggerName, qualityInspectionTriggerName,
-						"0 0 0 * * ? ", QualityInspectionScheduleJob.class, null);
+						cronExpression, QualityInspectionScheduleJob.class, null);
 				return null;
 			});
 
 			String qualityInspectionStatTriggerName = "QualityInspectionStat " + System.currentTimeMillis();
-			String statCorn = configurationProvider.getValue(ConfigConstants.QUALITY_STAT_CORN, "0 0 0 * * ? ");
+			String statCorn = configurationProvider.getValue(ConfigConstants.QUALITY_STAT_CORN, "0 30 2 * * ? ");
 			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_STAT.getCode()).enter(()-> {
 				scheduleProvider.scheduleCronJob(qualityInspectionStatTriggerName, qualityInspectionStatTriggerName,
 						statCorn, QualityInspectionStatScheduleJob.class, null);

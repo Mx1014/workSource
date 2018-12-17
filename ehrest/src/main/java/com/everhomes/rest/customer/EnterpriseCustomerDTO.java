@@ -96,7 +96,16 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String ownerType;
     private Long enterpriseId;
     private Long organizationId;
-    private Long communityId;
+    private Integer namespaceId;
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	private Long communityId;
     private String customerNumber;
     private String name;
     private String nickName;
@@ -280,6 +289,142 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private CustomerRequirementDTO requirement;
     private CustomerCurrentRentDTO currentRent;
 
+    private String legalAddress;
+    private String legalAddressZip;
+    private String postalAddress;
+    private String postalAddressZip;
+    private String taxpayerIdentificationCode;
+    private String identifyCardNumber;
+    private String openingBank;
+    private String openingName;
+    private String openingAccount;
+    private String stringTag17;
+    private String stringTag18;
+    private String stringTag19;
+    private String stringTag20;
+    private String stringTag21;
+    private String corpLegalPersonDuty;
+
+
+    public String getLegalAddress() {
+        return legalAddress;
+    }
+
+    public void setLegalAddress(String legalAddress) {
+        this.legalAddress = legalAddress;
+    }
+
+    public String getLegalAddressZip() {
+        return legalAddressZip;
+    }
+
+    public void setLegalAddressZip(String legalAddressZip) {
+        this.legalAddressZip = legalAddressZip;
+    }
+
+    public String getPostalAddress() {
+        return postalAddress;
+    }
+
+    public void setPostalAddress(String postalAddress) {
+        this.postalAddress = postalAddress;
+    }
+
+    public String getPostalAddressZip() {
+        return postalAddressZip;
+    }
+
+    public void setPostalAddressZip(String postalAddressZip) {
+        this.postalAddressZip = postalAddressZip;
+    }
+
+    public String getTaxpayerIdentificationCode() {
+        return taxpayerIdentificationCode;
+    }
+
+    public void setTaxpayerIdentificationCode(String taxpayerIdentificationCode) {
+        this.taxpayerIdentificationCode = taxpayerIdentificationCode;
+    }
+
+    public String getIdentifyCardNumber() {
+        return identifyCardNumber;
+    }
+
+    public void setIdentifyCardNumber(String identifyCardNumber) {
+        this.identifyCardNumber = identifyCardNumber;
+    }
+
+    public String getOpeningBank() {
+        return openingBank;
+    }
+
+    public void setOpeningBank(String openingBank) {
+        this.openingBank = openingBank;
+    }
+
+    public String getOpeningName() {
+        return openingName;
+    }
+
+    public void setOpeningName(String openingName) {
+        this.openingName = openingName;
+    }
+
+    public String getOpeningAccount() {
+        return openingAccount;
+    }
+
+    public void setOpeningAccount(String openingAccount) {
+        this.openingAccount = openingAccount;
+    }
+
+    public String getStringTag17() {
+        return stringTag17;
+    }
+
+    public void setStringTag17(String stringTag17) {
+        this.stringTag17 = stringTag17;
+    }
+
+    public String getStringTag18() {
+        return stringTag18;
+    }
+
+    public void setStringTag18(String stringTag18) {
+        this.stringTag18 = stringTag18;
+    }
+
+    public String getStringTag19() {
+        return stringTag19;
+    }
+
+    public void setStringTag19(String stringTag19) {
+        this.stringTag19 = stringTag19;
+    }
+
+    public String getStringTag20() {
+        return stringTag20;
+    }
+
+    public void setStringTag20(String stringTag20) {
+        this.stringTag20 = stringTag20;
+    }
+
+    public String getStringTag21() {
+        return stringTag21;
+    }
+
+    public void setStringTag21(String stringTag21) {
+        this.stringTag21 = stringTag21;
+    }
+
+    public String getCorpLegalPersonDuty() {
+        return corpLegalPersonDuty;
+    }
+
+    public void setCorpLegalPersonDuty(String corpLegalPersonDuty) {
+        this.corpLegalPersonDuty = corpLegalPersonDuty;
+    }
 
     public Timestamp getCreateTime() {
         return createTime;

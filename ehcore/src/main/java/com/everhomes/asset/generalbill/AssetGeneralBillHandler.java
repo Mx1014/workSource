@@ -3,10 +3,14 @@ package com.everhomes.asset.generalbill;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.GeneralBillHandler;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.BillItemDTO;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.promotion.order.GoodDTO;
 
 /**
  * @author created by ycx
@@ -17,6 +21,9 @@ public class AssetGeneralBillHandler implements GeneralBillHandler{
 
 	@Autowired
 	private AssetProvider assetProvider;
+	
+	@Autowired
+	private AddressProvider addressProvider;
 
 	public String getPaymentExtendInfo(BillItemDTO billItemDTO) {
 		//资产：项目-楼栋-门牌
@@ -24,6 +31,27 @@ public class AssetGeneralBillHandler implements GeneralBillHandler{
 		String buildingName = billItemDTO.getBuildingName();
 		String apartmentName = billItemDTO.getApartmentName();
 		return projectName + "-" + buildingName + "-" + apartmentName;
+	}
+
+	/**
+     * 组装商品的基本信息
+     * @param billItemDTO
+     * @return
+     */
+	public GoodDTO getGoodsInfo(BillItemDTO billItemDTO) {
+		//服务类别	域空间	服务提供方标识1	服务提供方标识2	服务提供方标识3	服务提供方标识4	服务提供方标识5	服务提供方名称	商品标识		商品名称	商品说明	数量	金额
+		//资产	NS			项目			/			/			/			/		项目-楼栋-门牌	费项ID	租金/水费/电费	    面积	/	x
+		GoodDTO good = new GoodDTO();
+		good.setNamespace("NS");
+		good.setTag1(billItemDTO.getOwnerId() + "");
+		good.setServeType(ServiceModuleConstants.ASSET_MODULE + "");
+		good.setServeApplyName(billItemDTO.getOwnerId() + "");//服务提供方名称
+		good.setGoodTag(billItemDTO.getChargingItemsId() + "");//商品标识
+		good.setGoodName(billItemDTO.getBillItemName());//商品名称
+		good.setCounts(1);
+		good.setPrice(billItemDTO.getAmountReceivable());
+		good.setTotalPrice(billItemDTO.getAmountReceivable());
+		return good;
 	}
 
 }

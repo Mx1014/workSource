@@ -17,6 +17,8 @@ import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
 import com.everhomes.rest.asset.modulemapping.ParkingInstanceConfigDTO;
 import com.everhomes.rest.asset.modulemapping.PrintInstanceConfigDTO;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.util.StringHelper;
 
@@ -68,4 +70,29 @@ public class ParkingGeneralBillHandler implements GeneralBillHandler{
 		return billItemDTO.getGoodsServeApplyName();
 	}
 
+	/**
+     * 组装商品的基本信息
+     * @param billItemDTO
+     * @return
+     */
+	public GoodDTO getGoodsInfo(BillItemDTO billItemDTO) {
+		//服务类别	域空间	服务提供方标识1	服务提供方标识2	服务提供方标识3	服务提供方标识4	服务提供方标识5	服务提供方名称	商品标识		商品名称				商品说明		数量	金额
+		//停车	NS			项目			停车场		/			/			/		项目-停车场		  x		月卡充值/临时停车/VIP车位	     月数/时长/时长		 /	 x
+		GoodDTO good = new GoodDTO();
+		good.setNamespace("NS");
+		good.setTag1(billItemDTO.getGoodsTag1());
+		good.setTag2(billItemDTO.getGoodsTag2());
+		good.setTag3(billItemDTO.getGoodsTag3());
+		good.setTag4(billItemDTO.getGoodsTag4());
+		good.setTag5(billItemDTO.getGoodsTag5());
+		good.setServeType(ServiceModuleConstants.PARKING_MODULE + "");
+		good.setServeApplyName(billItemDTO.getGoodsServeApplyName());//服务提供方名称
+		good.setGoodTag(billItemDTO.getGoodsTag());
+		good.setGoodName(billItemDTO.getGoodsName());
+		good.setGoodDescription(billItemDTO.getGoodsDescription());
+		good.setCounts(billItemDTO.getGoodsCounts());
+		good.setPrice(billItemDTO.getGoodsPrice());
+		good.setTotalPrice(billItemDTO.getGoodsTotalPrice());
+		return good;
+	}
 }

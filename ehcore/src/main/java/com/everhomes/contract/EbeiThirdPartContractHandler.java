@@ -877,4 +877,12 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         organizationAddressMapping.setLivingStatus(address.getLivingStatus());
         organizationProvider.updateOrganizationAddressMapping(organizationAddressMapping);
     }
+
+
+	@Override
+	public void syncBillsFromThirdPart(String pageOffset, String date, String communityIdentifier, Long taskId,
+			Long categoryId, Byte contractApplicationScene) {
+		// TODO Auto-generated method stub
+		
+	}
 }
