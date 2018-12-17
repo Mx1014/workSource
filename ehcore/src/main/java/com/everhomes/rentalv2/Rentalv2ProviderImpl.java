@@ -1019,7 +1019,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	@Override
 	public List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
 												Long startTime, Long endTime, String tag1, String tag2,String vendorType,String keyword, Long pageAnchor ,
-												Integer pageSize){
+												Integer pageSize,Integer pageNum){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
 
@@ -1049,12 +1049,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.CUSTOM_OBJECT.like("%"+keyword+"%").
 					or(Tables.EH_RENTALV2_ORDERS.USER_NAME.eq(keyword)).or(Tables.EH_RENTALV2_ORDERS.USER_PHONE.eq(keyword)));
 
-		if(null != pageAnchor && pageAnchor != 0)
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(pageAnchor)));
+//		if(null != pageAnchor && pageAnchor != 0)
+//			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(pageAnchor)));
 
 		step.orderBy(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.desc());
+        int firstOffset = (pageNum - 1) * pageSize;
 		if (pageSize != null)
-			step.limit(pageSize);
+			step.limit(firstOffset,pageSize);
 		step.where(condition);
 
 		return step.fetch().map((r) -> ConvertHelper.convert(r, RentalOrder.class));

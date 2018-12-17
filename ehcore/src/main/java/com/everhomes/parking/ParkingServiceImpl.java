@@ -1465,7 +1465,11 @@ public class ParkingServiceImpl implements ParkingService {
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(),cmd.getCardNumber(),
 				cmd.getStatus(),cmd.getPaySource(),cmd.getKeyWords());
 		response.setTotalAmount(totalAmount);
-
+		Long totalNum = parkingProvider.countRechargeOrdersPageNums(cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
+				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(),cmd.getCardNumber(),
+				cmd.getStatus(),cmd.getPaySource(),cmd.getKeyWords());
+		response.setTotalNum(totalNum);
 		return response;
 	}
 
