@@ -99,6 +99,7 @@ public class ListBillsDTO {
     @ItemType(BillItemDTO.class)
     private List<BillItemDTO> billItemDTOList;
     private String accountId;//物业缴费V7.4(瑞安项目-资产管理对接CM系统) : CM的客户ID
+    private String propertyID;//物业缴费V7.4(瑞安项目-资产管理对接CM系统) : CM的项目ID
 
     public List<String> getNoticeTelList() {
 		return noticeTelList;
@@ -418,6 +419,14 @@ public class ListBillsDTO {
 
 	public void setAccountId(String accountId) {
 		this.accountId = accountId;
+	}
+
+	public String getPropertyID() {
+		return propertyID;
+	}
+
+	public void setPropertyID(String propertyID) {
+		this.propertyID = propertyID;
 	}
 
 }

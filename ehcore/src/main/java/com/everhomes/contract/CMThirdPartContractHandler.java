@@ -911,6 +911,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                             customer.setMail(data.getContractHeader().getMail());
                             customer.setConnectorPhone(data.getContractHeader().getConnectorPhone());
                             customer.setCommunityId(address.getCommunityId());
+                            //物业缴费V7.4(瑞安项目-资产管理对接CM系统) -41302：增加第三方客户分类
+                            customer.setPropertyID(data.getContractHeader().getPropertyID());
                             cmCustomers.add(customer);
                         }
                     }
@@ -983,6 +985,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         customer.setNamespaceId(CMThirdPartContractHandler.NAMESPACE_ID);
         customer.setNamespaceCustomerType(NamespaceCustomerType.CM.getCode());
         customer.setNamespaceCustomerToken(cmCustomer.getAccountId());
+        //物业缴费V7.4(瑞安项目-资产管理对接CM系统) -41302：增加第三方客户分类
+        customer.setNamespaceCustomerGroup(cmCustomer.getPropertyID());
         customer.setName(cmCustomer.getAccountName());
         customer.setNickName(cmCustomer.getAccountName());
         customer.setContactName(cmCustomer.getConnector());

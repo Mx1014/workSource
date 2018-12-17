@@ -496,6 +496,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 					Long.parseLong(dto.getTargetId()), NamespaceCustomerType.CM.getCode());
 			if(enterpriseCustomer != null) {
 				dto.setAccountId(enterpriseCustomer.getNamespaceCustomerToken());
+				dto.setPropertyID(enterpriseCustomer.getNamespaceCustomerGroup());
 			}
 		} catch (Exception e) {
 			
