@@ -2031,28 +2031,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		RentalBillDTO billDTO = ConvertHelper.convert(rentalBill, RentalBillDTO.class);
 		mappingRentalBillDTO(billDTO, rentalBill, rs);
-
-		billDTO.setConfirmationPrompt(rs.getConfirmationPrompt());
-		billDTO.setHolidayOpenFlag(rule.getHolidayOpenFlag());
-		billDTO.setHolidayType(rule.getHolidayType());
-		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalBill.getResourceType(),
-				EhRentalv2Resources.class.getSimpleName(), rentalBill.getRentalResourceId(),null,null);
-		List<Long> defaultDate = new ArrayList<>();
-		if (rule.getHolidayOpenFlag() !=null && rule.getHolidayOpenFlag() == 0){//不开放
-			defaultDate = rule.getHolidayType().equals(RentalHolidayType.NORMAL_WEEKEND.getCode())?normalWeekend:legalHoliday;
-		}
-		List<Long> settingDate = closeDates == null || closeDates.size() == 0 ?new ArrayList<>():
-				closeDates.stream().map(r->r.getCloseDate().getTime()).collect(Collectors.toList());
-		Set<Long> defaultDateSet = new HashSet<>(defaultDate);
-		Set<Long> settingDateSet = new HashSet<>(settingDate);
-		defaultDateSet.removeAll(settingDateSet);
-		billDTO.setSpecialOpenDate(new ArrayList<>(defaultDateSet));
-		defaultDateSet = new HashSet<>(defaultDate);
-		settingDateSet.removeAll(defaultDateSet);
-		billDTO.setSpecialCloseDate(new ArrayList<>(settingDateSet));
-		//退款提示
-		billDTO.setRefundTip(getRefundTipByRule(rule,rentalBill.getRentalResourceId()));
-		billDTO.setFileFlag(rule.getFileFlag() == null ? (byte) 0 :rule.getFileFlag());
+		processRentalBillAfterCreate(billDTO,rs,rule);
 
 		return billDTO;
 	}
@@ -8183,6 +8162,50 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (dto.getStatus().equals(SiteBillStatus.FAIL.getCode()) && bill.getPaidMoney()!=null && bill.getPaidMoney().compareTo(new BigDecimal(0))>0)
 			dto.setStatus(SiteBillStatus.FAIL_PAID.getCode());
 		return dto;
+	}
+
+	private void processRentalBillAfterCreate(RentalBillDTO billDTO,RentalResource rs,RentalDefaultRule rule){
+		billDTO.setConfirmationPrompt(rs.getConfirmationPrompt());
+		billDTO.setHolidayOpenFlag(rule.getHolidayOpenFlag());
+		billDTO.setHolidayType(rule.getHolidayType());
+		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rs.getResourceType(),
+				EhRentalv2Resources.class.getSimpleName(), rs.getId(),null,null);
+		List<Long> defaultDate = new ArrayList<>();
+		if (rule.getHolidayOpenFlag() !=null && rule.getHolidayOpenFlag() == 0){//不开放
+			defaultDate = rule.getHolidayType().equals(RentalHolidayType.NORMAL_WEEKEND.getCode())?normalWeekend:legalHoliday;
+		}
+		List<Long> settingDate = closeDates == null || closeDates.size() == 0 ?new ArrayList<>():
+				closeDates.stream().map(r->r.getCloseDate().getTime()).collect(Collectors.toList());
+		Set<Long> defaultDateSet = new HashSet<>(defaultDate);
+		Set<Long> settingDateSet = new HashSet<>(settingDate);
+		defaultDateSet.removeAll(settingDateSet);
+		billDTO.setSpecialOpenDate(new ArrayList<>(defaultDateSet));
+		defaultDateSet = new HashSet<>(defaultDate);
+		settingDateSet.removeAll(defaultDateSet);
+		billDTO.setSpecialCloseDate(new ArrayList<>(settingDateSet));
+		//退款提示
+		billDTO.setRefundTip(getRefundTipByRule(rule,rs.getId()));
+		billDTO.setFileFlag(rule.getFileFlag() == null ? (byte) 0 :rule.getFileFlag());
+	}
+
+	@Override
+	public RentalBillDTO getRentalOrderDetail(GetRentalBillCommand cmd) {
+		if (null == cmd.getBillId()) {
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_CANNOT_FIND_ORDER,
+					"Invalid parameter : bill id is null");
+		}
+		RentalOrder bill = this.rentalv2Provider.findRentalBillById(cmd.getBillId());
+		if (null == bill) {
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_CANNOT_FIND_ORDER,
+					"Invalid parameter : bill id can not find bill");
+		}
+		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
+
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
+				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
+		RentalBillDTO billDTO = processOrderDTO(bill);
+		processRentalBillAfterCreate(billDTO,rs,rule);
+		return billDTO;
 	}
 
 	@Override

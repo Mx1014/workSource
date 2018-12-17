@@ -10,6 +10,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.rentalv2.*;
+import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.util.RequireAuthentication;
@@ -686,6 +687,22 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+    /**
+     * <b>URL: /rental/getRentalBill</b>
+     * <p>
+     * 查询单个订单
+     * </p>
+     */
+    @RequestMapping("getRentalBill")
+    @RestReturn(value = RentalBillDTO.class)
+    public RestResponse getRentalBill(@Valid GetRentalBillCommand cmd) {
+        RentalBillDTO dto = rentalService.getRentalOrderDetail(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	/**
 	 * <b>URL: /rental/getRenewRentalOrderInfo</b>
