@@ -58,7 +58,6 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 
-			this.dbProvider.execute((TransactionStatus status) -> {
 
 //				RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
 //				RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
@@ -111,8 +110,6 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 					LOGGER.error("待付款订单:id ["+order.getId()+"]状态有问题： 订单状态是："+order.getStatus());
 				}
 
-				return null;
-			});
 
 	}
 
