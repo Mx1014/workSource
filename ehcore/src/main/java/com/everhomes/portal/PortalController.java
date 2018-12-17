@@ -514,6 +514,29 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
+	 * <p>主页签查询</p>
+	 * <b>URL: /portal/listLaunchPadIndex</b>
+	 */
+	@RequestMapping("listLaunchPadIndex")
+	@RestReturn(ListLaunchPadIndexResponse.class)
+	public RestResponse listLaunchPadIndex(ListLaunchPadIndexCommand cmd){
+		return new RestResponse(portalService.listLaunchPadIndexs(cmd));
+	}
+
+    /**
+     * <p>是否启用主页签</p>
+     * <b>URL: /portal/updateIndexFlag</b>
+     */
+    @RequestMapping("updateIndexFlag")
+    @RestReturn(String.class)
+    public RestResponse updateIndexFlag(UpdateIndexFlagCommand cmd){
+        portalService.updateIndexFlag(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+	/**
 	 * <p>27.门户导航栏列表</p>
 	 * <b>URL: /portal/listPortalNavigationBars</b>
 	 */

@@ -3,6 +3,23 @@ package com.everhomes.rest.launchpad;
 import com.everhomes.util.StringHelper;
 import java.sql.Timestamp;
 
+/**
+ * <ul>
+ * <li>name: 门户导航栏名称</li>
+ * <li>description: 门户导航栏描述</li>
+ * <li>type: 主页签类型，请参考{@link com.everhomes.rest.launchpadbase.IndexType}</li>
+ * <li>configJson: 对象类型，如果type为门户，请参考{@link com.everhomes.rest.launchpadbase.indexconfigjson.Container}，
+ *                  如果type为应用，请参考{@link com.everhomes.rest.launchpadbase.indexconfigjson.Application}</li>
+ * <li>iconUrl: 导航的icon图片url</li>
+ * <li>selectedIconUrl: 选中导航的icon图片url</li>
+ *  <li>createTime: 创建时间</li>
+ * <li>updateTime: 修改时间</li>
+ * <li>creatorUid: 创建人id</li>
+ * <li>creatorUName: 创建人名称</li>
+ * <li>operatorUid: 操作人id</li>
+ * <li>operatorUName: 操作人名称</li>
+ * </ul>
+ */
 public class LaunchPadIndexDTO {
     private Byte     status;
     private Timestamp     updateTime;
@@ -14,7 +31,7 @@ public class LaunchPadIndexDTO {
     private String     configJson;
     private String     iconUri;
     private String     selectedIconUri;
-    private String     type;
+    private Byte     type;
     private Long     id;
     private String     description;
 
@@ -118,16 +135,13 @@ public class LaunchPadIndexDTO {
         this.selectedIconUri = selectedIconUri;
     }
 
-
-    public String getType() {
+    public Byte getType() {
         return type;
     }
 
-
-    public void setType(String type) {
+    public void setType(Byte type) {
         this.type = type;
     }
-
 
     public Long getId() {
         return id;

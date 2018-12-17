@@ -1,12 +1,15 @@
 // @formatter:off
 package com.everhomes.portal;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.ServiceModuleAppProfileProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.configurations.ConfigurationsService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -33,6 +36,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.*;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.configurations.admin.ConfigurationsCreateAdminCommand;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.IndexType;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.CardExtension;
@@ -196,6 +200,9 @@ public class PortalServiceImpl implements PortalService {
     private ServiceModuleEntryProvider serviceModuleEntryProvider;
 	@Autowired
     private ServiceModuleAppProfileProvider serviceModuleAppProfileProvider;
+
+	@Autowired
+    private ConfigurationsService configurationsService;
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
 
@@ -1597,7 +1604,38 @@ public class PortalServiceImpl implements PortalService {
 		}).collect(Collectors.toList()));
 	}
 
-	@Override
+    @Override
+    public ListLaunchPadIndexResponse listLaunchPadIndexs(ListLaunchPadIndexCommand cmd) {
+	    ListLaunchPadIndexResponse response = new ListLaunchPadIndexResponse();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<LaunchPadIndexDTO> list = new ArrayList<>();
+        String indexFlag = configurationProvider.getValue(cmd.getNamespaceId(),ConfigConstants.INDEX_FLAG, "");
+        if (!StringUtils.isEmpty(indexFlag) && TrueOrFalseFlag.TRUE.getCode().equals(Byte.valueOf(indexFlag))) {
+            response.setIndexFlag(TrueOrFalseFlag.TRUE.getCode());
+        }else {
+            response.setIndexFlag(TrueOrFalseFlag.FALSE.getCode());
+        }
+        List<LaunchPadIndex> launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
+            query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+            return query;
+        });
+        launchPadIndices.stream().forEach(r-> {
+            LaunchPadIndexDTO dto = ConvertHelper.convert(r, LaunchPadIndexDTO.class);
+            list.add(dto);
+        });
+        response.setLaunchPadIndexs(list);
+        return response;
+    }
+
+    @Override
+    public void updateIndexFlag(UpdateIndexFlagCommand cmd) {
+        ConfigurationsCreateAdminCommand configurationsCreateAdminCommand = new ConfigurationsCreateAdminCommand();
+        configurationsCreateAdminCommand.setName(ConfigConstants.INDEX_FLAG);
+        configurationsCreateAdminCommand.setValue(cmd.getIndexFlag().toString());
+        configurationsService.crteateConfiguration(configurationsCreateAdminCommand);
+    }
+
+    @Override
 	public PortalNavigationBarDTO createPortalNavigationBar(CreatePortalNavigationBarCommand cmd) {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
@@ -1856,6 +1894,9 @@ public class PortalServiceImpl implements PortalService {
 
 							//删除已有的layout
 							deleteLayoutBeforePublish(namespaceId, cmd.getPublishType());
+
+							//发布主页签 add by yanlong.liang 20181217
+                            publishNavigationBar(cmd.getVersionId(), cmd.getPublishType());
 
 							for (PortalLayout layout: layouts) {
 
@@ -2599,9 +2640,40 @@ public class PortalServiceImpl implements PortalService {
 				}else if(IndexType.fromCode(na.getType()) == IndexType.APPLICATION){
 					//TODO  转换成router
 					Application application = new Application();
-					index.setConfigJson(application.toString());
-				}
+                    List<Long> appOriginIds = new ArrayList<>();
+                    JSONObject jsonObject = JSON.parseObject(index.getConfigJson());
+                    if (jsonObject.get("appOriginId") != null) {
+                        appOriginIds.add(Long.valueOf(jsonObject.get("appOriginId").toString()));
+                        List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsByOriginIds(versionId, appOriginIds);
 
+                        if(apps != null && apps.size() > 0) {
+                            ServiceModuleApp app = apps.get(0);
+
+                            ServiceModule module = serviceModuleProvider.findServiceModuleById(app.getModuleId());
+
+                            Byte clientHandlerType = 0;
+                            String host = "";
+                            if (module != null) {
+                                clientHandlerType = module.getClientHandlerType();
+                                host = module.getHost();
+                            }
+
+                            String appConfig = launchPadService.refreshActionData(app.getInstanceConfig());
+                            //填充路由信息
+                            RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null, null, null, clientHandlerType);
+
+                            if (StringUtils.isEmpty(host)) {
+                                host = "default";
+                            }
+
+                            String router = "zl://" + host + routerInfo.getPath() + "?" + routerInfo.getQuery();
+                            application.setRouter(router);
+                            index.setConfigJson(application.toString());
+                        }
+                    }
+
+				}
+                index.setName(na.getLabel());
 				index.setCreateTime(new Timestamp(System.currentTimeMillis()));
 				index.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 				index.setCreatorUid(UserContext.currentUserId());

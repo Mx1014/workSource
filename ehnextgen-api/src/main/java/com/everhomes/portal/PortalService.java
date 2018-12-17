@@ -102,7 +102,9 @@ public interface PortalService {
 
 	ListPortalNavigationBarsResponse listPortalNavigationBars(ListPortalNavigationBarsCommand cmd);
 
+	ListLaunchPadIndexResponse listLaunchPadIndexs(ListLaunchPadIndexCommand cmd);
 
+	void updateIndexFlag(UpdateIndexFlagCommand cmd);
 	PortalNavigationBarDTO createPortalNavigationBar(CreatePortalNavigationBarCommand cmd);
 
 
