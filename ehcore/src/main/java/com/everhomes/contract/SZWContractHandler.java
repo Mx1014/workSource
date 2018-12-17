@@ -19,6 +19,7 @@ import com.everhomes.rest.contract.ContractCategoryCommand;
 import com.everhomes.rest.contract.ContractCategoryListDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractDocumentDTO;
 import com.everhomes.rest.contract.ContractEventDTO;
 import com.everhomes.rest.contract.ContractParamDTO;
 import com.everhomes.rest.contract.ContractTemplateDTO;
@@ -33,7 +34,9 @@ import com.everhomes.rest.contract.EnterpriseContractDTO;
 import com.everhomes.rest.contract.DurationParamDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.GenerateContractDocumentsCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
+import com.everhomes.rest.contract.GetContractDocumentsCommand;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
 import com.everhomes.rest.contract.GetDurationParamCommand;
@@ -56,6 +59,7 @@ import com.everhomes.rest.contract.SetContractParamCommand;
 import com.everhomes.rest.contract.SetPrintContractTemplateCommand;
 import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
 import com.everhomes.rest.contract.UpdateContractCommand;
+import com.everhomes.rest.contract.UpdateContractDocumentsCommand;
 import com.everhomes.rest.contract.UpdateContractTemplateCommand;
 import com.everhomes.rest.contract.UpdatePaymentContractCommand;
 import com.everhomes.rest.contract.listContractTemplateCommand;
@@ -337,6 +341,24 @@ public class SZWContractHandler implements ContractService{
 	public List<ContractDTO> getApartmentRentalContract(ListApartmentContractsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void generateContractDocuments(GenerateContractDocumentsCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ContractDocumentDTO getContractDocuments(GetContractDocumentsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateContractDocuments(UpdateContractDocumentsCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

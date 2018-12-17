@@ -19,6 +19,7 @@ import java.util.List;
  * <li>billItemGenerationMonth: 费项产生的月数</li>
  * <li>billItemGenerationDay: 费项产生的日数</li>
  * <li>billItemGenerationType: 1: 费项产生项第几个月份；2:费项产色黄姑娘第几个月份第几号；3：费用周期最后一天产生</li>
+ * <li>chargingItemId: 费项ID</li>
  *</ul>
  */
 public class ListChargingItemsForBillGroupDTO {
@@ -33,6 +34,7 @@ public class ListChargingItemsForBillGroupDTO {
     private Integer billItemGenerationMonth;
     private Integer billItemGenerationDay;
     private Byte billItemGenerationType;
+    private Long chargingItemId;
 
     public Byte getBillItemGenerationType() {
         return billItemGenerationType;
@@ -122,4 +124,12 @@ public class ListChargingItemsForBillGroupDTO {
     public ListChargingItemsForBillGroupDTO() {
 
     }
+
+	public Long getChargingItemId() {
+		return chargingItemId;
+	}
+
+	public void setChargingItemId(Long chargingItemId) {
+		this.chargingItemId = chargingItemId;
+	}
 }

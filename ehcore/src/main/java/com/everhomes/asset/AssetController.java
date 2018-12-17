@@ -21,6 +21,7 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1050,6 +1051,20 @@ public class AssetController extends ControllerBase {
 		restResponse.setErrorDescription("OK");
 		return restResponse;
 	}
+	
+	/**
+	 * <b>URL: /asset/payBillsV2</b>
+	 * <p>支付对接统一订单</p>
+	 */
+	@RequestMapping("payBillsV2")
+	@RestReturn(PayAssetGeneralOrderResponse.class)
+	public RestResponse payBillsV2(CreatePaymentBillOrderCommand cmd) {
+		PayAssetGeneralOrderResponse response = assetService.payBillsV2(cmd);
+		RestResponse restResponse = new RestResponse(response);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 
 	/**
 	 * <b>URL: /asset/listPaymentBill</b>
@@ -1279,6 +1294,21 @@ public class AssetController extends ControllerBase {
 	@RequireAuthentication(false)
 	public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
 		assetService.payNotify(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /asset/payNotify</b>
+	 * <p>支付模块回调接口，通知支付结果:物业缴费V8.0（账单对接卡券） -44680</p>
+	 */
+	@RequestMapping("payNotifyV2")
+	@RestReturn(value = String.class)
+	@RequireAuthentication(false)
+	public RestResponse payNotifyV2(MerchantPaymentNotificationCommand cmd) {
+		assetService.payNotifyV2(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

@@ -1,9 +1,29 @@
 package com.everhomes.asset.group;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.everhomes.asset.AssetErrorCodes;
+import com.everhomes.asset.AssetPaymentConstants;
+import com.everhomes.asset.PaymentBillGroup;
+import com.everhomes.asset.PaymentBillGroupRule;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
+import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsRulesDao;
+import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -15,40 +35,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.asset.AssetErrorCodes;
-import com.everhomes.asset.AssetPaymentConstants;
-import com.everhomes.asset.PaymentBillGroup;
-import com.everhomes.asset.PaymentBillGroupRule;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.paySDK.pojo.PayUserDTO;
-import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
-import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
-import com.everhomes.rest.asset.AssetProjectDefaultFlag;
-import com.everhomes.rest.asset.CreateBillGroupCommand;
-import com.everhomes.rest.asset.DeleteBillGroupCommand;
-import com.everhomes.rest.asset.DeleteBillGroupReponse;
-import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
-import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
-import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
-import com.everhomes.rest.asset.ListBillGroupsDTO;
-import com.everhomes.rest.asset.ModifyBillGroupCommand;
-import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.order.PaymentUserStatus;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhContractChargingItems;
-import com.everhomes.server.schema.tables.EhContracts;
-import com.everhomes.server.schema.tables.EhPaymentBillGroups;
-import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
-import com.everhomes.server.schema.tables.EhPaymentBills;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsRulesDao;
-import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 /**
  * @author created by ycx
  * @date 下午8:42:50
@@ -64,8 +54,10 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
  
+//    @Autowired
+//    private com.everhomes.paySDK.api.PayService payServiceV2;
     @Autowired
-    private com.everhomes.paySDK.api.PayService payServiceV2;
+    private com.everhomes.gorder.sdk.order.GeneralOrderService payServiceV2;
     
     private DSLContext getReadOnlyContext(){
         return this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -79,15 +71,16 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
 	private Long getNextSequence(Class clz){
         return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(clz));
     }
-    
+
     public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId, Long organizationId, Boolean allScope) {
         List<ListBillGroupsDTO> list = new ArrayList<>();
-        List<Long> userIds = new ArrayList<Long>();
+        //List<Long> userIds = new ArrayList<Long>();
         DSLContext context = getReadOnlyContext();
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(t.ID,t.NAME,t.DEFAULT_ORDER,t.BALANCE_DATE_TYPE,t.BALANCE_DATE_TYPE,t.BILLS_DAY,
-        		t.DUE_DAY,t.DUE_DAY_TYPE,t.BILLS_DAY_TYPE,t.BILLS_DAY_TYPE,t.BIZ_PAYEE_TYPE,t.BIZ_PAYEE_ID);
+        		t.DUE_DAY,t.DUE_DAY_TYPE,t.BILLS_DAY_TYPE,t.BILLS_DAY_TYPE,t.BIZ_PAYEE_TYPE,t.BIZ_PAYEE_ID,
+        		t.BILLING_CYCLE_EXPRESSION, t.BILLS_DAY_EXPRESSION, t.DUE_DAY_EXPRESSION);
         query.addFrom(t);
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
@@ -111,37 +104,43 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
             dto.setBillDayType(r.getValue(t.BILLS_DAY_TYPE));
             dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
             dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
-            userIds.add(r.getValue(t.BIZ_PAYEE_ID));
+            dto.setBillingCycleExpression(r.getValue(t.BILLING_CYCLE_EXPRESSION));//添加账单周期表达式
+            dto.setBillDayExpression(r.getValue(t.BILLS_DAY_EXPRESSION));//添加出账单日表达式
+            dto.setDueDayExpression(r.getValue(t.DUE_DAY_EXPRESSION));//添加最晚还款日表达式
+            if(r.getValue(t.BIZ_PAYEE_ID) != null) {
+            	//由于收款方账户名称可能存在修改的情况，故重新请求电商
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("listBillGroups(request), cmd={}", r.getValue(t.BIZ_PAYEE_ID));
+                }
+                //List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
+                ListPayUsersByMerchantIdsCommand cmd = new ListPayUsersByMerchantIdsCommand();
+        		cmd.setIds(Arrays.asList(r.getValue(t.BIZ_PAYEE_ID)));
+        		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd);
+        		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
+        			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+        			//throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_MERCHANT_ID_NOT_FOUND, "merchant id not found");
+        		}else {
+        			List<PayUserDTO> payUserDTOs = resp.getResponse();
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
+                    }
+                    if(payUserDTOs != null && payUserDTOs.size() != 0) {
+                    	PayUserDTO payUserDTO = payUserDTOs.get(0);
+                    	dto.setAccountName(payUserDTO.getRemark());// 用户向支付系统注册帐号时填写的帐号名称
+                    	dto.setAccountAliasName(payUserDTO.getUserAliasName());//企业名称（认证企业）
+            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                        Integer registerStatus = payUserDTO.getRegisterStatus();
+                        if(registerStatus != null && registerStatus.intValue() == 1) {
+                        	dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                        } else {
+                        	dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                        }
+                    }
+        		}
+            }
             list.add(dto);
             return null;
         });
-        //由于收款方账户名称可能存在修改的情况，故重新请求电商
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listBillGroups(request), cmd={}", userIds);
-        }
-        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
-        }
-        if(payUserDTOs != null && payUserDTOs.size() != 0) {
-        	for(int i = 0;i < payUserDTOs.size();i++) {
-            	for(int j = 0;j < list.size();j++) {
-            		if(payUserDTOs.get(i) != null && list.get(j) != null &&
-            			payUserDTOs.get(i).getId() != null && list.get(j).getBizPayeeId() != null &&
-            			payUserDTOs.get(i).getId().equals(list.get(j).getBizPayeeId())){
-            			list.get(j).setAccountName(payUserDTOs.get(i).getRemark());// 用户向支付系统注册帐号时填写的帐号名称
-            			list.get(j).setAccountAliasName(payUserDTOs.get(i).getUserAliasName());//企业名称（认证企业）
-            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
-                        Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
-                        if(registerStatus != null && registerStatus.intValue() == 1) {
-                        	list.get(j).setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
-                        } else {
-                        	list.get(j).setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-                        }
-            		}
-            	}
-            }
-        }
         return list;
     }
 
@@ -199,6 +198,9 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
         group.setBizPayeeId(cmd.getBizPayeeId());//增加收款方id
         group.setBizPayeeType(cmd.getBizPayeeType());//增加收款方类型
         group.setCategoryId(cmd.getCategoryId());
+        group.setBillingCycleExpression(cmd.getBillingCycleExpression());
+        group.setBillsDayExpression(cmd.getBillDayExpression());
+        group.setDueDayExpression(cmd.getDueDayExpression());
         if(allScope) {
         	group.setOrgId(cmd.getOrganizationId());//标准版新增的管理公司ID
         }
@@ -213,18 +215,29 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
         query.addValue(t.NAME, cmd.getBillGroupName());
         query.addValue(t.BILLS_DAY, cmd.getBillDay());
         query.addValue(t.BALANCE_DATE_TYPE, cmd.getBillingCycle());
-        query.addValue(t.DUE_DAY, cmd.getDueDay());
         query.addValue(t.DUE_DAY_TYPE, cmd.getDueDayType());
+        if (cmd.getBillingCycleExpression()!=null){
+            query.addValue(t.BILLING_CYCLE_EXPRESSION,cmd.getBillingCycleExpression());
+        }
+        if (cmd.getBillDayExpression()!=null){
+            query.addValue(t.BILLS_DAY_EXPRESSION,cmd.getBillDayExpression());
+        }
+        if (cmd.getDueDayExpression()!=null){
+            query.addValue(t.DUE_DAY_EXPRESSION,cmd.getDueDayExpression());
+        }
+        if (cmd.getDueDay()!=null){
+            query.addValue(t.DUE_DAY, cmd.getDueDay());
+        }
         if(cmd.getBizPayeeId() != null) {
-        	query.addValue(t.BIZ_PAYEE_ID, Long.parseLong(cmd.getBizPayeeId()));//更新收款方账户id
+            query.addValue(t.BIZ_PAYEE_ID, Long.parseLong(cmd.getBizPayeeId()));//更新收款方账户id
         }
         query.addValue(t.BIZ_PAYEE_TYPE, cmd.getBizPayeeType());//更新收款方账户类型
         if(cmd.getBillDayType()!= null){
-        	query.addValue(t.BILLS_DAY_TYPE, cmd.getBillDayType());
+            query.addValue(t.BILLS_DAY_TYPE, cmd.getBillDayType());
         }
-        
+
         if(cmd.getAllScope()){
-        	//更新账单组配置
+            //更新账单组配置
             query.addConditions(t.ID.eq(cmd.getBillGroupId()).or(t.BROTHER_GROUP_ID.eq(cmd.getBillGroupId())));
             query.addConditions(t.OWNER_ID.in(allCommunity));//兼容标准版引入的转交项目管理权
             query.execute();
@@ -232,11 +245,11 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
             //根据billGroupId查询出所有关联的项目（包括已经授权出去的项目）
             decouplingHistoryBillGroup(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getBillGroupId(), allCommunity);
         }else {
-        	//更新账单组配置
-        	query.addConditions(t.ID.eq(cmd.getBillGroupId()));
+            //更新账单组配置
+            query.addConditions(t.ID.eq(cmd.getBillGroupId()));
             query.execute();
             //具体项目修改billGroup的，此项目的所有group解耦
-        	Long nullId = null;
+            Long nullId = null;
             context.update(t)
                     .set(t.BROTHER_GROUP_ID,nullId)
                     .where(t.OWNER_ID.eq(cmd.getOwnerId()))
@@ -247,6 +260,7 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
                     .execute();
         }
     }
+
 
     public PaymentBillGroup getBillGroupById(Long billGroupId) {
         DSLContext context = getReadOnlyContext();

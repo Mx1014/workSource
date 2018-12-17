@@ -1459,7 +1459,19 @@ public class AddressProviderImpl implements AddressProvider {
 			   });
 		return result;
 	}
-	
+
+	@Override
+	public List<Long> findOrganizationAddressByOrganizationId(Long organizationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+		return context.select(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID)
+					  .from(Tables.EH_ORGANIZATION_ADDRESSES)
+					  .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+					  .and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()))
+					  .fetchInto(Long.class);
+	}
+
+
 	// 根据域空间修复合同门牌之间的关系
 	@Override
 	public int getTotalApartmentCount(Integer namespaceId) {
@@ -1472,11 +1484,11 @@ public class AddressProviderImpl implements AddressProvider {
 				       .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
 				       .fetchAnyInto(Integer.class);
 	}
-	
+
 	@Override
 	public List<Address> findActiveAddress(int startIndex, int pageSize, Integer namespaceId) {
 		List<Address> result = new ArrayList<>();
-		
+
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		com.everhomes.server.schema.tables.EhAddresses a = Tables.EH_ADDRESSES;
 		context.select(a.ID,a.COMMUNITY_ID,a.ADDRESS)
