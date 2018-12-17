@@ -56,9 +56,9 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 -- AUTHOR: 缪洲 20181211
 -- REMARK: 工位预定V2.4
---工位预定重做，旧数据无法兼容，因此删掉
+-- 工位预定重做，旧数据无法兼容，因此删掉
 DELETE FROM eh_office_cubicle_spaces; 
---工位预定重做，以前旧参观记录作废
+-- 工位预定重做，以前旧参观记录作废
 DELETE FROM eh_office_cubicle_orders; 
 SET @id = (SELECT MAX(id) from eh_locale_templates);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1,'sms.default', 94, 'zh_CN', '工会预定成功付款短信', '您已成功预定了${spaceName}短租工位，预定时间：${reserveTime}，订单编号：${orderNo}.如需取消，请在预定开始时间前取消，感谢您的使用。', 0);
