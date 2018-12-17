@@ -529,7 +529,7 @@ public class AssetProviderImpl implements AssetProvider {
                 t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
         		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
         		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY,
-        		t.TAX_AMOUNT);
+        		t.TAX_AMOUNT, t.THIRD_ERROR_DESCRIPTION);
 //        query.addFrom(t, t2);
 //        query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addFrom(t);
@@ -733,6 +733,8 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setCanModify(r.getValue(t.CAN_MODIFY));
             //瑞安CM对接 账单、费项表增加是否是只读字段:只读状态：0：非只读；1：只读
             dto.setIsReadOnly(r.getValue(t.IS_READONLY));
+            //瑞安项目专用、同瑞安CM系统服务账单同步失败的账单展示
+            dto.setThirdErrorDescription(r.getValue(t.THIRD_ERROR_DESCRIPTION));
             list.add(dto);
             return null;});
         return list;

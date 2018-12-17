@@ -6163,4 +6163,21 @@ public class AssetServiceImpl implements AssetService {
         return handler.createOrderV2(cmd);
 	}
 	
+	public ListBillsResponse listSyncToCMErrorBill(ListBillsCommand cmd) {
+    	LOGGER.info("AssetServiceImpl listSyncToCMErrorBill cmd={}", cmd.toString());
+    	cmd.setOwnerId(null);
+    	cmd.setCommunityId(null);
+    	cmd.setCategoryId(null);
+    	cmd.setBillGroupId(null);
+    	cmd.setStatus(null);
+    	
+        ListBillsResponse response = new ListBillsResponse();
+        AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId(), 0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        List<ListBillsDTO> list = handler.listBills(cmd.getNamespaceId(),response, cmd);
+        response.setListBillsDTOS(list);
+        return response;
+    }
+	
 }

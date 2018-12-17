@@ -360,4 +360,6 @@ public interface AssetService {
 	PayAssetGeneralOrderResponse payBillsV2(CreatePaymentBillOrderCommand cmd);
 	
 	void payNotifyV2(MerchantPaymentNotificationCommand cmd);
+	
+	ListBillsResponse listSyncToCMErrorBill(ListBillsCommand cmd);
 }

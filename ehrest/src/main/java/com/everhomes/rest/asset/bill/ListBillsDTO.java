@@ -100,6 +100,7 @@ public class ListBillsDTO {
     private List<BillItemDTO> billItemDTOList;
     private String accountId;//物业缴费V7.4(瑞安项目-资产管理对接CM系统) : CM的客户ID
     private String propertyID;//物业缴费V7.4(瑞安项目-资产管理对接CM系统) : CM的项目ID
+    private String thirdErrorDescription;//瑞安项目专用、同瑞安CM系统服务账单同步失败的账单展示
 
     public List<String> getNoticeTelList() {
 		return noticeTelList;
@@ -427,6 +428,14 @@ public class ListBillsDTO {
 
 	public void setPropertyID(String propertyID) {
 		this.propertyID = propertyID;
+	}
+
+	public String getThirdErrorDescription() {
+		return thirdErrorDescription;
+	}
+
+	public void setThirdErrorDescription(String thirdErrorDescription) {
+		this.thirdErrorDescription = thirdErrorDescription;
 	}
 
 }
