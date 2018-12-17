@@ -64,14 +64,18 @@
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
 
--- AUTHOR: 杨崇鑫
+-- AUTHOR: 杨崇鑫 2018-12-17
 -- REMARK: 瑞安项目专用、同瑞安CM系统服务账单同步失败的账单展示
 INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (102, 20400, 0, 'CM同步失败账单');
--- AUTHOR: 杨崇鑫
+-- AUTHOR: 杨崇鑫 2018-12-17
 -- REMARK: 瑞安项目专用、同瑞安CM系统服务账单同步失败的账单展示
 set @id=(select ifnull((SELECT max(id) from eh_service_module_include_functions),1));
 INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `module_id`, `community_id`, `function_id`) VALUES (@id:= @id +1, 999929, 20400, NULL, 102);
 
+-- AUTHOR: 黄鹏宇 2018-12-17
+-- REMARK: 瑞安屏蔽同步客户的按钮
+set @id= (select max(id)+1 from eh_service_module_exclude_functions);
+INSERT INTO `eh_service_module_exclude_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id, 999929, NULL, 21100, 99);
 
 
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
