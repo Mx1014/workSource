@@ -543,7 +543,7 @@ public class AssetProviderImpl implements AssetProvider {
         	query.addConditions(t.OWNER_ID.eq(ownerId));
         }
         
-        if(categoryId != null){
+        if(!org.springframework.util.StringUtils.isEmpty(categoryId)){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
         //增加欠费天数查询条件 : 0＜天数≤30,30＜天数≤60
@@ -579,7 +579,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
         //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步会再次传输
         if(!org.springframework.util.StringUtils.isEmpty(cmd.getThirdSign())){
-            query.addConditions(t.THIRD_SIGN.eq(cmd.getThirdSign()).or(t.THIRD_SIGN.isNull()));
+            query.addConditions(t.THIRD_SIGN.eq(cmd.getThirdSign()));
         }
         if(!org.springframework.util.StringUtils.isEmpty(cmd.getContractId())) {
         	query.addConditions(t.CONTRACT_ID.eq(cmd.getContractId()));
