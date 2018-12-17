@@ -18,6 +18,4 @@ public interface WelfareReceiverProvider {
 	void deleteWelfareReceivers(Long welfareId);
 
 	WelfareReceiver findWelfareReceiverByUser(Long welfareId, Long userId);
-
-	List<Long>  listWelfareIdsByUser(Long organizationId, Long currentUserId, Integer offset, Integer pageSize);
 }
