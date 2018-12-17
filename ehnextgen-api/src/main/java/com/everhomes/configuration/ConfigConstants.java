@@ -248,4 +248,7 @@ public interface ConfigConstants {
 	
 	//缴费对接门禁定时任务
 	public static final String SCHEDULE_ASSET_DOORACCESS_TASK_TIME = "asset.dooraccess.cronexpression";
+	
+	//品质核查定时任务
+	public static final String SCHEDULE_QUALITY_INSPECTION_TASK_CORN = "quality.inspection.cronexpression";
 }

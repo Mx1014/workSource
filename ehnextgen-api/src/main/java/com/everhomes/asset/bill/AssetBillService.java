@@ -11,6 +11,7 @@ import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
+import com.everhomes.rest.asset.bill.NotifyThirdSignCommand;
 
 /**
  * @author created by ycx
@@ -30,5 +31,7 @@ public interface AssetBillService {
 	ListBillsResponse listOpenBills(ListBillsCommand cmd);
 
 	ListBillsDTO changeChargeStatus(ChangeChargeStatusCommand cmd);
+
+	void notifyThirdSign(NotifyThirdSignCommand cmd);
 	
 }

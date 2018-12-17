@@ -5069,7 +5069,9 @@ public class FlowServiceImpl implements FlowService {
         switch (varType) {
             case FORM:
                 List<FlowConditionVariableDTO> list = getConditionVariableFromForm(flow, flow.getFormOriginId(), flow.getFormVersion());
-                groups.add(new FlowConditionVariableGroup("全局表单", FlowEntityType.FLOW.getCode(), flow.getTopId(), list));
+                if (list != null && list.size() > 0) {
+                    groups.add(new FlowConditionVariableGroup("全局表单", FlowEntityType.FLOW.getCode(), flow.getTopId(), list));
+                }
                 List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flow.getTopId(), FlowConstants.FLOW_CONFIG_VER);
                 for (FlowNode node : nodes) {
                     if (!Objects.equals(node.getFormStatus(), TrueOrFalseFlag.TRUE.getCode())) {
@@ -6156,12 +6158,26 @@ public class FlowServiceImpl implements FlowService {
                 FlowEventLogDTO dto = ConvertHelper.convert(enterLog, FlowEventLogDTO.class);
                 if (flowNode != null) {
                     dto.setFlowNodeName(flowNode.getNodeName());
+                } else {
+                    dto.setFlowNodeName(String.valueOf(flowCase.getCurrentNodeId()));
                 }
+
                 if (dto.getFlowUserName() == null || dto.getFlowUserName().isEmpty()) {
-                    OrganizationMember om = organizationProvider.findOrganizationMemberByUIdAndOrgId(enterLog.getFlowUserId(), flowCase.getOrganizationId());
+                    OrganizationMember om = organizationProvider
+                            .findOrganizationMemberByUIdAndOrgId(enterLog.getFlowUserId(), flowCase.getOrganizationId());
                     if (om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
                         dto.setFlowUserName(om.getContactName());
                     }
+                }
+                if (dto.getFlowUserName() == null || dto.getFlowUserName().isEmpty()) {
+                    List<OrganizationMember> memberList = organizationProvider
+                            .findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(flowCase.getOrganizationId(), enterLog.getFlowUserId());
+                    if (memberList != null && memberList.size() > 0) {
+                        dto.setFlowUserName(memberList.iterator().next().getContactName());
+                    }
+                }
+                if (dto.getFlowUserName() == null || dto.getFlowUserName().isEmpty()) {
+                    dto.setFlowUserName(String.valueOf(enterLog.getFlowUserId()));
                 }
                 dtoList.add(dto);
             }
@@ -6771,6 +6787,10 @@ public class FlowServiceImpl implements FlowService {
             }
         }
 
+        serviceTypes = serviceTypes.stream()
+                .filter(r -> StringUtils.isNotEmpty(r.getServiceName()))
+                .collect(Collectors.toList());
+
         ListFlowServiceTypeResponse response = new ListFlowServiceTypeResponse();
         response.setServiceTypes(serviceTypes);
         return response;
@@ -6789,6 +6809,7 @@ public class FlowServiceImpl implements FlowService {
                     dto.setServiceName(r.getServiceType());
                     dto.setModuleId(r.getModuleId());
                     dto.setOrganizationId(r.getOrganizationId());
+                    dto.setOriginAppId(-1L);
                     return dto;
                 }).collect(Collectors.toList());
         return serviceTypes;

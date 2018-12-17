@@ -460,7 +460,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     public List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
 																  String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
 																  Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords, 
-																  Long pageAnchor, Integer pageSize,Byte payMode) {
+																  Long pageAnchor, Integer pageSize,Byte payMode,Integer pageNum) {
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
@@ -470,8 +470,8 @@ public class ParkingProviderImpl implements ParkingProvider {
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PARKING_LOT_ID.eq(parkingLotId));
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(ParkingOrderDeleteFlag.NORMAL.getCode()));
 
-        if (null != pageAnchor && pageAnchor != 0)
-			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
+//        if (null != pageAnchor && pageAnchor != 0)
+//			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
         if(StringUtils.isNotBlank(plateNumber))
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.eq(plateNumber));
         if(StringUtils.isNotBlank(plateOwnerName))
@@ -512,8 +512,9 @@ public class ParkingProviderImpl implements ParkingProvider {
         }
 
         query.addOrderBy(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.desc());
+        int firstOffset = (pageNum - 1) * pageSize;
         if(null != pageSize)
-        	query.addLimit(pageSize);
+        	query.addLimit(firstOffset,pageSize);
         
     	return query.fetch().map(r -> ConvertHelper.convert(r, ParkingRechargeOrder.class));
     }

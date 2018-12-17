@@ -1729,7 +1729,8 @@ public class PortalServiceImpl implements PortalService {
 		if(null != oType){
 			List<String> groupTypes = new ArrayList<>();
 			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, cmd.getKeywords(), oType.getCode(), locator, pageSize);
+			//将管理公司和普通公司合并 addby yanlong.liang 20181213
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, cmd.getKeywords(),"", locator, pageSize);
 			for (Organization organization: organizations) {
 				dtos.add(ConvertHelper.convert(organization, ScopeDTO.class));
 			}
@@ -1749,7 +1750,8 @@ public class PortalServiceImpl implements PortalService {
 			List<Community> communities = communityProvider.listCommunities(namespaceId, locator, pageSize, new ListingQueryBuilderCallback() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-					query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType.getCode()));
+				    //将园区和小区合并 addby yanlong.liang 20181213
+//					query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType.getCode()));
 					if(!StringUtils.isEmpty(cmd.getKeywords())){
 						query.addConditions(Tables.EH_COMMUNITIES.NAME.like(cmd.getKeywords() + "%").or(Tables.EH_COMMUNITIES.ALIAS_NAME.like(cmd.getKeywords() + "%")));
 
@@ -1787,7 +1789,8 @@ public class PortalServiceImpl implements PortalService {
 		if(null != oType){
 			SearchOrganizationCommand command = new SearchOrganizationCommand();
 			command.setNamespaceId(namespaceId);
-			command.setOrganizationType(oType.getCode());
+			//不需要区分管理公司和普通公司  add by yanlong.liang 20181213
+//			command.setOrganizationType(oType.getCode());
 			command.setPageAnchor(cmd.getAnchor());
 			command.setPageSize(pageSize);
 			command.setKeyword(cmd.getKeywords());
@@ -1807,7 +1810,8 @@ public class PortalServiceImpl implements PortalService {
 		}
 		CommunityType communityType = cType;
 		if(null != communityType){
-			List<CommunityDoc> communities = communitySearcher.searchDocs(cmd.getKeywords(), cType.getCode(), null, null, cmd.getAnchor().intValue(), cmd.getPageSize());
+		    //不需要区分园区和小区 add by yanlong.liang 20181213
+			List<CommunityDoc> communities = communitySearcher.searchDocs(cmd.getKeywords(), null, null, null, cmd.getAnchor().intValue(), cmd.getPageSize());
 			for (CommunityDoc communityDoc: communities) {
 				dtos.add(ConvertHelper.convert(communityDoc, ScopeDTO.class));
 			}
