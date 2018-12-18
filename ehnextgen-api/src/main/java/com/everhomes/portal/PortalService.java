@@ -105,6 +105,9 @@ public interface PortalService {
 	ListLaunchPadIndexResponse listLaunchPadIndexs(ListLaunchPadIndexCommand cmd);
 
 	void updateIndexFlag(UpdateIndexFlagCommand cmd);
+
+	GetIndexFlagResponse getIndexFlag(GetIndexFlagCommand cmd);
+
 	PortalNavigationBarDTO createPortalNavigationBar(CreatePortalNavigationBarCommand cmd);
 
 

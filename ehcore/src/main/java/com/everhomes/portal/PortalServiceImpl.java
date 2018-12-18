@@ -1635,7 +1635,19 @@ public class PortalServiceImpl implements PortalService {
         configurationsService.crteateConfiguration(configurationsCreateAdminCommand);
     }
 
-    @Override
+	@Override
+	public GetIndexFlagResponse getIndexFlag(GetIndexFlagCommand cmd) {
+		GetIndexFlagResponse response = new GetIndexFlagResponse();
+		String indexFlag = configurationProvider.getValue(cmd.getNamespaceId(),ConfigConstants.INDEX_FLAG, "");
+		if (!StringUtils.isEmpty(indexFlag) && TrueOrFalseFlag.TRUE.getCode().equals(Byte.valueOf(indexFlag))) {
+			response.setIndexFlag(TrueOrFalseFlag.TRUE.getCode());
+		}else {
+			response.setIndexFlag(TrueOrFalseFlag.FALSE.getCode());
+		}
+		return response;
+	}
+
+	@Override
 	public PortalNavigationBarDTO createPortalNavigationBar(CreatePortalNavigationBarCommand cmd) {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());

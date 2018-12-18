@@ -524,7 +524,7 @@ public class PortalController extends ControllerBase {
 	}
 
     /**
-     * <p>是否启用主页签</p>
+     * <p>更新启用主页签</p>
      * <b>URL: /portal/updateIndexFlag</b>
      */
     @RequestMapping("updateIndexFlag")
@@ -536,6 +536,20 @@ public class PortalController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <p>查询是否启用主页签</p>
+     * <b>URL: /portal/updateIndexFlag</b>
+     */
+	@RequestMapping("getIndexFlag")
+	@RestReturn(GetIndexFlagResponse.class)
+	public RestResponse getIndexFlag(GetIndexFlagCommand cmd){
+		GetIndexFlagResponse res = portalService.getIndexFlag(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	/**
 	 * <p>27.门户导航栏列表</p>
 	 * <b>URL: /portal/listPortalNavigationBars</b>
