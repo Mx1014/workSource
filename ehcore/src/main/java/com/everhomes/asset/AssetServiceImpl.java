@@ -5039,7 +5039,7 @@ public class AssetServiceImpl implements AssetService {
         if (checkedBillId==null){
              dto = assetProvider.creatPropertyBill(createBillCommand,null);
         }else {
-             dto = assetProvider.mergrBillItemIntoPropertyBill(createBillCommand,checkedBillId);
+             dto = assetProvider.addBillItemIntoPropertyBill(createBillCommand,checkedBillId);
         }
 //        ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand,null);
 		//主要是把以前缴费这边为了兼容对接使用的String类型的billId全部换成Long类型的billId，因为创建统一账单都是在缴费这边的表，都是Long

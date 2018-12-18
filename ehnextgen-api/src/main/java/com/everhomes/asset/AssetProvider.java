@@ -72,7 +72,7 @@ public interface AssetProvider {
 
 //    ListBillsDTO creatPropertyBillForCommunity( CreateBillCommand cmd);
 
-    public ListBillsDTO mergrBillItemIntoPropertyBill( CreateBillCommand cmd,Long billId);
+    public ListBillsDTO addBillItemIntoPropertyBill( CreateBillCommand cmd,Long billId);
 
     ListBillDetailResponse listBillDetail(Long billId);
 
