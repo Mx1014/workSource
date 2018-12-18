@@ -4555,10 +4555,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
 		if (cmd.getPageNumber() == null)
-			cmd.setPageNumber(0);
+			cmd.setPageNumber(1);
 		Integer pageSize = PaginationConfigHelper.getPageSize(
 				configurationProvider, cmd.getPageSize());
-		Integer anchor = cmd.getPageSize() * cmd.getPageNumber();
+		Integer anchor = cmd.getPageSize() * (cmd.getPageNumber() - 1);
 		Long counts = rentalv2Provider.countRentalBills(cmd.getResourceTypeId(),cmd.getOrganizationId(),cmd.getCommunityId(),
 				cmd.getRentalSiteId(),cmd.getBillStatus(),cmd.getVendorType(),cmd.getStartTime(),cmd.getEndTime(),
 				null,null,cmd.getPayChannel(),cmd.getSource());
