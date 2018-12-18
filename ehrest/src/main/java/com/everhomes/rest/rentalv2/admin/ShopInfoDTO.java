@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 public class ShopInfoDTO {
     private String shopName;
     private String shopNo;
-    private String shopUrl;
+    private String shopURL;
 
     public String getShopName() {
         return shopName;
@@ -23,12 +23,12 @@ public class ShopInfoDTO {
         this.shopNo = shopNo;
     }
 
-    public String getShopUrl() {
-        return shopUrl;
+    public String getShopURL() {
+        return shopURL;
     }
 
-    public void setShopUrl(String shopUrl) {
-        this.shopUrl = shopUrl;
+    public void setShopURL(String shopURL) {
+        this.shopURL = shopURL;
     }
 
     @Override
