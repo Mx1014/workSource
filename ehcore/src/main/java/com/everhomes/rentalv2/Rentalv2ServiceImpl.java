@@ -7965,6 +7965,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 
 		ResourceShopSettingDTO dto = ConvertHelper.convert(rule,ResourceShopSettingDTO.class);
+		dto.setShopURL(rule.getShopUrl());
 		return dto;
 	}
 

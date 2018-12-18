@@ -11,4 +11,4 @@ ADD COLUMN `shop_name`  varchar(255) NULL COMMENT '关联商铺名' AFTER `previ
 ALTER TABLE `eh_rentalv2_default_rules`
 ADD COLUMN `shop_no`  varchar(255) NULL COMMENT '关联商铺号' AFTER `shop_name`;
 ALTER TABLE `eh_rentalv2_default_rules`
-ADD COLUMN `shop_uRL`  varchar(255) NULL COMMENT '关联商铺地址' AFTER `shop_no`;
+ADD COLUMN `shop_url`  varchar(255) NULL COMMENT '关联商铺地址' AFTER `shop_no`;
