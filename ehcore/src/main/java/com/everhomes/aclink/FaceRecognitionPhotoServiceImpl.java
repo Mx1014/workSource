@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.aclink.faceplusplus.FacePlusPlusService;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,9 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 	
 	@Autowired
 	DoorAccessProvider doorAccessProvider;
+
+	@Autowired
+	private FacePlusPlusService facePlusPlusService;
 	
 	@Override
 	public void setFacialRecognitionPhoto(SetFacialRecognitionPhotoCommand cmd) {
@@ -104,6 +108,8 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 			rec.setUserType(cmd.getUserType());
 			rec.setStatus((byte) 1);
 			faceRecognitionPhotoProvider.creatFacialRecognitionPhoto(rec);
+			//face++对接，新增访客照片
+			facePlusPlusService.addPhoto(rec.getImgUrl(),rec.getAuthId(),rec.getUserId());
 			return;
 		}
 		List<FaceRecognitionPhoto> recs = faceRecognitionPhotoProvider.listFacialRecognitionPhotoByUser(locator, user.getId(), 0);
@@ -114,6 +120,8 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 			rec.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			rec.setOperatorUid(user.getId());
 			faceRecognitionPhotoProvider.updateFacialRecognitionPhoto(rec);
+			//face++，更新图片
+			facePlusPlusService.addPhoto(rec.getImgUrl(),rec.getAuthId(),rec.getUserId());
 		}else{
 			FaceRecognitionPhoto rec = new FaceRecognitionPhoto();
 			rec.setImgUri(cmd.getImgUri());
@@ -125,6 +133,8 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 			rec.setUserId(user.getId());
 			rec.setStatus((byte) 1);
 			faceRecognitionPhotoProvider.creatFacialRecognitionPhoto(rec);
+			//face++，新增正式用户照片
+			facePlusPlusService.addPhoto(rec.getImgUrl(),rec.getAuthId(),rec.getUserId());
 		}
 		//同步照片
 		SyncLocalPhotoByUserIdCommand syncCmd = new SyncLocalPhotoByUserIdCommand();
