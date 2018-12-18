@@ -31,7 +31,7 @@ public class UpdateResourceShopSettingCommand {
 
     private String shopNo;
 
-    private String shopUrl;
+    private String shopURL;
 
     public String getOwnerType() {
         return ownerType;
@@ -97,11 +97,11 @@ public class UpdateResourceShopSettingCommand {
         this.shopNo = shopNo;
     }
 
-    public String getShopUrl() {
-        return shopUrl;
+    public String getShopURL() {
+        return shopURL;
     }
 
-    public void setShopUrl(String shopUrl) {
-        this.shopUrl = shopUrl;
+    public void setShopURL(String shopURL) {
+        this.shopURL = shopURL;
     }
 }

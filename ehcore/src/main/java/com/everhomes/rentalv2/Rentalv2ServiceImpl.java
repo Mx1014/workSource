@@ -7951,7 +7951,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 		rule.setShopName(cmd.getShopName());
 		rule.setShopNo(cmd.getShopNo());
-		rule.setShopUrl(cmd.getShopUrl());
+		rule.setShopUrl(cmd.getShopURL());
 		this.rentalv2Provider.updateRentalDefaultRule(rule);
 	}
 
