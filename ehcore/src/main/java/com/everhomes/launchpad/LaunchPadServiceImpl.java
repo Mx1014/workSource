@@ -3173,7 +3173,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		if(categories != null && categories.size() > 0){
 			for (ItemServiceCategry categry: categories){
 
-				List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, categry.getName(), null);
+				List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, categry.getName(), null, TrueOrFalseFlag.TRUE.getCode());
 				List<AppDTO> appDtos = itemToAppDto(launchPadItems);
 				LaunchPadCategoryDTO categoryDto = new LaunchPadCategoryDTO();
                 categoryDto.setAppDtos(appDtos);
@@ -3187,7 +3187,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			}
 
 		}else {
-			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, null, null);
+			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, null, null,TrueOrFalseFlag.FALSE.getCode());
 			List<AppDTO> appDtos = itemToAppDto(launchPadItems);
 			LaunchPadCategoryDTO categoryDto = new LaunchPadCategoryDTO();
             categoryDto.setAppDtos(appDtos);
@@ -3207,7 +3207,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		if(appDtos == null || appDtos.size() == 0){
 			//默认的
-			List<LaunchPadItem> defaultItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, null, ItemDisplayFlag.DISPLAY.getCode());
+			List<LaunchPadItem> defaultItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, null, ItemDisplayFlag.DISPLAY.getCode(), TrueOrFalseFlag.FALSE.getCode());
 			appDtos = itemToAppDto(defaultItems);
 		}
 
