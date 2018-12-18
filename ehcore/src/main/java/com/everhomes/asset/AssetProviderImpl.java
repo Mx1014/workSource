@@ -1695,6 +1695,7 @@ public class AssetProviderImpl implements AssetProvider {
                             amountReceivableWithoutTax,amountOwedWithoutTax,taxAmount);
                 }
 
+                reCalBillById(nextBillId);//重新计算账单
                 com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = findBillById(nextBillId);
 
                 response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
