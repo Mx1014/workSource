@@ -1,0 +1,1 @@
+ALTER TABLE eh_portal_navigation_bars MODIFY config_json VARCHAR(1024);
