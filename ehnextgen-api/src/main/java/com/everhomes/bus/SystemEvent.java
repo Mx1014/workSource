@@ -85,6 +85,8 @@ public enum SystemEvent {
 
    //服务联盟
     SERVICE_ALLIANCE_CREATE("service.alliance_create"),
+    SERVICE_ALLIANCE_APPLY("service.alliance_apply"),
+    SERVICE_ALLIANCE_APPLY_CANCEL("service.alliance_apply_cancel"),
 
 	//云打印
 	SIYIN_PRINT_PAID("siyin_print.paid");

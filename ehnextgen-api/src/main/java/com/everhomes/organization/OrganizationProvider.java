@@ -1011,4 +1011,7 @@ public interface OrganizationProvider {
 
 	List<Long> getOrganizationIdsHaveCommunity();
 
+	List<OrganizationMemberDetails> listOrganizationMemberDetailsByOrgIdIncluSubDepts(Integer namespaceId, Long orgId, String keywords,
+			CrossShardListingLocator locator, Integer pageSize);
+
 }

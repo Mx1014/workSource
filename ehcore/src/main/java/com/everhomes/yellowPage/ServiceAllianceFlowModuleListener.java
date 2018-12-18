@@ -57,6 +57,9 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
@@ -77,6 +80,8 @@ import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.server.schema.tables.EhServiceAlliances;
+import com.everhomes.server.schema.tables.EhSiyinPrintOrders;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.ConvertHelper;
@@ -221,6 +226,40 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
 		//发送消息给相关人员
 		sendMessage(yellowPage,flowCase, formItemsInfo);
+		
+		//发放积分
+		addPoints(yellowPage.getId(), flowCase.getProjectId());
+	}
+	
+	//添加积分
+	private void addPoints(Long serviceId, Long projectId) {
+		
+		LocalEventBus.publish(event -> {
+			LocalEventContext context = new LocalEventContext();
+			context.setUid(UserContext.currentUserId());
+			context.setNamespaceId(UserContext.getCurrentNamespaceId());
+			context.setCommunityId(projectId);
+			event.setContext(context);
+			event.setEntityType(EhServiceAlliances.class.getSimpleName());
+			event.setEntityId(serviceId);
+			event.setEventName(SystemEvent.SERVICE_ALLIANCE_APPLY.dft());
+		});
+		
+	}
+	
+	//回退积分
+	private void minusPoints(Long serviceId, Long projectId) {
+		
+		LocalEventBus.publish(event -> {
+			LocalEventContext context = new LocalEventContext();
+			context.setUid(UserContext.currentUserId());
+			context.setNamespaceId(UserContext.getCurrentNamespaceId());
+			context.setCommunityId(projectId);
+			event.setContext(context);
+			event.setEntityType(EhServiceAlliances.class.getSimpleName());
+			event.setEntityId(serviceId);
+			event.setEventName(SystemEvent.SERVICE_ALLIANCE_APPLY_CANCEL.dft());
+		});
 	}
 
 	private void createCommitStatDetail(FlowCase flowCase, ServiceAlliances service) {
@@ -676,11 +715,10 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
-
 		
 		FlowCase flowCase = ctx.getFlowCase();
 		
-		reNewEsWorkFlowStatus(flowCase.getId(), flowCase.getStatus());
+		reNewEsWorkFlowStatus(flowCase, flowCase.getStatus());
 		
 	}
 	
@@ -693,13 +731,13 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	* @date: 2018年6月20日 下午1:54:27 
 	*
 	*/
-	private void reNewEsWorkFlowStatus(Long flowCaseId, Byte flowCaseStatus) {
-
+	private void reNewEsWorkFlowStatus(FlowCase flowCase, Byte newFlowCaseStatus) {
+		
 		// 将工作流状态转成服务状态
-		ServiceAllianceWorkFlowStatus newStatus = ServiceAllianceWorkFlowStatus.getFromFlowCaseStatus(flowCaseStatus);
+		ServiceAllianceWorkFlowStatus newStatus = ServiceAllianceWorkFlowStatus.getFromFlowCaseStatus(newFlowCaseStatus);
 		
 		//获取储存在数据库的记录
-		ServiceAllianceApplicationRecord record = saapplicationRecordProvider.findServiceAllianceApplicationRecordByFlowCaseId(flowCaseId);
+		ServiceAllianceApplicationRecord record = saapplicationRecordProvider.findServiceAllianceApplicationRecordByFlowCaseId(flowCase.getId());
 		if (null == record) {
 			return ;
 		}
@@ -709,9 +747,13 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		saapplicationRecordProvider.updateServiceAllianceApplicationRecord(record);
 
 		// 更新es存储的服务状态
-		serviceAllianceRequestInfoSearcher.updateDocByField(flowCaseId, ALLIANCE_TEMPLATE_TYPE,
+		serviceAllianceRequestInfoSearcher.updateDocByField(flowCase.getId(), ALLIANCE_TEMPLATE_TYPE,
 				ALLIANCE_WORK_FLOW_STATUS_FIELD_NAME, newStatus.getCode());
-
+		
+		//如果是取消状态需要退还积分
+		if (ServiceAllianceWorkFlowStatus.INVALID ==  newStatus) {
+			minusPoints(record.getServiceAllianceId(), flowCase.getProjectId());
+		}
 	}
 	
 	@Override
@@ -729,7 +771,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		} 
 		
 		//更新es状态 #31378
-		reNewEsWorkFlowStatus(flowCase.getId(), newFlowCaseStatus);
+		reNewEsWorkFlowStatus(flowCase, newFlowCaseStatus);
 	}
 
 	

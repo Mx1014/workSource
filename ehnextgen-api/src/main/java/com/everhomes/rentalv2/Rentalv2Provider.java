@@ -279,4 +279,7 @@ public interface Rentalv2Provider {
 
 	RentalOrder getUserClosestBill(Long userId,Long resourceTypeId);
 
+	Long getRentalOrdersTotalNum(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
+			Long startTime, Long endTime, String tag1, String tag2, String keyword);
+
 }

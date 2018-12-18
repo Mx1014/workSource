@@ -277,6 +277,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
             order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
             paymentCardProvider.updatePaymentCardRechargeOrder(order);
         }else{ //返回错误
+            LOGGER.error("paymentCard recharge faild, cmd = {} response = {}", jo,cardInfo);
             order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
             order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
             paymentCardProvider.updatePaymentCardRechargeOrder(order);
@@ -354,7 +355,8 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
             paymentCard.setStatus(PaymentCardStatus.INACTIVE.getCode());
             paymentCard.setUpdateTime(new Timestamp(System.currentTimeMillis()));
             paymentCardProvider.updatePaymentCard(paymentCard);
-        }
+        }else
+            LOGGER.error("paymentCard unbundle faild, cmd = {} response = {}", jo,cardInfo);
     }
 
     public static void main (String[] args){
