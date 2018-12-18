@@ -311,12 +311,6 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 			e.setValue(timeToStr(contractDetailDTO.getSignedTime()));
 			entities.add(e);
 		}
-		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.CONTRACT_DOCUMENT.getCode());
-		e.setKey("合同模板");
-		e.setValue("");
-		entities.add(e);
 
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());

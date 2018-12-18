@@ -106,9 +106,13 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
     @Override
     public void exportRentalBills(SearchRentalOrdersCommand cmd, HttpServletResponse response) {
         Integer pageSize = Integer.MAX_VALUE;
+		Integer pageNum = 1;
+        if (cmd.getPageNum() != null) {
+        	pageNum = cmd.getPageNum();
+        }
         List<RentalOrder> bills = rentalv2Provider.searchRentalOrders(cmd.getResourceTypeId(), cmd.getResourceType(),
                 cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(),cmd.getTag1(),
-                cmd.getTag2(),null,cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+                cmd.getTag2(),null,cmd.getKeyword(), cmd.getPageAnchor(), pageSize,pageNum);
 
         if(null == bills){
             bills = new ArrayList<>();
