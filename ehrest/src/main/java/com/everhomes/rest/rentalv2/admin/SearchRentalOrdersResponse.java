@@ -15,13 +15,21 @@ public class SearchRentalOrdersResponse {
     @ItemType(RentalOrderDTO.class)
     private List<RentalOrderDTO> rentalBills;
     private BigDecimal totalAmount;
-
+    private Long totalNum;
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    public List<RentalOrderDTO> getRentalBills() {
+    public Long getTotalNum() {
+		return totalNum;
+	}
+
+	public void setTotalNum(Long totalNum) {
+		this.totalNum = totalNum;
+	}
+
+	public List<RentalOrderDTO> getRentalBills() {
         return rentalBills;
     }
 
