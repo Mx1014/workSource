@@ -2,7 +2,7 @@ package com.everhomes.rest.relocation;
 
 public class RelocationStatisticsDTO {
     private String name;
-    private Integer amount;
+    private Integer count;
 
     public String getName() {
         return name;
@@ -12,11 +12,11 @@ public class RelocationStatisticsDTO {
         this.name = name;
     }
 
-    public Integer getAmount() {
-        return amount;
+    public Integer getCount() {
+        return count;
     }
 
-    public void setAmount(Integer amount) {
-        this.amount = amount;
+    public void setCount(Integer count) {
+        this.count = count;
     }
 }

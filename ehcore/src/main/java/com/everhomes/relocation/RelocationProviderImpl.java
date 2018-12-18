@@ -15,8 +15,10 @@ import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,6 +123,28 @@ public class RelocationProviderImpl implements RelocationProvider {
 
     	return query.fetch().map(r -> ConvertHelper.convert(r, RelocationRequest.class));
     }
+
+	@Override
+	public List<RelocationStatistics> queryRelocationStatistics(Integer namespaceId, String ownerType, Long ownerId, Long startDate, Long endDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
+		SelectJoinStep<Record2<Integer, Byte>> step = context.select(DSL.count().as("count"), Tables.EH_RELOCATION_REQUESTS.STATUS)
+				.from(Tables.EH_RELOCATION_REQUESTS);
+		Condition condition = Tables.EH_RELOCATION_REQUESTS.NAMESPACE_ID.eq(namespaceId);
+		if (StringHelper.hasContent(ownerType) && null != ownerId)
+			condition = condition.and(Tables.EH_RELOCATION_REQUESTS.OWNER_TYPE.eq(ownerType))
+					.and(Tables.EH_RELOCATION_REQUESTS.OWNER_ID.eq(ownerId));
+		if (null != startDate)
+			condition = condition.and(Tables.EH_RELOCATION_REQUESTS.CREATE_TIME.gt(new Timestamp(startDate)));
+		if (null != endDate)
+			condition = condition.and(Tables.EH_RELOCATION_REQUESTS.CREATE_TIME.lt(new Timestamp(endDate)));
+		return step.where(condition).groupBy(Tables.EH_RELOCATION_REQUESTS.STATUS)
+				.fetch().map(r -> {
+					RelocationStatistics statistics = new RelocationStatistics();
+					statistics.setCount(r.value1());
+					statistics.setStatus(r.value2());
+					return statistics;
+				});
+	}
 
 	@Override
 	public void createRelocationRequestItem(RelocationRequestItem item){

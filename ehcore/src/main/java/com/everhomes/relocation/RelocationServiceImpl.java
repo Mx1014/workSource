@@ -19,7 +19,6 @@ import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.organization.OrganizationGroupType;
 
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -30,16 +29,16 @@ import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.rest.relocation.AttachmentDescriptor;
 
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 import net.greghaines.jesque.Job;
-import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +46,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -346,6 +347,62 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		populateRequestDTO(request, dto);
 
 		return dto;
+	}
+
+	@Override
+	public QueryRelocationStatisticsResponse queryRelocationStatistics(QueryRelocationStatisticsCommand cmd) {
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		QueryRelocationStatisticsResponse response = new QueryRelocationStatisticsResponse();
+
+		List<RelocationStatistics> relocationStatistics = relocationProvider.queryRelocationStatistics(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getStartTime(), cmd.getEndTime());
+		if (relocationStatistics == null || relocationStatistics.size() == 0 ){
+			response.setTotalCount(0);
+			return response;
+		}
+		response.setClassifyStatistics(new ArrayList<>());
+		Integer totalNum = 0;
+		for (RelocationStatistics statistics : relocationStatistics){
+			RelocationStatisticsDTO dto = new RelocationStatisticsDTO();
+			dto.setCount(statistics.getCount());
+			dto.setName(RelocationRequestStatus.fromCode(statistics.getStatus()).name());
+			response.getClassifyStatistics().add(dto);
+			totalNum += dto.getCount();
+		}
+		response.setTotalCount(totalNum);
+		return response;
+	}
+
+	@Override
+	public void exportRelocationRequests(SearchRelocationRequestsCommand cmd, HttpServletResponse response) {
+
+		List<RelocationRequest> requests = relocationProvider.searchRelocationRequests(cmd.getNamespaceId(), cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getKeyword(), cmd.getStartTime(), cmd.getEndTime(), cmd.getStatus(), null, null,
+				null);
+		if (requests == null)
+			requests = new ArrayList<>();
+
+	}
+
+	private ByteArrayOutputStream createRequestStream(List<RelocationRequest> requests){
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		if (null == requests || requests.isEmpty()) {
+			return out;
+		}
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("relocationRequest");
+
+	}
+
+	private void createRequestSheetHead(Sheet sheet){
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i =-1 ;
+		row.createCell(++i).setCellValue("申请单编号");
+		
 	}
 
 	/**
