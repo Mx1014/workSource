@@ -8915,12 +8915,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		closeDates.stream().anyMatch(r-> startTime == r.getCloseDate().getTime()))
 			return response;
 		//每日开放时间
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(rentalSite.getResourceType(),
+				PriceRuleType.RESOURCE.getCode(), rentalSite.getId());
+		Set<Byte> set = priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toSet());
 		RentalType[] iterators = {RentalType.HALFDAY,RentalType.DAY,RentalType.WEEK,RentalType.MONTH};
 		StringBuilder builder = new StringBuilder();
 		String separate = "注：";
 		for (RentalType iterator:iterators){
             String s = getResourceOpenTime(rentalSite.getResourceType(),rentalSite.getId(),iterator.getCode(),"，");
-            if (s == null)
+            if (s == null || !set.contains(iterator.getCode()))
                 continue;
 			builder.append(separate);
 			switch (iterator){
