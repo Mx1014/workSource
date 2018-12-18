@@ -69,10 +69,12 @@ import java.util.stream.Collectors;
 @Component(ThirdPartContractHandler.CONTRACT_PREFIX + "999929")
 public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(EbeiThirdPartContractHandler.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(CMThirdPartContractHandler.class);
 
     private static final String PAGE_SIZE = "20";
     private static final String SUCCESS_CODE = "0";
+    private static final String NO_DATA_CODE = "100";
+    
     private static final Integer NAMESPACE_ID = 999929;
 
     private static final String DispContract = "/DispContract";
@@ -187,16 +189,19 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                         date = getNextDay(date, sdf);
                     }
 
-                }else{
+                }else if(NO_DATA_CODE.equals(cmSyncObject.getErrorCode())){
+                	//{"errorcode":"100","errordescription":"请求参数无效！","errordetails":"无法找到有效合同数据！"}
                     LOGGER.error("sync from RuiAnCM error: {}", cmSyncObject.getErrorCode());
+                    return;
+                    //throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, Integer.valueOf(cmSyncObject.getErrorCode()), cmSyncObject.getErrordetails());
+                }else {
+                	LOGGER.error("sync from RuiAnCM error: {}", cmSyncObject.getErrorCode());
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, Integer.valueOf(cmSyncObject.getErrorCode()), cmSyncObject.getErrordetails());
                 }
             }else{
                 LOGGER.error("sync data from RuiAnCM is fail" );
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_UNKNOW_ERROR, "sync data from RuiAnCM is fail");
-
             }
-
         }
 
         //此方法可以获取当前正在进行同步的数据
@@ -321,6 +326,11 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                         syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);//同步到记录表
                         date = getNextDay(date, sdf);
                     }
+                }else if(NO_DATA_CODE.equals(cmSyncObject.getErrorCode())){
+                	//{"errorcode":"100","errordescription":"请求参数无效！","errordetails":"无法找到有效账单数据！"}
+                    LOGGER.error("sync from RuiAnCM error: {}", cmSyncObject.getErrorCode());
+                    return;
+                    //throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, Integer.valueOf(cmSyncObject.getErrorCode()), cmSyncObject.getErrordetails());
                 }else{
                     LOGGER.error("sync from RuiAnCM error: {}", cmSyncObject.getErrorCode());
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, Integer.valueOf(cmSyncObject.getErrorCode()), cmSyncObject.getErrordetails());
