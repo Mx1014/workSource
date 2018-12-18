@@ -17,6 +17,9 @@ public interface FieldService {
 
     List<FieldDTO> listFields(ListFieldCommand cmd);
     List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd);
+
+    List<FieldDTO> listActiveNoUsedItem(ListActiveNoUsedItemCommand cmd);
+
     List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd);
     List<FieldItemDTO> listScopeFieldItems(ListScopeFieldItemCommand cmd);
 

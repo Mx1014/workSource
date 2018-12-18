@@ -1,5 +1,8 @@
 package com.everhomes.openapi;
 
+import com.everhomes.aclink.dingxin.DingxinService;
+import com.everhomes.rest.aclink.*;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +16,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.aclink.BatchCreateVisitorsCommand;
-import com.everhomes.rest.aclink.BatchCreateVisitorsResponse;
-import com.everhomes.rest.aclink.CreateVisitorBatchCommand;
-import com.everhomes.rest.aclink.InvalidVistorAuthsCommand;
-import com.everhomes.rest.aclink.OpenQueryLogCommand;
-import com.everhomes.rest.aclink.OpenQueryLogResponse;
 
 @RestDoc(value = "Aclink open Constroller", site = "core")
 @RestController
@@ -29,6 +26,8 @@ public class AclinkOpenController extends ControllerBase {
     private DoorAccessService doorAccessService;
     @Autowired
     private AclinkLogService aclinkLogService;
+    @Autowired
+    private DingxinService dingxinService;
 
     /**
      * 
@@ -72,6 +71,23 @@ public class AclinkOpenController extends ControllerBase {
     public RestResponse queryLogs(OpenQueryLogCommand cmd){
     	RestResponse response = new RestResponse(aclinkLogService.openQueryLogs(cmd));
     	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /openapi/aclink/verifyDoorAuth</b>
+     * <p> (鼎芯)判断是否有开门权限</p>
+     * @return
+     */
+    @RequestMapping("verifyDoorAuth")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(value = false)
+    public RestResponse verifyOpenAuth(VerifyDoorAuthCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setResponseObject(dingxinService.verifyDoorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }

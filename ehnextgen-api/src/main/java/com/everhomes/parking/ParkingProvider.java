@@ -179,4 +179,8 @@ public interface ParkingProvider {
 
 	ParkingCardRequest findParkingCardRequestByPlateNumber(String plateNumber);
 
+	Long countRechargeOrdersPageNums(String ownerType, Long ownerId, Long parkingLotId, String plateNumber,
+			String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate, Byte rechargeType,
+			String paidType, String cardNumber, Byte status, String paySource, String keyWords);
+
 }

@@ -8133,14 +8133,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		SearchRentalOrdersResponse response = new SearchRentalOrdersResponse();
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-
+		Integer pageNum = 1;
+        if (cmd.getPageNum() != null) {
+        	pageNum = cmd.getPageNum();
+        }
 		List<RentalOrder> orders = rentalv2Provider.searchRentalOrders(cmd.getResourceTypeId(), cmd.getResourceType(),
 				cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag1(),
-				cmd.getTag2(), cmd.getVendorType(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+				cmd.getTag2(), cmd.getVendorType(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize,pageNum);
 		response.setTotalAmount(rentalv2Provider.getRentalOrdersTotalAmount(cmd.getResourceTypeId(), cmd.getResourceType(),
 				cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag1(),
 				cmd.getTag2(), cmd.getKeyword()));
-
+		response.setTotalNum(rentalv2Provider.getRentalOrdersTotalNum(cmd.getResourceTypeId(), cmd.getResourceType(),
+				cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag1(),
+				cmd.getTag2(), cmd.getKeyword()));
 		int size = orders.size();
 		if (size > 0) {
 			response.setRentalBills(orders.stream().map(r -> {
@@ -8152,7 +8157,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			if (size != pageSize) {
 				response.setNextPageAnchor(null);
 			} else {
-				response.setNextPageAnchor(orders.get(size - 1).getReserveTime().getTime());
+				Integer nextPageNum = pageNum + 1;
+	            response.setNextPageAnchor(nextPageNum.longValue());
+//				response.setNextPageAnchor(orders.get(size - 1).getReserveTime().getTime());
 			}
 		}
 

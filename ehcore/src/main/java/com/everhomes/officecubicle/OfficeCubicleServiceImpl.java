@@ -2185,6 +2185,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				return null;
 			});
 		}else if(cmd.getOrderType() == 4){
+			coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_ORDER_STATUS.getCode() + order.getId()).enter(()-> {
 			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
 			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			order.setOperatorUid(UserContext.currentUserId());
@@ -2198,6 +2199,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			smsProvider.addToTupleList(variables, "price", order.getPrice());
 			smsProvider.addToTupleList(variables, "refundPrice", refundPrice);
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
+			return null;
+		});
 		}
 	}
 	
@@ -2517,9 +2520,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(null == resp || null == resp.getResponse()){
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
-        List<GetPayUserListByMerchantDTO> merchantDTOS = resp.getResponse();
 		List<ListOfficeCubicleAccountDTO> payUserList = new ArrayList<ListOfficeCubicleAccountDTO>();
-		if (payUserList != null){
+		if(resp != null && resp.getErrorCode() != null && resp.getErrorCode().equals(HttpStatus.OK.value())){
+	        List<GetPayUserListByMerchantDTO> merchantDTOS = resp.getResponse();
             for (GetPayUserListByMerchantDTO merchantDTO : merchantDTOS) {
                 PayUserDTO payUserDTO = ConvertHelper.convert(merchantDTO,PayUserDTO.class);
                 ListOfficeCubicleAccountDTO dto = new ListOfficeCubicleAccountDTO();
