@@ -184,6 +184,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -1745,12 +1749,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
 
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
-            try {
-                // 这个代码只是为了修复错误的数据，后期删除
-                LOGGER.debug("Fetch user: {}", fetchUser(login.getUserId(), login.getNamespaceId()));
-            } catch (Exception e) {
-                LOGGER.error("Fetch user error", e);
-            }
             return true;
         } else {
             // 去统一用户那边检查登录状态
@@ -6305,17 +6303,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     newLogin.setDeviceIdentifier(cmd.getDeviceIdentifier());
                     accessor.putMapValueObject(String.valueOf(newLogin.getLoginId()), newLogin);
                 }
-
             }
-
-            List<Border> borders = this.borderProvider.listAllBorders();
-            List<String> borderStrs = borders.stream().map((Border border) -> {
-                return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
-            }).collect(Collectors.toList());
-
-            resp.setAccessPoints(borderStrs);
-            resp.setContentServer(contentServerService.getContentServer());
         }
+
+        List<Border> borders = this.borderProvider.listAllBorders();
+        List<String> borderStrs = borders.stream().map((Border border) -> {
+            return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
+        }).collect(Collectors.toList());
+
+        resp.setAccessPoints(borderStrs);
+        resp.setContentServer(contentServerService.getContentServer());
 
         Long l = configurationProvider.getLongValue(namespaceId, ConfigConstants.PAY_PLATFORM, 0L);
         resp.setPaymentPlatform(l);
@@ -6348,7 +6345,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		
 		// 客户端地址模式配置, add by momoubin,18/11/09
 		resp.setClientAddressMode(this.configurationProvider.getIntValue(namespaceId, ConfigConstants.CLIENT_ADDRESS_MODE, 0));
-		
+		resp.setAuthPopupConfig(Byte.valueOf(this.configurationProvider.getValue(namespaceId, "authPopupConfig", "1")));
         return resp;
     }
 
@@ -7544,14 +7541,17 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     @Override
     public void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText) {
-        User user = this.userProvider.findUserById(userId);
-        if(user == null){
-            LOGGER.error("Unable to find the user , userId= {}",  userId);
-            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
-        }
-        user.setVipLevel(vipLevel);
-        user.setVipLevelText(vipLevelText);
-        userProvider.updateUser(user);
+	    // 通过统一用户改 vip 信息
+	    sdkUserService.updateUserVipLevel(userId, vipLevel, vipLevelText);
+
+        // User user = this.userProvider.findUserById(userId);
+        // if(user == null){
+        //     LOGGER.error("Unable to find the user , userId= {}",  userId);
+        //     throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
+        // }
+        // user.setVipLevel(vipLevel);
+        // user.setVipLevelText(vipLevelText);
+        // userProvider.updateUser(user);
     }
 
 
@@ -7636,6 +7636,53 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
         response.setInfoUrl(StringHelper.interpolate(infoUrl,infoUrlParam));
         return response;
+    }
+
+    @Override
+    public void fixUserSync(FixUserSyncCommand cmd) {
+        new Thread(() -> {
+            CrossShardListingLocator locator = new CrossShardListingLocator();
+
+            int count = 1000;
+            do {
+                if (count < 0) {
+                    break;
+                }
+                count--;
+
+                List<User> users = userProvider.queryUsers(locator, 2000, (locator1, query) -> {
+                    if (cmd.getNamespaceId() != null) {
+                        query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                    }
+                    if (StringUtils.isNotEmpty(cmd.getStartDate())) {
+                        TemporalAccessor startDate = DateTimeFormatter.ofPattern("yyyyMMdd").parse(cmd.getStartDate());
+                        query.addConditions(Tables.EH_USERS.CREATE_TIME.ge(Timestamp.valueOf(LocalDate.from(startDate).atTime(LocalTime.MIN))));
+                    } else {
+                        query.addConditions(Tables.EH_USERS.CREATE_TIME.ge(Timestamp.valueOf(LocalDateTime.of(2018, 10, 29, 0, 0))));
+                    }
+                    if (StringUtils.isNotEmpty(cmd.getEndDate())) {
+                        TemporalAccessor endDate = DateTimeFormatter.ofPattern("yyyyMMdd").parse(cmd.getEndDate());
+                        query.addConditions(Tables.EH_USERS.CREATE_TIME.lt(Timestamp.valueOf(LocalDate.from(endDate).atTime(LocalTime.MAX))));
+                    }
+                    return query;
+                });
+                for (User user : users) {
+                    try {
+                        userProvider.updateUser(user);
+                        List<UserIdentifier> userIdentifiers = userProvider.listUserIdentifiersOfUser(user.getId());
+                        if (userIdentifiers != null) {
+                            userIdentifiers.forEach(iden -> {
+                                userProvider.updateIdentifier(iden);
+                                LOGGER.info("Fix user sync, identifier={}", iden);
+                            });
+                        }
+                        LOGGER.info("Fix user sync, user={}", user);
+                    } catch (Exception e) {
+                        LOGGER.error("fixUserInfoOnceTime error, user="+user, e);
+                    }
+                }
+            } while (locator.getAnchor() != null);
+        }, "fixUserInfoOnceTime").start();
     }
 
     /*******************统一用户同步数据**********************/

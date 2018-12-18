@@ -6,6 +6,7 @@ import com.everhomes.acl.ServiceModuleAppProfile;
 import com.everhomes.acl.ServiceModuleAppProfileProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
@@ -28,6 +29,12 @@ import com.everhomes.rest.common.OwnerType;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.launchpad.LaunchPadCategoryDTO;
 import com.everhomes.rest.launchpad.ListAllAppsResponse;
+import com.everhomes.rest.launchpad.ListWorkPlatformAppCommand;
+import com.everhomes.rest.launchpad.ListWorkPlatformAppResponse;
+import com.everhomes.rest.launchpad.SaveWorkPlatformAppCommand;
+import com.everhomes.rest.launchpad.UpdateWorkPlatformAppCommand;
+import com.everhomes.rest.launchpad.UpdateWorkPlatformAppSortCommand;
+import com.everhomes.rest.launchpad.WorkPlatformAppDTO;
 import com.everhomes.rest.module.AppCategoryDTO;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
 import com.everhomes.rest.common.ScopeType;
@@ -65,7 +72,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -150,6 +160,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
     @Autowired
     private OrdinaryLinkRouterListener ordinaryLinkRouterListener;
+    @Autowired
+    private WorkPlatformAppProvider workPlatformAppProvider;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
 
@@ -362,6 +377,31 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		dto.setStatus(orgapps.getStatus());
 		dto.setOrgAppId(id);
 
+        //安装应用时，同时修改工作台配置顺序 add by yanlong.liang 20181115
+        List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(cmd.getOriginId(), cmd.getOrganizationId());
+        if (CollectionUtils.isEmpty(list)) {
+            Byte sceneType = null;
+            if (ServiceModuleAppType.COMMUNITY.getCode() == serviceModuleApp.getAppType()) {
+                sceneType = ServiceModuleSceneType.MANAGEMENT.getCode();
+            }
+        	List<ServiceModuleAppEntry> serviceModuleAppEntryList = this.serviceModuleEntryProvider.listServiceModuleAppEntries(cmd.getOriginId(),null,
+                    TerminalType.MOBILE.getCode(),null,sceneType);
+        	if (!CollectionUtils.isEmpty(serviceModuleAppEntryList)) {
+        	    for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntryList) {
+                    Integer maxSort = this.workPlatformAppProvider.getMaxSort(cmd.getOrganizationId());
+                    if (maxSort != null) {
+                        WorkPlatformApp workPlatformApp = new WorkPlatformApp();
+                        workPlatformApp.setOrder(maxSort+1);
+                        workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                        workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+                        workPlatformApp.setScopeId(cmd.getOrganizationId());
+                        workPlatformApp.setAppId(cmd.getOriginId());
+                        workPlatformApp.setEntryId(serviceModuleAppEntry.getId());
+                        this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+                    }
+                }
+            }
+        }
 		return dto;
 	}
 
@@ -392,6 +432,26 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			}
 
 		}
+
+        //卸载应用时，同时修改工作台配置顺序 add by yanlong.liang 20181115
+        List<WorkPlatformApp> oldApps = this.workPlatformAppProvider.listWorkPlatformApp(orgapp.getAppOriginId(), orgapp.getOrgId());
+        if (!CollectionUtils.isEmpty(oldApps)) {
+            for (WorkPlatformApp oldApp : oldApps) {
+                this.workPlatformAppProvider.deleteWorkPlatformApp(oldApp);
+                List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(oldApp.getScopeId(), oldApp.getOrder());
+                if (!CollectionUtils.isEmpty(list)) {
+                    for (WorkPlatformApp app : list) {
+                        app.setOrder(app.getOrder()-1);
+                        this.workPlatformAppProvider.updateWorkPlatformApp(app);
+                    }
+                }
+                List<UserApp> userApps = this.userAppProvider.listUserApps(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),orgapp.getOrgId(),oldApp.getEntryId());
+                if (!CollectionUtils.isEmpty(userApps)) {
+                    List<Long> ids = userApps.stream().map(UserApp::getId).collect(Collectors.toList());
+                    this.userAppProvider.delete(ids);
+                }
+            }
+        }
 
 	}
 
@@ -577,7 +637,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
-		List<ServiceModuleApp> tempApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), ServiceModuleAppType.COMMUNITY.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
+		List<ServiceModuleApp> tempApps = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), ServiceModuleAppType.COMMUNITY.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
 		if(tempApps != null && tempApps.size() > 0) {
 
 			//用户是否启用自定义配置
@@ -589,7 +649,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				if (userApps != null && userApps.size() != 0) {
 					for (UserApp userApp : userApps) {
 						for (ServiceModuleApp app : tempApps) {
-							if (userApp.getAppId().equals(app.getOriginId())) {
+							if (userApp.getAppId().equals(app.getEntryId())) {
 								apps.add(app);
 							}
 						}
@@ -627,6 +687,17 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		return apps;
 	}
+
+    private List<ServiceModuleApp> findUserOrganizationApps(Long organizationId, Byte appType, Byte sceneType){
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+
+        List<ServiceModuleApp> tempApps = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), appType,
+                sceneType, OrganizationAppStatus.ENABLE.getCode(), null);
+
+        return tempApps;
+    }
 
 
 	private AppDTO getAllIcon(Long communityId, Long orgId, String allOrMoreType){
@@ -673,6 +744,43 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	}
 
+    private AppDTO getAllIconForWorkPlatform(Long orgId, String allOrMoreType){
+
+        AppDTO allDto = new AppDTO();
+        allDto.setAppId(-1L);
+        if(AllOrMoreType.fromCode(allOrMoreType) == AllOrMoreType.MORE){
+            allDto.setName("更多");
+        }else {
+            allDto.setName("全部");
+        }
+
+        allDto.setModuleId(-10000L);
+        allDto.setClientHandlerType((byte)0);
+        //填充路由信息
+        RouterInfo routerInfo = convertRouterInfo(allDto.getModuleId(), allDto.getAppId(), allDto.getName(), null, "/" + AllOrMoreType.fromCode(allOrMoreType).getCode(), null, null, (byte)0);
+        allDto.setRouterPath(routerInfo.getPath());
+        allDto.setRouterQuery(routerInfo.getQuery());
+
+        String host = "app-management";
+
+        String router = "zl://" + host + allDto.getRouterPath() + "?" + allDto.getRouterQuery();
+        allDto.setRouter(router);
+
+
+
+        Byte ownerType = OwnerType.ORGANIZATION.getCode();
+        Long ownerId = orgId;
+
+        LaunchPadConfig launchPadConfig = launchPadConfigProvider.findLaunchPadConfig(ownerType, ownerId);
+        if(launchPadConfig != null){
+            String url = contentServerService.parserUri(launchPadConfig.getNavigatorAllIconUri(), LaunchPadConfig.class.getSimpleName(), launchPadConfig.getId());
+            allDto.setIconUrl(url);
+        }
+
+
+        return allDto;
+
+    }
 	// 移动端广场需要编辑名称，所以需要 communityId, orgId
 	private AppDTO toAppDto(ServiceModuleApp app, Byte sceneType, Long communityId, Long orgId){
 
@@ -740,16 +848,41 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		Byte routerLocationType = null;
 		Byte routerSceneType = null;
 		if(app.getEntryId() != null){
-			ServiceModuleEntry entry = serviceModuleEntryProvider.findById(app.getEntryId());
+			List<ServiceModuleEntry> entrys = serviceModuleEntryProvider.listServiceModuleEntries(Arrays.asList(app.getModuleId()),
+                    ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(),ServiceModuleSceneType.CLIENT.getCode());
+			ServiceModuleEntry entry = null;
+			if (!CollectionUtils.isEmpty(entrys)) {
+			    entry = entrys.get(0);
+            }
 			if(entry != null){
 				routerLocationType = entry.getLocationType();
 				routerSceneType = entry.getSceneType();
 			}
-
 			//优先使用entryIcon
-			if(!StringUtils.isEmpty(entry.getIconUri())){
-				String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
-				appDTO.setIconUrl(url);
+			if(entry != null){
+                List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+                        this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(),entry.getId(),null,null);
+                if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
+                    if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                        appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                    }else {
+                        appDTO.setName(entry.getEntryName());
+                    }
+                    String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
+                            serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
+                    appDTO.setIconUrl(url);
+                }else {
+                    if (!StringUtils.isEmpty(entry.getIconUri())) {
+                        String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
+                        appDTO.setIconUrl(url);
+                    }else {
+                        ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
+                        if(profile != null && profile.getIconUri() != null){
+                            String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
+                            appDTO.setIconUrl(url);
+                        }
+                    }
+                }
 			}else {
 				ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
 				if(profile != null && profile.getIconUri() != null){
@@ -778,6 +911,107 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		return appDTO;
 	}
 
+    private AppDTO toAppDtoForWorkPlatform(ServiceModuleApp app, Byte sceneType, Long orgId){
+
+		List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(orgId);
+		if (!CollectionUtils.isEmpty(workPlatformApps)) {
+            for (WorkPlatformApp workPlatformApp : workPlatformApps) {
+                if (app.getOriginId().equals(workPlatformApp.getAppId()) && app.getEntryId().equals(workPlatformApp.getEntryId())) {
+                    if (TrueOrFalseFlag.FALSE.getCode().equals(workPlatformApp.getVisibleFlag())) {
+                        return null;
+                    }
+                }
+            }
+        }
+        AppDTO appDTO = ConvertHelper.convert(app, AppDTO.class);
+
+        ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(app.getModuleId());
+
+        appDTO.setAppId(app.getOriginId());
+
+
+        appDTO.setClientHandlerType(serviceModule.getClientHandlerType());
+
+        PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
+        if(handler != null){
+
+            HandlerGetItemActionDataCommand handlerCmd = new HandlerGetItemActionDataCommand();
+            handlerCmd.setAppOriginId(app.getOriginId());
+            handlerCmd.setAppId(app.getId());
+            String itemActionData = handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig(), handlerCmd);
+            if(itemActionData != null){
+                app.setInstanceConfig(itemActionData);
+            }
+        }
+
+        app.setInstanceConfig(launchPadService.refreshActionData(app.getInstanceConfig()));
+
+
+        Byte routerLocationType = null;
+        Byte routerSceneType = null;
+        if(app.getEntryId() != null){
+            List<ServiceModuleEntry> entrys = serviceModuleEntryProvider.listServiceModuleEntries(Arrays.asList(app.getModuleId()),
+                    ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),sceneType);
+            ServiceModuleEntry entry = null;
+            if (!CollectionUtils.isEmpty(entrys)) {
+                entry = entrys.get(0);
+            }
+            if(entry != null){
+                routerLocationType = entry.getLocationType();
+                routerSceneType = entry.getSceneType();
+            }
+            //优先使用entryIcon
+            if(entry != null){
+                List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+                        this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(),entry.getId(),null,null);
+                if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
+                	if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                        appDTO.setName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                    }else {
+                	    appDTO.setName(entry.getEntryName());
+                    }
+                    String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
+                            serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
+                    appDTO.setIconUrl(url);
+                }else {
+                    if (!StringUtils.isEmpty(entry.getIconUri())) {
+                        String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
+                        appDTO.setIconUrl(url);
+                    }else {
+                        ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
+                        if(profile != null && profile.getIconUri() != null){
+                            String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
+                            appDTO.setIconUrl(url);
+                        }
+                    }
+                }
+            }else {
+                ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
+                if(profile != null && profile.getIconUri() != null){
+                    String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
+                    appDTO.setIconUrl(url);
+                }
+            }
+
+        }
+
+        //填充路由信息
+        RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), appDTO.getName(), app.getInstanceConfig(), null, routerLocationType, routerSceneType, serviceModule.getClientHandlerType());
+
+
+        appDTO.setRouterPath(routerInfo.getPath());
+        appDTO.setRouterQuery(routerInfo.getQuery());
+
+        String host = serviceModule.getHost();
+        if(StringUtils.isEmpty(host)){
+            host  = "default";
+        }
+
+        String router = "zl://" + host + appDTO.getRouterPath() + "?" + appDTO.getRouterQuery();
+        appDTO.setRouter(router);
+
+        return appDTO;
+    }
 	@Override
 	public RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData, String path, Byte locationType, Byte sceneType, Byte clientHandlerType){
 
@@ -843,6 +1077,54 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		orgapp.setStatus(cmd.getStatus());
 
 		organizationAppProvider.updateOrganizationApp(orgapp);
+
+		//禁用或启用应用时，同时修改工作台配置顺序 add by yanlong.liang 20181115
+        if (OrganizationAppStatus.DISABLE.getCode().equals(cmd.getStatus())) {
+            List<WorkPlatformApp> oldApps = this.workPlatformAppProvider.listWorkPlatformApp(orgapp.getAppOriginId(), orgapp.getOrgId());
+            if (!CollectionUtils.isEmpty(oldApps)) {
+                for (WorkPlatformApp oldApp : oldApps) {
+                    this.workPlatformAppProvider.deleteWorkPlatformApp(oldApp);
+                    List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(oldApp.getScopeId(), oldApp.getOrder());
+                    if (!CollectionUtils.isEmpty(list)) {
+                        for (WorkPlatformApp app : list) {
+                            app.setOrder(app.getOrder()-1);
+                            this.workPlatformAppProvider.updateWorkPlatformApp(app);
+                        }
+                    }
+                    List<UserApp> userApps = this.userAppProvider.listUserApps(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),orgapp.getOrgId(),oldApp.getEntryId());
+                    if (!CollectionUtils.isEmpty(userApps)) {
+                        List<Long> ids = userApps.stream().map(UserApp::getId).collect(Collectors.toList());
+                        this.userAppProvider.delete(ids);
+                    }
+                }
+            }
+        }else {
+            List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(orgapp.getAppOriginId(), orgapp.getOrgId());
+            if (CollectionUtils.isEmpty(list)) {
+                ServiceModuleApp serviceModuleApp = findReleaseServiceModuleAppByOriginId(orgapp.getAppOriginId());
+                Byte sceneType = null;
+                if (serviceModuleApp != null && ServiceModuleAppType.COMMUNITY.getCode() == serviceModuleApp.getAppType()) {
+                    sceneType = ServiceModuleSceneType.MANAGEMENT.getCode();
+                }
+                List<ServiceModuleAppEntry> serviceModuleAppEntryList = this.serviceModuleEntryProvider.listServiceModuleAppEntries(orgapp.getAppOriginId(),null,
+                        TerminalType.MOBILE.getCode(),null,sceneType);
+                if (!CollectionUtils.isEmpty(serviceModuleAppEntryList)) {
+                    for (ServiceModuleAppEntry serviceModuleAppEntry : serviceModuleAppEntryList) {
+                        Integer maxSort = this.workPlatformAppProvider.getMaxSort(orgapp.getOrgId());
+                        if (maxSort != null) {
+                            WorkPlatformApp workPlatformApp = new WorkPlatformApp();
+                            workPlatformApp.setOrder(maxSort+1);
+                            workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                            workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+                            workPlatformApp.setScopeId(orgapp.getOrgId());
+                            workPlatformApp.setAppId(orgapp.getAppOriginId());
+                            workPlatformApp.setEntryId(serviceModuleAppEntry.getId());
+                            this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+                        }
+                    }
+                }
+            }
+        }
 	}
 
 	@Override
@@ -1033,12 +1315,23 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
 					for (ServiceModuleEntry entry: serviceModuleEntries){
 						if(entry.getModuleId().equals(appCommunityConfigDto.getModuleId())){
-
-							if(StringUtils.isEmpty(appCommunityConfigDto.getDisplayName())){
+                            List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+                                    this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(appCommunityConfigDto.getAppOriginId(),entry.getId(),null,null);
+							if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
+							    if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                                    appCommunityConfigDto.setDisplayName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                                }else {
+                                    appCommunityConfigDto.setDisplayName(entry.getEntryName());
+                                }
+                                String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
+                                        serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
+                                appCommunityConfigDto.setIconUrl(url);
+                            }
+                            if(StringUtils.isEmpty(appCommunityConfigDto.getDisplayName())){
 								appCommunityConfigDto.setDisplayName(entry.getEntryName());
 							}
 
-							if(!StringUtils.isEmpty(entry.getIconUri())){
+							if(StringUtils.isEmpty(appCommunityConfigDto.getIconUrl()) && !StringUtils.isEmpty(entry.getIconUri())){
 								String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
 								appCommunityConfigDto.setIconUrl(url);
 							}
@@ -1061,7 +1354,23 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			for (RecommendApp recommendApp: recommendApps){
 				for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
 					if(recommendApp.getAppId().equals(appCommunityConfigDto.getAppOriginId())){
-						recommendDtos.add(appCommunityConfigDto);
+                        List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(appCommunityConfigDto.getModuleId(), null,
+                                TerminalType.MOBILE.getCode(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), ServiceModuleSceneType.CLIENT.getCode());
+                        if (!CollectionUtils.isEmpty(serviceModuleEntries)) {
+                            List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
+                                    this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(appCommunityConfigDto.getAppOriginId(),serviceModuleEntries.get(0).getId(),null,null);
+                            if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfileList)) {
+                                if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfileList.get(0).getAppEntrySetting())) {
+                                    appCommunityConfigDto.setDisplayName(serviceModuleAppEntryProfileList.get(0).getEntryName());
+                                }else {
+                                    appCommunityConfigDto.setDisplayName(serviceModuleEntries.get(0).getEntryName());
+                                }
+                                String url = contentServerService.parserUri(serviceModuleAppEntryProfileList.get(0).getEntryUri(),
+                                        serviceModuleAppEntryProfileList.get(0).getClass().getName(), serviceModuleAppEntryProfileList.get(0).getId());
+                                appCommunityConfigDto.setIconUrl(url);
+                            }
+                        }
+                        recommendDtos.add(appCommunityConfigDto);
 						appCommunityConfigDto.setRecommendFlag(TrueOrFalseFlag.TRUE.getCode());
 					}
 				}
@@ -1304,6 +1613,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
+		//如果项目ID未空，则获取工作台app
+		if (cmd.getContext().getCommunityId() == null) {
+		    return listAllAppsForWorkPlatform(cmd);
+        }
 		Byte locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
 		Long communityId = cmd.getContext().getCommunityId();
 		OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(communityId);
@@ -1323,7 +1636,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			LaunchPadCategoryDTO dto = ConvertHelper.convert(appCategory, LaunchPadCategoryDTO.class);
 
-			List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+			List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
 
 			List<AppDTO> appDtos = toAppDtos(communityId, orgId, sceneType, apps);
 
@@ -1352,6 +1665,184 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		return response;
 	}
 
+    @Override
+    public ListAllAppsResponse listAllAppsForWorkPlatform(ListAllLaunchPadAppsCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+
+        Byte locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
+        Long orgId = cmd.getContext().getOrganizationId();
+        Byte sceneType = ServiceModuleSceneType.MANAGEMENT.getCode();
+
+        List<AppCategory> appCategories = appCategoryProvider.listAppCategories(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), 0L);
+
+        if(appCategories == null){
+            return null;
+        }
+
+        List<LaunchPadCategoryDTO> categoryDtos = new ArrayList<>();
+
+        for (AppCategory appCategory: appCategories) {
+
+            LaunchPadCategoryDTO dto = ConvertHelper.convert(appCategory, LaunchPadCategoryDTO.class);
+
+			List<AppDTO> appDtos = new ArrayList<>();
+            //OA应用 管理端
+            List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
+                    ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if(!CollectionUtils.isEmpty(oaApp)) {
+                appDtos.addAll(toAppDtosForWorkPlatform(orgId, sceneType, oaApp));
+            }
+            // OA应用 用户端
+            oaApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
+                    ServiceModuleAppType.OA.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if(!CollectionUtils.isEmpty(oaApp)) {
+                appDtos.addAll(toAppDtosForWorkPlatform(orgId, ServiceModuleSceneType.CLIENT.getCode(), oaApp));
+            }
+
+            //园区应用  管理端
+			List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
+					ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if (!CollectionUtils.isEmpty(communityApp)) {
+                appDtos.addAll(toAppDtosForWorkPlatform(orgId, sceneType, communityApp));
+			}
+			//根据后台工作台排序对应用进行排序
+            appDtos = sortAppDTO(appDtos,orgId);
+            dto.setAppDtos(appDtos);
+
+            categoryDtos.add(dto);
+        }
+
+
+        List<ServiceModuleApp> userOrganizationApps = new ArrayList<>();
+        List<AppDTO> appDtos = new ArrayList<>();
+
+
+        //OA应用 管理端
+        List<ServiceModuleApp> oaApps = findUserOrganizationApps(orgId,ServiceModuleAppType.OA.getCode(),ServiceModuleSceneType.MANAGEMENT.getCode());
+        if (!CollectionUtils.isEmpty(oaApps)) {
+            List<AppDTO> oaAppDtos = toAppDtosForWorkPlatform(orgId, ServiceModuleSceneType.MANAGEMENT.getCode(), oaApps);
+            if (!CollectionUtils.isEmpty(oaAppDtos)) {
+                appDtos.addAll(oaAppDtos);
+            }
+        }
+        //OA应用  用户端
+        List<ServiceModuleApp> oaClientApps = findUserOrganizationApps(orgId,ServiceModuleAppType.OA.getCode(),ServiceModuleSceneType.CLIENT.getCode());
+        if (!CollectionUtils.isEmpty(oaClientApps)) {
+            List<AppDTO> oaClientAppDtos = toAppDtosForWorkPlatform(orgId, ServiceModuleSceneType.CLIENT.getCode(), oaClientApps);
+            if (!CollectionUtils.isEmpty(oaClientAppDtos)) {
+                appDtos.addAll(oaClientAppDtos);
+            }
+        }
+        // 园区应用 管理端
+        List<ServiceModuleApp> communityApps = findUserOrganizationApps(orgId,ServiceModuleAppType.COMMUNITY.getCode(),ServiceModuleSceneType.MANAGEMENT.getCode());
+        if (!CollectionUtils.isEmpty(communityApps)) {
+            List<AppDTO> communityAppDtos = toAppDtosForWorkPlatform(orgId, ServiceModuleSceneType.MANAGEMENT.getCode(), communityApps);
+            if (!CollectionUtils.isEmpty(communityAppDtos)) {
+                appDtos.addAll(communityAppDtos);
+            }
+        }
+
+        appDtos = sortUserAppDTO(appDtos,orgId);
+        AppDTO allIcon = getAllIconForWorkPlatform(orgId, AllOrMoreType.ALL.getCode());
+        appDtos.add(allIcon);
+        ListAllAppsResponse response = new ListAllAppsResponse();
+
+        response.setCategoryDtos(categoryDtos);
+
+        response.setDefaultDtos(appDtos);
+	    return response;
+    }
+
+    private List<AppDTO> sortUserAppDTO(List<AppDTO> appDTOS, Long orgId) {
+	    List<AppDTO> list = new ArrayList<>();
+        //用户是否启用自定义配置
+        UserAppFlag userAppFlag = userAppFlagProvider.findUserAppFlag(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
+
+        //有用户自定义应用
+        if(userAppFlag != null){
+            List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
+            if (userApps != null && userApps.size() != 0) {
+                Integer maxOrder = userAppProvider.getMaxOrder(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), orgId);
+                if (maxOrder != null) {
+                    for (int i=0;i<maxOrder;i++) {
+                        list.add(null);
+                    }
+                }
+                List<AppDTO> noUserApp = new ArrayList<>();
+                for (AppDTO app : appDTOS) {
+                    //新安装的应用，没有在用户编辑的数据里，但是还是要展示.
+                    boolean flag = false;
+                    for (UserApp userApp : userApps) {
+                        if (userApp.getAppId().equals(app.getEntryId())) {
+                            if (userApp.getOrder() == 0) {
+                                list.set(userApp.getOrder(), app);
+                            }else {
+                                list.set(userApp.getOrder() - 1, app);
+                            }
+                            flag = true;
+                        }
+                    }
+                    if (!flag) {
+                        noUserApp.add(app);
+                    }
+                }
+                Iterator iterator  = list.iterator();
+                while (iterator.hasNext()) {
+                    AppDTO appDTO = (AppDTO) iterator.next();
+                    if (appDTO == null) {
+                        iterator.remove();
+                    }
+                }
+                if (!CollectionUtils.isEmpty(noUserApp)) {
+                    List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(orgId);
+                    if (!CollectionUtils.isEmpty(workPlatformApps)) {
+                        for (WorkPlatformApp workPlatformApp : workPlatformApps) {
+                            if (TrueOrFalseFlag.FALSE.getCode().equals(workPlatformApp.getVisibleFlag())) {
+                                continue;
+                            }
+                            for (AppDTO app : noUserApp) {
+                                if (app.getAppId().equals(workPlatformApp.getAppId()) && app.getEntryId().equals(workPlatformApp.getEntryId())) {
+                                    list.add(app);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(orgId);
+            if (!CollectionUtils.isEmpty(workPlatformApps)) {
+                for (WorkPlatformApp workPlatformApp : workPlatformApps) {
+                    if (TrueOrFalseFlag.FALSE.getCode().equals(workPlatformApp.getVisibleFlag())) {
+                        continue;
+                    }
+                    for (AppDTO app : appDTOS) {
+                        if (app.getAppId().equals(workPlatformApp.getAppId()) && app.getEntryId().equals(workPlatformApp.getEntryId())) {
+                            list.add(app);
+                        }
+                    }
+                }
+            }else {
+                list.addAll(appDTOS);
+            }
+        }
+        return list;
+    }
+    private List<AppDTO> sortAppDTO(List<AppDTO> appDTOS, Long orgId) {
+        List<AppDTO> appDTOs = new ArrayList<>();
+        List<WorkPlatformApp> workPlatformApps = this.workPlatformAppProvider.listWorkPlatformAppByScopeId(orgId);
+        if (!CollectionUtils.isEmpty(workPlatformApps)) {
+            for (WorkPlatformApp workPlatformApp : workPlatformApps) {
+                for (AppDTO appDTO : appDTOS) {
+                    if (appDTO.getAppId().equals(workPlatformApp.getAppId()) && appDTO.getEntryId().equals(workPlatformApp.getEntryId())) {
+                        appDTOs.add(appDTO);
+                    }
+                }
+            }
+        }
+        return appDTOs;
+    }
 	@Override
 	public List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
 		List<AppDTO> appDtos = new ArrayList<>() ;
@@ -1368,6 +1859,21 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		return appDtos;
 	}
 
+    private List<AppDTO> toAppDtosForWorkPlatform(Long orgId, Byte sceneType, List<ServiceModuleApp> userApps) {
+        List<AppDTO> appDtos = new ArrayList<>() ;
+        if(userApps != null && userApps.size() > 0){
+            for (ServiceModuleApp app: userApps){
+                AppDTO appDTO = toAppDtoForWorkPlatform(app, sceneType, orgId);
+                if(appDTO == null){
+                    continue;
+                }
+                appDtos.add(appDTO);
+            }
+        }
+
+        return appDtos;
+    }
+
 	@Override
 	public void updateBaseUserApps(UpdateUserAppsCommand cmd) {
 
@@ -1377,11 +1883,18 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
 					UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "Authentication is required");
 		}
+		if (cmd.getContext() != null && cmd.getContext().getCommunityId() != null && cmd.getCommunityId() == null) {
+		    cmd.setCommunityId(cmd.getContext().getCommunityId());
+        }
 
+		//如果项目ID为空，则更新工作台app
 		if(cmd.getCommunityId() == null){
-            LOGGER.error("communityId is null");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "communityId is null");
-
+            UpdateUserAppsForWorkPlatformCommand command = new UpdateUserAppsForWorkPlatformCommand();
+            command.setAppIds(cmd.getAppIds());
+            command.setEntryIds(cmd.getEntryIds());
+            command.setOrganizationId(cmd.getContext().getOrganizationId());
+            updateBaseUserAppsForWorkPlatform(command);
+            return;
         }
 
         dbProvider.execute(status -> {
@@ -1393,16 +1906,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 
             //没有自己的就返回吧
-            if(cmd.getAppIds() == null){
+            if(cmd.getEntryIds() == null){
             	return null;
 			}
 
             Integer order = 1;
 
-            for (Long appId: cmd.getAppIds()){
+            for (Long entryId: cmd.getEntryIds()){
 
                 UserApp userApp = new UserApp();
-                userApp.setAppId(appId);
+                userApp.setAppId(entryId);
                 userApp.setUserId(userId);
                 userApp.setLocationType(ServiceModuleLocationType.MOBILE_COMMUNITY.getCode());
                 userApp.setLocationTargetId(cmd.getCommunityId());
@@ -1414,6 +1927,52 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
             return null;
         });
 
+	}
+
+	@Override
+	public void updateBaseUserAppsForWorkPlatform(UpdateUserAppsForWorkPlatformCommand cmd) {
+		Long userId = UserContext.currentUserId();
+
+		if(userId == null || userId == 0){
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "Authentication is required");
+		}
+
+		if(cmd.getOrganizationId() == null){
+			LOGGER.error("organizationId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "organizationId is null");
+
+		}
+
+		dbProvider.execute(status -> {
+
+			//保存自定义标志
+			saveUserAppFlag(userId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), cmd.getOrganizationId());
+
+			userAppProvider.deleteByUserId(userId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), cmd.getOrganizationId());
+
+
+			//没有自己的就返回吧
+			if(cmd.getEntryIds() == null){
+				return null;
+			}
+
+			Integer order = 1;
+            //工作台对应的是入口ID
+			for (Long entryId: cmd.getEntryIds()){
+
+				UserApp userApp = new UserApp();
+				userApp.setAppId(entryId);
+				userApp.setUserId(userId);
+				userApp.setLocationType(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode());
+				userApp.setLocationTargetId(cmd.getOrganizationId());
+				userApp.setOrder(order);
+				order = order + 1;
+				userAppProvider.createUserApp(userApp);
+			}
+
+			return null;
+		});
 	}
 
 
@@ -1489,4 +2048,142 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		return response;
 	}
+
+	@Override
+	public ListWorkPlatformAppResponse listWorkPlatformApp(ListWorkPlatformAppCommand cmd) {
+
+		ListWorkPlatformAppResponse response = new ListWorkPlatformAppResponse();
+		Integer namespaceId = cmd.getNamespaceId();
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+
+		Byte locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
+		Long orgId = cmd.getOrganizationId();
+		Byte sceneType = ServiceModuleSceneType.MANAGEMENT.getCode();
+
+		List<AppCategory> appCategories = appCategoryProvider.listAppCategories(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), 0L);
+
+		if(appCategories == null){
+			return null;
+		}
+
+        List<WorkPlatformAppDTO> list = new ArrayList<>();
+		for (AppCategory appCategory: appCategories) {
+
+            //OA应用  管理端
+            List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
+                    ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if (!CollectionUtils.isEmpty(oaApp)) {
+                pareApp(list,oaApp,appCategory,locationType,sceneType,orgId);
+            }
+            //OA应用 用户端
+            oaApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
+                    ServiceModuleAppType.OA.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if (!CollectionUtils.isEmpty(oaApp)) {
+                pareApp(list,oaApp,appCategory,locationType,ServiceModuleSceneType.CLIENT.getCode(),orgId);
+            }
+			//园区应用
+            List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleAppsWithEntries(namespaceId, releaseVersion.getId(), orgId, locationType,
+                    ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if (!CollectionUtils.isEmpty(communityApp)) {
+                pareApp(list,communityApp,appCategory,locationType,sceneType,orgId);
+            }
+
+		}
+		response.setApps(list);
+		return response;
+	}
+
+	private void pareApp(List<WorkPlatformAppDTO> list,List<ServiceModuleApp> apps,AppCategory appCategory, Byte locationType, Byte sceneType, Long orgId){
+        for (int i=0;i<apps.size();i++) {
+            ServiceModuleApp app = apps.get(i);
+            WorkPlatformAppDTO dto = new WorkPlatformAppDTO();
+            dto.setAppEntryCategory(appCategory.getName());
+            ServiceModuleApp serviceModuleApp = this.serviceModuleAppProvider.findServiceModuleAppById(app.getId());
+            if (serviceModuleApp != null) {
+                dto.setAppName(serviceModuleApp.getName());
+            }else {
+                dto.setAppName(app.getName());
+            }
+            dto.setAppOriginId(app.getOriginId());
+            dto.setEntryId(app.getEntryId());
+            List<ServiceModuleEntry> entries = this.serviceModuleEntryProvider.listServiceModuleEntries(Arrays.asList(app.getModuleId()), locationType, sceneType);
+            if (!CollectionUtils.isEmpty(entries)) {
+                List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(app.getOriginId(), entries.get(0).getId(),
+                        null,null);
+                if (!CollectionUtils.isEmpty(serviceModuleAppEntryProfiles)) {
+                    if (TrueOrFalseFlag.TRUE.getCode().equals(serviceModuleAppEntryProfiles.get(0).getAppEntrySetting())) {
+                        dto.setAppEntry(serviceModuleAppEntryProfiles.get(0).getEntryName());
+                    }else {
+                        dto.setAppEntry(entries.get(0).getEntryName());
+                    }
+                }else {
+                    dto.setAppEntry(entries.get(0).getEntryName());
+                }
+            }
+            WorkPlatformApp workPlatformApp = this.workPlatformAppProvider.getWorkPlatformApp(app.getOriginId(), orgId,app.getEntryId());
+            if (workPlatformApp != null) {
+                dto.setId(workPlatformApp.getId());
+                dto.setVisibleFlag(workPlatformApp.getVisibleFlag());
+                dto.setSortNum(workPlatformApp.getOrder());
+            }else {
+                Integer maxSort = this.workPlatformAppProvider.getMaxSort(orgId);
+                if (maxSort != null) {
+                    WorkPlatformApp newWorkPlatformApp = new WorkPlatformApp();
+                    newWorkPlatformApp.setOrder(maxSort+1);
+                    newWorkPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                    newWorkPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+                    newWorkPlatformApp.setScopeId(orgId);
+                    newWorkPlatformApp.setAppId(app.getOriginId());
+                    newWorkPlatformApp.setEntryId(app.getEntryId());
+                    this.workPlatformAppProvider.createWorkPlatformApp(newWorkPlatformApp);
+
+                    dto.setId(newWorkPlatformApp.getId());
+                    dto.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                    dto.setSortNum(newWorkPlatformApp.getOrder());
+                }else {
+                    dto.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                    dto.setSortNum(i+1);
+                }
+            }
+            list.add(dto);
+        }
+    }
+    @Override
+    public void saveWorkPlatformApp(SaveWorkPlatformAppCommand cmd) {
+        for (int i = 0;i<cmd.getApps().size();i++) {
+            WorkPlatformAppDTO dto = cmd.getApps().get(i);
+            WorkPlatformApp app = this.workPlatformAppProvider.getWorkPlatformApp(dto.getAppOriginId(),cmd.getOrganizationId(),dto.getEntryId());
+            if (app == null) {
+                WorkPlatformApp newApp = new WorkPlatformApp();
+                newApp.setOrder(i+1);
+                newApp.setVisibleFlag(dto.getVisibleFlag());
+                newApp.setAppId(dto.getAppOriginId());
+                newApp.setScopeId(cmd.getOrganizationId());
+                newApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+                newApp.setEntryId(dto.getEntryId());
+                this.workPlatformAppProvider.createWorkPlatformApp(newApp);
+            }
+        }
+    }
+
+    @Override
+    public void updateWorkPlatformApp(UpdateWorkPlatformAppCommand cmd) {
+        WorkPlatformApp app = this.workPlatformAppProvider.findWorkPlatformById(cmd.getId());
+        if (app != null) {
+            app.setVisibleFlag(cmd.getVisibleFlag());
+            this.workPlatformAppProvider.updateWorkPlatformApp(app);
+        }
+    }
+
+    @Override
+    public void updateWorkPlatformAppSort(UpdateWorkPlatformAppSortCommand cmd) {
+        for (int i = 0;i<cmd.getIds().size();i++) {
+            Long id = cmd.getIds().get(i);
+            WorkPlatformApp app = this.workPlatformAppProvider.findWorkPlatformById(id);
+            if (app != null) {
+                app.setOrder(i+1);
+                this.workPlatformAppProvider.updateWorkPlatformApp(app);
+            }
+        }
+    }
 }

@@ -8,8 +8,7 @@ import com.everhomes.parking.ParkingSpace;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.rentalv2.*;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.SearchRentalOrdersCommand;
+import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DownloadUtils;
@@ -29,6 +28,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,6 +45,8 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
     private Rentalv2Provider rentalv2Provider;
     @Autowired
     private Rentalv2Service rentalv2Service;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
 
     private ThreadLocal<SimpleDateFormat> datetimeSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
@@ -81,17 +84,31 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
     }
 
     @Override
+    public void buildDefaultRule(AddDefaultRuleAdminCommand addCmd) {
+        addCmd.setPriceRules(rentalCommonService.buildDefaultPriceRule(Collections.singletonList(RentalType.HOUR.getCode())));
+        addCmd.setRentalTypes(Collections.singletonList(RentalType.HOUR.getCode()));
+        //设置按小时模式 每天开放时间
+        TimeIntervalDTO timeIntervalDTO = new TimeIntervalDTO();
+        timeIntervalDTO.setTimeStep(0.5D);
+        timeIntervalDTO.setBeginTime(8D);
+        timeIntervalDTO.setEndTime(22D);
+        addCmd.setTimeIntervals(Collections.singletonList(timeIntervalDTO));
+    }
+
+    @Override
     public void setRuleOwnerTypeByResource(QueryDefaultRuleAdminCommand queryRuleCmd, RentalResource resource) {
         queryRuleCmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
         queryRuleCmd.setOwnerId(resource.getCommunityId());
     }
+
+
 
     @Override
     public void exportRentalBills(SearchRentalOrdersCommand cmd, HttpServletResponse response) {
         Integer pageSize = Integer.MAX_VALUE;
         List<RentalOrder> bills = rentalv2Provider.searchRentalOrders(cmd.getResourceTypeId(), cmd.getResourceType(),
                 cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(),cmd.getTag1(),
-                cmd.getTag2(),null,cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+                cmd.getTag2(),null,cmd.getKeyword(), cmd.getPageAnchor(), pageSize,cmd.getPageNum());
 
         if(null == bills){
             bills = new ArrayList<>();

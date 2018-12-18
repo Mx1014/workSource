@@ -1,4 +1,3 @@
-
 ELASTIC=elasticsearch:9200
 INDEX=everhomesv3
 
@@ -107,7 +106,14 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/visitorsys" -d '
                  "idNumber" : {
                      "type": "string",
                      "index": "not_analyzed"
-                  }
+                  },
+                    "communityId" : {
+                        "type": "long"
+                    },
+                  "communityType" : {
+                      "type": "long",
+                      "index": "not_analyzed"
+                   }
 
             }
           }

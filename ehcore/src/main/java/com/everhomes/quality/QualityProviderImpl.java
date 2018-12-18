@@ -162,17 +162,18 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 	//@PostConstruct
 	public void init() {
 		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_QUALITY_INSPECTION_TASK_CORN, "0 30 2 * * ? ");
 		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
 		if(taskServer.equals(equipmentIp)) {
 			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_TASK.getCode()).enter(()-> {
 				String qualityInspectionTriggerName = "QualityInspection" + System.currentTimeMillis();
 				scheduleProvider.scheduleCronJob(qualityInspectionTriggerName, qualityInspectionTriggerName,
-						"0 0 0 * * ? ", QualityInspectionScheduleJob.class, null);
+						cronExpression, QualityInspectionScheduleJob.class, null);
 				return null;
 			});
 
 			String qualityInspectionStatTriggerName = "QualityInspectionStat " + System.currentTimeMillis();
-			String statCorn = configurationProvider.getValue(ConfigConstants.QUALITY_STAT_CORN, "0 0 0 * * ? ");
+			String statCorn = configurationProvider.getValue(ConfigConstants.QUALITY_STAT_CORN, "0 30 2 * * ? ");
 			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_STAT.getCode()).enter(()-> {
 				scheduleProvider.scheduleCronJob(qualityInspectionStatTriggerName, qualityInspectionStatTriggerName,
 						statCorn, QualityInspectionStatScheduleJob.class, null);
@@ -1798,8 +1799,10 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 		if(inspectionType != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
 
-		if(SpecificationScopeCode.ALL.equals(SpecificationScopeCode.fromCode(scopeCode))){
-			// base support
+		//issue-43661 【智谷汇】品质核查，后台制定的计划，执行人和审阅人在APP端都看不到 by djm
+		//pc把类型和标准建到了全部下面，而在具体园区下面设置任务，在pc可以看到任务
+		// app端同步数据，根据园区获取数据，具体园区下面没有对应的ownerId 所以前端传过来null取查询类型、标准，sql里面ownerId=null 这样查询不出数据，导致categories为空，app端数据无法显示
+		if(SpecificationScopeCode.ALL.equals(SpecificationScopeCode.fromCode(scopeCode)) && ownerId !=null){
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
 		}
 		

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
 import com.everhomes.rest.asset.BillItemDTO;
+import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 
 /**
@@ -13,7 +14,7 @@ import com.everhomes.serviceModuleApp.ServiceModuleApp;
 public interface GeneralBillHandler {
     static final String GENERALBILL_PREFIX = "GeneralBill-";
     
-    /**
+    /**+
      * 创建或更新缴费模块与其他模块的映射关系
      * @param assetInstanceConfigDTO
      */
@@ -40,5 +41,13 @@ public interface GeneralBillHandler {
     default String getPaymentExtendInfo(BillItemDTO billItemDTO) {
     	return null;
     }
+
+    /**
+     * 组装商品的基本信息
+     * @param billItemDTO
+     * @return
+     */
+    GoodDTO getGoodsInfo(BillItemDTO billItemDTO);
+    
     
 }

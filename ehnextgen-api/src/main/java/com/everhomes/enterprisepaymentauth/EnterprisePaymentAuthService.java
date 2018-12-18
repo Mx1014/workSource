@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.enterprisepaymentauth;
 
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.enterprisepaymentauth.BatchCreateOrUpdateEmployeePaymentLimitCommand;
 import com.everhomes.rest.enterprisepaymentauth.CreateOrUpdateEnterprisePaymentSceneLimitCommand;
 import com.everhomes.rest.enterprisepaymentauth.ExportEnterprisePaymentPayLogsCommand;
@@ -73,6 +74,8 @@ public interface EnterprisePaymentAuthService {
     ListEmployeePaymentLimitChangeLogsResponse listEmployeePaymentLimitChangeLogs(ListEmployeePaymentLimitChangeLogsCommand cmd);
 
     void autoDeleteEmployeePaymentLimit();
+
+    void markAutoDeleteEnterprisePaymentAuth(OrganizationMemberDetails memberDetail);
 
     void checkPaymentStatusScheduled();
 

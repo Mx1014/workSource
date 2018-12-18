@@ -18,6 +18,8 @@ public interface EnterprisePaymentAuthEmployeeLimitDetailProvider {
 
     void autoDeleteDismissEmployeePaymentAuthLimitDetail(String shouldDeleteMonth);
 
+    void markAutoDeleteDismissEmployeePaymentAuthLimitDetail(Integer namespaceId, Long organizationId, Long detailId, String waitAutoDeleteMonth);
+
     List<EnterprisePaymentAuthEmployeeLimitDetail> listEnterprisePaymentAuthEmployeeLimitDetailByScene(Integer currentNamespaceId, Long organizationId, Long sceneAppId, int pageSize, int pageOffSet);
 
     EnterprisePaymentAuthEmployeeLimitDetail findEnterprisePaymentAuthEmployeeLimitDetailByDetailId(Integer namespaceId, Long organizationId, Long detailId, Long sceneAppId);

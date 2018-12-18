@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.aclink.AclinkCameraDTO;
@@ -40,6 +44,7 @@ import com.everhomes.rest.aclink.DeleteLocalServerCommand;
 import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAccessLinkStatus;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.DoorAccessStatus;
 import com.everhomes.rest.aclink.ListAclinkServersResponse;
 import com.everhomes.rest.aclink.ListLocalCamerasCommand;
 import com.everhomes.rest.aclink.ListLocalIpadCommand;
@@ -54,6 +59,7 @@ import com.everhomes.rest.aclink.LocalDoorAccessDTO;
 import com.everhomes.rest.aclink.UpdateLocalServersCommand;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.sequence.LocalSequenceGenerator;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -81,19 +87,10 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 	private DoorAccessProvider doorAccessProvider;
 	
 	@Autowired
-	private AclinkIpadService aclinkIpadService;
-	
-	@Autowired
-	private DoorAccessService doorAccessService;
-	
-	@Autowired
 	private AesServerKeyProvider aesServerKeyProvider;
 	
 	@Autowired
     private BorderConnectionProvider borderConnectionProvider;
-	
-	@Autowired
-	private AesServerKeyService aesServerKeyService;
 	
 	@Autowired
 	private CommunityProvider communityProvider;
@@ -143,12 +140,32 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 		ListAclinkServersResponse resp = new ListAclinkServersResponse();
 		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
 		List<AclinkServer> servers= aclinkServerProvider.queryLocalServers(locator, cmd);
+		List<Long> serverIds = new ArrayList<Long>();
 		if (servers != null && servers.size() > 0){
 			List<AclinkServerDTO> dtos = servers.stream().map((r)-> {
-                return ConvertHelper.convert(r, AclinkServerDTO.class);
-            }).collect(Collectors.toList());
-            
-            resp.setAclinkServers(dtos);
+				serverIds.add(r.getId());
+				return ConvertHelper.convert(r, AclinkServerDTO.class);
+			}).collect(Collectors.toList());
+			
+			resp.setAclinkServers(dtos);
+		}
+		List<DoorAccess> doors= doorAccessProvider.queryDoorAccesss(new CrossShardListingLocator(), 0, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_DOOR_ACCESS.LOCAL_SERVER_ID.in(serverIds));
+				query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()));
+				return query;
+			}
+		});
+		if (doors != null && doors.size() > 0) {
+			doors.stream().forEach(door -> {
+				AclinkServerDTO serverDTO = resp.getAclinkServers().stream()
+						.filter(r -> r.getId().equals(door.getLocalServerId())).findFirst().get();
+				if(serverDTO.getListDoorAccess() == null){
+					serverDTO.setListDoorAccess(new ArrayList<LocalDoorAccessDTO>());
+				}
+				serverDTO.getListDoorAccess().add(ConvertHelper.convert(door, LocalDoorAccessDTO.class));
+			});
 		}
 		resp.setNextPageAnchor(locator.getAnchor());
 		return resp;

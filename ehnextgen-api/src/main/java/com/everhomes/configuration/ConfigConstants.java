@@ -85,8 +85,11 @@ public interface ConfigConstants {
 	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
 	
 	public static final String CLUB_SHARE_URL = "club.share.url";
-
-    String SERVICE_ALLIANCE_DETAIL_URL = "serviceAlliance.serviceDetail.url";
+	
+	@Deprecated
+    String SERVICE_ALLIANCE_DETAIL_URL = "serviceAlliance.serviceDetail.url"; //当前不使用了
+    
+    String SERVICE_DETAIL_URL = "serviceAlliance.detail.url";
 
     String RENTAL_RESOURCE_DETAIL_URL = "rental.resource.detail.url";
 
@@ -243,4 +246,7 @@ public interface ConfigConstants {
 	
 	//缴费对接门禁定时任务
 	public static final String SCHEDULE_ASSET_DOORACCESS_TASK_TIME = "asset.dooraccess.cronexpression";
+	
+	//品质核查定时任务
+	public static final String SCHEDULE_QUALITY_INSPECTION_TASK_CORN = "quality.inspection.cronexpression";
 }

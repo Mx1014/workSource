@@ -1367,6 +1367,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 notice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 doorAccessProvider.createAclinkFormValues(notice);
             }
+
+            doorAuthProvider.createDoorAuth(doorAuth);
+            
+            //会议室预订,短信二维码打不开
+            AesUserKey aesUserKey = generateAesUserKey(tmpUser, doorAuth);
+            if(aesUserKey == null) {
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "DoorAccess user key error");
+            }
+            if(doorAuth.getAuthRuleType() != null && doorAuth.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())){
+            	doorAuth.setQrKey(createZuolinQrByCount(doorAuth.getId()));
+            }else{
+            	doorAuth.setQrKey(createZuolinQrV1(aesUserKey.getSecret()));
+            }
+            doorAuthProvider.updateDoorAuth(doorAuth);
+
             rlt = ConvertHelper.convert(doorAuth, DoorAuthDTO.class);
             rlt.setDoorName(doorAcc.getDisplayNameNotEmpty());
             rlt.setHardwareId(doorAcc.getHardwareId());
@@ -4244,9 +4259,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	@Override
 	public String getVisitorUrlById(GetVisitorCommand cmd) {
         DoorAuth auth = doorAuthProvider.getDoorAuthById(Long.valueOf(cmd.getId()));
-        if(auth == null || (auth.getLinglingUuid() == null && auth.getAuthType() == 0)) {
+        if(auth == null || auth.getAuthType() == 0) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "tempAuth not found");
-        }else{
+        }else if(auth.getLinglingUuid() == null || auth.getLinglingUuid().isEmpty()){
         	//TODO driverType暂不处理;doorAccessType暂时只考虑zuolin by liuyilin 20181026
             String uuid = UUID.randomUUID().toString();
             uuid = uuid.replace("-", "");
@@ -6222,7 +6237,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			for(DoorAccessDTO da : das){
 				listMac.add(da.getHardwareId());
 			}
-			rsp.setMacAddress(listMac);
+			rsp.setListMac(listMac);			//待对接方上线,改为rsp.setMacAddress(listMac);
 		}
 		return rsp;
 	}

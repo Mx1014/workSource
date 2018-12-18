@@ -40,8 +40,8 @@ import java.util.List;
  *     <li>rejectCount: rejectCount</li>
  *     <li>title: title</li>
  *     <li>organizationId: 公司id</li>
- *     <li>currentNodeFormOriginId: currentNodeFormOriginId</li>
- *     <li>currentNodeFormVersion: currentNodeFormVersion</li>
+ *     <li>currentNodeFormOriginId: 当前节点的表单 id, 后期会废弃这个字段, 新的见 currentLane 里的 currentNode 的 formOriginId</li>
+ *     <li>currentNodeFormVersion: 当前节点的表单 version, 后期会废弃这个字段, 新的见 currentLane 里的 currentNode 的 formVersion</li>
  *     <li>currentLane: 当前泳道 {@link com.everhomes.rest.flow.FlowLaneLogDTO}</li>
  *     <li>entities: 实体的详细信息 {@link FlowCaseEntity}</li>
  *     <li>buttons: 按钮详情 {@link com.everhomes.rest.flow.FlowButtonDTO}</li>
@@ -81,7 +81,16 @@ public class FlowCaseBriefDTO {
     private String title;
     private Long organizationId;
 
+    /**
+     * 见 currentLane 里的 currentNode 的 formOriginId
+     */
+    @Deprecated
     private Long currentNodeFormOriginId;
+
+    /**
+     * 见 currentLane 里的 currentNode 的 formVersion
+     */
+    @Deprecated
     private Long currentNodeFormVersion;
 
     private FlowLaneLogDTO currentLane = new FlowLaneLogDTO();

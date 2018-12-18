@@ -120,7 +120,7 @@ public class FujicaParkingVendorHandler extends DefaultParkingVendorHandler {
                 else{
                     List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(parkingLot.getOwnerType(),parkingLot.getOwnerId(),parkingLot.getId(),
                             plateNumber,null,null,null,null,null,null,
-                            null,ParkingRechargeOrderStatus.PAID.getCode(), null, null, null,null,null);
+                            null,ParkingRechargeOrderStatus.PAID.getCode(), null, null, null,null,null,null);
                     if (list!=null && list.size()>0){
                         Long lastPaidTime = now - list.get(0).getPaidTime().getTime();
                         if (lastPaidTime/1000/60 < param.getOverTime())

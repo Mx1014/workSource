@@ -88,7 +88,17 @@ public class OfficeCubicleRangeProviderImpl implements OfficeCubicleRangeProvide
 		}
 		return null;
 	}
-
+	
+	@Override
+	public List<OfficeCubicleRange> getOfficeCubicleRangeByOwner(Long ownerId, String ownerType,  Integer namespaceId) {
+		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_RANGES)
+				.where(Tables.EH_OFFICE_CUBICLE_RANGES.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_OFFICE_CUBICLE_RANGES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_OFFICE_CUBICLE_RANGES.NAMESPACE_ID.eq(namespaceId))
+				.orderBy(Tables.EH_OFFICE_CUBICLE_RANGES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleRange.class));
+	}
+	
 	private EhOfficeCubicleRangesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

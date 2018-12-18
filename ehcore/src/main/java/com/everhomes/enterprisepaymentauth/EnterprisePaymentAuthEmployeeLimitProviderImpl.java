@@ -133,6 +133,18 @@ public class EnterprisePaymentAuthEmployeeLimitProviderImpl implements Enterpris
 	}
 
 	@Override
+	public void markAutoDeleteDismissEmployeePaymentAuthLimit(Integer namespaceId, Long organizationId, Long detailId, String waitAutoDeleteMonth) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterprisePaymentAuthEmployeeLimits.class));
+		UpdateQuery<EhEnterprisePaymentAuthEmployeeLimitsRecord> updateQuery = context.updateQuery(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMITS);
+		updateQuery.addConditions(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMITS.NAMESPACE_ID.eq(namespaceId));
+		updateQuery.addConditions(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMITS.ORGANIZATION_ID.eq(organizationId));
+		updateQuery.addConditions(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMITS.DETAIL_ID.eq(detailId));
+		updateQuery.addValue(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMITS.WAIT_AUTO_DELETE_MONTH, waitAutoDeleteMonth);
+		updateQuery.addValue(Tables.EH_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMITS.OPERATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()));
+		updateQuery.execute();
+	}
+
+	@Override
 	@CacheEvict(value = FIND_ENTERPRISE_PAYMENT_AUTH_EMPLOYEE_LIMIT_BY_DETAIL_ID, key = "{#namespaceId,#organizationId,#detailId}")
 	public void incrHistoricalTotalPayAmountAndPayCount(Integer namespaceId, Long organizationId, Long detailId, BigDecimal payAmount, Integer payCount) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

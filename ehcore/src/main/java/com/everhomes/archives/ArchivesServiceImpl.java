@@ -7,38 +7,95 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.filedownload.TaskService;
+import com.everhomes.enterprisepaymentauth.EnterprisePaymentAuthService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.*;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationMemberLog;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.archives.*;
+import com.everhomes.rest.archives.AddArchivesContactCommand;
+import com.everhomes.rest.archives.AddArchivesEmployeeCommand;
+import com.everhomes.rest.archives.AddArchivesLogCommand;
+import com.everhomes.rest.archives.ArchivesContactDTO;
+import com.everhomes.rest.archives.ArchivesDismissEmployeeDTO;
+import com.everhomes.rest.archives.ArchivesDismissReason;
+import com.everhomes.rest.archives.ArchivesDismissType;
+import com.everhomes.rest.archives.ArchivesEmployeeDTO;
+import com.everhomes.rest.archives.ArchivesFormDTO;
+import com.everhomes.rest.archives.ArchivesLocaleStringCode;
+import com.everhomes.rest.archives.ArchivesLocaleTemplateCode;
+import com.everhomes.rest.archives.ArchivesLogDTO;
+import com.everhomes.rest.archives.ArchivesNotificationCommand;
+import com.everhomes.rest.archives.ArchivesNotificationDTO;
+import com.everhomes.rest.archives.ArchivesNotificationTarget;
+import com.everhomes.rest.archives.ArchivesOperationStatus;
+import com.everhomes.rest.archives.ArchivesOperationType;
+import com.everhomes.rest.archives.ArchivesOperationalConfigurationDTO;
+import com.everhomes.rest.archives.ArchivesParameter;
+import com.everhomes.rest.archives.CheckOperationCommand;
+import com.everhomes.rest.archives.CheckOperationResponse;
+import com.everhomes.rest.archives.DeleteArchivesContactsCommand;
+import com.everhomes.rest.archives.DeleteArchivesEmployeesCommand;
+import com.everhomes.rest.archives.DismissArchivesEmployeesCommand;
+import com.everhomes.rest.archives.EmployArchivesEmployeesCommand;
+import com.everhomes.rest.archives.GetArchivesEmployeeCommand;
+import com.everhomes.rest.archives.GetArchivesEmployeeResponse;
+import com.everhomes.rest.archives.ListArchivesContactsCommand;
+import com.everhomes.rest.archives.ListArchivesContactsResponse;
+import com.everhomes.rest.archives.ListArchivesDismissEmployeesCommand;
+import com.everhomes.rest.archives.ListArchivesDismissEmployeesResponse;
+import com.everhomes.rest.archives.ListArchivesEmployeesCommand;
+import com.everhomes.rest.archives.ListArchivesEmployeesResponse;
+import com.everhomes.rest.archives.ListDismissCategoriesResponse;
+import com.everhomes.rest.archives.StickArchivesContactCommand;
+import com.everhomes.rest.archives.TransferArchivesContactsCommand;
+import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
+import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
-import com.everhomes.rest.filedownload.TaskRepeatFlag;
-import com.everhomes.rest.filedownload.TaskType;
-import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.general_approval.GeneralFormFieldAttribute;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.messaging.ChannelType;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
+import com.everhomes.rest.organization.DeleteOrganizationContactScopeType;
+import com.everhomes.rest.organization.DeleteOrganizationPersonnelByContactTokenCommand;
+import com.everhomes.rest.organization.EmployeeStatus;
+import com.everhomes.rest.organization.EmployeeType;
+import com.everhomes.rest.organization.FilterOrganizationContactScopeType;
+import com.everhomes.rest.organization.GetArchivesContactCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OperationType;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.RequestType;
+import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.user.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.everhomes.util.excel.ExcelUtils;
-
 import org.apache.commons.collections.CollectionUtils;
-import org.elasticsearch.discovery.zen.membership.MembershipAction;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,23 +105,25 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
-import java.io.*;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class ArchivesServiceImpl implements ArchivesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchivesServiceImpl.class);
-
-    private static final String ARCHIVES_NOTIFICATION = "archives_notification";
 
     private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -105,13 +164,10 @@ public class ArchivesServiceImpl implements ArchivesService {
     private CoordinationProvider coordinationProvider;
 
     @Autowired
-    private TaskService taskService;
-
-    @Autowired
     private RolePrivilegeService rolePrivilegeService;
-
     @Autowired
-    private UserPrivilegeMgr userPrivilegeMgr;
+    private EnterprisePaymentAuthService enterprisePaymentAuthService;
+
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) { 
@@ -1371,6 +1427,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         deleteOrganizationPersonnelByContactTokenCommand.setContactToken(employee.getContactToken());
         deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
         organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
+        // 标记该用户的企业支付授权为待删除状态，次月删除
+        enterprisePaymentAuthService.markAutoDeleteEnterprisePaymentAuth(employee);
     }
 
     private ArchivesDismissEmployees processDismissEmployee(OrganizationMemberDetails employee, DismissArchivesEmployeesCommand cmd) {
@@ -1908,6 +1966,37 @@ public class ArchivesServiceImpl implements ArchivesService {
         );
     }
 
+    /**
+     * 校验是否离职
+     * created by wuhan
+     */
+    @Override
+    public boolean checkDismiss(Long userId, Long orgId) {
+        OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetId(userId, orgId);
+        return checkDismiss(member);
+
+    }
+
+    /**
+     * 校验是否离职
+     * created by wuhan
+     */
+    @Override
+    public boolean checkDismiss(OrganizationMemberDetails member) {
+//        if (null != member.getDismissTime()) {
+//            if (DateHelper.currentGMTTime().after(member.getDismissTime())) {
+//                return true;
+//            }
+//        }
+        if (null == member) {
+            return true;
+        }
+        if (EmployeeStatus.fromCode(member.getEmployeeStatus()) == EmployeeStatus.DISMISSAL) {
+            return true;
+        }
+        return false;
+    }
+    
     @Override
     public ArchivesNotificationDTO getArchivesNotification(ArchivesNotificationCommand cmd){
         Integer namespaceId = cmd.getNamespaceId();

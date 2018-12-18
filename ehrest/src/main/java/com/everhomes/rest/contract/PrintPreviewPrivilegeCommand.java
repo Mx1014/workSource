@@ -13,12 +13,18 @@ import com.everhomes.util.StringHelper;
  */
 public class PrintPreviewPrivilegeCommand {
     private Long orgId;
-
     private Long communityId;
-
     private Integer namespaceId;
-
 	private Long categoryId;
+	private Long contractId;
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
+	}
 
 	public Long getCategoryId() {
 		return categoryId;

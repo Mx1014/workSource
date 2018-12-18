@@ -130,6 +130,8 @@ public interface SalaryService {
 
     ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd);
 
+    String findNameByOwnerAndUser(Long ownerId, Long uid);
+
     HttpServletResponse exportEmployeeSalaryTemplate(ExportEmployeeSalaryTemplateCommand cmd,
                                                      HttpServletResponse response);
 

@@ -742,9 +742,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                     }
                 });
             }
-            invitedCustomerDTO.setTrackers(trackers);
-            EnterpriseCustomer customer = ConvertHelper.convert(invitedCustomerDTO, EnterpriseCustomer.class);
-            customerSearcher.feedDoc(customer);
+            customerSearcher.syncSingleCustomer(invitedCustomerDTO.getId());
 
         }
 

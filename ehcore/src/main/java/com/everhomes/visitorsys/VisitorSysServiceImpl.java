@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.acl.RolePrivilegeService;
@@ -22,6 +23,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.http.HttpUtils;
@@ -43,7 +45,9 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.enterprise.FindEnterpriseDetailCommand;
+import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.OfficeSiteDTO;
 import com.everhomes.rest.organization.OrganizationAndDetailDTO;
@@ -55,6 +59,7 @@ import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
+import com.everhomes.search.FreqVisitorSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.VisitorsysSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
@@ -176,6 +181,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private VisitorSysDoorAccessProvider visitorSysDoorAccessProvider;
     @Autowired
     private DoorAccessProvider doorAccessProvider;
+    @Autowired
+    private VisitorSysHKWSUtil HKWSUtil;
+    @Autowired
+    private VisitorSysDingFengHuiUtil DFHUtil;
+    @Autowired
+    private FreqVisitorSearcher freqVisitorSearcher;
+    @Autowired
+    private FamilyProvider familyProvider;
+
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
@@ -411,7 +425,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public ListVisitReasonsResponse listVisitReasons(BaseVisitorsysCommand cmd) {
         beforePostForWeb(cmd);
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-        List<VisitorSysVisitReason> visitorSysVisitReasons = visitorSysVisitReasonProvider.listVisitorSysVisitReason(cmd.getNamespaceId());
+        if(cmd.getCommunityType() == null){
+            cmd.setCommunityType(CommunityType.COMMERCIAL.getCode());
+        }
+        List<VisitorSysVisitReason> visitorSysVisitReasons = visitorSysVisitReasonProvider.listVisitorSysVisitReason(cmd.getNamespaceId(),cmd.getCommunityType());
         ListVisitReasonsResponse response = new ListVisitReasonsResponse();
         response.setVisitorReasonList(visitorSysVisitReasons.stream().map(r->{
             BaseVisitorReasonDTO convert = new BaseVisitorReasonDTO();
@@ -733,6 +750,17 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkDoorGuard(relatedVisitor);
         visitorSysVisitorProvider.createVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
+        if(visitorType == VisitorsysVisitorType.BE_INVITED) {
+            if(namespaceId == 999925){
+//          上海金茂对接
+                HKWSUtil.addAppointment(visitor);
+            } else if (namespaceId == 999951){
+//          鼎峰汇对接
+                DFHUtil.doInvite(visitor);
+            }
+        }
 //        createVisitorActions(relatedVisitor);
         sendMessageToAdmin(relatedVisitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         return null;
@@ -805,6 +833,16 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkDoorGuard(relatedVisitor);
         visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        if(namespaceId == 999925){
+//          上海金茂对接
+            HKWSUtil.delAppointment(visitor);
+            HKWSUtil.addAppointment(visitor);
+        } else if (namespaceId == 999951){
+//          鼎峰汇对接
+            DFHUtil.cancelInvite(visitor);
+            DFHUtil.doInvite(visitor);
+        }
 //        createVisitorActions(relatedVisitor);
         sendMessageToAdmin(relatedVisitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         return null;
@@ -1414,14 +1452,29 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             response.setQrcode(communityVisitor.getDoorGuardQrcode());
         }
         //目前只有公司访客邀请函，所以以下设置基于公司访客邀请函的设置
-        response = VisitorSysUtils.copyAllNotNullProperties(enterpriseConfig, response);
-        response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
-        VisitorSysOfficeLocation location = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(enterpriseVisitor.getOfficeLocationId());
+        if(communityVisitor.getCommunityType() == null || communityVisitor.getCommunityType().byteValue() == CommunityType.COMMERCIAL.getCode()) {
+            response = VisitorSysUtils.copyAllNotNullProperties(enterpriseConfig, response);
+            response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
+        }else if(communityVisitor.getCommunityType().byteValue() == CommunityType.RESIDENTIAL.getCode()){
+            response = VisitorSysUtils.copyAllNotNullProperties(communityConfig, response);
+            response.setLogoUrl(contentServerService.parserUri(response.getLogoUri()));
+        }
+        VisitorSysOfficeLocation location = new VisitorSysOfficeLocation();
+        if(communityVisitor.getCommunityType() == null || communityVisitor.getCommunityType().byteValue() == CommunityType.COMMERCIAL.getCode()) {
+            location = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(enterpriseVisitor.getOfficeLocationId());
+        } else if(communityVisitor.getCommunityType().byteValue() == CommunityType.RESIDENTIAL.getCode()){
+            List<VisitorSysOfficeLocation> list = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(communityVisitor.getNamespaceId(),communityVisitor.getOwnerType(),communityVisitor.getOwnerId(), 100,Long.MAX_VALUE);
+            if(list != null && list.size() > 0){
+                location = list.get(0);
+            }
+        }
         VisitorsysFlagType visitorInfoFlag = VisitorsysFlagType.fromCode(enterpriseConfig.getBaseConfig().getVisitorInfoFlag());
         if(visitorInfoFlag == VisitorsysFlagType.YES) {
             BaseVisitorInfoDTO convert = ConvertHelper.convert(enterpriseVisitor, BaseVisitorInfoDTO.class);
-            convert.setEnterpriseFormValues(enterpriseVisitor.getFormJsonValue()==null?null:JSONObject.parseObject(enterpriseVisitor.getFormJsonValue(),
-                    new TypeReference<List<VisitorsysApprovalFormItem>>() {}));
+            if(communityVisitor.getCommunityType() == null || communityVisitor.getCommunityType().byteValue() == CommunityType.COMMERCIAL.getCode()){
+                convert.setEnterpriseFormValues(enterpriseVisitor.getFormJsonValue()==null?null:JSONObject.parseObject(enterpriseVisitor.getFormJsonValue(),
+                        new TypeReference<List<VisitorsysApprovalFormItem>>() {}));
+            }
             convert.setCommunityFormValues(communityVisitor.getFormJsonValue()==null?null:JSONObject.parseObject(communityVisitor.getFormJsonValue(),
                     new TypeReference<List<VisitorsysApprovalFormItem>>() {}));
             response.setVisitorInfoDTO(convert);
@@ -1726,12 +1779,17 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private GetFormResponse getForm(Integer namespaceId,String ownerType,Long ownerId,Long enterpriseId) {
         GetConfigurationCommand command = new GetConfigurationCommand();
         command.setNamespaceId(namespaceId);
-        VisitorsysOwnerType visitorsysOwnerType = checkOwner(ownerType, ownerId);
-        if(visitorsysOwnerType ==VisitorsysOwnerType.COMMUNITY){
+//        VisitorsysOwnerType visitorsysOwnerType = checkOwner(ownerType, ownerId);
+        VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(ownerType);
+        if(visitorsysOwnerType ==VisitorsysOwnerType.ENTERPRISE){
             command.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
-            command.setOwnerId(enterpriseId);
+            if(enterpriseId != null)
+                command.setOwnerId(enterpriseId);
+            else
+                command.setOwnerId(ownerId);
         }else{
-            Long communityId = organizationService.getOrganizationActiveCommunityId(ownerId);
+//            Long communityId = organizationService.getOrganizationActiveCommunityId(ownerId);
+            Long communityId = ownerId;
             command.setOwnerType(VisitorsysOwnerType.COMMUNITY.getCode());
             command.setOwnerId(communityId);
         }
@@ -1774,11 +1832,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         GetConfigurationCommand command = new GetConfigurationCommand();
         command.setNamespaceId(cmd.getNamespaceId());
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-        if(visitorsysOwnerType ==VisitorsysOwnerType.COMMUNITY) {
+        if(visitorsysOwnerType ==VisitorsysOwnerType.ENTERPRISE) {
             command.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
-            command.setOwnerId(cmd.getEnterpriseId());
+            if(cmd.getEnterpriseId() != null)
+                command.setOwnerId(cmd.getEnterpriseId());
+            else
+                command.setOwnerId(cmd.getOwnerId());
         } else{
-            Long communityId = organizationService.getOrganizationActiveCommunityId(cmd.getOwnerId());
+//            Long communityId = organizationService.getOrganizationActiveCommunityId(cmd.getOwnerId());
+            Long communityId = cmd.getOwnerId();
             command.setOwnerType(VisitorsysOwnerType.COMMUNITY.getCode());
             command.setOwnerId(communityId);
          }
@@ -1802,6 +1864,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             return;
 
         List<BaseVisitorDTO> visitorDtoList = response.getVisitorDtoList();
+
+        BaseVisitorDTO bean = visitorDtoList.get(0);
+        CommunityType communityType = CommunityType.fromCode(bean.getCommunityType());
 
         Workbook wb = new XSSFWorkbook();
 
@@ -1832,10 +1897,19 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             row.createCell(0).setCellValue("访客姓名");
             row.createCell(1).setCellValue("手机号码");
             row.createCell(2).setCellValue("访客类型");
-            row.createCell(3).setCellValue("来访事由");
-            row.createCell(4).setCellValue("到访企业时间");
-            row.createCell(5).setCellValue("状态");
+
+            if(communityType != null && communityType == CommunityType.RESIDENTIAL){
+                row.createCell(3).setCellValue("到访公寓");
+            } else {
+                row.createCell(3).setCellValue("到访公司");
+            }
+
+            row.createCell(4).setCellValue("来访事由");
+            row.createCell(5).setCellValue("到访企业时间");
+            row.createCell(6).setCellValue("状态");
         }
+
+
 
         DateTimeFormatter datetimeSF = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
         for(int i = 0, size = visitorDtoList.size(); i < size; i++){
@@ -1852,13 +1926,21 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             }else{
                 VisitorsysVisitorType type = VisitorsysVisitorType.fromCode((visitorDTO.getVisitorType()));
                 tempRow.createCell(2).setCellValue(type.getDesc());
-                tempRow.createCell(3).setCellValue(visitorDTO.getVisitReason());
-                tempRow.createCell(4).setCellValue(visitorDTO.getVisitTime().toLocalDateTime().format(datetimeSF));
+                if(communityType != null && communityType == CommunityType.RESIDENTIAL){
+                    tempRow.createCell(3).setCellValue(visitorDTO.getOfficeLocationName());
+                } else {
+                    tempRow.createCell(3).setCellValue(visitorDTO.getEnterpriseName());
+                }
+                tempRow.createCell(4).setCellValue(visitorDTO.getVisitReason());
+                tempRow.createCell(5).setCellValue(visitorDTO.getVisitTime().toLocalDateTime().format(datetimeSF));
                 VisitorsysStatus status = VisitorsysStatus.fromCode(visitorDTO.getVisitStatus());
-                tempRow.createCell(5).setCellValue(status==null?"未知":status.getDesc());
+                tempRow.createCell(6).setCellValue(status==null?"未知":status.getDesc());
             }
 
+
         }
+
+
 
         ByteArrayOutputStream out = null;
         try {
@@ -2103,7 +2185,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 break;
             case ENTERPRISE:
                 Organization organization = organizationProvider.findOrganizationById(ownerId);
-                if(organization==null){
+                FamilyDTO family = familyProvider.getFamilyById(ownerId);
+                if(organization==null && family == null){
                     throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_NOT_EXIST,
                             "unknown ownerId "+ownerId);
                 }
@@ -2312,15 +2395,30 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         for (String s : checkMustFillField) {
             checkMustFillParams(visitor,s);
         }
+        if(visitor.getCommunityType() == null){
+            if(visitor.getCommunityId() == null){
+//              没有传类型也没有id，设置默认值为商业园区
+                visitor.setCommunityType(CommunityType.COMMERCIAL.getCode());
+            } else{
+                Community community = communityProvider.findCommunityById(visitor.getCommunityId());
+                if(community != null){
+                    visitor.setCommunityType(community.getCommunityType());
+                }
+            }
+        }
+        CommunityType communitType = CommunityType.fromCode(visitor.getCommunityType());
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(visitor.getOwnerType(),visitor.getOwnerId());
-        checkOwner(VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
+        if(CommunityType.COMMERCIAL.equals(communitType))
+            checkOwner(VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
         GetConfigurationResponse configuration = getConfiguration(ConvertHelper.convert(visitor, GetConfigurationCommand.class));
         //检查园区表单
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             checkFormConfiguration(configuration, visitor.getCommunityFormValues());
         }
         //检查公司表单
-        checkFormConfiguration(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId(),visitor.getEnterpriseFormValues());
+        if(CommunityType.COMMERCIAL.equals(communitType))
+            checkFormConfiguration(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId(),visitor.getEnterpriseFormValues());
+
         VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
         VisitorsysStatus visitStatus = checkInvaildVisitStatus(visitor.getVisitStatus());
 
@@ -2629,14 +2727,21 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 //                }
 //            }
 //        }
+        Community community = null;
+        if(ownerType == VisitorsysOwnerType.COMMUNITY){
+            community = communityProvider.findCommunityById(visitor.getOwnerId());
+        }
+
 //        园区确认预约访客，企业的关联 和 园区登记临时访客，企业关联
-        if ((convert.getId() != null && convert.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) ||
-                convert.getVisitorType().equals(VisitorsysVisitorType.TEMPORARY.getCode())) {
-            if (ownerType == VisitorsysOwnerType.COMMUNITY) {
-                VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(convert.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), convert.getEnterpriseId());
-                if (null != config.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
-                    convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
-                    convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+        if(community == null || CommunityType.COMMERCIAL.equals(community.getCommunityType())){
+            if ((convert.getId() != null && convert.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) ||
+                    convert.getVisitorType().equals(VisitorsysVisitorType.TEMPORARY.getCode())) {
+                if (ownerType == VisitorsysOwnerType.COMMUNITY) {
+                    VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(convert.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), convert.getEnterpriseId());
+                    if (null != config.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
+                        convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                        convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    }
                 }
             }
         }
@@ -2786,7 +2891,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @return
      */
     private String generateInviationLink(Long id) {
-        String invitationLinkTemp = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITATION_LINK,"%s/visitor-appointment/build/invitation.html?visitorToken=%s");
+//        String invitationLinkTemp = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITATION_LINK,"%s/visitor-appointment/build/invitation.html?visitorToken=%s");
+        String invitationLinkTemp = "%s/evh/visitorsys/v?visitorToken=%s";
         String homeUrl = configurationProvider.getValue("home.url","");
         String token = WebTokenGenerator.getInstance().toWebToken(id);
         return String.format(invitationLinkTemp,homeUrl,token);
@@ -2854,6 +2960,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 bean.setNamespaceId(UserContext.getCurrentNamespaceId());
             bean.setDefaultDoorAccessFlag(TrueOrFalseFlag.FALSE.getCode());
             visitorSysDoorAccessProvider.createVisitorSysDoorAccess(bean);
+//          如果是第一个置为默认值
+            List<VisitorSysDoorAccess> results1 = visitorSysDoorAccessProvider.listVisitorSysDoorAccess(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),null);
+            if(results1.size() == 1){
+                cmd.setId(bean.getId());
+                setDefaultAccess(cmd);
+            }
         } else {
             VisitorSysDoorAccess bean = visitorSysDoorAccessProvider.findVisitorSysDoorAccess(cmd.getId());
             if(null != cmd.getDefaultAuthDurationType())
@@ -2925,5 +3037,30 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public List<VisitorSysDoorAccessDTO> listDoorAccessForManage(BaseVisitorsysCommand cmd) {
         checkMoblieManagePrivilege(cmd);
         return listDoorAccess(cmd);
+    }
+
+    @Override
+    public void syncHKWSUsers() {
+        HKWSUtil.syncHKWSUsers(null);
+    }
+
+    @Override
+    public void HKWSTest(BaseVisitorsysCommand cmd) {
+        VisitorSysVisitor bean = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getPmId());
+        if(cmd.getAppId() == 1L){
+            HKWSUtil.addAppointment(bean);
+        } else if (cmd.getAppId() == 2L) {
+            HKWSUtil.delAppointment(bean);
+        }
+    }
+
+    @Override
+    public ListFreqVisitorsResponse listFreqVisitors(ListFreqVisitorsCommand cmd) {
+        return freqVisitorSearcher.searchVisitors(cmd);
+    }
+
+    @Override
+    public void syncFreqVisitors(BaseVisitorsysCommand cmd) {
+        freqVisitorSearcher.syncVisitorsFromDb(cmd.getNamespaceId());
     }
 }

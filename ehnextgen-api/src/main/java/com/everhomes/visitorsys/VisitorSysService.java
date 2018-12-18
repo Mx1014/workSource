@@ -158,4 +158,12 @@ public interface VisitorSysService {
     GetConfigurationResponse getConfigurationForManage(GetConfigurationCommand cmd);
 
     List<VisitorSysDoorAccessDTO> listDoorAccessForManage(BaseVisitorsysCommand cmd);
+
+    void syncHKWSUsers();
+
+    void HKWSTest(BaseVisitorsysCommand cmd);
+
+    ListFreqVisitorsResponse listFreqVisitors(ListFreqVisitorsCommand cmd);
+
+    void syncFreqVisitors(BaseVisitorsysCommand cmd);
 }

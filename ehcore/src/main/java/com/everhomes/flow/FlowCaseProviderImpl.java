@@ -156,10 +156,11 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 
         return context.selectFrom(t)
                 .where(condition)
-                .groupBy(t.MODULE_ID, t.SERVICE_TYPE)
+                .groupBy(t.MODULE_ID, t.ORIGIN_APP_ID, t.SERVICE_TYPE)
                 .fetch(record -> {
                     FlowServiceTypeDTO dto = RecordHelper.convert(record, FlowServiceTypeDTO.class);
                     dto.setServiceName(record.getServiceType());
+                    dto.setOriginAppId(record.getOriginAppId());
                     return dto;
                 });
     }
@@ -388,7 +389,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
             cond = cond.and(
                     Tables.EH_FLOW_CASES.TITLE.like(keyword)
                     .or(Tables.EH_FLOW_CASES.SERVICE_TYPE.like(keyword))
-                    .or(Tables.EH_FLOW_CASES.CONTENT.like(keyword))
+                    // .or(Tables.EH_FLOW_CASES.CONTENT.like(keyword))
                     .or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(keyword))
                     .or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(keyword))
             );
@@ -519,11 +520,12 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
                 .on(t.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
                         .and(t.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
                 .where(condition)
-                .groupBy(t.MODULE_ID, t.SERVICE_TYPE)
+                .groupBy(t.MODULE_ID, t.ORIGIN_APP_ID, t.SERVICE_TYPE)
                 .fetch(record -> {
                     FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
                     dto.setModuleId(record.getValue(t.MODULE_ID));
                     dto.setServiceName(record.getValue(t.SERVICE_TYPE));
+                    dto.setOriginAppId(record.getValue(t.ORIGIN_APP_ID));
                     dto.setNamespaceId(record.getValue(t.NAMESPACE_ID));
                     return dto;
                 });

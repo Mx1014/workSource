@@ -22,9 +22,13 @@ import com.everhomes.rest.asset.AssetSubtractionType;
 import com.everhomes.rest.asset.BillGroupDTO;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
+import com.everhomes.rest.common.AssetModuleNotifyConstants;
+import com.everhomes.rest.contract.NamespaceContractType;
+import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -228,8 +232,8 @@ public class AssetBillProviderImpl implements AssetBillProvider {
         return vo;
     }
 	
-	public void changeChargeStatus(Integer currentNamespaceId, Long billId, BigDecimal amountReceived,
-			BigDecimal amountOwed, Integer paymentType) {
+	public void changeChargeStatus(Integer currentNamespaceId, Long billId, BigDecimal amountReceived, BigDecimal amountOwed,
+			Integer paymentType, Byte billStatus) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         context.update(t)
@@ -237,10 +241,80 @@ public class AssetBillProviderImpl implements AssetBillProvider {
                 .set(t.AMOUNT_RECEIVED, amountReceived)
                 .set(t.AMOUNT_OWED, amountOwed)
                 .set(t.THIRD_PAID, AssetPaymentBillStatus.PAID.getCode()) //总体原则：不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
+                .set(t.STATUS, billStatus)
                 .where(t.ID.eq(billId))
                 .and(t.NAMESPACE_ID.eq(currentNamespaceId))
                 .execute();
 	}
+	
+	public void deleteBillFromContract(Integer namespaceId, List<Long> contractIdList) {
+		this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            context.update(Tables.EH_PAYMENT_BILLS)
+            		.set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+                    .where(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_PAYMENT_BILLS.CONTRACT_ID.in(contractIdList))
+                    .execute();
+            context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+            	.set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+	    		.where(Tables.EH_PAYMENT_BILL_ITEMS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_BILL_ITEMS.CONTRACT_ID.in(contractIdList))
+	            .execute();
+            return null;
+        });
+	}
 
+	public void notifyThirdSign(List<Long> billIdList) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.THIRD_SIGN, AssetNotifyThirdSign.ERROR.getCode()) //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+                .where(t.ID.in(billIdList))
+                .execute();
+	}
+	
+	public void updateBill(List<Long> billIdList) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.THIRD_SIGN, AssetNotifyThirdSign.ERROR.getCode()) //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+                .where(t.ID.in(billIdList))
+                .execute();
+	}
+
+	public void deleteRuiCMSyncData() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		//删除eh_zj_syncdata_backup备份表
+        context.delete(Tables.EH_ZJ_SYNCDATA_BACKUP)
+                .where(Tables.EH_ZJ_SYNCDATA_BACKUP.NAMESPACE_ID.eq(999929))
+                .execute();
+        //删除同步的客户eh_organizations、eh_enterprise_customers
+        List<Long> organizationIdList = context.select(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID)
+        		.from(Tables.EH_ENTERPRISE_CUSTOMERS)
+        		.where(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(NamespaceCustomerType.CM.getCode()))
+        		.fetchInto(Long.class);
+        context.delete(Tables.EH_ORGANIZATIONS)
+	        .where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(999929))
+	        .and(Tables.EH_ORGANIZATIONS.ID.in(organizationIdList))
+	        .execute();
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMERS)
+	        .where(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(999929))
+	        .and(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(NamespaceCustomerType.CM.getCode()))
+	        .execute();
+        //删除同步的合同
+        context.delete(Tables.EH_CONTRACTS)
+	        .where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(999929))
+	        .and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(NamespaceContractType.RUIAN_CM.getCode()))
+	        .execute();
+        //删除同步的账单
+        context.delete(Tables.EH_PAYMENT_BILLS)
+	        .where(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(999929))
+	        .and(Tables.EH_PAYMENT_BILLS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ASSET_CM_MODULE))
+	        .execute();
+        context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
+	        .where(Tables.EH_PAYMENT_BILL_ITEMS.NAMESPACE_ID.eq(999929))
+	        .and(Tables.EH_PAYMENT_BILL_ITEMS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ASSET_CM_MODULE))
+	        .execute();
+	}
 
 }

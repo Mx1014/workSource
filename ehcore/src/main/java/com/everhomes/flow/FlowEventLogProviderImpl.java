@@ -182,12 +182,16 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         fields.add(Tables.EH_FLOW_EVENT_LOGS.ID);
 
         SelectQuery<Record> query = context.select(fields.toArray(new Field[0]))
-                .from(Tables.EH_FLOW_EVENT_LOGS).join(Tables.EH_FLOW_CASES)
+                .from(Tables.EH_FLOW_EVENT_LOGS)
+                .join(Tables.EH_FLOW_CASES)
                 .on(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(Tables.EH_FLOW_CASES.ID))
                 .join(Tables.EH_FLOWS)
                 .on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
                         .and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
-                .where(cond).orderBy(Tables.EH_FLOW_EVENT_LOGS.ID.desc()).limit(count + 1).getQuery();
+                .where(cond)
+                .orderBy(Tables.EH_FLOW_EVENT_LOGS.ID.desc())
+                .limit(count + 1)
+                .getQuery();
 
         if (callback != null) {
             callback.buildCondition(locator, query);
@@ -824,10 +828,11 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 .on(t.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
                         .and(t.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
                 .where(condition)
-                .groupBy(t.MODULE_ID, t.SERVICE_TYPE)
+                .groupBy(t.MODULE_ID, t.ORIGIN_APP_ID, t.SERVICE_TYPE)
                 .fetch(record -> {
                     FlowServiceTypeDTO dto = RecordHelper.convert(record, FlowServiceTypeDTO.class);
                     dto.setServiceName(record.getValue(t.SERVICE_TYPE));
+                    dto.setOriginAppId(record.getValue(t.ORIGIN_APP_ID));
                     return dto;
                 });
     }

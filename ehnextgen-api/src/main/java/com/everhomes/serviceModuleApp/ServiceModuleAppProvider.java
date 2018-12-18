@@ -44,6 +44,8 @@ public interface ServiceModuleAppProvider {
 
 	List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId);
 
+	List<ServiceModuleApp> listInstallServiceModuleAppsWithEntries(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId);
+
 	List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId);
 
 	List<ServiceModuleApp> listSystemApps(Long versionId);
@@ -52,4 +54,9 @@ public interface ServiceModuleAppProvider {
 
 	List<ServiceModuleApp> listServiceModuleAppsForEnterprisePay(Long versionId, Byte enableEnterprisePayFlag);
 
+	void createServiceModuleAppEntryProfile(ServiceModuleAppEntryProfile serviceModuleAppEntryProfile);
+
+	void updateServiceModuleAppEntryProfile(ServiceModuleAppEntryProfile serviceModuleAppEntryProfile);
+
+	List<ServiceModuleAppEntryProfile> listServiceModuleAppEntryProfile(Long originId, Long entryId, Byte entryCategory, Byte entrySettingFlag);
 }

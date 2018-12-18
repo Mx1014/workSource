@@ -11,13 +11,12 @@ import com.everhomes.util.StringHelper;
  * <li>beginDate: 查询开始时间</li>
  * <li>endDate: 查询结束时间</li>
  * <li>spaceName: 查询空间名</li>
- * <li>reserveKeyword: 查询预订人关键字</li>
- * <li>workFlowStatus: 工作流状态， {@link com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 一页的大小</li> 
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
+ * <li>orderStatus</li>
  * </ul>
  */
 public class SearchSpaceOrdersCommand {
@@ -35,6 +34,7 @@ public class SearchSpaceOrdersCommand {
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
+
 
 	public Long getCurrentPMId() {
 		return currentPMId;
@@ -91,17 +91,6 @@ public class SearchSpaceOrdersCommand {
 		this.ownerId = ownerId;
 	}
 
-
-	public Byte getWorkFlowStatus() {
-		return workFlowStatus;
-	}
-
-
-	public void setWorkFlowStatus(Byte workFlowStatus) {
-		this.workFlowStatus = workFlowStatus;
-	}
-
-
 	public Long getBeginDate() {
 		return beginDate;
 	}
@@ -120,27 +109,6 @@ public class SearchSpaceOrdersCommand {
 	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
 	}
-
-
-	public String getSpaceName() {
-		return spaceName;
-	}
-
-
-	public void setSpaceName(String spaceName) {
-		this.spaceName = spaceName;
-	}
-
-
-	public String getReserveKeyword() {
-		return reserveKeyword;
-	}
-
-
-	public void setReserveKeyword(String reserveKeyword) {
-		this.reserveKeyword = reserveKeyword;
-	}
-
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -161,6 +129,31 @@ public class SearchSpaceOrdersCommand {
 		this.pageSize = pageSize;
 	}
 
+
+
+	public String getSpaceName() {
+		return spaceName;
+	}
+
+	public void setSpaceName(String spaceName) {
+		this.spaceName = spaceName;
+	}
+
+	public String getReserveKeyword() {
+		return reserveKeyword;
+	}
+
+	public void setReserveKeyword(String reserveKeyword) {
+		this.reserveKeyword = reserveKeyword;
+	}
+
+	public Byte getWorkFlowStatus() {
+		return workFlowStatus;
+	}
+
+	public void setWorkFlowStatus(Byte workFlowStatus) {
+		this.workFlowStatus = workFlowStatus;
+	}
 
 	@Override
     public String toString() {
