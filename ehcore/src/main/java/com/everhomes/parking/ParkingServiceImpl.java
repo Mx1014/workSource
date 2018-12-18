@@ -1450,6 +1450,7 @@ public class ParkingServiceImpl implements ParkingService {
 				}
 				return d;
 			}).collect(Collectors.toList()));
+
 			if(size != pageSize){
 				response.setNextPageAnchor(null);
 			}else{
@@ -1962,6 +1963,7 @@ public class ParkingServiceImpl implements ParkingService {
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
 				cmd.getStatus(), cmd.getPaySource(), cmd.getKeyWords(), cmd.getPageAnchor(), pageSize, cmd.getPayMode(),pageNum);
+
 		Workbook wb = new XSSFWorkbook();
 
 		Font font = wb.createFont();
