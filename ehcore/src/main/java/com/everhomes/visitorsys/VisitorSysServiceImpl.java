@@ -2622,6 +2622,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if (formValues != null) {
                 setVisitorFormValues(convert, formValues.stream().collect(Collectors.toMap(VisitorsysApprovalFormItem::getFieldName, x -> x)));
                 convert.setFormJsonValue(formValues.toString());
+            } else{
+                List<VisitorsysApprovalFormItem> emptyForm = new ArrayList<>();
+                convert.setFormJsonValue(emptyForm.toString());
             }
         }else {
             Long communityId = organizationService.getOrganizationActiveCommunityId(visitor.getOwnerId());

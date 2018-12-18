@@ -154,6 +154,16 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
 	}
+
+    /**
+     * <b>URL: /community/listBuildingsWithoutAuth</b>
+     * <p>根据园区号查询楼栋列表(免认证)</p>
+     */
+    @RequestMapping("listBuildingsWithoutAuth")
+    @RestReturn(value=ListBuildingCommandResponse.class)
+    public RestResponse listBuildingsWithoutAuth(ListBuildingCommand cmd) {
+        return listBuildings(cmd);
+    }
 	
 	/**
 	 * <b>URL: /community/getBuilding</b>

@@ -147,6 +147,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StopWatch;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -1091,6 +1092,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			int size = 0;
 			if(null != list){
 				size = list.size();
+				StopWatch sw = new StopWatch();
+				sw.start("tasks data handler");
 				for(int i=0;i<size;i++){
 					Row tempRow = sheet.createRow(i + 4);
 					PmTaskDTO task = list.get(i);
@@ -1113,6 +1116,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 					cell3.setCellValue(task.getRequestorName());
 					Cell cell4 = tempRow.createCell(4);
 					cell4.setCellStyle(style);
+//					cell4.setCellValue(task.getAddress());
 					PmTask pmTask = pmTaskProvider.findTaskById(task.getId());
 					if(pmTask != null) {
 						cell4.setCellValue(pmTask.getAddress());
@@ -1232,6 +1236,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 					}
 
 				}
+				sw.stop();
+				LOGGER.debug(sw.getLastTaskName() + " : " + sw.getLastTaskTimeMillis() + "ms");
 			}
 
 
