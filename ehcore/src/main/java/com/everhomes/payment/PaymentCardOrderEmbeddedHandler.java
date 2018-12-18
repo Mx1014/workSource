@@ -3,6 +3,8 @@ package com.everhomes.payment;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,8 @@ public class PaymentCardOrderEmbeddedHandler implements OrderEmbeddedHandler{
 
     @Autowired
     private PaymentCardProvider paymentCardProvider;
+	@Autowired
+	private CoordinationProvider coordinationProvider;
     
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
@@ -37,19 +41,21 @@ public class PaymentCardOrderEmbeddedHandler implements OrderEmbeddedHandler{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"Order amount is not equal to payAmount.");
 		}
+		if (CardOrderStatus.PAID.getCode() != order.getPayStatus()) {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode() + orderId).tryEnter(() -> {
+				PaymentCard paymentCard = paymentCardProvider.findPaymentCardById(order.getCardId());
+				PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
+				Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
+				order.setPayStatus(CardOrderStatus.PAID.getCode());
+				order.setPaidTime(payTimeStamp);
+				order.setPaidType(cmd.getVendorType());
+				paymentCardProvider.updatePaymentCardRechargeOrder(order);
 
-		PaymentCard paymentCard = paymentCardProvider.findPaymentCardById(order.getCardId());
-		PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
-		
-		
-		Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
-		order.setPayStatus(CardOrderStatus.PAID.getCode());
-		order.setPaidTime(payTimeStamp);
-		order.setPaidType(cmd.getVendorType());
-		paymentCardProvider.updatePaymentCardRechargeOrder(order);
-		
-		handler.rechargeCard(order, paymentCard);
-    	
+				handler.rechargeCard(order, paymentCard);
+			});
+		}else{
+			LOGGER.error("PaymentCardOrderEmbeddedV2Handler order has been paid cmd = {}",cmd);
+		}
 	}
 
 	@Override
