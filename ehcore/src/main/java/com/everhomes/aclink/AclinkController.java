@@ -1089,7 +1089,7 @@ public class AclinkController extends ControllerBase {
      */
     @RequestMapping("verifyDoorAuth")
     @RestReturn(value=String.class)
-    @RequireAuthentication(value = true)
+    @RequireAuthentication(value = false)
     public RestResponse verifyOpenAuth(VerifyDoorAuthCommand cmd) {
         RestResponse response = new RestResponse();
         response.setResponseObject(dingxinService.verifyDoorAuth(cmd));
