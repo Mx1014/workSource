@@ -72,6 +72,17 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
         if(null == rs)
             return;
+        //发推送
+
+        Map<String, String> map = new HashMap<>();
+        map.put("userName", rentalBill.getUserName());
+        map.put("phone", rentalBill.getUserPhone());
+        map.put("resourceName", rentalBill.getResourceName());
+        map.put("useDetail", rentalBill.getUseDetail());
+        map.put("freeGoods", processFreeGoods(rentalBill));
+        map.put("paidGoods",  processPaidGoods(rentalBill));
+        rentalCommonService.sendMessageCode(rs.getChargeUid(), map,
+                    RentalNotificationTemplateCode.RENTAL_CANCEL_NOT_PAY);
 
         //发短信
         String templateScope = SmsTemplateCode.SCOPE;
@@ -142,12 +153,15 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables, "resourceName", rentalBill.getResourceName());
         smsProvider.addToTupleList(variables, "orderNum", rentalBill.getOrderNo());
 
-        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(rentalBill.getCreatorUid(),
+        String phone = rentalBill.getUserPhone();
+        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(rentalBill.getRentalUid(),
                 IdentifierType.MOBILE.getCode());
-        if (null == userIdentifier) {
-            LOGGER.error("userIdentifier is null...userId = " + rentalBill.getCreatorUid());
+        if (userIdentifier != null)
+            phone = userIdentifier.getIdentifierToken();
+        if (null == phone) {
+            LOGGER.error("phone is null...userId = " + rentalBill.getRentalUid());
         } else {
-            smsProvider.sendSms(rentalBill.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
+            smsProvider.sendSms(rentalBill.getNamespaceId(), phone, templateScope,
                     templateId, templateLocale, variables);
         }
     }
@@ -170,12 +184,15 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables, "orderNum", order.getOrderNo());
         smsProvider.addToTupleList(variables, "aclink", getAclinkInfo(order));
 
-        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
+        String phone = order.getUserPhone();
+        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(),
                 IdentifierType.MOBILE.getCode());
-        if (null == userIdentifier) {
-            LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
+        if (userIdentifier != null)
+            phone = userIdentifier.getIdentifierToken();
+        if (null == phone) {
+            LOGGER.error("phone is null...userId = " + order.getRentalUid());
         } else {
-            smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
+            smsProvider.sendSms(order.getNamespaceId(), phone, templateScope,
                     templateId, templateLocale, variables);
         }
     }

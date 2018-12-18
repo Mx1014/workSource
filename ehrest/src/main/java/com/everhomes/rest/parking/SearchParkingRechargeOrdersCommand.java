@@ -48,8 +48,18 @@ public class SearchParkingRechargeOrdersCommand {
 	private Long currentProjectId;
 	private Long appId;
 	private Byte payMode;
+	private Integer pageNum;
 	
-    public String getOwnerType() {
+	
+    public Integer getPageNum() {
+		return pageNum;
+	}
+
+	public void setPageNum(Integer pageNum) {
+		this.pageNum = pageNum;
+	}
+
+	public String getOwnerType() {
         return ownerType;
     }
 

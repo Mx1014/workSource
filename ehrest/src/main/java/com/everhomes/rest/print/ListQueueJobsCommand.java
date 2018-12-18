@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType : 打印所属类型, 参考{@link com.everhomes.rest.print.PrintOwnerType}</li>
  * <li>ownerId : 所属id</li>
  * <li>namespaceId : namespaceId</li>
- * <li>printerName : 填写解锁打印机时获取的打印机名称</li>
+ * <li>qrid : 二维码的qrid，电脑端扫描时不需要传</li>
  * </ul>
  *
  *  @author:dengs 2017年6月16日
@@ -18,7 +18,7 @@ public class ListQueueJobsCommand {
 	private String ownerType;
 	private Long ownerId;
 	private Integer namespaceId;
-	private String printerName;
+	private String qrid;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -49,11 +49,11 @@ public class ListQueueJobsCommand {
 		return StringHelper.toJsonString(this);
 	}
 
-	public String getPrinterName() {
-		return printerName;
+	public String getQrid() {
+		return qrid;
 	}
 
-	public void setPrinterName(String printerName) {
-		this.printerName = printerName;
+	public void setQrid(String qrid) {
+		this.qrid = qrid;
 	}
 }

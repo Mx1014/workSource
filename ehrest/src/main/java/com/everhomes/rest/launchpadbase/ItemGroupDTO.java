@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *     <li>separatorHeight: separatorHeight</li>
  *     <li>columnCount: columnCount</li>
  *     <li>title: 标题名称</li>
+ *     <li>titleUri: 标题图标uri</li>
  *     <li>titleUrl: 标题图标</li>
  *     <li>titleFlag: 是否有标题，5.8.4之后：0-无，1-居左，2-居中, 参考{@link com.everhomes.rest.portal.TitleFlag}</li>
  *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link com.everhomes.rest.portal.TitleStyle}</li>
@@ -36,7 +37,7 @@ public class ItemGroupDTO {
     private Integer columnCount;
 
     private String title;
-
+    private String titleUri;
     private String titleUrl;
 
     private Byte titleFlag;
@@ -49,6 +50,14 @@ public class ItemGroupDTO {
 
     private Byte titleMoreFlag;
 
+
+    public String getTitleUri() {
+        return titleUri;
+    }
+
+    public void setTitleUri(String titleUri) {
+        this.titleUri = titleUri;
+    }
 
     public Long getGroupId() {
         return groupId;

@@ -8197,7 +8197,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
 		//add by moubinmo；特殊情况：创建的管理员是没有注册激活的用户，添加需要添加一条 groupType 为  DIRECT_UNDER_ENTERPRISE 的部门信息到 eh_organization_members 表，否则从管理后台查出的人事记录没有部门记录。
-		createOrganiztionMemberOfDirectUnderEnterprise(member, organizationId);
+        //由于这处修改引发较多的bug，故注释之
+//		createOrganiztionMemberOfDirectUnderEnterprise(member, organizationId);
 
         return member;
     }
@@ -10495,10 +10496,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<Long> includeList = new ArrayList<>();
 
         includeList.add(member.getTargetId());
-        sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
+        // 18/12/17：注释原因是消息重复发送
+//        sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
 
-        //同意加入公司通知客户端  by sfyan 20160526
-        sendEnterpriseNotification(includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
+        //同意加入公司通知客户端  by sfyan 20160526 // 18/12/17：注释原因是消息重复发送
+//        sendEnterpriseNotification(includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
 
         // send notification to all the other members in the group
         notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER,null);
@@ -12350,8 +12352,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 else{
                 	//始终都要发消息
                     organizationMember.setOrganizationId(enterpriseId);
-                	//2018年10月17日 修改为新注册发消息,其它不发消息
-//                    sendMessageForContactApproved(organizationMember);
+                	//2018年10月17日 修改为新注册发消息,其它不发消息;18/12/12 注释去掉，
+                    sendMessageForContactApproved(organizationMember);
                 }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428

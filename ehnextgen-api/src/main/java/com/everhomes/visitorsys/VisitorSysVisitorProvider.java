@@ -25,4 +25,6 @@ public interface VisitorSysVisitorProvider {
     void deleteVisitorSysVisitorAppoint(Integer namespaceId, Long visitorId);
 
 	List<VisitorSysVisitor> listVisitorSysVisitorByVisitorPhone(Integer namespaceId, String ownerType, Long ownerId, String visitorPhone, Timestamp startOfDay, Timestamp endOfDay);
+
+	List<VisitorSysVisitor> listFreqVisitor();
 }

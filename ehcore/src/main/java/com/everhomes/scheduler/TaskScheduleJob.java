@@ -5,6 +5,10 @@ import com.everhomes.filedownload.Task;
 import com.everhomes.filedownload.TaskHandler;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.filedownload.TaskStatus;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.quartz.JobDataMap;
@@ -30,6 +34,8 @@ public class TaskScheduleJob extends QuartzJobBean {
     TaskService taskService;
     @Autowired
     private ScheduleProvider scheduleProvider;
+    @Autowired
+    UserProvider userProvider;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -44,6 +50,18 @@ public class TaskScheduleJob extends QuartzJobBean {
         String name = (String)jobDataMap.get("name");
         Byte status = (Byte)jobDataMap.get("status");
         Integer process = (Integer)jobDataMap.get("process");
+        Integer ns = (Integer)jobDataMap.get("ns");
+        Long userId = (Long)jobDataMap.get("userId");
+        
+        //setup user context, modify by janson
+        if(ns != null && userId != null) {
+        		User user = userProvider.findUserById(userId);
+        		if(user != null) {
+        			UserContext.current().setUser(user);
+        			UserContext.current().setNamespaceId(ns);		
+        		}
+        }
+        //end modify by janson
 
         String className = (String)jobDataMap.get("className");
         String paramsStr = (String)jobDataMap.get("params");

@@ -3,6 +3,20 @@ package com.everhomes.rest.asset;
 
 /**
  * Created by Wentian Wang on 2018/5/14.
+ * <ul>
+ * <li>DAY(1): 按天</li>
+ * <li>NATURAL_MONTH(2): 按自然月</li>
+ * <li>NATURAL_QUARTER(3): 按自然季</li>
+ * <li>NATURAL_YEAR(4): 按自然年</li>
+ * <li>ONE_DEAL(5): 一次性</li>
+ * <li>CONTRACT_MONTH(6): 按合同月</li>
+ * <li>CONTRACT_QUARTER(7): 按合同季</li>
+ * <li>CONTRACT_YEAR(8): 按合同年</li>
+ * <li>CONTRACT_TWOMONTH(9): 按合同两个月</li>
+ * <li>CONTRACT_SIXMONTH(10): 按合同6个月</li>
+ * <li>CUSTOM_NATURAL_PERIOD(11):自定义账单自然周期</li>
+ * <li>CUSTOM_CONTRACT_PERIOD(12):自定义账单合同周期</li>
+ * </ul>
  */
 public enum BillingCycle {
     DAY((byte)1, null, false),
@@ -14,7 +28,9 @@ public enum BillingCycle {
     CONTRACT_QUARTER((byte)7, 2, true),
     CONTRACT_YEAR((byte)8, 11, true),
 	CONTRACT_TWOMONTH((byte)9, 1, true),//新增按合同两个月
-	CONTRACT_SIXMONTH((byte)10, 5, true);//新增按合同6个月
+	CONTRACT_SIXMONTH((byte)10, 5, true),//新增按合同6个月
+    CUSTOM_NATURAL_PERIOD((byte)11,null,false),//自定义账单自然周期
+    CUSTOM_CONTRACT_PERIOD((byte)12,null,true);//自定义账单合同周期
 	
     private byte code;
     private Integer monthOffset;

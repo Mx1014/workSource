@@ -67,11 +67,11 @@ public interface Rentalv2Provider {
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
 			Byte invoiceFlag,Long userId,String payChannel,Byte source);
 	List<RentalOrder> listRentalBillsByUserOrgId(Long organizationId ,ListingLocator locator, Integer pageSize );
-	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime);
+	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime,String resourceType);
 
 	List<RentalOrder> listActiveBillsByInterval(Long rentalSiteId,Long startTime, Long endTime);
 
-	List<RentalOrder> listTargetRentalBills(Byte status);
+	List<RentalOrder> listTargetRentalBills(Byte[] status);
 	
 	List<RentalResource> findRentalSites(Long resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize, Byte status,List<Long>  siteIds,Long communityId);
@@ -233,7 +233,7 @@ public interface Rentalv2Provider {
 
 	List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
 										 Long startTime, Long endTime,String tag1, String tag2,String vendorType,String keyword, Long pageAnchor ,
-										 Integer pageSize);
+										 Integer pageSize,Integer pageNum);
 	BigDecimal getRentalOrdersTotalAmount(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
 										  Long startTime, Long endTime,String tag1, String tag2,String keyword);
 
@@ -278,4 +278,5 @@ public interface Rentalv2Provider {
 	void updateRentalStructure(RentalStructure rentalStructure);
 
 	RentalOrder getUserClosestBill(Long userId,Long resourceTypeId);
+
 }

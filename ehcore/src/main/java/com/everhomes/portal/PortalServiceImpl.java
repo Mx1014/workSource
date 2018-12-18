@@ -539,22 +539,36 @@ public class PortalServiceImpl implements PortalService {
 	    Collections.sort(list, new Comparator<ServiceModuleEntryDTO>() {
             @Override
             public int compare(ServiceModuleEntryDTO o1, ServiceModuleEntryDTO o2) {
-                if (o1 == null || o2 == null) {
+                if (o1 == null && o2 == null) {
+                    return 0;
+                }
+                if (o1 == null) {
                     return -1;
                 }
-                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
-                    return -1;
+                if (o2 == null) {
+                    return 1;
                 }
-                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
-                    return o2.getTerminalType().compareTo(o1.getTerminalType());
-                }
-                if (o1.getSceneType() == null || o2.getSceneType() == null) {
-                    return -1;
-                }
-                if (!o1.getSceneType().equals(o2.getSceneType())) {
-                    return o1.getSceneType().compareTo(o2.getSceneType());
-                }
-                return 0;
+                StringBuilder o1StringBuilder = new StringBuilder();
+                StringBuilder o2StringBuilder = new StringBuilder();
+                o1StringBuilder.append(o1.getTerminalType()==null?0:o1.getTerminalType()).append(o1.getSceneType()==null?0:100-o1.getSceneType());
+                o2StringBuilder.append(o2.getTerminalType()==null?0:o2.getTerminalType()).append(o2.getSceneType()==null?0:100-o2.getSceneType());
+                return o2StringBuilder.toString().compareTo(o1StringBuilder.toString());
+//                if (o1 == null || o2 == null) {
+//                    return -1;
+//                }
+//                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
+//                    return o2.getTerminalType().compareTo(o1.getTerminalType());
+//                }
+//                if (o1.getSceneType() == null || o2.getSceneType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getSceneType().equals(o2.getSceneType())) {
+//                    return o1.getSceneType().compareTo(o2.getSceneType());
+//                }
+//                return 0;
             }
         });
     }
@@ -563,22 +577,32 @@ public class PortalServiceImpl implements PortalService {
         Collections.sort(list, new Comparator<AppEntryDTO>() {
             @Override
             public int compare(AppEntryDTO o1, AppEntryDTO o2) {
-                if (o1 == null || o2 == null) {
+                if (o1 == null && o2 == null) {
+                    return 0;
+                }
+                if (o1 == null) {
                     return -1;
                 }
-                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
-                    return -1;
+                if (o2 == null) {
+                    return 1;
                 }
-                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
-                    return o2.getTerminalType().compareTo(o1.getTerminalType());
-                }
-                if (o1.getSceneType() == null || o2.getSceneType() == null) {
-                    return -1;
-                }
-                if (!o1.getSceneType().equals(o2.getSceneType())) {
-                    return o1.getSceneType().compareTo(o2.getSceneType());
-                }
-                return 0;
+                StringBuilder o1StringBuilder = new StringBuilder();
+                StringBuilder o2StringBuilder = new StringBuilder();
+                o1StringBuilder.append(o1.getTerminalType()==null?0:o1.getTerminalType()).append(o1.getSceneType()==null?0:100-o1.getSceneType());
+                o2StringBuilder.append(o2.getTerminalType()==null?0:o2.getTerminalType()).append(o2.getSceneType()==null?0:100-o2.getSceneType());
+//                if (o1.getTerminalType() == null || o2.getTerminalType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getTerminalType().equals(o2.getTerminalType())) {
+//                    return o2.getTerminalType().compareTo(o1.getTerminalType());
+//                }
+//                if (o1.getSceneType() == null || o2.getSceneType() == null) {
+//                    return -1;
+//                }
+//                if (!o1.getSceneType().equals(o2.getSceneType())) {
+//                    return o1.getSceneType().compareTo(o2.getSceneType());
+//                }
+                return o2StringBuilder.toString().compareTo(o1StringBuilder.toString());
             }
         });
     }
@@ -1667,7 +1691,8 @@ public class PortalServiceImpl implements PortalService {
 		if(null != oType){
 			List<String> groupTypes = new ArrayList<>();
 			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, cmd.getKeywords(), oType.getCode(), locator, pageSize);
+			//将管理公司和普通公司合并 addby yanlong.liang 20181213
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, cmd.getKeywords(),"", locator, pageSize);
 			for (Organization organization: organizations) {
 				dtos.add(ConvertHelper.convert(organization, ScopeDTO.class));
 			}
@@ -1687,7 +1712,8 @@ public class PortalServiceImpl implements PortalService {
 			List<Community> communities = communityProvider.listCommunities(namespaceId, locator, pageSize, new ListingQueryBuilderCallback() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-					query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType.getCode()));
+				    //将园区和小区合并 addby yanlong.liang 20181213
+//					query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType.getCode()));
 					if(!StringUtils.isEmpty(cmd.getKeywords())){
 						query.addConditions(Tables.EH_COMMUNITIES.NAME.like(cmd.getKeywords() + "%").or(Tables.EH_COMMUNITIES.ALIAS_NAME.like(cmd.getKeywords() + "%")));
 
@@ -1725,7 +1751,8 @@ public class PortalServiceImpl implements PortalService {
 		if(null != oType){
 			SearchOrganizationCommand command = new SearchOrganizationCommand();
 			command.setNamespaceId(namespaceId);
-			command.setOrganizationType(oType.getCode());
+			//不需要区分管理公司和普通公司  add by yanlong.liang 20181213
+//			command.setOrganizationType(oType.getCode());
 			command.setPageAnchor(cmd.getAnchor());
 			command.setPageSize(pageSize);
 			command.setKeyword(cmd.getKeywords());
@@ -1745,7 +1772,8 @@ public class PortalServiceImpl implements PortalService {
 		}
 		CommunityType communityType = cType;
 		if(null != communityType){
-			List<CommunityDoc> communities = communitySearcher.searchDocs(cmd.getKeywords(), cType.getCode(), null, null, cmd.getAnchor().intValue(), cmd.getPageSize());
+		    //不需要区分园区和小区 add by yanlong.liang 20181213
+			List<CommunityDoc> communities = communitySearcher.searchDocs(cmd.getKeywords(), null, null, null, cmd.getAnchor().intValue(), cmd.getPageSize());
 			for (CommunityDoc communityDoc: communities) {
 				dtos.add(ConvertHelper.convert(communityDoc, ScopeDTO.class));
 			}

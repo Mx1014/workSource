@@ -19,6 +19,7 @@ public class ReleaseQueueJobsCommand {
 	@ItemType(ListQueueJobsDTO.class)
 	private List<ListQueueJobsDTO> jobs;
 	private Integer namespaceId;
+	private String qrid;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -55,5 +56,13 @@ public class ReleaseQueueJobsCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getQrid() {
+		return qrid;
+	}
+
+	public void setQrid(String qrid) {
+		this.qrid = qrid;
 	}
 }

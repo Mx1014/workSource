@@ -1,42 +1,9 @@
 package com.everhomes.asset;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.poi.hssf.util.HSSFColor;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DSL;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.group.AssetGroupProvider;
+import com.everhomes.asset.util.MerchantOrderIdHelper;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -57,75 +24,14 @@ import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.paySDK.pojo.PayUserDTO;
-import com.everhomes.rest.asset.AssetBillStatDTO;
-import com.everhomes.rest.asset.AssetBillStatus;
-import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
-import com.everhomes.rest.asset.AssetBillTemplateSelectedFlag;
-import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
-import com.everhomes.rest.asset.AssetEnergyType;
-import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
-import com.everhomes.rest.asset.AssetPaymentBillSourceId;
-import com.everhomes.rest.asset.AssetPaymentBillStatus;
-import com.everhomes.rest.asset.AssetServiceErrorCode;
-import com.everhomes.rest.asset.AssetTargetType;
-import com.everhomes.rest.asset.BatchImportBillsCommand;
-import com.everhomes.rest.asset.BatchImportBillsResponse;
-import com.everhomes.rest.asset.BillDTO;
-import com.everhomes.rest.asset.BillDetailDTO;
-import com.everhomes.rest.asset.BillForClientV2;
-import com.everhomes.rest.asset.BillGroupDTO;
-import com.everhomes.rest.asset.BillIdAndType;
-import com.everhomes.rest.asset.BillIdCommand;
-import com.everhomes.rest.asset.BillItemDTO;
-import com.everhomes.rest.asset.BillItemIdCommand;
-import com.everhomes.rest.asset.BillStaticsCommand;
-import com.everhomes.rest.asset.BillStaticsDTO;
-import com.everhomes.rest.asset.CreateBillCommand;
-import com.everhomes.rest.asset.ExemptionItemDTO;
-import com.everhomes.rest.asset.ExemptionItemIdCommand;
-import com.everhomes.rest.asset.ExportBillTemplatesCommand;
-import com.everhomes.rest.asset.FieldValueDTO;
-import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
-import com.everhomes.rest.asset.FindUserInfoForPaymentDTO;
-import com.everhomes.rest.asset.FindUserInfoForPaymentResponse;
-import com.everhomes.rest.asset.GetAreaAndAddressByContractCommand;
-import com.everhomes.rest.asset.GetAreaAndAddressByContractDTO;
-import com.everhomes.rest.asset.ListAllBillsForClientCommand;
-import com.everhomes.rest.asset.ListAllBillsForClientDTO;
-import com.everhomes.rest.asset.ListBillDetailCommand;
-import com.everhomes.rest.asset.ListBillDetailResponse;
-import com.everhomes.rest.asset.ListBillDetailVO;
-import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
-import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
-import com.everhomes.rest.asset.ListBillItemsResponse;
-import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
-import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
-import com.everhomes.rest.asset.ListUploadCertificatesCommand;
-import com.everhomes.rest.asset.PaymentExpectanciesResponse;
-import com.everhomes.rest.asset.PaymentExpectancyDTO;
-import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
-import com.everhomes.rest.asset.ShowBillForClientDTO;
-import com.everhomes.rest.asset.ShowBillForClientV2Command;
-import com.everhomes.rest.asset.ShowBillForClientV2DTO;
-import com.everhomes.rest.asset.ShowCreateBillDTO;
-import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
-import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
-import com.everhomes.rest.asset.SimpleAssetBillDTO;
-import com.everhomes.rest.asset.TenantType;
-import com.everhomes.rest.asset.UploadCertificateInfoDTO;
-import com.everhomes.rest.asset.listBillExemtionItemsCommand;
+import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.FindContractCommand;
-import com.everhomes.rest.contract.ListCustomerContractsCommand;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
@@ -144,20 +50,33 @@ import com.everhomes.server.schema.tables.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateUtils;
-import com.everhomes.util.RegularExpressionUtils;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/4/11.
@@ -212,6 +131,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     
     @Autowired
     private AssetGroupProvider assetGroupProvider;
+
+    @Autowired
+    private MerchantOrderIdHelper merchantOrderIdHelper;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -698,13 +620,19 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     public void modifyBillStatus(BillIdCommand cmd) {
         assetProvider.modifyBillStatus(Long.parseLong(cmd.getBillId()));
         //物业缴费V6.6统一账单：账单状态改变回调接口
-        ListBillDetailCommand ncmd = new ListBillDetailCommand();
-        ncmd.setBillId(Long.valueOf(cmd.getBillId()));
-        ListBillDetailResponse billDetail = listBillDetail(ncmd);
+//        ListBillDetailCommand ncmd = new ListBillDetailCommand();
+//        ncmd.setBillId(Long.valueOf(cmd.getBillId()));
+//        ListBillDetailResponse billDetail = listBillDetail(ncmd);
         //core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
+        //使用billId拿到所有明细，获取每个明细的merchantOrderId并去重，然后回调
         NotifyBillHasBeenPaidCommand notifyBillHasBeenPaidCommand = new NotifyBillHasBeenPaidCommand();
-        notifyBillHasBeenPaidCommand.setMerchantOrderId(billDetail.getMerchantOrderId());
-        orderService.notifyBillHasBeenPaid(notifyBillHasBeenPaidCommand);
+        PaymentBillsCommand PBCmd = new PaymentBillsCommand();
+        PBCmd.setBillId(Long.valueOf(cmd.getBillId()));
+        for (String merchantOrderId: merchantOrderIdHelper.getAllMerchantOrderIdByBillId(PBCmd)){
+            notifyBillHasBeenPaidCommand.setMerchantOrderId(merchantOrderId);
+            orderService.notifyBillHasBeenPaid(notifyBillHasBeenPaidCommand);
+        }
+
     }
 
     @Override
@@ -868,7 +796,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             SelectQuery<Record> query = context.selectQuery();
             query.addSelect(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.AMOUNT_OWED,t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE,t.STATUS,t.NOTICETEL,t.NOTICE_TIMES,
                     t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
-                    t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL);
+                    t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,t.THIRD_PAID);
             query.addFrom(t, t2);
             query.addConditions(t.ID.eq(t2.BILL_ID));
             query.addConditions(t.TARGET_TYPE.eq(cmd.getTargetType()));
@@ -881,8 +809,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
             query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
             query.addConditions(t2.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
-            query.addConditions(t.THIRD_PAID.isNull()
-            		.or(t.THIRD_PAID.ne(AssetPaymentBillStatus.PAID.getCode())));//物业缴费V7.5（中天-资管与财务EAS系统对接） ： 不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
             query.addGroupBy(t.ID);
             paymentBills = query.fetchInto(PaymentBills.class);
         }
@@ -893,7 +819,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             //剩下的按照billGroup再分tab
             Map<ContractIdBillGroup, List<PaymentBills>> idMap = new HashMap<>();
             Map<ContractNumBillGroup, List<PaymentBills>> numMap = new HashMap<>();
-            Map<Long, List<PaymentBills>> groupMap = new HashMap<>();
+            Map<String, List<PaymentBills>> groupMap = new HashMap<>();
             for (int i = 0; i < paymentBills.size(); i++) {
                 PaymentBills bill = paymentBills.get(i);
                 if (bill.getContractId() != null) {
@@ -922,12 +848,24 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     }
                     continue;
                 }else{
-                    if (groupMap.containsKey(bill.getBillGroupId())) {
-                        groupMap.get(bill.getBillGroupId()).add(bill);
+                    if (groupMap.containsKey(bill.getBillGroupId() + "")) {
+                    	//物业缴费V7.4：若用户在第三方线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
+                    	if(bill.getThirdPaid() != null && bill.getThirdPaid().equals(AssetPaymentBillStatus.PAID.getCode())) {
+                    		if(groupMap.containsKey(bill.getBillGroupId() + "thirdPaid")) {
+                    			groupMap.get(bill.getBillGroupId() + "thirdPaid").add(bill);
+                    		}else {
+                    			List<PaymentBills> idList = new ArrayList<>();
+                                idList.add(bill);
+                                groupMap.put(bill.getBillGroupId() + "thirdPaid", idList);
+                    		}
+                    	}else {
+                    		groupMap.get(bill.getBillGroupId() + "").add(bill);
+                    	}
                     } else {
                         List<PaymentBills> idList = new ArrayList<>();
                         idList.add(bill);
-                        groupMap.put(bill.getBillGroupId(), idList);
+                        String key = bill.getBillGroupId() + "";
+                        groupMap.put(key, idList);
                     }
                 }
             }
@@ -937,8 +875,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         }
 
         assemble:
-        {
-        	List<Long> userIds = new ArrayList<Long>();//由于收款方账户名称可能存在修改的情况，故重新请求电商
+        {       	        	
             for (int j = 0; j < maps.size(); j++) {
                 Map<?, ?> map = maps.get(j);
                 if (map.size() < 1) continue;
@@ -947,14 +884,34 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     List<PaymentBills> enclosedBills = (List<PaymentBills>) entry.getValue();
                     if (enclosedBills.size() > 0){
                         Long billGroupId = enclosedBills.get(0).getBillGroupId();
+                        Byte thirdPaid = enclosedBills.get(0).getThirdPaid();
                         dto.setBillGroupName(assetGroupProvider.getbillGroupNameById(billGroupId));
                         dto.setBillGroupId(billGroupId);
-                        //新增收款方账户类型、账户ID字段 
+                        //物业缴费V7.4：若用户在第三方线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
+                        dto.setThirdPaid(thirdPaid);
+                        //新增收款方账户类型、账户ID字段
                         PaymentBillGroup paymentBillGroup = assetGroupProvider.getBillGroupById(billGroupId);
                         if(paymentBillGroup != null) {
                         	dto.setBizPayeeId(paymentBillGroup.getBizPayeeId());
                         	dto.setBizPayeeType(paymentBillGroup.getBizPayeeType());
-                        	userIds.add(paymentBillGroup.getBizPayeeId());//由于收款方账户名称可能存在修改的情况，故重新请求电商
+                        	//由于收款方账户名称可能存在修改的情况，故重新请求电商
+                            if(LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("showBillForClientV2(request), cmd={}", paymentBillGroup.getBizPayeeId());
+                            }
+                            List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(Arrays.asList(paymentBillGroup.getBizPayeeId()));
+                            if(LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("showBillForClientV2(response), response={}", payUserDTOs);
+                            }
+                            if(payUserDTOs != null && payUserDTOs.size() != 0) {
+                            	PayUserDTO payUserDTO = payUserDTOs.get(0);
+                    			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                                Integer registerStatus = payUserDTO.getRegisterStatus();
+                                if(registerStatus != null && registerStatus.intValue() == 1) {
+                                	dto.setRegisterStatus(PaymentUserStatus.ACTIVE.getCode());
+                                } else {
+                                	dto.setRegisterStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                                }
+                            }
                         }
                         if(enclosedBills.get(0).getContractId() != null){
                             dto.setContractId(String.valueOf(enclosedBills.get(0).getContractId()));
@@ -986,6 +943,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                         v2.setAmountReceivable(bill.getAmountReceivable().toString());
                         v2.setBillDuration(bill.getDateStrBegin() + "至" + bill.getDateStrEnd());
                         v2.setBillId(String.valueOf(bill.getId()));
+                        //物业缴费V7.4：若用户在第三方线下支付部分账单金额，则需要同步剩余应缴金额在APP端显示，账单状态为“未支付”，且剩余金额不支持线上缴纳。
+                        v2.setThirdPaid(bill.getThirdPaid());
                         list.add(v2);
                     }
                     dto.setAddressStr(assetProvider.getAddressStrByIds(addressIds.stream().collect(Collectors.toList())));
@@ -1014,37 +973,14 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     // stringbuilder append null results in 'null' str
                     // , thus hereby I use emtpy string to replace 'null' str by wentian @2018.5.11
                     if(!StringUtils.isBlank(dto.getAddressStr())){
+                    	//修复 缺陷 #45086 【缴费管理V8.0】手动新增的账单与资源预定产生的账单合并一起支付时，收费项目显示出错
+                        dto.setAddressStr(dto.getAddressStr().replace("null,","").trim());
                         dto.setAddressStr(dto.getAddressStr().replace("null","").trim());
                     }else{
                         dto.setAddressStr("");
                     }
                     tabBills.add(dto);
                 }
-            }
-            //由于收款方账户名称可能存在修改的情况，故重新请求电商
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("showBillForClientV2(request), cmd={}", userIds);
-            }
-            List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("showBillForClientV2(response), response={}", payUserDTOs);
-            }
-            if(payUserDTOs != null && payUserDTOs.size() != 0) {
-            	for(int i = 0;i < payUserDTOs.size();i++) {
-            		for(int j = 0;j < tabBills.size();j++) {
-            			if(payUserDTOs.get(i) != null && tabBills.get(j) != null &&
-                    			payUserDTOs.get(i).getId() != null && tabBills.get(j).getBizPayeeId() != null &&
-                    			payUserDTOs.get(i).getId().equals(tabBills.get(j).getBizPayeeId())){
-            				// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
-                            Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
-                            if(registerStatus != null && registerStatus.intValue() == 1) {
-                            	tabBills.get(j).setRegisterStatus(PaymentUserStatus.ACTIVE.getCode());
-                            } else {
-                            	tabBills.get(j).setRegisterStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-                            }
-            			}
-            		}
-            	}
             }
         }
         return tabBills;
@@ -1275,11 +1211,14 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                 createBillCommands = entry.getKey();
                 datas = entry.getValue();
             }
-            
+
             // 原来的实现方式是对于每条excel数据，都进行帐单和费项的比较来判断帐单是否需要覆盖，这使得查询、比较、删除、插入次数过多，处理一条数据需要15秒以上，
             // 使得数据很难导进去，故先对已存在的数据进行处理成一个标识（字符串），方便后面比较 by lqs 20181207
-            Map<String, String> existBills = prepareUserBillIdentifiers(createBillCommands);
-            
+            Map<String, String> existBills = null;
+            if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())) {
+                existBills = prepareUserBillIdentifiers(createBillCommands);
+            }
+
             long updateStartTime = System.currentTimeMillis();
             long roundStartTime = updateStartTime;
             LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
@@ -1299,7 +1238,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             	if(isCreate.get(0)) {
             		createBillFromImport(command);//物业缴费V6.0（UE优化) 账单区分数据来源
             	}
-            	
+
             	// 由于插入/更新数据非常慢，打印一下前两条的时间
             	if(((i % 500) == 0 || i == 1) && LOGGER.isInfoEnabled()) {
                     long roundEndTime = System.currentTimeMillis();
@@ -1381,15 +1320,15 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     	    isCreate.set(0, false);
     	}
     }
-    
+
     private String genUserBillIdentifier(CreateBillCommand command) {
         String identifier = null;
-        
+
         Long billGroupId = command.getBillGroupDTO().getBillGroupId();
         String dateStrBegin = command.getDateStrBegin();
         String dateStrEnd = command.getDateStrEnd();
         identifier = concateUserBillIdentifier(billGroupId, dateStrBegin, dateStrEnd);
-        
+
         List<Long> addressIds = new ArrayList<>();
         for (BillItemDTO billItemDTO : command.getBillGroupDTO().getBillItemDTOList()) {
             if (billItemDTO.getAddressId() != null && !addressIds.contains(billItemDTO.getAddressId())) {
@@ -1401,10 +1340,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         for(Long addressId : addressIds) {
             identifier = identifier + "_" + String.valueOf(addressId);
         }
-        
+
         return identifier;
     }
-    
+
     /**
      * <p>个人客户的帐单以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性（这三个信息构成唯一标识)，导入的时候需要比较是否已经存在相同标识的帐单，
      * 如果相同标识的帐单已经存在，则需要先删除再重新建。而这个比较过程，原来是把eh_payment_bills表与eh_payment_bill_items进行联查，其中帐单时间
@@ -1426,7 +1365,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         // 最小的开始日期、最大的结束日期，它们共同构成限制数据查询的范围，减少数据量加载和比较
         String minBeginDateStr = null;
         String maxEndDateStr = null;
-        
+
         long calDateStartTime = System.currentTimeMillis();
         Long communityId = null; // 假定billDatas时里的所有数据都是同一个小区的，只提取其中一个
         for(int i = 0; i < billDatas.size(); i++){
@@ -1434,26 +1373,26 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             if(communityId == null && command.getOwnerId() != null) {
                 communityId = command.getOwnerId();
             }
-            
+
             // 取开始日期最小值
             String dateStrBegin = command.getDateStrBegin();
             if((minBeginDateStr == null) || (dateStrBegin != null && dateStrBegin.compareTo(minBeginDateStr) < 0)) {
                 minBeginDateStr = dateStrBegin;
             }
-            
+
             // 取结束日期最大值
             String dateStrEnd = command.getDateStrEnd();
             if((maxEndDateStr == null) || (dateStrEnd  != null && dateStrEnd.compareTo(maxEndDateStr) > 0)) {
                 maxEndDateStr =  dateStrEnd;
-            } 
+            }
         }
         long calDateEndTime = System.currentTimeMillis();
-        
+
         long prepareBillStartTime = System.currentTimeMillis();
         Map<Long, String> map = prepareUserBillIdentifierFromBill(namespaceId, communityId, minBeginDateStr, maxEndDateStr);
         populateUserBillIdentifierWithAddress(map);
         long prepareBillEndTime = System.currentTimeMillis();
-        
+
         long mapRevertStartTime = System.currentTimeMillis();
         Map<String, String> billIdentifiers = new HashMap<String, String>();
         Iterator<Entry<Long, String>> iterator = map.entrySet().iterator();
@@ -1465,22 +1404,22 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             }
         }
         long mapRevertEndTime = System.currentTimeMillis();
-        
+
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Process bill importing data, prepare user bill identifiers, namespaceId={}, communityId={}, minBeginDateStr={}, maxEndDateStr={}, "
-                    + "totalCount={}, elapse={}, calDateElapse={}, prepareBillElapse={}, mapRevertElapse={}", 
-                    namespaceId, communityId, minBeginDateStr, maxEndDateStr, billDatas.size(), (endTime - startTime), 
+                    + "totalCount={}, elapse={}, calDateElapse={}, prepareBillElapse={}, mapRevertElapse={}",
+                    namespaceId, communityId, minBeginDateStr, maxEndDateStr, billDatas.size(), (endTime - startTime),
                     (calDateEndTime - calDateStartTime), (prepareBillEndTime - prepareBillStartTime), (mapRevertEndTime - mapRevertStartTime));
         }
-        
+
         return billIdentifiers;
     }
-    
+
     private Map<Long, String> prepareUserBillIdentifierFromBill(Integer namespaceId, Long communityId, String dateStrBegin, String dateStrEnd) {
         long startTime = System.currentTimeMillis();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        
+
         Condition conditions = Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId);
         conditions = conditions.and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(communityId));
         conditions = conditions.and(Tables.EH_PAYMENT_BILLS.STATUS.eq(new Byte("0"))); // 账单状态，0:待缴;1:已缴（如果已缴，不允许覆盖，所以是新增账单）
@@ -1492,7 +1431,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         if(StringHelper.hasContent(dateStrEnd)) {
             conditions = conditions.and(Tables.EH_PAYMENT_BILLS.DATE_STR_END.lessOrEqual(dateStrEnd));
         }
-        
+
         // 个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性，先从帐单里提取出账单组、账单开始时间、帐单结束时间作为帐单标识
         // map用于存储billId与帐单标识的映射关系，其中帐单标识格式：帐单组_账单开始时间_帐单结束时间
         // 由于后面还需要拼地址数据，所以标识保留StringBuilder结果
@@ -1515,21 +1454,21 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                 map.put(bill.getId(), concateUserBillIdentifier(bill.getBillGroupId(), bill.getDateStrBegin(), bill.getDateStrEnd()));
             });
         }
-        
+
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
-            LOGGER.info("Process bill importing data, prepare user bill identifiers from eh_payment_bills, namespaceId={}, communityId={}, dateStrBegin={}, dateStrEnd={}, totalCount={}, elapse={}", 
+            LOGGER.info("Process bill importing data, prepare user bill identifiers from eh_payment_bills, namespaceId={}, communityId={}, dateStrBegin={}, dateStrEnd={}, totalCount={}, elapse={}",
                     namespaceId, communityId, dateStrBegin, dateStrEnd, totalCount, (endTime - startTime));
         }
-        
+
         return map;
     }
-    
+
     private void populateUserBillIdentifierWithAddress(Map<Long, String> map) {
         long startTime = System.currentTimeMillis();
         // 分批取收费明细数据避免一下子加载大量数据而引起内存占用过多问题
         int batchCount = 1000;
-        
+
         Iterator<Entry<Long, String>> iterator = map.entrySet().iterator();
         Entry<Long, String> entry = null;
         List<Long> billIdList = new ArrayList<Long>(batchCount);
@@ -1538,64 +1477,76 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             index++;
             entry = iterator.next();
             billIdList.add(entry.getKey());
-            
+
             if((index % batchCount) == 0) {
                 populateUserBillIdentifierWithAddress(map, billIdList);
                 billIdList.clear();
             }
         }
-        
+
         if(billIdList.size() > 0) {
             populateUserBillIdentifierWithAddress(map, billIdList);
             billIdList.clear();
         }
-        
+
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
-            LOGGER.info("Process bill importing data, prepare user bill identifiers with bill item, billSize={}, itemCount={}, elapse={}", 
+            LOGGER.info("Process bill importing data, prepare user bill identifiers with bill item, billSize={}, itemCount={}, elapse={}",
                     map.size(), index, (endTime - startTime));
         }
     }
-    
+
     private void populateUserBillIdentifierWithAddress(Map<Long, String> map, List<Long> billIdList) {
+    	List<PaymentBillItems> items = new ArrayList<PaymentBillItems>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         context.select().from(Tables.EH_PAYMENT_BILL_ITEMS).where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.in(billIdList))
         .orderBy(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID, Tables.EH_PAYMENT_BILL_ITEMS.ADDRESS_ID)
         .fetch()
         .forEach(r ->{
-            PaymentBillItems item = ConvertHelper.convert(r, PaymentBillItems.class);
-            String identifier = map.get(item.getBillId());
-            if(identifier != null) {
+            items.add(ConvertHelper.convert(r, PaymentBillItems.class));
+        });
+        
+        // 一个帐单下的多个费项明细所关联的地址，大部分都是相同的，需要过滤掉（注意：查询时，地址已经是排序好的，故不用再排序） by lqs 20181210
+        Map<Long, Long> existAddresses = new HashMap<Long, Long>();
+        for(PaymentBillItems item : items) {
+            Long existAddressId = existAddresses.get(item.getBillId());
+            if(existAddressId == null || !existAddressId.equals(item.getAddressId())) {
+                String identifier = map.get(item.getBillId());
+                if(identifier == null) {
+                    identifier = "unknown";
+                }
                 String addressIdStr = (item.getAddressId() == null) ? "" : String.valueOf(item.getAddressId());
                 identifier = identifier + "_" + addressIdStr;
                 map.put(item.getBillId(), identifier);
+                
+                existAddresses.put(item.getBillId(), item.getAddressId());
             }
-        });
+        }
     }
-    
+
     private String concateUserBillIdentifier(Long billGroupId, String dateStrBegin, String dateStrEnd) {
         StringBuilder strBuilder = new StringBuilder();
-        
+
         if(billGroupId == null) {
             strBuilder.append("unknown");
         } else {
             strBuilder.append(billGroupId);
         }
-        
-        strBuilder.append("_"); 
+
+        strBuilder.append("_");
         if(dateStrBegin == null) {
             strBuilder.append("unknown");
         } else {
             strBuilder.append(dateStrBegin);
         }
-        
-        strBuilder.append("_"); 
+
+        strBuilder.append("_");
         if(dateStrEnd == null) {
             strBuilder.append("unknown");
         } else {
             strBuilder.append(dateStrEnd);
         }
-        
+
         return strBuilder.toString();
     }
     
@@ -1663,7 +1614,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             else if(headers[i].contains("账单开始时间")) dateStrBeginIndex = i;
             else if(headers[i].contains("账单结束时间")) dateStrEndIndex = i;
         }
-        
+
         long roundStartTime = System.currentTimeMillis();
         long fieldRoundElapse = 0L;
         bill:for (int i = 2; i < resultList.size(); i++) {
@@ -1899,7 +1850,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                 }
             }
             fieldRoundElapse += System.currentTimeMillis() - fieldStartTime;
-            
+
             billGroupDTO.setBillGroupId(billGroupId);
             billGroupDTO.setBillItemDTOList(billItemDTOList);
             billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
@@ -1911,57 +1862,59 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             cmd.setOwnerType("community");
             cmd.setOwnerId(ownerId);
             cmd.setIsSettled(billSwitch);
+            // 对于个人客户导帐单时，会有可能出现这样的一个情况：不同门牌的业主名称一样，但实际上他们是不同的人，所以不能把他们当同一个客户来看；
+            // 故需要生成多个帐单，即使客户名称、帐期、门牌一样的时候也生成多个，让用户在界面上确认，如果多了可以删除，但合并了则有问题 by lqs 20181210
             //个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
-            if(targetType.equals(AssetTargetType.USER.getCode())){
-            	for(int m = 0;m < cmds.size();m++) {
-            		CreateBillCommand createBillCommand = cmds.get(m);
-            		if(cmd.getTargetName().equals(createBillCommand.getTargetName()) 
-        				&& cmd.getDateStrBegin().equals(createBillCommand.getDateStrBegin())
-        				&& cmd.getDateStrEnd().equals(createBillCommand.getDateStrEnd())) {
-            			//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
-        				if(createBillCommand.getAddresses().equals(cmd.getAddresses())) {
-        					cmds.set(m, cmd);
-                			continue bill;
-        				}else if(!createBillCommand.getAddresses().contains(cmd.getAddresses())){//未合并为一个账单之前的情况，如：456、457， 新的数据是456，是不同的数据，所以是新增。
-        					//个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
-        					BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
-                			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
-                			List<ExemptionItemDTO> newExemptionItemDTOList = newBillGroupDTO.getExemptionItemDTOList();
-                			newBillItemDTOList.addAll(billItemDTOList);
-                			newExemptionItemDTOList.addAll(exemptionItemDTOList);
-                			newBillGroupDTO.setBillItemDTOList(newBillItemDTOList);
-                			newBillGroupDTO.setExemptionItemDTOList(newExemptionItemDTOList);
-                			createBillCommand.setBillGroupDTO(newBillGroupDTO);
-                			createBillCommand.setAddresses(cmd.getAddresses() + "," + createBillCommand.getAddresses());
-                			cmds.set(m, createBillCommand);
-                			continue bill;
-        				}
-            		}
-            	}
-            }
+//            if(targetType.equals(AssetTargetType.USER.getCode())){
+//            	for(int m = 0;m < cmds.size();m++) {
+//            		CreateBillCommand createBillCommand = cmds.get(m);
+//            		if(cmd.getTargetName().equals(createBillCommand.getTargetName()) 
+//        				&& cmd.getDateStrBegin().equals(createBillCommand.getDateStrBegin())
+//        				&& cmd.getDateStrEnd().equals(createBillCommand.getDateStrEnd())) {
+//            			//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+//        				if(createBillCommand.getAddresses().equals(cmd.getAddresses())) {
+//        					cmds.set(m, cmd);
+//                			continue bill;
+//        				}else if(!createBillCommand.getAddresses().contains(cmd.getAddresses())){//未合并为一个账单之前的情况，如：456、457， 新的数据是456，是不同的数据，所以是新增。
+//        					//个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
+//        					BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
+//                			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
+//                			List<ExemptionItemDTO> newExemptionItemDTOList = newBillGroupDTO.getExemptionItemDTOList();
+//                			newBillItemDTOList.addAll(billItemDTOList);
+//                			newExemptionItemDTOList.addAll(exemptionItemDTOList);
+//                			newBillGroupDTO.setBillItemDTOList(newBillItemDTOList);
+//                			newBillGroupDTO.setExemptionItemDTOList(newExemptionItemDTOList);
+//                			createBillCommand.setBillGroupDTO(newBillGroupDTO);
+//                			createBillCommand.setAddresses(cmd.getAddresses() + "," + createBillCommand.getAddresses());
+//                			cmds.set(m, createBillCommand);
+//                			continue bill;
+//        				}
+//            		}
+//            	}
+//            }
             cmds.add(cmd);
-            
+
             // 打印阶段日志和时间，方便定位性能问题 by lqs 20181206
             if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
                 long roundEndTime = System.currentTimeMillis();
                 int cmdSize = (cmds == null) ? 0 : cmds.size();
                 int dataSize = (datas == null) ? 0 : datas.size();
-                LOGGER.info("Process bill importing data, parse excel data roundly, index={}, namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, roundElapse={}, fieldRoundElapse={}", 
+                LOGGER.info("Process bill importing data, parse excel data roundly, index={}, namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, roundElapse={}, fieldRoundElapse={}",
                         i, namespaceId, billGroupId, targetType, cmdSize, dataSize, (roundEndTime - startTime), fieldRoundElapse);
                 roundStartTime = roundEndTime;
                 fieldRoundElapse = 0;
             }
         }
         map.put(cmds, datas);
-        
+
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             int cmdSize = (cmds == null) ? 0 : cmds.size();
             int dataSize = (datas == null) ? 0 : datas.size();
-            LOGGER.info("Process bill importing data, parse excel data end, namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, elapse={}", 
+            LOGGER.info("Process bill importing data, parse excel data end, namespaceId={}, billGroupId={}, targetType={}, cmdSize={}, dataSize={}, elapse={}",
                     namespaceId, billGroupId, targetType, cmdSize, dataSize, (endTime - startTime));
         }
-        
+
         return map;
     }
 
