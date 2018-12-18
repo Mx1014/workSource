@@ -5,10 +5,11 @@ package com.everhomes.rest.user;
  * <ul>
  *  <li>APP: 1-来源app用户</li>
  *  <li>WEIXIN: 2-来源微信</li>
+ *  <li>ALIPAY: 3-来源支付宝</li>
  * </ul>
  */
 public enum UserSourceType {
-    APP((byte)1), WEIXIN((byte)2);
+    APP((byte)1), WEIXIN((byte)2), ALIPAY((byte)3);
 
     private byte code;
     private UserSourceType(byte code) {

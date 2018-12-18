@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>notAuthUsers: 园区非认证用户数</li>
  *     <li>authingUsers: authingUsers</li>
  *     <li>wxUserCount: wxUserCount</li>
+ *     <li>alipayUserCount: alipayUserCount</li>
  *     <li>appUserCount: appUserCount</li>
  *     <li>maleCount: maleCount</li>
  *     <li>femaleCount: femaleCount</li>
@@ -25,6 +26,8 @@ public class CountCommunityUserResponse {
 	private Integer authingUsers;
 
 	private Integer wxUserCount;
+
+	private Integer alipayUserCount;
 
 	private Integer appUserCount;
 
@@ -62,6 +65,14 @@ public class CountCommunityUserResponse {
 
 	public void setWxUserCount(Integer wxUserCount) {
 		this.wxUserCount = wxUserCount;
+	}
+
+	public Integer getAlipayUserCount() {
+		return alipayUserCount;
+	}
+
+	public void setAlipayUserCount(Integer alipayUserCount) {
+		this.alipayUserCount = alipayUserCount;
 	}
 
 	public Integer getAppUserCount() {
