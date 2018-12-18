@@ -2523,22 +2523,20 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<ListOfficeCubicleAccountDTO> payUserList = new ArrayList<ListOfficeCubicleAccountDTO>();
 		if(resp != null && resp.getErrorCode() != null && resp.getErrorCode().equals(HttpStatus.OK.value())){
 	        List<GetPayUserListByMerchantDTO> merchantDTOS = resp.getResponse();
-			if (payUserList != null){
-	            for (GetPayUserListByMerchantDTO merchantDTO : merchantDTOS) {
-	                PayUserDTO payUserDTO = ConvertHelper.convert(merchantDTO,PayUserDTO.class);
-	                ListOfficeCubicleAccountDTO dto = new ListOfficeCubicleAccountDTO();
-					dto.setAccountId(payUserDTO.getId());
-					dto.setAccountType(payUserDTO.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
-					dto.setAccountName(payUserDTO.getRemark());
-					dto.setAccountAliasName(payUserDTO.getUserAliasName());
-			        if (payUserDTO.getRegisterStatus() != null && payUserDTO.getRegisterStatus().intValue() == 1) {
-			            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
-			        } else {
-			            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-			        }
-	                payUserList.add(dto);
-	            }
-			}
+            for (GetPayUserListByMerchantDTO merchantDTO : merchantDTOS) {
+                PayUserDTO payUserDTO = ConvertHelper.convert(merchantDTO,PayUserDTO.class);
+                ListOfficeCubicleAccountDTO dto = new ListOfficeCubicleAccountDTO();
+				dto.setAccountId(payUserDTO.getId());
+				dto.setAccountType(payUserDTO.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+				dto.setAccountName(payUserDTO.getRemark());
+				dto.setAccountAliasName(payUserDTO.getUserAliasName());
+		        if (payUserDTO.getRegisterStatus() != null && payUserDTO.getRegisterStatus().intValue() == 1) {
+		            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+		        } else {
+		            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+		        }
+                payUserList.add(dto);
+            }
 		}
 		return payUserList;
 	}
