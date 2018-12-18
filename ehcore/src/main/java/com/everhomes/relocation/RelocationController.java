@@ -105,4 +105,18 @@ public class RelocationController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /relocation/admin/queryRelocationStatistics</b>
+     * <p>查询物品放行统计</p>
+     */
+    @RequestMapping("admin/queryRelocationStatistics")
+    @RestReturn(value=QueryRelocationStatisticsResponse.class)
+    public RestResponse queryRelocationStatistics(QueryRelocationStatisticsCommand cmd) {
+        RelocationConfigDTO dto = relocationConfigService.searchRelocationConfigById(cmd);
+        RestResponse response = new RestResponse(dto == null ? new RelocationConfigDTO() : dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

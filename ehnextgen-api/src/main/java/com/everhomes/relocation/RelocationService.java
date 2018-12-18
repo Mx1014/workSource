@@ -13,4 +13,6 @@ public interface RelocationService {
     RelocationInfoDTO getRelocationUserInfo(GetRelocationUserInfoCommand cmd);
 
     RelocationRequestDTO requestRelocation(RequestRelocationCommand cmd);
+
+    
 }
