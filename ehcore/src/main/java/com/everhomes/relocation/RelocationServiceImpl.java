@@ -29,11 +29,15 @@ import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.rest.relocation.AttachmentDescriptor;
 
+import com.everhomes.rest.rentalv2.RentalBillDTO;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.RuntimeErrorException;
 
+import com.everhomes.util.StringHelper;
 import net.greghaines.jesque.Job;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -48,6 +52,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -385,6 +390,8 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		if (requests == null)
 			requests = new ArrayList<>();
 
+		ByteArrayOutputStream out = createRequestStream(requests);
+		DownloadUtils.download(out, response);
 	}
 
 	private ByteArrayOutputStream createRequestStream(List<RelocationRequest> requests){
@@ -395,6 +402,59 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		}
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("relocationRequest");
+		for (RelocationRequest request : requests ) {
+			RelocationRequestDTO dto = ConvertHelper.convert(request, RelocationRequestDTO.class);
+			populateRequestDTO(request, dto);
+			this.setNewRelocationRequestBookRow(sheet, dto);
+		}
+
+		try {
+			wb.write(out);
+			wb.close();
+
+		} catch (IOException e) {
+			LOGGER.error("export is fail", e);
+		}
+		return out;
+	}
+
+	private void setNewRelocationRequestBookRow(Sheet sheet ,RelocationRequestDTO dto){
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
+		int i = -1;
+		//申请单编号
+		row.createCell(++i).setCellValue(dto.getRequestNo());
+		//申请时间
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd hh:mm");
+		row.createCell(++i).setCellValue(sdf.format(new Date(dto.getCreateTime().getTime())));
+		//状态
+		row.createCell(++i).setCellValue(RelocationRequestStatus.fromCode(dto.getStatus()).name());
+		//申请人
+		row.createCell(++i).setCellValue(dto.getRequestorName());
+		//手机号码
+		if (StringHelper.hasContent(dto.getContactPhone()))
+			row.createCell(++i).setCellValue(dto.getContactPhone());
+		else
+			row.createCell(++i).setCellValue("");
+		//公司名称
+		if (StringHelper.hasContent(dto.getRequestorEnterpriseName()))
+			row.createCell(++i).setCellValue(dto.getRequestorEnterpriseName());
+		else
+			row.createCell(++i).setCellValue("");
+		//公司地址
+		if (StringHelper.hasContent(dto.getRequestorEnterpriseAddress()))
+			row.createCell(++i).setCellValue(dto.getRequestorEnterpriseAddress());
+		else
+			row.createCell(++i).setCellValue("");
+		//放行日期
+		sdf = new SimpleDateFormat("yyyy/MM/dd");
+		row.createCell(++i).setCellValue(sdf.format(new Date(dto.getRelocationDate().getTime())));
+		//物品清单
+		StringBuilder sb = new StringBuilder();
+		for (RelocationRequestItemDTO itemDTO : dto.getItems()){
+			sb.append(itemDTO.getItemName()).append("*").append(itemDTO.getItemQuantity()).append("、");
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		row.createCell(++i).setCellValue(sb.toString());
 
 	}
 
@@ -402,6 +462,14 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		Row row = sheet.createRow(sheet.getLastRowNum());
 		int i =-1 ;
 		row.createCell(++i).setCellValue("申请单编号");
+		row.createCell(++i).setCellValue("申请时间");
+		row.createCell(++i).setCellValue("状态");
+		row.createCell(++i).setCellValue("申请人");
+		row.createCell(++i).setCellValue("手机号码");
+		row.createCell(++i).setCellValue("公司名称");
+		row.createCell(++i).setCellValue("公司地址");
+		row.createCell(++i).setCellValue("放行日期");
+		row.createCell(++i).setCellValue("物品清单");
 
 	}
 
