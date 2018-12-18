@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
 @RestDoc(value="Relocation controller", site="relocation")
 @RestController
 @RequestMapping("/relocation")
@@ -34,6 +37,17 @@ public class RelocationController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /relocation/exportRelocationRequests</b>
+     * <p>
+     * 导出搬迁申请
+     * </p>
+     */
+    @RequestMapping("exportRelocationRequests")
+    public void exportRelocationRequests(SearchRelocationRequestsCommand cmd, HttpServletResponse response) {
+        relocationService.exportRelocationRequests(cmd, response );
     }
 
     /**
@@ -112,8 +126,8 @@ public class RelocationController extends ControllerBase {
     @RequestMapping("admin/queryRelocationStatistics")
     @RestReturn(value=QueryRelocationStatisticsResponse.class)
     public RestResponse queryRelocationStatistics(QueryRelocationStatisticsCommand cmd) {
-        RelocationConfigDTO dto = relocationConfigService.searchRelocationConfigById(cmd);
-        RestResponse response = new RestResponse(dto == null ? new RelocationConfigDTO() : dto);
+        QueryRelocationStatisticsResponse res = relocationService.queryRelocationStatistics(cmd);
+        RestResponse response = new RestResponse(res == null ? new RelocationConfigDTO() : res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
