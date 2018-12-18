@@ -1619,7 +1619,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ListBillsDTO mergrBillItemIntoPropertyBill( CreateBillCommand cmd,Long billId){
+    public ListBillsDTO addBillItemIntoPropertyBill( CreateBillCommand cmd,Long billId){
             final ListBillsDTO[] response = {new ListBillsDTO()};
             this.dbProvider.execute((TransactionStatus status) -> {
                 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -1687,11 +1687,11 @@ public class AssetProviderImpl implements AssetProvider {
 
                 //增减减免费用
                 if(list2!=null) {
-                    exemptionItemCreate(list2,cmd,nextBillId,context,amountOwed,amountOwedWithoutTax);
+                    createExemptionItem(list2,cmd,nextBillId,context,amountOwed,amountOwedWithoutTax);
                 }
                 //增加账单明细
                 if(list1!=null){
-                    billItemCreate(list1,cmd,context,nextBillId,assetBillDateDTO,amountReceivable,amountOwed,
+                    createBillItem(list1,cmd,context,nextBillId,assetBillDateDTO,amountReceivable,amountOwed,
                             amountReceivableWithoutTax,amountOwedWithoutTax,taxAmount);
                 }
 
@@ -1709,7 +1709,7 @@ public class AssetProviderImpl implements AssetProvider {
             return response[0];
     }
     /**
-     * 创建减免费用
+     * 创建减免费用(临时方法)
      * @param exemptionItemList
      * @param cmd
      * @param nextBillId
@@ -1717,7 +1717,7 @@ public class AssetProviderImpl implements AssetProvider {
      * @param amountOwed
      * @param amountOwedWithoutTax
      */
-    private void exemptionItemCreate(List<ExemptionItemDTO> exemptionItemList,CreateBillCommand cmd,
+    private void createExemptionItem(List<ExemptionItemDTO> exemptionItemList,CreateBillCommand cmd,
                                      Long nextBillId,DSLContext context, BigDecimal amountOwed,
                                      BigDecimal amountOwedWithoutTax){
 
@@ -1783,7 +1783,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     /**
-     * 创建账单明细
+     * 创建账单明细(临时方法)
      * @param billItemList
      * @param cmd
      * @param context
@@ -1796,7 +1796,7 @@ public class AssetProviderImpl implements AssetProvider {
      * @param taxAmount
      * @return
      */
-    private List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemCreate(List<BillItemDTO> billItemList,
+    private List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> createBillItem(List<BillItemDTO> billItemList,
                                                                                              CreateBillCommand cmd, DSLContext context,Long nextBillId,AssetBillDateDTO assetBillDateDTO,BigDecimal amountReceivable,
                                                                                              BigDecimal amountOwed,BigDecimal amountReceivableWithoutTax,BigDecimal amountOwedWithoutTax,BigDecimal taxAmount){
         List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
