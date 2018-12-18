@@ -1487,6 +1487,8 @@ public class AssetServiceImpl implements AssetService {
                         d.add(Calendar.MONTH,1);
                         due.setTime(d.getTime());
                     }
+                    //周期结束时间还原
+                    d.setTime(periodStopTime);
                     break ;
                 default:
                     LOGGER.error("unexpeced bills day type when cal due day, day type = {}, group id ={}", group.getBillsDayType(), group.getId());
@@ -1505,7 +1507,16 @@ public class AssetServiceImpl implements AssetService {
             else if(group.getDueDayType() == 2){
                 deadline.add(Calendar.MONTH,group.getDueDay());
             }else if(group.getDueDayType() == 3){
-                Date billsDay = new Date(d.getTimeInMillis());
+                //获取周期结束时间
+                Date periodStopTime = new Date(d.getTimeInMillis());
+                //获取出明细时间
+                Date billDateDue = null;
+                try {
+                    billDateDue = yyyyMMdd.parse(obj.getBillDateDue());
+                }catch (ParseException e){
+                    LOGGER.error("billDateDue parse error,{}",billDateDue);
+                    e.printStackTrace();
+                }
                 //月底处理
                 if (expressionParseConfig.getDueDayDate()==-1){
                     d.add(Calendar.MONTH,1);
@@ -1514,12 +1525,13 @@ public class AssetServiceImpl implements AssetService {
                 }else {
                     d.set(Calendar.DAY_OF_MONTH,expressionParseConfig.getDueDayDate());
                 }
-                if (d.getTime().compareTo(billsDay)>=0){
+                if (d.getTime().compareTo(billDateDue)>=0){
                     deadline.setTime(d.getTime());
                 }else {
                     d.add(Calendar.MONTH,1);
                     deadline.setTime(d.getTime());
                 }
+                d.setTime(periodStopTime);
             }else {
                 LOGGER.info("Group due day type can only be 1 or 2, but now type = {}",group.getBalanceDateType());
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
@@ -1756,11 +1768,42 @@ public class AssetServiceImpl implements AssetService {
             Calendar d = newClearedCalendar();
             if(billingCycle.byteValue() == (byte) 5){
                 // in this case, 5 stands for the one time pay mode
-                d.setTime(dateStrEnd.getTime());
+            	//缺陷 #44466 【智谷汇】【保证金】合同产生的账单时间有误
+            	//缺陷 #42424 【智谷汇】保证金设置为固定金额，但是实际会以合同签约门牌的数量计价。实际上保证金是按照合同收费，不是按照门牌的数量进行重复计费
+                //缺陷 #42424 如果是一次性产生费用，那么只在第一个收费周期产生费用
+                if(AssetOneTimeBillStatus.TRUE.getCode().equals(rule.getOneTimeBillStatus())) {
+                	d.setTime(a.getTime());
+                	//按照账单组的计费周期分为按月，按季，按年，均有固定和自然两种情况
+                    BillingCycle billGroupBillingCycle = BillingCycle.fromCode(group.getBalanceDateType());
+                    if(!billGroupBillingCycle.isContract()){
+                        //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                        int monthOffset;
+                        if(billGroupBillingCycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                        	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                        	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                        }else {
+                        	monthOffset = billGroupBillingCycle.getMonthOffset();
+                        }
+                        d.add(Calendar.MONTH, monthOffset);
+                        d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+                     }else{
+                        // #32243  check if the next day is beyond the maximum day of the next month
+                        int prevDay = d.get(Calendar.DAY_OF_MONTH);
+                        //修复缺陷 #44139 【保证金】【合同管理】将一次性收费项与其他收费周期放在同一账单组，签合同时添加两条计价条款，费用清单生成不了
+                        d.add(Calendar.MONTH, billGroupBillingCycle.getMonthOffset()+1);
+                        int maximumDay = d.getActualMaximum(Calendar.DAY_OF_MONTH);
+                        if(prevDay <= maximumDay){
+                            d.add(Calendar.DAY_OF_MONTH, -1);
+                        }
+                    }
+                }else {
+                	d.setTime(dateStrEnd.getTime());
+                }
             } else {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 //兼容方案：11和12是自定义自然周期和自定义合同周期
-                if (cmd.getBillingCycle()==11||cmd.getBillingCycle()==12){
+                if (cmd.getBillingCycle()==BillingCycle.CUSTOM_NATURAL_PERIOD.getCode()||
+                        cmd.getBillingCycle()==BillingCycle.CUSTOM_CONTRACT_PERIOD.getCode()){
                     if (firstPeriodFlag){
                         Date firstPeriodStopTime = expressionParseProcess.calculateFirstPeriodStoptTime(a.getTime());
                         d.setTime(firstPeriodStopTime);
@@ -1775,7 +1818,8 @@ public class AssetServiceImpl implements AssetService {
                     d.setTime(a.getTime());
                 }
                 //兼容方案：11和12是自定义自然周期和自定义合同周期
-                if (cmd.getBillingCycle()==11||cmd.getBillingCycle()==12){
+                if (cmd.getBillingCycle()==BillingCycle.CUSTOM_NATURAL_PERIOD.getCode()||
+                        cmd.getBillingCycle()==BillingCycle.CUSTOM_CONTRACT_PERIOD.getCode()){
                     ;
                 }else {
                     //第一个周期计算
@@ -1864,6 +1908,8 @@ public class AssetServiceImpl implements AssetService {
                         d.add(Calendar.MONTH,1);
                         due.setTime(d.getTime());
                     }
+                    //周期结束时间还原
+                    d.setTime(periodStopTime);
                     break;
                 default:
                     LOGGER.error("unexpeced bills day type when cal due day, day type = {}, group id ={}", group.getBillsDayType(), group.getId());
@@ -1884,7 +1930,16 @@ public class AssetServiceImpl implements AssetService {
             }
             //固定某日为最晚还款日
             else if (group.getDueDayType() == 3){
-                Date billsDay = new Date(d.getTimeInMillis());
+                //获取周期结束时间
+                Date periodStopTime = new Date(d.getTimeInMillis());
+                //获取出明细时间
+                Date billDateDue = null;
+                try {
+                    billDateDue = yyyyMMdd.parse(obj.getBillDateDue());
+                }catch (ParseException e){
+                    LOGGER.error("billDateDue parse error,{}",billDateDue);
+                    e.printStackTrace();
+                }
                 //月底处理
                 if (expressionParseConfig.getDueDayDate()==-1){
                     d.add(Calendar.MONTH,1);
@@ -1893,12 +1948,13 @@ public class AssetServiceImpl implements AssetService {
                 }else {
                     d.set(Calendar.DAY_OF_MONTH,expressionParseConfig.getDueDayDate());
                 }
-                if (d.getTime().compareTo(billsDay)>=0){
+                if (d.getTime().compareTo(billDateDue)>=0){
                     deadline.setTime(d.getTime());
                 }else {
                     d.add(Calendar.MONTH,1);
                     deadline.setTime(d.getTime());
                 }
+                d.setTime(periodStopTime);
             }else{
                 LOGGER.info("Group due day type can only be 1 or 2, but now type = {}",group.getBalanceDateType());
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
@@ -1909,28 +1965,32 @@ public class AssetServiceImpl implements AssetService {
             obj.setBillCycleStart(yyyyMMdd.format(a.getTime()));
             obj.setBillCycleEnd(yyyyMMdd.format(d.getTime()));
 
-            if(!uniqueRecorder.containsKey(dag)){
-                //未存在改账单（未更新价格），就加入
-                uniqueRecorder.put(dag,obj);
-            }else{
-                //已存在，则更新为时间范围更广的
-                BillItemsExpectancy prev = uniqueRecorder.get(dag);
-                if(prev.getDateStrBegin().compareTo(obj.getDateStrBegin()) == 1){
-                    prev.setDateStrBegin(obj.getDateStrBegin());
-                    prev.setBillCycleStart(obj.getBillCycleStart());
+
+           if(!uniqueRecorder.containsKey(dag)){
+               //未存在改账单（未更新价格），就加入
+               uniqueRecorder.put(dag,obj);
+           }else{
+
+               //已存在，则更新为时间范围更广的
+               BillItemsExpectancy prev = uniqueRecorder.get(dag);
+               if(prev.getDateStrBegin().compareTo(obj.getDateStrBegin()) == 1){
+                   prev.setDateStrBegin(obj.getDateStrBegin());
+                   prev.setBillCycleStart(obj.getBillCycleStart());
+               }
+               if(prev.getDateStrEnd().compareTo(obj.getDateStrEnd()) == -1){
+                   prev.setDateStrEnd(obj.getDateStrEnd());
+                   prev.setBillCycleEnd(obj.getBillCycleEnd());
+                   prev.setBillDateDeadline(obj.getBillDateDeadline());
+                   prev.setBillDateDue(obj.getBillDateDue());
                 }
-                if(prev.getDateStrEnd().compareTo(obj.getDateStrEnd()) == -1){
-                    prev.setDateStrEnd(obj.getDateStrEnd());
-                    prev.setBillCycleEnd(obj.getBillCycleEnd());
-                    prev.setBillDateDeadline(obj.getBillDateDeadline());
-                    prev.setBillDateDue(obj.getBillDateDue());
-                }
-            }
+           }
+
             if(billingCycle == 5){
                 break timeLoop;
             }
             d.add(Calendar.DAY_OF_MONTH,1);
-            if (cmd.getBillingCycle()==11||cmd.getBillingCycle()==12){
+            if (cmd.getBillingCycle()==BillingCycle.CUSTOM_NATURAL_PERIOD.getCode()||
+                    cmd.getBillingCycle()==BillingCycle.CUSTOM_CONTRACT_PERIOD.getCode()){
                 Date PeriodStartTime = expressionParseProcess.calculateNextPeriodStartTime(d.getTime());
                 a.setTime(PeriodStartTime);
             }else {
@@ -4947,6 +5007,8 @@ public class AssetServiceImpl implements AssetService {
 		for(GoodDTO goodDTO : cmd.getGoodDTOList()) {
 			BillItemDTO billItemDTO = new BillItemDTO();
 			billItemDTO.setBillItemId(charingItemId);
+			//修复缺陷 #45063 【缴费管理V8.0】资源预订通过企业支付后在物业缴费产生的账单，App支付时，收费项目显示有误，且发放的卡券不能用
+			billItemDTO.setChargingItemsId(charingItemId);
 			billItemDTO.setBillItemName(billItemName);
 			BigDecimal amountReceivable = BigDecimal.ZERO;
 			if(goodDTO.getTotalPrice() != null) {
@@ -5204,6 +5266,10 @@ public class AssetServiceImpl implements AssetService {
     //对接下载中心
 	@Override
     public OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Export payment bill, exporting start, taskId={}", taskId);
+        }
 		//公用字段
 		Long communityId;
 		List<ListBillsDTO> dtos ;
@@ -5213,6 +5279,7 @@ public class AssetServiceImpl implements AssetService {
 		Long categoryId = null;
 		String moduleName = "";
 		taskService.updateTaskProcess(taskId, 10);
+        long billQryStartTime = System.currentTimeMillis();
 		if (cmd instanceof ListBillsCommand) {
 			//缴费下载
 			ListBillsCommand ListBillsCMD = (ListBillsCommand) cmd;
@@ -5245,12 +5312,19 @@ public class AssetServiceImpl implements AssetService {
 			moduleName="对公转账";
 
 		} else {
-			LOGGER.error("exportAssetListByParams is error.");
-			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
+			LOGGER.error("Export payment bill, unsupported command type, taskId={}, command={}", taskId, cmd.getClass().getName());
+			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "Unsupported command type");
 		}
 
 		taskService.updateTaskProcess(taskId, 25);
 
+        if(LOGGER.isInfoEnabled()) {
+            long billQryEndTime = System.currentTimeMillis();
+            int billSize = (dtos == null) ? 0 : dtos.size();
+            LOGGER.info("Export payment bill, query bills by conditions, taskId={}, billSize={}, elapse={}", taskId, billSize, (billQryEndTime - billQryStartTime));
+        }        
+
+        long itemProcessStartTime = System.currentTimeMillis();
 		//初始化 字段信息
         List<String> propertyNames = new ArrayList<String>();
         List<String> titleName = new ArrayList<String>();
@@ -5311,6 +5385,13 @@ public class AssetServiceImpl implements AssetService {
         	}
         }
         taskService.updateTaskProcess(taskId, 40);
+        if(LOGGER.isInfoEnabled()) {
+            long itemProcessEndTime = System.currentTimeMillis();
+            int size = (billItemDTOList == null) ? 0 : billItemDTOList.size();
+            LOGGER.info("Export payment bill, process bill items, taskId={}, itemSize={}, elapse={}", 
+                    taskId, size, (itemProcessEndTime - itemProcessStartTime));
+        }
+        
         propertyNames.add("addresses");
         titleName.add("楼栋/门牌");
         titleSize.add(20);
@@ -5336,6 +5417,9 @@ public class AssetServiceImpl implements AssetService {
         List<Map<String, String>> dataList = new ArrayList<>();
         taskService.updateTaskProcess(taskId, 65);
         //组装datalist来确定propertyNames的值
+        long processStartTime = System.currentTimeMillis();
+        long roundStartTime = System.currentTimeMillis();
+        int itemCount = 0;
         for(int i = 0; i < dtos.size(); i++) {
             ListBillsDTO dto = (ListBillsDTO)dtos.get(i);
             Map<String, String> detail = new HashMap<String, String>();
@@ -5366,6 +5450,7 @@ public class AssetServiceImpl implements AssetService {
             	BigDecimal lateFineAmount = BigDecimal.ZERO;
             	BigDecimal energyConsume = BigDecimal.ZERO;//增加用量
         		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
+        		    itemCount++;
         			//如果费项ID相等
         			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
         				//如果费项ID相等，并且费项名称相等，那么说明是费项本身，如果不相等，则说明是费项产生的滞纳金
@@ -5435,7 +5520,21 @@ public class AssetServiceImpl implements AssetService {
             }
             detail.put("invoiceNum", dto.getInvoiceNum());
             dataList.add(detail);
+            if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
+                long roundEndTime = System.currentTimeMillis();
+                LOGGER.info("Export payment bill, process bill data, taskId={}, index={}, billSize={}, currBillId={}, itemCount={}, elapse={}", 
+                        taskId, i, dtos.size(), dto.getBillId(), itemCount, (roundEndTime - roundStartTime));
+                roundStartTime = roundEndTime;
+            }
         }
+
+        // 后面是直接输出文件流，暂不观察这些文件流的时间 by lqs 20181214
+        if (LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Export payment bill, process data end, taskId={}, itemCount={}, billSize={}, elapse={}, processElapse={}", 
+                    taskId, itemCount, dtos.size(), (endTime - startTime), (endTime - processStartTime));
+        }
+        
 		Community community = communityProvider.findCommunityById(communityId);
 		taskService.updateTaskProcess(taskId, 90);
 		if (community == null) {
@@ -5456,7 +5555,11 @@ public class AssetServiceImpl implements AssetService {
 	//对接下载中心,下载交易明细。
     @Override
     public OutputStream exportOutputStreamListPaymentBill(ListPaymentBillCmd cmd, Long taskId) {
-
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Export payment bill order, exporting start, taskId={}", taskId);
+        }
+        
         //表头信息初及数据标签始化
         ExportExcelnitUtil excelInfo = exportPaymentBillExcelInit(new ExportExcelnitUtil());
         //公用字段
@@ -5467,6 +5570,7 @@ public class AssetServiceImpl implements AssetService {
         taskService.updateTaskProcess(taskId, 10);
         //交易明细下载
 
+        long billQryStartTime = System.currentTimeMillis();
         communityId = cmd.getCommunityId();
         cmd.setPageSize(10000l);
         ListPaymentBillResp result = listPaymentBill(cmd);
@@ -5483,9 +5587,17 @@ public class AssetServiceImpl implements AssetService {
 
         taskService.updateTaskProcess(taskId, 25);
 
+        if(LOGGER.isInfoEnabled()) {
+            long billQryEndTime = System.currentTimeMillis();
+            int billSize = (paymentOrderBillDTOs == null) ? 0 : paymentOrderBillDTOs.size();
+            LOGGER.info("Export payment bill order, query bills by conditions, taskId={}, billSize={}, elapse={}", taskId, billSize, (billQryEndTime - billQryStartTime));
+        }        
+
         List<Map<String, String>> dataList = new ArrayList<>();
         taskService.updateTaskProcess(taskId, 65);
         //组装datalist来确定propertyNames的值
+        long processStartTime = System.currentTimeMillis();
+        long roundStartTime = System.currentTimeMillis();
         for(int i = 0; i < dtos.size(); i++) {
             PaymentOrderBillDTO dto = dtos.get(i);
             if(dto != null) {
@@ -5531,16 +5643,29 @@ public class AssetServiceImpl implements AssetService {
                 detail.put("payerName",dto.getPayerName());
                 detail.put("addresses",dto.getAddresses());
                 dataList.add(detail);
+                
+                if((i % 500) == 0 && LOGGER.isInfoEnabled()) {
+                    long roundEndTime = System.currentTimeMillis();
+                    LOGGER.info("Export payment bill order, query bills by conditions, taskId={}, index={}, billSize={}, currBillId={}, elapse={}", 
+                            taskId, i, dtos.size(), dto.getBillId(), (roundEndTime - roundStartTime));
+                    roundStartTime = roundEndTime;
+                }
             }
         }
 
+        // 后面是直接输出文件流，暂不观察这些文件流的时间 by lqs 20181214
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Export payment bill order, exporting start, taskId={}, elapse={}, processElapse={}", 
+                    taskId, (endTime - startTime), (endTime - processStartTime));
+        }
 
         Community community = communityProvider.findCommunityById(communityId);
         taskService.updateTaskProcess(taskId, 90);
         if (community == null) {
-            LOGGER.error("Community is not exist.");
+            LOGGER.error("Export payment bill order, community not found, taskId={}, communityId={}", taskId, communityId);
             throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
-                    "Community is not exist.");
+                    "Community not found");
         }
         if (dtos != null && dtos.size() > 0) {
             String fileName = String.format(moduleName+"信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));

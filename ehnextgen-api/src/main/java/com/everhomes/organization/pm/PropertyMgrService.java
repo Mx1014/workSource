@@ -574,4 +574,6 @@ public interface PropertyMgrService {
 
 	void fixApartmentLivingStatus();
 
+	void fixApartmentLivingStatusByNamespaceId(Integer namespaceId);
+
 }

@@ -69,7 +69,10 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.hp.hpl.sparta.xpath.Step;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.tools.ant.taskdefs.condition.And;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -81,6 +84,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+
+
+
+
+
+
 
 
 
@@ -5490,6 +5500,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS).where(condition).fetchCount();
     }
+     
+    @Override
+    public List<OrganizationMemberDetails> listOrganizationMemberDetailsByOrgIdIncluSubDepts(Integer namespaceId, Long orgId, String keywords, CrossShardListingLocator locator,Integer pageSize) {
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+    	Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId);
+    	condition = condition.and(DSL.exists(DSL.selectOne().from(Tables.EH_ORGANIZATION_MEMBERS).join(Tables.EH_ORGANIZATIONS).on(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(Tables.EH_ORGANIZATIONS.PATH.concat("%")))
+    			.where(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
+    			.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+    			.and(Tables.EH_ORGANIZATIONS.ID.eq(orgId))));
+    	SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS).where(condition);
+    	if(keywords != null){
+    		step = step.and( Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%" + keywords + "%").or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.like("%" + keywords + "%")));
+    	}
+    	Result<Record> records = step.orderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.asc()).limit(pageSize).fetch();
+    	if(CollectionUtils.isEmpty(records)){
+    		return new ArrayList<>();
+    	}
+		return records.map(r->ConvertHelper.convert(r, OrganizationMemberDetails.class));
+    }
+    
     @Override
     public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());

@@ -19,13 +19,21 @@ public class SearchRentalOrdersCommand {
     private String vendorType;
     private Long pageAnchor;
     private Integer pageSize;
-
+    private Integer pageNum;
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    public String getTag1() {
+    public Integer getPageNum() {
+		return pageNum;
+	}
+
+	public void setPageNum(Integer pageNum) {
+		this.pageNum = pageNum;
+	}
+
+	public String getTag1() {
         return tag1;
     }
 

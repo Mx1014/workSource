@@ -18,6 +18,8 @@ import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.CustomerContactDTO;
 import com.everhomes.rest.investment.CustomerContactType;
 import com.everhomes.rest.investment.CustomerTrackerDTO;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeFieldItem;
 
 @Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "enterpriseCustomer")
 public class EnterpriseCustomerContractTemplate implements ContractTemplateHandler{
@@ -26,6 +28,9 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 	
 	@Autowired
 	private CustomerService customerService;
+	
+	@Autowired
+	private FieldService fieldService;
 	
 //	private EnterpriseCustomerDTO enterpriseCustomer;
 //	
@@ -69,56 +74,70 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 		if (enterpriseCustomer != null) {
 			String enterpriseCustomerInfoKey = segments[1];
 			data = PropertyUtils.getProperty(enterpriseCustomer, enterpriseCustomerInfoKey);
-			value = formatValue(segments,data);
+			value = formatValue(segments,data,enterpriseCustomer);
 		}
 		
 		return value;
 	}
 
 	@SuppressWarnings("unchecked")
-	private String formatValue(String[] segments,Object data){
-		if (data == null) {
+	private String formatValue(String[] segments,Object data,EnterpriseCustomerDTO enterpriseCustomer){
+		if (data == null && !"contacts".equals(segments[1]) && !"trackers".equals(segments[1])) {
 			return "";
 		}
 		
 		String value = "";
 		switch (segments[1]) {
 			case "contacts":
-				if ("customer".equals(segments[2])) {
-					List<CustomerContactDTO> customerContacts = ((List<CustomerContactDTO>) data)
-																.stream()
-																.filter(r->r.getContactType()==CustomerContactType.CUSTOMER_CONTACT.getCode())
-																.collect(Collectors.toList());
-					if (customerContacts != null && customerContacts.size()>0) {
+				if (segments.length >= 4) {
+					if ("customer".equals(segments[2])) {
 						if ("name".equals(segments[3])) {
-							value = customerContacts.get(0).getName();
+							value = enterpriseCustomer.getContactName();
 						}else if ("phoneNumber".equals(segments[3])) {
-							value = customerContacts.get(0).getPhoneNumber();
+							value = enterpriseCustomer.getContactPhone();
 						}
-					}											
-				}else if ("channel".equals(segments[2])) {
-					List<CustomerContactDTO> channelContacts = ((List<CustomerContactDTO>) data)
-																.stream()
-																.filter(r->r.getContactType()==CustomerContactType.CHANNEL_CONTACT.getCode())
-																.collect(Collectors.toList());
-					if (channelContacts != null && channelContacts.size()>0) {
-						if ("name".equals(segments[3])) {
-							value = channelContacts.get(0).getName();
-						}else if ("phoneNumber".equals(segments[3])) {
-							value = channelContacts.get(0).getPhoneNumber();
-						}
-					}	
+					}
 				}
 				break;
 			case "trackers":
-				List<CustomerTrackerDTO> trackers = (List<CustomerTrackerDTO>)data;
-				if (trackers != null && trackers.size()>0) {
+				if (segments.length >= 3) {
 					if ("trackerName".equals(segments[2])) {
-						value = trackers.get(0).getTrackerName();
+						value = enterpriseCustomer.getTrackingName();
 					}else if ("trackerPhone".equals(segments[2])) {
-						value = trackers.get(0).getTrackerPhone();
+						value = enterpriseCustomer.getTrackingPhone();
 					}
 				}
+				break;
+			case "categoryItemId":
+			case "levelItemId":
+			case "contactGenderItemId":
+			case "corpProductCategoryItemId":
+			case "propertyType":
+			case "corpNatureItemId":
+			case "corpPurposeItemId":
+			case "corpQualificationItemId":
+			case "corpIndustryItemId":
+			case "sourceItemId":
+			case "registrationTypeId":
+			case "technicalFieldId":
+			case "taxpayerTypeId":
+			case "relationWillingId":
+			case "highAndNewTechId":
+			case "entrepreneurialCharacteristicsId":
+			case "serialEntrepreneurId":
+			case "buyOrLeaseItemId":
+			case "financingDemandItemId":
+			case "dropBox1ItemId":
+			case "dropBox2ItemId":
+			case "dropBox3ItemId":
+			case "dropBox4ItemId":
+			case "dropBox5ItemId":
+			case "dropBox6ItemId":
+			case "dropBox7ItemId":
+			case "dropBox8ItemId":
+			case "dropBox9ItemId":
+			case "dropBox10ItemId":
+				value = getItemDisplayName(enterpriseCustomer,(Long) data);
 				break;
 			default:
 				value = data.toString();
@@ -127,13 +146,15 @@ public class EnterpriseCustomerContractTemplate implements ContractTemplateHandl
 		return value;
 	}
 	
-	private String formatTimeStamp(Long timeStamp){
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return simpleDateFormat.format(new Date(timeStamp));
+	private String getItemDisplayName(EnterpriseCustomerDTO enterpriseCustomer,Long itemId){
+		String itemDisplayName = "";
+		if (itemId != null && enterpriseCustomer != null) {
+			ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(enterpriseCustomer.getNamespaceId(),null, enterpriseCustomer.getCommunityId(), itemId);
+		    if (scopeFieldItem != null) {
+		    	itemDisplayName = scopeFieldItem.getItemDisplayName();
+		    }
+		}
+		return itemDisplayName;
 	}
 	
-	private String formatTimeStamp(Timestamp timeStamp){
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return simpleDateFormat.format(new Date(timeStamp.getTime()));
-	}
 }

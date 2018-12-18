@@ -121,21 +121,4 @@ public class WelfareReceiverProviderImpl implements WelfareReceiverProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
-
-	@Override
-	public List<Long> listWelfareIdsByUser(Long organizationId, Long currentUserId, Integer offset,
-			Integer pageSize) {
-		SelectConditionStep<Record1<Long>> step = getReadOnlyContext().selectDistinct(Tables.EH_WELFARE_RECEIVERS.WELFARE_ID).from(Tables.EH_WELFARE_RECEIVERS)
-				.where(Tables.EH_WELFARE_RECEIVERS.ORGANIZATION_ID.eq(organizationId))
-				.and(Tables.EH_WELFARE_RECEIVERS.RECEIVER_UID.eq(currentUserId));
-		if(offset != null &&pageSize != null){
-			step.limit(offset, pageSize);
-		}
-		Result<Record1<Long>> records = step.orderBy(Tables.EH_WELFARE_RECEIVERS.UPDATE_TIME.desc())
-				.fetch();
-		if (null == records || records.size() == 0) {
-			return null;
-		}
-		return records.map(r -> r.value1());
-	}
 }

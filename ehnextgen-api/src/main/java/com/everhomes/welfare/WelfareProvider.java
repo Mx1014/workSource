@@ -17,5 +17,5 @@ public interface WelfareProvider {
 
 	void deleteWelfare(Long welfareId);
 
-	List<Welfare> listWelfareByIds(List<Long> wefareIds);
+	List<Welfare> listSendedWelfareByReciver(Long organizationId, Long currentUserId, Integer offset, Integer pageSize);
 }

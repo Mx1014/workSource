@@ -5618,7 +5618,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//eh_payment_bill_orders中的PAYMENT_STATUS=2代表支付成功
         query.addOrderBy(t2.PAYMENT_TIME.desc());
         query.fetch().map(r -> {
-        	dto.setPaymentOrderNum(r.getValue(t2.PAYMENT_ORDER_ID).toString());//支付订单ID
+        	dto.setPaymentOrderNum(String.valueOf(r.getValue(t2.PAYMENT_ORDER_ID)));//支付订单ID
             SimpleDateFormat yyyyMMddHHmm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             //缴费时间
 

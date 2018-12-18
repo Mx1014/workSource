@@ -59,8 +59,10 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 -- AUTHOR: 缪洲 20181211
 -- REMARK: 工位预定V2.4
-DELETE FROM eh_office_cubicle_spaces;
-DELETE FROM eh_office_cubicle_orders;
+-- 工位预定重做，旧数据无法兼容，因此删掉
+DELETE FROM eh_office_cubicle_spaces; 
+-- 工位预定重做，以前旧参观记录作废
+DELETE FROM eh_office_cubicle_orders; 
 SET @id = (SELECT MAX(id) from eh_locale_templates);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1,'sms.default', 94, 'zh_CN', '工会预定成功付款短信', '您已成功预定了${spaceName}短租工位，预定时间：${reserveTime}，订单编号：${orderNo}.如需取消，请在预定开始时间前取消，感谢您的使用。', 0);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1,'sms.default', 95, 'zh_CN', '工会预定成功退款短信', '尊敬的用户，您预定的${spaceName}短租工位已退款成功，订单编号：${orderNo}，订单金额${price}元，退款金额：${refundPrice}元，期待下次为您服务。', 0);
@@ -112,7 +114,7 @@ update eh_siyin_print_printers set owner_type = 'community', owner_id = 24011104
 
 -- AUTHOR: 吴寒
 -- REMARK: 修改bug:之前的菜单表和模块表id搞错了
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79881000','企业支付授权','70000010',NULL,'enterprise-payment-auth','1','2','/70000010/79881000','zuolin','8','271000','3','system','module','2','1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79881000','企业支付授权','23040000',NULL,'enterprise-payment-auth','1','2','/23000000/23040000/79881000','zuolin','8','271000','3','system','module','2','1');
 UPDATE eh_web_menus SET id = 79880000 , module_id =271000 WHERE id = 271000;
 UPDATE eh_service_modules SET id = 270000 , path ='/100/270000' WHERE id = 79870000;
 UPDATE eh_service_modules SET id = 271000 , parent_id = 270000 , path ='/100/270000/271000' WHERE id = 79880000;
@@ -169,7 +171,7 @@ INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12132, 'enterprise_customer', 'stringTag20', '预留字段20', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 128}');
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12133, 'enterprise_customer', 'stringTag21', '预留字段21', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 128}');
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12134, 'enterprise_customer', 'corpLegalPersonDuty', '法人代表职务', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 32}');
-INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12135, 'enterprise_customer', 'corpLegalPersonToken', '法人代表职务', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (12135, 'enterprise_customer', 'corpLegalPersonToken', '法人联系电话', 'String', 11, '/1/11/', 0, NULL, 2, 1, SYSDATE(), 1, SYSDATE(), '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
 SET @id = IFNULL((select max(id) from eh_var_field_ranges), 1);
@@ -243,6 +245,10 @@ INSERT INTO eh_var_fields (`id`, `module_name`, `name`, `display_name`, `field_t
 -- AUTHOR: 梁燕龙  20181214
 -- REMARK: 更新企业账单为企业应用
 UPDATE eh_service_module_apps SET app_type = 0 WHERE module_id = 20500;
+
+-- AUTHOR: 黄明波  20181214
+-- REMARK: 修复物业报修跳转bug
+delete from eh_service_alliance_jump_module where  module_id = 20100 and (module_name = '投诉建议' or instance_config like '%"taskCategoryId":9%');
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -344,11 +350,20 @@ INSERT INTO `eh_payment_app_views`(`id`, `namespace_id`, `community_id`, `has_vi
 -- REMARK: 瑞安CM对接：开启支付权限
 update eh_payment_app_views set has_view = 1 where namespace_id=999929 and view_item = 'PAY';	
 
+-- AUTHOR: 梁燕龙 20181214
+-- REMARK: 企业账单菜单表数据修改
+UPDATE eh_web_menus SET type  ='park' WHERE id = 78000003;
 
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
+
+-- AUTHOR: 黄明波
+-- REMARK: 升级万智汇服务联盟离线包版本
+update eh_version_urls set target_version = '1.2.1', download_url = replace(download_url, '-1-2-0', '-1-2-1'), info_url = replace(info_url, '-1-2-0', '-1-2-1'), publish_time = now() where download_url like '%/nar/serviceAlliance/offline/serviceAlliance%';
+
+
 -- --------------------- SECTION END wanzhihui ------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: jinmao

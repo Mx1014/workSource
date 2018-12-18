@@ -14,19 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.investment.InvitedCustomerService;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ChangeMethod;
 import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.PeriodUnit;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.CustomerContactDTO;
 import com.everhomes.rest.investment.CustomerContactType;
 import com.everhomes.rest.investment.InvitedCustomerDTO;
 import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 @Component(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + "investmentPromotion")
 public class InvestmentPromotionContractTemplate implements ContractTemplateHandler{
@@ -95,12 +89,6 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 		
 		String value = "";
 		switch (segments[1]) {
-			case "levelItemId":
-				ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), invitedCustomer.getLevelItemId());
-			    if (levelItem != null) {
-			    	value = levelItem.getItemDisplayName();
-			    }
-				break;
 			case "contacts":
 				if ("customer".equals(segments[2])) {
 					List<CustomerContactDTO> customerContacts = invitedCustomer.getContacts()
@@ -137,6 +125,40 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 					}
 				}
 				break;
+			case "categoryItemId":
+			case "levelItemId":
+			case "contactGenderItemId":
+			case "corpProductCategoryItemId":
+			case "propertyType":
+			case "corpNatureItemId":
+			case "corpPurposeItemId":
+			case "corpQualificationItemId":
+			case "corpIndustryItemId":
+			case "sourceItemId":
+			case "registrationTypeId":
+			case "technicalFieldId":
+			case "taxpayerTypeId":
+			case "relationWillingId":
+			case "highAndNewTechId":
+			case "entrepreneurialCharacteristicsId":
+			case "serialEntrepreneurId":
+			case "buyOrLeaseItemId":
+			case "financingDemandItemId":
+			case "dropBox1ItemId":
+			case "dropBox2ItemId":
+			case "dropBox3ItemId":
+			case "dropBox4ItemId":
+			case "dropBox5ItemId":
+			case "dropBox6ItemId":
+			case "dropBox7ItemId":
+			case "dropBox8ItemId":
+			case "dropBox9ItemId":
+			case "dropBox10ItemId":
+				value = getItemDisplayName(invitedCustomer,(Long) data);
+				break;
+			case "expectedSignDate": 
+				value = formatTimeStamp((Long) data);
+				break;
 			default:
 				value = data.toString();
 				break;
@@ -144,14 +166,23 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 		return value;
 	}
 	
-	private String formatTimeStamp(Long timeStamp){
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return simpleDateFormat.format(new Date(timeStamp));
+	private String getItemDisplayName(InvitedCustomerDTO invitedCustomer,Long itemId){
+		String itemDisplayName = "";
+		if (itemId != null && invitedCustomer != null) {
+			ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(invitedCustomer.getNamespaceId(),null, invitedCustomer.getCommunityId(), itemId);
+		    if (scopeFieldItem != null) {
+		    	itemDisplayName = scopeFieldItem.getItemDisplayName();
+		    }
+		}
+		return itemDisplayName;
 	}
 	
-	private String formatTimeStamp(Timestamp timeStamp){
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return simpleDateFormat.format(new Date(timeStamp.getTime()));
+	private String formatTimeStamp(Long timeStamp){
+		if (timeStamp != null) {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+			return simpleDateFormat.format(new Date(timeStamp));
+		}
+		return "";
 	}
 	
 }
