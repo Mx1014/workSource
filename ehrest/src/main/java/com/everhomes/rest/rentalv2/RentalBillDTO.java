@@ -68,6 +68,7 @@ public class RentalBillDTO {
 	private Long rentalBillId;
 	private String orderNo;
 	private String siteName;
+	private Long rentalResourceId;
 	private String buildingName;
 	private String address;
 	private String resourceAddress;
@@ -644,5 +645,13 @@ public class RentalBillDTO {
 
 	public void setShopUrl(String shopUrl) {
 		this.shopUrl = shopUrl;
+	}
+
+	public Long getRentalResourceId() {
+		return rentalResourceId;
+	}
+
+	public void setRentalResourceId(Long rentalResourceId) {
+		this.rentalResourceId = rentalResourceId;
 	}
 }
