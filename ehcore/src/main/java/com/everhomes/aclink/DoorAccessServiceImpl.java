@@ -1280,7 +1280,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     	doorAuth.setDriver(DoorAccessDriverType.BUS.getCode());
                     }else if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
                         doorAuth.setDriver(DoorAccessDriverType.FACEPLUSPLUS.getCode());
-                    }else {
+                    }else if(doorAcc.getDoorType().equals(DoorAccessType.DINGXIN.getCode())) {
+                        doorAuth.setDriver(DoorAccessDriverType.DINGXIN.getCode());
+                    }else{
                         doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
                     }
                     
@@ -1331,6 +1333,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         			doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
             } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_UCLBRT_DOOR.getCode())) {
         		doorAuth.setDriver(DoorAccessDriverType.UCLBRT.getCode());
+            } else if(doorAcc.getDoorType().equals(DoorAccessType.DINGXIN.getCode())){
+                doorAuth.setDriver(DoorAccessDriverType.DINGXIN.getCode());
             }else if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
                 doorAuth.setDriver(DoorAccessDriverType.FACEPLUSPLUS.getCode());
             } else {
@@ -3057,6 +3061,36 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qrKeys.add(qr);
     }
 
+    private void doDingxinQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys){
+        DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
+        qr.setCreateTimeMs(auth.getCreateTime().getTime());
+        qr.setCreatorUid(auth.getApproveUserId());
+        qr.setDoorGroupId(doorAccess.getId());
+        qr.setDoorName(doorAccess.getName());
+        qr.setDoorDisplayName(doorAccess.getDisplayNameNotEmpty());
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
+        if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+            qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
+            String s = WebTokenGenerator.getInstance().toWebToken("0," + auth.getUserId().toString());
+            qr.setQrCodeKey(homeUrl + "?userId=" + s);
+//            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getUserId().toString() + "&userType=" + "user");
+        } else {
+            qr.setExpireTimeMs(auth.getValidEndMs());
+            String s = WebTokenGenerator.getInstance().toWebToken("1," + auth.getId().toString());
+            qr.setQrCodeKey(homeUrl + "?userId=" + s);
+//            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getId() + "&userType=" + "visitor");
+        }
+        qr.setId(auth.getId());
+        qr.setQrDriver(DoorAccessDriverType.DINGXIN.getCode());
+        qr.setCreateTimeMs(auth.getCreateTime().getTime());
+        qr.setCurrentTime(DateHelper.currentGMTTime().getTime());
+        qr.setDoorOwnerId(doorAccess.getOwnerId());
+        qr.setDoorOwnerType(doorAccess.getOwnerType());
+        Long qrImageTimeout = this.configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 1*60);
+        qr.setQrImageTimeout(qrImageTimeout*1000l);
+        qrKeys.add(qr);
+    }
+
     /**
      * 锁管家的app请求参数拼接
      * @auther wh
@@ -3205,6 +3239,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				Long t4 = DateHelper.currentGMTTime().getTime();
 
 				LOGGER.info("拿一个uclbrt 的二维码" + (t4 - t3));
+			} else if (auth.getDriver().equals(DoorAccessDriverType.DINGXIN.getCode())) {
+			    //港湾一号智慧园区对接鼎芯门禁
+                resp.setQrTimeout(this.getQrTimeout() / 1000l);
+                doDingxinQRKey(user, doorAccess, auth, qrKeys);
 			} else if (auth.getDriver().equals(DoorAccessDriverType.FACEPLUSPLUS.getCode())) {
 			    continue;
             } else {

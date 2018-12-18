@@ -10,23 +10,25 @@ package com.everhomes.rest.aclink;
  * <li>uclbrt: 锁掌柜(对接系统)</li>
  * <li>bus:园区班车</li>
  * <li>FACEPLUSPLUS("face++"):face++门禁</li>
+ * <li>DINGXIN("dingxin"):鼎芯门禁</li>
  * </ul>
  * @author janson
  *
  */
 public enum DoorAccessDriverType {
     ZUOLIN("zuolin"), LINGLING("lingling"), PHONE_VISIT("phone_visit"), ZUOLIN_V2("zuolin_v2"), HUARUN_ANGUAN("huarun_anguan"), WANG_LONG("wanglong"),
-    UCLBRT("uclbrt") ,BUS("bus"), FACEPLUSPLUS("face++");
+    UCLBRT("uclbrt") ,BUS("bus"), FACEPLUSPLUS("face++"), DINGXIN("dingxin");
+
 
     private String code;
     private DoorAccessDriverType(String code) {
         this.code = code;
     }
-    
+
     public String getCode() {
         return this.code;
     }
-    
+
     public static DoorAccessDriverType fromCode(String code) {
         DoorAccessDriverType[] values = DoorAccessDriverType.values();
         for(DoorAccessDriverType value : values) {
@@ -34,7 +36,7 @@ public enum DoorAccessDriverType {
                 return value;
             }
         }
-        
+
         return null;
     }
 }

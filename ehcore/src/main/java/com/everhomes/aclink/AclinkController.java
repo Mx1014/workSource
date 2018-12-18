@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.aclink.dingxin.DingxinService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -99,6 +100,9 @@ public class AclinkController extends ControllerBase {
     
     @Autowired
     AclinkLogService aclinkLogService;
+
+    @Autowired
+    DingxinService dingxinService;
 
     /**
      * <b>URL: /aclink/activing</b>
@@ -1072,6 +1076,23 @@ public class AclinkController extends ControllerBase {
     @RestReturn(value = QueryServiceHotlineResponse.class)
     public RestResponse queryServiceHotline(@Valid QueryServiceHotlineCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.queryServiceHotline(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /aclink/verifyDoorAuth</b>
+     * <p> (鼎芯)判断是否有开门权限</p>
+     * @return
+     */
+    @RequestMapping("verifyDoorAuth")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(value = false)
+    public RestResponse verifyOpenAuth(VerifyDoorAuthCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setResponseObject(dingxinService.verifyDoorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
