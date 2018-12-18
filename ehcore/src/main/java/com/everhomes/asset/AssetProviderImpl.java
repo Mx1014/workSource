@@ -3960,11 +3960,13 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t.AMOUNT_RECEIVED,t.AMOUNT_OWED)
                 .set(t.AMOUNT_OWED,BigDecimal.ZERO)
                 .where(t.ID.in(billIds))
+                .and(t.STATUS.ne(AssetPaymentBillStatus.PAID.getCode()))//修复缺陷 #45229 【鼎峰汇】【缴费管理】部分账单缴费后，交易明细中的实收金额显示为“0”-必【必须解决】
                 .execute();
         context.update(t1)
                 .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_OWED)
                 .set(t1.AMOUNT_OWED,BigDecimal.ZERO)
                 .where(t1.BILL_ID.in(billIds))
+                .and(t1.STATUS.ne(AssetPaymentBillStatus.PAID.getCode()))//修复缺陷 #45229 【鼎峰汇】【缴费管理】部分账单缴费后，交易明细中的实收金额显示为“0”-必【必须解决】
                 .execute();
 
     }
