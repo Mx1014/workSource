@@ -37,7 +37,8 @@ public interface ParkingProvider {
     
     List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
                                                            String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-                                                           Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords, Long pageAnchor, Integer pageSize, Byte payMode);
+                                                           Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords, 
+                                                           Long pageAnchor, Integer pageSize, Byte payMode,Integer pageNum);
     
     BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
                                           String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
@@ -177,5 +178,9 @@ public interface ParkingProvider {
 	String findParkingLotNameByVendorName(Integer namespaceId, String vendorName);
 
 	ParkingCardRequest findParkingCardRequestByPlateNumber(String plateNumber);
+
+	Long countRechargeOrdersPageNums(String ownerType, Long ownerId, Long parkingLotId, String plateNumber,
+			String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate, Byte rechargeType,
+			String paidType, String cardNumber, Byte status, String paySource, String keyWords);
 
 }

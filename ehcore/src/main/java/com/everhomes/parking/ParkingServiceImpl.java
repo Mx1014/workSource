@@ -1428,11 +1428,14 @@ public class ParkingServiceImpl implements ParkingService {
 		if(null != cmd.getEndDate())
 			endDate = new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-
+		Integer pageNum = 1;
+        if (cmd.getPageNum() != null) {
+        	pageNum = cmd.getPageNum();
+        }
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
-				cmd.getStatus(), cmd.getPaySource(),cmd.getKeyWords(),cmd.getPageAnchor(), pageSize, cmd.getPayMode());
+				cmd.getStatus(), cmd.getPaySource(),cmd.getKeyWords(),cmd.getPageAnchor(), pageSize, cmd.getPayMode(),pageNum);
 		int size = list.size();
 		if(size > 0){
 			response.setOrders(list.stream().map(r -> {
@@ -1450,7 +1453,9 @@ public class ParkingServiceImpl implements ParkingService {
 			if(size != pageSize){
 				response.setNextPageAnchor(null);
 			}else{
-				response.setNextPageAnchor(list.get(size - 1).getCreateTime().getTime());
+	            Integer nextPageNum = pageNum + 1;
+	            response.setNextPageAnchor(nextPageNum.longValue());
+//				response.setNextPageAnchor(list.get(size - 1).getCreateTime().getTime());
 			}
 		}
 
@@ -1459,7 +1464,11 @@ public class ParkingServiceImpl implements ParkingService {
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(),cmd.getCardNumber(),
 				cmd.getStatus(),cmd.getPaySource(),cmd.getKeyWords());
 		response.setTotalAmount(totalAmount);
-
+		Long totalNum = parkingProvider.countRechargeOrdersPageNums(cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
+				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(),cmd.getCardNumber(),
+				cmd.getStatus(),cmd.getPaySource(),cmd.getKeyWords());
+		response.setTotalNum(totalNum);
 		return response;
 	}
 
@@ -1944,11 +1953,14 @@ public class ParkingServiceImpl implements ParkingService {
 			startDate = new Timestamp(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
 			endDate = new Timestamp(cmd.getEndDate());
-
+		Integer pageNum = 1;
+        if (cmd.getPageNum() != null) {
+        	pageNum = cmd.getPageNum();
+        }
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
-				cmd.getStatus(), cmd.getPaySource(), cmd.getKeyWords(), cmd.getPageAnchor(), cmd.getPageSize(), cmd.getPayMode());
+				cmd.getStatus(), cmd.getPaySource(), cmd.getKeyWords(), cmd.getPageAnchor(), cmd.getPageSize(), cmd.getPayMode(),pageNum);
 		Workbook wb = new XSSFWorkbook();
 
 		Font font = wb.createFont();

@@ -19,8 +19,20 @@ public class ListParkingRechargeOrdersResponse {
     private List<ParkingRechargeOrderDTO> orders;
     
     private BigDecimal totalAmount;
+    private Long totalNum;
     
-    public ListParkingRechargeOrdersResponse() {
+    
+
+
+	public Long getTotalNum() {
+		return totalNum;
+	}
+
+	public void setTotalNum(Long totalNum) {
+		this.totalNum = totalNum;
+	}
+
+	public ListParkingRechargeOrdersResponse() {
     }
     
     public ListParkingRechargeOrdersResponse(Long nextPageAnchor, List<ParkingRechargeOrderDTO> orders) {

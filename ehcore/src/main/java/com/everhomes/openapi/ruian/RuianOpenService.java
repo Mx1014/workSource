@@ -25,7 +25,7 @@ public class RuianOpenService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RuianOpenService.class);
 
     // 我们的communityId(key)和mallcooId(value)的映射表
-    public static final Map<String, String> PROJECT_MAPPING = new HashMap(){{put("240111044332063000","10776");put("default","10764");}};
+    public static final Map<String, String> PROJECT_MAPPING = new HashMap(){{put("240111044332063582","10776");put("default","10764");}};
 
     // 去mallcoo获取ticket的url
     public static final String TICKET_GET_RUL = "https://openapi10.mallcoo.cn/User/MallCard/v2/Open/ByMallCardTypeID/";

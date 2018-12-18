@@ -38,25 +38,32 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
         LOGGER.info("PaymentCardOrderEmbeddedV2Handler paySuccess start cmd = {}", cmd);
         PaymentCardRechargeOrder order = checkOrder(cmd.getBizOrderNum());
 
+        if (CardOrderStatus.PAID.getCode() != order.getPayStatus()) {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode() + cmd.getOrderId()).tryEnter(() -> {
+                PaymentCard paymentCard = paymentCardProvider.findPaymentCardById(order.getCardId());
+                PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 
-        this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()+cmd.getOrderId()).tryEnter(()-> {
-            PaymentCard paymentCard = paymentCardProvider.findPaymentCardById(order.getCardId());
-            PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
+                Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
+                order.setPayStatus(CardOrderStatus.PAID.getCode());
+                order.setPaidTime(payTimeStamp);
+                switch (cmd.getPaymentType()) {
+                    case 1:
+                    case 7:
+                    case 9:
+                    case 21:
+                        order.setPaidType(VendorType.WEI_XIN.getCode());
+                        break;
+                    default:
+                        order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
+                        break;
+                }
+                paymentCardProvider.updatePaymentCardRechargeOrder(order);
 
-            Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
-            order.setPayStatus(CardOrderStatus.PAID.getCode());
-            order.setPaidTime(payTimeStamp);
-            switch (cmd.getPaymentType()){
-                case 1:
-                case 7:
-                case 9:
-                case 21: order.setPaidType(VendorType.WEI_XIN.getCode());break;
-                default: order.setPaidType(VendorType.ZHI_FU_BAO.getCode());break;
-            }
-            paymentCardProvider.updatePaymentCardRechargeOrder(order);
-
-            handler.rechargeCard(order, paymentCard);
-        });
+                handler.rechargeCard(order, paymentCard);
+            });
+        }else{
+            LOGGER.error("PaymentCardOrderEmbeddedV2Handler order has been paid cmd = {}",cmd);
+        }
 
         LOGGER.info("PaymentCardOrderEmbeddedV2Handler paySuccess end");
     }
