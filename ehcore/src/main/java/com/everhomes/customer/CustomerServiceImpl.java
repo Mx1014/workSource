@@ -4225,15 +4225,17 @@ public class CustomerServiceImpl implements CustomerService {
             OrganizationContactDTO topAdmin = null;
             if(superAdmins != null && superAdmins.size() > 0){
                 Organization org = organizationProvider.findOrganizationById(superAdmins.get(0).getOrganizationId());
-                List<OrganizationContactDTO> topAdmins = superAdmins.stream().filter(r->r.getId().equals(org.getAdminTargetId())).collect(Collectors.toList());
-                if(topAdmins != null && topAdmins.size() > 0){
-                    topAdmin = topAdmins.get(0);
+                if(org != null) {
+                    List<OrganizationContactDTO> topAdmins = superAdmins.stream().filter(r -> r.getTargetId().equals(org.getAdminTargetId())).collect(Collectors.toList());
+                    if (topAdmins != null && topAdmins.size() > 0) {
+                        topAdmin = topAdmins.get(0);
+                    }
                 }
             }
             OrganizationContactDTO finalTopAdmin = topAdmin;
             List<OrganizationContactDTO> exTopSuperAdmins = null;
             if(superAdmins != null && superAdmins.size() > 0 && topAdmin != null) {
-                exTopSuperAdmins = superAdmins.stream().filter(admin -> !admin.getId().equals(finalTopAdmin.getId())).collect(Collectors.toList());
+                exTopSuperAdmins = superAdmins.stream().filter(admin -> !admin.getTargetId().equals(finalTopAdmin.getId())).collect(Collectors.toList());
             }
             List<OrganizationContactDTO> finalExTopSuperAdmins = exTopSuperAdmins;
             array.forEach(r->{
