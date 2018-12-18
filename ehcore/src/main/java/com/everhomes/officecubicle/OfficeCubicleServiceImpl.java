@@ -2185,6 +2185,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				return null;
 			});
 		}else if(cmd.getOrderType() == 4){
+			coordinationProvider.getNamedLock(CoordinationLocks.OFFICE_CUBICLE_ORDER_STATUS.getCode() + order.getId()).enter(()-> {
 			order.setOrderStatus(OfficeCubicleOrderStatus.REFUNDED.getCode());
 			order.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			order.setOperatorUid(UserContext.currentUserId());
@@ -2198,6 +2199,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			smsProvider.addToTupleList(variables, "price", order.getPrice());
 			smsProvider.addToTupleList(variables, "refundPrice", refundPrice);
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
+			return null;
+		});
 		}
 	}
 	
