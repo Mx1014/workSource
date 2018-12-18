@@ -7,8 +7,11 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
--- AUTHOR:
--- REMARK:
+
+-- AUTHOR: 李清岩
+-- REMARK：访客来访提示
+INSERT INTO eh_locale_templates ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('aclink.notification', '2', 'zh_CN', '访客使用了临时授权二维码进入门禁A。', '访客${visitorName}使用了临时授权二维码进入${doorName}。', '0');
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
