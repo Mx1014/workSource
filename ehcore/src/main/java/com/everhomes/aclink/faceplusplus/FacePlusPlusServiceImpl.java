@@ -522,14 +522,14 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
         String cookie = this.login();
         if(authId != null){
             DoorAuth auth = doorAuthProvider.getDoorAuthById(authId);
-            if(auth != null && auth.getStringTag2() != null){
+            if(auth != null && auth.getDriver().equals(DoorAccessDriverType.FACEPLUSPLUS.getCode()) && auth.getStringTag2() != null){
                 this.uploadPhoto(cookie,url,auth.getStringTag2());
             }
         }
         if(userId != null){
             List<DoorAuth> auths = new ArrayList<>();
             ListingLocator locator = new ListingLocator();
-            auths = doorAuthProvider.queryDoorAuth(locator, 9999, new ListingQueryBuilderCallback() {
+            auths = doorAuthProvider.queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
                 @Override
                 public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                                                                     SelectQuery<? extends Record> query) {

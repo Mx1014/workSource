@@ -2139,6 +2139,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         //TODO when the key is invalid, MUST invalid it and generate a command.
         List<AesUserKey> aesUserKeys = new ArrayList<AesUserKey>();
         for(DoorAuth auth : auths) {
+            //face++和鼎芯门禁没有蓝牙
+            if(auth.getDriver().equals(DoorAccessDriverType.FACEPLUSPLUS.getCode()) || auth.getDriver().equals(DoorAccessDriverType.DINGXIN.getCode())){
+                continue;
+            }
             AesUserKey aesUserKey = generateAesUserKey(user, auth);
             if(aesUserKey != null) {
                 aesUserKeys.add(aesUserKey);    
@@ -3072,12 +3076,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
             qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
             String s = WebTokenGenerator.getInstance().toWebToken("0," + auth.getUserId().toString());
-            qr.setQrCodeKey(homeUrl + "?userId=" + s);
+            qr.setQrCodeKey(homeUrl + "/openapi/aclink/verifyDoorAuth" + "?userId=" + s);
 //            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getUserId().toString() + "&userType=" + "user");
         } else {
             qr.setExpireTimeMs(auth.getValidEndMs());
             String s = WebTokenGenerator.getInstance().toWebToken("1," + auth.getId().toString());
-            qr.setQrCodeKey(homeUrl + "?userId=" + s);
+            qr.setQrCodeKey(homeUrl + "/openapi/aclink/verifyDoorAuth" + "?userId=" + s);
 //            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getId() + "&userType=" + "visitor");
         }
         qr.setId(auth.getId());
@@ -5997,13 +6001,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(cmd.getNamespaceId() != null){
                     query.addConditions(Tables.EH_DOOR_ACCESS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
                 }
-//                if(cmd.getNamespaceName() != null && !cmd.getNamespaceName().isEmpty()){
-//                    query.addConditions(com.everhomes.schema.Tables.EH_NAMESPACES.NAME.eq(cmd.getNamespaceName()));
-//                }
-//                if(cmd.getDoorType() != null) {
-//                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
-//
-//                }
+                if(cmd.getDoorType() != null) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
+
+                }
                 if(cmd.getDeviceId() != null){
                     query.addConditions(Tables.EH_DOOR_ACCESS.DEVICE_ID.eq(cmd.getDeviceId()));
                 }
