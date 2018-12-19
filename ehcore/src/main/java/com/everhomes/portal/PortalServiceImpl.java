@@ -2672,7 +2672,7 @@ public class PortalServiceImpl implements PortalService {
 				LaunchPadIndex index = ConvertHelper.convert(na, LaunchPadIndex.class);
 
 				if(IndexType.fromCode(na.getType()) == IndexType.CONTAINER){
-					Container container = ConvertHelper.convert(index.getConfigJson(), Container.class);
+					Container container = (Container) StringHelper.fromJsonString(index.getConfigJson(), Container.class);
 					List<PortalLaunchPadMapping> portalLaunchPadMappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.name(), container.getLayoutId(), null);
 
 					if(portalLaunchPadMappings != null && portalLaunchPadMappings.size() > 0){
