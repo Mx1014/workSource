@@ -74,6 +74,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.CopyUtils;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -180,6 +181,10 @@ public class AssetSchedule{
    }
    
    public void updateBillDueDayCountOnTime() {
+       long startTime = System.currentTimeMillis();
+       if(LOGGER.isInfoEnabled()) {
+           LOGGER.info("Update bill dueday count(start), runningFlag={}", scheduleProvider.getRunningFlag());
+       }
        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
        	//获得账单,分页一次最多10000个，防止内存不够
            int pageSize = 10000;
@@ -187,26 +192,47 @@ public class AssetSchedule{
            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
            Date today = new Date();
            coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
-           	//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
-           	Long nextPageAnchor = 0l;
+               long roundStartTime = System.currentTimeMillis();
+               int totalSize = 0;
+               long dayMilis = 1000 * 3600 * 24;
+               //根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
+               Long nextPageAnchor = 0L;
                while(nextPageAnchor != null){
-                   SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+                   SettledBillRes res = assetProvider.getSettledBills(pageSize, pageAnchor);
                    List<PaymentBills> bills = res.getBills();
+                   totalSize += bills.size();
                    //更新账单
                    for(PaymentBills bill : bills){
                        String dueDayDeadline = bill.getDueDayDeadline();
+                       if(!StringHelper.hasContent(dueDayDeadline)) {
+                           // 由于之前有BUG，导致有些帐单并没有填上该值，在数据库中存在1万多条这种记录 by lqs 20181219
+                           continue;
+                       }
                        try{
                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
-                           Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000*3600*24));
+                           Long dueDayCount = (today.getTime() - deadline.getTime()) / dayMilis;
                            if(dueDayCount.compareTo(0l) < 0) {
                            	dueDayCount = null;
                            }
                            assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
-                       } catch (Exception e){ continue; };
+                       } catch (Exception e){
+                           LOGGER.error("Update bill dueday count, due day deadline parse error, pageAnchor={}, billId={}, dueDayDeadline={}", 
+                                   pageAnchor, bill.getId(), dueDayDeadline, e);
+                       };
                    }
                    nextPageAnchor = res.getNextPageAnchor();
+                   
+                   if(LOGGER.isInfoEnabled()) {
+                       long roundEndTime = System.currentTimeMillis();
+                       LOGGER.info("Update bill dueday count(updating), totalSize={}, elapse={}", totalSize, (roundEndTime - roundStartTime));
+                       roundStartTime = roundEndTime;
+                   }
                }
            });
+       }
+       if(LOGGER.isInfoEnabled()) {
+           long endTime = System.currentTimeMillis();
+           LOGGER.info("Update bill dueday count(end), elapse={}", (endTime - startTime));
        }
    }
    
@@ -361,6 +387,10 @@ public class AssetSchedule{
     }
     
     public void lateFineCal() {
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Calculate late fine of bills(start), runningFlag={}", scheduleProvider.getRunningFlag());
+        }
     	if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
     		/**
              * 1. 遍历所有的账单（所有维度），更新账单的欠费状态
@@ -373,11 +403,15 @@ public class AssetSchedule{
             SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
             Date today = new Date();
             coordinationProvider.getNamedLock("update_bill_and_late_fine").tryEnter(()->{
+                long roundStartTime = System.currentTimeMillis();
+                int totalBillCount = 0;
+                int totalBillItemCount = 0;
                 Long nextPageAnchor = 0l;
                 while(nextPageAnchor != null){
                     List<Long> overdueBillIds = new ArrayList<>();
                     SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
                     List<PaymentBills> bills = res.getBills();
+                    totalBillCount += bills.size();
                     //更新账单
                     for(PaymentBills bill : bills){
                         String dueDayDeadline = bill.getDueDayDeadline();
@@ -394,6 +428,7 @@ public class AssetSchedule{
                     nextPageAnchor = res.getNextPageAnchor();
                     //这10000个账单中欠费的billItem
                     List<PaymentBillItems> billItems = assetProvider.getBillItemsByBillIds(overdueBillIds);
+                    totalBillItemCount += billItems.size();
                     for(int i = 0; i < billItems.size(); i++){
                         PaymentBillItems item = billItems.get(i);
                         //没有关联滞纳金标准的不计算，剔除出更新队列
@@ -413,7 +448,8 @@ public class AssetSchedule{
                         amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
                         List<PaymentFormula> formulas = assetStandardProvider.getFormulas(item.getLateFineStandardId());
                         if(formulas.size() != 1) {
-                            LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
+                            LOGGER.info("Calculate late fine of bills, formula is more than one or less than one, billId={}, itemId={}, formulas={}", 
+                                    item.getBillId(), StringHelper.toJsonString(formulas));
                         }
                         String formulaJson = formulas.get(0).getFormulaJson();
                         if(formulaJson.contains("qf")) {//issue-34468 【物业缴费】执行接口，报错
@@ -426,7 +462,8 @@ public class AssetSchedule{
                     			fineAmount = new BigDecimal(object.toString());
                     			fineAmount = fineAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
                     		} catch (Exception e) {
-                    			LOGGER.info("lateFineCal scriptEngine error, formulaJson={}, exception={}", formulaJson, e);
+                                LOGGER.info("Calculate late fine of bills, script error, billId={}, itemId={}, formulaJson={}", 
+                                        item.getBillId(), item.getId(), formulaJson, e);
                     		}
 	                        //开始构造一条滞纳金记录
 	                        //查看item是否已经有滞纳金产生了
@@ -453,9 +490,20 @@ public class AssetSchedule{
 	                        assetProvider.reCalBillById(item.getBillId());
                         }
                     }
+                    
+                    if(LOGGER.isInfoEnabled()) {
+                        long roundEndTime = System.currentTimeMillis();
+                        LOGGER.info("Calculate late fine of bills(round updating), nextPageAnchor={}, pageSize={}, totalBillCount={}, totalBillItemCount={}, elapse={}", 
+                                nextPageAnchor, pageSize, totalBillCount, totalBillItemCount, (roundEndTime - roundStartTime));
+                    }
                 }
             });
     	}
+
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Calculate late fine of bills(end), elapse={}", (endTime - startTime));
+        }
     }
 	
     private Calendar newClearedCalendar() {
