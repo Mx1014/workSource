@@ -313,12 +313,6 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 		}
 		
 		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.CONTRACT_DOCUMENT.getCode());
-		e.setKey("合同模板");
-		e.setValue("");
-		entities.add(e);
-
-		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("合同资产");
 		StringBuffer apartments = new StringBuffer();
