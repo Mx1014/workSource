@@ -1628,7 +1628,9 @@ public class AssetProviderImpl implements AssetProvider {
 
             }
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
-            response[0].setBillGroupName(billGroupDTO.getBillGroupName());
+            if(billGroupDTO != null) {
+            	response[0].setBillGroupName(billGroupDTO.getBillGroupName());
+            }
             response[0].setBillId(String.valueOf(newBill.getId()));
             response[0].setNoticeTelList(noticeTelList);
             response[0].setBillStatus(newBill.getStatus());
