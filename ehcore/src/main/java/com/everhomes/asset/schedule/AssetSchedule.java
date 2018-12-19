@@ -212,7 +212,8 @@ public class AssetSchedule{
                            }
                            assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
                        } catch (Exception e){
-                           LOGGER.error("Update bill dueday count, pageAnchor={}, pageSize={}, totalSize={}", pageAnchor, pageSize, totalSize, e);
+                           LOGGER.error("Update bill dueday count, due day deadline parse error, pageAnchor={}, billId={}, dueDayDeadline={}", 
+                                   pageAnchor, bill.getId(), dueDayDeadline, e);
                        };
                    }
                    nextPageAnchor = res.getNextPageAnchor();
