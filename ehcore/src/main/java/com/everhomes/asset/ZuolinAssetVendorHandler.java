@@ -67,6 +67,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StopWatch;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -1170,13 +1171,14 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
         BatchImportBillsResponse response = new BatchImportBillsResponse();
         ArrayList resultList = null;
+        StopWatch stopWatch = new StopWatch();//主要是为了监控各个过程耗费的时间
         try{
-        	long startTime = System.currentTimeMillis();
+        	stopWatch.start("processorExcel");
             resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
-            if(LOGGER.isDebugEnabled()) {
-        		long processorExcelTime = System.currentTimeMillis();
-        		LOGGER.info("batchImportBills processorExcelTime={} ms", (processorExcelTime - startTime));
-        	}
+            stopWatch.stop();
+//            if(LOGGER.isDebugEnabled()) {
+//        		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
+//        	}
             if(null == resultList || resultList.isEmpty()){
                 LOGGER.error("bill import: File content is empty, userId");
                 //不恰当的使用了组织架构的scope，潜在可能造成拆分障碍 by wentian
@@ -1184,6 +1186,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                         "File content is empty");
             }else {
             	//修复ISSUE-32519 : 已经填写了内容，右键删除后，导入总是提示有一行失败，且失败原因“账单开始时间格式错误,请参考说明进行填写”
+            	stopWatch.start("checkDeleteNullRow");
             	Iterator iterator = resultList.iterator();
             	while(iterator.hasNext()){
             		RowResult currentRow = (RowResult) iterator.next();
@@ -1191,6 +1194,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     	iterator.remove();
                     }
                 }
+            	stopWatch.stop();
+//            	if(LOGGER.isDebugEnabled()) {
+//            		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
+//            	}
             }
         }catch (IOException exception){
             LOGGER.error("file resolve failed in batchImportBills", exception);
@@ -1208,15 +1215,19 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         task.setCreatorUid(UserContext.currentUserId());
         ArrayList finalResultList = resultList;
         task = importFileService.executeTask(() -> {
+        	stopWatch.start("handleImportBillData");
             ImportFileResponse importTaskResponse = new ImportFileResponse();
             Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = handleImportBillData(finalResultList, cmd.getBillGroupId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getBillSwitch(), cmd.getTargetType());
+            stopWatch.stop();
+            if(LOGGER.isDebugEnabled()) {
+        		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
+        	}
             List<CreateBillCommand> createBillCommands = new ArrayList<>();
             List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
             for(Map.Entry<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> entry : map.entrySet()){
                 createBillCommands = entry.getKey();
                 datas = entry.getValue();
             }
-
             // 原来的实现方式是对于每条excel数据，都进行帐单和费项的比较来判断帐单是否需要覆盖，这使得查询、比较、删除、插入次数过多，处理一条数据需要15秒以上，
             // 使得数据很难导进去，故先对已存在的数据进行处理成一个标识（字符串），方便后面比较 by lqs 20181207
             Map<String, String> existBills = null;
@@ -1674,15 +1685,16 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         		if(pos != -1) {
             		buildingName = address.substring(0, pos);
             		apartmentName = address.substring(pos + 1);
-            		Address addressByBuildingApartmentName = addressProvider.findAddressByBuildingApartmentName(namespaceId, ownerId, buildingName, apartmentName);
-            		if(addressByBuildingApartmentName != null) {
-            			addressId = addressByBuildingApartmentName.getId();
-            		} else {
-            		    log.setErrorLog("楼栋/门牌找不到");
-                        log.setCode(AssetBillImportErrorCodes.ADDRESS_INCORRECT);
-                        datas.add(log);
-                        continue bill;
-            		}
+            		//缴费管理V7.6（账单导入优化）：根据楼栋门牌查询addressId这步应该在最后面做成批量的，才能提高性能
+//            		Address addressByBuildingApartmentName = addressProvider.findAddressByBuildingApartmentName(namespaceId, ownerId, buildingName, apartmentName);
+//            		if(addressByBuildingApartmentName != null) {
+//            			addressId = addressByBuildingApartmentName.getId();
+//            		} else {
+//            		    log.setErrorLog("楼栋/门牌找不到");
+//                        log.setCode(AssetBillImportErrorCodes.ADDRESS_INCORRECT);
+//                        datas.add(log);
+//                        continue bill;
+//            		}
             	}else {
             		log.setErrorLog("楼栋/门牌格式错误，楼栋门牌要以/分开");
             		log.setCode(AssetBillImportErrorCodes.ADDRESS_INCORRECT);
