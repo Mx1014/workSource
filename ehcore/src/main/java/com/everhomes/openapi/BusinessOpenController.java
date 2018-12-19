@@ -116,6 +116,10 @@ public class BusinessOpenController extends ControllerBase {
     @Autowired
     private WeChatService wechatService;
 
+    @Autowired
+    private OpenMessageService openMessageService;
+
+
 	private AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId){
         if(null == namespaceId) {
             LOGGER.error("checkAssetVendor namespaceId cannot be null.");
@@ -301,32 +305,11 @@ public class BusinessOpenController extends ControllerBase {
     }
 
     // add by momoubin,18/12/14,发送系统消息
-    private void sendSystemMessageToUser(Long userId, String content, Map<String, String> meta) {
-        MessageDTO messageDto = new MessageDTO();
-        messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(User.SYSTEM_UID);
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()),
-                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(content);
-        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-        if (null != meta && meta.size() > 0) {
-            messageDto.getMeta().putAll(meta);
-        }
-
-        LOGGER.debug("sendMessageToUser-systemId=" + User.BIZ_UID);
-        LOGGER.debug("sendMessageToUser-SYSTEM_USER_LOGIN=" + StringHelper.toJsonString(User.SYSTEM_UID));
-
-        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-    }
-
-    // add by momoubin,18/12/14,发送系统消息
     @RequestMapping("sendSystemMessageToUser")
     @RestReturn(value = String.class)
     public RestResponse sendSystemMessageToUser(BusinessMessageCommand cmd) {
         cmd.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        sendSystemMessageToUser(cmd.getUserId(), cmd.getContent(), cmd.getMeta());
+        openMessageService.sendSystemMessageToUser(cmd.getUserId(),cmd.getContent(),cmd.getMeta());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
