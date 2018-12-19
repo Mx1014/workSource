@@ -5138,6 +5138,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//填充价格分类
 		priceRule.setPriceClassification(rentalv2Provider.listClassification(rs.getResourceType(),EhRentalv2PriceRules.class.getSimpleName(),
 				priceRule.getId(),null,null,null,null));
+
+		List<RentalResourceOrder> rentalResourceOrders = this.rentalv2Provider.findAllRentalSiteBillByTime(rs, start.getTimeInMillis(),
+				end.getTimeInMillis());
+		List<RentalCell> closedCells = this.rentalv2Provider.findCellClosedByTimeInterval(rs.getResourceType(), rs.getId(), start.getTimeInMillis(),
+				end.getTimeInMillis());
+		SegmentTree usedSegment = new SegmentTree();
+		SegmentTree closedSegment = new SegmentTree();
+		if (rentalResourceOrders != null && rentalResourceOrders.size()>0)
+			for (RentalResourceOrder resourceOrder:rentalResourceOrders)
+				usedSegment.putSegment(resourceOrder.getBeginTime().getTime(),resourceOrder.getEndTime().getTime(),
+						resourceOrder.getRentalCount().intValue());
+		if (closedCells != null && closedCells.size() >0)
+			for (RentalCell cell : closedCells)
+				closedSegment.putSegment(cell.getBeginTime().getTime(),cell.getEndTime().getTime(),1);
+
 		for (; start.before(end); start.add(Calendar.MONTH, 1)) {
 			RentalSiteDayRulesDTO dayDto = new RentalSiteDayRulesDTO();
 			response.getSiteDays().add(dayDto);
@@ -5158,8 +5173,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 					// 支持复选，要换一种方式计算剩余数量
+					Double rentedCount = rsr.getCounts() - usedSegment.getMaxCover(rsr.getBeginTime().getTime(), rsr.getEndTime().getTime());
+					dto.setCounts(rentedCount < 0 ?0.0:rentedCount);
 					dto.setResourceCounts(rsr.getCounts());
-					calculateAvailableCount(dto, rs, rsr, priceRules);
+
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
 
@@ -5169,7 +5186,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 					// 多种模式的情况下，一种模式下关闭的其它模式下对应的时间段也要关闭
 					if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
-						calculateCurrentStatus(dto, rs, rsr, priceRules);
+						if (closedSegment.getMaxCover(rsr.getBeginTime().getTime(),rsr.getEndTime().getTime()) > 0)
+							dto.setStatus(SiteRuleStatus.MANUAL_CLOSE.getCode());
 					}
 
 					setRentalSiteRulesDTOExtraInfo(dto);
@@ -5266,6 +5284,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			pricePackages.forEach(r->r.setPriceClassification(rentalv2Provider.listClassification(rs.getResourceType(),EhRentalv2PricePackages.class.getSimpleName(),
 					r.getId(),null,null,null,null)));
 
+		List<RentalResourceOrder> rentalResourceOrders = this.rentalv2Provider.findAllRentalSiteBillByTime(rs, start.getTimeInMillis(),
+				end.getTimeInMillis());
+		List<RentalCell> closedCells = this.rentalv2Provider.findCellClosedByTimeInterval(rs.getResourceType(), rs.getId(), start.getTimeInMillis(),
+				end.getTimeInMillis());
+		SegmentTree usedSegment = new SegmentTree();
+		SegmentTree closedSegment = new SegmentTree();
+		if (rentalResourceOrders != null && rentalResourceOrders.size()>0)
+			for (RentalResourceOrder resourceOrder:rentalResourceOrders)
+				usedSegment.putSegment(resourceOrder.getBeginTime().getTime(),resourceOrder.getEndTime().getTime(),
+						resourceOrder.getRentalCount().intValue());
+		if (closedCells != null && closedCells.size() >0)
+			for (RentalCell cell : closedCells)
+				closedSegment.putSegment(cell.getBeginTime().getTime(),cell.getEndTime().getTime(),1);
+
 		for (;start.before(end);start.add(Calendar.DATE,7)){
 			RentalSiteDayRulesDTO dayDto = new RentalSiteDayRulesDTO();
 			dtos.add(dayDto);
@@ -5283,8 +5315,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setRuleDate(rsr.getResourceRentalDate().getTime());
 
 					// 支持复选，要换一种方式计算剩余数量
+					Double rentedCount = rsr.getCounts() - usedSegment.getMaxCover(rsr.getBeginTime().getTime(), rsr.getEndTime().getTime());
+					dto.setCounts(rentedCount < 0 ?0.0:rentedCount);
 					dto.setResourceCounts(rsr.getCounts());
-					calculateAvailableCount(dto, rs, rsr, priceRules);
+
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
 
@@ -5294,7 +5328,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 					// 多种模式的情况下，一种模式下关闭的其它模式下对应的时间段也要关闭
 					if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
-						calculateCurrentStatus(dto, rs, rsr, priceRules);
+						if (closedSegment.getMaxCover(rsr.getBeginTime().getTime(),rsr.getEndTime().getTime()) > 0)
+							dto.setStatus(SiteRuleStatus.MANUAL_CLOSE.getCode());
 					}
 					setRentalSiteRulesDTOExtraInfo(dto);
 					dayDto.getSiteRules().add(dto);

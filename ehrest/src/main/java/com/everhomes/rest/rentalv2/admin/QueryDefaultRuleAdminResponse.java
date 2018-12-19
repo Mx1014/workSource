@@ -134,6 +134,12 @@ public class QueryDefaultRuleAdminResponse {
 
 	private Byte remarkFlag;
 	private String remark;
+	private Byte fileFlag;
+	private String previewUsingImageUri;
+	private String previewIdleImageUri;
+	private String shopName;
+	private String shopNo;
+	private String shopUrl;
 
 
 	@Override
@@ -427,5 +433,53 @@ public class QueryDefaultRuleAdminResponse {
 
 	public void setStructures(List<SiteStructureDTO> structures) {
 		this.structures = structures;
+	}
+
+	public Byte getFileFlag() {
+		return fileFlag;
+	}
+
+	public void setFileFlag(Byte fileFlag) {
+		this.fileFlag = fileFlag;
+	}
+
+	public String getPreviewUsingImageUri() {
+		return previewUsingImageUri;
+	}
+
+	public void setPreviewUsingImageUri(String previewUsingImageUri) {
+		this.previewUsingImageUri = previewUsingImageUri;
+	}
+
+	public String getPreviewIdleImageUri() {
+		return previewIdleImageUri;
+	}
+
+	public void setPreviewIdleImageUri(String previewIdleImageUri) {
+		this.previewIdleImageUri = previewIdleImageUri;
+	}
+
+	public String getShopName() {
+		return shopName;
+	}
+
+	public void setShopName(String shopName) {
+		this.shopName = shopName;
+	}
+
+	public String getShopNo() {
+		return shopNo;
+	}
+
+	public void setShopNo(String shopNo) {
+		this.shopNo = shopNo;
+	}
+
+	public String getShopUrl() {
+		return shopUrl;
+	}
+
+	public void setShopUrl(String shopUrl) {
+		this.shopUrl = shopUrl;
 	}
 }
