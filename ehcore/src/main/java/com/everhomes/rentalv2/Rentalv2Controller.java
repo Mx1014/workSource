@@ -126,6 +126,7 @@ public class Rentalv2Controller extends ControllerBase {
 	 */
 
 	@RequestMapping("findRentalSiteDayStatus")
+	@RequireAuthentication(value = false)
 	@RestReturn(value = FindRentalSiteDayStatusCommandResponse.class)
 	public RestResponse findRentalSiteDayStatus(@Valid FindRentalSiteDayStatusCommand cmd) {
 		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
