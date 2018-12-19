@@ -22,7 +22,7 @@ import java.util.List;
  *     <li>orgDtos: 企业地址， 参考{@link OrganizationDetailDTO}</li>
  *     <li>addressDtos: 家庭地址， 参考{@link AddressDTO}</li>
  *     <li>memberLogDTOs: 用户认证记录， 参考{@link OrganizationMemberLogDTO}</li>
- *     <li>userSourceType: userSourceType</li>
+ *     <li>userSourceType: 用户来源 1：来源app 2：来源微信 3: 来源支付宝</li>
  *     <li>recentlyActiveTime: 最近活跃时间</li>
  *     <li>email: 邮箱</li>
  * </ul>

@@ -8,7 +8,7 @@ package com.everhomes.rest.community.admin;
  *     <li>namespaceId: namespaceId</li>
  *     <li>keywords: 姓名或者昵称</li>
  *     <li>organizationId: organizationId</li>
- *     <li>userSourceType: 用户来源 1：来源app 2：来源微信</li>
+ *     <li>userSourceType: 用户来源 1：来源app 2：来源微信 3: 来源支付宝</li>
  *     <li>phone: 手机号码</li>
  *     <li>startTime: 注册时间-开始</li>
  *     <li>endTime: 注册时间-结束</li>

@@ -47,7 +47,7 @@ public interface UserProvider {
 
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
 
-    List<User> listAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
+    List<User> listAppAndWeiXinAndAlipayUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
     /**根据域空间id和注册的手机号来查询对应的注册信息**/
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
@@ -222,7 +222,7 @@ public interface UserProvider {
     String findUserTokenOfUser(Long userId);
 
 
-    Integer countAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
+    Integer countAppAndWeiXinAndAlipayUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
 
     String getNickNameByUid(Long creatorUid);
 

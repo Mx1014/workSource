@@ -205,7 +205,14 @@ public class CommunityAllUserApplyExportTaskHandler implements FileDownloadTaskH
                 }else {
                     communityAllUserDTO.setAuthString("未认证");
                 }
-                communityAllUserDTO.setUserSourceTypeString(NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX ? "微信": "无");
+                // communityAllUserDTO.setUserSourceTypeString(NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX ? "微信": "无");
+                if (NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX) {
+                    communityAllUserDTO.setUserSourceTypeString("微信");
+                }else if (NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.ALIPAY) {
+                    communityAllUserDTO.setUserSourceTypeString("支付宝");
+                }else {
+                    communityAllUserDTO.setUserSourceTypeString("无");
+                }
                 communityAllUserDTO.setEmail("-");
                 UserIdentifier emailIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.EMAIL.getCode());
 
