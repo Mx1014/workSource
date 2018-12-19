@@ -191,6 +191,16 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 			result = Utils.get((Map<String, Object>) null,urlbuffer2.substring(0,urlbuffer2.length()-1).toString());
 			jsonObject = JSONObject.parseObject(result);
 		}
+		boolean flag = configProvider.getBooleanValue("parking.elive.debug", false);
+		if(flag){
+			map.put("tn", getToken(true));
+			StringBuffer urlbuffer2 = new StringBuffer(funurl).append("?");
+			for (Map.Entry<String, Object> entry : map.entrySet()) {
+				urlbuffer2.append(entry.getKey()).append('=').append(entry.getValue()).append('&');
+			}
+			result = Utils.get((Map<String, Object>) null,urlbuffer2.substring(0,urlbuffer2.length()-1).toString());
+			jsonObject = JSONObject.parseObject(result);
+		}
 //		if(jsonObject!=null && jsonObject.getInteger("resultCode")!=0){
 //			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GET_TOKEN,
 //					jsonObject.getInteger("resultCode")+','+jsonObject.getString("message"));
