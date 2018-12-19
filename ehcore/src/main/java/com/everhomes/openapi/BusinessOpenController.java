@@ -315,6 +315,7 @@ public class BusinessOpenController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
     @RequestMapping("sendMessageToUser")
     @RestReturn(value = String.class)
     public RestResponse sendMessageToUser(BusinessMessageCommand cmd) {
