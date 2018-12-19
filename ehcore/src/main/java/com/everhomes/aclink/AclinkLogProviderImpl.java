@@ -247,23 +247,23 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         Result<Record1<Integer>> rlt5 = context.select(t.AUTH_ID.count().as("bluetooth"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
                 .where(condition)
-                .and(t.EVENT_TYPE.eq(0L)).fetch();
+                .and(t.EVENT_TYPE.eq(AclinkLogEventType.PHONE_BLE_OPEN.getCode())).fetch();
         Result<Record1<Integer>> rlt6 = context.select(t.AUTH_ID.count().as("qr"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
                 .where(condition)
-                .and(t.EVENT_TYPE.eq(1L)).fetch();
+                .and(t.EVENT_TYPE.eq(AclinkLogEventType.PHONE_QR_OPEN.getCode())).fetch();
         Result<Record1<Integer>> rlt7 = context.select(t.AUTH_ID.count().as("remote"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
                 .where(condition)
-                .and(t.EVENT_TYPE.eq(2L)).fetch();
+                .and(t.EVENT_TYPE.eq(AclinkLogEventType.PHONE_REMOTE_OPEN.getCode())).fetch();
         Result<Record1<Integer>> rlt8 = context.select(t.AUTH_ID.count().as("button"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
                 .where(condition)
-                .and(t.EVENT_TYPE.eq(3L)).fetch();
+                .and(t.EVENT_TYPE.eq(AclinkLogEventType.BUTTON_OPEN.getCode())).fetch();
         Result<Record1<Integer>> rlt9 = context.select(t.AUTH_ID.count().as("face"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
                 .where(condition)
-                .and(t.EVENT_TYPE.eq(4L)).fetch();
+                .and(t.EVENT_TYPE.eq(AclinkLogEventType.FACE_OPEN.getCode())).fetch();
         Result<Record1<Integer>> rlt10 = context.select(t2.ID.count().as("temp"))
                 .from(t2)
                 .where(condition2)

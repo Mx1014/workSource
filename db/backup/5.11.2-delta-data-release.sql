@@ -250,6 +250,11 @@ UPDATE eh_service_module_apps SET app_type = 0 WHERE module_id = 20500;
 -- REMARK: 修复物业报修跳转bug
 delete from eh_service_alliance_jump_module where  module_id = 20100 and (module_name = '投诉建议' or instance_config like '%"taskCategoryId":9%');
 
+
+-- AUTHOR: 吴寒  20181214
+-- REMARK: 更正文案信息
+UPDATE eh_locale_templates SET TEXT = '你收到了${subject},快去查看吧!' WHERE scope = 'welfare.msg' AND CODE = 1;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
