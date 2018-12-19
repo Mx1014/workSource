@@ -132,6 +132,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.officecubicle.ListOfficeCubicleAccountDTO;
 import com.everhomes.rest.organization.VendorType;
 
 import com.everhomes.rest.user.IdentifierType;
@@ -3554,20 +3555,25 @@ public class ParkingServiceImpl implements ParkingService {
 		if(null == resp || null == resp.getResponse()){
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
-		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
-		return payUserList.stream().map(r->{
-			ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
-			dto.setAccountId(r.getId());
-			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
-			dto.setAccountName(r.getRemark());
-			dto.setAccountAliasName(r.getUserAliasName());
-	        if (r.getRegisterStatus() != null && r.getRegisterStatus().intValue() == 1) {
-	            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
-	        } else {
-	            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-	        }
-			return dto;
-		}).collect(Collectors.toList());
+		List<ListBizPayeeAccountDTO> payUserList = new ArrayList<ListBizPayeeAccountDTO>();
+		if(resp != null && resp.getErrorCode() != null && resp.getErrorCode().equals(HttpStatus.OK.value())){
+			List<GetPayUserListByMerchantDTO> merchantDTOS = resp.getResponse();
+            for (GetPayUserListByMerchantDTO merchantDTO : merchantDTOS) {
+                PayUserDTO payUserDTO = ConvertHelper.convert(merchantDTO,PayUserDTO.class);
+                ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+				dto.setAccountId(payUserDTO.getId());
+				dto.setAccountType(payUserDTO.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+				dto.setAccountName(payUserDTO.getRemark());
+				dto.setAccountAliasName(payUserDTO.getUserAliasName());
+		        if (payUserDTO.getRegisterStatus() != null && payUserDTO.getRegisterStatus().intValue() == 1) {
+		            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+		        } else {
+		            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+		        }
+                payUserList.add(dto);
+            }
+		}
+		return payUserList;
 	}
 
 	@Override
