@@ -1186,7 +1186,6 @@ public class AclinkAdminController extends ControllerBase {
         return response;
     }
 
-//add by liqingyan
     /**
      * <b>URL: /admin/aclink/doorStatisticByTime</b>
      * <p>门禁时间统计</p>
