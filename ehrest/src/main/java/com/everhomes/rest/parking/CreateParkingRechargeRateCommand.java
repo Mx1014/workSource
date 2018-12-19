@@ -32,8 +32,18 @@ public class CreateParkingRechargeRateCommand {
     private BigDecimal monthCount;
     @NotNull
     private BigDecimal price;
+    private String cardTypeId;
 
-    public CreateParkingRechargeRateCommand() {
+    
+    public String getCardTypeId() {
+		return cardTypeId;
+	}
+
+	public void setCardTypeId(String cardTypeId) {
+		this.cardTypeId = cardTypeId;
+	}
+
+	public CreateParkingRechargeRateCommand() {
     }
 
     public String getOwnerType() {

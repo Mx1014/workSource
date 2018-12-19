@@ -8,6 +8,7 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.parking.ParkingCardType;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 
 import org.jooq.SortField;
@@ -182,5 +183,7 @@ public interface ParkingProvider {
 	Long countRechargeOrdersPageNums(String ownerType, Long ownerId, Long parkingLotId, String plateNumber,
 			String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate, Byte rechargeType,
 			String paidType, String cardNumber, Byte status, String paySource, String keyWords);
+
+	void createParkingCardType(ParkingCardRequestType parkingCardType);
 
 }

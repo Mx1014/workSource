@@ -290,6 +290,21 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
+    public void createParkingCardType(ParkingCardRequestType parkingCardType){
+    	
+    	long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhParkingCardTypes.class));
+    	parkingCardType.setId(id);
+    	parkingCardType.setStatus(ParkingCommonStatus.ACTIVE.getCode());
+    	parkingCardType.setCreateTime(new Timestamp(System.currentTimeMillis()));
+    	parkingCardType.setCreatorUid(UserContext.currentUserId());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingCardTypesDao dao = new EhParkingCardTypesDao(context.configuration());
+		dao.insert(parkingCardType);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingCardTypes.class, null);
+    }
+    
+    @Override
     public void requestParkingCard(ParkingCardRequest parkingCardRequest){
     	
     	long id = sequenceProvider.getNextSequence(NameMapper
@@ -668,6 +683,8 @@ public class ParkingProviderImpl implements ParkingProvider {
     	
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingRechargeRates.class, parkingRechargeRate.getId());
     }
+    
+
     
     @Override
     public ParkingRechargeRate findParkingRechargeRatesById(Long id){
