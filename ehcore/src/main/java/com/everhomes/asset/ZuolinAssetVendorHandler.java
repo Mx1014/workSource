@@ -1221,9 +1221,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             ImportFileResponse importTaskResponse = new ImportFileResponse();
             Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> map = handleImportBillData(finalResultList, cmd.getBillGroupId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getBillSwitch(), cmd.getTargetType());
             stopWatch.stop();
-            if(LOGGER.isDebugEnabled()) {
-        		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
-        	}
+//            if(LOGGER.isDebugEnabled()) {
+//        		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
+//        	}
             List<CreateBillCommand> createBillCommands = new ArrayList<>();
             List<ImportFileResultLog<List<String>>> datas = new ArrayList<>();
             for(Map.Entry<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> entry : map.entrySet()){
@@ -1234,12 +1234,24 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             // 使得数据很难导进去，故先对已存在的数据进行处理成一个标识（字符串），方便后面比较 by lqs 20181207
             Map<String, String> existBills = null;
             if(cmd.getTargetType().equals(AssetTargetType.USER.getCode())) {
+            	stopWatch.start("prepareUserBillIdentifiers");
                 existBills = prepareUserBillIdentifiers(createBillCommands);
+                stopWatch.stop();
+                if(LOGGER.isDebugEnabled()) {
+            		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
+            	}
+            }else {
+            	stopWatch.start("prepareOrganBillIdentifiers");
+                existBills = prepareOrganBillIdentifiers(createBillCommands);
+                stopWatch.stop();
+                if(LOGGER.isDebugEnabled()) {
+            		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
+            	}
             }
-
             long updateStartTime = System.currentTimeMillis();
             long roundStartTime = updateStartTime;
             LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
+            stopWatch.start("createOrModifyBill");
             for(int i = 0; i < createBillCommands.size(); i++){
                 CreateBillCommand command = createBillCommands.get(i);
                 command.setCategoryId(categoryId);
@@ -1264,6 +1276,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     roundStartTime = roundEndTime;
             	}
             }
+            stopWatch.stop();
+            if(LOGGER.isDebugEnabled()) {
+        		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
+        	}
             if(LOGGER.isInfoEnabled()) {
                 long updateEndTime = System.currentTimeMillis();
                 int cmdSize = (createBillCommands == null) ? 0 : createBillCommands.size();
@@ -2329,5 +2345,77 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     
     public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
     	return assetProvider.showCreateBillSubItemList(cmd);
-    }        
+    }
+    
+    /**
+     * 企业客户时，以账单时间、账单组、企业名称3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+     * <p>企业客户的帐单以账单时间、账单组、企业名称3条信息定位账单的唯一性（这三个信息构成唯一标识)，导入的时候需要比较是否已经存在相同标识的帐单，
+     * 如果相同标识的帐单已经存在，则需要先删除再重新建。/p>
+     * <p>为了加快速度，先把excel数据里出现的时间段，把数据库已有的帐单分批遍历出来（分批是为了减少内存的占用），然后组装出帐单组、帐单时间、企业名称的标识；
+     * 比较的时候，把excel里的数据也按同样的规则组装出标识；</p>
+     * <p>标识在组装的过程中是使用一个map保存，key为帐单ID，value为标识；为了在比较的时候可以快速找到标识，把该map反转一下，也就是key是标识，value
+     * 是帐单ID（注意：如果数据中有两个帐单标识一样，则会被覆盖掉），这样在比较时可以用map的查找速度来得到，而不是每次查找都遍历所有标识才能找到；
+     * 两个标识比较如果相同则认为帐单已存在，先删除再插入。</p>
+     * <p>帐单标识格式：<b>帐单组_账单开始时间_帐单结束时间</b></p>
+     * @param billDatas excel表中的数据列表
+     * @return 帐单标识map
+     */
+    private Map<String, String> prepareOrganBillIdentifiers(List<CreateBillCommand> billDatas) {
+        long startTime = System.currentTimeMillis();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        // 最小的开始日期、最大的结束日期，它们共同构成限制数据查询的范围，减少数据量加载和比较
+        String minBeginDateStr = null;
+        String maxEndDateStr = null;
+
+        long calDateStartTime = System.currentTimeMillis();
+        Long communityId = null; // 假定billDatas时里的所有数据都是同一个小区的，只提取其中一个
+        for(int i = 0; i < billDatas.size(); i++){
+            CreateBillCommand command = billDatas.get(i);
+            if(communityId == null && command.getOwnerId() != null) {
+                communityId = command.getOwnerId();
+            }
+
+            // 取开始日期最小值
+            String dateStrBegin = command.getDateStrBegin();
+            if((minBeginDateStr == null) || (dateStrBegin != null && dateStrBegin.compareTo(minBeginDateStr) < 0)) {
+                minBeginDateStr = dateStrBegin;
+            }
+
+            // 取结束日期最大值
+            String dateStrEnd = command.getDateStrEnd();
+            if((maxEndDateStr == null) || (dateStrEnd  != null && dateStrEnd.compareTo(maxEndDateStr) > 0)) {
+                maxEndDateStr =  dateStrEnd;
+            }
+        }
+        long calDateEndTime = System.currentTimeMillis();
+
+        long prepareBillStartTime = System.currentTimeMillis();
+        Map<Long, String> map = prepareUserBillIdentifierFromBill(namespaceId, communityId, minBeginDateStr, maxEndDateStr);
+        populateUserBillIdentifierWithAddress(map);
+        long prepareBillEndTime = System.currentTimeMillis();
+
+        long mapRevertStartTime = System.currentTimeMillis();
+        Map<String, String> billIdentifiers = new HashMap<String, String>();
+        Iterator<Entry<Long, String>> iterator = map.entrySet().iterator();
+        Entry<Long, String> entry = null;
+        while(iterator.hasNext()) {
+            entry = iterator.next();
+            if(entry.getValue() != null) {
+                billIdentifiers.put(entry.getValue(), String.valueOf(entry.getKey()));
+            }
+        }
+        long mapRevertEndTime = System.currentTimeMillis();
+
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Process bill importing data, prepare user bill identifiers, namespaceId={}, communityId={}, minBeginDateStr={}, maxEndDateStr={}, "
+                    + "totalCount={}, elapse={}, calDateElapse={}, prepareBillElapse={}, mapRevertElapse={}",
+                    namespaceId, communityId, minBeginDateStr, maxEndDateStr, billDatas.size(), (endTime - startTime),
+                    (calDateEndTime - calDateStartTime), (prepareBillEndTime - prepareBillStartTime), (mapRevertEndTime - mapRevertStartTime));
+        }
+
+        return billIdentifiers;
+    }
+    
+    
 }
