@@ -499,8 +499,6 @@ public class AddressProviderImpl implements AddressProvider {
                     , Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID));
             query.addConditions(Tables.EH_ADDRESSES.LIVING_STATUS.eq(livingStatus)
                  .or(Tables.EH_ADDRESSES.LIVING_STATUS.isNull().and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus))));
-            //数据重复问题，by-djm
-            query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID));
         }
 
         query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
