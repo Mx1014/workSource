@@ -2386,10 +2386,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		//查询合同适用场景，物业合同不修改资产状态。
         ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
 
-        if (contractCategory== null && contract.getPaymentFlag()==1) {
+        // 第三方同步的 以及付款合同
+        if ((contractCategory== null && contract.getPaymentFlag()==1) || !cmd.getCheckAuth()) {
         	flag = true;
 		} else if (ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
-			flag = false;
+			flag = true;
 		}
         
 		contract.setStatus(ContractStatus.INACTIVE.getCode());
@@ -2404,17 +2405,29 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			if(contractApartments != null && contractApartments.size() > 0) {
 				boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
 				contractApartments.forEach(contractApartment -> {
-					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
-					if(addressMapping != null) {
-						//26058  已售的状态不变
-						if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
-							addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
-							propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
-						}
+					// 房源合同映射关系
+					ContractBuildingMapping mapping = contractBuildingMappingProvider.findContractBuildingMappingById(contractApartment.getId());
+					// 第三方同步没有资产id
+					if (contractApartment.getAddressId() != null) {
+						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
+						if(addressMapping != null) {
+							//26058  已售的状态不变
+							if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
+								addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+								propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+								
+								mapping.setStatus(CommonStatus.INACTIVE.getCode());
+								contractBuildingMappingProvider.updateContractBuildingMapping(mapping);
+							}
 
-						if(individualFlag) {
-							propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), contractApartment.getAddressId(), contract.getCustomerId());
+							if(individualFlag) {
+								propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), contractApartment.getAddressId(), contract.getCustomerId());
+							}
 						}
+					} else {
+						//没有关联房源id
+						mapping.setStatus(CommonStatus.INACTIVE.getCode());
+						contractBuildingMappingProvider.updateContractBuildingMapping(mapping);
 					}
 				});
 			}
