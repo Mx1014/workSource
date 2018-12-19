@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *     <li>description: 描述</li>
  *     <li>iconUri: icon 图片</li>
  *     <li>selectedIconUri: icon选中图片</li>
- *     <li>topBarStyle: 顶栏样式，请参考{@link com.everhomes.rest.launchpadbase.indexconfigjson.TopBarStyle})</li>
+ *     <li>topBarStyle: 顶栏样式，请参考{@link com.everhomes.rest.launchpadbase.indexconfigjson.TopBarStyle}</li>
  * </ul>
  */
 public class CreatePortalNavigationBarCommand {

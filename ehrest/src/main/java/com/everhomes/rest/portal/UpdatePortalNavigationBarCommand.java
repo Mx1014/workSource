@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *     <li>configJson: 配置信息</li>
  *     <li>iconUri: icon 图片</li>
  *     <li>selectedIconUri: icon选中图片</li>
+ *     <li>topBarStyle: 顶栏样式，请参考{@link com.everhomes.rest.launchpadbase.indexconfigjson.TopBarStyle}</li>
  * </ul>
  */
 public class UpdatePortalNavigationBarCommand {
@@ -30,6 +31,16 @@ public class UpdatePortalNavigationBarCommand {
 	private String iconUri;
 
 	private String selectedIconUri;
+
+	private Byte topBarStyle;
+
+	public Byte getTopBarStyle() {
+		return topBarStyle;
+	}
+
+	public void setTopBarStyle(Byte topBarStyle) {
+		this.topBarStyle = topBarStyle;
+	}
 
 	public Long getId() {
 		return id;
