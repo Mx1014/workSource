@@ -2,7 +2,6 @@ package com.everhomes.customer;
 
 import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.acl.RolePrivilegeServiceImpl;
 import com.everhomes.activity.ActivityCategories;
 import com.everhomes.activity.ActivityProivider;
 import com.everhomes.activity.ActivityService;
@@ -19,7 +18,6 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.configurations.Configurations;
 import com.everhomes.configurations.ConfigurationsProvider;
-import com.everhomes.configurations.ConfigurationsService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -37,7 +35,6 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
@@ -122,7 +119,6 @@ import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.tachikoma.commons.util.json.JsonHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -4214,10 +4210,8 @@ public class CustomerServiceImpl implements CustomerService {
         }else if(moduleId.equals(CustomerModuleType.INVITED_CUSTOMER)){
             configName = "chooseTrackerInvited";
         }
-        List<Configurations> configs = configurationsProvider.listConfigurations(namespaceId,
-                configName, null, null, null,true);
-        if(configs != null && configs.size() > 0){
-            Configurations config = configs.get(0);
+        PropertyConfiguration config = enterpriseCustomerProvider.findPropertyConfigurationByName(namespaceId, null, null, configName);
+        if(config != null){
             JsonParser parser = new JsonParser();
             JsonElement element = parser.parse(config.getValue());
             JsonObject obj = element.getAsJsonObject();
@@ -5147,5 +5141,47 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
+    @Override
+    public void createCustomerPropertyConfig(propertyConfigCommand cmd) {
+        PropertyConfiguration config = ConvertHelper.convert(cmd, PropertyConfiguration.class);
+        PropertyConfiguration configExist = enterpriseCustomerProvider.findPropertyConfigurationByName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleId(), cmd.getName());
 
+        if(configExist != null){
+            if(LOGGER.isInfoEnabled()){
+                LOGGER.info("the config is exist ,will update property config , info : {}" , config);
+            }
+            config.setId(configExist.getId());
+            enterpriseCustomerProvider.updatePropertyConfiguration(config);
+            return;
+        }
+
+        if(LOGGER.isInfoEnabled()){
+            LOGGER.info("create new property config , info : {}" , config);
+        }
+        enterpriseCustomerProvider.createPropertyConfiguration(config);
+    }
+
+    @Override
+    public PropertyConfigurationDTO getCustomerPropertyConfigByName(propertyConfigCommand cmd){
+        PropertyConfiguration config = enterpriseCustomerProvider.findPropertyConfigurationByName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleId(), cmd.getName());
+        if(config != null){
+            return ConvertHelper.convert(config, PropertyConfigurationDTO.class);
+        }else{
+            config = ConvertHelper.convert(cmd, PropertyConfiguration.class);
+            config.setValue("{\"value\" : [1,2,3]}");
+            if(LOGGER.isInfoEnabled()){
+                LOGGER.info("can't find config, will init new property config , info : {}" , config);
+            }
+            return ConvertHelper.convert(enterpriseCustomerProvider.createPropertyConfiguration(config), PropertyConfigurationDTO.class);
+        }
+    }
+
+    @Override
+    public void updateCustomerPropertyConfig(propertyConfigCommand cmd) {
+        PropertyConfiguration config = ConvertHelper.convert(cmd, PropertyConfiguration.class);
+        if(LOGGER.isInfoEnabled()){
+            LOGGER.info("update property config , info : {}" , config);
+        }
+        enterpriseCustomerProvider.updatePropertyConfiguration(config);
+    }
 }

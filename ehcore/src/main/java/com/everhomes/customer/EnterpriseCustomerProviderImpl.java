@@ -14,17 +14,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.EasySearchEnterpriseCustomersDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
-import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
-import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
@@ -36,70 +26,19 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhCustomerAccountsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerConfigutationsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerDepartureInfosDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorStatisticsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerEntryInfosDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerEventsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerInvestmentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerPatentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerPotentialDatasDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTalentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTaxesDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTrackingPlansDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTrackingsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAdminsDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
-import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
+import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerAccountsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerCertificatesRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerCommercialsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerDepartureInfosRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerEconomicIndicatorStatisticsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerEconomicIndicatorsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerEntryInfosRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerEventsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerInvestmentsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerPatentsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerPotentialDatasRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTalentsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTaxesRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrackingPlansRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrademarksRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseCustomerAdminsRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
 import com.everhomes.varField.FieldParams;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.JoinType;
-import org.jooq.Record;
-import org.jooq.SelectOffsetStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +54,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -2726,5 +2664,56 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         });
         return dtoList;
     }
+
+    @Override
+    public PropertyConfiguration createPropertyConfiguration(PropertyConfiguration config) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPropertyConfigurations.class));
+        config.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPropertyConfigurations.class, id));
+
+        EhPropertyConfigurationsDao dao = new EhPropertyConfigurationsDao(context.configuration());
+        dao.insert(config);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPropertyConfigurations.class, null);
+        return config;
+    }
+
+    @Override
+    public void updatePropertyConfiguration(PropertyConfiguration config) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPropertyConfigurations.class));
+
+        EhPropertyConfigurationsDao dao = new EhPropertyConfigurationsDao(context.configuration());
+        dao.update(config);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPropertyConfigurations.class, null);
+
+    }
+
+    @Override
+    public PropertyConfiguration findPropertyConfigurationByName(Integer namespaceId, Long communityId, Long moduleId, String name){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPropertyConfigurationsRecord> query = context.selectQuery(Tables.EH_PROPERTY_CONFIGURATIONS);
+
+        query.addConditions(Tables.EH_PROPERTY_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_PROPERTY_CONFIGURATIONS.NAME.eq(name));
+
+        if(moduleId != null) {
+            query.addConditions(Tables.EH_PROPERTY_CONFIGURATIONS.MODULE_ID.eq(moduleId));
+        }
+        if(communityId != null){
+            query.addConditions(Tables.EH_PROPERTY_CONFIGURATIONS.COMMUNITY_ID.eq(communityId));
+        }else{
+            query.addConditions(Tables.EH_PROPERTY_CONFIGURATIONS.COMMUNITY_ID.isNull());
+        }
+
+        return query.fetchAnyInto(PropertyConfiguration.class);
+    }
+
+    @Override
+    public PropertyConfiguration findPropertyConfigurationsById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        EhPropertyConfigurationsDao dao = new EhPropertyConfigurationsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), PropertyConfiguration.class);
+    }
+
 
 }

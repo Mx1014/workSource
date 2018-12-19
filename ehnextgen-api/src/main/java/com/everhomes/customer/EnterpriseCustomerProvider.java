@@ -264,4 +264,11 @@ public interface EnterpriseCustomerProvider {
     
 	EnterpriseCustomer findByOrganizationIdAndType(Long organizationId, String namespaceCustomerType);
 
+    PropertyConfiguration createPropertyConfiguration(PropertyConfiguration config);
+
+    void updatePropertyConfiguration(PropertyConfiguration config);
+
+    PropertyConfiguration findPropertyConfigurationByName(Integer namespaceId, Long communityId, Long moduleId, String name);
+
+    PropertyConfiguration findPropertyConfigurationsById(Long id);
 }
