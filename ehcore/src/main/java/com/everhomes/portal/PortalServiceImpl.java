@@ -39,9 +39,11 @@ import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.configurations.admin.ConfigurationsCreateAdminCommand;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.IndexType;
+import com.everhomes.rest.launchpadbase.LayoutType;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.CardExtension;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Application;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
+import com.everhomes.rest.launchpadbase.indexconfigjson.TopBarStyle;
 import com.everhomes.rest.module.AccessControlType;
 import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.module.ServiceModuleAppType;
@@ -2651,6 +2653,13 @@ public class PortalServiceImpl implements PortalService {
 					if(portalLaunchPadMappings != null && portalLaunchPadMappings.size() > 0){
 						container.setLayoutId(portalLaunchPadMappings.get(0).getLaunchPadContentId());
 					}
+                    if (TopBarStyle.LUCENCY_SHADE.getCode().equals(na.getTopBarStyle())) {
+                        container.setLayoutType(LayoutType.NAV_LUCENCY.getCode());
+                    }else if (TopBarStyle.OPAQUE_DEFORMATION.getCode().equals(na.getTopBarStyle())) {
+					    container.setLayoutType(LayoutType.NAV_OPAQUE.getCode());
+                    }else if (TopBarStyle.OPAQUE_STATIC.getCode().equals(na.getTopBarStyle())) {
+					    container.setLayoutType(LayoutType.NAV_STATIC.getCode());
+                    }
 
 					index.setConfigJson(container.toString());
 
