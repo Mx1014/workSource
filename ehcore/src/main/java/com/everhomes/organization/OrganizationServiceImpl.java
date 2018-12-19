@@ -7576,6 +7576,19 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return o2.getApproveTime().compareTo(o1.getApproveTime());
             }
         });
+
+        //add by momoubin,18/12/19：通过/拒绝用户根据 操作（通过/拒绝）时间降序；
+        if(cmd.getStatus() == OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode()){
+            Collections.sort(response.getMembers(), new Comparator<OrganizationMemberDTO>() {
+                @Override
+                public int compare(OrganizationMemberDTO o1, OrganizationMemberDTO o2) {
+                    if (o1.getCreateTime() == null || o2.getCreateTime() == null) {
+                        return -1;
+                    }
+                    return o2.getCreateTime().compareTo(o1.getCreateTime());
+                }
+            });
+        }
         return response;
     }
 
