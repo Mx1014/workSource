@@ -76,11 +76,11 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     private RentalResourceType updateRentalResourceType(Integer namespaceId,RentalInstanceConfig rentalInstanceConfig, String name){
         RentalResourceType rentalResourceType = rentalv2Provider.findRentalResourceTypeById(rentalInstanceConfig.getResourceTypeId());
         if(null != rentalResourceType){
-            if(null == rentalInstanceConfig.getPageType()){
-                rentalResourceType.setPageType((byte)0);
+            if(null != rentalInstanceConfig.getPageType()){
+                rentalResourceType.setPageType(rentalInstanceConfig.getPageType());
             }
-            if(null == rentalInstanceConfig.getDetailPageType()){
-                rentalResourceType.setDetailPageType((byte)0);
+            if(null != rentalInstanceConfig.getDetailPageType()){
+                rentalResourceType.setDetailPageType(rentalInstanceConfig.getDetailPageType());
             }
             if (null != rentalInstanceConfig.getPayMode())
                 rentalResourceType.setPayMode(rentalInstanceConfig.getPayMode());
