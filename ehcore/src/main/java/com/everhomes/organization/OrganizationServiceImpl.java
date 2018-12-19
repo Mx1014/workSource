@@ -6586,10 +6586,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //            }
         if (cmd.getJobPositionIds() != null) {
             //1.统一删除所有的部门岗位条目
-            //modify by yuanlei
-            //下面的这行代码是删除之前原有的部门岗位，这样的话，每次员工在新添加部门岗位时，就会将原来的部门岗位进行删除，不满足一个员工可以存在于多个部门岗位中
-            //所以我们再添加新的部门岗位时，不能删除之前原有的部门岗位，所以将下面的这行代码进行注释掉
-//            this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_POSITION.getCode());
+            this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_POSITION.getCode());
             //2. 统一新增岗位
             detailIds.forEach(detailId -> {
                 OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
