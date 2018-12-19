@@ -3529,6 +3529,7 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalLaunchPadMapping> portalLaunchPadMappings = new ArrayList<>();
 		Timestamp createTimestamp = new Timestamp(System.currentTimeMillis());
 
+		Map<Long, Long> layoutIdMap = new HashMap<>();
 		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalLayouts.class), (long)portalLayouts.size() + 1);
 		for(PortalLayout layout: portalLayouts){
 			id++;
@@ -3536,6 +3537,10 @@ public class PortalServiceImpl implements PortalService {
 			portalContentScopes.addAll(newPortalContentScope);
 			List<PortalLaunchPadMapping> newPortalLaunchPadMapping = getNewPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.getCode(), layout.getId(), id);
 			portalLaunchPadMappings.addAll(newPortalLaunchPadMapping);
+            //发布后，主页签保存的LayoutId就消失了，现在用map来保存，然后在更新主页签的layouytId
+            // add by yanlong.liang 20181219
+			layoutIdMap.put(layout.getId(), id);
+
 
 			copyPortalItemGroupToNewVersion(namespaceId, layout.getId(), id, newVersionId);
 
@@ -3569,6 +3574,17 @@ public class PortalServiceImpl implements PortalService {
         List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(oldVersionId);
         if (!CollectionUtils.isEmpty(portalNavigationBars)) {
             for (PortalNavigationBar portalNavigationBar : portalNavigationBars) {
+
+                if(IndexType.fromCode(portalNavigationBar.getType()) == IndexType.CONTAINER) {
+                    Container container = (Container) StringHelper.fromJsonString(portalNavigationBar.getConfigJson(), Container.class);
+                    if (container != null && container.getLayoutId() != null) {
+                        Long newLayoutId = layoutIdMap.get(container.getLayoutId());
+                        container.setLayoutId(newLayoutId);
+                        portalNavigationBar.setConfigJson(container.toString());
+                        this.portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
+                    }
+
+                }
                 PortalNavigationBar newPortalNavigationBar = ConvertHelper.convert(portalNavigationBar, PortalNavigationBar.class);
                 newPortalNavigationBar.setVersionId(newVersionId);
                 newPortalNavigationBar.setId(null);
