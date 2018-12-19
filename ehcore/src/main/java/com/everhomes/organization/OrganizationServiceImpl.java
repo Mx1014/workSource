@@ -10498,11 +10498,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<Long> includeList = new ArrayList<>();
 
         includeList.add(member.getTargetId());
-        // 18/12/17：注释原因是消息重复发送
-//        sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
+        sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
 
-        //同意加入公司通知客户端  by sfyan 20160526 // 18/12/17：注释原因是消息重复发送
-//        sendEnterpriseNotification(includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
+        //同意加入公司通知客户端  by sfyan 20160526
+        sendEnterpriseNotification(includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
 
         // send notification to all the other members in the group
         notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER,null);
