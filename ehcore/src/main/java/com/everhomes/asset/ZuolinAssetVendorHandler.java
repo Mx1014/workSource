@@ -1177,7 +1177,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         		long processorExcelTime = System.currentTimeMillis();
         		LOGGER.info("batchImportBills processorExcelTime={} ms", (processorExcelTime - startTime));
         	}
-            
             if(null == resultList || resultList.isEmpty()){
                 LOGGER.error("bill import: File content is empty, userId");
                 //不恰当的使用了组织架构的scope，潜在可能造成拆分障碍 by wentian
