@@ -18,7 +18,6 @@ import java.sql.Timestamp;
  * <li>creatorUName: 创建人名称</li>
  * <li>operatorUid: 操作人id</li>
  * <li>operatorUName: 操作人名称</li>
- * <li>topBarStyle: 顶栏样式，请参考{@link com.everhomes.rest.launchpadbase.indexconfigjson.TopBarStyle}</li>
  * </ul>
  */
 public class LaunchPadIndexDTO {
@@ -35,15 +34,7 @@ public class LaunchPadIndexDTO {
     private Byte     type;
     private Long     id;
     private String     description;
-    private Byte    topBarStyle;
 
-    public Byte getTopBarStyle() {
-        return topBarStyle;
-    }
-
-    public void setTopBarStyle(Byte topBarStyle) {
-        this.topBarStyle = topBarStyle;
-    }
 
     public Byte getStatus() {
         return status;
