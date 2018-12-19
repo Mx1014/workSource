@@ -2,6 +2,8 @@ package com.everhomes.asset.ExpressionParse;
 
 import org.apache.log4j.Logger;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,6 +17,9 @@ public abstract class ExpressionParseProcess {
     private List<CycleRange> ranges = new ArrayList<>();
     //默认有效期开始时间为当前
     private Date startTime = new Date();
+
+    //用来将时间格式化到天，将时分秒规整。避免时间比较错误。
+    private SimpleDateFormat yyyyMMMdd = new SimpleDateFormat("yyyy-MM-dd");
 
     public List<CycleRange> getRanges() {
         return ranges;
@@ -68,12 +73,21 @@ public abstract class ExpressionParseProcess {
         if (startTime==null){
             startTime = this.startTime;
         }
-        for (CycleRange range:ranges){
-            if (startTime.compareTo(range.getStartTime())>=0&&
-                startTime.compareTo(range.getStopTime())<=0){
-                return range.getStopTime();
+        try {
+            Date formatStartTime = yyyyMMMdd.parse(yyyyMMMdd.format(startTime));
+            for (CycleRange range:ranges){
+                Date formatRangeStartTime = yyyyMMMdd.parse(yyyyMMMdd.format(range.getStartTime()));
+                Date formatRangeStopTime = yyyyMMMdd.parse(yyyyMMMdd.format(range.getStopTime()));
+                if (formatStartTime.compareTo(formatRangeStartTime)>=0&&
+                        formatStartTime.compareTo(formatRangeStopTime)<=0){
+                    return range.getStopTime();
+                }
             }
+        }catch (ParseException p){
+            LOGGER.error("parse time error");
+            p.printStackTrace();
         }
+
         LOGGER.error("Can't find first period stopTime");
         return null;
     }
