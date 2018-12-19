@@ -1940,8 +1940,6 @@ public class PortalServiceImpl implements PortalService {
 							//删除已有的layout
 							deleteLayoutBeforePublish(namespaceId, cmd.getPublishType());
 
-							//发布主页签 add by yanlong.liang 20181217
-                            publishNavigationBar(cmd.getVersionId(), cmd.getPublishType());
 
 							for (PortalLayout layout: layouts) {
 
@@ -1952,7 +1950,8 @@ public class PortalServiceImpl implements PortalService {
 								//发布layout
 								publishLayout(layout, cmd.getVersionId(), cmd.getPublishType());
 							}
-
+                            //发布主页签 add by yanlong.liang 20181217
+                            publishNavigationBar(cmd.getVersionId(), cmd.getPublishType());
 
 
 						//正式发布之后，在此基础上生成小本版
