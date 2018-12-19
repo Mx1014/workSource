@@ -604,6 +604,20 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
+	 * <p>更新门户导航栏顺序</p>
+	 * <b>URL: /portal/updateNavigationBarOrder</b>
+	 */
+	@RequestMapping("updateNavigationBarOrder")
+	@RestReturn(String.class)
+	public RestResponse updateNavigationBarOrder(UpdatePortalNavigationBarOrderCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		portalService.updatePortalNavigationBarOrder(cmd.getIds());
+		return new RestResponse();
+	}
+	/**
 	 * <p>31.发布</p>
 	 * <b>URL: /portal/publish</b>
 	 */

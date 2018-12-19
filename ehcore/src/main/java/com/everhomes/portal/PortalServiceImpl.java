@@ -1619,10 +1619,19 @@ public class PortalServiceImpl implements PortalService {
         }
         List<LaunchPadIndex> launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
             query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+            query.addOrderBy(Tables.EH_LAUNCH_PAD_INDEXS.DEFAULT_ORDER.asc());
             return query;
         });
         launchPadIndices.stream().forEach(r-> {
             LaunchPadIndexDTO dto = ConvertHelper.convert(r, LaunchPadIndexDTO.class);
+            if(!StringUtils.isEmpty(r.getIconUri())){
+                String url = contentServerService.parserUri(r.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                dto.setIconUrl(url);
+            }
+            if(!StringUtils.isEmpty(r.getSelectedIconUri())){
+                String url = contentServerService.parserUri(r.getSelectedIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                dto.setSelectedIconUrl(url);
+            }
             list.add(dto);
         });
         response.setLaunchPadIndexs(list);
@@ -1658,6 +1667,12 @@ public class PortalServiceImpl implements PortalService {
 		portalNavigationBar.setCreatorUid(user.getId());
 		portalNavigationBar.setNamespaceId(namespaceId);
 		portalNavigationBar.setStatus(PortalNavigationBarStatus.ACTIVE.getCode());
+		Integer maxOrder = this.portalNavigationBarProvider.maxOrder(cmd.getNamespaceId(), cmd.getVersionId());
+		if (maxOrder != null) {
+		    portalNavigationBar.setDefaultOrder(maxOrder + 1);
+        }else {
+		    portalNavigationBar.setDefaultOrder(1);
+        }
 		portalNavigationBarProvider.createPortalNavigationBar(portalNavigationBar);
 		return processPortalNavigationBarDTO(portalNavigationBar);
 	}
@@ -1677,7 +1692,18 @@ public class PortalServiceImpl implements PortalService {
 		return processPortalNavigationBarDTO(portalNavigationBar);
 	}
 
-	@Override
+    @Override
+    public void updatePortalNavigationBarOrder(List<Long> ids) {
+        for (int i = 0; i< ids.size(); i++) {
+            PortalNavigationBar portalNavigationBar = this.portalNavigationBarProvider.findPortalNavigationBarById(ids.get(i));
+            if (portalNavigationBar != null) {
+                portalNavigationBar.setDefaultOrder(i + 1);
+                this.portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
+            }
+        }
+    }
+
+    @Override
 	public void deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd) {
 
 		portalNavigationBarProvider.deletePortalNavigationBar(cmd.getId());
@@ -3539,6 +3565,17 @@ public class PortalServiceImpl implements PortalService {
 
 		// 此时又发生了一个很伤心的事情，例如运营板块也包含了一些应用id，也是旧的
 		updateItemGroupConfig(namespaceId, newVersionId);
+
+		//生成新的主页签 add by yanlong.liang 20181219
+        List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(oldVersionId);
+        if (!CollectionUtils.isEmpty(portalNavigationBars)) {
+            for (PortalNavigationBar portalNavigationBar : portalNavigationBars) {
+                PortalNavigationBar newPortalNavigationBar = ConvertHelper.convert(portalNavigationBar, PortalNavigationBar.class);
+                newPortalNavigationBar.setVersionId(newVersionId);
+                newPortalNavigationBar.setId(null);
+                this.portalNavigationBarProvider.createPortalNavigationBar(newPortalNavigationBar);
+            }
+        }
 
 	}
 

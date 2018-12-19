@@ -15,4 +15,5 @@ public interface PortalNavigationBarProvider {
 
 	List<PortalNavigationBar> listPortalNavigationBar(Long versionId);
 
+	Integer maxOrder(Integer namespaceId, Long versionId);
 }

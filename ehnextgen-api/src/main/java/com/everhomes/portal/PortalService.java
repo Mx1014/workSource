@@ -113,6 +113,8 @@ public interface PortalService {
 
 	PortalNavigationBarDTO updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd);
 
+	void updatePortalNavigationBarOrder(List<Long> ids);
+
 
 	void deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd);
 

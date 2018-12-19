@@ -30,11 +30,29 @@ public class LaunchPadIndexDTO {
     private Integer     namespaceId;
     private String     configJson;
     private String     iconUri;
+    private String     iconUrl;
     private String     selectedIconUri;
+    private String     selectedIconUrl;
     private Byte     type;
     private Long     id;
     private String     description;
 
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getSelectedIconUrl() {
+        return selectedIconUrl;
+    }
+
+    public void setSelectedIconUrl(String selectedIconUrl) {
+        this.selectedIconUrl = selectedIconUrl;
+    }
 
     public Byte getStatus() {
         return status;

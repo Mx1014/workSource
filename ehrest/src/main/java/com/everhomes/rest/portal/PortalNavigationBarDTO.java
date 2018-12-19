@@ -15,6 +15,7 @@ package com.everhomes.rest.portal;
  * <li>operatorUid: 操作人id</li>
  * <li>operatorUName: 操作人名称</li>
  * <li>topBarStyle: 顶栏样式，请参考{@link com.everhomes.rest.launchpadbase.indexconfigjson.TopBarStyle}</li>
+ * <li>defaultOrder: 排序</li>
  * </ul>
  */
 public class PortalNavigationBarDTO {
@@ -35,6 +36,15 @@ public class PortalNavigationBarDTO {
     private String creatorUName;
     private String operatorUName;
     private Byte topBarStyle;
+    private Integer defaultOrder;
+
+    public Integer getDefaultOrder() {
+        return defaultOrder;
+    }
+
+    public void setDefaultOrder(Integer defaultOrder) {
+        this.defaultOrder = defaultOrder;
+    }
 
     public Byte getTopBarStyle() {
         return topBarStyle;
