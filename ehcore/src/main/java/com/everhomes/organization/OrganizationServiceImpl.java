@@ -6319,7 +6319,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         addArchivesContactCommand.setNamespaceId(user.getNamespaceId());
                         this.archivesService.addArchivesContact(addArchivesContactCommand);
                         DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
-                        sendMessageForContactApproved(member);
+//                        sendMessageForContactApproved(member);//add by momoubin,18/12/19,发送重复消息
 
                         //通过认证的同步到企业客户的人才团队中 21710
                         customerService.createCustomerTalentFromOrgMember(member.getOrganizationId(), member);
