@@ -163,8 +163,9 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         parkingRechargeRate.setCreateTime(new Timestamp(System.currentTimeMillis()));
         parkingRechargeRate.setStatus(ParkingRechargeRateStatus.ACTIVE.getCode());
         parkingProvider.createParkingRechargeRate(parkingRechargeRate);
-        List<ParkingCardRequestType> cardTypes = parkingProvider.listParkingCardTypes(null,null,cmd.getParkingLotId());
-        if (cardTypes == null || cardTypes.size() ==0){
+        ParkingCardRequestType parkingRequestType = 
+        		parkingProvider.findParkingCardTypeByTypeId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getCardTypeId());
+        if (parkingRequestType == null){
             ParkingCardRequestType cardType = new ParkingCardRequestType();
             cardType.setCardTypeId(cmd.getCardTypeId());
             cardType.setCardTypeName(cmd.getCardTypeName());
