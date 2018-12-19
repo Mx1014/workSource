@@ -2139,6 +2139,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         //TODO when the key is invalid, MUST invalid it and generate a command.
         List<AesUserKey> aesUserKeys = new ArrayList<AesUserKey>();
         for(DoorAuth auth : auths) {
+            //face++和鼎芯门禁没有蓝牙
+            if(auth.getDriver().equals(DoorAccessDriverType.FACEPLUSPLUS.getCode()) || auth.getDriver().equals(DoorAccessDriverType.DINGXIN.getCode())){
+                continue;
+            }
             AesUserKey aesUserKey = generateAesUserKey(user, auth);
             if(aesUserKey != null) {
                 aesUserKeys.add(aesUserKey);    
