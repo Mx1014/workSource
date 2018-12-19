@@ -146,7 +146,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         parkingRechargeRate.setOwnerType(cmd.getOwnerType());
         parkingRechargeRate.setOwnerId(cmd.getOwnerId());
         parkingRechargeRate.setParkingLotId(cmd.getParkingLotId());
-        parkingRechargeRate.setCardType(cmd.getCardType());
+        parkingRechargeRate.setCardType(cmd.getCardTypeId());
 
     	//费率 名称默认设置 by sw
         Map<String, Object> map = new HashMap<>();
@@ -167,7 +167,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         if (cardTypes == null || cardTypes.size() ==0){
             ParkingCardRequestType cardType = new ParkingCardRequestType();
             cardType.setCardTypeId(cmd.getCardTypeId());
-            cardType.setCardTypeName(cmd.getCardType());
+            cardType.setCardTypeName(cmd.getCardTypeName());
             cardType.setOwnerId(cmd.getOwnerId());
             cardType.setOwnerType(cmd.getOwnerType());
             cardType.setParkingLotId(cmd.getParkingLotId());
