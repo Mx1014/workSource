@@ -3708,7 +3708,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
         context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
-        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME)
+        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME,t.DATE_STR_GENERATION)
                 .from(t,t1,billGroup)
                 .where(t.BILL_ID.in(fetch1))
                 .and(t.BILL_GROUP_ID.eq(billGroup.ID))
@@ -3737,6 +3737,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setTaxAmount(taxAmount != null ? taxAmount.stripTrailingZeros() : taxAmount);
                     dto.setAmountReceivable(amountReceivable != null ? amountReceivable.stripTrailingZeros() : amountReceivable);
                     dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax.stripTrailingZeros() : amountReceivableWithoutTax);
+                    dto.setDateStrGeneration(r.getValue(t.DATE_STR_GENERATION));
                     set.add(dto);
                     return null;
                 });
