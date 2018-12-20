@@ -249,4 +249,6 @@ public interface ConfigConstants {
 	
 	//品质核查定时任务
 	public static final String SCHEDULE_QUALITY_INSPECTION_TASK_CORN = "quality.inspection.cronexpression";
+
+	public static final String USER_VIP_LEVEL_URL = "user.vip.level.url";
 }

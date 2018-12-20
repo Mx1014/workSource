@@ -127,7 +127,8 @@ public interface ParkingProvider {
     List<ParkingCarVerification> searchParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
                                                                String plateNumber, String plateOwnerName, String plateOwnerPhone,
                                                                Timestamp startDate, Timestamp endDate, Byte status,
-                                                               String requestorEnterpriseName, String ownerKeyWords, Long pageAnchor, Integer pageSize);
+                                                               String requestorEnterpriseName, String ownerKeyWords, Long pageAnchor, 
+                                                               Integer pageSize,Integer pageNum);
 
     List<ParkingCarVerification> listParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
                                                              Long requestorUid, Byte sourceType, Long pageAnchor, Integer pageSize);
@@ -186,5 +187,9 @@ public interface ParkingProvider {
 			String paidType, String cardNumber, Byte status, String paySource, String keyWords);
 
 	void createParkingCardType(ParkingCardRequestType parkingCardType);
+
+	Long countCarVerifications(String ownerType, Long ownerId, Long parkingLotId, String plateNumber,
+			String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate, Byte status,
+			String requestorEnterpriseName, String ownerKeyWords);
 
 }

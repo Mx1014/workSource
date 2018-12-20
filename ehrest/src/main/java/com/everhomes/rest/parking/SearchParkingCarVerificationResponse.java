@@ -17,8 +17,18 @@ public class SearchParkingCarVerificationResponse {
 
     @ItemType(ParkingCarVerificationDTO.class)
     private List<ParkingCarVerificationDTO> requests;
+    private Long totalNum;
 
-    public Long getNextPageAnchor() {
+    
+    public Long getTotalNum() {
+		return totalNum;
+	}
+
+	public void setTotalNum(Long totalNum) {
+		this.totalNum = totalNum;
+	}
+
+	public Long getNextPageAnchor() {
         return nextPageAnchor;
     }
 
