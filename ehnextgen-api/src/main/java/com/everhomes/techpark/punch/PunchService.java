@@ -21,6 +21,7 @@ import com.everhomes.rest.techpark.punch.admin.GetPunchGroupsCountResponse;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoCommand;
 import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoResponse;
+import com.everhomes.rest.techpark.punch.admin.ListAllSimplePunchGroupsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
@@ -357,5 +358,7 @@ public interface PunchService {
 	GoOutPunchLogDTO updateGoOutPunchLog(UpdateGoOutPunchLogCommand cmd);
 
 	GoOutPunchLogDTO getGoOutPunchLog(GetGoOutPunchLogCommand cmd);
+
+	ListAllSimplePunchGroupsResponse listAllSimplePunchGroups(ListPunchGroupsCommand cmd);
  
 }
