@@ -106,6 +106,7 @@ import com.everhomes.rest.techpark.punch.admin.GetPunchGroupsCountResponse;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoCommand;
 import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoResponse;
+import com.everhomes.rest.techpark.punch.admin.ListAllSimplePunchGroupsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
@@ -317,7 +318,7 @@ public class PunchServiceImpl implements PunchService {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         }
     };
-
+    
     public static final Integer CONFIG_VERSION_CODE = 0;
     @Autowired
     private TaskService taskService;
@@ -8090,6 +8091,42 @@ public class PunchServiceImpl implements PunchService {
             if (null != dto) {
                 punchGroups.add(dto);
             }
+        }
+        response.setPunchGroups(punchGroups);
+        return response;
+    }
+
+    @Override
+    public ListAllSimplePunchGroupsResponse listAllSimplePunchGroups(ListPunchGroupsCommand cmd) {
+    	ListAllSimplePunchGroupsResponse response = new ListAllSimplePunchGroupsResponse();
+        Long creatorUid = null;
+        if (!checkBooleanAppPrivilege(cmd.getOwnerId(), cmd.getDeptId() == null ? cmd.getOwnerId() : cmd.getDeptId(), PrivilegeConstants.PUNCH_RULE_QUERY_ALL)) {
+            //没通过全部校验的就要进行creator校验
+            if ((checkBooleanAppPrivilege(cmd.getOwnerId(), cmd.getDeptId() == null ? cmd.getOwnerId() : cmd.getDeptId(), PrivilegeConstants.PUNCH_RULE_QUERY_CREATOR))) {
+                creatorUid = UserContext.current().getUser().getId();
+            } else {
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                        "check app privilege error");
+            }
+        }
+        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.PUNCHGROUP.getCode(), cmd.getOwnerId(),
+                null, cmd.getGroupName(), null, null, Integer.MAX_VALUE);
+
+        if (null == organizations)
+            return response;
+        List<PunchGroupDTO> punchGroups = new ArrayList<>();
+        
+        for (Organization r : organizations) {
+            PunchRule pr = punchProvider.getPunchruleByPunchOrgId(r.getId());
+            if (null == pr)
+                continue;
+            PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
+            //打卡时间
+            dto.setTimeRules(processPunchTimeRuleDTOs(r.getId(), pr.getStatus()));
+            //打卡地点和WiFi
+            dto.setPunchGeoPoints(processPunchGeoPointDTOs(r.getId()));
+            dto.setWifis(processPunchWiFiDTOs(r.getId()));
+            punchGroups.add(dto);
         }
         response.setPunchGroups(punchGroups);
         return response;

@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  * <li>billGroupId:账单组id，即账单组下拉框查询条件</li>
  * <li>billGroupName:账单组名称</li>
  * <li>billStatus: 账单状态,0:未缴;1:已缴</li>
+ * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
  *</ul>
  */
 public class ListBillsCommandForEnt {
@@ -38,6 +39,8 @@ public class ListBillsCommandForEnt {
     private String billGroupName;
     private Byte billStatus;
     private Long moduleId;//用于下载中心
+    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+    private Byte deleteFlag;//修复缺陷 #45326 【智富汇】【缴费管理】园区管理后台账单、企业工作台账单、企业管理员手机账单，三者数据不统一、数据异常
     
 	public Long getModuleId() {
 		return moduleId;
@@ -121,6 +124,12 @@ public class ListBillsCommandForEnt {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
 	}
 	
 }
