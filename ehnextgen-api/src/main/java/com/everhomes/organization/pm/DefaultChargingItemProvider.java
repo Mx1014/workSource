@@ -9,7 +9,9 @@ public interface DefaultChargingItemProvider {
     void createDefaultChargingItem(DefaultChargingItem defaultChargingItem);
     void updateDefaultChargingItem(DefaultChargingItem defaultChargingItem);
     DefaultChargingItem findById(Long id);
-    List<DefaultChargingItem> listDefaultChargingItems(Integer namespaceId, Long communityId, String ownerType, Long ownerId);
+    
+    //修复缺陷 #45399 【智富汇】【缴费管理】计价条款异常，加categoryId
+    List<DefaultChargingItem> listDefaultChargingItems(Integer namespaceId, Long communityId, String ownerType, Long ownerId, Long categoryId);
 
     void createDefaultChargingItemProperty(DefaultChargingItemProperty property);
     void updateDefaultChargingItemProperty(DefaultChargingItemProperty property);

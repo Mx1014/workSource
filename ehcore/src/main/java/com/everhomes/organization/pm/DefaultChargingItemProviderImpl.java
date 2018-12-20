@@ -22,6 +22,7 @@ import org.jooq.DSLContext;
 import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,18 +79,34 @@ public class DefaultChargingItemProviderImpl implements DefaultChargingItemProvi
     }
 
     @Override
-    public List<DefaultChargingItem> listDefaultChargingItems(Integer namespaceId, Long communityId, String ownerType, Long ownerId) {
+    public List<DefaultChargingItem> listDefaultChargingItems(Integer namespaceId, Long communityId, String ownerType, Long ownerId, Long categoryId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhDefaultChargingItemsRecord> query = context.selectQuery(Tables.EH_DEFAULT_CHARGING_ITEMS);
+        //修复缺陷 #45399 【智富汇】【缴费管理】计价条款异常，加categoryId
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_DEFAULT_CHARGING_ITEMS);
+        query.addJoin(Tables.EH_PAYMENT_BILL_GROUPS, Tables.EH_DEFAULT_CHARGING_ITEMS.BILL_GROUP_ID.eq(Tables.EH_PAYMENT_BILL_GROUPS.ID));
         query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEMS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEMS.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEMS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEMS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEMS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(categoryId));
 
         List<DefaultChargingItem> result = new ArrayList<>();
         query.fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, DefaultChargingItem.class));
+        	DefaultChargingItem dto = new DefaultChargingItem();
+        	dto.setId(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.ID));
+        	dto.setChargingItemId(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+            dto.setChargingStandardId(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_STANDARD_ID));
+        	dto.setFormula(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.FORMULA));
+            dto.setFormulaType(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.FORMULA_TYPE));
+        	dto.setBillingCycle(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.BILLING_CYCLE));
+        	dto.setChargingVariables(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES));
+        	dto.setChargingStartTime(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_START_TIME));
+        	dto.setChargingExpiredTime(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_EXPIRED_TIME));
+        	dto.setStatus(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.STATUS));
+        	dto.setBillGroupId(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.BILL_GROUP_ID));
+            result.add(dto);
             return null;
         });
 
