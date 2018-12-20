@@ -2904,10 +2904,13 @@ public class ParkingServiceImpl implements ParkingService {
 		if (null != cmd.getEndTime()) {
 			endTime = new Timestamp(cmd.getEndTime());
 		}
-
+		Integer pageNum = 1;
+        if (cmd.getPageNum() != null) {
+        	pageNum = cmd.getPageNum();
+        }
 		List<ParkingCarVerification> verifications = parkingProvider.searchParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), cmd.getPlateOwnerPhone(), startTime, endTime,
-				cmd.getStatus(), cmd.getRequestorEnterpriseName(), cmd.getOwnerKeyWords(), cmd.getPageAnchor(), pageSize);
+				cmd.getStatus(), cmd.getRequestorEnterpriseName(), cmd.getOwnerKeyWords(), cmd.getPageAnchor(), pageSize,pageNum);
 
 		SearchParkingCarVerificationResponse response = new SearchParkingCarVerificationResponse();
 
@@ -2921,10 +2924,16 @@ public class ParkingServiceImpl implements ParkingService {
 			if(size != pageSize){
 				response.setNextPageAnchor(null);
 			}else{
-				response.setNextPageAnchor(verifications.get(size-1).getCreateTime().getTime());
+	            Integer nextPageNum = pageNum + 1;
+	            response.setNextPageAnchor(nextPageNum.longValue());
+//				response.setNextPageAnchor(verifications.get(size-1).getCreateTime().getTime());
 			}
 		}
 
+		Long totalNum = parkingProvider.countCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), cmd.getPlateOwnerPhone(), startTime, endTime,
+				cmd.getStatus(), cmd.getRequestorEnterpriseName(), cmd.getOwnerKeyWords());
+		response.setTotalNum(totalNum);
 		return response;
 	}
 
@@ -2945,10 +2954,14 @@ public class ParkingServiceImpl implements ParkingService {
 		if (null != cmd.getEndTime()) {
 			endTime = new Timestamp(cmd.getEndTime());
 		}
-
+		Integer pageNum = 1;
+        if (cmd.getPageNum() != null) {
+        	pageNum = cmd.getPageNum();
+        }
 		List<ParkingCarVerification> verifications = parkingProvider.searchParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), cmd.getPlateOwnerPhone(), startTime, endTime,
-				cmd.getStatus(), cmd.getRequestorEnterpriseName(),  cmd.getOwnerKeyWords(),null,configProvider.getIntValue("parking.exportcarverifications.maxcount",10000));
+				cmd.getStatus(), cmd.getRequestorEnterpriseName(),  cmd.getOwnerKeyWords(),null,
+				configProvider.getIntValue("parking.exportcarverifications.maxcount",10000),pageNum);
 
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("车辆认证申请记录");

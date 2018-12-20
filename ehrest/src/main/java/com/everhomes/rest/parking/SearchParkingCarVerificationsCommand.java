@@ -48,8 +48,18 @@ public class SearchParkingCarVerificationsCommand {
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
+	private Integer pageNum;
 
-    public String getOwnerKeyWords() {
+	
+    public Integer getPageNum() {
+		return pageNum;
+	}
+
+	public void setPageNum(Integer pageNum) {
+		this.pageNum = pageNum;
+	}
+
+	public String getOwnerKeyWords() {
         return ownerKeyWords;
     }
 
