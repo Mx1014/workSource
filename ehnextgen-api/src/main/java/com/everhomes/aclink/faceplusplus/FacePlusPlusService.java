@@ -24,9 +24,9 @@ public interface FacePlusPlusService {
 
     void deleteUser (String cookie, String subjectId, String ip);
 
-    DoorAuth createAuth (DoorAuth doorAuth, CreateDoorAuthCommand cmd, UserInfo custom, String ip,String username, String password);
+    DoorAuth createAuth (DoorAuth doorAuth, CreateDoorAuthCommand cmd, UserInfo custom);
 
-    void addPhoto(String url,Long authId,Long userId, String ip,String username, String password);
+    void addPhoto(String url,Long authId,Long userId);
 
     String filetest (String url);
 

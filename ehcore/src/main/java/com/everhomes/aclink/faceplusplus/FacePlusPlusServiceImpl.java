@@ -487,8 +487,16 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
     }
 
     @Override
-    public DoorAuth createAuth (DoorAuth doorAuth, CreateDoorAuthCommand cmd,UserInfo custom, String ip,String username, String password){
-        String cookie = this.login(ip,username,password);
+    public DoorAuth createAuth (DoorAuth doorAuth, CreateDoorAuthCommand cmd,UserInfo custom){
+        AclinkFormValues ips = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.IP.getCode());
+        AclinkFormValues usernames = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.IP.getCode());
+        AclinkFormValues passwords = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.IP.getCode());
+        if(ips == null || usernames == null || passwords == null || ips.getValue().isEmpty() || usernames.getValue().isEmpty() || passwords.getValue().isEmpty()){
+            LOGGER.error("unable to find ip, username or password");
+            return null;
+        }
+        String ip = ips.getValue();
+        String cookie = this.login(ip,usernames.getValue(),passwords.getValue());
         if(cmd.getRightOpen() == (byte)1){
             String userName = cmd.getUserId().toString();//face++ username 存左邻用户id
             JSONObject response = null;
@@ -518,30 +526,49 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
     }
 
     @Override
-    public void addPhoto(String url,Long authId,Long userId, String ip,String username, String password){
-        String cookie = this.login(ip,username,password);
+    public void addPhoto(String url,Long authId,Long userId){
+        //访客授权记录
+        List<DoorAuth> auths = new ArrayList<>();
         if(authId != null){
             DoorAuth auth = doorAuthProvider.getDoorAuthById(authId);
             if(auth != null && auth.getDriver().equals(DoorAccessDriverType.FACEPLUSPLUS.getCode()) && auth.getStringTag2() != null){
-                this.uploadPhoto(cookie,url,auth.getStringTag2(),ip);
+                auths.add(auth);
+            }else {
+                LOGGER.error("unable to find auth");
+                return;
             }
         }
+        //用户授权记录
         if(userId != null){
-            List<DoorAuth> auths = new ArrayList<>();
             ListingLocator locator = new ListingLocator();
-            auths = doorAuthProvider.queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
+            List<DoorAuth> authsx = doorAuthProvider.queryDoorAuth(locator, 9999, new ListingQueryBuilderCallback() {
                 @Override
                 public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                                                                     SelectQuery<? extends Record> query) {
                     query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
                     query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(DoorAccessDriverType.FACEPLUSPLUS.getCode()));
                     query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte)1));
+                    query.addConditions(Tables.EH_DOOR_AUTH.STRING_TAG2.isNotNull());
                     return query;
                 }
             });
-            if(!ListUtils.isEmpty(auths) && !auths.get(0).getStringTag2().isEmpty()){
-                this.uploadPhoto(cookie,url,auths.get(0).getStringTag2(),ip);
+            if(ListUtils.isEmpty(authsx)){
+                LOGGER.error("unable to find auth");
+                return;
             }
+            auths.addAll(authsx);
+        }
+        for(DoorAuth auth: auths){
+            AclinkFormValues ips = doorAccessProvider.findAclinkFormValues(auth.getOwnerId(),auth.getOwnerType(),AclinkFormValuesType.IP.getCode());
+            AclinkFormValues usernames = doorAccessProvider.findAclinkFormValues(auth.getOwnerId(),auth.getOwnerType(),AclinkFormValuesType.USERNAME.getCode());
+            AclinkFormValues passwords = doorAccessProvider.findAclinkFormValues(auth.getOwnerId(),auth.getOwnerType(),AclinkFormValuesType.PASSWORD.getCode());
+            if(ips == null || usernames == null || passwords == null || ips.getValue().isEmpty() || usernames.getValue().isEmpty() || passwords.getValue().isEmpty()){
+                LOGGER.error("unable to find ip, username or password");
+                return;
+            }
+            String ip = ips.getValue();
+            String cookie = this.login(ip,usernames.getValue(),passwords.getValue());
+            this.uploadPhoto(cookie,url,auth.getStringTag2(),ip);
         }
     }
 
