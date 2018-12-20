@@ -2848,7 +2848,10 @@ public class CommunityServiceImpl implements CommunityService {
                     query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
                 }else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
                     query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
-                }
+                }else if(UserSourceType.ALIPAY == UserSourceType.fromCode(cmd.getUserSourceType())) {
+                	// 增加支付宝用户统计
+					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.ALIPAY.getCode()));
+				}
 
                 query.addGroupBy(Tables.EH_USERS.ID);
 
@@ -2882,9 +2885,11 @@ public class CommunityServiceImpl implements CommunityService {
                 communityAllUserDTO.setGender(user.getGender());
                 if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
                     communityAllUserDTO.setUserSourceType(UserSourceType.WEIXIN.getCode());
+                }else if (NamespaceUserType.ALIPAY.getCode().equals(user.getNamespaceUserType())){
+                    communityAllUserDTO.setUserSourceType(UserSourceType.ALIPAY.getCode());
                 }else {
-                    communityAllUserDTO.setUserSourceType(UserSourceType.APP.getCode());
-                }
+					communityAllUserDTO.setUserSourceType(UserSourceType.APP.getCode());
+				}
                 communityAllUserDTO.setApplyTime(user.getCreateTime());
                 communityAllUserDTOS.add(communityAllUserDTO);
             }
@@ -3265,8 +3270,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public CountCommunityUserResponse countCommunityUsers(
-			CountCommunityUsersCommand cmd) {
+	public CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd) {
 
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
@@ -3278,6 +3282,7 @@ public class CommunityServiceImpl implements CommunityService {
         if(cmd.getCommunityId() == null){
             int allCount = userProvider.countUserByNamespaceId(namespaceId, null);
             int wxCount = userProvider.countUserByNamespaceIdAndNamespaceUserType(namespaceId, NamespaceUserType.WX.getCode());
+            int alipayCount = userProvider.countUserByNamespaceIdAndNamespaceUserType(namespaceId, NamespaceUserType.ALIPAY.getCode());
             int maleCount = userProvider.countUserByNamespaceIdAndGender(namespaceId, UserGender.MALE.getCode());
             int femaleCount = userProvider.countUserByNamespaceIdAndGender(namespaceId, UserGender.FEMALE.getCode());
 
@@ -3324,7 +3329,8 @@ public class CommunityServiceImpl implements CommunityService {
             resp.setAuthingUsers(authingUsers);
             resp.setNotAuthUsers(notAuthUsers);
             resp.setWxUserCount(wxCount);
-            resp.setAppUserCount(allCount - wxCount);
+            resp.setAlipayUserCount(alipayCount);
+            resp.setAppUserCount(allCount - wxCount - alipayCount);
             resp.setMaleCount(maleCount);
             resp.setFemaleCount(femaleCount);
 

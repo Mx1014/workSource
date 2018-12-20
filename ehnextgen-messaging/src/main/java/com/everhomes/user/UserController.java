@@ -1936,4 +1936,18 @@ public class UserController extends ControllerBase {
         this.userService.fixUserSync(cmd);
 		return new RestResponse("OK");
     }
+
+    /**
+     * <b>URL:/user/getUserList</b>
+     * <p>根据用户ID列表获取用户信息列表</p>
+     */
+	@RequestMapping("getUserList")
+	@RestReturn(String.class)
+	public RestResponse getUserList(@Valid GetUserListCommand cmd) {
+		GetUserListResponse res = this.userService.getUserList(cmd);
+        RestResponse resp = new RestResponse(res);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return  resp;
+	}
 }

@@ -2139,6 +2139,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         //TODO when the key is invalid, MUST invalid it and generate a command.
         List<AesUserKey> aesUserKeys = new ArrayList<AesUserKey>();
         for(DoorAuth auth : auths) {
+            //face++和鼎芯门禁没有蓝牙
+            if(auth.getDriver().equals(DoorAccessDriverType.FACEPLUSPLUS.getCode()) || auth.getDriver().equals(DoorAccessDriverType.DINGXIN.getCode())){
+                continue;
+            }
             AesUserKey aesUserKey = generateAesUserKey(user, auth);
             if(aesUserKey != null) {
                 aesUserKeys.add(aesUserKey);    
@@ -5874,6 +5878,72 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         return dto;
 	}
+    //门禁3.0访客授权接口，门禁组，发短信，人脸照片，自定义表单，静态二维码，来访通知
+    private DoorAuthDTO createVisitorAuth(CreateLocalVistorCommand cmd){
+        User user = UserContext.current().getUser();
+        DoorAccess doorAccess = new DoorAccess();
+        //非门禁组按原方法查找
+        DoorAuth auth = new DoorAuth();
+        if(null == cmd.getGroupType() || cmd.getGroupType() != (byte)2) {
+            doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+            auth = createZuolinQrAuth(user, doorAccess, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+        }
+        if(null != cmd.getGroupType() && cmd.getGroupType() == (byte)2){
+            AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getDoorId());
+            auth = createZuolinGroupQrAuth(user,group, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+        }
+        //发送短信
+        String nickName = getRealName(user);
+        String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
+        //TODO:门禁组短信
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
+        LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
+                SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
+
+        if(lt != null && lt.getText().indexOf("{link}") >= 0) {
+            smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        }
+
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
+        String templateLocale = user.getLocale();
+        smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        //创建自定义表单记录
+        if(null != cmd.getList() && !cmd.getList().isEmpty()){
+            for(CreateCustomFieldCommand itemCmd:cmd.getList()){
+                if(itemCmd == null || itemCmd.getId() == null) continue;
+                AclinkFormValues value = new AclinkFormValues();
+                value.setNamespaceId(namespaceId);
+                value.setTitleId(itemCmd.getId());
+                value.setValue(itemCmd.getName());
+                value.setType(AclinkFormValuesType.CUSTOM_FIELD.getCode());
+                //表单记录ownerId对应授权Id
+                value.setOwnerId(auth.getId());
+                value.setOwnerType((byte)5);
+                value.setCreatorUid(user.getId());
+                value.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.createAclinkFormValues(value);
+            }
+        }
+
+        DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+        dto.setQrString(auth.getQrKey());
+        if(cmd.getHeadImgUri() != null && !cmd.getHeadImgUri().isEmpty()){
+            NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
+            SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
+            createPhotoCmd.setUserType((byte) 1);
+            createPhotoCmd.setImgUri(cmd.getHeadImgUri());
+            createPhotoCmd.setImgUrl(contentServerService.parserUri(createPhotoCmd.getImgUri()));
+            createPhotoCmd.setAuthId(auth.getId());
+            faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
+
+            cmd1.setDoorId(cmd.getDoorId());
+            faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+        }
+        return dto;
+    }
 
 	/**
 	 * 根据电话号码合门禁组的id将授权设置为失效
@@ -5997,13 +6067,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(cmd.getNamespaceId() != null){
                     query.addConditions(Tables.EH_DOOR_ACCESS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
                 }
-//                if(cmd.getNamespaceName() != null && !cmd.getNamespaceName().isEmpty()){
-//                    query.addConditions(com.everhomes.schema.Tables.EH_NAMESPACES.NAME.eq(cmd.getNamespaceName()));
-//                }
-//                if(cmd.getDoorType() != null) {
-//                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
-//
-//                }
+                if(cmd.getDoorType() != null) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
+
+                }
                 if(cmd.getDeviceId() != null){
                     query.addConditions(Tables.EH_DOOR_ACCESS.DEVICE_ID.eq(cmd.getDeviceId()));
                 }
@@ -6251,11 +6318,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 itemCmd.setValidFromMs(cmd.getValidFromMs());
             }
         }
-        return createLocalVisitorAuth(itemCmd);
+        //return createLocalVisitorAuth(itemCmd);
+        //发送短信，调xx接口
+        return createVisitorAuth(itemCmd);
     }
     
-
-
 
     @Override
 	public ListZLDoorAccessResponse listDoorAccessMacByApp() {

@@ -1,5 +1,7 @@
 package com.everhomes.payment.zhuzong;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * UserID : 账号
  * ResultID : 结果编号 1 失败 2 没有信息 3 已解绑 4 已销户
@@ -73,5 +75,10 @@ public class ZhuzongUserCardInfo {
 
     public void setStateID(String stateID) {
         StateID = stateID;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

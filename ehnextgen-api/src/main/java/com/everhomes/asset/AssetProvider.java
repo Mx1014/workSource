@@ -72,6 +72,8 @@ public interface AssetProvider {
 
 //    ListBillsDTO creatPropertyBillForCommunity( CreateBillCommand cmd);
 
+    public ListBillsDTO addBillItemIntoPropertyBill( CreateBillCommand cmd,Long billId);
+
     ListBillDetailResponse listBillDetail(Long billId);
 
     List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType, Long categoryId);

@@ -83,6 +83,12 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.RequestType;
 import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
+import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.news.publishNewsCommand;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -458,6 +464,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getUserId(), cmd.getOrganizationId());
     	return getArchivesStickContactInfo(detail);
     }
+	
     private List<ArchivesContactDTO> listArchivesContacts(ListArchivesContactsCommand cmd, ListArchivesContactsResponse response, List<Long> detailIds) {
         List<ArchivesContactDTO> contacts = new ArrayList<>();
         
@@ -485,24 +492,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (res.getMembers() == null)
                 return contacts;
             res.getMembers().forEach(r -> {
-                ArchivesContactDTO dto = new ArchivesContactDTO();
-                dto.setDetailId(r.getDetailId());
-                dto.setOrganizationId(r.getOrganizationId());
-                dto.setTargetId(r.getTargetId());
-                dto.setTargetType(r.getTargetType());
-                dto.setAccount(r.getAccount());
-                dto.setContactName(r.getContactName());
-                dto.setDepartments(r.getDepartments());
-                dto.setJobPositions(r.getJobPositions());
-                dto.setJobLevels(r.getJobLevels());
-                dto.setGender(r.getGender());
-                dto.setRegionCode(r.getRegionCode());
-                dto.setContactToken(r.getContactToken());
-                dto.setContactShortToken(r.getContactShortToken());
-                dto.setContactEnName(r.getContactEnName());
-                dto.setWorkEmail(r.getWorkEmail());
-                dto.setVisibleFlag(r.getVisibleFlag());
-                dto.setStick("0");
+                ArchivesContactDTO dto = processArchivesContactDTO(r);
                 contacts.add(dto);
             });
             response.setNextPageAnchor(res.getNextPageAnchor());
@@ -510,7 +500,27 @@ public class ArchivesServiceImpl implements ArchivesService {
         return contacts;
     }
 
-
+	private ArchivesContactDTO processArchivesContactDTO(OrganizationMemberDTO r) {
+		ArchivesContactDTO dto = new ArchivesContactDTO();
+		dto.setDetailId(r.getDetailId());
+		dto.setOrganizationId(r.getOrganizationId());
+		dto.setTargetId(r.getTargetId());
+		dto.setTargetType(r.getTargetType());
+		dto.setAccount(r.getAccount());
+		dto.setContactName(r.getContactName());
+		dto.setDepartments(r.getDepartments());
+		dto.setJobPositions(r.getJobPositions());
+		dto.setJobLevels(r.getJobLevels());
+		dto.setGender(r.getGender());
+		dto.setRegionCode(r.getRegionCode());
+		dto.setContactToken(r.getContactToken());
+		dto.setContactShortToken(r.getContactShortToken());
+		dto.setContactEnName(r.getContactEnName());
+		dto.setWorkEmail(r.getWorkEmail());
+		dto.setVisibleFlag(r.getVisibleFlag());
+		dto.setStick("0");
+		return dto;
+	}
 
     /**
      * 获取员工在企业的真实名称

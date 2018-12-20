@@ -29,6 +29,8 @@ public class NavigatorInstanceConfig implements Serializable  {
 
 	private String backgroundColor;
 
+	private Float backgroundAlpha;
+
 	private Byte allOrMoreFlag;
 
 	private String allOrMoreType;
@@ -37,7 +39,15 @@ public class NavigatorInstanceConfig implements Serializable  {
 
 	private String allOrMoreIconUri;
 
-	public String getItemGroup() {
+    public Float getBackgroundAlpha() {
+        return backgroundAlpha;
+    }
+
+    public void setBackgroundAlpha(Float backgroundAlpha) {
+        this.backgroundAlpha = backgroundAlpha;
+    }
+
+    public String getItemGroup() {
 		return itemGroup;
 	}
 

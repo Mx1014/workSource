@@ -29,6 +29,7 @@ import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
 import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoCommand;
 import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoResponse;
 import com.everhomes.rest.techpark.punch.admin.ImportVacationBalancesCommand;
+import com.everhomes.rest.techpark.punch.admin.ListAllSimplePunchGroupsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchGroupsCommand;
@@ -53,6 +54,7 @@ import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.techpark.punch.PunchVacationBalanceService;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +66,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
 import java.text.ParseException;
 
 @RestDoc(value = "Punch controller", site = "ehccore")
@@ -748,7 +751,6 @@ public class PunchAdminController extends ControllerBase {
         return response;
     }
 
-
     /**
      * <b>URL: punch/listPunchGroups</b>
      * <p>
@@ -765,6 +767,22 @@ public class PunchAdminController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: punch/listAllSimplePunchGroups</b>
+     * <p>
+     * 列出全部考勤组的基本 信息(给设置未安排班次的规则使用)
+     * </p>
+     */
+    @RequestMapping("listAllSimplePunchGroups")
+    @RestReturn(value = ListAllSimplePunchGroupsResponse.class)
+    public RestResponse listAllSimplePunchGroups(@Valid ListPunchGroupsCommand cmd) {
+        ListAllSimplePunchGroupsResponse commandResponse = punchService.listAllSimplePunchGroups(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     /**
      * <b>URL: punch/getPunchGroupsCount</b>
      * <p>

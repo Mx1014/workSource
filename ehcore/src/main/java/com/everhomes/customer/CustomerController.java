@@ -13,7 +13,6 @@ import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
-import com.everhomes.rest.enterprise.UpdateSuperAdminCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -1751,5 +1750,46 @@ public class CustomerController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /customer/createCustomerPropertyConfig</b>
+     * <p>创建新的config</p>
+     */
+    @RequestMapping("createCustomerPropertyConfig")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerPropertyConfig(propertyConfigCommand cmd) {
+        customerService.createCustomerPropertyConfig(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/updateCustomerPropertyConfig</b>
+     * <p>更新config</p>
+     */
+    @RequestMapping("updateCustomerPropertyConfig")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerPropertyConfig(propertyConfigCommand cmd) {
+        customerService.updateCustomerPropertyConfig(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerPropertyConfigByName</b>
+     * <p>更新config</p>
+     */
+    @RequestMapping("getCustomerPropertyConfigByName")
+    @RestReturn(value = PropertyConfigurationDTO.class)
+    public RestResponse getCustomerPropertyConfigByName(propertyConfigCommand cmd) {
+        PropertyConfigurationDTO dto = customerService.getCustomerPropertyConfigByName(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

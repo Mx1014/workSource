@@ -393,14 +393,15 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
 
         List<ActiveDoorByEquipmentDTO> dtos = new ArrayList<ActiveDoorByEquipmentDTO>();
-        SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
-                ,t.DEVICE_NAME.as("type"))
+        SelectHavingStep<Record2<Integer,Byte>> groupBy = context.select(t.ID.count().as("num")
+                ,t.DOOR_TYPE.as("type"))
                 .from(t)
-                .groupBy(t.DEVICE_ID);
+                .where(t.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))
+                .groupBy(t.DOOR_TYPE);
         groupBy.fetch().map((r) -> {
             ActiveDoorByEquipmentDTO dto = new ActiveDoorByEquipmentDTO();
             dto.setActiveDoorNumber(r.value1());
-            dto.setEquipment(r.value2());
+            dto.setDoorType(r.value2());
             dtos.add(dto);
             return null;
         });
@@ -416,6 +417,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
                 ,t.FIRMWARE_NAME.as("firmware"))
                 .from(t)
+                .where(t.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))
                 .groupBy(t.FIRMWARE_NAME);
         groupBy.fetch().map((r) -> {
             ActiveDoorByFirmwareDTO dto = new ActiveDoorByFirmwareDTO();
@@ -528,6 +530,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             dto.setNamespaceName(r.getValue(com.everhomes.schema.Tables.EH_NAMESPACES.NAME));
             dto.setCommunityName(r.getValue(Tables.EH_COMMUNITIES.NAME));
             dto.setOrganizationName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
+            dto.setDoorType(r.getValue(t.DOOR_TYPE));
             return dto;
         });
         if(count > 0 && objs.size() > count) {
