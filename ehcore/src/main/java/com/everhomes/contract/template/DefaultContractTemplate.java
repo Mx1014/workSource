@@ -93,12 +93,18 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 					value = periodUnit.getDescription();
 				}
 				break;
+			case "contractType":
+				ContractType contractType = ContractType.fromStatus((Byte) data);
+				if (contractType != null) {
+					value = contractType.getDescription();
+				}
+				break;
 			case "apartments":
 				StringBuilder apartmentsSBuilder = new StringBuilder();
 				List<BuildingApartmentDTO> apartments = (List<BuildingApartmentDTO>)data;
 				for(BuildingApartmentDTO apartment : apartments){
-					apartmentsSBuilder.append(apartment.getBuildingName()).append("/").
-									   append(apartment.getApartmentName()).append(",");
+					apartmentsSBuilder.append(apartment.getBuildingName()).append("/")
+									  .append(apartment.getApartmentName()).append(",");
 				}
 				if (apartmentsSBuilder.length() > 0) {
 					value = apartmentsSBuilder.substring(0, apartmentsSBuilder.length()-1);
@@ -116,11 +122,8 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 					value = organization.getName();
 				}
 				break;
-			case "contractType":
-				ContractType contractType = ContractType.fromStatus((Byte) data);
-				if (contractType != null) {
-					value = contractType.getDescription();
-				}
+			case "customerId":
+				value = contract.getCustomerName();
 				break;
 			default:
 				value = data.toString();
