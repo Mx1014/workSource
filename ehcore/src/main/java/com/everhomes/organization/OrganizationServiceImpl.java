@@ -6317,7 +6317,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         addArchivesContactCommand.setNamespaceId(user.getNamespaceId());
                         this.archivesService.addArchivesContact(addArchivesContactCommand);
                         DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
-                        sendMessageForContactApproved(member);
+//                        sendMessageForContactApproved(member);
 
                         //通过认证的同步到企业客户的人才团队中 21710
                         customerService.createCustomerTalentFromOrgMember(member.getOrganizationId(), member);
