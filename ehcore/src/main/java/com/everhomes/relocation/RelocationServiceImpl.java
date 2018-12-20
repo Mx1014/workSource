@@ -431,7 +431,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd hh:mm");
 		row.createCell(++i).setCellValue(sdf.format(new Date(dto.getCreateTime().getTime())));
 		//状态
-		row.createCell(++i).setCellValue(RelocationRequestStatus.fromCode(dto.getStatus()).name());
+		row.createCell(++i).setCellValue(RelocationRequestStatus.fromCode(dto.getStatus()).getDescription());
 		//申请人
 		row.createCell(++i).setCellValue(dto.getRequestorName());
 		//手机号码
