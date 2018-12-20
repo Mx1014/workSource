@@ -2970,13 +2970,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (cmd.getRentType() ==1){
 				BigDecimal roomMinPrice = officeCubicleProvider.getRoomMinPrice(r.getId());
 				BigDecimal stationMinPrice = officeCubicleProvider.getStationMinPrice(r.getId());
-				if (roomMinPrice == null){
-					roomMinPrice =  new BigDecimal(0);
-				}
 				if (stationMinPrice == null){
 					stationMinPrice =  new BigDecimal(0);
 				}
-				dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
+				if (roomMinPrice == null){
+					roomMinPrice =  new BigDecimal(0);
+					dto.setMinUnitPrice(stationMinPrice);
+				} else {
+					dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
+				}
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)1);
 			}else{
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)2);
