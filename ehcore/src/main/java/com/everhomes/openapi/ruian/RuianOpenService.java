@@ -2,6 +2,7 @@ package com.everhomes.openapi.ruian;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.activity.ruian.WebApiRuianHelper;
+import com.everhomes.rest.openapi.ruian.MallcooAutoLoginCommand;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class RuianOpenService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RuianOpenService.class);
 
     // 我们的communityId(key)和mallcooId(value)的映射表
-    public static final Map<String, String> PROJECT_MAPPING = new HashMap(){{put("240111044332063000","10776");put("default","10764");}};
+    public static final Map<String, String> PROJECT_MAPPING = new HashMap(){{put("240111044332063582","10776");put("default","10764");}};
 
     // 去mallcoo获取ticket的url
     public static final String TICKET_GET_RUL = "https://openapi10.mallcoo.cn/User/MallCard/v2/Open/ByMallCardTypeID/";
@@ -42,28 +43,37 @@ public class RuianOpenService {
     /**
      * 去猫酷拿ticket然后转跳
      */
-    public HttpHeaders buildRedirectHeader(String communityId) {
+    public HttpHeaders buildRedirectHeader(MallcooAutoLoginCommand mallcooAutoLoginCommand) {
 
-        String mallId = PROJECT_MAPPING.get(communityId);
-        if ( mallId == null ) {
-            mallId = PROJECT_MAPPING.get("default");
-            LOGGER.error("no mallId mapping 4 communityId: [" + communityId + "] and default mallId used to avoid error");
-        }
+        String communityId = mallcooAutoLoginCommand.getCommunityId() == null ? "default" : mallcooAutoLoginCommand.getCommunityId();
+        String callbackUrl = mallcooAutoLoginCommand.getCallbackUrl() == null ? CALLBACK_URL : mallcooAutoLoginCommand.getCallbackUrl();
+        String mallId = PROJECT_MAPPING.get(communityId) == null ? PROJECT_MAPPING.get("default") : PROJECT_MAPPING.get(communityId);
 
         String redirectToLoginUrl = REDIRECT_TO_LOGIN_URL.replaceAll(MALLID_PLACEHOLDER, mallId);
-        String callbackUrl = CALLBACK_URL.replaceAll(MALLID_PLACEHOLDER, mallId);
+        callbackUrl = callbackUrl.replaceAll(MALLID_PLACEHOLDER, mallId);
         String ticketGetUrl = TICKET_GET_RUL.replaceAll(MALLID_PLACEHOLDER, mallId);
 
         Long userId = UserContext.currentUserId();
+        // 游客用户直接重定向到要转跳的地址不进行自动登录
+        if ( userId == null || userId.compareTo(0L) == 0){
+            LOGGER.info("unlogined user redirect without auto login");
+            return buildHeaders(callbackUrl);
+        }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //仅瑞安域空间允许用此接口
-      if ( namespaceId == null || RUIAN_NAMESPACE_ID.compareTo(namespaceId) != 0 ) {
-          LOGGER.error("user in namespace[" + namespaceId + "] is not allowed to redirect to ruian");
-          return null;
-      }
+        if ( namespaceId == null || RUIAN_NAMESPACE_ID.compareTo(namespaceId) != 0 ) {
+            LOGGER.error("user in namespace[" + namespaceId + "] is not allowed to redirect to ruian");
+            return null;
+        }
 
-        String ticket = getTicketFromMallcoo(userId, ticketGetUrl);
+        String identifierToken = userService.getUserIdentifier(userId).getIdentifierToken();
+        if(identifierToken == null){
+            LOGGER.warn("error occured in getTicketFromMallcoo cause there is no identifier token(phoneNum) for user [" + userId + "]");
+            return buildHeaders(callbackUrl);
+        }
+
+        String ticket = getTicketFromMallcoo(identifierToken, ticketGetUrl);
         try {
             callbackUrl = URLEncoder.encode(callbackUrl, "utf-8");
         } catch (UnsupportedEncodingException e1) {
@@ -77,28 +87,26 @@ public class RuianOpenService {
                 .build()
                 .toUriString();
 
-        HttpHeaders httpHeaders = new HttpHeaders();
+        return buildHeaders(uriStr);
+    }
+
+    private HttpHeaders buildHeaders(String uriStr){
+        HttpHeaders headers = new HttpHeaders();
         try {
-            httpHeaders.setLocation(new URI(uriStr));
+            headers.setLocation(new URI(uriStr));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-
-        return httpHeaders;
+        return headers;
     }
 
     /**
      * 用手机号去猫酷拿ticket
      */
-    private String getTicketFromMallcoo(long userId, String ticketGetUrl) {
+    private String getTicketFromMallcoo(String phoneNum, String ticketGetUrl) {
         try {
-            String identifierToken = userService.getUserIdentifier(userId).getIdentifierToken();
-
             org.json.simple.JSONObject object = new org.json.simple.JSONObject();
-            if(identifierToken == null){
-                LOGGER.error("error occured in getTicketFromMallcoo cause there is no identifier token(phoneNum) for user [" + userId + "]");
-            }
-            object.put("Mobile",identifierToken);
+            object.put("Mobile",phoneNum);
             String resultStr = WebApiRuianHelper.getIns().doPost(ticketGetUrl, object.toString(),null);
 
             JSONObject resultJson = JSONObject.parseObject(resultStr);
