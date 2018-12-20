@@ -79,6 +79,13 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -980,7 +987,13 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
 
         User user = UserContext.current().getUser();
-        rsp.setVipLevelText(user.getVipLevelText());
+        JSONObject jsonObject = getUserVipLevel(user.getId(), user.getNamespaceId());
+        if (jsonObject != null) {
+            Integer level = jsonObject.getInteger("membershipLevel");
+            String levelText = jsonObject.getString("name");
+            userService.updateUserVipLevel(user.getId(), level, levelText);
+            rsp.setVipLevelText(levelText);
+        }
         BizMyUserCenterCountResponse response = fetchBizMyUserCenterCount(user);
 
         // UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
@@ -1013,6 +1026,58 @@ public class UserActivityServiceImpl implements UserActivityService {
             rsp.setPoint(0L);
         }
         return rsp;
+    }
+
+    public JSONObject getUserVipLevel(Long userId, Integer namespaceId){
+        String url = configurationProvider.getValue(namespaceId, ConfigConstants.USER_VIP_LEVEL_URL, "") + "/prmt/member/getUserScoresByUserId";
+        CloseableHttpClient httpClient = null;
+        CloseableHttpResponse response = null;
+        JSONObject result = null;
+        try{
+            httpClient = HttpClients.createDefault();
+            HttpPost httpPost = new HttpPost(url);
+            httpPost.addHeader("content-type","application/json");
+            JSONObject jsonParam = new JSONObject();
+            jsonParam.put("userId", userId);
+            jsonParam.put("namespaceId", namespaceId);
+            StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
+            entity.setContentType("application/json");
+            httpPost.setEntity(entity);
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setConnectTimeout(5000).setConnectionRequestTimeout(5000)
+                    .setSocketTimeout(5000).build();
+            httpPost.setConfig(requestConfig);
+            response = httpClient.execute(httpPost);
+            String json = EntityUtils.toString(response.getEntity(),"utf8");
+            int status = response.getStatusLine().getStatusCode();
+            if(status != 200){
+                LOGGER.error("Failed to get the user vip level, url={}, status={}", url, response.getStatusLine());
+            }
+            // http返回转为json格式
+            result = JSONObject.parseObject(json);
+
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Get user vip level result, url={}, result={}", url, result);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to get the http result, url={}", url, e);
+        } finally {
+            if(response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
     }
 
     @Override
