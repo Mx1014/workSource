@@ -2390,7 +2390,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         long calDateEndTime = System.currentTimeMillis();
 
         long prepareBillStartTime = System.currentTimeMillis();
-        Map<Long, String> map = prepareUserBillIdentifierFromBill(namespaceId, communityId, minBeginDateStr, maxEndDateStr);
+        Map<Long, String> map = prepareOrganBillIdentifierFromBill(namespaceId, communityId, minBeginDateStr, maxEndDateStr);
         populateUserBillIdentifierWithAddress(map);
         long prepareBillEndTime = System.currentTimeMillis();
 
@@ -2415,6 +2415,54 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         }
 
         return billIdentifiers;
+    }
+    
+    private Map<Long, String> prepareOrganBillIdentifierFromBill(Integer namespaceId, Long communityId, String dateStrBegin, String dateStrEnd) {
+        long startTime = System.currentTimeMillis();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        Condition conditions = Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId);
+        conditions = conditions.and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(communityId));
+        conditions = conditions.and(Tables.EH_PAYMENT_BILLS.STATUS.eq(new Byte("0"))); // 账单状态，0:待缴;1:已缴（如果已缴，不允许覆盖，所以是新增账单）
+        conditions = conditions.and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(AssetTargetType.ORGANIZATION.getCode())); // 企业客户
+        // 加上时间段限制，减少数据量
+        if(StringHelper.hasContent(dateStrBegin)) {
+            conditions = conditions.and(Tables.EH_PAYMENT_BILLS.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
+        }
+        if(StringHelper.hasContent(dateStrEnd)) {
+            conditions = conditions.and(Tables.EH_PAYMENT_BILLS.DATE_STR_END.lessOrEqual(dateStrEnd));
+        }
+
+        // 企业客户时，以账单时间、账单组、企业名称3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+        // map用于存储billId与帐单标识的映射关系，其中帐单标识格式：帐单组_账单开始时间_帐单结束时间
+        // 由于后面还需要拼地址数据，所以标识保留StringBuilder结果
+        Map<Long, String> map = new HashMap<Long, String>();
+        Integer totalCount = context.selectCount().from(Tables.EH_PAYMENT_BILLS).where(conditions).fetchOneInto(Integer.class);
+        if(totalCount == null) {
+            totalCount = 0;
+        }
+        int pageSize = 1000;
+        int pageCount = totalCount / pageSize;
+        if((totalCount % pageSize) > 0) {
+            pageCount++;
+        }
+        int offset = 0;
+        for(int i = 0; i < pageCount; i++) {
+            offset = i * pageSize;
+            context.select().from(Tables.EH_PAYMENT_BILLS).where(conditions).limit(pageSize).offset(offset).fetch()
+            .forEach(r ->{
+                PaymentBills bill = ConvertHelper.convert(r, PaymentBills.class);
+                map.put(bill.getId(), concateUserBillIdentifier(bill.getBillGroupId(), bill.getDateStrBegin(), bill.getDateStrEnd()));
+            });
+        }
+
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Process bill importing data, prepare user bill identifiers from eh_payment_bills, namespaceId={}, communityId={}, dateStrBegin={}, dateStrEnd={}, totalCount={}, elapse={}",
+                    namespaceId, communityId, dateStrBegin, dateStrEnd, totalCount, (endTime - startTime));
+        }
+
+        return map;
     }
     
     
