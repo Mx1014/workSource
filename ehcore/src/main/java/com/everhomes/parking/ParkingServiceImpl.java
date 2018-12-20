@@ -2619,7 +2619,7 @@ public class ParkingServiceImpl implements ParkingService {
 		createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
 		createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
 		String homeurl = configProvider.getValue("home.url", "");
-		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
+		String callbackurl = homeurl + contextPath + configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.pay.callBackUrl", "/parking/notifyParkingRechargeOrderPaymentV2");
 		createRefundOrderCommand.setCallbackUrl(callbackurl);
 		createRefundOrderCommand.setSourceType(SourceType.MOBILE.getCode());
 
