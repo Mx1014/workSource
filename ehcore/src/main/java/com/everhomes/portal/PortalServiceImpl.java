@@ -2673,18 +2673,27 @@ public class PortalServiceImpl implements PortalService {
 
 				if(IndexType.fromCode(na.getType()) == IndexType.CONTAINER){
 					Container container = (Container) StringHelper.fromJsonString(index.getConfigJson(), Container.class);
-					List<PortalLaunchPadMapping> portalLaunchPadMappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.name(), container.getLayoutId(), null);
-
-					if(portalLaunchPadMappings != null && portalLaunchPadMappings.size() > 0){
-						container.setLayoutId(portalLaunchPadMappings.get(0).getLaunchPadContentId());
-					}
                     if (TopBarStyle.LUCENCY_SHADE.getCode().equals(na.getTopBarStyle())) {
                         container.setLayoutType(LayoutType.NAV_LUCENCY.getCode());
                     }else if (TopBarStyle.OPAQUE_DEFORMATION.getCode().equals(na.getTopBarStyle())) {
-					    container.setLayoutType(LayoutType.NAV_OPAQUE.getCode());
+                        container.setLayoutType(LayoutType.NAV_OPAQUE.getCode());
                     }else if (TopBarStyle.OPAQUE_STATIC.getCode().equals(na.getTopBarStyle())) {
-					    container.setLayoutType(LayoutType.NAV_STATIC.getCode());
+                        container.setLayoutType(LayoutType.NAV_STATIC.getCode());
+                    }else {
+                        if (container.getLayoutId() != null) {
+                            PortalLayout portalLayout = this.portalLayoutProvider.findPortalLayoutById(container.getLayoutId());
+                            if (portalLayout != null) {
+                                if (PortalLayoutType.ASSOCIATIONLAYOUT.getCode().equals(portalLayout.getType())) {
+                                    container.setLayoutType(LayoutType.TAB.getCode());
+                                }
+                            }
+                        }
                     }
+//					List<PortalLaunchPadMapping> portalLaunchPadMappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.name(), container.getLayoutId(), null);
+//
+//					if(portalLaunchPadMappings != null && portalLaunchPadMappings.size() > 0){
+//						container.setLayoutId(portalLaunchPadMappings.get(0).getLaunchPadContentId());
+//					}
 
 					index.setConfigJson(container.toString());
 
