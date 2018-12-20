@@ -3076,12 +3076,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
             qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
             String s = WebTokenGenerator.getInstance().toWebToken("0," + auth.getUserId().toString());
-            qr.setQrCodeKey(homeUrl + "/openapi/aclink/verifyDoorAuth" + "?userId=" + s);
+            qr.setQrCodeKey(homeUrl + "/evh/openapi/aclink/verifyDoorAuth" + "?userId=" + s);
 //            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getUserId().toString() + "&userType=" + "user");
         } else {
             qr.setExpireTimeMs(auth.getValidEndMs());
             String s = WebTokenGenerator.getInstance().toWebToken("1," + auth.getId().toString());
-            qr.setQrCodeKey(homeUrl + "/openapi/aclink/verifyDoorAuth" + "?userId=" + s);
+            qr.setQrCodeKey(homeUrl + "/evh/openapi/aclink/verifyDoorAuth" + "?userId=" + s);
 //            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getId() + "&userType=" + "visitor");
         }
         qr.setId(auth.getId());
