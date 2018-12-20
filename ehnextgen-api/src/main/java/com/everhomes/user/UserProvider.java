@@ -152,6 +152,8 @@ public interface UserProvider {
 
     List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel);
 
+    List<UserDTO> getUserByIds(List<Long> ids);
+
     TargetDTO findUserByTokenAndName(String tel, String targetName);
 	
 	TargetDTO findUserByToken(String tel,Integer namespaceId);
