@@ -2807,11 +2807,17 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingCardRequestTypeDTO> dtos = new ArrayList<>();
 		if (!types.isEmpty()) {
-			dtos = types.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestTypeDTO.class))
-					.collect(Collectors.toList());
-
 			ListParkingRechargeRatesCommand listParkingRechargeRatesCommand = ConvertHelper.convert(cmd, ListParkingRechargeRatesCommand.class);
-			List<ParkingRechargeRateDTO> rates = listParkingRechargeRates(listParkingRechargeRatesCommand);
+ 			List<ParkingRechargeRateDTO> rates = listParkingRechargeRates(listParkingRechargeRatesCommand);
+			for (ParkingCardRequestType type: types) {
+	 			for (ParkingRechargeRateDTO rate :rates){
+					ParkingCardRequestTypeDTO dto = new ParkingCardRequestTypeDTO();
+					if (type.getCardTypeId().equals(rate.getCardTypeId())){
+						dto = ConvertHelper.convert(type, ParkingCardRequestTypeDTO.class);
+						dtos.add(dto);
+					}
+				}
+			}
 
 			for (ParkingCardRequestTypeDTO type: dtos) {
 				for (ParkingRechargeRateDTO rate: rates) {
