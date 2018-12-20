@@ -1263,7 +1263,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 			DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		    SelectJoinStep<Record1<Integer>> query = context.selectCount()
 		    		.from(Tables.EH_PARKING_CAR_VERIFICATIONS);
-		    Condition condition = Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType);
+		    Condition condition = Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType);
 		    condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_ID.eq(ownerId));
 		    condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType));
 		    condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PARKING_LOT_ID.eq(parkingLotId));
