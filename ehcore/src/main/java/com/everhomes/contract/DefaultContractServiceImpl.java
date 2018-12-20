@@ -4650,26 +4650,38 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		// 校验查看合同文档权限
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.GENERATE_CONTRACT_DOCUMENTS, cmd.getOrgId(), cmd.getCommunityId());
 		
-		ContractDocumentDTO result = new ContractDocumentDTO();
+		ContractDocumentDTO contractDocumentDTO = new ContractDocumentDTO();
 		ContractDocument contractDocument = contractProvider.findContractDocumentById(cmd.getId());
 		if (contractDocument != null) {
-			result.setId(contractDocument.getId());
+			contractDocumentDTO.setId(contractDocument.getId());
 			if ("gogs".equals(contractDocument.getContentType())) {
 				try {
 					//查询gogs上面的数据
 					String moduleType = "ContractDocument_" + contractDocument.getCategoryId();
 					GogsRepo repo = gogsRepo("contractDocument",contractDocument.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractDocuments", contractDocument.getCommunityId());
-					result.setContent(gogsGetScript(repo, contractDocument.gogsPath(), contractDocument.getContent()));
-				} catch (GogsConflictException | GogsNotExistException e) {
-					LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
-					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
-							"contractDocumentName is already exist");
-				} catch (Exception e){
+					contractDocumentDTO.setContent(gogsGetScript(repo, contractDocument.gogsPath(), contractDocument.getContent()));
+				} catch (GogsConflictException e) {
+					LOGGER.error(
+							"save contract document to Gogs,contract document already exists,namespaceId = {},communityId = {},contract document name = {}.",
+							contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+					throw RuntimeErrorException.errorWith(
+							ContractErrorCode.SCOPE, 
+							ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+							"Gogs conflict exception");
+				}catch (GogsNotExistException e) {
+					LOGGER.error(
+							"save contract document to Gogs,contract document do not exist,namespaceId = {},communityId = {},contract document name = {}.",
+							contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+					throw RuntimeErrorException.errorWith(
+							ContractErrorCode.SCOPE, 
+							ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+							"Gogs not exist exception");
+				}catch (Exception e){
 					LOGGER.error("Gogs OthersException .", e);
 				}
 			}
 		}
-		return result;
+		return contractDocumentDTO;
 	}
 
 	@Override 
@@ -4709,11 +4721,23 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					contract.setDocumentId(contractDocument.getId());
 					contractProvider.updateContract(contract);
 				}
-			} catch (GogsConflictException | GogsNotExistException e) {
-				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
-				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
-						"contractDocumentName is already exist");
-			} catch (Exception e){
+			} catch (GogsConflictException e) {
+				LOGGER.error(
+						"save contract document to Gogs,contract document already exists,namespaceId = {},communityId = {},contract document name = {}.",
+						contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+				throw RuntimeErrorException.errorWith(
+						ContractErrorCode.SCOPE, 
+						ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+						"Gogs conflict exception");
+			}catch (GogsNotExistException e) {
+				LOGGER.error(
+						"save contract document to Gogs,contract document do not exist,namespaceId = {},communityId = {},contract document name = {}.",
+						contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+				throw RuntimeErrorException.errorWith(
+						ContractErrorCode.SCOPE, 
+						ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+						"Gogs not exist exception");
+			}catch (Exception e){
 				LOGGER.error("Gogs OthersException .", e);
 			}
 		}
@@ -4804,7 +4828,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	private void saveContractDocumentToGogs(GenerateContractDocumentsCommand cmd, String contractDocumentText) {
 		if (cmd.getId() == null) {
 			ContractDocument contractDocument = getContractDocumentFromCommand(cmd);
-			//以name_contractNumber作为文档上传到gogs时的唯一标识
+			//以name_contractNumber作为文档上传到gogs时的唯一标识(合同名称+合同编号)
 			if (contractDocument.getName() != null && contractDocument.getContractNumber() != null) {
 				saveContractDocument(contractDocument,contractDocumentText);
 			}
@@ -4859,11 +4883,23 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 						contractProvider.updateContract(contract);
 					}
 				}
-			}catch (GogsConflictException | GogsNotExistException e) {
-				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), contractDocument.getNamespaceId());
-				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
-						"contractDocumentName is already exist");
-			} catch (Exception e){
+			}catch (GogsConflictException e) {
+				LOGGER.error(
+						"save contract document to Gogs,contract document already exists,namespaceId = {},communityId = {},contract document name = {}.",
+						contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+				throw RuntimeErrorException.errorWith(
+						ContractErrorCode.SCOPE, 
+						ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+						"Gogs conflict exception");
+			}catch (GogsNotExistException e) {
+				LOGGER.error(
+						"save contract document to Gogs,contract document do not exist,namespaceId = {},communityId = {},contract document name = {}.",
+						contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+				throw RuntimeErrorException.errorWith(
+						ContractErrorCode.SCOPE, 
+						ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+						"Gogs not exist exception");
+			}catch (Exception e){
 				LOGGER.error("Gogs OthersException .", e);
 			}
 		}
