@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/openapi/ruian")
-@RequireAuthentication(false)
+// @RequireAuthentication(false)
 public class RuianOpenController extends ControllerBase {
 
     @Autowired
