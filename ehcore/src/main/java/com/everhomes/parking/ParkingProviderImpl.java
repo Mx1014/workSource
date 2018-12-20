@@ -1264,39 +1264,39 @@ public class ParkingProviderImpl implements ParkingProvider {
 		    SelectJoinStep<Record1<Integer>> query = context.selectCount()
 		    		.from(Tables.EH_PARKING_CAR_VERIFICATIONS);
 		    Condition condition = Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType);
-		    condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_ID.eq(ownerId));
-		    condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType));
-		    condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PARKING_LOT_ID.eq(parkingLotId));
-		    condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.SOURCE_TYPE.eq(ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode()));
+		    condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_ID.eq(ownerId));
+		    condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType));
+		    condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PARKING_LOT_ID.eq(parkingLotId));
+		    condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.SOURCE_TYPE.eq(ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode()));
 		    
 			if (StringUtils.isNotBlank(plateNumber)) {
-				condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_NUMBER.like("%" + plateNumber + "%"));
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_NUMBER.like("%" + plateNumber + "%"));
 			}
 			if (StringUtils.isNotBlank(plateOwnerName)) {
-				condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_NAME.like("%" + plateOwnerName + "%"));
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_NAME.like("%" + plateOwnerName + "%"));
 			}
 			if (StringUtils.isNotBlank(plateOwnerPhone)) {
-				condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_PHONE.like("%" + plateOwnerPhone + "%"));
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_PHONE.like("%" + plateOwnerPhone + "%"));
 			}
 			if (null != startDate) {
-				condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.ge(startDate));
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.ge(startDate));
 			}
 			if (null != endDate) {
-				condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.le(endDate));
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.le(endDate));
 			}
 
 			if (null != status) {
-				condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.eq(status));
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.eq(status));
 			}else {
-				condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode())
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode())
 					.and(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.UN_AUTHORIZED.getCode())));
 			}
 
 			if (StringUtils.isNotBlank(requestorEnterpriseName)) {
-				condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_ENTERPRISE_NAME.like("%" + requestorEnterpriseName + "%"));
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_ENTERPRISE_NAME.like("%" + requestorEnterpriseName + "%"));
 			}
 			if (StringUtils.isNotBlank(ownerKeyWords)) {
-				condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_PHONE.like("%" + ownerKeyWords + "%")
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_PHONE.like("%" + ownerKeyWords + "%")
 						.or(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_NAME.like("%" + ownerKeyWords + "%")));
 			}
 		
