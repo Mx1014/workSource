@@ -1779,14 +1779,17 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		if(cmd.getRentSize() == null) {
 			contract.setRentSize(rentSize);
 		}
-		if(cmd.getCategoryId() != null) {
-			contract.setCategoryId(cmd.getCategoryId());
-		}
-		if(cmd.getTemplateId() != null) {
-			contract.setTemplateId(cmd.getTemplateId());
-		}
-		if (cmd.getDocumentId() != null) {
-			contract.setDocumentId(cmd.getDocumentId());
+		
+		//没有意义的两行代码，contract是由cmd转化过来的，这里再用set方法来设置值的操作多余了
+//		if(cmd.getCategoryId() != null) {
+//			contract.setCategoryId(cmd.getCategoryId());
+//		}
+//		if(cmd.getTemplateId() != null) {
+//			contract.setTemplateId(cmd.getTemplateId());
+//		}
+		
+		if (contract.getDocumentId() == null) {
+			contract.setDocumentId(exist.getDocumentId());
 		}
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
@@ -3515,7 +3518,8 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	@Override
 	public ContractTemplateDTO updateContractTemplate(UpdateContractTemplateCommand cmd) {
 		if (null == cmd.getId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			throw RuntimeErrorException.errorWith(
+					ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id parameter in the command");
 		}
@@ -3535,8 +3539,15 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		if (cmd.getName() != null) {
 			contractTemplateParent.setName(cmd.getName());
 		}
+		/*
+		 * issue-45202:修改了合同模板点击保存时，如果合同模板内没有内容，前端contents会不传（cmd.getContents() == null），
+		 * 这种情况下contractTemplateParent类里的contents还是之前的commitId，导致更新时存到文档里的内容是上一次提交的commitId。
+		 * 而期望的情况是存一个空文本的，因此当cmd.getContents() == null时，将contractTemplateParent类里的contents置为空字符串（""）。
+		*/
 		if (cmd.getContents() != null) {
 			contractTemplateParent.setContents(cmd.getContents());
+		}else {
+			contractTemplateParent.setContents("");
 		}
 		contractTemplateParent.setParentId(cmd.getId());
 		contractTemplateParent.setVersion(contractTemplateParent.getVersion()+1);
@@ -4642,26 +4653,38 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		// 校验查看合同文档权限
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.GENERATE_CONTRACT_DOCUMENTS, cmd.getOrgId(), cmd.getCommunityId());
 		
-		ContractDocumentDTO result = new ContractDocumentDTO();
+		ContractDocumentDTO contractDocumentDTO = new ContractDocumentDTO();
 		ContractDocument contractDocument = contractProvider.findContractDocumentById(cmd.getId());
 		if (contractDocument != null) {
-			result.setId(contractDocument.getId());
+			contractDocumentDTO.setId(contractDocument.getId());
 			if ("gogs".equals(contractDocument.getContentType())) {
 				try {
 					//查询gogs上面的数据
 					String moduleType = "ContractDocument_" + contractDocument.getCategoryId();
 					GogsRepo repo = gogsRepo("contractDocument",contractDocument.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractDocuments", contractDocument.getCommunityId());
-					result.setContent(gogsGetScript(repo, contractDocument.gogsPath(), contractDocument.getContent()));
-				} catch (GogsConflictException | GogsNotExistException e) {
-					LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
-					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
-							"contractDocumentName is already exist");
-				} catch (Exception e){
+					contractDocumentDTO.setContent(gogsGetScript(repo, contractDocument.gogsPath(), contractDocument.getContent()));
+				} catch (GogsConflictException e) {
+					LOGGER.error(
+							"save contract document to Gogs,contract document already exists,namespaceId = {},communityId = {},contract document name = {}.",
+							contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+					throw RuntimeErrorException.errorWith(
+							ContractErrorCode.SCOPE, 
+							ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+							"Gogs conflict exception");
+				}catch (GogsNotExistException e) {
+					LOGGER.error(
+							"save contract document to Gogs,contract document do not exist,namespaceId = {},communityId = {},contract document name = {}.",
+							contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+					throw RuntimeErrorException.errorWith(
+							ContractErrorCode.SCOPE, 
+							ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+							"Gogs not exist exception");
+				}catch (Exception e){
 					LOGGER.error("Gogs OthersException .", e);
 				}
 			}
 		}
-		return result;
+		return contractDocumentDTO;
 	}
 
 	@Override 
@@ -4701,11 +4724,23 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					contract.setDocumentId(contractDocument.getId());
 					contractProvider.updateContract(contract);
 				}
-			} catch (GogsConflictException | GogsNotExistException e) {
-				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), cmd.getNamespaceId());
-				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
-						"contractDocumentName is already exist");
-			} catch (Exception e){
+			} catch (GogsConflictException e) {
+				LOGGER.error(
+						"save contract document to Gogs,contract document already exists,namespaceId = {},communityId = {},contract document name = {}.",
+						contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+				throw RuntimeErrorException.errorWith(
+						ContractErrorCode.SCOPE, 
+						ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+						"Gogs conflict exception");
+			}catch (GogsNotExistException e) {
+				LOGGER.error(
+						"save contract document to Gogs,contract document do not exist,namespaceId = {},communityId = {},contract document name = {}.",
+						contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+				throw RuntimeErrorException.errorWith(
+						ContractErrorCode.SCOPE, 
+						ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+						"Gogs not exist exception");
+			}catch (Exception e){
 				LOGGER.error("Gogs OthersException .", e);
 			}
 		}
@@ -4779,8 +4814,13 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		}
 		// 5、循环模板内容，把模板中的key换成value，获取合同文档
 		String contractDocumentText = null;
-		if (dataMap.size() > 0 && contractTemplateText != null) {
-			contractDocumentText = GetKeywordsUtils.translate(dataMap,contractTemplateText, "${", "}");
+		if (contractTemplateText != null) {
+			//issue-45197:有可能模板里面是没有插入任何变量的，就只是单纯的文本。这种情况，就不用再根据合同模板进行翻译了。
+			if (dataMap.size() > 0) {
+				contractDocumentText = GetKeywordsUtils.translate(dataMap,contractTemplateText, "${", "}");
+			}else if (dataMap.size() == 0) {
+				contractDocumentText = contractTemplateText;
+			}
 		}
 		// 6、把得到的合同文档存到gogs里去，并记录在数据库中
 		if (contractDocumentText != null) {
@@ -4791,7 +4831,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	private void saveContractDocumentToGogs(GenerateContractDocumentsCommand cmd, String contractDocumentText) {
 		if (cmd.getId() == null) {
 			ContractDocument contractDocument = getContractDocumentFromCommand(cmd);
-			//以name_contractNumber作为文档上传到gogs时的唯一标识
+			//以name_contractNumber作为文档上传到gogs时的唯一标识(合同名称+合同编号)
 			if (contractDocument.getName() != null && contractDocument.getContractNumber() != null) {
 				saveContractDocument(contractDocument,contractDocumentText);
 			}
@@ -4846,11 +4886,23 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 						contractProvider.updateContract(contract);
 					}
 				}
-			}catch (GogsConflictException | GogsNotExistException e) {
-				LOGGER.error("contractDocumentName {} in namespace {} already exist!", contractDocument.gogsPath(), contractDocument.getNamespaceId());
-				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
-						"contractDocumentName is already exist");
-			} catch (Exception e){
+			}catch (GogsConflictException e) {
+				LOGGER.error(
+						"save contract document to Gogs,contract document already exists,namespaceId = {},communityId = {},contract document name = {}.",
+						contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+				throw RuntimeErrorException.errorWith(
+						ContractErrorCode.SCOPE, 
+						ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+						"Gogs conflict exception");
+			}catch (GogsNotExistException e) {
+				LOGGER.error(
+						"save contract document to Gogs,contract document do not exist,namespaceId = {},communityId = {},contract document name = {}.",
+						contractDocument.getNamespaceId(),contractDocument.getCommunityId(),contractDocument.gogsPath());
+				throw RuntimeErrorException.errorWith(
+						ContractErrorCode.SCOPE, 
+						ContractErrorCode.ERROR_CONTRACT_DOCUMENT_NAME_EXIST,
+						"Gogs not exist exception");
+			}catch (Exception e){
 				LOGGER.error("Gogs OthersException .", e);
 			}
 		}
@@ -4907,7 +4959,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					handler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + type);
 					handlerMap.put(type, handler);
 				}
-				
+				/**
+				 * 这里翻译的判断很多，主要是兼容模板里存的参数不对时的情形，有这么几种情况：
+				 * 1、没有找到处理的handler
+				 * 2、找到了handler，但是要获取的参数名传的不对，或者参数名不符合校验规则
+				 * 3、找到了handler，参数名传的也对，但是反射出来的值为空（这个好像不需要，在getValue方法里已经有过判空了，就保留吧，不敢改了）
+				 */
 				if (handler != null) {
 					if (handler.isValid(contractDetailDTO, segments)) {
 						dataValue = handler.getValue(contractDetailDTO, segments);
@@ -4921,6 +4978,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				}else {
 					dataMap.put(replaceKey, "");
 				}
+				//这句将segments置为null的代码很关键。
+				//因为segments应该是跟着replaceKey变化而变化的，一次循环结束，segments不应该保留上个replaceKey的信息
+				segments = null;
+			}else {
+				dataMap.put(replaceKey, "");
 			}
 		}
 		return dataMap;
@@ -4937,8 +4999,18 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 	
 	public static void main(String[] args) {
+//		String content = "<p>${<spanstyle=\"background:#B8B8B8\">合同名称<astyle=\"display: none\">@@name##</a></span>}</p><p>${<spanstyle=\"background:#B8B8B8\">合同fdsfadsfa</span>}</p>";
+//		List<String> replaceKeys = GetKeywordsUtils.getKeywordsWithPattern(content, "${", "}");
+//		ContractDetailDTO contractDetailDTO = new ContractDetailDTO();
+//		contractDetailDTO.setName("测试合同");
+//		Map<String, String> dataMap = new HashMap<>();
+//		dataMap = getContractTemplateDataMap(replaceKeys,contractDetailDTO);
 		
 		
+//		Map<String, String> dataMap = new HashMap<>();
+//		dataMap.put("${<spanstyle=\"background:#B8B8B8\">合同名称<astyle=\"display: none\">@@name##</a></span>}", "测试合同");
+//		String translate = GetKeywordsUtils.translate(dataMap, content,  "${", "}");
+//		System.out.println(translate);
 	}
 
 	// 产生合同报表信息,目前只支持月份更新以前的统计信息
