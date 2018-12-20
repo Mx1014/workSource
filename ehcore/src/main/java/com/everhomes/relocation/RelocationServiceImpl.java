@@ -376,7 +376,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		for (RelocationStatistics statistics : relocationStatistics){
 			RelocationStatisticsDTO dto = new RelocationStatisticsDTO();
 			dto.setCount(statistics.getCount());
-			dto.setName(RelocationRequestStatus.fromCode(statistics.getStatus()).name());
+			dto.setName(RelocationRequestStatus.fromCode(statistics.getStatus()).getDescription());
 			response.getClassifyStatistics().add(dto);
 			totalNum += dto.getCount();
 		}
@@ -405,6 +405,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		}
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("relocationRequest");
+		createRequestSheetHead(sheet);
 		for (RelocationRequest request : requests ) {
 			RelocationRequestDTO dto = ConvertHelper.convert(request, RelocationRequestDTO.class);
 			populateRequestDTO(request, dto);
