@@ -54,8 +54,10 @@ public class RuianOpenService {
         String ticketGetUrl = TICKET_GET_RUL.replaceAll(MALLID_PLACEHOLDER, mallId);
 
         Long userId = UserContext.currentUserId();
-        if ( userId == null ){
-            buildHeaders(callbackUrl);
+        // 游客用户直接重定向到要转跳的地址不进行自动登录
+        if ( userId == null || userId.compareTo(0L) == 0){
+            LOGGER.info("unlogined user redirect without auto login");
+            return buildHeaders(callbackUrl);
         }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
@@ -68,7 +70,7 @@ public class RuianOpenService {
         String identifierToken = userService.getUserIdentifier(userId).getIdentifierToken();
         if(identifierToken == null){
             LOGGER.warn("error occured in getTicketFromMallcoo cause there is no identifier token(phoneNum) for user [" + userId + "]");
-            buildHeaders(callbackUrl);
+            return buildHeaders(callbackUrl);
         }
 
         String ticket = getTicketFromMallcoo(identifierToken, ticketGetUrl);
@@ -89,7 +91,7 @@ public class RuianOpenService {
     }
 
     private HttpHeaders buildHeaders(String uriStr){
-        HttpHeaders headers = new HttpHeaders();;
+        HttpHeaders headers = new HttpHeaders();
         try {
             headers.setLocation(new URI(uriStr));
         } catch (URISyntaxException e) {
