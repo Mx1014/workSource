@@ -2617,7 +2617,9 @@ public class ParkingServiceImpl implements ParkingService {
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 					"网络出错，服务连接失败");
 		}
-		order.setGeneralOrderId(refundOrderRestResponse.getResponse().getOrderId()+"");
+		if(refundOrderRestResponse.getResponse().getOrderId()!=null){
+			order.setGeneralOrderId(refundOrderRestResponse.getResponse().getOrderId()+"");
+		}
 		order.setBizOrderNo(refundOrderRestResponse.getResponse().getBusinessOrderNumber());
 		order.setStatus(ParkingRechargeOrderStatus.REFUNDING.getCode());
 		parkingProvider.updateParkingRechargeOrder(order);
