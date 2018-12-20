@@ -1477,7 +1477,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listCommunityUserRelatedTrackUsers")
     @RestReturn(value = OrganizationMemberDTO.class,collection = true)
     public RestResponse listCommunityUserRelatedTrackUsers(ListCommunitySyncResultCommand cmd) {
-        RestResponse response = new RestResponse(customerService.liscustomer/listCommunityRelatedMemberstCommunityUserRelatedTrackUsers(cmd));
+        RestResponse response = new RestResponse(customerService.listCommunityUserRelatedTrackUsers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
