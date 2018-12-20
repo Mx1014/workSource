@@ -4787,8 +4787,13 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		}
 		// 5、循环模板内容，把模板中的key换成value，获取合同文档
 		String contractDocumentText = null;
-		if (dataMap.size() > 0 && contractTemplateText != null) {
-			contractDocumentText = GetKeywordsUtils.translate(dataMap,contractTemplateText, "${", "}");
+		if (contractTemplateText != null) {
+			//issue-45197:有可能模板里面是没有插入任何变量的，就只是单纯的文本。这种情况，就不用再根据合同模板进行翻译了。
+			if (dataMap.size() > 0) {
+				contractDocumentText = GetKeywordsUtils.translate(dataMap,contractTemplateText, "${", "}");
+			}else if (dataMap.size() == 0) {
+				contractDocumentText = contractTemplateText;
+			}
 		}
 		// 6、把得到的合同文档存到gogs里去，并记录在数据库中
 		if (contractDocumentText != null) {
