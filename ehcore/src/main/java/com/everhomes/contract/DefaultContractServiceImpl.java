@@ -3515,7 +3515,8 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	@Override
 	public ContractTemplateDTO updateContractTemplate(UpdateContractTemplateCommand cmd) {
 		if (null == cmd.getId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			throw RuntimeErrorException.errorWith(
+					ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id parameter in the command");
 		}
@@ -3535,8 +3536,15 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		if (cmd.getName() != null) {
 			contractTemplateParent.setName(cmd.getName());
 		}
+		/*
+		 * issue-45202:修改了合同模板点击保存时，如果合同模板内没有内容，前端contents会不传（cmd.getContents() == null），
+		 * 这种情况下contractTemplateParent类里的contents还是之前的commitId，导致更新时存到文档里的内容是上一次提交的commitId。
+		 * 而期望的情况是存一个空文本的，因此当cmd.getContents() == null时，将contractTemplateParent类里的contents置为空字符串（""）。
+		*/
 		if (cmd.getContents() != null) {
 			contractTemplateParent.setContents(cmd.getContents());
+		}else {
+			contractTemplateParent.setContents("");
 		}
 		contractTemplateParent.setParentId(cmd.getId());
 		contractTemplateParent.setVersion(contractTemplateParent.getVersion()+1);
