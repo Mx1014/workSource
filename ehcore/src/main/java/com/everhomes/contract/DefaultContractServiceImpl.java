@@ -2401,6 +2401,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_DELETE,contract,null);
 		//释放资源状态
 		if(flag) {
+			LOGGER.info("Deletecontract related apartment, release start run, contractid={}", contract.getId());
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {
 				boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
@@ -2425,6 +2426,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 							}
 						}
 					} else {
+						LOGGER.info("Deletecontract related apartment, apartmentid is null, contractid={}", contractApartment.getContractId());
 						//没有关联房源id
 						mapping.setStatus(CommonStatus.INACTIVE.getCode());
 						contractBuildingMappingProvider.updateContractBuildingMapping(mapping);
