@@ -38,11 +38,15 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -250,11 +254,11 @@ public class DingxinServiceImpl implements DingxinService {
         String[] ss = s.split(",");
         String userType = ss[0];
         String userId = ss[1];
-        if(userType.equals("1")){
+        if(userType.equals("0")){
            auths = doorAuthProvider.listValidDoorAuthByUser(Long.parseLong(userId), DoorAccessDriverType.DINGXIN.getCode());
-        } else if(userType.equals("0")){
+        } else if(userType.equals("1")){
             DoorAuth auth = doorAuthProvider.getDoorAuthById(Long.parseLong(userId));
-            if(auth.getStatus().equals(DoorAuthStatus.VALID.getCode()) && auth.getRightOpen().equals(DoorAuthStatus.VALID.getCode())){
+            if(auth !=null && auth.getStatus().equals(DoorAuthStatus.VALID.getCode()) && auth.getRightOpen().equals(DoorAuthStatus.VALID.getCode())){
                 auths.add(auth);
             }
         }
@@ -264,7 +268,7 @@ public class DingxinServiceImpl implements DingxinService {
         } else {
             auths.stream().forEach(n -> doorIds.add(n.getDoorId()));
         }
-        DoorAccess door = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getUid());
+        DoorAccess door = doorAccessProvider.queryDoorAccessByUuid(cmd.getUid());
         String result = null;
         if(door == null){
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "door is not found");
@@ -302,12 +306,15 @@ public class DingxinServiceImpl implements DingxinService {
         try{
             httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(url);
-            httpPost.addHeader("content-type","application/json");
-            JSONObject jsonParam = new JSONObject();
-            jsonParam.put("uid", uid);
-            StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
-            entity.setContentType("application/json");
-            httpPost.setEntity(entity);
+//            httpPost.addHeader("content-type","application/json");
+//            JSONObject jsonParam = new JSONObject();
+//            jsonParam.put("uid", uid);
+//            StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
+//            entity.setContentType("application/json");
+            List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+            NameValuePair pair = new BasicNameValuePair("uid", uid);
+            pairs.add(pair);
+            httpPost.setEntity(new UrlEncodedFormEntity(pairs, HTTP.UTF_8));
             response = httpClient.execute(httpPost);
             String json = EntityUtils.toString(response.getEntity(),"utf8");
             int status = response.getStatusLine().getStatusCode();
