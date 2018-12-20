@@ -7685,6 +7685,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }, "fixUserInfoOnceTime").start();
     }
 
+    @Override
+    public GetUserListResponse getUserList(GetUserListCommand cmd) {
+        GetUserListResponse response = new GetUserListResponse();
+        List<UserDTO> list = this.userProvider.getUserByIds(cmd.getIds());
+        response.setUserDtos(list);
+        return response;
+    }
+
     /*******************统一用户同步数据**********************/
     @KafkaListener(topics = "user-create-event")
     public void syncCreateUser(ConsumerRecord<?, String> record) {

@@ -1947,6 +1947,38 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Override
+    public List<UserDTO> getUserByIds(List<Long> ids) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<UserDTO> list = new ArrayList<>();
+        com.everhomes.server.schema.tables.EhUsers r = Tables.EH_USERS.as("r");
+        com.everhomes.server.schema.tables.EhUserIdentifiers o = Tables.EH_USER_IDENTIFIERS.as("o");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(r.ID);
+        query.addSelect(r.NICK_NAME);
+        query.addSelect(o.IDENTIFIER_TOKEN);
+        query.addFrom(r);
+        query.addFrom(o);
+        query.addConditions(r.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        query.addConditions(r.ID.eq(o.OWNER_UID));
+        if(ids.size() == 1){
+            query.addConditions(r.ADDRESS_ID.eq(ids.get(0)));
+        }
+        if(ids.size() > 1){
+            query.addConditions(r.ADDRESS_ID.in(ids));
+        }
+        query.fetch()
+                .map(f -> {
+                    UserDTO dto = new UserDTO();
+                    dto.setId(f.getValue(r.ID));
+                    dto.setNickName(f.getValue(r.NICK_NAME));
+                    dto.setIdentifierToken(f.getValue(o.IDENTIFIER_TOKEN));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
+    }
+
+    @Override
     public TargetDTO findUserByToken(String tel,Integer namespaceId) {
         TargetDTO dto = new TargetDTO();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());

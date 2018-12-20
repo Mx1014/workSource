@@ -393,4 +393,6 @@ public interface UserService {
     SmartCardVerifyResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd);
 
     void fixUserSync(FixUserSyncCommand cmd);
+
+    GetUserListResponse getUserList(GetUserListCommand cmd);
 }
