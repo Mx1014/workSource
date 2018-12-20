@@ -16,8 +16,18 @@ public class ListParkingCardRequestResponse {
 
     @ItemType(ParkingCardRequestDTO.class)
     private List<ParkingCardRequestDTO> requests;
+    private Long totalNum;
     
-    public ListParkingCardRequestResponse() {
+    
+    public Long getTotalNum() {
+		return totalNum;
+	}
+
+	public void setTotalNum(Long totalNum) {
+		this.totalNum = totalNum;
+	}
+
+	public ListParkingCardRequestResponse() {
     }
     
     public ListParkingCardRequestResponse(Long nextPageAnchor, List<ParkingCardRequestDTO> requests) {

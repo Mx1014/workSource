@@ -40,6 +40,8 @@ public class ItemGroupInstanceConfig {
 
 	private String backgroundColor;
 
+	private Float backgroundAlpha;
+
 	private Byte titleFlag;
 
 	private String title;
@@ -104,6 +106,14 @@ public class ItemGroupInstanceConfig {
 	private Byte showDots;
 	//banner字段end
 
+
+    public Float getBackgroundAlpha() {
+        return backgroundAlpha;
+    }
+
+    public void setBackgroundAlpha(Float backgroundAlpha) {
+        this.backgroundAlpha = backgroundAlpha;
+    }
 
     public Byte getShowDots() {
         return showDots;

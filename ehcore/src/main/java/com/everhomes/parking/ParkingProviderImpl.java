@@ -698,17 +698,17 @@ public class ParkingProviderImpl implements ParkingProvider {
     public List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                               String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
                                                               Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName, Long flowId,TableField field,
-                                                              int order, String cardTypeId, String ownerKeyWords,  Long pageAnchor, Integer pageSize){
+                                                              int order, String cardTypeId, String ownerKeyWords,  Long pageAnchor, Integer pageSize,Integer pageNum){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
-        if (null != pageAnchor && pageAnchor != 0) {
-        	if (order > 0)
-				query.addConditions(field.gt(new Timestamp(pageAnchor)));
-        	else
-				query.addConditions(field.lt(new Timestamp(pageAnchor)));
-		}
+//        if (null != pageAnchor && pageAnchor != 0) {
+//        	if (order > 0)
+//				query.addConditions(field.gt(new Timestamp(pageAnchor)));
+//        	else
+//				query.addConditions(field.lt(new Timestamp(pageAnchor)));
+//		}
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
         if(null != ownerId)
@@ -750,8 +750,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 			else
 				query.addOrderBy(field.desc());
         }
+        int firstOffset = (pageNum - 1) * pageSize;
         if(null != pageSize)
-        	query.addLimit(pageSize);
+        	query.addLimit(firstOffset,pageSize);
         
         List<ParkingCardRequest> resultList = query.fetch().map(r -> {
 			ParkingCardRequest convert = ConvertHelper.convert(r, ParkingCardRequest.class);
@@ -1056,7 +1057,8 @@ public class ParkingProviderImpl implements ParkingProvider {
 	public List<ParkingCarVerification> searchParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
 																	  String plateNumber, String plateOwnerName, String plateOwnerPhone,
 																	  Timestamp startDate, Timestamp endDate, Byte status,
-																	  String requestorEnterpriseName, String ownerKeyWords, Long pageAnchor, Integer pageSize) {
+																	  String requestorEnterpriseName, String ownerKeyWords, Long pageAnchor, 
+																	  Integer pageSize,Integer pageNum) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarVerifications.class));
 		SelectQuery<EhParkingCarVerificationsRecord> query = context.selectQuery(Tables.EH_PARKING_CAR_VERIFICATIONS);
 
@@ -1065,9 +1067,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PARKING_LOT_ID.eq(parkingLotId));
 		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.SOURCE_TYPE.eq(ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode()));
 
-		if (null != pageAnchor && pageAnchor != 0L) {
-			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
-		}
+//		if (null != pageAnchor && pageAnchor != 0L) {
+//			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
+//		}
 		if (StringUtils.isNotBlank(plateNumber)) {
 			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_NUMBER.like("%" + plateNumber + "%"));
 		}
@@ -1100,8 +1102,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 		}
 
 		query.addOrderBy(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.desc());
+        int firstOffset = (pageNum - 1) * pageSize;
 		if (null != pageSize) {
-			query.addLimit(pageSize);
+			query.addLimit(firstOffset,pageSize);
 		}
 		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingCarVerification.class));
 	}
@@ -1251,6 +1254,57 @@ public class ParkingProviderImpl implements ParkingProvider {
 		return count[0];
 	}
 
+	@Override
+	public Long countCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
+			  String plateNumber, String plateOwnerName, String plateOwnerPhone,
+			  Timestamp startDate, Timestamp endDate, Byte status,
+			  String requestorEnterpriseName, String ownerKeyWords) {
+			Long count =0L;
+			DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		    SelectJoinStep<Record1<Integer>> query = context.selectCount()
+		    		.from(Tables.EH_PARKING_CAR_VERIFICATIONS);
+		    Condition condition = Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType);
+		    condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_ID.eq(ownerId));
+		    condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType));
+		    condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PARKING_LOT_ID.eq(parkingLotId));
+		    condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.SOURCE_TYPE.eq(ParkingCarVerificationSourceType.CAR_VERIFICATION.getCode()));
+		    
+			if (StringUtils.isNotBlank(plateNumber)) {
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_NUMBER.like("%" + plateNumber + "%"));
+			}
+			if (StringUtils.isNotBlank(plateOwnerName)) {
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_NAME.like("%" + plateOwnerName + "%"));
+			}
+			if (StringUtils.isNotBlank(plateOwnerPhone)) {
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_PHONE.like("%" + plateOwnerPhone + "%"));
+			}
+			if (null != startDate) {
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.ge(startDate));
+			}
+			if (null != endDate) {
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.le(endDate));
+			}
+
+			if (null != status) {
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.eq(status));
+			}else {
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode())
+					.and(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.UN_AUTHORIZED.getCode())));
+			}
+
+			if (StringUtils.isNotBlank(requestorEnterpriseName)) {
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_ENTERPRISE_NAME.like("%" + requestorEnterpriseName + "%"));
+			}
+			if (StringUtils.isNotBlank(ownerKeyWords)) {
+				condition = condition.and(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_PHONE.like("%" + ownerKeyWords + "%")
+						.or(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_NAME.like("%" + ownerKeyWords + "%")));
+			}
+		
+			count = query.where(condition).fetchOneInto(Long.class);
+	                	
+			return count;
+	}
+	
 	@Override
 	public ParkingSpace getAnyParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, List<String> spaces) {
 

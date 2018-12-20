@@ -228,11 +228,14 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		sendMessage(yellowPage,flowCase, formItemsInfo);
 		
 		//发放积分
-		addPoints(yellowPage.getId(), flowCase.getProjectId());
+		addPoints(yellowPage.getId(), flowCase.getProjectId(), flowCase.getId());
 	}
 	
 	//添加积分
-	private void addPoints(Long serviceId, Long projectId) {
+	private void addPoints(Long serviceId, Long projectId, Long flowCaseId) {
+		
+		LOGGER.info("alliance addPoints user={}, serviceId={}, projectId={}, flowCaseId={}",
+				UserContext.currentUserId(), serviceId, projectId, flowCaseId);
 		
 		LocalEventBus.publish(event -> {
 			LocalEventContext context = new LocalEventContext();
@@ -248,7 +251,10 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	}
 	
 	//回退积分
-	private void minusPoints(Long serviceId, Long projectId) {
+	private void minusPoints(Long serviceId, Long projectId, Long flowCaseId) {
+		
+		LOGGER.info("alliance minusPoints user={}, serviceId={}, projectId={}, flowCaseId={}",
+				UserContext.currentUserId(), serviceId, projectId, flowCaseId);
 		
 		LocalEventBus.publish(event -> {
 			LocalEventContext context = new LocalEventContext();
@@ -765,7 +771,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		
 		//如果是取消状态需要退还积分
 		if (ServiceAllianceWorkFlowStatus.INVALID ==  newStatus) {
-			minusPoints(record.getServiceAllianceId(), flowCase.getProjectId());
+			minusPoints(record.getServiceAllianceId(), flowCase.getProjectId(), flowCase.getId());
 		}
 	}
 	

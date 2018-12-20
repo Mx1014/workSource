@@ -7853,7 +7853,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Override
 	public List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd) {
-		List<DefaultChargingItem> items = defaultChargingItemProvider.listDefaultChargingItems(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOwnerType(), cmd.getOwnerId());
+		//修复缺陷 #45399 【智富汇】【缴费管理】计价条款异常，加categoryId
+		List<DefaultChargingItem> items = defaultChargingItemProvider.listDefaultChargingItems(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCategoryId());
 		if(items != null && items.size() > 0) {
 			List<DefaultChargingItemDTO> list = items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
 			for(DefaultChargingItemDTO itemDto : list) {
