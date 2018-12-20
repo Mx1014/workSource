@@ -2925,6 +2925,8 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
 				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
 					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+				}else if(UserSourceType.ALIPAY == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.ALIPAY.getCode()));
 				}
 
 				if(null != cmd.getCommunityId()){
