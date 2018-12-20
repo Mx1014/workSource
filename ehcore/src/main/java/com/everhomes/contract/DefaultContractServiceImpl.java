@@ -1785,8 +1785,8 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		if(cmd.getTemplateId() != null) {
 			contract.setTemplateId(cmd.getTemplateId());
 		}
-		if (cmd.getDocumentId() != null) {
-			contract.setDocumentId(cmd.getDocumentId());
+		if (contract.getDocumentId() == null) {
+			contract.setDocumentId(exist.getDocumentId());
 		}
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
