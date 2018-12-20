@@ -1625,11 +1625,11 @@ public class PortalServiceImpl implements PortalService {
         launchPadIndices.stream().forEach(r-> {
             LaunchPadIndexDTO dto = ConvertHelper.convert(r, LaunchPadIndexDTO.class);
             if(!StringUtils.isEmpty(r.getIconUri())){
-                String url = contentServerService.parserUri(r.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                String url = contentServerService.parserUri(r.getIconUri());
                 dto.setIconUrl(url);
             }
             if(!StringUtils.isEmpty(r.getSelectedIconUri())){
-                String url = contentServerService.parserUri(r.getSelectedIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                String url = contentServerService.parserUri(r.getSelectedIconUri());
                 dto.setSelectedIconUrl(url);
             }
             list.add(dto);
