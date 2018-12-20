@@ -144,6 +144,7 @@ public class InvestmentPromotionContractTemplate implements ContractTemplateHand
 			case "serialEntrepreneurId":
 			case "buyOrLeaseItemId":
 			case "financingDemandItemId":
+			case "aptitudeFlagItemId":
 			case "dropBox1ItemId":
 			case "dropBox2ItemId":
 			case "dropBox3ItemId":
