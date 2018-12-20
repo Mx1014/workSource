@@ -115,7 +115,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 	@Override
 	public SearchRelocationRequestsResponse searchRelocationRequests(SearchRelocationRequestsCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049200L, cmd.getAppId(), null,cmd.getCurrentProjectId());//物品搬迁全部权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//物品搬迁全部权限
 		}
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -356,6 +356,9 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 
 	@Override
 	public QueryRelocationStatisticsResponse queryRelocationStatistics(QueryRelocationStatisticsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049220L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+		}
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
