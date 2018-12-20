@@ -3713,7 +3713,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t.BILL_ID.in(fetch1))
                 .and(t.BILL_GROUP_ID.eq(billGroup.ID))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-                .orderBy(t1.NAME,t.DATE_STR)
+                .orderBy(t1.NAME,t.DATE_STR_BEGIN)//修复缺陷 #44251【中天】【合同管理】【现网】费用清单2019-03-08	2019-03-31显示在前，2019-03-01 2019-03-07显示在后
                 .limit(pageOffset,pageSize+1)
                 .fetch()
                 .map(r -> {
