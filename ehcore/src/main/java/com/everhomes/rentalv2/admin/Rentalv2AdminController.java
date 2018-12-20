@@ -9,6 +9,7 @@ import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -762,6 +763,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	 * <p>获取资源概览图片</p>
 	 */
 	@RequestMapping("getResourcePreviewImage")
+	@RequireAuthentication(value = false)
 	@RestReturn(ResourcePreviewImageDTO.class)
 	public RestResponse getResourcePreviewImage(GetResourcePreviewImageCommand cmd) {
 		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
