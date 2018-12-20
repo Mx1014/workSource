@@ -519,6 +519,7 @@ public class PortalController extends ControllerBase {
 	 */
 	@RequestMapping("listLaunchPadIndex")
 	@RestReturn(ListLaunchPadIndexResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse listLaunchPadIndex(ListLaunchPadIndexCommand cmd){
 		return new RestResponse(portalService.listLaunchPadIndexs(cmd));
 	}
