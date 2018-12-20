@@ -1779,12 +1779,15 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		if(cmd.getRentSize() == null) {
 			contract.setRentSize(rentSize);
 		}
-		if(cmd.getCategoryId() != null) {
-			contract.setCategoryId(cmd.getCategoryId());
-		}
-		if(cmd.getTemplateId() != null) {
-			contract.setTemplateId(cmd.getTemplateId());
-		}
+		
+		//没有意义的两行代码，contract是由cmd转化过来的，这里再用set方法来设置值的操作多余了
+//		if(cmd.getCategoryId() != null) {
+//			contract.setCategoryId(cmd.getCategoryId());
+//		}
+//		if(cmd.getTemplateId() != null) {
+//			contract.setTemplateId(cmd.getTemplateId());
+//		}
+		
 		if (contract.getDocumentId() == null) {
 			contract.setDocumentId(exist.getDocumentId());
 		}
