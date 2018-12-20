@@ -18,6 +18,7 @@ import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ChangeMethod;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractType;
 import com.everhomes.rest.contract.PeriodUnit;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
@@ -81,10 +82,16 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 				value = formatTimeStamp((Timestamp) data);
 				break;
 			case "changeMethod":
-				value = ChangeMethod.fromStatus((byte) data).getDescription();
+				ChangeMethod changeMethod = ChangeMethod.fromStatus((byte) data);
+				if (changeMethod != null) {
+					value = changeMethod.getDescription();
+				}
 				break;
 			case "periodUnit":
-				value = PeriodUnit.fromStatus((byte) data).getDescription();
+				PeriodUnit periodUnit = PeriodUnit.fromStatus((byte) data);
+				if (periodUnit != null) {
+					value = periodUnit.getDescription();
+				}
 				break;
 			case "apartments":
 				StringBuilder apartmentsSBuilder = new StringBuilder();
@@ -107,6 +114,12 @@ public class DefaultContractTemplate implements ContractTemplateHandler{
 				Organization organization = organizationProvider.findOrganizationById((Long)data);
 				if (organization != null) {
 					value = organization.getName();
+				}
+				break;
+			case "contractType":
+				ContractType contractType = ContractType.fromStatus((Byte) data);
+				if (contractType != null) {
+					value = contractType.getDescription();
 				}
 				break;
 			default:

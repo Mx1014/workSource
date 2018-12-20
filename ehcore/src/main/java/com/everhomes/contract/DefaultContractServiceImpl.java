@@ -4907,7 +4907,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					handler = PlatformContext.getComponent(ContractTemplateHandler.CONTRACTTEMPLATE_PREFIX + type);
 					handlerMap.put(type, handler);
 				}
-				
+				/**
+				 * 这里翻译的判断很多，主要是兼容模板里存的参数不对时的情形，有这么几种情况：
+				 * 1、没有找到处理的handler
+				 * 2、找到了handler，但是要获取的参数名传的不对，或者参数名不符合校验规则
+				 * 3、找到了handler，参数名传的也对，但是反射出来的值为空（这个好像不需要，在getValue方法里已经有过判空了，就保留吧，不敢改了）
+				 */
 				if (handler != null) {
 					if (handler.isValid(contractDetailDTO, segments)) {
 						dataValue = handler.getValue(contractDetailDTO, segments);
@@ -4921,6 +4926,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				}else {
 					dataMap.put(replaceKey, "");
 				}
+				//这句将segments置为null的代码很关键。
+				//因为segments应该是跟着replaceKey变化而变化的，一次循环结束，segments不应该保留上个replaceKey的信息
+				segments = null;
+			}else {
+				dataMap.put(replaceKey, "");
 			}
 		}
 		return dataMap;
@@ -4937,8 +4947,18 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 	
 	public static void main(String[] args) {
+//		String content = "<p>${<spanstyle=\"background:#B8B8B8\">合同名称<astyle=\"display: none\">@@name##</a></span>}</p><p>${<spanstyle=\"background:#B8B8B8\">合同fdsfadsfa</span>}</p>";
+//		List<String> replaceKeys = GetKeywordsUtils.getKeywordsWithPattern(content, "${", "}");
+//		ContractDetailDTO contractDetailDTO = new ContractDetailDTO();
+//		contractDetailDTO.setName("测试合同");
+//		Map<String, String> dataMap = new HashMap<>();
+//		dataMap = getContractTemplateDataMap(replaceKeys,contractDetailDTO);
 		
 		
+//		Map<String, String> dataMap = new HashMap<>();
+//		dataMap.put("${<spanstyle=\"background:#B8B8B8\">合同名称<astyle=\"display: none\">@@name##</a></span>}", "测试合同");
+//		String translate = GetKeywordsUtils.translate(dataMap, content,  "${", "}");
+//		System.out.println(translate);
 	}
 
 	// 产生合同报表信息,目前只支持月份更新以前的统计信息
