@@ -130,7 +130,7 @@ public class UserButtApiServiceImpl implements NashornModuleApiService {
         if (!StringUtils.isEmpty(thirdUrl)) {
             ThirdPartActionData actionData = new ThirdPartActionData();
             actionData.setUrl(thirdUrl);
-            String url = RouterBuilder.build(Router.BROWSER_I, actionData);
+            String url = RouterBuilder.build(Router.BROWSER_THIRD, actionData);
             RouterMetaObject metaObject = new RouterMetaObject();
             metaObject.setUrl(url);
             Map<String, String> meta = new HashMap<>();
@@ -144,6 +144,12 @@ public class UserButtApiServiceImpl implements NashornModuleApiService {
 
     }
 
+//    public static void main(String[] args) {
+//        ThirdPartActionData actionData = new ThirdPartActionData();
+//        actionData.setUrl("www.baidu.com");
+//        String url = RouterBuilder.build(Router.BROWSER_THIRD, actionData);
+//        System.out.println(url);
+//    }
     public void testCall() {
         LOGGER.debug("this is test api call");
     }
