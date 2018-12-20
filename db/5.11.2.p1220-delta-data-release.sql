@@ -21,6 +21,15 @@
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
 -- AUTHOR:
 -- REMARK:
+
+-- AUTHOR:杨崇鑫 2018-12-20
+-- REMARK:#45229 【鼎峰汇】【缴费管理】部分账单缴费后，交易明细中的实收金额显示为“0”-必【必须解决】
+update eh_payment_bills bill, eh_payment_bill_orders order2 set bill.amount_received = order2.amount where bill.id = order2.bill_id 
+	and bill.switch=1 and order2.payment_status = 2 and bill.status=1 and namespace_id=999951;	
+update eh_payment_bills bill, eh_payment_bill_orders order2 set bill.amount_owed = 0 where bill.id = order2.bill_id 
+	and bill.switch=1 and order2.payment_status = 2 and bill.status=1 and namespace_id=999951;
+	
+	
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
 
