@@ -12,6 +12,9 @@
 -- REMARK：访客来访提示
 INSERT INTO eh_locale_templates ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('aclink.notification', '2', 'zh_CN', '访客使用了临时授权二维码进入门禁A。', '访客${visitorName}使用了临时授权二维码进入${doorName}。', '0');
 
+-- AUTHOR: 梁燕龙
+-- REMARK: 修改模块名称
+UPDATE eh_service_modules SET name = '资源预订' WHERE id = 40400;
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
