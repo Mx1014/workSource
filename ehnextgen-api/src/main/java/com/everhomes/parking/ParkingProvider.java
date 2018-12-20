@@ -54,7 +54,8 @@ public interface ParkingProvider {
     List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                        String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate,
                                                        Timestamp endDate, Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName,
-                                                       Long flowId, TableField field, int order, String cardTypeId, String ownerKeyWords, Long pageAnchor, Integer pageSize);
+                                                       Long flowId, TableField field, int order, String cardTypeId, String ownerKeyWords, Long pageAnchor, 
+                                                       Integer pageSize,Integer pageNum);
     
     void updateParkingLot(ParkingLot parkingLot);
     

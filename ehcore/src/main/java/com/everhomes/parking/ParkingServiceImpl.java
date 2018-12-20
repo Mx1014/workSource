@@ -1519,12 +1519,15 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 
 		}
-
+		Integer pageNum = 1;
+        if (cmd.getPageNum() != null) {
+        	pageNum = cmd.getPageNum();
+        }
 		List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(), startDate, endDate, cmd.getStatus(), cmd.getCarBrand(),
 				cmd.getCarSerieName(), cmd.getPlateOwnerEntperiseName(), cmd.getFlowId(),field, order, cmd.getCardTypeId(),cmd.getOwnerKeyWords(),
-				cmd.getPageAnchor(), pageSize);
+				cmd.getPageAnchor(), pageSize,pageNum);
 
 		Long userId = UserContext.current().getUser().getId();
 		int size = list.size();
@@ -1545,9 +1548,14 @@ public class ParkingServiceImpl implements ParkingService {
 			if(size != pageSize){
 				response.setNextPageAnchor(null);
 			}else{
-				response.setNextPageAnchor(list.get(size-1).getAnchor().getTime());
+	            Integer nextPageNum = pageNum + 1;
+	            response.setNextPageAnchor(nextPageNum.longValue());
+//				response.setNextPageAnchor(list.get(size-1).getAnchor().getTime());
 			}
 		}
+		Long totalNum = parkingProvider.countParkingCardRequest(
+				cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getFlowId(), null, cmd.getStatus()).longValue();
+		response.setTotalNum(totalNum);
 		return response;
 	}
 

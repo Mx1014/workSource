@@ -698,17 +698,17 @@ public class ParkingProviderImpl implements ParkingProvider {
     public List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                               String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
                                                               Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName, Long flowId,TableField field,
-                                                              int order, String cardTypeId, String ownerKeyWords,  Long pageAnchor, Integer pageSize){
+                                                              int order, String cardTypeId, String ownerKeyWords,  Long pageAnchor, Integer pageSize,Integer pageNum){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
-        if (null != pageAnchor && pageAnchor != 0) {
-        	if (order > 0)
-				query.addConditions(field.gt(new Timestamp(pageAnchor)));
-        	else
-				query.addConditions(field.lt(new Timestamp(pageAnchor)));
-		}
+//        if (null != pageAnchor && pageAnchor != 0) {
+//        	if (order > 0)
+//				query.addConditions(field.gt(new Timestamp(pageAnchor)));
+//        	else
+//				query.addConditions(field.lt(new Timestamp(pageAnchor)));
+//		}
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
         if(null != ownerId)
@@ -750,8 +750,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 			else
 				query.addOrderBy(field.desc());
         }
+        int firstOffset = (pageNum - 1) * pageSize;
         if(null != pageSize)
-        	query.addLimit(pageSize);
+        	query.addLimit(firstOffset,pageSize);
         
         List<ParkingCardRequest> resultList = query.fetch().map(r -> {
 			ParkingCardRequest convert = ConvertHelper.convert(r, ParkingCardRequest.class);
