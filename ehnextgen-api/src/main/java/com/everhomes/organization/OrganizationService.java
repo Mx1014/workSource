@@ -1,33 +1,41 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
 import com.everhomes.customer.EnterpriseCustomer;
-import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
-import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
-import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.enterprise.*;
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
-
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.Contract;
-import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
+import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.enterprise.*;
+import com.everhomes.rest.enterprise.ApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchRejectContactCommand;
+import com.everhomes.rest.enterprise.ChangeWorkBenchFlagCommand;
+import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.enterprise.CreateEnterpriseStandardCommand;
+import com.everhomes.rest.enterprise.CreateSettledEnterpriseCommand;
+import com.everhomes.rest.enterprise.DeleteWorkPlacesCommand;
+import com.everhomes.rest.enterprise.DestoryOrganizationCommand;
+import com.everhomes.rest.enterprise.FindEnterpriseDetailCommand;
+import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
+import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
+import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
+import com.everhomes.rest.enterprise.ListEnterpriseByNamespaceIdCommand;
+import com.everhomes.rest.enterprise.ListUserOrganizationsCommand;
+import com.everhomes.rest.enterprise.ListUserOrganizationsResponse;
+import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
+import com.everhomes.rest.enterprise.RejectContactCommand;
+import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.enterprise.UpdateEnterpriseDetailCommand;
+import com.everhomes.rest.enterprise.UpdateSuperAdminCommand;
+import com.everhomes.rest.enterprise.UpdateWorkPlaceCommand;
+import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
+import com.everhomes.rest.enterprise.WholeAddressComamnd;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
@@ -49,6 +57,7 @@ import com.everhomes.rest.organization.pm.PmBuildingDTO;
 import com.everhomes.rest.organization.pm.PmManagementsResponse;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.user.UserTokenCommand;
@@ -56,13 +65,11 @@ import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
-
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -643,4 +650,6 @@ public interface OrganizationService {
 	List<Long> listMemberDetailIds(Long ownerId, Long deptId, Integer pageSize, Integer pageOffSet, String userName);
 
 	List<OrganizationMemberDetails> listMembers(Long ownerId, Long deptId, Integer pageSize, Integer pageOffSet, String userName, Condition condition);
+
+	String fixUpUserName(User user, Long organizationId);
 }
