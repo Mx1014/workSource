@@ -187,7 +187,8 @@ public enum CoordinationLocks {
 	
 
     INVITED_CUSTOMER_STATISTIC("invited_customer_statistic"),
-    NEW_DEFAULT_ENTERPRISE_MOMENT("new.default.enterprise.moment");
+    NEW_DEFAULT_ENTERPRISE_MOMENT("new.default.enterprise.moment"),
+    INIT_DEFAULT_ENTERPRISE_MOMENT_TAG("new.default.enterprise.moment.tag");
 
     private String code;
 
