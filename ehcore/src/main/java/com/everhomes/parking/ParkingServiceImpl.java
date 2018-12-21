@@ -804,7 +804,12 @@ public class ParkingServiceImpl implements ParkingService {
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REQUEST_SERVER,
 						"Parking request temp fee failed");
 			}
-
+			boolean temfeeFlag = configProvider.getBooleanValue("parking.order.tempfee.debug", false);
+			if (temfeeFlag){
+				LOGGER.error("Parking request temp fee failed, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REQUEST_SERVER,
+						"Parking request temp fee failed");
+			}
 			BigDecimal tempFee = dto.getPrice();
 			if (null != parkingLot.getTempFeeDiscountFlag()) {
 				if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
@@ -817,8 +822,8 @@ public class ParkingServiceImpl implements ParkingService {
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
 						"Overdue fees");
 			}
-			boolean flag = configProvider.getBooleanValue("parking.order.debug", false);
-			if (flag){
+			boolean overdueFlag = configProvider.getBooleanValue("parking.order.overdue.debug", false);
+			if (overdueFlag){
 				LOGGER.error("Overdue fees, cmd={}", cmd);
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
 						"Overdue fees");
