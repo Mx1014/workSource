@@ -3107,7 +3107,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
      * 锁管家的app请求参数拼接
      * @auther wh
      * */ 
-    private void doUclbrtQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
+    private void doUclbrtQRKey(DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
     	LOGGER.info("ucl 进入doQRKEY " );
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         qr.setCreateTimeMs(auth.getCreateTime().getTime());
@@ -3123,7 +3123,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         Aclink ca = aclinkProvider.getAclinkByDoorId(doorAccess.getId());
         if(null !=ca){
         	UclbrtParamsDTO paramsDTO = JSON.parseObject(ca.getUclbrtParams(), UclbrtParamsDTO.class); 
-        	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
+        	//UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
         	qr.setQrCodeKey(uclbrtHttpClient.getQrCode(paramsDTO, auth.getPhone(), qr.getExpireTimeMs()));
         	if(null != qr.getQrCodeKey()){
         		qrKeys.add(qr);
@@ -3246,7 +3246,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				if (!auth.getRightOpen().equals((byte) 1)) {
 					continue;
 				}
-				doUclbrtQRKey(user, doorAccess, auth, qrKeys);
+				doUclbrtQRKey(doorAccess, auth, qrKeys);
 
 				Long t4 = DateHelper.currentGMTTime().getTime();
 
