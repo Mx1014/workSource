@@ -473,7 +473,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                 
 				if (contract.getSponsorUid() != null) {
 					// 用户可能不在组织架构中 所以用nickname,//由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字ruian_cm
-					if (cmd.getNamespaceId() == 999929 && contract.getNamespaceContractType().equals(NamespaceContractType.RUIAN_CM.getCode())) {
+//					if (cmd.getNamespaceId() == 999929 && contract.getNamespaceContractType().equals(NamespaceContractType.RUIAN_CM.getCode()))
+					if (cmd.getNamespaceId() == 999929 && NamespaceContractType.RUIAN_CM.getCode().equals(contract.getNamespaceContractType())) {
 						dto.setSponsorName(contract.getSponsorUid());
 					} else {
 						User user = userProvider.findUserById(Long.parseLong(contract.getSponsorUid()));

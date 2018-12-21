@@ -4229,7 +4229,7 @@ public class CustomerServiceImpl implements CustomerService {
             OrganizationContactDTO finalTopAdmin = topAdmin;
             List<OrganizationContactDTO> exTopSuperAdmins = null;
             if(superAdmins != null && superAdmins.size() > 0 && topAdmin != null) {
-                exTopSuperAdmins = superAdmins.stream().filter(admin -> !admin.getTargetId().equals(finalTopAdmin.getId())).collect(Collectors.toList());
+                exTopSuperAdmins = superAdmins.stream().filter(admin -> !admin.getTargetId().equals(finalTopAdmin.getTargetId())).collect(Collectors.toList());
             }
             List<OrganizationContactDTO> finalExTopSuperAdmins = exTopSuperAdmins;
             array.forEach(r->{

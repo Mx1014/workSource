@@ -21,13 +21,17 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.aclink.AclinkAuditStatus;
 import com.everhomes.rest.aclink.AclinkServerDTO;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DeletePhotoByIdCommand;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.DoorAccessStatus;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.FaceRecognitionPhotoDTO;
+import com.everhomes.rest.aclink.GetPhotoSyncResultResponse;
 import com.everhomes.rest.aclink.ListFacialRecognitionPhotoByUserResponse;
 import com.everhomes.rest.aclink.NotifySyncVistorsCommand;
 import com.everhomes.rest.aclink.SetFacialRecognitionPhotoCommand;
@@ -151,7 +155,9 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 		List<FaceRecognitionPhoto> faceRecs = faceRecognitionPhotoProvider.listFacialRecognitionPhotoByUser(new CrossShardListingLocator(), user.getId(), 0);
 		List<FaceRecognitionPhotoDTO> listDtos = new ArrayList<FaceRecognitionPhotoDTO>();
 		for(FaceRecognitionPhoto rec : faceRecs){
-			listDtos.add(ConvertHelper.convert(rec, FaceRecognitionPhotoDTO.class));
+			FaceRecognitionPhotoDTO dto = ConvertHelper.convert(rec, FaceRecognitionPhotoDTO.class);
+			dto.setSyncStatus(rec.getSyncTime() == null || rec.getSyncTime().before(rec.getOperateTime()) ? AclinkAuditStatus.WAITING.getCode() : AclinkAuditStatus.SUCCESS.getCode());
+			listDtos.add(dto);
 		}
 		rsp.setListPhoto(listDtos);
 		return rsp;
@@ -366,4 +372,22 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 			faceRecognitionPhotoProvider.updateFacialRecognitionPhotos(listPhotos);
 		}
 	}
+
+	@Override
+	public void invalidPhotoByIds(DeletePhotoByIdCommand cmd) {
+		List<FaceRecognitionPhoto> photos = faceRecognitionPhotoProvider.findFaceRecognitionPhotoByIds(cmd.getPhotoIds());
+		if(photos != null && photos.size() > 0){
+			photos.forEach(r -> r.setStatus(DoorAuthStatus.INVALID.getCode()));
+			faceRecognitionPhotoProvider.updateFacialRecognitionPhotos(photos);
+		}
+	}
+
+	@Override
+	public GetPhotoSyncResultResponse getPhotoSyncResult() {
+		GetPhotoSyncResultResponse rsp = new GetPhotoSyncResultResponse();
+		User user = UserContext.current().getUser();
+		rsp.setFaceSyncStatus(faceRecognitionPhotoProvider.getPhotoSyncStatusByUserId(user.getId()));
+		return rsp;
+	}
+
 }

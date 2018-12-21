@@ -12,7 +12,7 @@ public class SegmentTree {
     }
 
     public void putSegment(long lborder, long rborder, int num){
-        if (lborder == rborder)
+        if (lborder >= rborder)
             return;
         modifyTree(rborder);
         putSegment(this.root,lborder,rborder,num);

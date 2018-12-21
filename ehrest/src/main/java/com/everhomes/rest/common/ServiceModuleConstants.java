@@ -54,4 +54,5 @@ public interface ServiceModuleConstants {
     long ENTERPRISE_VISITOR_MODULE = 52100;//企业访客
     long QUALITY_MODULE = 20600;//品质核查
     long ENTERPRISE_PAYMENT_AUTH = 271000L;//企业支付授权
+    long ENTERPRISE_MOMENT_MODULE = 274000; // 同事圈模块
 }

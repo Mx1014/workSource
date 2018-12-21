@@ -9,6 +9,7 @@ import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -738,6 +739,81 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 
 	/**
+	 *
+	 * <b>URL: /rental/admin/updateResourcePreviewImage<b>
+	 * <p>修改资源概览图片</p>
+	 */
+	@RequestMapping("updateResourcePreviewImage")
+	@RestReturn(String.class)
+	public RestResponse updateResourcePreviewImage(updateResourcePreviewImageCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
+		rentalService.updateResourcePreviewImage(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourcePreviewImage<b>
+	 * <p>获取资源概览图片</p>
+	 */
+	@RequestMapping("getResourcePreviewImage")
+	@RequireAuthentication(value = false)
+	@RestReturn(ResourcePreviewImageDTO.class)
+	public RestResponse getResourcePreviewImage(GetResourcePreviewImageCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
+		RestResponse response = new RestResponse(rentalService.getResourcePreviewImage(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/updateResourceShopSetting<b>
+	 * <p>修改资源商铺关联信息</p>
+	 */
+	@RequestMapping("updateResourceShopSetting")
+	@RestReturn(String.class)
+	public RestResponse updateResourceShopSetting(UpdateResourceShopSettingCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
+		rentalService.updateResourceShopSetting(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourceShopSetting<b>
+	 * <p>获取资源商铺关联信息</p>
+	 */
+	@RequestMapping("getResourceShopSetting")
+	@RestReturn(ResourceShopSettingDTO.class)
+	public RestResponse getResourceShopSetting(GetResourceShopSettingCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
+		RestResponse response = new RestResponse(rentalService.getResourceShopSetting(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /rental/admin/searchRentalOrders</b>
 	 * <p>查询订单</p>
 	 */
@@ -978,6 +1054,21 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RestReturn(value = Long.class,collection = true)
 	public RestResponse getHolidayCloseDates( GetHolidayCloseDatesCommand cmd) {
 		RestResponse response = new RestResponse(rentalService.getHolidayCloseDates(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/searchShops</b>
+	 * <p>
+	 * 获取店铺信息
+	 * </p>
+	 */
+	@RequestMapping("searchShops")
+	@RestReturn(SearchShopsResponse.class)
+	public RestResponse searchShops( SearchShopsCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.searchShops(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

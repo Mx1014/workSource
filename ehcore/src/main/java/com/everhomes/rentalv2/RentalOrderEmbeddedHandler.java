@@ -65,8 +65,6 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 
 		//success
 		if(cmd.getPayStatus().toLowerCase().equals("success")) {
-			this.dbProvider.execute((TransactionStatus status) -> {
-
 //				RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(cmd.getOrderNo());
 //				RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
 
@@ -106,8 +104,6 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 					}
 				} else
 					LOGGER.error("待付款订单:id [" + order.getId() + "]状态有问题： 订单状态是：" + order.getStatus());
-				return null;
-			});
 		}
 	}
 

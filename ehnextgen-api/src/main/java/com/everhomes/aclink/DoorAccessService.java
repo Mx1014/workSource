@@ -299,4 +299,6 @@ public interface DoorAccessService {
     void updateServiceHotline (UpdateServiceHotlineCommand cmd);
     //访客来访提示
     VisitorComingNoticeResponse visitorComingNotice (VisitorComingNoticeCommand cmd);
+
+	public void notifyPhotoSyncResult(NotifyPhotoSyncResultCommand cmd);
 }

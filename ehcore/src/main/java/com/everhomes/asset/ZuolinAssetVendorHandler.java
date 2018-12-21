@@ -1241,12 +1241,12 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
             	}
             }else {
-            	stopWatch.start("prepareOrganBillIdentifiers");
-                existBills = prepareOrganBillIdentifiers(createBillCommands);
-                stopWatch.stop();
-                if(LOGGER.isDebugEnabled()) {
-            		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
-            	}
+//            	stopWatch.start("prepareOrganBillIdentifiers");
+//                existBills = prepareOrganBillIdentifiers(createBillCommands);
+//                stopWatch.stop();
+//                if(LOGGER.isDebugEnabled()) {
+//            		LOGGER.info("batchImportBills processTime={}", stopWatch.prettyPrint());
+//            	}
             }
             long updateStartTime = System.currentTimeMillis();
             long roundStartTime = updateStartTime;
@@ -1718,15 +1718,15 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             		buildingName = address.substring(0, pos);
             		apartmentName = address.substring(pos + 1);
             		//缴费管理V7.6（账单导入优化）：根据楼栋门牌查询addressId这步应该在最后面做成批量的，才能提高性能
-//            		Address addressByBuildingApartmentName = addressProvider.findAddressByBuildingApartmentName(namespaceId, ownerId, buildingName, apartmentName);
-//            		if(addressByBuildingApartmentName != null) {
-//            			addressId = addressByBuildingApartmentName.getId();
-//            		} else {
-//            		    log.setErrorLog("楼栋/门牌找不到");
-//                        log.setCode(AssetBillImportErrorCodes.ADDRESS_INCORRECT);
-//                        datas.add(log);
-//                        continue bill;
-//            		}
+            		Address addressByBuildingApartmentName = addressProvider.findAddressByBuildingApartmentName(namespaceId, ownerId, buildingName, apartmentName);
+            		if(addressByBuildingApartmentName != null) {
+            			addressId = addressByBuildingApartmentName.getId();
+            		} else {
+            		    log.setErrorLog("楼栋/门牌找不到");
+                        log.setCode(AssetBillImportErrorCodes.ADDRESS_INCORRECT);
+                        datas.add(log);
+                        continue bill;
+            		}
             	}else {
             		log.setErrorLog("楼栋/门牌格式错误，楼栋门牌要以/分开");
             		log.setCode(AssetBillImportErrorCodes.ADDRESS_INCORRECT);
@@ -1748,11 +1748,11 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     	}else {
                     		cmd.setTargetName(data[j]);
                     		//缴费管理V7.6（账单导入优化）："通过客户名称（企业名称）查询关联的企业id"这步应该在最后面做成批量的，才能提高性能
-//                    		//通过客户名称（企业名称）查询关联的企业id
-//                    		Organization organizationByName = organizationProvider.findOrganizationByName(data[j], namespaceId);
-//                            if(organizationByName != null){
-//                                cmd.setTargetId(organizationByName.getId());
-//                            }
+                    		//通过客户名称（企业名称）查询关联的企业id
+                    		Organization organizationByName = organizationProvider.findOrganizationByName(data[j], namespaceId);
+                            if(organizationByName != null){
+                                cmd.setTargetId(organizationByName.getId());
+                            }
                     	}
                     }else {//个人客户
                     	cmd.setTargetName(data[j]);
@@ -1766,21 +1766,21 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                             continue bill;
                         }
                 		//缴费管理V7.6（账单导入优化）："通过客户手机号查询关联的个人ID"这步应该在最后面做成批量的，才能提高性能
-//                    	UserIdentifier claimedIdentifierByToken = userProvider.findClaimedIdentifierByToken(namespaceId, data[j]);
-//                        if(claimedIdentifierByToken!=null){
-//                            cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
-//                        }
+                    	UserIdentifier claimedIdentifierByToken = userProvider.findClaimedIdentifierByToken(namespaceId, data[j]);
+                        if(claimedIdentifierByToken!=null){
+                            cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
+                        }
                     	cmd.setCustomerTel(data[j]);
                 	}
                 }else if(headers[j].contains("合同编号")){
                     cmd.setContractNum(data[j]);
                     //缴费管理V7.6（账单导入优化）："通过合同编号查询合同ID"这步应该在最后面做成批量的，才能提高性能
-//                    List<Long> list = contractProvider.SimpleFindContractByNumber(data[j]);
-//                    if(list.size() != 1){
-//                        LOGGER.warn("SimpleFindContractByNumber find more than 1, contract Id is={}", list);
-//                    }else{
-//                        cmd.setContractId(list.get(0));
-//                    }
+                    List<Long> list = contractProvider.SimpleFindContractByNumber(data[j]);
+                    if(list.size() != 1){
+                        LOGGER.warn("SimpleFindContractByNumber find more than 1, contract Id is={}", list);
+                    }else{
+                        cmd.setContractId(list.get(0));
+                    }
                 }else if(headers[j].contains("催缴手机号")){
                 	List<String> list = new ArrayList<>();
                 	list = Arrays.asList(data[j].split(","));

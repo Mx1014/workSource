@@ -7,8 +7,9 @@ package com.everhomes.rest.comment;
  * </ul>
  */
 public interface OwnerTypeConstants {
-    public static final long FORUM = 1;
-    public static final long NEWS = 2;
-    public static final long SERVICEALLIANCE = 3;
-    public static final long WORK_REPORT = 4;
+    long FORUM = 1;
+    long NEWS = 2;
+    long SERVICEALLIANCE = 3;
+    long WORK_REPORT = 4;
+    long ENTERPRISE_MOMENT = 5;
 }

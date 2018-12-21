@@ -52,7 +52,7 @@ public interface RentalOrderHandler {
 
     public void nearHalfHourBegin(RentalOrder order);
 
-    default public Long gerMerchantId(RentalOrder order){return null;}
+    default public Long gerMerchantId(RentalResource rentalResource){return null;}
 
     default public void processCreateMerchantOrderCmd(CreateMerchantOrderCommand cmd,RentalOrder order){}
 }
