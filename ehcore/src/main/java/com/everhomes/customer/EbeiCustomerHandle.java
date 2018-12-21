@@ -464,6 +464,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
             customer.setCommunityId(communityId);
             customer.setNamespaceCustomerType(NamespaceCustomerType.EBEI.getCode());
             customer.setNamespaceCustomerToken(ebeiCustomer.getOwnerId());
+            customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
             customer.setName(ebeiCustomer.getCompanyName());
             customer.setNickName(ebeiCustomer.getCompanyName());
             customer.setContactName(ebeiCustomer.getContactPerson());
