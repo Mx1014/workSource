@@ -414,7 +414,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setDailyPrice(dailyPrice);
 		}
 		if(halfdailyPriceRule.getWorkdayPrice()!=null){
-			dto.setHalfdailyPrice(halfdailyPrice);
+		dto.setHalfdailyPrice(halfdailyPrice);
 		}
 		return dto;
 	}
@@ -2938,7 +2938,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setBeginTime(order.getBeginTime().getTime());
 			dto.setEndTime(order.getEndTime().getTime());
 		}
-		dto.setRefundAmount(calculateRefundAmount(order,System.currentTimeMillis(),space));
+		if (order.getPrice() !=null && !order.getPrice().equals(new BigDecimal(0.00))){
+			dto.setRefundAmount(calculateRefundAmount(order,System.currentTimeMillis(),space));
+		}
 		response.setOrders(dto);
 		return response;
 	}
