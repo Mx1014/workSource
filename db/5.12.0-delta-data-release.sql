@@ -68,6 +68,11 @@ INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALU
 INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('enterprise_moments', '20005', 'zh_CN', '讨论');
 INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('enterprise_moments', '20006', 'zh_CN', '建议');
 
+-- AUTHOR:刘一麟
+-- REMARK:人脸识别v1.8
+INSERT INTO `ehcore`.`eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('aclink.notification', '3', 'zh_CN', '您于【日期】上传的人脸照片已通过审核，现可正常使用。', '您于${dateTime}上传的人脸照片已通过审核，现可正常使用。', '0');
+INSERT INTO `ehcore`.`eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('aclink.notification', '4', 'zh_CN', '您于【日期】上传的人脸照片因质量过低，未能通过审核，请重新拍摄上传。', '您于${dateTime}上传的人脸照片因质量过低，未能通过审核，请重新拍摄上传。', '0');
+
 -- AUTHOR:st.zheng
 -- REMARK:资源预约3.8.3
 update eh_configurations set `value` = '/resource-rental/build/index.html#/resource-detail?namespaceId=%s&rentalSiteId=%s&detailPageType=%s&canRental=1&isApp=1#sign_suffix' where name = 'rental.resource.detail.url';

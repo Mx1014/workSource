@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.aclink;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,18 +20,22 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.aclink.AclinkAuditStatus;
+import com.everhomes.rest.aclink.DoorAccessStatus;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.FaceRecognitionPhotoDTO;
 import com.everhomes.rest.aclink.SyncLocalVistorDataResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhFaceRecognitionPhotos;
 import com.everhomes.server.schema.tables.daos.EhAclinkServersDao;
 import com.everhomes.server.schema.tables.daos.EhDoorAuthDao;
 import com.everhomes.server.schema.tables.daos.EhFaceRecognitionPhotosDao;
+import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
+import com.everhomes.server.schema.tables.pojos.EhFaceRecognitionPhotos;
 import com.everhomes.server.schema.tables.records.EhFaceRecognitionPhotosRecord;
 import com.everhomes.user.User;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class FaceRecognitionPhotoProviderImpl implements FaceRecognitionPhotoProvider {
@@ -192,6 +197,31 @@ public class FaceRecognitionPhotoProviderImpl implements FaceRecognitionPhotoPro
 			return ConvertHelper.convert(r, FaceRecognitionPhoto.class);
 		});
 		return objs != null && objs.size() > 0 ? objs.get(0) : null;
+	}
+	
+	@Override
+	public Byte getPhotoSyncStatusByUserId(Long userId) {
+		List<FaceRecognitionPhoto> faceRecs = this.listFacialRecognitionPhotoByUser(new CrossShardListingLocator(), userId, 0);
+		if(faceRecs != null && faceRecs.size() > 0 && faceRecs.get(0) != null){
+			return faceRecs.get(0).getSyncTime() == null || faceRecs.get(0).getSyncTime().before(faceRecs.get(0).getOperateTime()) ? AclinkAuditStatus.WAITING.getCode() : AclinkAuditStatus.SUCCESS.getCode();
+		}else{
+			return AclinkAuditStatus.INVALID.getCode();
+		}
+	}
+
+	@Override
+	public void updateFacialRecognitionPhotoBatch(List<FaceRecognitionPhoto> photoList) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhFaceRecognitionPhotosDao dao = new EhFaceRecognitionPhotosDao(context.configuration());
+		List<EhFaceRecognitionPhotos> list = new ArrayList<>();
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		for(FaceRecognitionPhoto photo : photoList){
+			photo.setOperateTime(now);
+			list.add(ConvertHelper.convert(photo, EhFaceRecognitionPhotos.class));
+		}
+		dao.update(list);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhFaceRecognitionPhotos.class, null);
+		
 	}
 	
 }

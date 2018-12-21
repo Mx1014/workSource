@@ -18,7 +18,6 @@ ALTER TABLE eh_enterprise_customers ADD COLUMN namespace_customer_group VARCHAR(
 -- REMARK: 物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error描述给左邻系统
 ALTER TABLE `eh_payment_bills` ADD COLUMN `third_error_description` VARCHAR(256) COMMENT '一个特殊error描述给左邻系统';
 
-
 -- AUTHOR: 张智伟
 -- REMARK: issue-43700 企业同事圈v1.0
 CREATE TABLE eh_enterprise_moments (
@@ -202,3 +201,21 @@ ALTER TABLE `eh_rentalv2_default_rules`
 ADD COLUMN `shop_no`  varchar(255) NULL COMMENT '关联商铺号' AFTER `shop_name`;
 ALTER TABLE `eh_rentalv2_default_rules`
 ADD COLUMN `shop_url`  varchar(255) NULL COMMENT '关联商铺地址' AFTER `shop_no`;
+
+
+-- AUTHOR: 刘一麟 2018-12-19
+-- REMARK: 人脸识别v1.8 照片注册结果通知
+CREATE TABLE `eh_aclink_photo_sync_result` (
+    `id` BIGINT NOT NULL COMMENT '主键',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间ID',
+    `server_id` BIGINT NOT NULL COMMENT '内网服务器id',
+    `photo_id` BIGINT NOT NULL COMMENT '照片id',
+    `res_code` TINYINT NOT NULL COMMENT '同步结果',
+    `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
+    `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+    `operate_time` DATETIME COMMENT '记录更新时间',
+    `operator_uid` BIGINT COMMENT '记录更新人userId',
+    PRIMARY KEY (`id`)
+)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='照片同步结果表';
+
+ALTER TABLE eh_door_auth_level ADD COLUMN `name` varchar(128) COMMENT '自动授权对象名称' AFTER `level_type`;
