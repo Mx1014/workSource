@@ -500,19 +500,31 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//空间管理权限
 		}
 
-		if (null == cmd.getContactPhone())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of contact phone error: null ");
+//		if (null == cmd.getContactPhone())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of contact phone error: null ");
 //		if (null == cmd.getId())
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid paramter of ID error: null ");
-		if (null == cmd.getSpaceAttachments())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid paramter of space attachment: null");
+//		if (null == cmd.getSpaceAttachments())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid paramter of space attachment: null");
 //		OfficeCubicleSpace oldSpace = this.officeCubicleProvider.getSpaceById(cmd.getId());
 //		if (null == oldSpace)
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid paramter of space id error: no space found");
+		if (cmd.getShortRentNums()!= null){
+			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
+			space.setShortRentNums(cmd.getShortRentNums());
+			this.officeCubicleProvider.updateSpace(space);
+			return;
+		}
+		if(cmd.getLongRentPrice() != null){
+			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
+			space.setLongRentPrice(cmd.getLongRentPrice());
+			this.officeCubicleProvider.updateSpace(space);
+			return;
+		}
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
 			space.setNamespaceId(UserContext.getCurrentNamespaceId());
