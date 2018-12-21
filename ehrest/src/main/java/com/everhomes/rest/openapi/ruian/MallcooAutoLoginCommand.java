@@ -4,17 +4,27 @@ import com.everhomes.util.StringHelper;
 import javax.validation.constraints.NotNull;
 
 public class MallcooAutoLoginCommand {
-    @NotNull
+
     private String communityId;
+    private String callbackUrl;
 
     public MallcooAutoLoginCommand() {
     }
+
     public String getCommunityId() {
         return communityId;
     }
 
-    public void setCommunityId(String content) {
-        this.communityId = content;
+    public void setCommunityId(String communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getCallbackUrl() {
+        return callbackUrl;
+    }
+
+    public void setCallbackUrl(String callbackUrl) {
+        this.callbackUrl = callbackUrl;
     }
 
     @Override

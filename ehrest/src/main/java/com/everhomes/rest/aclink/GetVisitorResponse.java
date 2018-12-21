@@ -41,6 +41,15 @@ public class GetVisitorResponse {
     private Long validFromMs;
     private Integer validAuthAmount;
     private String hotline;
+    private String driver;
+    
+    public String getDriver() {
+		return driver;
+	}
+
+	public void setDriver(String driver) {
+		this.driver = driver;
+	}
 
     public String getHotline() {
         return hotline;

@@ -431,8 +431,6 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     @Override
     public List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback) {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
-
-
     	if(locator.getAnchor() == null) {
     		locator.setAnchor(cmd.getPageAnchor());
     	}
@@ -442,11 +440,14 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 
            Condition cond = buildSearchFlowCaseCmdCondition(locator,cmd);
 
-            SelectQuery<Record> query = context.select(Tables.EH_FLOW_CASES.fields())
-                    .from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
-                    .on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
-                            .and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
-                    .where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc()).limit(count + 1).getQuery();
+            com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+
+            SelectQuery<Record> query = context.select(t.fields())
+                    .from(t)
+                    .where(cond)
+                    .orderBy(t.ID.desc())
+                    .limit(count + 1)
+                    .getQuery();
 
             if (callback != null) {
                 callback.buildCondition(locator, query);
