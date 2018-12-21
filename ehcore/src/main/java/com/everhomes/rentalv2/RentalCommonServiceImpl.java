@@ -123,7 +123,7 @@ public class RentalCommonServiceImpl {
     }
 
     public RentalResourceType createRentalResourceType(Integer namespaceId, String name, Byte pageType,Byte payMode,
-                                                       String identify,Byte unauthVisible,Byte crossCommuFlag){
+                                                       String identify,Byte unauthVisible,Byte crossCommuFlag,Byte detailPageType){
         RentalResourceType rentalResourceType = new RentalResourceType();
         rentalResourceType.setNamespaceId(namespaceId);
         rentalResourceType.setName(name);
@@ -137,12 +137,15 @@ public class RentalCommonServiceImpl {
             unauthVisible = (byte)0;
         if (null == crossCommuFlag)
             crossCommuFlag = (byte)1;
+        if (null == detailPageType)
+            detailPageType = (byte)0;
         rentalResourceType.setPageType(pageType);
         rentalResourceType.setPayMode(payMode);
         rentalResourceType.setIdentify(identify);
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
         rentalResourceType.setUnauthVisible(unauthVisible);
         rentalResourceType.setCrossCommuFlag(crossCommuFlag);
+        rentalResourceType.setDetailPageType(detailPageType);
         rentalv2Provider.createRentalResourceType(rentalResourceType);
         return rentalResourceType;
     }

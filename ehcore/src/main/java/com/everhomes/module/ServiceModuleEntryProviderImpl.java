@@ -21,6 +21,7 @@ import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +84,38 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
             return null;
         });
         return results;
+    }
+
+    @Override
+    public Integer getMaxOrderFromServiceModuleEntry(Long moduleId, Long appCategoryId, Byte terminalType, Byte locationType, Byte sceneType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record1<Integer>> query = context.select(DSL.max(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER)).from(Tables.EH_SERVICE_MODULE_ENTRIES).getQuery();
+        if(moduleId != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID.eq(moduleId));
+        }
+
+        if(appCategoryId != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.APP_CATEGORY_ID.eq(appCategoryId));
+        }
+
+        if(terminalType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.TERMINAL_TYPE.eq(terminalType));
+        }
+        if(locationType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.LOCATION_TYPE.eq(locationType));
+        }
+        if(sceneType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.SCENE_TYPE.eq(sceneType));
+        }
+
+        //查询某个分类的话，就不按照模块排序了。查询所有的
+        if(appCategoryId != null){
+            query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER);
+        }else {
+            query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID);
+        }
+
+        return query.fetchOneInto(Integer.class);
     }
 
 

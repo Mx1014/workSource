@@ -54,7 +54,7 @@ public class OfficeCubiclePortalPublishHandler implements PortalPublishHandler {
             return type;
         }
         return rentalCommonService.createRentalResourceType(namespaceId,name,(byte)0,
-                (byte)0,RentalV2ResourceType.STATION_BOOKING.getCode(),(byte)1,(byte)0);
+                (byte)0,RentalV2ResourceType.STATION_BOOKING.getCode(),(byte)1,(byte)0,(byte)0);
     }
     
     @Override
