@@ -2671,8 +2671,16 @@ public class PortalServiceImpl implements PortalService {
 			for (PortalNavigationBar na: portalNavigationBars){
 				LaunchPadIndex index = ConvertHelper.convert(na, LaunchPadIndex.class);
 
+
 				if(IndexType.fromCode(na.getType()) == IndexType.CONTAINER){
 					Container container = (Container) StringHelper.fromJsonString(index.getConfigJson(), Container.class);
+                    PortalLayout portalLayout = null;
+                    if (container.getLayoutId() != null) {
+                        portalLayout = this.portalLayoutProvider.findPortalLayoutById(container.getLayoutId());
+                    }
+                    if (portalLayout != null) {
+                        container.setLayoutName(portalLayout.getName());
+                    }
                     if (TopBarStyle.LUCENCY_SHADE.getCode().equals(na.getTopBarStyle())) {
                         container.setLayoutType(LayoutType.NAV_LUCENCY.getCode());
                     }else if (TopBarStyle.OPAQUE_DEFORMATION.getCode().equals(na.getTopBarStyle())) {
@@ -2680,12 +2688,9 @@ public class PortalServiceImpl implements PortalService {
                     }else if (TopBarStyle.OPAQUE_STATIC.getCode().equals(na.getTopBarStyle())) {
                         container.setLayoutType(LayoutType.NAV_STATIC.getCode());
                     }else {
-                        if (container.getLayoutId() != null) {
-                            PortalLayout portalLayout = this.portalLayoutProvider.findPortalLayoutById(container.getLayoutId());
-                            if (portalLayout != null) {
-                                if (PortalLayoutType.ASSOCIATIONLAYOUT.getCode().equals(portalLayout.getType())) {
-                                    container.setLayoutType(LayoutType.TAB.getCode());
-                                }
+                        if (portalLayout != null) {
+                            if (PortalLayoutType.ASSOCIATIONLAYOUT.getCode().equals(portalLayout.getType())) {
+                                container.setLayoutType(LayoutType.TAB.getCode());
                             }
                         }
                     }
