@@ -6341,7 +6341,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		Long userId = user == null ? null : user.getId();
 		List<IndexDTO> indexDtos = launchPadService.listIndexDtos(namespaceId, userId);
 
-		resp.setIndexDtos(indexDtos);
+		//由于要兼容旧版本定制版app，需要使用不同的字段，否则客户端会崩掉  add by yanlong.liang 20181221
+		//如果是标准版，使用IndexDtos字段，如果是定制版，使用CustomIndexDtos
+		if (namespaceId == 2) {
+            resp.setIndexDtos(indexDtos);
+        }else {
+		    resp.setCustomIndexDtos(indexDtos);
+        }
 		//判断是否启用主页签
         String indexFlag = configurationProvider.getValue(cmd.getNamespaceId(),ConfigConstants.INDEX_FLAG, "");
         if (!org.springframework.util.StringUtils.isEmpty(indexFlag) && TrueOrFalseFlag.TRUE.getCode().equals(Byte.valueOf(indexFlag))) {
