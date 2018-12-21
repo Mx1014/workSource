@@ -68,6 +68,9 @@ INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALU
 INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('enterprise_moments', '20005', 'zh_CN', '讨论');
 INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('enterprise_moments', '20006', 'zh_CN', '建议');
 
+-- AUTHOR:st.zheng
+-- REMARK:资源预约3.8.3
+update eh_configurations set `value` = '/resource-rental/build/index.html#/resource-detail?namespaceId=%s&rentalSiteId=%s&detailPageType=%s&canRental=1&isApp=1#sign_suffix' where name = 'rental.resource.detail.url';
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
