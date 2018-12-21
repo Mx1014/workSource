@@ -776,8 +776,8 @@ public class EnterpriseMomentServiceImpl implements EnterpriseMomentService {
 
     @Override
     public void createNewMessageAfterDoFavourite(EnterpriseMoment moment, EnterpriseMomentFavourite favourite) {
-        // 点赞自己发布的动态或者该动态已被删除则不需要创建历史消息
-        if (UserContext.currentUserId().equals(moment.getCreatorUid()) || TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(moment.getDeleteFlag())) {
+        // 该动态已被删除则不需要创建历史消息
+        if (TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(moment.getDeleteFlag())) {
             return;
         }
         Long userId = UserContext.currentUserId();
