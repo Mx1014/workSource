@@ -517,11 +517,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
 			space.setShortRentNums(cmd.getShortRentNums());
 			this.officeCubicleProvider.updateSpace(space);
+			return;
 		}
 		if(cmd.getLongRentPrice() != null){
 			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
 			space.setLongRentPrice(cmd.getLongRentPrice());
 			this.officeCubicleProvider.updateSpace(space);
+			return;
 		}
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
