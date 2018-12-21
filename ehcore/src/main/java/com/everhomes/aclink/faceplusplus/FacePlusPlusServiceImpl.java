@@ -489,8 +489,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
     @Override
     public DoorAuth createAuth (DoorAuth doorAuth, CreateDoorAuthCommand cmd,UserInfo custom){
         AclinkFormValues ips = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.IP.getCode());
-        AclinkFormValues usernames = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.IP.getCode());
-        AclinkFormValues passwords = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.IP.getCode());
+        AclinkFormValues usernames = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.USERNAME.getCode());
+        AclinkFormValues passwords = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.PASSWORD.getCode());
         if(ips == null || usernames == null || passwords == null || ips.getValue().isEmpty() || usernames.getValue().isEmpty() || passwords.getValue().isEmpty()){
             LOGGER.error("unable to find ip, username or password");
             return null;

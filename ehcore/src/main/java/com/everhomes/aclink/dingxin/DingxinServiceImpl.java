@@ -308,6 +308,7 @@ public class DingxinServiceImpl implements DingxinService {
             StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
             entity.setContentType("application/json");
             httpPost.setEntity(entity);
+            LOGGER.info("start to connect dingxin");
             response = httpClient.execute(httpPost);
             String json = EntityUtils.toString(response.getEntity(),"utf8");
             int status = response.getStatusLine().getStatusCode();
@@ -340,6 +341,7 @@ public class DingxinServiceImpl implements DingxinService {
                 }
             }
         }
+        LOGGER.info("finished");
         return result;
     }
 }
