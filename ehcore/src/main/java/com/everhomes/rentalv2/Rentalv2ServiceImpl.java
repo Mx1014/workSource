@@ -4025,6 +4025,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
                                   ActivityRosterPayVersionFlag version){
 		RentalOrder bill = rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
         PreOrderCommand preOrderCommand = convertOrderDTOForV2(bill, cmd.getClientAppName(), cmd.getPaymentType());
+        preOrderCommand.setExpiration(bill.getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME);
         Object obj = null;
         if (ActivityRosterPayVersionFlag.V2 == version) {
             PreOrderDTO callBack = null;

@@ -609,6 +609,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         preOrderCommand.setGoodsDescription(null);
         preOrderCommand.setIndustryName(null);
         preOrderCommand.setIndustryCode(null);
+        preOrderCommand.setExpirationMillis(cmd.getExpiration());
         preOrderCommand.setSourceType(SourceType.MOBILE.getCode());
         preOrderCommand.setOrderRemark1("资源预订");
         //preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));

@@ -70,6 +70,7 @@ public class PreOrderCommand {
     //支付微信公众号必填
     private PaymentParamsDTO paymentParams;
 
+
     private Integer commitFlag;
 
     public Integer getCommitFlag() {
@@ -258,6 +259,5 @@ public class PreOrderCommand {
     public void setMerchantId(Long merchantId) {
         this.merchantId = merchantId;
     }
-
 
 }
