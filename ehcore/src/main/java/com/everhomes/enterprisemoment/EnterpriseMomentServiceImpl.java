@@ -381,7 +381,7 @@ public class EnterpriseMomentServiceImpl implements EnterpriseMomentService {
 
         if (!checkUserMomentPrivilege(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), UserContext.currentUserId(),
                 cmd.getAppId(), cmd.getMomentId(), PrivilegeType.VIEW)) {
-        	throw RuntimeErrorException.errorWith(EnterpriseMomentConstants.ERROR_SCOPE, EnterpriseMomentConstants.ERROR_INVALID_PARAMETER, "没有权限");
+        	throw RuntimeErrorException.errorWith(EnterpriseMomentConstants.ERROR_SCOPE, EnterpriseMomentConstants.ERROR_PRIVILEGE, "没有权限");
         }
         EnterpriseMoment moment = enterpriseMomentProvider.findEnterpriseMomentById(cmd.getMomentId());
 
@@ -393,7 +393,7 @@ public class EnterpriseMomentServiceImpl implements EnterpriseMomentService {
 	public void deleteMoment(DeleteMomentCommand cmd) {
         if(!checkUserMomentPrivilege(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), UserContext.currentUserId(),
                 cmd.getAppId(), cmd.getMomentId(),PrivilegeType.OPERATE)){
-            throw RuntimeErrorException.errorWith(EnterpriseMomentConstants.ERROR_SCOPE, EnterpriseMomentConstants.ERROR_INVALID_PARAMETER, "没有权限");
+            throw RuntimeErrorException.errorWith(EnterpriseMomentConstants.ERROR_SCOPE, EnterpriseMomentConstants.ERROR_PRIVILEGE, "没有权限");
         }
         enterpriseMomentProvider.deleteEnterpriseMoment(cmd.getMomentId());
 	}
