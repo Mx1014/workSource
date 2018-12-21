@@ -35,6 +35,7 @@ import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractOperateStatus;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.contract.NamespaceContractType;
 import com.everhomes.rest.contract.OpenapiListContractsCommand;
 import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.contract.statistic.ContractReportFormListContractsCommand;
@@ -471,8 +472,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                 }
                 
 				if (contract.getSponsorUid() != null) {
-					// 用户可能不在组织架构中 所以用nickname,//由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字
-					if (cmd.getNamespaceId() == 999929) {
+					// 用户可能不在组织架构中 所以用nickname,//由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字ruian_cm
+					if (cmd.getNamespaceId() == 999929 && contract.getNamespaceContractType().equals(NamespaceContractType.RUIAN_CM.getCode())) {
 						dto.setSponsorName(contract.getSponsorUid());
 					} else {
 						User user = userProvider.findUserById(Long.parseLong(contract.getSponsorUid()));

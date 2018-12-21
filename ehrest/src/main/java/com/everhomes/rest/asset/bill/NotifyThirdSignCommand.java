@@ -5,18 +5,18 @@ import java.util.List;
 
 /**
  *<ul>
- * <li>billIdList: 账单ID列表，左邻对这些账单置一个特殊error标记，以此标记判断这些账单数据下一次同步不再传输</li>
+ * <li>notifyThirdSignDTOList: 账单ID+错误描述列表，左邻对这些账单置一个特殊error标记，以此标记判断这些账单数据下一次同步不再传输</li>
  */
 public class NotifyThirdSignCommand {
 	
-	private List<Long> billIdList;
+	private List<NotifyThirdSignDTO> notifyThirdSignDTOList;
 
-	public List<Long> getBillIdList() {
-		return billIdList;
+	public List<NotifyThirdSignDTO> getNotifyThirdSignDTOList() {
+		return notifyThirdSignDTOList;
 	}
 
-	public void setBillIdList(List<Long> billIdList) {
-		this.billIdList = billIdList;
+	public void setNotifyThirdSignDTOList(List<NotifyThirdSignDTO> notifyThirdSignDTOList) {
+		this.notifyThirdSignDTOList = notifyThirdSignDTOList;
 	}
 	
 }
