@@ -1,3 +1,5 @@
+-- AUTHOR :黄鹏宇 2018年12月20日
+-- REMARK :添加物业配置表
 CREATE TABLE `eh_property_configurations` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT NULL,

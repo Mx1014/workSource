@@ -15,6 +15,12 @@ INSERT INTO eh_locale_templates ( `scope`, `code`, `locale`, `description`, `tex
 -- AUTHOR: 梁燕龙
 -- REMARK: 修改模块名称
 UPDATE eh_service_modules SET name = '资源预订' WHERE id = 40400;
+
+-- AUTHOR:2018年12月21日 黄鹏宇
+-- REMARK:为创业场添加客户类型
+SET @id = (SELECT MAX(id) FROM eh_var_field_ranges);
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',4,'investment_promotion','enterprise_customer');
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
