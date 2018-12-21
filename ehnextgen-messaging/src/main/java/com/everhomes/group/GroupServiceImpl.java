@@ -6145,7 +6145,14 @@ public class GroupServiceImpl implements GroupService {
 //		response.setAppIconUrl(versionInfoDTO.getIconUrl());
 //		response.setDownloadUrl(versionInfoDTO.getDownloadUrl());
 		// 熊颖之前有个接口可以获取app名称和图标, update by tt, 20161115
-		AppUrlDTO appUrlDTO = appUrlService.getAppInfo(new GetAppInfoCommand(cmd.getNamespaceId(),OSType.Android.getCode()));
+//		AppUrlDTO appUrlDTO = appUrlService.getAppInfo(new GetAppInfoCommand(cmd.getNamespaceId(),OSType.Android.getCode()));
+        // 根据手机系统获取appUrl
+        AppUrlDTO appUrlDTO;
+        if ( cmd.getRealm() != null && cmd.getRealm().toLowerCase().startsWith("ios")){
+            appUrlDTO = appUrlService.getAppInfo(new GetAppInfoCommand(cmd.getNamespaceId(), OSType.IOS.getCode()));
+        } else {
+            appUrlDTO = appUrlService.getAppInfo(new GetAppInfoCommand(cmd.getNamespaceId(), OSType.Android.getCode()));
+        }
 		response.setAppName(appUrlDTO.getName());
 		response.setAppIconUrl(appUrlDTO.getLogoUrl());
 		response.setDownloadUrl(appUrlDTO.getDownloadUrl());
