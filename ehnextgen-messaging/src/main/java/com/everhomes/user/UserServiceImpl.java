@@ -6342,7 +6342,15 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		List<IndexDTO> indexDtos = launchPadService.listIndexDtos(namespaceId, userId);
 
 		resp.setIndexDtos(indexDtos);
-		
+		//判断是否启用主页签
+        String indexFlag = configurationProvider.getValue(cmd.getNamespaceId(),ConfigConstants.INDEX_FLAG, "");
+        if (!org.springframework.util.StringUtils.isEmpty(indexFlag) && TrueOrFalseFlag.TRUE.getCode().equals(Byte.valueOf(indexFlag))) {
+            resp.setIndexFlag(TrueOrFalseFlag.TRUE.getCode());
+        }else {
+            resp.setIndexFlag(TrueOrFalseFlag.FALSE.getCode());
+        }
+
+
 		// 客户端地址模式配置, add by momoubin,18/11/09
 		resp.setClientAddressMode(this.configurationProvider.getIntValue(namespaceId, ConfigConstants.CLIENT_ADDRESS_MODE, 0));
 		resp.setAuthPopupConfig(Byte.valueOf(this.configurationProvider.getValue(namespaceId, "authPopupConfig", "1")));
