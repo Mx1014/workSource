@@ -13,6 +13,7 @@ import java.util.List;
  * <li>id: 评论id</li>
  * <li>ownerToken: 实体标识</li>
  * <li>parentCommentId: 父评论的ID</li>
+ * <li>replyToUserId: 被回复人的uid</li>
  * <li>creatorUid: 创建者id</li>
  * <li>creatorNickName: 创建者昵称</li>
  * <li>creatorAvatar: 创建者在圈内的头像URI</li>
@@ -27,6 +28,7 @@ public class CommentDTO {
 	private Long id;
 	private String ownerToken;
 	private Long parentCommentId;
+	private Long replyToUserId;
 	private Long creatorUid;
 	private String creatorNickName;
 	private String creatorAvatar;
@@ -59,6 +61,14 @@ public class CommentDTO {
 
 	public void setParentCommentId(Long parentCommentId) {
 		this.parentCommentId = parentCommentId;
+	}
+
+	public Long getReplyToUserId() {
+		return replyToUserId;
+	}
+
+	public void setReplyToUserId(Long replyToUserId) {
+		this.replyToUserId = replyToUserId;
 	}
 
 	public Long getCreatorUid() {
