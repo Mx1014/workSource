@@ -410,8 +410,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			halfdailyPrice = halfdailyPriceRule.getWorkdayPrice();
 			
 		}
-		dto.setDailyPrice(dailyPrice);
-		dto.setHalfdailyPrice(halfdailyPrice);
+		if (dailyPriceRule.getWorkdayPrice()!=null){
+			dto.setDailyPrice(dailyPrice);
+		}
+		if(halfdailyPriceRule.getWorkdayPrice()!=null){
+			dto.setHalfdailyPrice(halfdailyPrice);
+		}
 		return dto;
 	}
 
@@ -565,8 +569,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd.getSpaceAttachments().forEach((dto) -> {
 					this.saveAttachment(dto, space.getId(),(byte)1);
 				});
-			} else {
-				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)1);
 			}
 			if (null != cmd.getShortRentAttachments()){
 				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId(),(byte)2);
@@ -3022,8 +3024,14 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				if(halfdailyPriceRule.getWorkdayPrice()!=null){
 					halfdailyPrice = halfdailyPriceRule.getWorkdayPrice();
 				}
-				dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?
-						halfdailyPrice:dailyPrice);
+				if (dailyPriceRule.getWorkdayPrice()!=null && halfdailyPriceRule.getWorkdayPrice()==null){
+					dto.setMinUnitPrice(dailyPriceRule.getWorkdayPrice());
+				} else if (dailyPriceRule.getWorkdayPrice()==null && halfdailyPriceRule.getWorkdayPrice()!=null){
+					dto.setMinUnitPrice(halfdailyPriceRule.getWorkdayPrice());
+				} else {
+					dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?
+							halfdailyPrice:dailyPrice);
+				}
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), s.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),s.getId(),null,null,null,null);
