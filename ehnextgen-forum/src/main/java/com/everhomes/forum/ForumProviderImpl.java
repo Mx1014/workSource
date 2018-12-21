@@ -248,7 +248,7 @@ public class ForumProviderImpl implements ForumProvider {
                     post.setFloorNumber(floorNumber);
                     
                 } else {
-                	if(post.getCategoryId() == 1010) {
+                	if(post.getEmbeddedAppId() != null && post.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY)) {
                 		userActivityProvider.addPostedTopic(post.getCreatorUid(), UserFavoriteTargetType.ACTIVITY.getCode(), id);
                     } else {
                     	userActivityProvider.addPostedTopic(post.getCreatorUid(), UserFavoriteTargetType.TOPIC.getCode(), id);
