@@ -415,8 +415,10 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
     	sourceTypeList.add(AssetSourceType.RENTAL_MODULE);
     	sourceTypeList.add(AssetSourceType.PRINT_MODULE);
     	cmd.setSourceTypeList(sourceTypeList);
-    	//物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
-    	cmd.setThirdSign(AssetNotifyThirdSign.CORRECT.getCode());
+    	//物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步会再次传输
+    	//cmd.setThirdSign(AssetNotifyThirdSign.ERROR.getCode());
+    	//只查看正常使用的账单
+    	cmd.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
     	LOGGER.info("AssetBillServiceImpl listOpenBills convertCmd={}", cmd);
         ListBillsResponse response = new ListBillsResponse();
         Long pageAnchor = cmd.getPageAnchor();
@@ -496,6 +498,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 					Long.parseLong(dto.getTargetId()), NamespaceCustomerType.CM.getCode());
 			if(enterpriseCustomer != null) {
 				dto.setAccountId(enterpriseCustomer.getNamespaceCustomerToken());
+				dto.setPropertyID(enterpriseCustomer.getNamespaceCustomerGroup());
 			}
 		} catch (Exception e) {
 			
@@ -503,10 +506,10 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 	}
 	
 	/**
-     * 物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+     * 物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步会再次传输
     */
     public void notifyThirdSign(NotifyThirdSignCommand cmd)  {
-    	assetBillProvider.notifyThirdSign(cmd.getBillIdList());
+    	assetBillProvider.notifyThirdSign(cmd.getNotifyThirdSignDTOList());
     }
 
     /**

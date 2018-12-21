@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.bill.NotifyThirdSignDTO;
 import com.everhomes.asset.PaymentBills;
 
 /**
@@ -26,7 +27,7 @@ public interface AssetBillProvider {
 	
 	void deleteBillFromContract(Integer namespaceId, List<Long> contractIdList);
 
-	void notifyThirdSign(List<Long> billIdList);
+	void notifyThirdSign(List<NotifyThirdSignDTO> list);
 
 	void deleteRuiCMSyncData();
 	
