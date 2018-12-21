@@ -315,6 +315,7 @@ public class DingxinServiceImpl implements DingxinService {
             NameValuePair pair = new BasicNameValuePair("uid", uid);
             pairs.add(pair);
             httpPost.setEntity(new UrlEncodedFormEntity(pairs, HTTP.UTF_8));
+            LOGGER.info("start to connect");
             response = httpClient.execute(httpPost);
             String json = EntityUtils.toString(response.getEntity(),"utf8");
             int status = response.getStatusLine().getStatusCode();
