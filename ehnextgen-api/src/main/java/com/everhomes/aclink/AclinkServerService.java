@@ -14,6 +14,7 @@ import com.everhomes.rest.aclink.CreateMarchUUIDResponse;
 import com.everhomes.rest.aclink.DeleteLocalServerCommand;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
 import com.everhomes.rest.aclink.DoorMessage;
+import com.everhomes.rest.aclink.GetLocalServerAddressResponse;
 import com.everhomes.rest.aclink.ListAclinkServersResponse;
 import com.everhomes.rest.aclink.ListLocalServerByOrgCommand;
 import com.everhomes.rest.aclink.PairLocalServerResponse;
@@ -55,5 +56,7 @@ public interface AclinkServerService {
 	AclinkServerDTO onServerDisconnecting(AclinkDisconnectedCommand cmd);
 
 	void updateCameraIpadBatch(UpdateCameraIpadBatchCommand cmd);
+
+	GetLocalServerAddressResponse getLocalServerAddressByIpad(String uuid);
 
 }

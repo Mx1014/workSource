@@ -24,9 +24,16 @@ public class GetUserKeyInfoResponse {
 	private String blueToothSecret;
 	@ItemType(AclinkKeyExtraActionsDTO.class)
 	private List<AclinkKeyExtraActionsDTO> extraActions;
+	private Byte faceSyncStatus;
 
 	private HashMap<String, String> authInfo;
 	
+	public Byte getFaceSyncStatus() {
+		return faceSyncStatus;
+	}
+	public void setFaceSyncStatus(Byte faceSyncStatus) {
+		this.faceSyncStatus = faceSyncStatus;
+	}
 	public Long getAuthId() {
 		return authId;
 	}
