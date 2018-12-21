@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnectionProvider;
@@ -45,6 +46,7 @@ import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAccessLinkStatus;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
 import com.everhomes.rest.aclink.DoorAccessStatus;
+import com.everhomes.rest.aclink.GetLocalServerAddressResponse;
 import com.everhomes.rest.aclink.ListAclinkServersResponse;
 import com.everhomes.rest.aclink.ListLocalCamerasCommand;
 import com.everhomes.rest.aclink.ListLocalIpadCommand;
@@ -673,5 +675,35 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 		
 		aclinkIpadProvider.updateIpadBatch(updateIpads);
 		
+	}
+
+	@Override
+	public GetLocalServerAddressResponse getLocalServerAddressByIpad(String uuid) {
+		GetLocalServerAddressResponse rsp = new GetLocalServerAddressResponse();
+		List<AclinkIpad> ipads = aclinkIpadProvider.queryLocalIpads(new CrossShardListingLocator(),0,new ListingQueryBuilderCallback(){
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+					SelectQuery<? extends Record> query) {
+				if(uuid != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.UUID.eq(uuid));
+				}
+                return query;
+			}
+		});
+		//异常处理可优化
+		if(ipads == null || ipads.size() == 0 || ipads.get(0).getServerId() == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_UUID_EXISTS, "匹配码已失效");
+		}
+		if(!StringUtils.isEmpty(ipads.get(0).getLogoUrl())){
+			rsp.setLogoUrl(ipads.get(0).getLogoUrl());
+		}
+		
+		AclinkServer server = aclinkServerProvider.findServerById(ipads.get(0).getServerId());
+		if(server == null || server.getIpAddress() == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_SERVER_NOT_FOUND, "未关联内网服务器");
+		}
+		rsp.setIpAddress(server.getIpAddress().concat(":8000"));//默认8000端口,可优化
+		return rsp;
 	}
 }

@@ -1655,6 +1655,20 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/aclink/getLocalServerAddressByIpad</b>
+     * <p> 内网服务器配对</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getLocalServerAddressByIpad")
+    @RestReturn(value=GetLocalServerAddressResponse.class)
+    public RestResponse getLocalServerAddressByIpad(PairLocalServerCommand cmd){
+    	RestResponse response = new RestResponse(aclinkServerService.getLocalServerAddressByIpad(cmd.getUuid()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /admin/aclink/updateServerSyncTime</b>
@@ -1773,11 +1787,10 @@ public class AclinkAdminController extends ControllerBase {
         return response;
     }
     
-//createLocalVisitorAuth Test
     /**
      * 
      * <b>URL: /admin/aclink/createLocalVisitorAuth</b>
-     * <p>更新用户同步时间 </p>
+     * <p>人脸识别访客授权</p>
      * @return
      */
     @RequestMapping("createLocalVisitorAuth")
@@ -1805,6 +1818,7 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
     //20180914 add by liqingyan
     /**
      * <b>URL: /admin/aclink/checkMobilePrivilege</b>

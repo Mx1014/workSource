@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.aclink;
 
+import com.everhomes.rest.aclink.DeletePhotoByIdCommand;
+import com.everhomes.rest.aclink.GetPhotoSyncResultResponse;
 import com.everhomes.rest.aclink.ListFacialRecognitionPhotoByUserResponse;
 import com.everhomes.rest.aclink.NotifySyncVistorsCommand;
 import com.everhomes.rest.aclink.SetFacialRecognitionPhotoCommand;
@@ -32,4 +34,8 @@ public interface FaceRecognitionPhotoService {
 
 	void invalidVistorSyncState(UpdateVistorSyncTimeCommand cmd);
 
+	void invalidPhotoByIds(DeletePhotoByIdCommand cmd);
+
+	GetPhotoSyncResultResponse getPhotoSyncResult();
+	
 }
