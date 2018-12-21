@@ -3,9 +3,7 @@ package com.everhomes.goods;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rentalv2.RentalResource;
-import com.everhomes.rentalv2.RentalResourceType;
-import com.everhomes.rentalv2.Rentalv2Provider;
+import com.everhomes.rentalv2.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.goods.*;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
@@ -24,6 +22,8 @@ public class RentalPromotionHandlerImpl extends DefaultGoodsPromotionHandlerImpl
     private Rentalv2Provider rentalv2Provider;
     @Autowired
     private CommunityProvider communityProvider;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
 
     @Override
     public GetGoodListResponse getGoodList(GetGoodListCommand cmd) {
@@ -36,6 +36,10 @@ public class RentalPromotionHandlerImpl extends DefaultGoodsPromotionHandlerImpl
             List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(resourceTypeId, null, locator, Integer.MAX_VALUE, null, null, communityId);
             if (rentalSites != null && rentalSites.size() > 0){
                 for (RentalResource rentalSite : rentalSites) {
+                    RentalOrderHandler rentalOrderHandler = rentalCommonService.getRentalOrderHandler(rentalSite.getResourceType());
+                    Long merchantId = rentalOrderHandler.gerMerchantId(rentalSite);
+                    if (cmd.getMerchantId() != null && !cmd.getMerchantId().equals(merchantId))
+                        continue;
                     GoodTagInfo good = ConvertHelper.convert(cmd.getGoodTagInfo(), GoodTagInfo.class);
                     good.setGoodsTag(rentalSite.getId().toString());
                     good.setGoodsName(rentalSite.getResourceName());
