@@ -240,8 +240,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
     private final static String FACEPLUSPLUS_PASSWORD = "123456";
 
     @Override
-    public String login (){
-        String url = URL_FACEPLUSPLUS + "/auth/login";
+    public String login (String ip,String username, String password){
+        String url = ip + "/auth/login";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         String result = null;
@@ -253,8 +253,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             httpPost.addHeader("content-type","application/json");
 
             JSONObject jsonParam = new JSONObject();
-            jsonParam.put("username", FACEPLUSPLUS_USERNAME);
-            jsonParam.put("password", FACEPLUSPLUS_PASSWORD);
+            jsonParam.put("username", username);
+            jsonParam.put("password", password);
             StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
             entity.setContentEncoding("UTF-8");
             entity.setContentType("application/json");
@@ -297,8 +297,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
     }
 
     @Override
-    public JSONObject createUser (String cookie, Integer subjectType, String name, Long start_time, Long end_time){
-        String url = URL_FACEPLUSPLUS + "/subject";
+    public JSONObject createUser (String cookie, Integer subjectType, String name, Long start_time, Long end_time,String ip){
+        String url = ip + "/subject";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         JSONObject result = null;
@@ -377,8 +377,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
     }
 
     @Override
-    public String uploadPhoto (String cookie, String photourl, String subjectId){
-        String url = URL_FACEPLUSPLUS + "/subject/photo";
+    public String uploadPhoto (String cookie, String photourl, String subjectId,String ip){
+        String url = ip + "/subject/photo";
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         String result = null;
@@ -442,8 +442,8 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
     }
 
     @Override
-    public void deleteUser (String cookie, String subjectId){
-        String url = URL_FACEPLUSPLUS + "/subject/" + subjectId;
+    public void deleteUser (String cookie, String subjectId, String ip){
+        String url = ip + "/subject/" + subjectId;
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         JSONObject result = null;
@@ -488,14 +488,22 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
 
     @Override
     public DoorAuth createAuth (DoorAuth doorAuth, CreateDoorAuthCommand cmd,UserInfo custom){
-        String cookie = this.login();
+        AclinkFormValues ips = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.IP.getCode());
+        AclinkFormValues usernames = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.USERNAME.getCode());
+        AclinkFormValues passwords = doorAccessProvider.findAclinkFormValues(doorAuth.getOwnerId(),doorAuth.getOwnerType(),AclinkFormValuesType.PASSWORD.getCode());
+        if(ips == null || usernames == null || passwords == null || ips.getValue().isEmpty() || usernames.getValue().isEmpty() || passwords.getValue().isEmpty()){
+            LOGGER.error("unable to find ip, username or password");
+            return null;
+        }
+        String ip = ips.getValue();
+        String cookie = this.login(ip,usernames.getValue(),passwords.getValue());
         if(cmd.getRightOpen() == (byte)1){
             String userName = cmd.getUserId().toString();//face++ username 存左邻用户id
             JSONObject response = null;
             if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())){
-                response = this.createUser(cookie, 0, userName, 0L, 0L);//subjectType 0 员工，1 访客 正式用户不传时间
+                response = this.createUser(cookie, 0, userName, 0L, 0L,ip);//subjectType 0 员工，1 访客 正式用户不传时间
             }else{
-                response = this.createUser(cookie, 1, userName, cmd.getValidFromMs()/1000L, cmd.getValidEndMs()/1000L);//subjectType 0 员工，1 访客 正式用户不传时间
+                response = this.createUser(cookie, 1, userName, cmd.getValidFromMs()/1000L, cmd.getValidEndMs()/1000L,ip);//subjectType 0 员工，1 访客 正式用户不传时间
             }
             String subjectId = response.getJSONObject("data").getString("id");//face++用户ID
             if(subjectId != null){
@@ -507,10 +515,10 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
             if(!ListUtils.isEmpty(photos)){
                 String photoUrl = photos.get(0).getImgUrl();
                 //上传照片
-                this.uploadPhoto(cookie,photoUrl,subjectId);
+                this.uploadPhoto(cookie,photoUrl,subjectId,ip);
             }
         }else if(cmd.getRightOpen() == (byte)0){
-            this.deleteUser(cookie, doorAuth.getStringTag2());
+            this.deleteUser(cookie, doorAuth.getStringTag2(),ip);
             doorAuth.setStringTag2(null);
             doorAuthProvider.updateDoorAuth(doorAuth);
         }
@@ -519,29 +527,48 @@ public class FacePlusPlusServiceImpl implements FacePlusPlusService {
 
     @Override
     public void addPhoto(String url,Long authId,Long userId){
-        String cookie = this.login();
+        //访客授权记录
+        List<DoorAuth> auths = new ArrayList<>();
         if(authId != null){
             DoorAuth auth = doorAuthProvider.getDoorAuthById(authId);
             if(auth != null && auth.getDriver().equals(DoorAccessDriverType.FACEPLUSPLUS.getCode()) && auth.getStringTag2() != null){
-                this.uploadPhoto(cookie,url,auth.getStringTag2());
+                auths.add(auth);
+            }else {
+                LOGGER.error("unable to find auth");
+                return;
             }
         }
+        //用户授权记录
         if(userId != null){
-            List<DoorAuth> auths = new ArrayList<>();
             ListingLocator locator = new ListingLocator();
-            auths = doorAuthProvider.queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
+            List<DoorAuth> authsx = doorAuthProvider.queryDoorAuth(locator, 9999, new ListingQueryBuilderCallback() {
                 @Override
                 public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                                                                     SelectQuery<? extends Record> query) {
                     query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
                     query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(DoorAccessDriverType.FACEPLUSPLUS.getCode()));
                     query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte)1));
+                    query.addConditions(Tables.EH_DOOR_AUTH.STRING_TAG2.isNotNull());
                     return query;
                 }
             });
-            if(!ListUtils.isEmpty(auths) && !auths.get(0).getStringTag2().isEmpty()){
-                this.uploadPhoto(cookie,url,auths.get(0).getStringTag2());
+            if(ListUtils.isEmpty(authsx)){
+                LOGGER.error("unable to find auth");
+                return;
             }
+            auths.addAll(authsx);
+        }
+        for(DoorAuth auth: auths){
+            AclinkFormValues ips = doorAccessProvider.findAclinkFormValues(auth.getOwnerId(),auth.getOwnerType(),AclinkFormValuesType.IP.getCode());
+            AclinkFormValues usernames = doorAccessProvider.findAclinkFormValues(auth.getOwnerId(),auth.getOwnerType(),AclinkFormValuesType.USERNAME.getCode());
+            AclinkFormValues passwords = doorAccessProvider.findAclinkFormValues(auth.getOwnerId(),auth.getOwnerType(),AclinkFormValuesType.PASSWORD.getCode());
+            if(ips == null || usernames == null || passwords == null || ips.getValue().isEmpty() || usernames.getValue().isEmpty() || passwords.getValue().isEmpty()){
+                LOGGER.error("unable to find ip, username or password");
+                return;
+            }
+            String ip = ips.getValue();
+            String cookie = this.login(ip,usernames.getValue(),passwords.getValue());
+            this.uploadPhoto(cookie,url,auth.getStringTag2(),ip);
         }
     }
 

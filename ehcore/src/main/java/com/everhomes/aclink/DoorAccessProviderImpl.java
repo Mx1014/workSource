@@ -1178,7 +1178,9 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_ACLINK_FORM_VALUES);
         query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_TYPE.eq(ownerType));
+        if(ownerType != null){
+            query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_TYPE.eq(ownerType));
+        }
         query.addConditions(Tables.EH_ACLINK_FORM_VALUES.TYPE.eq(type));
 //        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.STATUS.eq((byte)1));
         query.addLimit(1);
