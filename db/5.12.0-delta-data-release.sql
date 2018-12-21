@@ -35,6 +35,12 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4920049220, '0', '物品放行 统计信息权限', '物品放行 统计信息权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '49220', '0', 4920049220, '全部权限', '0', now());
 
+-- AUTHOR:刘一麟
+-- REMARK:人脸识别v1.8
+INSERT INTO `ehcore`.`eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('aclink.notification', '3', 'zh_CN', '您于【日期】上传的人脸照片已通过审核，现可正常使用。', '您于${dateTime}上传的人脸照片已通过审核，现可正常使用。', '0');
+INSERT INTO `ehcore`.`eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('aclink.notification', '4', 'zh_CN', '您于【日期】上传的人脸照片因质量过低，未能通过审核，请重新拍摄上传。', '您于${dateTime}上传的人脸照片因质量过低，未能通过审核，请重新拍摄上传。', '0');
+
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
