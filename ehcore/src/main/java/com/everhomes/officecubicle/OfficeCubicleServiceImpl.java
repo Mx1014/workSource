@@ -2938,7 +2938,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setBeginTime(order.getBeginTime().getTime());
 			dto.setEndTime(order.getEndTime().getTime());
 		}
-		if (order.getPrice() !=null && !order.getPrice().equals(new BigDecimal(0.00))){
+		
+		if (order.getPrice() !=null && !(order.getPrice().intValue() == 0)){
 			dto.setRefundAmount(calculateRefundAmount(order,System.currentTimeMillis(),space));
 		}
 		response.setOrders(dto);
@@ -3045,7 +3046,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (room!=null){
 				roomSize = room.size();
 			}
-			if (station == null && room==null){
+			if (stationSize == 0 && roomSize==0){
 				continue;
 			}
 			Integer allPositonNums = stationSize + roomSize;
