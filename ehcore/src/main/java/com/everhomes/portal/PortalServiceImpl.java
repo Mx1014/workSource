@@ -2754,7 +2754,10 @@ public class PortalServiceImpl implements PortalService {
 				index.setCreateTime(new Timestamp(System.currentTimeMillis()));
 				index.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 				index.setCreatorUid(UserContext.currentUserId());
-
+                if (PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW) {
+                    index.setPreviewVersionId(versionId);
+                    index.setStatus(null);
+                }
 				launchPadIndexProvider.createLaunchPadIndex(index);
 			}
 

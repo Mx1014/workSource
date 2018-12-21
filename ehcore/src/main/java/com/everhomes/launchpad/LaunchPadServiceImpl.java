@@ -36,6 +36,8 @@ import com.everhomes.portal.PortalItemGroup;
 import com.everhomes.portal.PortalItemGroupProvider;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalService;
+import com.everhomes.portal.PortalVersionUser;
+import com.everhomes.portal.PortalVersionUserProvider;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressType;
 import com.everhomes.rest.banner.BannerDTO;
@@ -185,6 +187,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Autowired
     private PortalItemGroupProvider portalItemGroupProvider;
+
+	@Autowired
+    private PortalVersionUserProvider portalVersionUserProvider;
 	
 	@Override
 	public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
@@ -2876,11 +2881,25 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 
-		List<LaunchPadIndex> launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
-			query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(namespaceId));
-			query.addOrderBy(Tables.EH_LAUNCH_PAD_INDEXS.DEFAULT_ORDER);
-			return query;
-		});
+		//先查预览版本，如果预览版本没有，则使用正式版本
+        PortalVersionUser portalVersionUser = this.portalVersionUserProvider.findPortalVersionUserByUserId(userId);
+		List<LaunchPadIndex> launchPadIndices = new ArrayList<>();
+        if (portalVersionUser != null) {
+            launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
+                query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(namespaceId));
+                query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.PREVIEW_VERSION_ID.eq(portalVersionUser.getVersionId()));
+                query.addOrderBy(Tables.EH_LAUNCH_PAD_INDEXS.DEFAULT_ORDER);
+                return query;
+            });
+        }
+        if (!CollectionUtils.isEmpty(launchPadIndices)) {
+            launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
+                query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(namespaceId));
+                query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.STATUS.isNotNull());
+                query.addOrderBy(Tables.EH_LAUNCH_PAD_INDEXS.DEFAULT_ORDER);
+                return query;
+            });
+        }
 
 		List<IndexDTO> dtos = new ArrayList<>();
 		for (LaunchPadIndex index: launchPadIndices){
