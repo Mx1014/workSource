@@ -1874,7 +1874,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         ServiceModuleEntry serviceModuleEntry = ConvertHelper.convert(cmd, ServiceModuleEntry.class);
 
-        serviceModuleEntry.setDefaultOrder(1000);
+        Integer maxOrder = serviceModuleEntryProvider.getMaxOrderFromServiceModuleEntry(null,cmd.getAppCategoryId(),null,null,null);
+        if (maxOrder != null) {
+            serviceModuleEntry.setDefaultOrder(maxOrder + 1);
+        }else {
+            serviceModuleEntry.setDefaultOrder(1);
+        }
+
         serviceModuleEntry.setModuleName(module.getName());
         serviceModuleEntryProvider.create(serviceModuleEntry);
 
