@@ -1706,7 +1706,19 @@ public class PortalServiceImpl implements PortalService {
     @Override
 	public void deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd) {
 
-		portalNavigationBarProvider.deletePortalNavigationBar(cmd.getId());
+	    //先更新剩下的主页签排序，再删除
+        PortalNavigationBar deleteNavigationBar = portalNavigationBarProvider.findPortalNavigationBarById(cmd.getId());
+        if (deleteNavigationBar != null) {
+            List<PortalNavigationBar> list = this.portalNavigationBarProvider.listPortalNavigationBarByOrder(deleteNavigationBar.getVersionId(), deleteNavigationBar.getDefaultOrder());
+            if (!CollectionUtils.isEmpty(list)) {
+                for (PortalNavigationBar portalNavigationBar : list) {
+                    portalNavigationBar.setDefaultOrder(portalNavigationBar.getDefaultOrder() - 1);
+                    this.portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
+                }
+            }
+        }
+        portalNavigationBarProvider.deletePortalNavigationBar(cmd.getId());
+
 	}
 
 	private PortalNavigationBar checkPortalNavigationBar(Long id){

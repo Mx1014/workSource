@@ -78,6 +78,22 @@ public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvi
 	}
 
 	@Override
+	public List<PortalNavigationBar> listPortalNavigationBarByOrder(Long versionId, Integer order) {
+		Condition cond = Tables.EH_PORTAL_NAVIGATION_BARS.STATUS.ne(PortalNavigationBarStatus.INACTIVE.getCode());
+		if(null != versionId){
+			cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.VERSION_ID.eq(versionId));
+		}
+
+		if (order != null) {
+		    cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.DEFAULT_ORDER.gt(order));
+        }
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_NAVIGATION_BARS)
+				.where(cond)
+				.orderBy(Tables.EH_PORTAL_NAVIGATION_BARS.DEFAULT_ORDER.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, PortalNavigationBar.class));
+	}
+
+	@Override
 	public Integer maxOrder(Integer namespaceId, Long versionId) {
 		Condition cond = Tables.EH_PORTAL_NAVIGATION_BARS.STATUS.ne(PortalNavigationBarStatus.INACTIVE.getCode());
 		if(null != versionId){
