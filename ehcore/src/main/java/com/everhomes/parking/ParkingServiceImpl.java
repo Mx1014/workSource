@@ -817,7 +817,12 @@ public class ParkingServiceImpl implements ParkingService {
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
 						"Overdue fees");
 			}
-
+			boolean flag = configProvider.getBooleanValue("parking.order.debug", false);
+			if (flag){
+				LOGGER.error("Overdue fees, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
+						"Overdue fees");
+			}
 			parkingRechargeOrder.setOriginalPrice(dto.getPrice());
 			parkingRechargeOrder.setPrice(cmd.getPrice());
 			parkingRechargeOrder.setOrderToken(dto.getOrderToken());

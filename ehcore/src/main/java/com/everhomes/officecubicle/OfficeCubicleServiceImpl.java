@@ -2981,8 +2981,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			dto.setSpaceName(s.getName());
 			List<OfficeCubicleAttachment> attachments = null;
 			if (cmd.getRentType() ==1){
-				BigDecimal roomMinPrice = officeCubicleProvider.getRoomMinPrice(r.getId());
-				BigDecimal stationMinPrice = officeCubicleProvider.getStationMinPrice(r.getId());
+				BigDecimal roomMinPrice = officeCubicleProvider.getRoomMinPrice(s.getId());
+				BigDecimal stationMinPrice = officeCubicleProvider.getStationMinPrice(s.getId());
 				if (stationMinPrice == null){
 					stationMinPrice =  new BigDecimal(0);
 				}
