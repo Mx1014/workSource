@@ -500,19 +500,31 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//空间管理权限
 		}
 
-//		if (null == cmd.getCategories())
+//		if (null == cmd.getContactPhone())
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//					"Invalid paramter of Categories error: null ");
+//					"Invalid paramter of contact phone error: null ");
 //		if (null == cmd.getId())
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid paramter of ID error: null ");
-//		if (null == cmd.getCityName())
+//		if (null == cmd.getSpaceAttachments())
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//					"Invalid paramter of city error: null id or name");
+//					"Invalid paramter of space attachment: null");
 //		OfficeCubicleSpace oldSpace = this.officeCubicleProvider.getSpaceById(cmd.getId());
 //		if (null == oldSpace)
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid paramter of space id error: no space found");
+		if (cmd.getShortRentNums()!= null){
+			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
+			space.setShortRentNums(cmd.getShortRentNums());
+			this.officeCubicleProvider.updateSpace(space);
+			return;
+		}
+		if(cmd.getLongRentPrice() != null){
+			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
+			space.setLongRentPrice(cmd.getLongRentPrice());
+			this.officeCubicleProvider.updateSpace(space);
+			return;
+		}
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleSpace space = officeCubicleProvider.getSpaceById(cmd.getId());
 			space.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -2970,13 +2982,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (cmd.getRentType() ==1){
 				BigDecimal roomMinPrice = officeCubicleProvider.getRoomMinPrice(r.getId());
 				BigDecimal stationMinPrice = officeCubicleProvider.getStationMinPrice(r.getId());
-				if (roomMinPrice == null){
-					roomMinPrice =  new BigDecimal(0);
-				}
 				if (stationMinPrice == null){
 					stationMinPrice =  new BigDecimal(0);
 				}
-				dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
+				if (roomMinPrice == null){
+					roomMinPrice =  new BigDecimal(0);
+					dto.setMinUnitPrice(stationMinPrice);
+				} else {
+					dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
+				}
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)1);
 			}else{
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)2);

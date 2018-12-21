@@ -768,12 +768,12 @@ public class PunchAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: punch/listPunchGroups</b>
+     * <b>URL: punch/listAllSimplePunchGroups</b>
      * <p>
-     * 列出全部考勤组的name和id 信息
+     * 列出全部考勤组的基本 信息(给设置未安排班次的规则使用)
      * </p>
      */
-    @RequestMapping("listPunchGroups")
+    @RequestMapping("listAllSimplePunchGroups")
     @RestReturn(value = ListAllSimplePunchGroupsResponse.class)
     public RestResponse listAllSimplePunchGroups(@Valid ListPunchGroupsCommand cmd) {
         ListAllSimplePunchGroupsResponse commandResponse = punchService.listAllSimplePunchGroups(cmd);

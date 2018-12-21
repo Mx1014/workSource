@@ -204,6 +204,10 @@ public class AssetSchedule{
                    //更新账单
                    for(PaymentBills bill : bills){
                        String dueDayDeadline = bill.getDueDayDeadline();
+                       if(!StringHelper.hasContent(dueDayDeadline)) {
+                           // 由于之前有BUG，导致有些帐单并没有填上该值，在数据库中存在1万多条这种记录 by lqs 20181219
+                           continue;
+                       }
                        try{
                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
                            Long dueDayCount = (today.getTime() - deadline.getTime()) / dayMilis;
@@ -212,7 +216,8 @@ public class AssetSchedule{
                            }
                            assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
                        } catch (Exception e){
-                           LOGGER.error("Update bill dueday count, pageAnchor={}, pageSize={}, totalSize={}", pageAnchor, pageSize, totalSize, e);
+                           LOGGER.error("Update bill dueday count, due day deadline parse error, pageAnchor={}, billId={}, dueDayDeadline={}", 
+                                   pageAnchor, bill.getId(), dueDayDeadline, e);
                        };
                    }
                    nextPageAnchor = res.getNextPageAnchor();

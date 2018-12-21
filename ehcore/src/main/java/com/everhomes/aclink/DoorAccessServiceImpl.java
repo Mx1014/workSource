@@ -1375,14 +1375,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             doorAuthProvider.createDoorAuth(doorAuth);
             
             //会议室预订,短信二维码打不开
-            AesUserKey aesUserKey = generateAesUserKey(tmpUser, doorAuth);
-            if(aesUserKey == null) {
-                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "DoorAccess user key error");
-            }
-            if(doorAuth.getAuthRuleType() != null && doorAuth.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())){
-            	doorAuth.setQrKey(createZuolinQrByCount(doorAuth.getId()));
-            }else{
-            	doorAuth.setQrKey(createZuolinQrV1(aesUserKey.getSecret()));
+            if(doorAcc.getOwnerType() != null && doorAcc.getDoorType() != null 
+                    && ( doorAcc.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode())
+                            || doorAcc.getDoorType().equals(DoorAccessType.ZLACLINK_NOWIFI.getCode())
+                            || doorAcc.getDoorType().equals(DoorAccessType.ACLINK_ZL_GROUP.getCode())
+                            || doorAcc.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode()) ) ) {
+            	
+            	AesUserKey aesUserKey = generateAesUserKey(tmpUser, doorAuth);
+            	if(aesUserKey == null) {
+            		throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "DoorAccess user key error");
+            	}
+            	if(doorAuth.getAuthRuleType() != null && doorAuth.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())){
+            		doorAuth.setQrKey(createZuolinQrByCount(doorAuth.getId()));
+            	}else{
+            		doorAuth.setQrKey(createZuolinQrV1(aesUserKey.getSecret()));
+            	}
+            	doorAuthProvider.updateDoorAuth(doorAuth);
             }
             doorAuthProvider.updateDoorAuth(doorAuth);
 
@@ -3076,12 +3084,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
             qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
             String s = WebTokenGenerator.getInstance().toWebToken("0," + auth.getUserId().toString());
-            qr.setQrCodeKey(homeUrl + "/openapi/aclink/verifyDoorAuth" + "?userId=" + s);
+            qr.setQrCodeKey(homeUrl + "/evh/openapi/aclink/verifyDoorAuth" + "?userId=" + s);
 //            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getUserId().toString() + "&userType=" + "user");
         } else {
             qr.setExpireTimeMs(auth.getValidEndMs());
             String s = WebTokenGenerator.getInstance().toWebToken("1," + auth.getId().toString());
-            qr.setQrCodeKey(homeUrl + "/openapi/aclink/verifyDoorAuth" + "?userId=" + s);
+            qr.setQrCodeKey(homeUrl + "/evh/openapi/aclink/verifyDoorAuth" + "?userId=" + s);
 //            qr.setQrCodeKey(homeUrl + "?userId=" + auth.getId() + "&userType=" + "visitor");
         }
         qr.setId(auth.getId());
@@ -3099,7 +3107,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
      * 锁管家的app请求参数拼接
      * @auther wh
      * */ 
-    private void doUclbrtQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
+    private void doUclbrtQRKey(DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
     	LOGGER.info("ucl 进入doQRKEY " );
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         qr.setCreateTimeMs(auth.getCreateTime().getTime());
@@ -3115,7 +3123,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         Aclink ca = aclinkProvider.getAclinkByDoorId(doorAccess.getId());
         if(null !=ca){
         	UclbrtParamsDTO paramsDTO = JSON.parseObject(ca.getUclbrtParams(), UclbrtParamsDTO.class); 
-        	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
+        	//UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
         	qr.setQrCodeKey(uclbrtHttpClient.getQrCode(paramsDTO, auth.getPhone(), qr.getExpireTimeMs()));
         	if(null != qr.getQrCodeKey()){
         		qrKeys.add(qr);
@@ -3238,7 +3246,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				if (!auth.getRightOpen().equals((byte) 1)) {
 					continue;
 				}
-				doUclbrtQRKey(user, doorAccess, auth, qrKeys);
+				doUclbrtQRKey(doorAccess, auth, qrKeys);
 
 				Long t4 = DateHelper.currentGMTTime().getTime();
 
@@ -4234,10 +4242,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setCreateTime(auth.getCreateTime().getTime());
         Integer namespaceId = null;
         if(doorAccess.getOwnerType() != null && doorAccess.getDoorType() != null 
-                && ( doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode())
-                        || doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_NOWIFI.getCode())
-                        || doorAccess.getDoorType().equals(DoorAccessType.ACLINK_ZL_GROUP.getCode())
-                        || doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode()) ) ) {
+//                && ( doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode())
+//                        || doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_NOWIFI.getCode())
+//                        || doorAccess.getDoorType().equals(DoorAccessType.ACLINK_ZL_GROUP.getCode())
+//                        || doorAccess.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode()) ) 
+                ) {
             
             if(doorAccess.getOwnerType().equals(DoorAccessOwnerType.COMMUNITY.getCode())) {
                 Community community = communityProvider.findCommunityById(doorAccess.getOwnerId());
@@ -4274,6 +4283,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 System.arraycopy(origin, 6, qrArr, 0, qrLen);
                 Long qrImageTimeout = this.configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 10*60l);
                 resp.setQr(AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), qrImageTimeout*1000l));
+            }else if(DoorAccessType.ACLINK_UCLBRT_DOOR.getCode() == doorAccess.getDoorType()){
+            	List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
+            	doUclbrtQRKey(doorAccess, auth, qrKeys);
+            	resp.setQr(qrKeys.get(0).getQrCodeKey());
+            	resp.setDriver(DoorAccessDriverType.UCLBRT.getCode());
             }
         }
         //服务热线

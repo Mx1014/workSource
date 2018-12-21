@@ -1527,7 +1527,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
         query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
-        query.addConditions(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.USER.getCode()));
+        query.addConditions(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.USER.getCode()).or(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.isNull()));
         if (null != driver){
             query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver));
         }

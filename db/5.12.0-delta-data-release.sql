@@ -15,6 +15,27 @@ INSERT INTO eh_locale_templates ( `scope`, `code`, `locale`, `description`, `tex
 -- AUTHOR: 梁燕龙
 -- REMARK: 修改模块名称
 UPDATE eh_service_modules SET name = '资源预订' WHERE id = 40400;
+
+-- AUTHOR:2018年12月21日 黄鹏宇
+-- REMARK:为创业场添加客户类型
+SET @id = (SELECT MAX(id) FROM eh_var_field_ranges);
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',4,'investment_promotion','enterprise_customer');
+
+-- AUTHOR:st.zheng
+-- REMARK:物品放行1.2
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`)
+VALUES ('49210', '申请记录', '49200', '/200/40000/49200/49210', '1', '4', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '', '1', '1', 'subModule', '1', '0', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`)
+VALUES ('49220', '统计信息', '49200', '/200/40000/49200/49220', '1', '4', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '', '1', '1', 'subModule', '1', '0', NULL, NULL, NULL, NULL);
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4920049210, '0', '物品放行 申请记录权限', '物品放行 申请记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '49210', '0', 4920049210, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4920049220, '0', '物品放行 统计信息权限', '物品放行 统计信息权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '49220', '0', 4920049220, '全部权限', '0', now());
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
@@ -91,6 +112,21 @@ update eh_var_field_item_scopes set module_name = 'enterprise_customer' where mo
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
+
+-- AUTHOR: 杨崇鑫 2018-12-17
+-- REMARK: 瑞安项目专用、同瑞安CM系统服务账单同步失败的账单展示
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (102, 20400, 0, 'CM同步失败账单');
+-- AUTHOR: 杨崇鑫 2018-12-17
+-- REMARK: 瑞安项目专用、同瑞安CM系统服务账单同步失败的账单展示
+set @id=(select ifnull((SELECT max(id) from eh_service_module_include_functions),1));
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `module_id`, `community_id`, `function_id`) VALUES (@id:= @id +1, 999929, 20400, NULL, 102);
+
+-- AUTHOR: 黄鹏宇 2018-12-17
+-- REMARK: 瑞安屏蔽同步客户的按钮
+set @id= (select max(id)+1 from eh_service_module_exclude_functions);
+INSERT INTO `eh_service_module_exclude_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id, 999929, NULL, 21100, 99);
+
+
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui

@@ -2040,7 +2040,7 @@ public class PortalServiceImpl implements PortalService {
 				serviceModuleAppProvider.updateServiceModuleApp(app);
 			}
 			//发布应用时，同时同步应用入口信息
-            publishAppEntries(app);
+//            publishAppEntries(app);
 		}
 
 		/**

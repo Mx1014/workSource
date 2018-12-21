@@ -4,7 +4,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jooq.DAO;
 import org.jooq.DSLContext;
+import org.jooq.Query;
+import org.jooq.TableRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.asset.bill.AssetNotifyThirdSign;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
+import com.everhomes.rest.asset.bill.NotifyThirdSignDTO;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
@@ -264,23 +268,30 @@ public class AssetBillProviderImpl implements AssetBillProvider {
         });
 	}
 
-	public void notifyThirdSign(List<Long> billIdList) {
+	public void notifyThirdSign(List<NotifyThirdSignDTO> list) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        context.update(t)
-                .set(t.THIRD_SIGN, AssetNotifyThirdSign.ERROR.getCode()) //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
-                .where(t.ID.in(billIdList))
-                .execute();
+        List<Query> queryList = new ArrayList<Query>();
+        for(NotifyThirdSignDTO dto : list) {
+        	Query query = context.update(t)
+                    .set(t.THIRD_SIGN, AssetNotifyThirdSign.ERROR.getCode()) //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步会再次传输
+                    .set(t.THIRD_ERROR_DESCRIPTION, dto.getErrorDescription()) //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ：一个特殊的error描述
+                    .where(t.ID.eq(dto.getBillId()));
+        	queryList.add(query);
+        }
+        dbProvider.execute(status->{
+			return context.batch(queryList).execute();
+		});
 	}
 	
-	public void updateBill(List<Long> billIdList) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        context.update(t)
-                .set(t.THIRD_SIGN, AssetNotifyThirdSign.ERROR.getCode()) //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
-                .where(t.ID.in(billIdList))
-                .execute();
-	}
+//	public void updateBill(List<Long> billIdList) {
+//		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+//        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+//        context.update(t)
+//                .set(t.THIRD_SIGN, AssetNotifyThirdSign.ERROR.getCode()) //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步会再次传输
+//                .where(t.ID.in(billIdList))
+//                .execute();
+//	}
 
 	public void deleteRuiCMSyncData() {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());

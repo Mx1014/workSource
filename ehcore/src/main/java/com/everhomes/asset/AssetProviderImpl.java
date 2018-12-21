@@ -528,7 +528,7 @@ public class AssetProviderImpl implements AssetProvider {
                 t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
         		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
         		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY,
-        		t.TAX_AMOUNT);
+        		t.TAX_AMOUNT, t.THIRD_ERROR_DESCRIPTION);
 //        query.addFrom(t, t2);
 //        query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addFrom(t);
@@ -542,7 +542,7 @@ public class AssetProviderImpl implements AssetProvider {
         	query.addConditions(t.OWNER_ID.eq(ownerId));
         }
         
-        if(categoryId != null){
+        if(!org.springframework.util.StringUtils.isEmpty(categoryId)){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
         //增加欠费天数查询条件 : 0＜天数≤30,30＜天数≤60
@@ -576,9 +576,9 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(cmd.getSourceTypeList())){
             query.addConditions(t2.SOURCE_TYPE.in(cmd.getSourceTypeList()));
         }
-        //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步不再传输
+        //物业缴费V7.4(瑞安项目-资产管理对接CM系统) ： 一个特殊error标记给左邻系统，左邻系统以此标记判断该条数据下一次同步会再次传输
         if(!org.springframework.util.StringUtils.isEmpty(cmd.getThirdSign())){
-            query.addConditions(t.THIRD_SIGN.eq(cmd.getThirdSign()).or(t.THIRD_SIGN.isNull()));
+            query.addConditions(t.THIRD_SIGN.eq(cmd.getThirdSign()));
         }
         if(!org.springframework.util.StringUtils.isEmpty(cmd.getContractId())) {
         	query.addConditions(t.CONTRACT_ID.eq(cmd.getContractId()));
@@ -732,6 +732,8 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setCanModify(r.getValue(t.CAN_MODIFY));
             //瑞安CM对接 账单、费项表增加是否是只读字段:只读状态：0：非只读；1：只读
             dto.setIsReadOnly(r.getValue(t.IS_READONLY));
+            //瑞安项目专用、同瑞安CM系统服务账单同步失败的账单展示
+            dto.setThirdErrorDescription(r.getValue(t.THIRD_ERROR_DESCRIPTION));
             list.add(dto);
             return null;});
         return list;
@@ -3708,12 +3710,12 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
         context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
-        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME)
+        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME,t.DATE_STR_GENERATION)
                 .from(t,t1,billGroup)
                 .where(t.BILL_ID.in(fetch1))
                 .and(t.BILL_GROUP_ID.eq(billGroup.ID))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-                .orderBy(t1.NAME,t.DATE_STR)
+                .orderBy(t1.NAME,t.DATE_STR_BEGIN)//修复缺陷 #44251【中天】【合同管理】【现网】费用清单2019-03-08	2019-03-31显示在前，2019-03-01 2019-03-07显示在后
                 .limit(pageOffset,pageSize+1)
                 .fetch()
                 .map(r -> {
@@ -3737,6 +3739,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setTaxAmount(taxAmount != null ? taxAmount.stripTrailingZeros() : taxAmount);
                     dto.setAmountReceivable(amountReceivable != null ? amountReceivable.stripTrailingZeros() : amountReceivable);
                     dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax.stripTrailingZeros() : amountReceivableWithoutTax);
+                    dto.setDateStrGeneration(r.getValue(t.DATE_STR_GENERATION));
                     set.add(dto);
                     return null;
                 });
@@ -4204,7 +4207,7 @@ public class AssetProviderImpl implements AssetProvider {
     
     @Override
     public void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds,Integer paymentType) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
         //更新订单状态，记录订单的支付方式，更改金钱
