@@ -1873,7 +1873,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("faceplusLogin")
     @RestReturn(value=String.class)
     public RestResponse faceplusLogin(FaceplusLoginCommand cmd){
-        RestResponse response = new RestResponse(facePlusPlusService.login());
+        RestResponse response = new RestResponse(facePlusPlusService.login(cmd.getUrl(),cmd.getUsername(),cmd.getPassword()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
