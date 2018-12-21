@@ -1,34 +1,31 @@
 package com.everhomes.search;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.enterprise.EnterpriseCommunityType;
+import com.everhomes.user.UserContext;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.address.ListAllCommunitesCommand;
-import com.everhomes.rest.community.CommunityDoc;
-import com.everhomes.rest.enterprise.EnterpriseCommunityType;
-import com.everhomes.user.UserContext;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class CommunitySearcherImpl extends AbstractElasticSearch implements CommunitySearcher {

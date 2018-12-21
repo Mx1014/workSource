@@ -96,8 +96,10 @@ import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 @Component
 public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
@@ -697,27 +699,28 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	 */
 	private String getCustomObject(FlowCase flowCase, List<FlowCaseEntity> entities, GeneralForm form, List<PostApprovalFormItem> valItems) {
 
-		JSONObject json = new JSONObject();
+		Map<String, Object> map = new LinkedHashMap<>();
+		
 		for (FlowCaseEntity entity : entities) {
-			json.put(entity.getKey(), entity.getValue());
+			map.put(entity.getKey(), entity.getValue());
 		}
 
-		fillEnanbleProvider(json, flowCase);
-		fillFormInfo(json, form);
-		fillFormVals(json,valItems);
+		fillEnanbleProvider(map, flowCase);
+		fillFormInfo(map, form);
+		fillFormVals(map,valItems);
 
-		return json.toJSONString();
+		return JSONObject.toJSONString(map);
 	}
 
-	private void fillFormVals(JSONObject json, List<PostApprovalFormItem> valItems) {
-		json.put("customObjectFormVals", StringHelper.toJsonString(valItems));
+	private void fillFormVals(Map<String, Object> map, List<PostApprovalFormItem> valItems) {
+		map.put("customObjectFormVals", StringHelper.toJsonString(valItems));
 	}
 
-	private void fillFormInfo(JSONObject json, GeneralForm form) {
-		json.put("formOriginId", form.getFormOriginId());
+	private void fillFormInfo(Map<String, Object> map, GeneralForm form) {
+		map.put("formOriginId", form.getFormOriginId());
 	}
 
-	private void fillEnanbleProvider(JSONObject json, FlowCase flowCase) {
+	private void fillEnanbleProvider(Map<String, Object> map, FlowCase flowCase) {
 
 		if (!FlowOwnerType.SERVICE_ALLIANCE.getCode().equals(flowCase.getOwnerType())) {
 			return;
@@ -729,7 +732,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			enableProvider = sc.getEnableProvider();
 		}
 
-		json.put("enableProvider", enableProvider);
+		map.put("enableProvider", enableProvider);
 	}
 
 	@Override
@@ -915,7 +918,6 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		return dtos;
 	}
 
-
 	private Byte checkFormProjectConfigByFlow(Flow flow) {
 		GetProjectCustomizeCommand cmd = new GetProjectCustomizeCommand();
 		cmd.setProjectId(flow.getProjectId());
@@ -926,7 +928,5 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		cmd.setOwnerType(EhOrganizations.class.getSimpleName());
 		return generalFormService.getProjectCustomize(cmd);
 	}
-
-
-
+	
 }
