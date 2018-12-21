@@ -2534,6 +2534,16 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /pm/listApartmentsByMultiStatusWithoutAuth</b>
+	 * <p>支持同时查询多个状态的房源列表(免状态)</p>
+	 */
+	@RequestMapping("listApartmentsByMultiStatusWithoutAuth")
+	@RestReturn(value=ListApartmentsByMultiStatusResponse.class)
+	public RestResponse listApartmentsByMultiStatusWithoutAuth(ListApartmentsByMultiStatusCommand cmd) {
+		return listApartmentsByMultiStatus(cmd);
+	}
 	
 	/**
 	 * <b>URL: /pm/fixApartmentLivingStatus</b>

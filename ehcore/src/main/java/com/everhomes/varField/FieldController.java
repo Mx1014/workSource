@@ -256,4 +256,19 @@ public class FieldController extends ControllerBase {
         return restResponse;
     }
 
+    /**
+     * <p>查询所有的生效字段</p>
+     * <b>URL: /varField/listActiveNoUsedItem</b>
+     */
+    @RequestMapping("listActiveNoUsedItem")
+    @RestReturn(value = FieldDTO.class, collection = true)
+    public RestResponse listActiveNoUsedItem(ListActiveNoUsedItemCommand cmd){
+        List<FieldDTO> list = fieldService.listActiveNoUsedItem(cmd);
+        RestResponse restResponse = new RestResponse(list);
+        restResponse.setErrorCode(200);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+
 }

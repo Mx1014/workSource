@@ -1779,22 +1779,18 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private GetFormResponse getForm(Integer namespaceId,String ownerType,Long ownerId,Long enterpriseId) {
         GetConfigurationCommand command = new GetConfigurationCommand();
         command.setNamespaceId(namespaceId);
-//        VisitorsysOwnerType visitorsysOwnerType = checkOwner(ownerType, ownerId);
-        VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(ownerType);
-        if(visitorsysOwnerType ==VisitorsysOwnerType.ENTERPRISE){
+        VisitorsysOwnerType visitorsysOwnerType = checkOwner(ownerType, ownerId);
+        if(visitorsysOwnerType ==VisitorsysOwnerType.COMMUNITY){
             command.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
-            if(enterpriseId != null)
-                command.setOwnerId(enterpriseId);
-            else
-                command.setOwnerId(ownerId);
+            command.setOwnerId(enterpriseId);
         }else{
-//            Long communityId = organizationService.getOrganizationActiveCommunityId(ownerId);
-            Long communityId = ownerId;
+            Long communityId = organizationService.getOrganizationActiveCommunityId(ownerId);
             command.setOwnerType(VisitorsysOwnerType.COMMUNITY.getCode());
             command.setOwnerId(communityId);
         }
         return new GetFormResponse(getConfiguration(command).getFormConfig());
     }
+
     @Override
     public GetFormResponse getUIForm(GetUIFormCommand cmd) {
         VisitorSysDevice device = checkDevice(cmd.getDeviceType(), cmd.getDeviceId());
@@ -1832,18 +1828,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         GetConfigurationCommand command = new GetConfigurationCommand();
         command.setNamespaceId(cmd.getNamespaceId());
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-        if(visitorsysOwnerType ==VisitorsysOwnerType.ENTERPRISE) {
+        if(visitorsysOwnerType ==VisitorsysOwnerType.COMMUNITY) {
             command.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
-            if(cmd.getEnterpriseId() != null)
-                command.setOwnerId(cmd.getEnterpriseId());
-            else
-                command.setOwnerId(cmd.getOwnerId());
+            command.setOwnerId(cmd.getEnterpriseId());
         } else{
-//            Long communityId = organizationService.getOrganizationActiveCommunityId(cmd.getOwnerId());
-            Long communityId = cmd.getOwnerId();
+            Long communityId = organizationService.getOrganizationActiveCommunityId(cmd.getOwnerId());
             command.setOwnerType(VisitorsysOwnerType.COMMUNITY.getCode());
             command.setOwnerId(communityId);
-         }
+        }
         return new GetFormForWebResponse(getConfiguration(command).getFormConfig());
     }
 
@@ -2630,6 +2622,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if (formValues != null) {
                 setVisitorFormValues(convert, formValues.stream().collect(Collectors.toMap(VisitorsysApprovalFormItem::getFieldName, x -> x)));
                 convert.setFormJsonValue(formValues.toString());
+            } else{
+                List<VisitorsysApprovalFormItem> emptyForm = new ArrayList<>();
+                convert.setFormJsonValue(emptyForm.toString());
             }
         }else {
             Long communityId = organizationService.getOrganizationActiveCommunityId(visitor.getOwnerId());

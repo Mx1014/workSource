@@ -146,6 +146,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -165,6 +166,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -6317,7 +6319,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         addArchivesContactCommand.setNamespaceId(user.getNamespaceId());
                         this.archivesService.addArchivesContact(addArchivesContactCommand);
                         DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
-                        sendMessageForContactApproved(member);
+//                        sendMessageForContactApproved(member);//add by momoubin,18/12/19,发送重复消息
 
                         //通过认证的同步到企业客户的人才团队中 21710
                         customerService.createCustomerTalentFromOrgMember(member.getOrganizationId(), member);
@@ -10496,11 +10498,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<Long> includeList = new ArrayList<>();
 
         includeList.add(member.getTargetId());
-        // 18/12/17：注释原因是消息重复发送
-//        sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
+        sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
 
-        //同意加入公司通知客户端  by sfyan 20160526 // 18/12/17：注释原因是消息重复发送
-//        sendEnterpriseNotification(includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
+        //同意加入公司通知客户端  by sfyan 20160526
+        sendEnterpriseNotification(includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
 
         // send notification to all the other members in the group
         notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER,null);
@@ -12590,21 +12591,25 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization org = this.checkOrganization(cmd.getOrganizationId());
         if(null == org)
             return response;
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int pageSize = cmd.getPageSize() == null ? 30 : cmd.getPageSize();
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
         ListArchivesContactsCommand cmd1 = new ListArchivesContactsCommand();
-        cmd1.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CURRENT.getCode()));
-        cmd1.setKeywords(cmd.getKeywords());
-        cmd1.setNamespaceId(cmd.getNamespaceId());
-        cmd1.setOrganizationId(cmd.getOrganizationId());
-        cmd1.setPageSize(pageSize);
-		ListArchivesContactsResponse resp1 = archivesService.listArchivesContacts(cmd1);
-		if(resp1.getContacts() == null)
+        
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
+		//  默认（包含本节点及下级部门）
+		List<OrganizationMemberDetails> organizationMembers = organizationProvider.listOrganizationMemberDetailsByOrgIdIncluSubDepts(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getKeywords(), locator, pageSize + 1);
+		if(organizationMembers == null)
             return response;
-        //  默认（包含本节点及下级部门）
-		List<ArchivesContactDTO> organizationMembers = resp1.getContacts();
+
+        Long nextPageAnchor = null;
+        if (organizationMembers != null && organizationMembers.size() > pageSize) {
+        	organizationMembers.remove(organizationMembers.size() - 1);
+            nextPageAnchor = organizationMembers.get(organizationMembers.size() - 1).getId();
+        }
+        response.setNextPageAnchor(nextPageAnchor);
 
         //  校验权限（管理员）
         Long enterpriseId = getTopOrganizationId(cmd.getOrganizationId());
@@ -12616,22 +12621,23 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         boolean adminFlag = temp;
 
+        
         List<OrganizationContactDTO> members = organizationMembers.stream().map(r -> {
             OrganizationContactDTO dto = ConvertHelper.convert(r, OrganizationContactDTO.class);
             try{
-	            dto.setId(r.getDetailId());
+	            dto.setId(r.getId());
 				dto.setContactName(r.getContactName());
 				dto.setContactToken(r.getContactToken());
 				dto.setTargetId(r.getTargetId());
 				//增加岗位显示与 detailId added by ryan 20120713
-				dto.setDetailId(r.getDetailId());
+				dto.setDetailId(r.getId());
 
 	            //  2.detailId, 隐藏性信息
 	            dto.setVisibleFlag(r.getVisibleFlag());
 
 
 	            //  1.添加职位
-	            dto.setJobPosition(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(r.getDetailId())));
+	            dto.setJobPosition(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(r.getId())));
 	            //  3.头像
 	            if (OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(r.getTargetType())) {
 	                User user = userProvider.findUserById(r.getTargetId());
@@ -12663,7 +12669,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         }catch(Exception e){
         	LOGGER.error("convertPinyin has error! ",e);
         }
-        response.setNextPageAnchor(resp1.getNextPageAnchor());
         response.setMembers(members);
         return response;
     }

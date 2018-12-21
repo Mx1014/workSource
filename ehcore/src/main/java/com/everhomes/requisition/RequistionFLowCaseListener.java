@@ -244,6 +244,9 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
             for (Map.Entry map : jsonObject.entrySet()) {
                 fieldValue = map.getValue().toString();
                 String fieldName = map.getKey().toString();
+                fieldValue = fieldValue.replace("[","");
+                fieldValue = fieldValue.replace("]","");
+                fieldValue = fieldValue.replace("\"","");
                 if(fieldName.equals("addressId")){
                     fieldValue = fieldValue.replace("\"","");
                     fieldValue = addressProvider.getAddressNameById(Long.valueOf(fieldValue));

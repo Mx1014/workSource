@@ -593,19 +593,23 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Override
-    public Integer countAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
+    // 增加统计支付宝用户
+    // public Integer countAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
+    public Integer countAppAndWeiXinAndAlipayUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
         com.everhomes.server.schema.tables.EhUsers t = Tables.EH_USERS;
         final Integer[] count = {0};
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
                 (DSLContext context, Object reducingContext)-> {
                     Condition appUser = t.NAMESPACE_USER_TYPE.isNull().and(t.NAMESPACE_USER_TOKEN.eq(""));
                     Condition weiXinUser = t.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode());
+                    // 增加统计支付宝用户
+                    Condition alipayUser = t.NAMESPACE_USER_TYPE.eq(NamespaceUserType.ALIPAY.getCode());
 
                     SelectQuery<Record1<Integer>> query = context
                             .selectCount().from(t)
                             .where(t.NAMESPACE_ID.eq(namespaceId))
                             .and(t.STATUS.eq(UserStatus.ACTIVE.getCode()))
-                            .and(appUser.or(weiXinUser))
+                            .and(appUser.or(weiXinUser).or(alipayUser))//增加支付宝用户
                             .getQuery();
 
                     if (excludeUIDs != null && excludeUIDs.size() > 0) {
@@ -624,19 +628,23 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Override
-    public List<User> listAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
+    // 增加统计支付宝用户
+    // public List<User> listAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
+    public List<User> listAppAndWeiXinAndAlipayUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
         com.everhomes.server.schema.tables.EhUsers t = Tables.EH_USERS;
         final List<User> users = new ArrayList<>();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
                 (DSLContext context, Object reducingContext)-> {
                     Condition appUser = t.NAMESPACE_USER_TYPE.isNull().and(t.NAMESPACE_USER_TOKEN.eq(""));
                     Condition weiXinUser = t.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode());
+                    // 增加统计支付宝用户
+                    Condition alipayUser = t.NAMESPACE_USER_TYPE.eq(NamespaceUserType.ALIPAY.getCode());
 
                     SelectQuery<EhUsersRecord> query = context
                             .selectFrom(t)
                             .where(t.NAMESPACE_ID.eq(namespaceId))
                             .and(t.STATUS.eq(UserStatus.ACTIVE.getCode()))
-                            .and(appUser.or(weiXinUser))
+                            .and(appUser.or(weiXinUser).or(alipayUser))//增加支付宝用户
                             .getQuery();
 
                     if (excludeUIDs != null && excludeUIDs.size() > 0) {
