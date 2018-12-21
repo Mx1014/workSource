@@ -2973,11 +2973,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return resp;
 		}
 		List<SpaceForAppDTO> spaceList = new ArrayList<SpaceForAppDTO>();
-		spaceList = list.stream().map(r->{
+		for (OfficeCubicleSpace s : list){
+
 			SpaceForAppDTO dto = new SpaceForAppDTO();
-			dto.setAddress(r.getAddress());
-			dto.setSpaceId(r.getId());
-			dto.setSpaceName(r.getName());
+			dto.setAddress(s.getAddress());
+			dto.setSpaceId(s.getId());
+			dto.setSpaceName(s.getName());
 			List<OfficeCubicleAttachment> attachments = null;
 			if (cmd.getRentType() ==1){
 				BigDecimal roomMinPrice = officeCubicleProvider.getRoomMinPrice(r.getId());
@@ -2991,15 +2992,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				} else {
 					dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
 				}
-				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)1);
+				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(s.getId(),(byte)1);
 			}else{
-				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(r.getId(),(byte)2);
+				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(s.getId(),(byte)2);
 				QueryDefaultRuleAdminCommand cmd2 = new QueryDefaultRuleAdminCommand();
-		        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(r.getNamespaceId(),
+		        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(s.getNamespaceId(),
 		                RentalV2ResourceType.STATION_BOOKING.getCode());
 				cmd2.setResourceType(RentalV2ResourceType.STATION_BOOKING.getCode());
 				cmd2.setResourceTypeId(type.getId());
-				cmd2.setSourceId(r.getId());
+				cmd2.setSourceId(s.getId());
 				cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
 				QueryDefaultRuleAdminResponse resp2 = rentalv2Service.queryDefaultRule(cmd2);
 
@@ -3024,8 +3025,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?
 						halfdailyPrice:dailyPrice);
 			}
-			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), r.getId(),null,null,null,null,null);
-			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),r.getId(),null,null,null,null);
+			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), s.getId(),null,null,null,null,null);
+			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),s.getId(),null,null,null,null);
 			Integer stationSize = 0;
 			Integer roomSize = 0;
 			if (station !=null){
@@ -3034,6 +3035,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if (room!=null){
 				roomSize = room.size();
 			}
+			if (station == null && room==null){
+				continue;
+			}
 			Integer allPositonNums = stationSize + roomSize;
 			dto.setAllPositonNums(allPositonNums);
 			if (attachments!=null){
@@ -3041,8 +3045,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 						UserContext.current().getUser().getId()));
 			}
 			dto.setRentType(cmd.getRentType());
-			return dto;
-		}).collect(Collectors.toList());
+			spaceList.add(dto);
+		}
 		Collections.sort(spaceList,new CompartorPinYin());
 		resp.setSpace(spaceList);
 		return resp;
