@@ -9,18 +9,24 @@ package com.everhomes.rest.relocation;
  * </ul>
  */
 public enum RelocationRequestStatus {
-	CANCELED((byte)0), COMPLETED((byte)1), PROCESSING((byte)2);
+	CANCELED((byte)0,"已取消"), COMPLETED((byte)1,"已完成"), PROCESSING((byte)2,"处理中");
 
     private byte code;
+    private String description;
 
-    private RelocationRequestStatus(byte code) {
+    private RelocationRequestStatus(byte code, String description) {
         this.code = code;
+        this.description = description;
     }
     
     public byte getCode() {
         return this.code;
     }
-    
+
+    public String getDescription() {
+        return description;
+    }
+
     public static RelocationRequestStatus fromCode(Byte code) {
         if(code != null) {
             RelocationRequestStatus[] values = RelocationRequestStatus.values();
