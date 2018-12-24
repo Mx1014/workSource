@@ -1980,13 +1980,6 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.STATION_NOT_ENOUGH,
 				"工位数量不足");
 			}
-			for (int i=0;i<rentalOrder.getRentalCount();i++){
-				OfficeCubicleStationRent sr = new OfficeCubicleStationRent();
-				sr.setOrderId(order.getId());
-				sr.setSpaceId(space.getId());
-				sr.setRentType(OfficeCubicleRentType.SHORT_RENT.getCode());
-				officeCubicleProvider.createCubicleStationRent(sr);
-			}
 			return null;
 		});
 		AddRentalOrderUsingInfoCommand rentalCommand = new AddRentalOrderUsingInfoCommand(); 
@@ -2007,8 +2000,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			smsProvider.addToTupleList(variables, "orderNo", String.valueOf(order.getOrderNo()));
 			sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
 			OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
+			rent.setBeginTime(rentalOrder.getStartTime());
+			rent.setEndTime(rentalOrder.getEndTime());
 			rent.setOrderId(order.getId());
-			for(int i=0;i<= order.getRentCount() ;i++){
+			rent.setRentType(OfficeCubicleRentType.SHORT_RENT.getCode());
+			for(int i=0;i<= rentalOrder.getRentalCount() ;i++){
 				officeCubicleProvider.createCubicleStationRent(rent);
 			}
 			officeCubicleProvider.updateCubicleRentOrder(order);
@@ -2193,9 +2189,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				smsProvider.addToTupleList(variables, "reserveTime", order.getUseDetail());
 				smsProvider.addToTupleList(variables, "orderNo", String.valueOf(order.getOrderNo()));
 				sendMessageToUser(UserContext.getCurrentNamespaceId(),order.getCreatorUid(),templateId, variables);
+				RentalOrder rentalOrder = rentalv2Provider.findRentalBillById(order.getRentalOrderNo());
 				OfficeCubicleStationRent rent = ConvertHelper.convert(cmd, OfficeCubicleStationRent.class);
+				rent.setBeginTime(rentalOrder.getStartTime());
+				rent.setEndTime(rentalOrder.getEndTime());
 				rent.setOrderId(order.getId());
-				for(int i=0;i<= order.getRentCount() ;i++){
+				rent.setRentType(OfficeCubicleRentType.SHORT_RENT.getCode());
+				for(int i=0;i<= rentalOrder.getRentalCount();i++){
 					officeCubicleProvider.createCubicleStationRent(rent);
 				}
 				return null;
