@@ -1203,6 +1203,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			BigDecimal refundRate = new BigDecimal(0);
 			if (orderRule != null){
 				refundRate = new BigDecimal(orderRule.getFactor());
+			} else if(space.getRefundStrategy().equals(RentalOrderStrategy.FULL.getCode())){
+				refundRate = new BigDecimal(100);
 			}
 			resp.setRefundRate(refundRate);
 		}
