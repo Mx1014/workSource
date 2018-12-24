@@ -2892,7 +2892,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 return query;
             });
         }
-        if (!CollectionUtils.isEmpty(launchPadIndices)) {
+        if (CollectionUtils.isEmpty(launchPadIndices)) {
             launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
                 query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(namespaceId));
                 query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.STATUS.isNotNull());
