@@ -894,7 +894,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
 			returnUrl = String.format(configProvider.getValue("parking.tempfee.return.url","zl://parking/tempFeeStatus?orderId=%s"), String.valueOf(order.getId()));	
-			extendInfo = parkingLot.getName()+"（月卡车：" + order.getPlateNumber() + "）";
+			extendInfo = parkingLot.getName()+"（临时车：" + order.getPlateNumber() + "）";
 		}
 		
 		try {
