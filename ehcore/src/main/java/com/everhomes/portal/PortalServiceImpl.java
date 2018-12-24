@@ -3614,10 +3614,9 @@ public class PortalServiceImpl implements PortalService {
 		updateItemGroupConfig(namespaceId, newVersionId);
 
 		//生成新的主页签 add by yanlong.liang 20181219
-        List<PortalNavigationBar> oldPortalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(null);
-        if (!CollectionUtils.isEmpty(oldPortalNavigationBars)) {
-            for (PortalNavigationBar portalNavigationBar : oldPortalNavigationBars) {
-
+        List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(oldVersionId);
+        if (!CollectionUtils.isEmpty(portalNavigationBars)) {
+            for (PortalNavigationBar portalNavigationBar : portalNavigationBars) {
                 if(IndexType.fromCode(portalNavigationBar.getType()) == IndexType.CONTAINER) {
                     Container container = (Container) StringHelper.fromJsonString(portalNavigationBar.getConfigJson(), Container.class);
                     if (container != null && container.getLayoutId() != null) {
@@ -3630,11 +3629,7 @@ public class PortalServiceImpl implements PortalService {
                     }
 
                 }
-            }
-        }
-        List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(oldVersionId);
-        if (!CollectionUtils.isEmpty(portalNavigationBars)) {
-            for (PortalNavigationBar portalNavigationBar : portalNavigationBars) {
+
                 PortalNavigationBar newPortalNavigationBar = ConvertHelper.convert(portalNavigationBar, PortalNavigationBar.class);
                 newPortalNavigationBar.setVersionId(newVersionId);
                 newPortalNavigationBar.setId(null);
