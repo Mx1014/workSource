@@ -2676,6 +2676,20 @@ public class PortalServiceImpl implements PortalService {
 			}
 		}
 
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			List<LaunchPadIndex> launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
+				query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(portalVersion.getNamespaceId()));
+				query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.PREVIEW_VERSION_ID.isNotNull());
+				return query;
+			});
+
+			if(launchPadIndices != null){
+				for (LaunchPadIndex index: launchPadIndices){
+					launchPadIndexProvider.deleteLaunchPadIndex(index);
+				}
+			}
+		}
 
 		List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(versionId);
 
