@@ -289,10 +289,6 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
     	LOGGER.info("AssetServiceImpl listBills cmd={}", cmd.toString());
-         // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
         //房源招商新增的映射逻辑
         if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
             // 转换
@@ -5055,7 +5051,22 @@ public class AssetServiceImpl implements AssetService {
 		createBillCommand.setBillGroupDTO(billGroupDTO);
 		createBillCommand.setCanMergeBillItem(true);
 
-		ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand,null);
+        //检查明细生成日期是否在现有账单周期中，若在则返回该账单ID，否则返回null。
+        Long checkedBillId = null;
+        ListBillsDTO dto = null;
+        try {
+            checkedBillId = checkBillItemIsInBill(createBillCommand);
+        } catch (ParseException parseException) {
+            LOGGER.error("parse date error");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "parse date error");
+        }
+
+        if (checkedBillId==null){
+             dto = assetProvider.creatPropertyBill(createBillCommand,null);
+        }else {
+             dto = assetProvider.addBillItemIntoPropertyBill(createBillCommand,checkedBillId);
+        }
 //        ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand,null);
 		//主要是把以前缴费这边为了兼容对接使用的String类型的billId全部换成Long类型的billId，因为创建统一账单都是在缴费这边的表，都是Long
 		ListGeneralBillsDTO convertDTO = ConvertHelper.convert(dto, ListGeneralBillsDTO.class);
@@ -5066,6 +5077,39 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 
+    private Long checkBillItemIsInBill(CreateBillCommand cmd) throws ParseException{
+        Long billId=null;
+//        出账单日解析
+        SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+        AssetBillDateDTO assetBillDateDTO = assetProvider.generateBillDate(cmd.getBillGroupDTO().getBillGroupId(),
+                cmd.getDateStrBegin(), cmd.getDateStrEnd());
+        Date dateStrDue = yyyyMMdd.parse(assetBillDateDTO.getDateStrDue());
+
+        PaymentBillsCommand PBCmd = new PaymentBillsCommand();
+        PBCmd.setNamespaceId(cmd.getNamespaceId());
+        PBCmd.setSourceId(cmd.getSourceId());
+        PBCmd.setSourceType(cmd.getSourceType());
+        PBCmd.setDateStr(yyyyMM.format(new Date()));
+        PBCmd.setTargetId(cmd.getTargetId());
+        PBCmd.setTargetType(cmd.getTargetType());
+        List<PaymentBills> bills = assetProvider.findPaymentBills(PBCmd);
+
+        if (bills!=null){
+            Date createDateStd = new Date(0l);
+            for (PaymentBills bill : bills){
+                if (dateStrDue.compareTo(yyyyMMdd.parse(bill.getDateStrBegin()))>=0
+                        && dateStrDue.compareTo(yyyyMMdd.parse(bill.getDateStrEnd()))<=0){
+                    if (bill.getCreatTime().compareTo(createDateStd)>=0){
+                        createDateStd = bill.getCreatTime();
+                        billId = bill.getId();
+                    }
+                }
+            }
+        }
+
+        return billId;
+    }
 //	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
 //		List<Long> billIdList = cmd.getBillIdList();
 //		//1、先校验是否可以正常取消
@@ -6166,5 +6210,22 @@ public class AssetServiceImpl implements AssetService {
         cmd.setSourceType(SourceType.MOBILE.getCode());
         return handler.createOrderV2(cmd);
 	}
+	
+	public ListBillsResponse listSyncToCMErrorBill(ListBillsCommand cmd) {
+    	LOGGER.info("AssetServiceImpl listSyncToCMErrorBill cmd={}", cmd.toString());
+    	cmd.setOwnerId(null);
+    	cmd.setCommunityId(null);
+    	cmd.setCategoryId(null);
+    	cmd.setBillGroupId(null);
+    	cmd.setStatus(null);
+    	
+        ListBillsResponse response = new ListBillsResponse();
+        AssetVendor assetVendor = checkAssetVendor(cmd.getNamespaceId(), 0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        List<ListBillsDTO> list = handler.listBills(cmd.getNamespaceId(),response, cmd);
+        response.setListBillsDTOS(list);
+        return response;
+    }
 	
 }

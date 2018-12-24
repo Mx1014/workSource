@@ -126,18 +126,16 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
     	if(StringUtils.isBlank(plateNumber)) {
     		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
 					parkingLot.getId(),null);
-    		
     	}else{
     		String cardType = "普通月卡";
     		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
 					parkingLot.getId(),cardType);
     	}
+		ListCardTypeResponse resp = listCardType(null);
 		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 
 			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
-			dto.setCardTypeId("普通月卡");
-			dto.setRateToken(String.valueOf(r.getId()));
-			dto.setVendorName(ParkingLotVendor.TEST.getCode());
+            populaterate(resp.getCardTypes(), dto, r);
 			return dto;
 		}
 		).collect(Collectors.toList());
@@ -145,6 +143,21 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 		return result;
     }
 
+    private void populaterate(List<ParkingCardType> cardTypes, ParkingRechargeRateDTO dto, ParkingRechargeRate r) {
+        ParkingCardType temp = null;
+        for (ParkingCardType t : cardTypes) {
+            if (t.getTypeId().equals(r.getCardType())) {
+                temp = t;
+            }
+        }
+        if(temp!=null) {
+            dto.setCardTypeId(temp.getTypeId());
+            dto.setCardType(temp.getTypeName());
+            dto.setRateToken(r.getId().toString());
+            dto.setVendorName(ParkingLotVendor.TEST.getCode());
+        }
+    }
+    
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
 		boolean notifyresult = configProvider.getBooleanValue("parking.test.notifyresult", true);

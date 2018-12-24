@@ -12,6 +12,8 @@ import com.everhomes.rest.aclink.SyncLocalVistorDataResponse;
 public interface FaceRecognitionPhotoProvider {
 
 	void updateFacialRecognitionPhoto(FaceRecognitionPhoto rec);
+	
+	void updateFacialRecognitionPhotoBatch(List<FaceRecognitionPhoto> photoList);
 
 	void creatFacialRecognitionPhoto(FaceRecognitionPhoto rec);
 
@@ -30,5 +32,7 @@ public interface FaceRecognitionPhotoProvider {
 	void updateFacialRecognitionPhotos(List<FaceRecognitionPhoto> listPhotos);
 	
 	FaceRecognitionPhoto findPhotoByAuthId(Long authId);
+
+	Byte getPhotoSyncStatusByUserId(Long userId);
 
 }

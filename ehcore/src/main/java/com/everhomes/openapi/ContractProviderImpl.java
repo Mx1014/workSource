@@ -1329,7 +1329,7 @@ public class ContractProviderImpl implements ContractProvider {
 		cond = cond.and(t3.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
 		
 		if(locator.getAnchor() != null) {
-			cond = cond.and(t3.ID.gt(locator.getAnchor()));
+			cond = cond.and(t3.ID.lt(locator.getAnchor()));
         }
 		
 		if(null != name && !"".equals(name)){
@@ -1365,7 +1365,7 @@ public class ContractProviderImpl implements ContractProvider {
 		     cond = cond.and(t3.OWNER_ID.in(communityIds).or(t3.OWNER_ID.eq(0L)));
 		}
 
-		query.orderBy(t3.ID.asc());
+		query.orderBy(t3.ID.desc());
 		
 		LOGGER.debug("query sql:{}", query.getSQL());
 		LOGGER.debug("query param:{}", query.getBindValues());

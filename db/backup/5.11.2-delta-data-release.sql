@@ -7,6 +7,9 @@
 -- REMARK:刷新es映射 visitorsys.sh 调用 /evh/visitorsys/syncVisitor同步数据
 -- REMARK:刷新es映射 freqvisitor.sh 调用 /evh/visitorsys/syncFreqVisitors同步数据
 
+-- AUTHOR:黄鹏宇 20181213
+-- REMARK:执行release前请先备份eh_var_field_items,eh_var_field_item_scopes,eh_enterprise_customers表
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
@@ -247,12 +250,39 @@ UPDATE eh_service_module_apps SET app_type = 0 WHERE module_id = 20500;
 -- REMARK: 修复物业报修跳转bug
 delete from eh_service_alliance_jump_module where  module_id = 20100 and (module_name = '投诉建议' or instance_config like '%"taskCategoryId":9%');
 
+
+-- AUTHOR: 吴寒  20181214
+-- REMARK: 更正文案信息
+UPDATE eh_locale_templates SET TEXT = '你收到了${subject},快去查看吧!' WHERE scope = 'welfare.msg' AND CODE = 1;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
--- AUTHOR:
--- REMARK:
+-- AUTHOR:2018年12月13日 黄鹏宇
+-- REMARK:关联缺陷#40159 修复中天的数据并且根据任务43743的代码更改数据库
+update eh_enterprise_customers set source_item_id = 14788 where source_item_id = 14559 and community_id = 240111044332061061;
+update eh_enterprise_customers set source_item_id = 14787 where source_item_id = 14558 and community_id = 240111044332061061;
+update eh_enterprise_customers set source_item_id = 14786 where source_item_id = 14557 and community_id = 240111044332061061;
+update eh_enterprise_customers set source_item_id = 14789 where source_item_id = 14560 and community_id = 240111044332061061;
+
+update eh_enterprise_customers set source_item_id = 14788 where source_item_id = 14784 and community_id = 240111044332061061;
+update eh_enterprise_customers set source_item_id = 14698 where source_item_id = 14744 and community_id = 240111044332063624;
+
+update eh_var_field_item_scopes set status = 0 where module_name = 'investment_promotion'and field_id = 6 and community_id in (240111044332061061 ,240111044332061062 ,240111044332061063 ,240111044332061064 ,240111044332063624 ,240111044332063625 ,240111044332063626 );
+update eh_var_field_item_scopes set module_name = 'enterprise_customer' where module_name = 'investment_promotion' and field_id = 6 and community_id is null and namespace_id = 999944;
+
+update eh_var_field_item_scopes set module_name = 'enterprise_customer' where module_name = 'investment_promotion' and field_id = 24 and namespace_id = 999944;
+
+update eh_var_field_item_scopes set status = 0 where namespace_id in (0,999954) and status = 2 and module_name = 'investment_promotion' and field_id = 24;
+update eh_var_field_item_scopes set module_name = 'enterprise_customer' where namespace_id= 0 and status = 2 and module_name = 'investment_promotion' and field_id = 6;
+
+update eh_var_field_item_scopes set status = 0 where status = 2 and module_name = 'enterprise_customer' and field_id = 5;
+
+update eh_var_field_item_scopes set module_name = 'enterprise_customer' where status = 2 and module_name = 'investment_promotion' and field_id = 5;
+
+update eh_var_field_item_scopes set module_name = 'enterprise_customer' where module_name = 'investment_promotion' and field_id = 12113 and status = 2 ;
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev

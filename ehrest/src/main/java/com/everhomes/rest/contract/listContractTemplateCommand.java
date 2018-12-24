@@ -34,7 +34,7 @@ public class listContractTemplateCommand {
 	private String name;
 	@NotNull
 	private Long orgId;
-	private Long pageAnchor = 0L;
+	private Long pageAnchor;
 	private Integer pageSize;
 	private Long appId;
 	

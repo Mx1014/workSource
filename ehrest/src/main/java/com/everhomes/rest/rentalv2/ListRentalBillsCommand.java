@@ -39,6 +39,7 @@ public class ListRentalBillsCommand {
 	private Byte source;
     
 	private Integer pageSize;
+	private Integer pageNumber;
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
@@ -174,5 +175,13 @@ public class ListRentalBillsCommand {
 
 	public void setSource(Byte source) {
 		this.source = source;
+	}
+
+	public Integer getPageNumber() {
+		return pageNumber;
+	}
+
+	public void setPageNumber(Integer pageNumber) {
+		this.pageNumber = pageNumber;
 	}
 }

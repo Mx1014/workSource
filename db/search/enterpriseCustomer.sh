@@ -39,7 +39,6 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
 			"trackingUid": {"type":"long"},
 			"sourceItemId": {"type":"long"},
 			"propertyType": {"type":"long"},
-			"trackingUid": {"type":"long"},
             "status":{"type":"byte"},
             "propertyUnitPrice":{"type":"double"},
             "buildingId":{"type":"string"},

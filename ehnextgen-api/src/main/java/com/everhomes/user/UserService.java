@@ -34,7 +34,7 @@ import java.util.Map;
  * @author Kelven Yang
  *
  */
-public interface UserService {
+public interface    UserService {
     SignupToken signup(SignupCommand cmd, HttpServletRequest request);
     UserIdentifier findIdentifierByToken(Integer namespaceId, SignupToken signupToken);
     void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request);
@@ -93,7 +93,10 @@ public interface UserService {
 	UserLogin synThridUser(SynThridUserCommand cmd);
 	GetSignatureCommandResponse getThirdSignature(GetBizSignatureCommand cmd);
 	UserInfo getUserInfoById(GetUserInfoByIdCommand cmd);
-	String getUserAvatarUriByGender(Long userId, Integer namespaceId, Byte gener);
+
+    String getUserAvatarUrl(Long uid);
+
+    String getUserAvatarUriByGender(Long userId, Integer namespaceId, Byte gener);
 	void sendUserTestSms(SendUserTestSmsCommand cmd);
 	void sendUserTestMail(SendUserTestMailCommand cmd);
 	RichLinkDTO sendUserRichLinkMessage(SendUserTestRichLinkMessageCommand cmd);
@@ -393,4 +396,6 @@ public interface UserService {
     SmartCardVerifyResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd);
 
     void fixUserSync(FixUserSyncCommand cmd);
+
+    GetUserListResponse getUserList(GetUserListCommand cmd);
 }

@@ -178,18 +178,18 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
         Condition cond = buildSearchFlowCaseCondition(locator, cmd);
 
-        List<Field> fields = new ArrayList<>(Arrays.asList(Tables.EH_FLOW_CASES.fields()));
-        fields.add(Tables.EH_FLOW_EVENT_LOGS.ID);
+        com.everhomes.server.schema.tables.EhFlowEventLogs log = Tables.EH_FLOW_EVENT_LOGS;
+        com.everhomes.server.schema.tables.EhFlowCases flowCase = Tables.EH_FLOW_CASES;
+
+        List<Field> fields = new ArrayList<>(Arrays.asList(flowCase.fields()));
+        fields.add(log.ID);
 
         SelectQuery<Record> query = context.select(fields.toArray(new Field[0]))
-                .from(Tables.EH_FLOW_EVENT_LOGS)
-                .join(Tables.EH_FLOW_CASES)
-                .on(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(Tables.EH_FLOW_CASES.ID))
-                .join(Tables.EH_FLOWS)
-                .on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
-                        .and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+                .from(log)
+                .join(flowCase)
+                .on(log.FLOW_CASE_ID.eq(flowCase.ID))
                 .where(cond)
-                .orderBy(Tables.EH_FLOW_EVENT_LOGS.ID.desc())
+                .orderBy(log.ID.desc())
                 .limit(count + 1)
                 .getQuery();
 
@@ -199,9 +199,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
         List<FlowCaseDetail> objs = query.fetch().map((r) -> {
             FlowCaseDetail detail = r.into(FlowCaseDetail.class);
-            detail.setId(r.getValue(Tables.EH_FLOW_CASES.ID));
-            detail.setEventLogId(r.getValue(Tables.EH_FLOW_EVENT_LOGS.ID));
-            // objs.add(convertRecordToDetail(r));
+            detail.setId(r.getValue(flowCase.ID));
+            detail.setEventLogId(r.getValue(log.ID));
             return detail;
         });
 

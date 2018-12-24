@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.aclink.faceplusplus.FacePlusPlusService;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +21,17 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.aclink.AclinkAuditStatus;
 import com.everhomes.rest.aclink.AclinkServerDTO;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DeletePhotoByIdCommand;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.DoorAccessStatus;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.FaceRecognitionPhotoDTO;
+import com.everhomes.rest.aclink.GetPhotoSyncResultResponse;
 import com.everhomes.rest.aclink.ListFacialRecognitionPhotoByUserResponse;
 import com.everhomes.rest.aclink.NotifySyncVistorsCommand;
 import com.everhomes.rest.aclink.SetFacialRecognitionPhotoCommand;
@@ -86,6 +91,9 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 	
 	@Autowired
 	DoorAccessProvider doorAccessProvider;
+
+	@Autowired
+	private FacePlusPlusService facePlusPlusService;
 	
 	@Override
 	public void setFacialRecognitionPhoto(SetFacialRecognitionPhotoCommand cmd) {
@@ -104,6 +112,8 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 			rec.setUserType(cmd.getUserType());
 			rec.setStatus((byte) 1);
 			faceRecognitionPhotoProvider.creatFacialRecognitionPhoto(rec);
+			//face++对接，新增访客照片
+			facePlusPlusService.addPhoto(rec.getImgUrl(),rec.getAuthId(),rec.getUserId());
 			return;
 		}
 		List<FaceRecognitionPhoto> recs = faceRecognitionPhotoProvider.listFacialRecognitionPhotoByUser(locator, user.getId(), 0);
@@ -114,6 +124,8 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 			rec.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			rec.setOperatorUid(user.getId());
 			faceRecognitionPhotoProvider.updateFacialRecognitionPhoto(rec);
+			//face++，更新图片
+			facePlusPlusService.addPhoto(rec.getImgUrl(),rec.getAuthId(),rec.getUserId());
 		}else{
 			FaceRecognitionPhoto rec = new FaceRecognitionPhoto();
 			rec.setImgUri(cmd.getImgUri());
@@ -125,6 +137,8 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 			rec.setUserId(user.getId());
 			rec.setStatus((byte) 1);
 			faceRecognitionPhotoProvider.creatFacialRecognitionPhoto(rec);
+			//face++，新增正式用户照片
+			facePlusPlusService.addPhoto(rec.getImgUrl(),rec.getAuthId(),rec.getUserId());
 		}
 		//同步照片
 		SyncLocalPhotoByUserIdCommand syncCmd = new SyncLocalPhotoByUserIdCommand();
@@ -141,7 +155,9 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 		List<FaceRecognitionPhoto> faceRecs = faceRecognitionPhotoProvider.listFacialRecognitionPhotoByUser(new CrossShardListingLocator(), user.getId(), 0);
 		List<FaceRecognitionPhotoDTO> listDtos = new ArrayList<FaceRecognitionPhotoDTO>();
 		for(FaceRecognitionPhoto rec : faceRecs){
-			listDtos.add(ConvertHelper.convert(rec, FaceRecognitionPhotoDTO.class));
+			FaceRecognitionPhotoDTO dto = ConvertHelper.convert(rec, FaceRecognitionPhotoDTO.class);
+			dto.setSyncStatus(rec.getSyncTime() == null || rec.getSyncTime().before(rec.getOperateTime()) ? AclinkAuditStatus.WAITING.getCode() : AclinkAuditStatus.SUCCESS.getCode());
+			listDtos.add(dto);
 		}
 		rsp.setListPhoto(listDtos);
 		return rsp;
@@ -356,4 +372,22 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 			faceRecognitionPhotoProvider.updateFacialRecognitionPhotos(listPhotos);
 		}
 	}
+
+	@Override
+	public void invalidPhotoByIds(DeletePhotoByIdCommand cmd) {
+		List<FaceRecognitionPhoto> photos = faceRecognitionPhotoProvider.findFaceRecognitionPhotoByIds(cmd.getPhotoIds());
+		if(photos != null && photos.size() > 0){
+			photos.forEach(r -> r.setStatus(DoorAuthStatus.INVALID.getCode()));
+			faceRecognitionPhotoProvider.updateFacialRecognitionPhotos(photos);
+		}
+	}
+
+	@Override
+	public GetPhotoSyncResultResponse getPhotoSyncResult() {
+		GetPhotoSyncResultResponse rsp = new GetPhotoSyncResultResponse();
+		User user = UserContext.current().getUser();
+		rsp.setFaceSyncStatus(faceRecognitionPhotoProvider.getPhotoSyncStatusByUserId(user.getId()));
+		return rsp;
+	}
+
 }

@@ -21,8 +21,7 @@ public enum FlowCaseEntityType {
 	FILE("file"),
 	CONTRACT_PRICE("contract_price"),
 	ENTITY_GROUP("entity_group"),
-	SUB_ENTITY_GROUP("sub_entity_group"),
-	CONTRACT_DOCUMENT("contract_document");
+	SUB_ENTITY_GROUP("sub_entity_group");
 
 	private String code;
 

@@ -165,6 +165,8 @@ public enum Router {
      */
     BROWSER_I(ActionType.OFFICIAL_URL,
             "zl://browser/i", OfficialActionData.class),
+    BROWSER_THIRD(
+            "zl://browser/i", ThirdPartActionData.class),
     BROWSER_NAR(ActionType.OFFLINE_WEBAPP,
             "zl://browser/nar", OfflineWebAppActionData.class),
 

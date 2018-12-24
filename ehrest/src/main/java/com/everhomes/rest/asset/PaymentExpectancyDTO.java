@@ -22,6 +22,7 @@ import java.math.BigDecimal;
  * <li>billGroupId : 账单组id</li>
  * <li>billGroupName : 账单组名称</li>
  * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
+ * <li>dateStrGeneration:明细产生时间</li>
  *</ul>
  */
 public class PaymentExpectancyDTO {
@@ -41,7 +42,7 @@ public class PaymentExpectancyDTO {
     private String billGroupName;//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
     //物业缴费V6.0 账单、费项表增加是否删除状态字段
     private Byte deleteFlag;
-    
+    private String dateStrGeneration;
     
 	public Long getChargingItemId() {
 		return chargingItemId;
@@ -166,4 +167,12 @@ public class PaymentExpectancyDTO {
 	public void setDeleteFlag(Byte deleteFlag) {
 		this.deleteFlag = deleteFlag;
 	}
+
+    public String getDateStrGeneration() {
+        return dateStrGeneration;
+    }
+
+    public void setDateStrGeneration(String dateStrGeneration) {
+        this.dateStrGeneration = dateStrGeneration;
+    }
 }

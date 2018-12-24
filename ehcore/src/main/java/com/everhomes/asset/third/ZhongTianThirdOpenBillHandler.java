@@ -19,6 +19,7 @@ import com.everhomes.contract.ContractCategory;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.ListBillDetailResponse;
@@ -73,6 +74,8 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
     	//只传租赁账单
     	Long assetCategoryId = getRentalAssetCategoryId(cmd.getNamespaceId());
     	cmd.setCategoryId(assetCategoryId);
+    	//只查看正常使用的账单
+    	cmd.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
     	LOGGER.info("AssetBillServiceImpl listOpenBills convertCmd={}", cmd.toString());
         ListBillsResponse response = new ListBillsResponse();
         Long pageAnchor = cmd.getPageAnchor();

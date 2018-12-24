@@ -1813,6 +1813,20 @@ public class AssetController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}
+	
+	/**
+	 * <p>瑞安项目专用、同瑞安CM系统服务账单同步失败的账单展示</p>
+	 * <b>URL: /asset/listSyncToCMErrorBill</b>
+	 */
+	@RequestMapping("listSyncToCMErrorBill")
+	@RestReturn(value = ListBillsResponse.class)
+	public RestResponse listSyncToCMErrorBill(ListBillsCommand cmd) {
+		ListBillsResponse listBillsResponse = assetService.listSyncToCMErrorBill(cmd);
+		RestResponse response = new RestResponse(listBillsResponse);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
 
     
 }

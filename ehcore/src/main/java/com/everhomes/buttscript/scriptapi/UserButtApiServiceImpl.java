@@ -5,6 +5,8 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.Router;
+import com.everhomes.rest.common.ThirdPartActionData;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.messaging.ChannelType;
@@ -13,6 +15,8 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
@@ -20,12 +24,14 @@ import com.everhomes.scriptengine.nashorn.NashornModuleApiService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,7 +104,7 @@ public class UserButtApiServiceImpl implements NashornModuleApiService {
         return count ;
     }
 
-    public void sendVipLevelMessageToUser(Long userId, String levelName) {
+    public void sendVipLevelMessageToUser(Long userId, String levelName, String thirdUrl) {
         LOGGER.info("the script call the api sendVipLevelMessageToUser, userId= {}, levelName={}",userId,levelName);
         Map<String, String> map = new HashMap<String, String>();
         map.put("levelName", levelName);
@@ -119,12 +125,31 @@ public class UserButtApiServiceImpl implements NashornModuleApiService {
         messageDto.setBody(notifyTextForApplicant);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
         messageDto.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(userId)));
+
+
+        if (!StringUtils.isEmpty(thirdUrl)) {
+            ThirdPartActionData actionData = new ThirdPartActionData();
+            actionData.setUrl(thirdUrl);
+            String url = RouterBuilder.build(Router.BROWSER_THIRD, actionData);
+            RouterMetaObject metaObject = new RouterMetaObject();
+            metaObject.setUrl(url);
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+            messageDto.setMeta(meta);
+        }
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                 AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(userId),
                 messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 
     }
 
+//    public static void main(String[] args) {
+//        ThirdPartActionData actionData = new ThirdPartActionData();
+//        actionData.setUrl("www.baidu.com");
+//        String url = RouterBuilder.build(Router.BROWSER_THIRD, actionData);
+//        System.out.println(url);
+//    }
     public void testCall() {
         LOGGER.debug("this is test api call");
     }

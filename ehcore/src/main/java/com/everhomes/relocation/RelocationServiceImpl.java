@@ -19,7 +19,6 @@ import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.organization.OrganizationGroupType;
 
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -30,16 +29,20 @@ import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.rest.relocation.AttachmentDescriptor;
 
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-
+import com.everhomes.rest.rentalv2.RentalBillDTO;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.RuntimeErrorException;
 
+import com.everhomes.util.StringHelper;
 import net.greghaines.jesque.Job;
-import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +50,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -109,7 +115,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 	@Override
 	public SearchRelocationRequestsResponse searchRelocationRequests(SearchRelocationRequestsCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049200L, cmd.getAppId(), null,cmd.getCurrentProjectId());//物品搬迁全部权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//物品搬迁全部权限
 		}
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -346,6 +352,129 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		populateRequestDTO(request, dto);
 
 		return dto;
+	}
+
+	@Override
+	public QueryRelocationStatisticsResponse queryRelocationStatistics(QueryRelocationStatisticsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049220L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+		}
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		QueryRelocationStatisticsResponse response = new QueryRelocationStatisticsResponse();
+
+		List<RelocationStatistics> relocationStatistics = relocationProvider.queryRelocationStatistics(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getStartTime(), cmd.getEndTime());
+		if (relocationStatistics == null || relocationStatistics.size() == 0 ){
+			response.setTotalCount(0);
+			return response;
+		}
+		response.setClassifyStatistics(new ArrayList<>());
+		Integer totalNum = 0;
+		for (RelocationStatistics statistics : relocationStatistics){
+			RelocationStatisticsDTO dto = new RelocationStatisticsDTO();
+			dto.setCount(statistics.getCount());
+			dto.setName(RelocationRequestStatus.fromCode(statistics.getStatus()).getDescription());
+			response.getClassifyStatistics().add(dto);
+			totalNum += dto.getCount();
+		}
+		response.setTotalCount(totalNum);
+		return response;
+	}
+
+	@Override
+	public void exportRelocationRequests(SearchRelocationRequestsCommand cmd, HttpServletResponse response) {
+
+		List<RelocationRequest> requests = relocationProvider.searchRelocationRequests(cmd.getNamespaceId(), cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getKeyword(), cmd.getStartTime(), cmd.getEndTime(), cmd.getStatus(), null, null,
+				null);
+		if (requests == null)
+			requests = new ArrayList<>();
+
+		ByteArrayOutputStream out = createRequestStream(requests);
+		DownloadUtils.download(out, response);
+	}
+
+	private ByteArrayOutputStream createRequestStream(List<RelocationRequest> requests){
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		if (null == requests || requests.isEmpty()) {
+			return out;
+		}
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("relocationRequest");
+		createRequestSheetHead(sheet);
+		for (RelocationRequest request : requests ) {
+			RelocationRequestDTO dto = ConvertHelper.convert(request, RelocationRequestDTO.class);
+			populateRequestDTO(request, dto);
+			this.setNewRelocationRequestBookRow(sheet, dto);
+		}
+
+		try {
+			wb.write(out);
+			wb.close();
+
+		} catch (IOException e) {
+			LOGGER.error("export is fail", e);
+		}
+		return out;
+	}
+
+	private void setNewRelocationRequestBookRow(Sheet sheet ,RelocationRequestDTO dto){
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
+		int i = -1;
+		//申请单编号
+		row.createCell(++i).setCellValue(dto.getRequestNo());
+		//申请时间
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd hh:mm");
+		row.createCell(++i).setCellValue(sdf.format(new Date(dto.getCreateTime().getTime())));
+		//状态
+		row.createCell(++i).setCellValue(RelocationRequestStatus.fromCode(dto.getStatus()).getDescription());
+		//申请人
+		row.createCell(++i).setCellValue(dto.getRequestorName());
+		//手机号码
+		if (StringHelper.hasContent(dto.getContactPhone()))
+			row.createCell(++i).setCellValue(dto.getContactPhone());
+		else
+			row.createCell(++i).setCellValue("");
+		//公司名称
+		if (StringHelper.hasContent(dto.getRequestorEnterpriseName()))
+			row.createCell(++i).setCellValue(dto.getRequestorEnterpriseName());
+		else
+			row.createCell(++i).setCellValue("");
+		//公司地址
+		if (StringHelper.hasContent(dto.getRequestorEnterpriseAddress()))
+			row.createCell(++i).setCellValue(dto.getRequestorEnterpriseAddress());
+		else
+			row.createCell(++i).setCellValue("");
+		//放行日期
+		sdf = new SimpleDateFormat("yyyy/MM/dd");
+		row.createCell(++i).setCellValue(sdf.format(new Date(dto.getRelocationDate().getTime())));
+		//物品清单
+		StringBuilder sb = new StringBuilder();
+		for (RelocationRequestItemDTO itemDTO : dto.getItems()){
+			sb.append(itemDTO.getItemName()).append("*").append(itemDTO.getItemQuantity()).append("、");
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		row.createCell(++i).setCellValue(sb.toString());
+
+	}
+
+	private void createRequestSheetHead(Sheet sheet){
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i =-1 ;
+		row.createCell(++i).setCellValue("申请单编号");
+		row.createCell(++i).setCellValue("申请时间");
+		row.createCell(++i).setCellValue("状态");
+		row.createCell(++i).setCellValue("申请人");
+		row.createCell(++i).setCellValue("手机号码");
+		row.createCell(++i).setCellValue("公司名称");
+		row.createCell(++i).setCellValue("公司地址");
+		row.createCell(++i).setCellValue("放行日期");
+		row.createCell(++i).setCellValue("物品清单");
+
 	}
 
 	/**

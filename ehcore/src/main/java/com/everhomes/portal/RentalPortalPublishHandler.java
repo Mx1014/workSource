@@ -62,21 +62,25 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     private RentalResourceType createRentalResourceType(Integer namespaceId, String name,RentalInstanceConfig rentalInstanceConfig){
         RentalResourceType rentalResourceType = rentalCommonService.createRentalResourceType(namespaceId,name,
                 rentalInstanceConfig.getPageType(),rentalInstanceConfig.getPayMode(),rentalInstanceConfig.getIdentify(),
-                rentalInstanceConfig.getUnauthVisible(),rentalInstanceConfig.getCrossCommuFlag());
+                rentalInstanceConfig.getUnauthVisible(),rentalInstanceConfig.getCrossCommuFlag(),rentalInstanceConfig.getDetailPageType());
 
         rentalInstanceConfig.setPageType(rentalResourceType.getPageType());
         rentalInstanceConfig.setPayMode(rentalResourceType.getPayMode());
         rentalInstanceConfig.setIdentify(rentalResourceType.getIdentify());
         rentalInstanceConfig.setUnauthVisible(rentalResourceType.getUnauthVisible());
         rentalInstanceConfig.setResourceTypeId(rentalResourceType.getId());
+        rentalInstanceConfig.setDetailPageType(rentalResourceType.getDetailPageType());
         return rentalResourceType;
     }
 
     private RentalResourceType updateRentalResourceType(Integer namespaceId,RentalInstanceConfig rentalInstanceConfig, String name){
         RentalResourceType rentalResourceType = rentalv2Provider.findRentalResourceTypeById(rentalInstanceConfig.getResourceTypeId());
         if(null != rentalResourceType){
-            if(null == rentalInstanceConfig.getPageType()){
-                rentalResourceType.setPageType((byte)0);
+            if(null != rentalInstanceConfig.getPageType()){
+                rentalResourceType.setPageType(rentalInstanceConfig.getPageType());
+            }
+            if(null != rentalInstanceConfig.getDetailPageType()){
+                rentalResourceType.setDetailPageType(rentalInstanceConfig.getDetailPageType());
             }
             if (null != rentalInstanceConfig.getPayMode())
                 rentalResourceType.setPayMode(rentalInstanceConfig.getPayMode());

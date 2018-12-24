@@ -14,6 +14,8 @@ public class CMCustomer {
 
     private Long communityId;
     private Long customerId;
+    
+    private String PropertyID;
 
     public Long getCustomerId() {
         return customerId;
@@ -70,4 +72,12 @@ public class CMCustomer {
     public void setMail(String mail) {
         Mail = mail;
     }
+
+	public String getPropertyID() {
+		return PropertyID;
+	}
+
+	public void setPropertyID(String propertyID) {
+		PropertyID = propertyID;
+	}
 }

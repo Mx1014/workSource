@@ -1,29 +1,6 @@
 // @formatter:off
 package com.everhomes.pusher;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.jooq.tools.StringUtils;
-import org.json.simple.parser.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.apnshttp2.builder.ApnsClient;
 import com.everhomes.apnshttp2.builder.impl.ApnsClientBuilder;
 import com.everhomes.apnshttp2.notifiction.Notification;
@@ -46,12 +23,7 @@ import com.everhomes.developer_account_info.DeveloperAccountInfo;
 import com.everhomes.developer_account_info.DeveloperAccountInfoProvider;
 import com.everhomes.device.Device;
 import com.everhomes.device.DeviceProvider;
-import com.everhomes.messaging.ApnsServiceFactory;
-import com.everhomes.messaging.MessagingService;
-import com.everhomes.messaging.PushMessageResolver;
-import com.everhomes.messaging.PusherService;
-import com.everhomes.messaging.PusherVenderType;
-import com.everhomes.messaging.PusherVendorService;
+import com.everhomes.messaging.*;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
@@ -61,12 +33,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
-import com.everhomes.rest.messaging.ChannelType;
-import com.everhomes.rest.messaging.DeviceMessage;
-import com.everhomes.rest.messaging.DeviceMessages;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.pusher.ThirdPartPushMessageCommand;
@@ -77,24 +44,35 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ExecutorUtil;
+import com.everhomes.user.*;
 import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
-import com.notnoop.apns.APNS;
-import com.notnoop.apns.ApnsService;
-import com.notnoop.apns.ApnsServiceBuilder;
-import com.notnoop.apns.EnhancedApnsNotification;
-import com.notnoop.apns.PayloadBuilder;
+import com.notnoop.apns.*;
 import com.notnoop.exceptions.NetworkIOException;
 import com.xiaomi.xmpush.server.Result;
 import com.xiaomi.xmpush.server.Sender;
+import org.jooq.tools.StringUtils;
+import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
@@ -924,8 +902,10 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 			
 			// 3.2(tocken/namespace确定一个用户)
 			UserIdentifier user = userProvider.findClaimedIdentifierByTokenAndNamespaceId(token,appNamespaceMapping.getNamespaceId());
-			LOGGER.debug("appNamespaceMapping : "+ appNamespaceMapping == null?"appNamespaceMapping is null":appNamespaceMapping.toString());
-			
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.debug("appNamespaceMapping : "+ appNamespaceMapping == null?"appNamespaceMapping is null":appNamespaceMapping.toString());
+			}
+
 			if (user != null) {
 				// 4.1 消息构造
 				MessageDTO messageDto = new MessageDTO();
@@ -950,12 +930,16 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 				
 				// 4.3 根据 msgType 推送方式推送给用户
 				messagingService.routeMessage(null, User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING,ChannelType.USER.getCode(), String.valueOf(user.getOwnerUid()), messageDto, MSG_DEFAULT_SEND_TYPE);
-				LOGGER.debug("调用第三方信息推送接口：=====【发送成功】===== messageDto= ",messageDto);
+				if(LOGGER.isDebugEnabled()){
+					LOGGER.debug("【thirdPartPushMessage success】===== messageDto= ",messageDto);
+				}
 
 			}else{
 				// 4.4 用户不存在，则加入失败列表
 				unReachTokenList.add(token);
-				LOGGER.debug("调用第三方信息推送接口：=====【用户不存在】===== token=",token);
+				if(LOGGER.isDebugEnabled()){
+					LOGGER.debug("【thirdPartPushMessage user fail】===== token=",token);
+				}
 				continue;
 			}
 		}

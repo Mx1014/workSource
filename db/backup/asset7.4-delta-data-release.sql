@@ -7,15 +7,7 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
--- AUTHOR:孟千翔
--- REMARK:设置减免金额均为删除
-UPDATE eh_payment_exemption_items SET delete_flag=1;
 
--- AUTHOR:杨崇鑫 20181212
--- REMARK:物业缴费V8.0（账单对接卡券） -44680
-SET @id = ifnull((SELECT MAX(id) FROM `eh_configurations`),0);
-INSERT INTO `eh_configurations`(`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
-	VALUES (@id := @id + 1, 'pay.v2.callback.url.assetV2', '/asset/payNotifyV2', '物业缴费新支付回调接口对接最新统一订单', 0, NULL, 1);
 
 	
 -- --------------------- SECTION END ALL -----------------------------------------------------
@@ -72,15 +64,7 @@ INSERT INTO `eh_configurations`(`id`, `name`, `value`, `description`, `namespace
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
--- AUTHOR: 杨崇鑫 2018-12-06
--- REMARK: 瑞安CM对接 :APP端显示的支付状态是“已支付，待确认”。
-SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_app_views`),0);
-INSERT INTO `eh_payment_app_views`(`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) 
-	VALUES (@id := @id + 1, 999929, NULL, 1, 'CONFIRM', NULL, NULL, NULL, NULL, NULL, NULL);
-	
--- AUTHOR: 杨崇鑫 2018-12-07
--- REMARK: 瑞安CM对接：开启支付权限
-update eh_payment_app_views set has_view = 1 where namespace_id=999929 and view_item = 'PAY';	
+
 
 
 

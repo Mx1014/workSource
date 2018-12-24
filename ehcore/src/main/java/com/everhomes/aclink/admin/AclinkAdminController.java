@@ -2,6 +2,7 @@
 package com.everhomes.aclink.admin;
 
 import com.everhomes.aclink.*;
+import com.everhomes.aclink.faceplusplus.FacePlusPlusService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -52,7 +54,10 @@ public class AclinkAdminController extends ControllerBase {
     
     @Autowired
     private AclinkLogService aclinkLogService;
-    
+
+    @Autowired
+    private FacePlusPlusService facePlusPlusService;
+
     /**
      * <b>URL: /admin/aclink/searchDoorAccess</b>
      * <p>获取门禁列表</p>
@@ -1181,7 +1186,6 @@ public class AclinkAdminController extends ControllerBase {
         return response;
     }
 
-//add by liqingyan
     /**
      * <b>URL: /admin/aclink/doorStatisticByTime</b>
      * <p>门禁时间统计</p>
@@ -1651,6 +1655,20 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/aclink/getLocalServerAddressByIpad</b>
+     * <p> 内网服务器配对</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getLocalServerAddressByIpad")
+    @RestReturn(value=GetLocalServerAddressResponse.class)
+    public RestResponse getLocalServerAddressByIpad(PairLocalServerCommand cmd){
+    	RestResponse response = new RestResponse(aclinkServerService.getLocalServerAddressByIpad(cmd.getUuid()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /admin/aclink/updateServerSyncTime</b>
@@ -1769,11 +1787,10 @@ public class AclinkAdminController extends ControllerBase {
         return response;
     }
     
-//createLocalVisitorAuth Test
     /**
      * 
      * <b>URL: /admin/aclink/createLocalVisitorAuth</b>
-     * <p>更新用户同步时间 </p>
+     * <p>人脸识别访客授权</p>
      * @return
      */
     @RequestMapping("createLocalVisitorAuth")
@@ -1801,6 +1818,7 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
     //20180914 add by liqingyan
     /**
      * <b>URL: /admin/aclink/checkMobilePrivilege</b>
@@ -1859,4 +1877,35 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     *
+     * <b>URL: /admin/aclink/faceplusLogin</b>
+     * <p>登录face++ </p>
+     * @return
+     */
+    @RequestMapping("faceplusLogin")
+    @RestReturn(value=String.class)
+    public RestResponse faceplusLogin(FaceplusLoginCommand cmd){
+        RestResponse response = new RestResponse(facePlusPlusService.login(cmd.getUrl(),cmd.getUsername(),cmd.getPassword()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /admin/aclink/filetest</b>
+     * <p>上传文件测试 </p>
+     * @return
+     */
+    @RequestMapping("filetest")
+    @RestReturn(value= String.class)
+    public RestResponse filetest(FaceplusLoginCommand cmd){
+        RestResponse response = new RestResponse(facePlusPlusService.filetest(cmd.getUrl()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

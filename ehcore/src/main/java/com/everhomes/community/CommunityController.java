@@ -82,6 +82,17 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /community/getWithoutAuth</b>
+     * <p>根据园区ID获取园区信息(不认证)</p>
+     */
+    @RequestMapping("getWithoutAuth")
+    @RestReturn(value=CommunityDTO.class)
+    @RequireAuthentication(false)
+    public RestResponse getCommunityByIdWithoutAuth(GetCommunityByIdCommand cmd, HttpServletRequest request, HttpServletResponse paramResponse) {
+        return this.getCommunityById(cmd,request,paramResponse);
+    }
     
     /**
      * <b>URL: /community/getCommunitiesByNameAndCityId</b>
@@ -143,6 +154,16 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
 	}
+
+    /**
+     * <b>URL: /community/listBuildingsWithoutAuth</b>
+     * <p>根据园区号查询楼栋列表(免认证)</p>
+     */
+    @RequestMapping("listBuildingsWithoutAuth")
+    @RestReturn(value=ListBuildingCommandResponse.class)
+    public RestResponse listBuildingsWithoutAuth(ListBuildingCommand cmd) {
+        return listBuildings(cmd);
+    }
 	
 	/**
 	 * <b>URL: /community/getBuilding</b>

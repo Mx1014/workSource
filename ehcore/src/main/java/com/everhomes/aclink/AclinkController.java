@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.aclink.dingxin.DingxinService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -99,6 +100,9 @@ public class AclinkController extends ControllerBase {
     
     @Autowired
     AclinkLogService aclinkLogService;
+
+    @Autowired
+    DingxinService dingxinService;
 
     /**
      * <b>URL: /aclink/activing</b>
@@ -791,6 +795,23 @@ public class AclinkController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /aclink/notifyPhotoSyncResult</b>
+     * <p>内网服务器回传识别结果</p>
+     * @return 门禁列表
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("notifyPhotoSyncResult")
+    @RestReturn(value=String.class)
+    public RestResponse notifyPhotoSyncResult(@Valid NotifyPhotoSyncResultCommand cmd) {
+    	//TODO RequireAuthentication
+        RestResponse response = new RestResponse();
+        doorAccessService.notifyPhotoSyncResult(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /aclink/syncTimer</b>
      * <p>同步门禁时间</p>
      * @return 同步门禁时间
@@ -897,6 +918,38 @@ public class AclinkController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+    *
+    * <b>URL: /aclink/getPhotoSyncResult</b>
+    * <p>人脸识别照片上传 </p>
+    * @return
+    */
+   @RequireAuthentication(false)
+   @RequestMapping("getPhotoSyncResult")
+   @RestReturn(value=GetPhotoSyncResultResponse.class)
+   public RestResponse getPhotoSyncResult(){
+		RestResponse response = new RestResponse(faceRecognitionPhotoService.getPhotoSyncResult());
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+   }
+    
+    /**
+    *
+    * <b>URL: /aclink/deletePhotoByIds</b>
+    * <p>删除人脸识别照片 </p>
+    * @return
+    */
+   @RequestMapping("deletePhotoByIds")
+   @RestReturn(value=String.class)
+   public RestResponse deletePhotoByIds(DeletePhotoByIdCommand cmd){
+		RestResponse response = new RestResponse();
+		faceRecognitionPhotoService.invalidPhotoByIds(cmd);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+   }
 
     /**
      *
@@ -1072,6 +1125,23 @@ public class AclinkController extends ControllerBase {
     @RestReturn(value = QueryServiceHotlineResponse.class)
     public RestResponse queryServiceHotline(@Valid QueryServiceHotlineCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.queryServiceHotline(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /aclink/verifyDoorAuth</b>
+     * <p> (鼎芯)判断是否有开门权限</p>
+     * @return
+     */
+    @RequestMapping("verifyDoorAuth")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(value = false)
+    public RestResponse verifyOpenAuth(VerifyDoorAuthCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setResponseObject(dingxinService.verifyDoorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -146,7 +146,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         parkingRechargeRate.setOwnerType(cmd.getOwnerType());
         parkingRechargeRate.setOwnerId(cmd.getOwnerId());
         parkingRechargeRate.setParkingLotId(cmd.getParkingLotId());
-        parkingRechargeRate.setCardType(cmd.getCardType());
+        parkingRechargeRate.setCardType(cmd.getCardTypeId());
 
     	//费率 名称默认设置 by sw
         Map<String, Object> map = new HashMap<>();
@@ -163,6 +163,17 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         parkingRechargeRate.setCreateTime(new Timestamp(System.currentTimeMillis()));
         parkingRechargeRate.setStatus(ParkingRechargeRateStatus.ACTIVE.getCode());
         parkingProvider.createParkingRechargeRate(parkingRechargeRate);
+        ParkingCardRequestType parkingRequestType = 
+        		parkingProvider.findParkingCardTypeByTypeId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getCardTypeId());
+        if (parkingRequestType == null){
+            ParkingCardRequestType cardType = new ParkingCardRequestType();
+            cardType.setCardTypeId(cmd.getCardTypeId());
+            cardType.setCardTypeName(cmd.getCardTypeName());
+            cardType.setOwnerId(cmd.getOwnerId());
+            cardType.setOwnerType(cmd.getOwnerType());
+            cardType.setParkingLotId(cmd.getParkingLotId());
+        	parkingProvider.createParkingCardType(cardType);
+        }
         return ConvertHelper.convert(parkingRechargeRate, ParkingRechargeRateDTO.class);
     }
 

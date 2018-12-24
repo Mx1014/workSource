@@ -2573,6 +2573,23 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         //		}
         return info;
     }
+    @Override
+    public String getUserAvatarUrl(Long uid) {
+        User queryUser = userProvider.findUserById(uid);
+        if (queryUser != null) {
+            return getUserAvatarUrl(queryUser);
+        }
+        return null;
+    }
+
+    private String getUserAvatarUrl(User queryUser) {
+        String avatarUri = queryUser.getAvatar();
+        if (avatarUri == null || avatarUri.trim().length() == 0) {
+            avatarUri = getUserAvatarUriByGender(queryUser.getId(), queryUser.getNamespaceId(), queryUser.getGender());
+        }
+        String url = contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), queryUser.getId());
+        return url;
+    }
 
     private void populateUserAvatar(UserInfo user, String avatarUri) {
         if (avatarUri == null || avatarUri.trim().length() == 0) {
@@ -7697,6 +7714,17 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 }
             } while (locator.getAnchor() != null);
         }, "fixUserInfoOnceTime").start();
+    }
+
+    @Override
+    public GetUserListResponse getUserList(GetUserListCommand cmd) {
+        GetUserListResponse response = new GetUserListResponse();
+        if (CollectionUtils.isEmpty(cmd.getIds())) {
+            return response;
+        }
+        List<UserDTO> list = this.userProvider.getUserByIds(cmd.getIds());
+        response.setUserDtos(list);
+        return response;
     }
 
     /*******************统一用户同步数据**********************/

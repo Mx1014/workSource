@@ -186,8 +186,9 @@ public enum CoordinationLocks {
 	OFFICE_CUBICLE_ORDER_STATUS("office_cubicle_order_status"),
 	
 
-    INVITED_CUSTOMER_STATISTIC("invited_customer_statistic");
-
+    INVITED_CUSTOMER_STATISTIC("invited_customer_statistic"),
+    NEW_DEFAULT_ENTERPRISE_MOMENT("new.default.enterprise.moment"),
+    INIT_DEFAULT_ENTERPRISE_MOMENT_TAG("new.default.enterprise.moment.tag");
 
     private String code;
 
