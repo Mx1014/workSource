@@ -3088,5 +3088,21 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				}
 			}
 		}
+		List<OfficeCubicleRoom> roomList = 
+				officeCubicleProvider.getOfficeCubicleRoom(null, null, null, null, (byte)2, null, null);
+		List<OfficeCubicleStation> stationList = 
+				officeCubicleProvider.getOfficeCubicleStation(null, null, null, null, null, null, (byte)2, null);
+		for(OfficeCubicleRoom room :roomList){
+			if (room.getEndTime().getTime()<(System.currentTimeMillis())){
+				room.setStatus((byte)1);
+				officeCubicleProvider.updateRoom(room);
+			}
+		}
+		for(OfficeCubicleStation station : stationList){
+			if (station.getEndTime().getTime()<(System.currentTimeMillis())){
+				station.setStatus((byte)1);
+				officeCubicleProvider.updateCubicle(station);
+			}
+		}
 	}
 }
