@@ -104,6 +104,23 @@ update eh_var_field_item_scopes set module_name = 'enterprise_customer' where st
 
 update eh_var_field_item_scopes set module_name = 'enterprise_customer' where module_name = 'investment_promotion' and field_id = 12113 and status = 2 ;
 
+
+-- AUTHOR:2018年12月24日 黄明波
+-- REMARK:issue-44627 增加国贸服务快递的微信支持
+set @max_id = (select ifnull(max(id), 0) from eh_express_companies);
+set @namespace_id = 999923;
+INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `logistics_url`, `order_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'community', 240111044832061111, 2, 'EMS', '', '国贸服务，EMS快递公司', NULL, NULL, NULL, NULL, NULL, 2, 0, now(), null, 0);
+INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `logistics_url`, `order_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'community', 240111044832061111, 3, '中国邮政', '', '国贸服务，中国邮政快递公司', NULL, NULL, NULL, NULL, NULL, 2, 0, now(), null, 0);
+INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `logistics_url`, `order_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'community', 240111044832061111, 4, '国贸物业酒店管理有限公司', '', '国贸项目，国贸快递业务对应的公司', NULL, NULL, NULL, NULL, NULL, 1, 0, now(), null, 0);
+
+
+set @max_id = (select ifnull(max(id), 0) from eh_express_company_businesses);
+INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 3, 9, '邮政快递包裹', '[{"packageType": 3},{"packageType": 2},{"packageType": 1}]', '请确认寄件物品价值不超过2万元，贵重物品务必保价，保价费=保价金额*1%，最低2元', '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 1, 2, 0, now(), null, 0);
+INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 3, 2, '同城信筒快件', '[{"packageType": 4},{"packageType": 5}]', NULL, '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 1, 2, 0, now(), null, 0);
+INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 2, 3, 'EMS标准快递', '[]', '请确认寄件物品价值不超过5万元，贵重物品务必保价，保价费=保价金额*0.5%，最低1元', '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 2, 2, 0, now(), null, 0);
+INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 4, 10, '国贸快递', '[]', NULL, '[{"status": 6},{"status": 5},{"status": 4}]', 3, 2, 0, now(), null, 0);
+
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev

@@ -19,6 +19,7 @@ import com.everhomes.parking.handler.Utils;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
@@ -1588,10 +1589,9 @@ public class ExpressServiceImpl implements ExpressService {
         String businessPayerParams = getBusinessPayerParams(cmd);
         preOrderCommand.setBusinessPayerParams(businessPayerParams);
 
-       // preOrderCommand.setPaymentPayeeType(billGroup.getBizPayeeType()); 不填会不会有问题?
         preOrderCommand.setPaymentPayeeId(bizPayeeId); //不知道填什么
+        buildSpecificPayMethod(cmd, preOrderCommand); // 填充微信，支付宝支付时，请求参数
 
-//        preOrderCommand.setPaymentParams(flattenMap);
         //preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
 //        String homeUrl = "http://10.1.110.51:9092";
@@ -1614,6 +1614,34 @@ public class ExpressServiceImpl implements ExpressService {
         LOGGER.info("preOrderCommand:"+StringHelper.toJsonString(preOrderCommand));
         return preOrderCommand;
     }
+	
+	private void buildSpecificPayMethod(PayExpressOrderCommandV2 inputCmd, CreatePurchaseOrderCommand createPurchaseOrderCommand) {
+
+		Integer paymentType = inputCmd.getPaymentType();
+		if (null == paymentType) {
+			return;
+		}
+
+		String namespaceUserToken = UserContext.current().getUser().getNamespaceUserToken();
+		Map<String, String> flattenMap = new HashMap<>();
+		flattenMap.put("acct", namespaceUserToken);
+		flattenMap.put("payType", "no_credit");
+
+		createPurchaseOrderCommand.setCommitFlag(1);
+
+		// 公众号支付
+		if (paymentType == PaymentType.WECHAT_JS_PAY.getCode() || paymentType == PaymentType.WECHAT_JS_ORG_PAY.getCode()) {
+			createPurchaseOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			createPurchaseOrderCommand.setPaymentParams(flattenMap);
+		} else if (paymentType != null && paymentType == PaymentType.ALI_JS_PAY.getCode()) {
+			createPurchaseOrderCommand.setPaymentType(PaymentType.ALI_JS_PAY.getCode());
+			createPurchaseOrderCommand.setPaymentParams(flattenMap);
+		} else if (paymentType != null && paymentType == PaymentType.WECHAT_SCAN_PAY.getCode()) {
+			createPurchaseOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			createPurchaseOrderCommand.setPaymentParams(flattenMap);
+		}
+
+	}
 	
     private String getBusinessPayerParams(PayExpressOrderCommandV2 cmd) {
 
