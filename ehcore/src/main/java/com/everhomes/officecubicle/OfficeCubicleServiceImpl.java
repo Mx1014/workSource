@@ -3042,8 +3042,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 							halfdailyPrice:dailyPrice);
 				}
 			}
-			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(cmd.getOwnerId(),cmd.getOwnerType(), s.getId(),null,null,null,null,null);
-			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(cmd.getOwnerId(),cmd.getOwnerType(),s.getId(),null,null,null,null);
+			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(s.getOwnerId(),s.getOwnerType(), s.getId(),null,null,null,null,null);
+			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(s.getOwnerId(),s.getOwnerType(),s.getId(),null,null,null,null);
 			Integer stationSize = 0;
 			Integer roomSize = 0;
 			if (station !=null){
