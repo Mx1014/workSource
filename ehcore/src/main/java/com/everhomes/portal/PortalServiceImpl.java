@@ -3624,7 +3624,6 @@ public class PortalServiceImpl implements PortalService {
                         if (newLayoutId != null) {
                             container.setLayoutId(newLayoutId);
                             portalNavigationBar.setConfigJson(container.toString());
-                            this.portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
                         }
                     }
 
