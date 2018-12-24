@@ -3614,7 +3614,7 @@ public class PortalServiceImpl implements PortalService {
 		updateItemGroupConfig(namespaceId, newVersionId);
 
 		//生成新的主页签 add by yanlong.liang 20181219
-        List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(oldVersionId);
+        List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(null);
         if (!CollectionUtils.isEmpty(portalNavigationBars)) {
             for (PortalNavigationBar portalNavigationBar : portalNavigationBars) {
 
