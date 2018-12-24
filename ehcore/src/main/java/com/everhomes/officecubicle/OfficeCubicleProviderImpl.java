@@ -485,7 +485,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		if (rentType!=null)
 			condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType);
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.lt(new Timestamp(System.currentTimeMillis())));
-		condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.gt(new Timestamp(System.currentTimeMillis())));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.gt(new Timestamp(System.currentTimeMillis())));
 		step.where(condition);
 		List<OfficeCubicleStationRent> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_STATION_RENT.OPERATE_TIME.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleStationRent.class);
