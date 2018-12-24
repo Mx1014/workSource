@@ -3622,9 +3622,11 @@ public class PortalServiceImpl implements PortalService {
                     Container container = (Container) StringHelper.fromJsonString(portalNavigationBar.getConfigJson(), Container.class);
                     if (container != null && container.getLayoutId() != null) {
                         Long newLayoutId = layoutIdMap.get(container.getLayoutId());
-                        container.setLayoutId(newLayoutId);
-                        portalNavigationBar.setConfigJson(container.toString());
-                        this.portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
+                        if (newLayoutId != null) {
+                            container.setLayoutId(newLayoutId);
+                            portalNavigationBar.setConfigJson(container.toString());
+                            this.portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
+                        }
                     }
 
                 }
