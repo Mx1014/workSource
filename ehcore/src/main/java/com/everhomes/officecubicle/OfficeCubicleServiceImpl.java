@@ -2097,6 +2097,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		preDto.setAmount(priceRule.get(0).getWorkdayPrice().multiply(new BigDecimal(100)).longValue());
 		order.setBizOrderNo(response.getBizOrderNum());
 		order.setOrderStatus(OfficeCubicleOrderStatus.UNPAID.getCode());
+		order.setBeginTime(rentalOrder.getStartTime());
+		order.setEndTime(rentalOrder.getEndTime());
 		officeCubicleProvider.updateCubicleRentOrder(order);
 		return preDto;
 		
@@ -2470,6 +2472,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		
 		if (cmd.getRentalOrderNo()!=null){
+			RentalOrder rentalOrder = rentalv2Provider.findRentalBillById(cmd.getRentalOrderNo());
+			order.setBeginTime(rentalOrder.getStartTime());
+			order.setEndTime(rentalOrder.getEndTime());
+			officeCubicleProvider.updateCubicleRentOrder(order);
 			rentalCommonService.rentalOrderSuccess(cmd.getRentalOrderNo());
 		}
 		return null;
