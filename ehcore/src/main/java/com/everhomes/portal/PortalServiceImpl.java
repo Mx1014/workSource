@@ -1,12 +1,15 @@
 // @formatter:off
 package com.everhomes.portal;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.ServiceModuleAppProfileProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.configurations.ConfigurationsService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -33,11 +36,14 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.*;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.configurations.admin.ConfigurationsCreateAdminCommand;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.IndexType;
+import com.everhomes.rest.launchpadbase.LayoutType;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.CardExtension;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Application;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
+import com.everhomes.rest.launchpadbase.indexconfigjson.TopBarStyle;
 import com.everhomes.rest.module.AccessControlType;
 import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.module.ServiceModuleAppType;
@@ -196,6 +202,9 @@ public class PortalServiceImpl implements PortalService {
     private ServiceModuleEntryProvider serviceModuleEntryProvider;
 	@Autowired
     private ServiceModuleAppProfileProvider serviceModuleAppProfileProvider;
+
+	@Autowired
+    private ConfigurationsService configurationsService;
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
 
@@ -1597,6 +1606,58 @@ public class PortalServiceImpl implements PortalService {
 		}).collect(Collectors.toList()));
 	}
 
+    @Override
+    public ListLaunchPadIndexResponse listLaunchPadIndexs(ListLaunchPadIndexCommand cmd) {
+	    ListLaunchPadIndexResponse response = new ListLaunchPadIndexResponse();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<LaunchPadIndexDTO> list = new ArrayList<>();
+        String indexFlag = configurationProvider.getValue(cmd.getNamespaceId(),ConfigConstants.INDEX_FLAG, "");
+        if (!StringUtils.isEmpty(indexFlag) && TrueOrFalseFlag.TRUE.getCode().equals(Byte.valueOf(indexFlag))) {
+            response.setIndexFlag(TrueOrFalseFlag.TRUE.getCode());
+        }else {
+            response.setIndexFlag(TrueOrFalseFlag.FALSE.getCode());
+        }
+        List<LaunchPadIndex> launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
+            query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+            query.addOrderBy(Tables.EH_LAUNCH_PAD_INDEXS.DEFAULT_ORDER.asc());
+            return query;
+        });
+        launchPadIndices.stream().forEach(r-> {
+            LaunchPadIndexDTO dto = ConvertHelper.convert(r, LaunchPadIndexDTO.class);
+            if(!StringUtils.isEmpty(r.getIconUri())){
+                String url = contentServerService.parserUri(r.getIconUri());
+                dto.setIconUrl(url);
+            }
+            if(!StringUtils.isEmpty(r.getSelectedIconUri())){
+                String url = contentServerService.parserUri(r.getSelectedIconUri());
+                dto.setSelectedIconUrl(url);
+            }
+            list.add(dto);
+        });
+        response.setLaunchPadIndexs(list);
+        return response;
+    }
+
+    @Override
+    public void updateIndexFlag(UpdateIndexFlagCommand cmd) {
+        ConfigurationsCreateAdminCommand configurationsCreateAdminCommand = new ConfigurationsCreateAdminCommand();
+        configurationsCreateAdminCommand.setName(ConfigConstants.INDEX_FLAG);
+        configurationsCreateAdminCommand.setValue(cmd.getIndexFlag().toString());
+        configurationsService.crteateConfiguration(configurationsCreateAdminCommand);
+    }
+
+	@Override
+	public GetIndexFlagResponse getIndexFlag(GetIndexFlagCommand cmd) {
+		GetIndexFlagResponse response = new GetIndexFlagResponse();
+		String indexFlag = configurationProvider.getValue(cmd.getNamespaceId(),ConfigConstants.INDEX_FLAG, "");
+		if (!StringUtils.isEmpty(indexFlag) && TrueOrFalseFlag.TRUE.getCode().equals(Byte.valueOf(indexFlag))) {
+			response.setIndexFlag(TrueOrFalseFlag.TRUE.getCode());
+		}else {
+			response.setIndexFlag(TrueOrFalseFlag.FALSE.getCode());
+		}
+		return response;
+	}
+
 	@Override
 	public PortalNavigationBarDTO createPortalNavigationBar(CreatePortalNavigationBarCommand cmd) {
 		User user = UserContext.current().getUser();
@@ -1606,6 +1667,12 @@ public class PortalServiceImpl implements PortalService {
 		portalNavigationBar.setCreatorUid(user.getId());
 		portalNavigationBar.setNamespaceId(namespaceId);
 		portalNavigationBar.setStatus(PortalNavigationBarStatus.ACTIVE.getCode());
+		Integer maxOrder = this.portalNavigationBarProvider.maxOrder(cmd.getNamespaceId(), cmd.getVersionId());
+		if (maxOrder != null) {
+		    portalNavigationBar.setDefaultOrder(maxOrder + 1);
+        }else {
+		    portalNavigationBar.setDefaultOrder(1);
+        }
 		portalNavigationBarProvider.createPortalNavigationBar(portalNavigationBar);
 		return processPortalNavigationBarDTO(portalNavigationBar);
 	}
@@ -1613,21 +1680,45 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public PortalNavigationBarDTO updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd) {
 		PortalNavigationBar portalNavigationBar = checkPortalNavigationBar(cmd.getId());
-		portalNavigationBar.setLabel(cmd.getName());
+		portalNavigationBar.setLabel(cmd.getLabel());
 		portalNavigationBar.setDescription(cmd.getDescription());
 		portalNavigationBar.setType(cmd.getType());
 		portalNavigationBar.setConfigJson(cmd.getConfigJson());
 		portalNavigationBar.setIconUri(cmd.getIconUri());
 		portalNavigationBar.setSelectedIconUri(cmd.getSelectedIconUri());
 		portalNavigationBar.setOperatorUid(UserContext.current().getUser().getId());
+		portalNavigationBar.setTopBarStyle(cmd.getTopBarStyle());
 		portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
 		return processPortalNavigationBarDTO(portalNavigationBar);
 	}
 
-	@Override
+    @Override
+    public void updatePortalNavigationBarOrder(List<Long> ids) {
+        for (int i = 0; i< ids.size(); i++) {
+            PortalNavigationBar portalNavigationBar = this.portalNavigationBarProvider.findPortalNavigationBarById(ids.get(i));
+            if (portalNavigationBar != null) {
+                portalNavigationBar.setDefaultOrder(i + 1);
+                this.portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
+            }
+        }
+    }
+
+    @Override
 	public void deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd) {
 
-		portalNavigationBarProvider.deletePortalNavigationBar(cmd.getId());
+	    //先更新剩下的主页签排序，再删除
+        PortalNavigationBar deleteNavigationBar = portalNavigationBarProvider.findPortalNavigationBarById(cmd.getId());
+        if (deleteNavigationBar != null) {
+            List<PortalNavigationBar> list = this.portalNavigationBarProvider.listPortalNavigationBarByOrder(deleteNavigationBar.getVersionId(), deleteNavigationBar.getDefaultOrder());
+            if (!CollectionUtils.isEmpty(list)) {
+                for (PortalNavigationBar portalNavigationBar : list) {
+                    portalNavigationBar.setDefaultOrder(portalNavigationBar.getDefaultOrder() - 1);
+                    this.portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
+                }
+            }
+        }
+        portalNavigationBarProvider.deletePortalNavigationBar(cmd.getId());
+
 	}
 
 	private PortalNavigationBar checkPortalNavigationBar(Long id){
@@ -1861,6 +1952,7 @@ public class PortalServiceImpl implements PortalService {
 							//删除已有的layout
 							deleteLayoutBeforePublish(namespaceId, cmd.getPublishType());
 
+
 							for (PortalLayout layout: layouts) {
 
 								//标准版不能删除
@@ -1870,7 +1962,8 @@ public class PortalServiceImpl implements PortalService {
 								//发布layout
 								publishLayout(layout, cmd.getVersionId(), cmd.getPublishType());
 							}
-
+                            //发布主页签 add by yanlong.liang 20181217
+                            publishNavigationBar(cmd.getVersionId(), cmd.getPublishType());
 
 
 						//正式发布之后，在此基础上生成小本版
@@ -2583,6 +2676,20 @@ public class PortalServiceImpl implements PortalService {
 			}
 		}
 
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			List<LaunchPadIndex> launchPadIndices = launchPadIndexProvider.queryLaunchPadIndexs(locator, 100, (locator1, query) -> {
+				query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.NAMESPACE_ID.eq(portalVersion.getNamespaceId()));
+				query.addConditions(Tables.EH_LAUNCH_PAD_INDEXS.PREVIEW_VERSION_ID.isNotNull());
+				return query;
+			});
+
+			if(launchPadIndices != null){
+				for (LaunchPadIndex index: launchPadIndices){
+					launchPadIndexProvider.deleteLaunchPadIndex(index);
+				}
+			}
+		}
 
 		List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(versionId);
 
@@ -2590,26 +2697,81 @@ public class PortalServiceImpl implements PortalService {
 			for (PortalNavigationBar na: portalNavigationBars){
 				LaunchPadIndex index = ConvertHelper.convert(na, LaunchPadIndex.class);
 
-				if(IndexType.fromCode(na.getType()) == IndexType.CONTAINER){
-					Container container = ConvertHelper.convert(index.getConfigJson(), Container.class);
-					List<PortalLaunchPadMapping> portalLaunchPadMappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.name(), container.getLayoutId(), null);
 
-					if(portalLaunchPadMappings != null && portalLaunchPadMappings.size() > 0){
-						container.setLayoutId(portalLaunchPadMappings.get(0).getLaunchPadContentId());
-					}
+				if(IndexType.fromCode(na.getType()) == IndexType.CONTAINER){
+					Container container = (Container) StringHelper.fromJsonString(index.getConfigJson(), Container.class);
+                    PortalLayout portalLayout = null;
+                    if (container.getLayoutId() != null) {
+                        portalLayout = this.portalLayoutProvider.findPortalLayoutById(container.getLayoutId());
+                    }
+                    if (portalLayout != null) {
+                        container.setLayoutName(portalLayout.getName());
+                    }
+                    if (TopBarStyle.LUCENCY_SHADE.getCode().equals(na.getTopBarStyle())) {
+                        container.setLayoutType(LayoutType.NAV_LUCENCY.getCode());
+                    }else if (TopBarStyle.OPAQUE_DEFORMATION.getCode().equals(na.getTopBarStyle())) {
+                        container.setLayoutType(LayoutType.NAV_OPAQUE.getCode());
+                    }else if (TopBarStyle.OPAQUE_STATIC.getCode().equals(na.getTopBarStyle())) {
+                        container.setLayoutType(LayoutType.NAV_STATIC.getCode());
+                    }else {
+                        if (portalLayout != null) {
+                            if (PortalLayoutType.ASSOCIATIONLAYOUT.getCode().equals(portalLayout.getType())) {
+                                container.setLayoutType(LayoutType.TAB.getCode());
+                            }
+                        }
+                    }
+//					List<PortalLaunchPadMapping> portalLaunchPadMappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.name(), container.getLayoutId(), null);
+//
+//					if(portalLaunchPadMappings != null && portalLaunchPadMappings.size() > 0){
+//						container.setLayoutId(portalLaunchPadMappings.get(0).getLaunchPadContentId());
+//					}
 
 					index.setConfigJson(container.toString());
 
 				}else if(IndexType.fromCode(na.getType()) == IndexType.APPLICATION){
 					//TODO  转换成router
 					Application application = new Application();
-					index.setConfigJson(application.toString());
-				}
+                    List<Long> appOriginIds = new ArrayList<>();
+                    JSONObject jsonObject = JSON.parseObject(index.getConfigJson());
+                    if (jsonObject.get("appOriginId") != null) {
+                        appOriginIds.add(Long.valueOf(jsonObject.get("appOriginId").toString()));
+                        List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsByOriginIds(versionId, appOriginIds);
 
+                        if(apps != null && apps.size() > 0) {
+                            ServiceModuleApp app = apps.get(0);
+
+                            ServiceModule module = serviceModuleProvider.findServiceModuleById(app.getModuleId());
+
+                            Byte clientHandlerType = 0;
+                            String host = "";
+                            if (module != null) {
+                                clientHandlerType = module.getClientHandlerType();
+                                host = module.getHost();
+                            }
+
+                            String appConfig = launchPadService.refreshActionData(app.getInstanceConfig());
+                            //填充路由信息
+                            RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null, null, null, clientHandlerType);
+
+                            if (StringUtils.isEmpty(host)) {
+                                host = "default";
+                            }
+
+                            String router = "zl://" + host + routerInfo.getPath() + "?" + routerInfo.getQuery();
+                            application.setRouter(router);
+                            index.setConfigJson(application.toString());
+                        }
+                    }
+
+				}
+                index.setName(na.getLabel());
 				index.setCreateTime(new Timestamp(System.currentTimeMillis()));
 				index.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 				index.setCreatorUid(UserContext.currentUserId());
-
+                if (PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW) {
+                    index.setPreviewVersionId(versionId);
+                    index.setStatus(null);
+                }
 				launchPadIndexProvider.createLaunchPadIndex(index);
 			}
 
@@ -3410,6 +3572,7 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalLaunchPadMapping> portalLaunchPadMappings = new ArrayList<>();
 		Timestamp createTimestamp = new Timestamp(System.currentTimeMillis());
 
+		Map<Long, Long> layoutIdMap = new HashMap<>();
 		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalLayouts.class), (long)portalLayouts.size() + 1);
 		for(PortalLayout layout: portalLayouts){
 			id++;
@@ -3417,6 +3580,10 @@ public class PortalServiceImpl implements PortalService {
 			portalContentScopes.addAll(newPortalContentScope);
 			List<PortalLaunchPadMapping> newPortalLaunchPadMapping = getNewPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.getCode(), layout.getId(), id);
 			portalLaunchPadMappings.addAll(newPortalLaunchPadMapping);
+            //发布后，主页签保存的LayoutId就消失了，现在用map来保存，然后在更新主页签的layouytId
+            // add by yanlong.liang 20181219
+			layoutIdMap.put(layout.getId(), id);
+
 
 			copyPortalItemGroupToNewVersion(namespaceId, layout.getId(), id, newVersionId);
 
@@ -3445,6 +3612,29 @@ public class PortalServiceImpl implements PortalService {
 
 		// 此时又发生了一个很伤心的事情，例如运营板块也包含了一些应用id，也是旧的
 		updateItemGroupConfig(namespaceId, newVersionId);
+
+		//生成新的主页签 add by yanlong.liang 20181219
+        List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(oldVersionId);
+        if (!CollectionUtils.isEmpty(portalNavigationBars)) {
+            for (PortalNavigationBar portalNavigationBar : portalNavigationBars) {
+                if(IndexType.fromCode(portalNavigationBar.getType()) == IndexType.CONTAINER) {
+                    Container container = (Container) StringHelper.fromJsonString(portalNavigationBar.getConfigJson(), Container.class);
+                    if (container != null && container.getLayoutId() != null) {
+                        Long newLayoutId = layoutIdMap.get(container.getLayoutId());
+                        if (newLayoutId != null) {
+                            container.setLayoutId(newLayoutId);
+                            portalNavigationBar.setConfigJson(container.toString());
+                        }
+                    }
+
+                }
+
+                PortalNavigationBar newPortalNavigationBar = ConvertHelper.convert(portalNavigationBar, PortalNavigationBar.class);
+                newPortalNavigationBar.setVersionId(newVersionId);
+                newPortalNavigationBar.setId(null);
+                this.portalNavigationBarProvider.createPortalNavigationBar(newPortalNavigationBar);
+            }
+        }
 
 	}
 

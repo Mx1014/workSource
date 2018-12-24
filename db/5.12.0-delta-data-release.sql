@@ -76,6 +76,11 @@ INSERT INTO `ehcore`.`eh_locale_templates` (`scope`, `code`, `locale`, `descript
 -- AUTHOR:st.zheng
 -- REMARK:资源预约3.8.3
 update eh_configurations set `value` = '/resource-rental/build/index.html#/resource-detail?namespaceId=%s&rentalSiteId=%s&detailPageType=%s&canRental=1&isApp=1#sign_suffix' where name = 'rental.resource.detail.url';
+
+-- AUTHOR:梁燕龙
+-- REMARK: 域空间管理v3.0 主页签
+DELETE from eh_launch_pad_indexs;
+DELETE from eh_portal_navigation_bars;
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base

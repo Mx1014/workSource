@@ -8,6 +8,7 @@ import java.util.Map;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.launchpad.ItemServiceCategryStatus;
 import com.everhomes.rest.portal.PortalPublishType;
 import com.everhomes.sequence.SequenceProvider;
@@ -854,7 +855,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 
 	@Override
-	public List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, List<Tuple<Byte, Long>> scopes, String categoryName, Byte displayFlag){
+	public List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, List<Tuple<Byte, Long>> scopes, String categoryName, Byte displayFlag, Byte moreOrderFlag){
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
 
@@ -890,7 +891,11 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		Condition previewCondition = getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName());
 		query.addConditions(previewCondition);
 		query.addGroupBy(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME);
-		query.addOrderBy(Tables.EH_LAUNCH_PAD_ITEMS.DEFAULT_ORDER.asc());
+		if (TrueOrFalseFlag.TRUE.getCode().equals(moreOrderFlag)) {
+            query.addOrderBy(Tables.EH_LAUNCH_PAD_ITEMS.MORE_ORDER.asc());
+        }else {
+            query.addOrderBy(Tables.EH_LAUNCH_PAD_ITEMS.DEFAULT_ORDER.asc());
+        }
 
 		List<LaunchPadItem> items = query.fetch().map((r) -> ConvertHelper.convert(r, LaunchPadItem.class));
 

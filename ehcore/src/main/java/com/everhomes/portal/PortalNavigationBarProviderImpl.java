@@ -7,6 +7,7 @@ import java.util.List;
 import com.everhomes.rest.portal.PortalNavigationBarStatus;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -72,10 +73,42 @@ public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvi
 
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_NAVIGATION_BARS)
 				.where(cond)
-				.orderBy(Tables.EH_PORTAL_NAVIGATION_BARS.ID.asc())
+				.orderBy(Tables.EH_PORTAL_NAVIGATION_BARS.DEFAULT_ORDER.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalNavigationBar.class));
 	}
-	
+
+	@Override
+	public List<PortalNavigationBar> listPortalNavigationBarByOrder(Long versionId, Integer order) {
+		Condition cond = Tables.EH_PORTAL_NAVIGATION_BARS.STATUS.ne(PortalNavigationBarStatus.INACTIVE.getCode());
+		if(null != versionId){
+			cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.VERSION_ID.eq(versionId));
+		}
+
+		if (order != null) {
+		    cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.DEFAULT_ORDER.gt(order));
+        }
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_NAVIGATION_BARS)
+				.where(cond)
+				.orderBy(Tables.EH_PORTAL_NAVIGATION_BARS.DEFAULT_ORDER.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, PortalNavigationBar.class));
+	}
+
+	@Override
+	public Integer maxOrder(Integer namespaceId, Long versionId) {
+		Condition cond = Tables.EH_PORTAL_NAVIGATION_BARS.STATUS.ne(PortalNavigationBarStatus.INACTIVE.getCode());
+		if(null != versionId){
+			cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.VERSION_ID.eq(versionId));
+		}
+
+		if (namespaceId != null) {
+            cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.NAMESPACE_ID.eq(namespaceId));
+        }
+
+		return getReadOnlyContext().select(DSL.max(Tables.EH_PORTAL_NAVIGATION_BARS.DEFAULT_ORDER)).from(Tables.EH_PORTAL_NAVIGATION_BARS)
+				.where(cond)
+				.fetchOneInto(Integer.class);
+	}
+
 	private EhPortalNavigationBarsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
