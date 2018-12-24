@@ -64,7 +64,7 @@ public class EnterpriseMomentTagProviderImpl implements EnterpriseMomentTagProvi
 			} else{
 				newEnterpriseMomentTag.setId(sameNameEnterpriseMomentTag.getId());
 				updateEnterpriseMomentTag(newEnterpriseMomentTag);
-				enterpriseMomentTags.add(sameNameEnterpriseMomentTag);
+				enterpriseMomentTags.add(newEnterpriseMomentTag);
 			}
 		}
 		return enterpriseMomentTags;
