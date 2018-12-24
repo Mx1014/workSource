@@ -7705,6 +7705,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @Override
     public GetUserListResponse getUserList(GetUserListCommand cmd) {
         GetUserListResponse response = new GetUserListResponse();
+        if (CollectionUtils.isEmpty(cmd.getIds())) {
+            return response;
+        }
         List<UserDTO> list = this.userProvider.getUserByIds(cmd.getIds());
         response.setUserDtos(list);
         return response;
