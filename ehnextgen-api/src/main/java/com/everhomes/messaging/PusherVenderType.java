@@ -2,7 +2,10 @@ package com.everhomes.messaging;
 
 public enum PusherVenderType {
     HUAWEI("huawei"),
-    XIAOMI("xiaomi")
+    XIAOMI("xiaomi"),
+    OPPO("oppo"),
+    MEIZU("meizu"),
+    GETUI("getui")
     ;
     
     private String code;
