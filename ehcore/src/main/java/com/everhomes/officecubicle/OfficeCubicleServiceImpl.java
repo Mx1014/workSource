@@ -3014,41 +3014,41 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(s.getId(),(byte)1);
 			}else{
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(s.getId(),(byte)2);
-//				QueryDefaultRuleAdminCommand cmd2 = new QueryDefaultRuleAdminCommand();
-//		        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(s.getNamespaceId(),
-//		                RentalV2ResourceType.STATION_BOOKING.getCode());
-//				cmd2.setResourceType(RentalV2ResourceType.STATION_BOOKING.getCode());
-//				cmd2.setResourceTypeId(type.getId());
-//				cmd2.setSourceId(s.getId());
-//				cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
-//				QueryDefaultRuleAdminResponse resp2 = rentalv2Service.queryDefaultRule(cmd2);
-//
-//				PriceRuleDTO dailyPriceRule = new PriceRuleDTO();
-//				PriceRuleDTO halfdailyPriceRule = new PriceRuleDTO();
-//				for (PriceRuleDTO priceRule :resp2.getPriceRules()){
-//					if (priceRule.getRentalType() ==RentalType.DAY.getCode()){
-//						dailyPriceRule = priceRule;
-//					}
-//					if (priceRule.getRentalType() ==RentalType.HALFDAY.getCode()){
-//						halfdailyPriceRule = priceRule;
-//					}
-//				}
-//				BigDecimal dailyPrice = new BigDecimal(0.00);
-//				BigDecimal halfdailyPrice = new BigDecimal(0.00);
-//				if(dailyPriceRule.getWorkdayPrice() != null){
-//					dailyPrice = dailyPriceRule.getWorkdayPrice();
-//				}
-//				if(halfdailyPriceRule.getWorkdayPrice()!=null){
-//					halfdailyPrice = halfdailyPriceRule.getWorkdayPrice();
-//				}
-//				if (dailyPriceRule.getWorkdayPrice()!=null && halfdailyPriceRule.getWorkdayPrice()==null){
-//					dto.setMinUnitPrice(dailyPriceRule.getWorkdayPrice());
-//				} else if (dailyPriceRule.getWorkdayPrice()==null && halfdailyPriceRule.getWorkdayPrice()!=null){
-//					dto.setMinUnitPrice(halfdailyPriceRule.getWorkdayPrice());
-//				} else {
-//					dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?
-//							halfdailyPrice:dailyPrice);
-//				}
+				QueryDefaultRuleAdminCommand cmd2 = new QueryDefaultRuleAdminCommand();
+		        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(s.getNamespaceId(),
+		                RentalV2ResourceType.STATION_BOOKING.getCode());
+				cmd2.setResourceType(RentalV2ResourceType.STATION_BOOKING.getCode());
+				cmd2.setResourceTypeId(type.getId());
+				cmd2.setSourceId(s.getId());
+				cmd2.setSourceType(RuleSourceType.RESOURCE.getCode());
+				QueryDefaultRuleAdminResponse resp2 = rentalv2Service.queryDefaultRule(cmd2);
+
+				PriceRuleDTO dailyPriceRule = new PriceRuleDTO();
+				PriceRuleDTO halfdailyPriceRule = new PriceRuleDTO();
+				for (PriceRuleDTO priceRule :resp2.getPriceRules()){
+					if (priceRule.getRentalType() ==RentalType.DAY.getCode()){
+						dailyPriceRule = priceRule;
+					}
+					if (priceRule.getRentalType() ==RentalType.HALFDAY.getCode()){
+						halfdailyPriceRule = priceRule;
+					}
+				}
+				BigDecimal dailyPrice = new BigDecimal(0.00);
+				BigDecimal halfdailyPrice = new BigDecimal(0.00);
+				if(dailyPriceRule.getWorkdayPrice() != null){
+					dailyPrice = dailyPriceRule.getWorkdayPrice();
+				}
+				if(halfdailyPriceRule.getWorkdayPrice()!=null){
+					halfdailyPrice = halfdailyPriceRule.getWorkdayPrice();
+				}
+				if (dailyPriceRule.getWorkdayPrice()!=null && halfdailyPriceRule.getWorkdayPrice()==null){
+					dto.setMinUnitPrice(dailyPriceRule.getWorkdayPrice());
+				} else if (dailyPriceRule.getWorkdayPrice()==null && halfdailyPriceRule.getWorkdayPrice()!=null){
+					dto.setMinUnitPrice(halfdailyPriceRule.getWorkdayPrice());
+				} else {
+					dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?
+							halfdailyPrice:dailyPrice);
+				}
 			}
 			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(s.getOwnerId(),s.getOwnerType(), s.getId(),null,null,null,null,null);
 			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(s.getOwnerId(),s.getOwnerType(),s.getId(),null,null,null,null);
