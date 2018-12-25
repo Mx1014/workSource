@@ -3083,12 +3083,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
     private void doDingxinQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys){
+        List<DoorAccessQRKeyDTO> result = qrKeys.stream().filter(qr -> qr.getQrDriver().equals(DoorAccessDriverType.DINGXIN.getCode())).collect(Collectors.toList());
+        if(!ListUtils.isEmpty(result)){
+            return;
+        }
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         qr.setCreateTimeMs(auth.getCreateTime().getTime());
         qr.setCreatorUid(auth.getApproveUserId());
         qr.setDoorGroupId(doorAccess.getId());
         qr.setDoorName(doorAccess.getName());
-        qr.setDoorDisplayName(doorAccess.getDisplayNameNotEmpty());
+        qr.setDoorDisplayName("门禁");
         String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
         if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
             qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
@@ -3273,11 +3277,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			}
 
 		}
-        LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0)); 
+        LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0));
         if (resp.getKeys() == null || resp.getKeys().size() ==0 ){
         	LOGGER.info(String.format("user{%d} has no valid auth,phone:%d",user.getId(),user.getIdentityNumberTag()));
         }
-        return resp;              
+        return resp;
      }
     
     public ListDoorAccessQRKeyResponse listDoorAccessQRKey2() {
