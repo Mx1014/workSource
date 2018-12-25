@@ -1266,6 +1266,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
             return order.getPrice();
         }else if (space.getRefundStrategy().equals(RentalOrderStrategy.NONE.getCode())){
         	return new BigDecimal(0);
+        }else if(space.getRefundStrategy() ==null){
+        	return new BigDecimal(0);
         }
         
         return order.getPrice();
@@ -3050,20 +3052,14 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 							halfdailyPrice:dailyPrice);
 				}
 			}
-			List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(s.getOwnerId(),s.getOwnerType(), s.getId(),null,null,null,null,null);
-			List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(s.getOwnerId(),s.getOwnerType(),s.getId(),null,null,null,null);
-			Integer stationSize = 0;
-			Integer roomSize = 0;
-			if (station !=null){
-				stationSize =station.size();
-			}
-			if (room!=null){
-				roomSize = room.size();
-			}
-			if (stationSize == 0 && roomSize==0){
+			Integer allPositonNums = null;
+			if (s.getShortRentNums()!=null){
+				allPositonNums = Integer.valueOf(s.getShortRentNums());
+			} else if (s.getShortRentNums()==null){
+				continue;
+			} else if (Integer.valueOf(s.getShortRentNums()) == 0){
 				continue;
 			}
-			Integer allPositonNums = stationSize + roomSize;
 			dto.setAllPositonNums(allPositonNums);
 			if (attachments!=null){
 				dto.setCoverUrl(this.contentServerService.parserUri(attachments.get(0).getContentUri(), EntityType.USER.getCode(),
