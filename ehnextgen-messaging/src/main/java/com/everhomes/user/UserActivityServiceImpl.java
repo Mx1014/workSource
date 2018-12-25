@@ -989,10 +989,13 @@ public class UserActivityServiceImpl implements UserActivityService {
         User user = UserContext.current().getUser();
         JSONObject jsonObject = getUserVipLevel(user.getId(), user.getNamespaceId());
         if (jsonObject != null) {
-            Integer level = jsonObject.getInteger("membershipLevel");
-            String levelText = jsonObject.getString("name");
-            userService.updateUserVipLevel(user.getId(), level, levelText);
-            rsp.setVipLevelText(levelText);
+            JSONObject responseJson = JSONObject.parseObject(jsonObject.get("response").toString());
+            if (responseJson != null) {
+                Integer level = responseJson.getInteger("membershipLevel");
+                String levelText = responseJson.getString("name");
+                userService.updateUserVipLevel(user.getId(), level, levelText);
+                rsp.setVipLevelText(levelText);
+            }
         }
         BizMyUserCenterCountResponse response = fetchBizMyUserCenterCount(user);
 
