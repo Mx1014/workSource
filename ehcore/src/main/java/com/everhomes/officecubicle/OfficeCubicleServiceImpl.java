@@ -3014,6 +3014,21 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					dto.setMinUnitPrice(roomMinPrice.compareTo(stationMinPrice)>0?stationMinPrice:roomMinPrice);
 				}
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(s.getId(),(byte)1);
+				List<OfficeCubicleStation> station = officeCubicleProvider.getOfficeCubicleStation(s.getOwnerId(),s.getOwnerType(), s.getId(),null,null,null,null,null);
+				List<OfficeCubicleRoom> room = officeCubicleProvider.getOfficeCubicleRoom(s.getOwnerId(),s.getOwnerType(),s.getId(),null,null,null,null);
+				Integer stationSize = 0;
+				Integer roomSize = 0;
+				if (station !=null){
+					stationSize =station.size();
+				}
+				if (room!=null){
+					roomSize = room.size();
+				}
+				if (stationSize == 0 && roomSize==0){
+					continue;
+				}
+				Integer allPositonNums = stationSize + roomSize;
+				dto.setAllPositonNums(allPositonNums);
 			}else{
 				attachments = this.officeCubicleProvider.listAttachmentsBySpaceId(s.getId(),(byte)2);
 				QueryDefaultRuleAdminCommand cmd2 = new QueryDefaultRuleAdminCommand();
@@ -3051,16 +3066,18 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					dto.setMinUnitPrice(dailyPrice.compareTo(halfdailyPrice)>0?
 							halfdailyPrice:dailyPrice);
 				}
+				Integer allPositonNums = null;
+				if (s.getShortRentNums()!=null){
+					allPositonNums = Integer.valueOf(s.getShortRentNums());
+				} else if (s.getShortRentNums()==null){
+					continue;
+				} else if (Integer.valueOf(s.getShortRentNums()) == 0){
+					continue;
+				}
+				dto.setAllPositonNums(allPositonNums);
 			}
-			Integer allPositonNums = null;
-			if (s.getShortRentNums()!=null){
-				allPositonNums = Integer.valueOf(s.getShortRentNums());
-			} else if (s.getShortRentNums()==null){
-				continue;
-			} else if (Integer.valueOf(s.getShortRentNums()) == 0){
-				continue;
-			}
-			dto.setAllPositonNums(allPositonNums);
+
+
 			if (attachments!=null){
 				dto.setCoverUrl(this.contentServerService.parserUri(attachments.get(0).getContentUri(), EntityType.USER.getCode(),
 						UserContext.current().getUser().getId()));
