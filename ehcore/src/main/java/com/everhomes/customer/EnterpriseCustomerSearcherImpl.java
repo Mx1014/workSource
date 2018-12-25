@@ -613,7 +613,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0L;
+        Long anchor = 1L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -621,7 +621,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
-        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setFrom((anchor.intValue() - 1 ) * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
         if(cmd.getSortField() != null && cmd.getSortType() != null) {
             if(cmd.getSortType() == 0) {
@@ -633,6 +633,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.addSort("id", SortOrder.DESC);
         }
         SearchResponse rsp = builder.execute().actionGet();
+        Long totalHits = rsp.getHits().getTotalHits();
 
         if(LOGGER.isDebugEnabled())
             LOGGER.info("EnterpriseCustomerSearcherImpl query builder: {}, rsp: {}", builder, rsp);
@@ -647,6 +648,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
         List<EnterpriseCustomerDTO> dtos = new ArrayList<>();
         Map<Long, EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomersByIds(ids);
+        response.setTotalNum(totalHits);
+
 
         if(cmd.getConvertFlag() == null || cmd.getConvertFlag() == 0) {
             if (customers != null && customers.size() > 0) {

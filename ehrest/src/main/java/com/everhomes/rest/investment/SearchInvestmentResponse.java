@@ -22,6 +22,16 @@ public class SearchInvestmentResponse {
 
     private Long nextPageAnchor;
 
+    private Long totalNum;
+
+    public Long getTotalNum() {
+        return totalNum;
+    }
+
+    public void setTotalNum(Long totalNum) {
+        this.totalNum = totalNum;
+    }
+
     public List<EnterpriseCustomerDTO> getDtos() {
         return dtos;
     }
