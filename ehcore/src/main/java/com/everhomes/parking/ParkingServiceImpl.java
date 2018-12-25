@@ -2825,7 +2825,7 @@ public class ParkingServiceImpl implements ParkingService {
 			for (ParkingCardRequestType type: types) {
 	 			for (ParkingRechargeRateDTO rate :rates){
 					ParkingCardRequestTypeDTO dto = new ParkingCardRequestTypeDTO();
-					if (type.getCardTypeId().equals(rate.getCardTypeId())){
+					if (type.getCardTypeId().equals(rate.getCardTypeId())&& rate.getMonthCount().intValue() == 1){
 						dto = ConvertHelper.convert(type, ParkingCardRequestTypeDTO.class);
 						dtos.add(dto);
 					}
