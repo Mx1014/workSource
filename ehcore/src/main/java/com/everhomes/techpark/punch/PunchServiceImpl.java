@@ -10992,7 +10992,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setUserId(statistic.getUserId());
         if(null != statistic.getUserId() && statistic.getUserId() > 0L){
             User u = this.userProvider.findUserById(statistic.getUserId());
-            dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(), EntityType.USER.getCode(),u.getId()));
+            if(u != null){
+            	dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(), EntityType.USER.getCode(),u.getId()));
+            }
         }
         dto.setDepartmentId(statistic.getDeptId());
         if(null != statistic.getDeptId()){
