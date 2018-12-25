@@ -8121,6 +8121,7 @@ public class PunchServiceImpl implements PunchService {
             if (null == pr)
                 continue;
             PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
+            dto.setGroupName(pr.getName());
             //打卡时间
             dto.setTimeRules(processPunchTimeRuleDTOs(r.getId(), pr.getStatus()));
             //打卡地点和WiFi
