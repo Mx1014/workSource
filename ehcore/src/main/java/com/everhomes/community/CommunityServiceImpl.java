@@ -2551,6 +2551,11 @@ public class CommunityServiceImpl implements CommunityService {
             if (user != null) {
                 communityUserAddressDTO = ConvertHelper.convert(user, CommunityUserAddressDTO.class);
                 communityUserAddressDTO.setIdentityNumber(user.getIdentityNumberTag());
+                //最新活跃时间 add by sfyan 20170620
+                List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
+                if(userActivities.size() > 0){
+                    communityUserAddressDTO.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+                }
             }
 
             //是否展示会员等级
