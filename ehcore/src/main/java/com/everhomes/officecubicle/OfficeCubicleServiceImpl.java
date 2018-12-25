@@ -1197,9 +1197,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		List<OfficeCubicleRefundTips> refundTips = officeCubicleProvider.listRefundTips(cmd.getSpaceId(), null);
 		if (cmd.getOrderId() !=null){
 			OfficeCubicleRentOrder order = officeCubicleProvider.findOfficeCubicleRentOrderById(cmd.getOrderId());
-			BigDecimal refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space);
+			BigDecimal refundPrice = new BigDecimal(0);
+			OfficeCubicleRefundRule orderRule = new OfficeCubicleRefundRule();
+			if (space.getRefundStrategy() != null){
+				refundPrice = calculateRefundAmount(order,System.currentTimeMillis(),space);
+				orderRule = findOfficeCubicleRefundRule(order,System.currentTimeMillis(),space);
+			}
 			resp.setRefundPrice(refundPrice);
-			OfficeCubicleRefundRule orderRule = findOfficeCubicleRefundRule(order,System.currentTimeMillis(),space);
 			BigDecimal refundRate = new BigDecimal(0);
 			if (orderRule != null){
 				refundRate = new BigDecimal(orderRule.getFactor());
