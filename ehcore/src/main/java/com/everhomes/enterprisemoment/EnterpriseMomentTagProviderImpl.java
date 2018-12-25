@@ -63,8 +63,8 @@ public class EnterpriseMomentTagProviderImpl implements EnterpriseMomentTagProvi
 				enterpriseMomentTags.add(newEnterpriseMomentTag);
 			} else{
 				newEnterpriseMomentTag.setId(sameNameEnterpriseMomentTag.getId());
-				updateEnterpriseMomentTag(sameNameEnterpriseMomentTag);
-				enterpriseMomentTags.add(sameNameEnterpriseMomentTag);
+				updateEnterpriseMomentTag(newEnterpriseMomentTag);
+				enterpriseMomentTags.add(newEnterpriseMomentTag);
 			}
 		}
 		return enterpriseMomentTags;
@@ -78,6 +78,7 @@ public class EnterpriseMomentTagProviderImpl implements EnterpriseMomentTagProvi
 		enterpriseMomentTag.setName(name);
 		enterpriseMomentTag.setCreatorUid(creatorUid);
 		enterpriseMomentTag.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		enterpriseMomentTag.setDeleteFlag((byte)0);
 		return enterpriseMomentTag;
 	}
 

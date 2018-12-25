@@ -510,7 +510,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 
 		Map<String, Object> map = new HashMap<>();
 		map.put("requestorName", request.getRequestorName());
-		map.put("requestorEnterpriseName", request.getRequestorEnterpriseName());
+		map.put("requestorEnterpriseName", request.getRequestorEnterpriseName() == null ?"无": request.getRequestorEnterpriseName());
 		map.put("items", getItemName(items));
 		map.put("totalNum", items.stream().mapToInt(RelocationRequestItemDTO::getItemQuantity).summaryStatistics().getSum());
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

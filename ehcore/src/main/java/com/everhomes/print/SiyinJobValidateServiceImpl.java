@@ -43,6 +43,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -183,13 +184,17 @@ public class SiyinJobValidateServiceImpl {
 	public void createOrder(SiyinPrintRecord record){
 		//支付和合并订单，必须上锁。
 		coordinationProvider.getNamedLock(CoordinationLocks.PRINT_ORDER_LOCK_FLAG.getCode()).enter(()->{
-			// 记得上锁 PRINT_ORDER_LOCK_FLAG
-           //存在记录，不做重复计算
-           //获取未支付/未锁定的订单，如没有获取到则创建一个新订单
-           SiyinPrintOrder order = getPrintOrder(record);
+
+			List<SiyinPrintSetting> settings = siyinPrintSettingProvider.listSiyinPrintSettingByOwner(PrintOwnerType.COMMUNITY.getCode(), record.getOwnerId());
+			//获取价格map
+			Map<String, BigDecimal> priceMap = getPriceMap(settings);
+			
+			// 存在记录，不做重复计算
+			// 获取未支付/未锁定的订单，如没有获取到则创建一个新订单
+			SiyinPrintOrder order = getPrintOrder(record, priceMap);
            
            //将记录合并到订单上,并更新到数据库
-           mergeRecordToOrder(record,order);
+           mergeRecordToOrder(record,order,priceMap);
            dbProvider.execute(r->{
         	   
         	   //订单金额为0，那么设置成支付状态。
@@ -395,8 +400,17 @@ public class SiyinJobValidateServiceImpl {
 		}
 		return null;
 	}
-	private SiyinPrintOrder getPrintOrder(SiyinPrintRecord record) {
-		SiyinPrintOrder order = siyinPrintOrderProvider.findUnlockedOrderByUserId(record.getCreatorUid(),record.getJobType(),record.getOwnerType(),record.getOwnerId(), record.getPrinterName());
+	private SiyinPrintOrder getPrintOrder(SiyinPrintRecord record, Map<String, BigDecimal> priceMap) {
+		SiyinPrintOrder unLockOrder = siyinPrintOrderProvider.findUnlockedOrderByUserId(record.getCreatorUid(),record.getJobType(),record.getOwnerType(),record.getOwnerId(), record.getPrinterName());
+		
+		//检查当前记录是否可以和之前的订单合并
+		SiyinPrintOrder order = checkOnCreatingOrder(unLockOrder, record, priceMap);
+		if (null != unLockOrder && null == order) {
+			//如果不能合并，将旧的订单进行锁定
+			unLockOrder.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+			siyinPrintOrderProvider.updateSiyinPrintOrder(unLockOrder);
+		}
+		
         if(order == null){
         	order = new SiyinPrintOrder();
         	order.setNamespaceId(record.getNamespaceId());
@@ -431,7 +445,7 @@ public class SiyinJobValidateServiceImpl {
         }
 		return order;
 	}
-	
+
 	private String getPrinterNameBySerialNumber(String serialNumber) {
 		
 		SiyinPrintPrinter printer = siyinPrintPrinterProvider.findSiyinPrintPrinterByReadName(serialNumber);
@@ -459,10 +473,7 @@ public class SiyinJobValidateServiceImpl {
 		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
 	}
 	
-	private void mergeRecordToOrder(SiyinPrintRecord record, SiyinPrintOrder order) {
-		List<SiyinPrintSetting> settings = siyinPrintSettingProvider.listSiyinPrintSettingByOwner(PrintOwnerType.COMMUNITY.getCode(), record.getOwnerId());
-		//获取价格map
-		Map<String, BigDecimal> priceMap = getPriceMap(settings);
+	private void mergeRecordToOrder(SiyinPrintRecord record, SiyinPrintOrder order, Map<String, BigDecimal> priceMap) {
 		
 		//订单为新创建的情况
 		List<SiyinPrintRecord> list = null;
@@ -561,32 +572,9 @@ public class SiyinJobValidateServiceImpl {
 	 *计算订单价格 
 	 */
 	private BigDecimal calculateOrderTotalAmount(List<SiyinPrintRecord> list, Map<String, BigDecimal> priceMap) {
-		BigDecimal defaultdecimal = new BigDecimal(configurationProvider.getValue(PrintErrorCode.PRINT_DEFAULT_PRICE,"0.1"));
 		BigDecimal totolamount = new BigDecimal(0);
 		for (SiyinPrintRecord record : list) {
-			String key = "";
-			PrintJobTypeType jobType = PrintJobTypeType.fromCode(record.getJobType());
-			if(jobType == PrintJobTypeType.SCAN){//如果是扫描
-				if(record.getColorSurfaceCount() != 0){//彩色扫描面数不为空,计算 值
-					key = record.getJobType()+"-"+PrintColorType.COLOR.getCode();
-					totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal,record.getColorSurfaceCount()));
-				}
-				
-				if(record.getMonoSurfaceCount() != 0){//黑白计算
-					key = record.getJobType()+"-"+PrintColorType.BLACK_WHITE.getCode();
-					totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal,record.getMonoSurfaceCount()));
-				}
-			}else{//打印和复印
-				if(record.getColorSurfaceCount() != 0){//彩色扫描面数不为空,计算 值
-					key = record.getJobType()+"-"+record.getPaperSize()+"-"+PrintColorType.COLOR.getCode();
-					totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal,record.getColorSurfaceCount()));
-				}
-				
-				if(record.getMonoSurfaceCount() != 0){//黑白计算
-					key = record.getJobType()+"-"+record.getPaperSize()+"-"+PrintColorType.BLACK_WHITE.getCode();
-					totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal,record.getMonoSurfaceCount()));
-				}
-			}
+			totolamount = totolamount.add(getPriceByRecord(record, priceMap));
 		}
 		return totolamount;
 	}
@@ -648,7 +636,74 @@ public class SiyinJobValidateServiceImpl {
 		return defaultText;
 	 }
 	 
-	 private String getLocalActivityString(String code){
-		 return getLocalActivityString(code,"");
-	 }
+	/**
+	 * 因为一次打印过程，司印可能通知左邻多次，故这里需要判断此次记录是否属于上一次未锁定的订单
+	 * @param unlockOrder
+	 * @param record
+	 * @param priceMap
+	 * @return
+	 */
+	private SiyinPrintOrder checkOnCreatingOrder(SiyinPrintOrder unlockOrder, SiyinPrintRecord record, Map<String, BigDecimal> priceMap) {
+		
+		if (null == unlockOrder) {
+			return null;
+		}
+		
+		//1.如果打印/扫描/复印 时间距离订单上一次更新时间超过20分钟，则认为是不同的订单。
+		if (isOrderOutdated(unlockOrder)) {
+			return null;
+		}
+		
+		// 2.如果旧的订单价格为0，新的不为0，认为是不同订单。
+		BigDecimal currentPrice = getPriceByRecord(record, priceMap);
+		if (unlockOrder.getOrderTotalFee().compareTo(new BigDecimal("0")) ==  0 && currentPrice.compareTo(new BigDecimal("0")) > 0) {
+			return null;
+		}
+		
+		return unlockOrder;
+	}
+	
+	private boolean isOrderOutdated(SiyinPrintOrder order) {
+		Timestamp orderTime = order.getCreateTime();
+		if (null != order.getOperateTime()) {
+			orderTime = order.getOperateTime();
+		}
+
+		int diffMinutes = configurationProvider.getIntValue(PrintErrorCode.PRINT_SIYIN_ORDER_DIFF_TIME, 20);
+
+		return ((int) (System.currentTimeMillis() - orderTime.getTime())) / (1000 * 60) > diffMinutes;
+	}
+	
+	private BigDecimal getPriceByRecord(SiyinPrintRecord record, Map<String, BigDecimal> priceMap) {
+
+		BigDecimal defaultdecimal = new BigDecimal(
+				configurationProvider.getValue(PrintErrorCode.PRINT_DEFAULT_PRICE, "0.0"));
+		
+		BigDecimal totolamount = new BigDecimal(0);
+		String key = "";
+		PrintJobTypeType jobType = PrintJobTypeType.fromCode(record.getJobType());
+		if (jobType == PrintJobTypeType.SCAN) {// 如果是扫描
+			if (record.getColorSurfaceCount() != 0) {// 彩色扫描面数不为空,计算 值
+				key = record.getJobType() + "-" + PrintColorType.COLOR.getCode();
+				totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal, record.getColorSurfaceCount()));
+			}
+
+			if (record.getMonoSurfaceCount() != 0) {// 黑白计算
+				key = record.getJobType() + "-" + PrintColorType.BLACK_WHITE.getCode();
+				totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal, record.getMonoSurfaceCount()));
+			}
+		} else {// 打印和复印
+			if (record.getColorSurfaceCount() != 0) {// 彩色扫描面数不为空,计算 值
+				key = record.getJobType() + "-" + record.getPaperSize() + "-" + PrintColorType.COLOR.getCode();
+				totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal, record.getColorSurfaceCount()));
+			}
+
+			if (record.getMonoSurfaceCount() != 0) {// 黑白计算
+				key = record.getJobType() + "-" + record.getPaperSize() + "-" + PrintColorType.BLACK_WHITE.getCode();
+				totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal, record.getMonoSurfaceCount()));
+			}
+		}
+
+		return totolamount;
+	}
 }

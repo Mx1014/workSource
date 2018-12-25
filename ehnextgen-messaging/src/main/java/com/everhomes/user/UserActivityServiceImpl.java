@@ -989,10 +989,13 @@ public class UserActivityServiceImpl implements UserActivityService {
         User user = UserContext.current().getUser();
         JSONObject jsonObject = getUserVipLevel(user.getId(), user.getNamespaceId());
         if (jsonObject != null) {
-            Integer level = jsonObject.getInteger("membershipLevel");
-            String levelText = jsonObject.getString("name");
-            userService.updateUserVipLevel(user.getId(), level, levelText);
-            rsp.setVipLevelText(levelText);
+            JSONObject responseJson = JSONObject.parseObject(jsonObject.get("response").toString());
+            if (responseJson != null) {
+                Integer level = responseJson.getInteger("membershipLevel");
+                String levelText = responseJson.getString("name");
+                userService.updateUserVipLevel(user.getId(), level, levelText);
+                rsp.setVipLevelText(levelText);
+            }
         }
         BizMyUserCenterCountResponse response = fetchBizMyUserCenterCount(user);
 
@@ -1030,19 +1033,13 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     public JSONObject getUserVipLevel(Long userId, Integer namespaceId){
         String url = configurationProvider.getValue(namespaceId, ConfigConstants.USER_VIP_LEVEL_URL, "") + "/prmt/member/getUserScoresByUserId";
+        url += "?userId=" + userId + "&namespaceId=" + namespaceId;
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
         JSONObject result = null;
         try{
             httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(url);
-            httpPost.addHeader("content-type","application/json");
-            JSONObject jsonParam = new JSONObject();
-            jsonParam.put("userId", userId);
-            jsonParam.put("namespaceId", namespaceId);
-            StringEntity entity = new StringEntity(jsonParam.toString(),"utf-8");
-            entity.setContentType("application/json");
-            httpPost.setEntity(entity);
             RequestConfig requestConfig = RequestConfig.custom()
                     .setConnectTimeout(5000).setConnectionRequestTimeout(5000)
                     .setSocketTimeout(5000).build();

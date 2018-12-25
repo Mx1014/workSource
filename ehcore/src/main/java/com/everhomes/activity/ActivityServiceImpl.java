@@ -1336,8 +1336,13 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         BigDecimal amout = activity.getChargePrice();
         if(amout == null){
             createPurchaseOrderCommand.setAmount(new BigDecimal(0).longValue());
+        } else {
+            createPurchaseOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
         }
-        createPurchaseOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
+
+        if(cmd.getPaymentType() != null){
+            createPurchaseOrderCommand.setPaymentType(cmd.getPaymentType());
+        }
 
         createPurchaseOrderCommand.setAccountCode(generateAccountCode());
         createPurchaseOrderCommand.setClientAppName(cmd.getClientAppName());

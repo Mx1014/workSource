@@ -378,45 +378,45 @@ public class EnterpriseMomentServiceImpl implements EnterpriseMomentService {
 
     @Override
     public MomentDTO getMomentDetail(GetMomentDetailCommand cmd) {
-
-        if (!checkUserMomentPrivilege(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), UserContext.currentUserId(),
-                cmd.getAppId(), cmd.getMomentId(), PrivilegeType.VIEW)) {
-        	throw RuntimeErrorException.errorWith(EnterpriseMomentConstants.ERROR_SCOPE, EnterpriseMomentConstants.ERROR_PRIVILEGE, "没有权限");
-        }
         EnterpriseMoment moment = enterpriseMomentProvider.findEnterpriseMomentById(cmd.getMomentId());
-
+        if (moment == null || TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(moment.getDeleteFlag())) {
+            throw RuntimeErrorException.errorWith(EnterpriseMomentConstants.ERROR_SCOPE, EnterpriseMomentConstants.ERROR_MOMENT_DELETED, "动态已删除");
+        }
+        if (!checkUserMomentPrivilege(moment, UserContext.currentUserId(), cmd.getAppId(), PrivilegeType.VIEW)) {
+            throw RuntimeErrorException.errorWith(EnterpriseMomentConstants.ERROR_SCOPE, EnterpriseMomentConstants.ERROR_PRIVILEGE, "没有权限");
+        }
         return processMomentDTO(moment, false);
     }
 
-
     @Override
-	public void deleteMoment(DeleteMomentCommand cmd) {
-        if(!checkUserMomentPrivilege(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), UserContext.currentUserId(),
-                cmd.getAppId(), cmd.getMomentId(),PrivilegeType.OPERATE)){
+    public void deleteMoment(DeleteMomentCommand cmd) {
+        EnterpriseMoment moment = enterpriseMomentProvider.findEnterpriseMomentById(cmd.getMomentId());
+        // 动态不存在直接提示删除成功
+        if (moment == null) {
+            return;
+        }
+        if (!checkUserMomentPrivilege(moment, UserContext.currentUserId(), cmd.getAppId(), PrivilegeType.OPERATE)) {
             throw RuntimeErrorException.errorWith(EnterpriseMomentConstants.ERROR_SCOPE, EnterpriseMomentConstants.ERROR_PRIVILEGE, "没有权限");
         }
+        // 动态已删除直接提示删除成功
+        if (TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(moment.getDeleteFlag())) {
+            return;
+        }
         enterpriseMomentProvider.deleteEnterpriseMoment(cmd.getMomentId());
-	}
+    }
 
-    private Boolean checkUserMomentPrivilege(Integer currentNamespaceId, Long organizationId, Long userId, Long appId, Long momentId, PrivilegeType privilegeType) {
-        EnterpriseMoment moment = enterpriseMomentProvider.findEnterpriseMomentById(momentId);
-        if(moment == null){
-        	throw RuntimeErrorException.errorWith(EnterpriseMomentConstants.ERROR_SCOPE, EnterpriseMomentConstants.ERROR_NO_MOMENT, "动态已删除");
-        }
-        if(TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(moment.getDeleteFlag())){
-        	throw RuntimeErrorException.errorWith(EnterpriseMomentConstants.ERROR_SCOPE, EnterpriseMomentConstants.ERROR_MOMENT_DELETED, "动态已删除");
-        }
+    private Boolean checkUserMomentPrivilege(EnterpriseMoment moment, Long userId, Long appId, PrivilegeType privilegeType) {
         switch (privilegeType) {
             case VIEW:
                 //检查是否在scope内,如果在就返回鉴权成功,如果不在就检查是否为可操作人
-                List<EnterpriseMomentScope> scopes = enterpriseMomentScopeProvider.listEnterpriseMomentScopeByMomentId(moment.getNamespaceId(), moment.getOrganizationId(), momentId);
+                List<EnterpriseMomentScope> scopes = enterpriseMomentScopeProvider.listEnterpriseMomentScopeByMomentId(moment.getNamespaceId(), moment.getOrganizationId(), moment.getId());
                 EnterpriseMomentScope scope = findUserScope(scopes, moment.getOrganizationId(), userId);
-                if(scope != null) {
+                if (scope != null) {
                     return true;
                 }
             case OPERATE:
                 //管理员和创建人是可操作人
-                if (checkAdmin(appId, currentNamespaceId, organizationId, userId)) {
+                if (checkAdmin(appId, moment.getNamespaceId(), moment.getOrganizationId(), userId)) {
                     return true;
                 } else if (moment.getCreatorUid().equals(userId)) {
                     return true;
@@ -480,7 +480,14 @@ public class EnterpriseMomentServiceImpl implements EnterpriseMomentService {
 				buildMomentTagDTO(null, localeStringService.getLocalizedString(EnterpriseMomentConstants.INIT_TAG_SCOPE, EnterpriseMomentConstants.INIT_TAG4, local, "")),
 				buildMomentTagDTO(null, localeStringService.getLocalizedString(EnterpriseMomentConstants.INIT_TAG_SCOPE, EnterpriseMomentConstants.INIT_TAG5, local, ""))
 		);
-		enterpriseMomentTagProvider.batchCreateEnterpriseMomentTag(namespaceId, creatorUid, organizationId, addTags);
+		coordinationProvider.getNamedLock(CoordinationLocks.INIT_DEFAULT_ENTERPRISE_MOMENT_TAG.getCode() + organizationId).enter(() -> {
+			//再验证一遍
+			if(!enterpriseMomentTagProvider.isNeedInitTag(namespaceId, organizationId)){
+				return null;
+			}
+			enterpriseMomentTagProvider.batchCreateEnterpriseMomentTag(namespaceId, creatorUid, organizationId, addTags);
+			return null;
+		});
 		return enterpriseMomentTagProvider.listEnterpriseMomentTag(namespaceId, organizationId);
 	}
 
@@ -512,8 +519,9 @@ public class EnterpriseMomentServiceImpl implements EnterpriseMomentService {
 		List<MomentTagDTO> updateTagDTOSTemp = updateTagDTOS;
         List<MomentTagDTO> addTagDTOSTemp = addTagDTOS;
 		dbProvider.execute(transactionStatus -> {
-			enterpriseMomentTagProvider.batchUpdateEnterpriseMomentTag(namespaceId, userId, organizationId, updateTagDTOSTemp);
-			enterpriseMomentTagProvider.batchDeleteEnterpriseMomentTag(namespaceId, userId, organizationId, deleteTagDTOS);
+            //这里要严格按照删除、更新、创建的顺序
+            enterpriseMomentTagProvider.batchDeleteEnterpriseMomentTag(namespaceId, userId, organizationId, deleteTagDTOS);
+            enterpriseMomentTagProvider.batchUpdateEnterpriseMomentTag(namespaceId, userId, organizationId, updateTagDTOSTemp);
 			enterpriseMomentTagProvider.batchCreateEnterpriseMomentTag(namespaceId, userId, organizationId, addTagDTOSTemp);
 			return null;
 		});
@@ -688,16 +696,14 @@ public class EnterpriseMomentServiceImpl implements EnterpriseMomentService {
 
     @Override
     public ListMomentMessagesResponse listMomentMessages(ListMomentMessagesCommand cmd) {
-
         ListMomentMessagesResponse response = new ListMomentMessagesResponse();
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        int pageSize = (cmd.getPageSize() == null) ? 30 : cmd.getPageSize();
+        int pageSize = (cmd.getPageSize() == null) ? 25 : cmd.getPageSize();
         if (TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(cmd.getNewMessageFlag())) {
             pageSize = getUserNewMessageCount(cmd.getOrganizationId(), UserContext.currentUserId());
-            // 新消息数量置空
-            if (pageSize > 30) {
-                //超过30条只显示第一页三十条,不超过30条,显示新消息数量
-                pageSize = 30;
+            if (pageSize > 25) {
+                //超过25条只显示第一页三十条,不超过25条,显示新消息数量
+                pageSize = 25;
             }
         }
         //先查询pagesize 然后再看pageAnchor因为这里要清除新消息
@@ -776,8 +782,8 @@ public class EnterpriseMomentServiceImpl implements EnterpriseMomentService {
 
     @Override
     public void createNewMessageAfterDoFavourite(EnterpriseMoment moment, EnterpriseMomentFavourite favourite) {
-        // 点赞自己发布的动态或者该动态已被删除则不需要创建历史消息
-        if (UserContext.currentUserId().equals(moment.getCreatorUid()) || TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(moment.getDeleteFlag())) {
+        // 该动态已被删除则不需要创建历史消息
+        if (TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(moment.getDeleteFlag())) {
             return;
         }
         Long userId = UserContext.currentUserId();

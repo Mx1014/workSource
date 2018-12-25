@@ -43,26 +43,6 @@ public class EnterpriseMomentScopeProviderImpl implements EnterpriseMomentScopeP
 	}
 
 	@Override
-	public void updateEnterpriseMomentScope(EnterpriseMomentScope enterpriseMomentScope) {
-		assert (enterpriseMomentScope.getId() != null);
-		getReadWriteDao().update(enterpriseMomentScope);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseMomentScopes.class, enterpriseMomentScope.getId());
-	}
-
-	@Override
-	public EnterpriseMomentScope findEnterpriseMomentScopeById(Long id) {
-		assert (id != null);
-		return ConvertHelper.convert(getReadOnlyDao().findById(id), EnterpriseMomentScope.class);
-	}
-	
-	@Override
-	public List<EnterpriseMomentScope> listEnterpriseMomentScope() {
-		return getReadOnlyContext().select().from(Tables.EH_ENTERPRISE_MOMENT_SCOPES)
-				.orderBy(Tables.EH_ENTERPRISE_MOMENT_SCOPES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, EnterpriseMomentScope.class));
-	}
-
-	@Override
 	public List<EnterpriseMomentScope> listEnterpriseMomentScopeByMomentId(Integer namespaceId, Long organizationId, Long momentId) {
 		Result<Record> records = getReadOnlyContext().select().from(Tables.EH_ENTERPRISE_MOMENT_SCOPES)
 				.where(Tables.EH_ENTERPRISE_MOMENT_SCOPES.NAMESPACE_ID.eq(namespaceId))
