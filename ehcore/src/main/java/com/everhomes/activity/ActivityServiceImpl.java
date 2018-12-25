@@ -1342,6 +1342,9 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 
         if(cmd.getPaymentType() != null){
             createPurchaseOrderCommand.setPaymentType(cmd.getPaymentType());
+            if(cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_ORG_PAY.getCode()){
+                createPurchaseOrderCommand.setCommitFlag(1);
+            }
         }
 
         createPurchaseOrderCommand.setAccountCode(generateAccountCode());
