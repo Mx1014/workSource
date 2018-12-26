@@ -12512,8 +12512,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 else{
                 	//始终都要发消息
                     organizationMember.setOrganizationId(enterpriseId);
-                	//2018年10月17日 修改为新注册发消息,其它不发消息;18/12/12 注释去掉，
-                    sendMessageForContactApproved(organizationMember);
+                	//2018年10月17日 修改为新注册发消息,其它不发消息;
+                    //发消息在上面的joinOrganizationAfterOperation(organizationMember,false);方法内发
+//                    sendMessageForContactApproved(organizationMember);
                 }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
