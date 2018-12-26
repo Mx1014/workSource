@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.security.Security;
 import java.sql.Timestamp;
+import java.text.Collator;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1300,7 +1301,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         doorAuth.setNickname(getRealName(ConvertHelper.convert(custom, User.class)));
                         }
 
-                    Long authId = doorAuthProvider.createDoorAuth(doorAuth);
+                    doorAuthProvider.createDoorAuth(doorAuth);
 
                     //face++门禁，若有开门权限且有照片，发送照片到face++服务器
                     if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
@@ -1381,8 +1382,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAccessProvider.createAclinkFormValues(notice);
             }
 
-            doorAuthProvider.createDoorAuth(doorAuth);
-            
             //会议室预订,短信二维码打不开
             if(doorAcc.getOwnerType() != null && doorAcc.getDoorType() != null 
                     && ( doorAcc.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode())
@@ -1399,7 +1398,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             	}else{
             		doorAuth.setQrKey(createZuolinQrV1(aesUserKey.getSecret()));
             	}
-            	doorAuthProvider.updateDoorAuth(doorAuth);
             }
             doorAuthProvider.updateDoorAuth(doorAuth);
 
@@ -2280,6 +2278,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         	resp.setNextPageAnchor(dtos.get(dtos.size() - 1).getCreateTimeMs());
         	dtos.remove(dtos.size() - 1);
         }
+        //当前页面钥匙按doorName排序
+        Comparator<AesUserKeyDTO> valueComparator = (o1, o2) -> Collator.getInstance(Locale.CHINA).compare(o1.getDoorName(), o2.getDoorName());
+        Collections.sort(dtos,valueComparator);
         resp.setNextPageAnchor(locator.getAnchor());
         resp.setAesUserKeys(dtos);
         
@@ -4637,8 +4638,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             dingxinService.openDoor(doorAccess.getUuid());
             return;
         }
+        //face++门禁不支持远程开门
+        else if(doorAccess.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
+            return;
+        }
 
-		// DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(doorId,
+        // DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(doorId,
 		// user.getId(), null, null, (byte)1);
 		AesUserKey aesUserKey = generateAesUserKey(user, doorAuth);
 		if (aesUserKey == null) {
