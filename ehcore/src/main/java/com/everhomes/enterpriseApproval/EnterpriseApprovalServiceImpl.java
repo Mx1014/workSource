@@ -700,7 +700,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         flowFormCmd.setEntityType(FlowEntityType.FLOW.getCode());
 
         FlowFormRelationDataDirectRelation directRelation = new FlowFormRelationDataDirectRelation();
-        directRelation.setFormVersion(form.getFormOriginId());
+        directRelation.setFormOriginId(form.getFormOriginId());
         directRelation.setFormVersion(form.getFormVersion());
         flowFormCmd.setFormRelationType(FlowFormRelationType.DIRECT_RELATION.getCode());
         flowFormCmd.setDirectRelation(directRelation);
