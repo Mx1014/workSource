@@ -1205,7 +1205,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         List<UserLogin> logins = listLoginByDevice(newLogin.getDeviceIdentifier());
         for (UserLogin login : logins) {
             //For some reason ???
-            if (login != newLogin) {
+            if (!Objects.equals(login, newLogin)
+                    && Objects.equals(login.getNamespaceId(), newLogin.getNamespaceId())) {
                 //kickoff the login
                 login.setStatus(UserLoginStatus.LOGGED_OFF);
                 saveLogin(login);
