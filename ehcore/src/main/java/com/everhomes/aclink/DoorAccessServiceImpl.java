@@ -1301,7 +1301,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         doorAuth.setNickname(getRealName(ConvertHelper.convert(custom, User.class)));
                         }
 
-                    Long authId = doorAuthProvider.createDoorAuth(doorAuth);
+                    doorAuthProvider.createDoorAuth(doorAuth);
 
                     //face++门禁，若有开门权限且有照片，发送照片到face++服务器
                     if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
@@ -1382,8 +1382,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAccessProvider.createAclinkFormValues(notice);
             }
 
-            doorAuthProvider.createDoorAuth(doorAuth);
-            
             //会议室预订,短信二维码打不开
             if(doorAcc.getOwnerType() != null && doorAcc.getDoorType() != null 
                     && ( doorAcc.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode())
@@ -1400,7 +1398,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             	}else{
             		doorAuth.setQrKey(createZuolinQrV1(aesUserKey.getSecret()));
             	}
-            	doorAuthProvider.updateDoorAuth(doorAuth);
             }
             doorAuthProvider.updateDoorAuth(doorAuth);
 
