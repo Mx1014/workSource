@@ -7837,4 +7837,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin newLogin = (UserLogin) StringHelper.fromJsonString(record.value(), UserLogin.class);
         kickoffLoginByDevice(newLogin);
     }
+
+    @KafkaListener(topics = "user-logoff")
+    public void userLogoffMessage(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-logoff ] {}", record.value());
+
+        UserLogin login = (UserLogin) StringHelper.fromJsonString(record.value(), UserLogin.class);
+        logoff(login);
+    }
 }
