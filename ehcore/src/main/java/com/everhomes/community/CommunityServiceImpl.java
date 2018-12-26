@@ -3432,6 +3432,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         //绑定微信的、男性、女性
         Set<Long> wxMemberIds = new HashSet<>();
+        Set<Long> alipayMemberIds = new HashSet<>();
         Set<Long> maleMemberIds = new HashSet<>();
         Set<Long> femaleMemberIds = new HashSet<>();
 
@@ -3445,7 +3446,9 @@ public class CommunityServiceImpl implements CommunityService {
         for(User u: allUsers){
             if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
                 wxMemberIds.add(u.getId());
-            }
+            }else if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.ALIPAY){
+				alipayMemberIds.add(u.getId());
+			}
 
             if(UserGender.fromCode(u.getGender()) == UserGender.MALE){
                 maleMemberIds.add(u.getId());
@@ -3458,6 +3461,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 		//绑定微信
 		int wxCount = wxMemberIds.size();
+        //支付宝用户
+		int alipayCount = alipayMemberIds.size();
         //男性用户
         int maleCount = maleMemberIds.size();
         //女性用户
@@ -3469,7 +3474,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setAuthingUsers(authingCount);
         resp.setNotAuthUsers(notAuthCount);
         resp.setWxUserCount(wxCount);
-		resp.setAppUserCount(allCount - wxCount);
+        resp.setAlipayUserCount(alipayCount);
+		resp.setAppUserCount(allCount - wxCount - alipayCount);
 		resp.setMaleCount(maleCount);
 		resp.setFemaleCount(femaleCount);
 
@@ -3487,6 +3493,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		//已认证、认证中的微信微信用户
 		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode(), null);
+		int alipayCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.ALIPAY.getCode(), null);
 
         //未认证用户 userprofile表中的用户-已认证或者认证中的用户
         List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
@@ -3519,7 +3526,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setAuthingUsers(authingCount);
         resp.setNotAuthUsers(notAuthCount);
         resp.setWxUserCount(wxCount);
-		resp.setAppUserCount(allCount - wxCount);
+        resp.setAlipayUserCount(alipayCount);
+		resp.setAppUserCount(allCount - wxCount - alipayCount);
 		resp.setMaleCount(maleCount);
 		resp.setFemaleCount(femaleCount);
 
