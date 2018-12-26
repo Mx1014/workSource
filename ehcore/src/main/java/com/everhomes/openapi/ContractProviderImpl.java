@@ -2330,6 +2330,7 @@ public class ContractProviderImpl implements ContractProvider {
 	public Long findAddressByContractId(Long contractId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Long> addressList = context.select(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID)
+				.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId))
 				.fetchInto(Long.class);
 		if(addressList != null && addressList.size() != 0) {

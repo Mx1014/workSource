@@ -134,7 +134,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 											namespaceContractToken, contractCategoryId);
 								}
 							}catch (Exception e){
-					            LOGGER.error(e.toString());
+					            LOGGER.error("", e);
 					        }
 						}
 						//获取左邻缴费应用categoryId
@@ -145,7 +145,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 								categoryId = assetServiceModuleAppDTOs.get(0).getCategoryId();
 							}
 						}catch (Exception e){
-				            LOGGER.error(e.toString());
+							LOGGER.error("", e);
 				        }
 						List<CMBill> cmBills = cmDataObject.getBill();
 						for(CMBill cmBill : cmBills) {
@@ -176,7 +176,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 											try{
 												amountOwed = new BigDecimal(cmBill.getBalanceAmt());
 									        }catch (Exception e){
-									            LOGGER.error(e.toString());
+									        	LOGGER.error("", e);
 									        }
 											//已收=账单金额（应收）-账单欠款金额（待收）
 											amountReceived = zuolinServiceBill.getAmountReceivable().subtract(amountOwed);
@@ -192,7 +192,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 										LOGGER.error("The bill is not zuolinServiceBill, billId = {}", cmBill.getBillID());
 									}
 						        }catch (Exception e){
-						            LOGGER.error(e.toString());
+						        	LOGGER.error("", e);
 						        }
 							}else {
 								//来源于CM的租金账单场景
@@ -215,22 +215,22 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 									try{
 										amountOwed = new BigDecimal(cmBill.getBalanceAmt());
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 									try{
 										amountOwedWithoutTax = new BigDecimal(cmBill.getBalanceAmt());
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 									try{
 										amountReceivable = new BigDecimal(cmBill.getDocumentAmt());
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 									try{
 										amountReceivableWithoutTax = new BigDecimal(cmBill.getChargeAmt());
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 									//已收=账单金额（应收）-账单欠款金额（待收）
 									amountReceived = amountReceivable.subtract(amountOwed);
@@ -238,7 +238,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 									try{
 										taxAmount = new BigDecimal(cmBill.getTaxAmt());
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 
 									PaymentBills paymentBills = new PaymentBills();
@@ -266,7 +266,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 							            	dateStr = yyyyMM.format(yyyyMM.parse(cmBill.getStartDate()));//账期取的是账单开始时间的yyyy-MM
 							            }
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 									paymentBills.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
 									paymentBills.setSwitch((byte) 1);//默认为已出
