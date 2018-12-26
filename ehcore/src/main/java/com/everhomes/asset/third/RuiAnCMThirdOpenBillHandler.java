@@ -128,6 +128,10 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 									contractNum = contract.getContractNumber();
 									communityId = contract.getCommunityId();
 									addressId = contractProvider.findAddressByContractId(contractId);
+								}else {
+									LOGGER.info("syncRuiAnCMBillToZuolin findContractByNamespaceToken is null, namespaceId={}, NAMESPACE_CONTRACT_TYPE={},"
+											+ "NAMESPACE_CONTRACT_TOKEN= {}, contractCategoryId={}", namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
+											namespaceContractToken, contractCategoryId);
 								}
 							}catch (Exception e){
 					            LOGGER.error(e.toString());
