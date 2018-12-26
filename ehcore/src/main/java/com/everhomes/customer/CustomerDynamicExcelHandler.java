@@ -26,6 +26,7 @@ import com.everhomes.rest.enterprise.FindEnterpriseDetailCommand;
 import com.everhomes.rest.enterprise.UpdateWorkPlaceCommand;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.investment.CustomerLevelType;
 import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.organization.*;
@@ -771,6 +772,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         enterpriseCustomer.setOwnerType(customerInfo.getOwnerType());
         enterpriseCustomer.setCreatorUid(UserContext.currentUserId());
         enterpriseCustomer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+        enterpriseCustomer.setLevelItemId(CustomerLevelType.REGISTERED_CUSTOMER.getCode());
         String customerAddressString = "";
         Class<?> clz = EnterpriseCustomer.class.getSuperclass();//校验数字日期格式
         Boolean flag = true;
