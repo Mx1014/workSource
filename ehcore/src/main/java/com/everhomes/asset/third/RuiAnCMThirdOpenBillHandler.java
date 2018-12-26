@@ -288,7 +288,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 							            	dateStr = yyyyMM.format(yyyyMM.parse(cmBill.getStartDate()));//账期取的是账单开始时间的yyyy-MM
 							            }
 							        }catch (Exception e){
-							        	LOGGER.error("", e);
+							        	LOGGER.error("startDate cannot format yyyyMM, e={}, cmBill={}", e, cmBill);
 							        }
 									paymentBills.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
 									paymentBills.setSwitch((byte) 1);//默认为已出
