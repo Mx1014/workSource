@@ -1205,9 +1205,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			}
 			resp.setRefundPrice(refundPrice);
 			BigDecimal refundRate = new BigDecimal(0);
-			if (orderRule != null){
+			if (orderRule.getFactor() != null){
 				refundRate = new BigDecimal(orderRule.getFactor());
 			} else if(space.getRefundStrategy().equals(RentalOrderStrategy.FULL.getCode())){
+				refundRate = new BigDecimal(100);
+			}
+			if (space.getRefundStrategy() != null && space.getRefundStrategy().equals(RentalOrderStrategy.FULL.getCode())){
 				refundRate = new BigDecimal(100);
 			}
 			resp.setRefundRate(refundRate);
@@ -3074,10 +3077,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				}
 				Integer allPositonNums = null;
 				if (s.getShortRentNums()!=null){
-					allPositonNums = Integer.valueOf(s.getShortRentNums());
+					if(Integer.valueOf(s.getShortRentNums()) == 0){
+						continue;
+					}else{
+						allPositonNums = Integer.valueOf(s.getShortRentNums());
+					}
 				} else if (s.getShortRentNums()==null){
-					continue;
-				} else if (Integer.valueOf(s.getShortRentNums()) == 0){
 					continue;
 				}
 				dto.setAllPositonNums(allPositonNums);
