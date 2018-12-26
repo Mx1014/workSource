@@ -10813,7 +10813,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setUserId(pdl.getUserId());
         if(null != pdl.getUserId() && pdl.getUserId() > 0L){
             User u = this.userProvider.findUserById(pdl.getUserId());
-            dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(), EntityType.USER.getCode(),u.getId()));
+            if(u != null) {
+                dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(), EntityType.USER.getCode(), u.getId()));
+            }
         }
         dto.setDepartmentId(pdl.getDeptId());
         if(null != pdl.getDeptId()){
@@ -11040,7 +11042,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setUserId(detail.getTargetId());
         if(null != detail.getTargetId() && detail.getTargetId() > 0L){
             User u = this.userProvider.findUserById(detail.getTargetId());
-            dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(),EntityType.USER.getCode(),u.getId()));
+            if (u != null) {
+                dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(),EntityType.USER.getCode(),u.getId()));
+            }
         }
         Long userDeptId = organizationService.getDepartmentByDetailIdAndOrgId(detail.getId(), detail.getOrganizationId());
         dto.setDepartmentId(userDeptId);
