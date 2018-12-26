@@ -3331,7 +3331,7 @@ public class CommunityServiceImpl implements CommunityService {
                         authUsers += countCommunityUserResponse.getAuthUsers();
                         authingUsers += countCommunityUserResponse.getAuthingUsers();
                         //未认证用户 userprofile表中的用户-已认证或者认证中的用户
-                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
+//                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
 
                         //未认证
 //                        int notAuthCount = 0;
