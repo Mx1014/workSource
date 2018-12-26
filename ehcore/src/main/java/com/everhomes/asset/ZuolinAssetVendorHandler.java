@@ -790,7 +790,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         		if(sceneDTO != null && sceneDTO.getStatus() != null && sceneDTO.getStatus().equals((byte)3)) {//2:审核中，3：已认证
         			FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
             		//addressIds.add(familyDTO.getAddressId());
-        			addressList.add(familyDTO.getBuildingName() + "/" + familyDTO.getApartmentName());
+        			//修复缺陷 #45789 【鼎峰智慧社区】鼎峰源著1栋2单元/702 APP账单显示与后台不符，并且业主在12月13号交了两笔335的费用，后台也查不到
+        			if(cmd.getOwnerId() != null && cmd.getOwnerId().equals(familyDTO.getCommunityId())) {
+        				addressList.add(familyDTO.getBuildingName() + "/" + familyDTO.getApartmentName());
+        			}
         		}
         	}
         	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1012,7 +1015,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         		if(sceneDTO != null && sceneDTO.getStatus() != null && sceneDTO.getStatus().equals((byte)3)) {//2:审核中，3：已认证
         			FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
             		//addressIds.add(familyDTO.getAddressId());
-        			addressList.add(familyDTO.getBuildingName() + "/" + familyDTO.getApartmentName());
+        			//修复缺陷 #45789 【鼎峰智慧社区】鼎峰源著1栋2单元/702 APP账单显示与后台不符，并且业主在12月13号交了两笔335的费用，后台也查不到
+        			if(cmd.getOwnerId() != null && cmd.getOwnerId().equals(familyDTO.getCommunityId())) {
+        				addressList.add(familyDTO.getBuildingName() + "/" + familyDTO.getApartmentName());
+        			}
         		}
         	}
         	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
