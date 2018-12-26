@@ -529,7 +529,7 @@ public class ExpressServiceImpl implements ExpressService {
 			}
 			
 			//加一个开关，方便在beta环境测试
-			boolean flag = configProvider.getBooleanValue("beta.express.order.amount", false);
+			boolean flag = configProvider.getBooleanValue("express.order.test", false);
 			if (!flag) {
 				if (0!=expressOrder.getPaySummary().compareTo(new BigDecimal(cmd.getPayAmount()))) {
 					LOGGER.error("order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
@@ -750,12 +750,20 @@ public class ExpressServiceImpl implements ExpressService {
 			ExpressCompany expressCompany = findTopExpressCompany(cmd.getExpressCompanyId());
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 			handler.createOrder(expressOrder, expressCompany);//同城信筒并不在此给邮政创建订单，而是在支付之后创建订单
+			modifyPaySummary(expressOrder);
 			expressOrderProvider.createExpressOrder(expressOrder);
 			handler.afterCreateOrder(expressOrder, expressCompany);//同城信筒并不在此给邮政创建订单，而是在支付之后创建订单
 			return null;
 		});
 		createExpressOrderLog(owner, ExpressActionEnum.CREATE, expressOrder, null);
 		return new CreateExpressOrderResponse(convertToExpressOrderDTOForDetail(expressOrder));
+	}
+
+	private void modifyPaySummary(ExpressOrder expressOrder) {
+		boolean flag = configProvider.getBooleanValue("express.order.test", false);
+		if (flag) {
+			expressOrder.setPaySummary(new BigDecimal(configProvider.getValue("express.order.test.amount", "0.01")));
+		}
 	}
 
 	private void checkCreateExpressOrderCommand(CreateExpressOrderCommand cmd) {
