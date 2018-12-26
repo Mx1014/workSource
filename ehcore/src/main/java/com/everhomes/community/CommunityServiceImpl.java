@@ -2425,6 +2425,11 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
 			dto.setIdentityNumber(user.getIdentityNumberTag());
+            if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
+                dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+            }else {
+                dto.setUserSourceType(UserSourceType.APP.getCode());
+            }
 			//dto.setAddressDtos(addressDtos);
             String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
             if ("true".equals(showVipFlag)) {
@@ -2491,6 +2496,11 @@ public class CommunityServiceImpl implements CommunityService {
                 dto.setShowVipLevelFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
             }
             dto.setVipLevel(user.getVipLevel());
+            if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
+                dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+            }else {
+                dto.setUserSourceType(UserSourceType.APP.getCode());
+            }
         }
 		List<OrganizationMemberLog> memberLogs = this.organizationProvider.listOrganizationMemberLogs(user.getId());
 		List<OrganizationMemberLogDTO> memberLog = new ArrayList<>();
@@ -2555,6 +2565,16 @@ public class CommunityServiceImpl implements CommunityService {
             if (user != null) {
                 communityUserAddressDTO = ConvertHelper.convert(user, CommunityUserAddressDTO.class);
                 communityUserAddressDTO.setIdentityNumber(user.getIdentityNumberTag());
+                if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
+                    communityUserAddressDTO.setUserSourceType(UserSourceType.WEIXIN.getCode());
+                }else {
+                    communityUserAddressDTO.setUserSourceType(UserSourceType.APP.getCode());
+                }
+                //最新活跃时间 add by sfyan 20170620
+                List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
+                if(userActivities.size() > 0){
+                    communityUserAddressDTO.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+                }
             }
 
             //是否展示会员等级

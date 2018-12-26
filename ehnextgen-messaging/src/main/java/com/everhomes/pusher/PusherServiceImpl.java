@@ -447,9 +447,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param destLogin
-	 * @return iOS Xiaomi Huawei Android
+	 * @return iOS Xiaomi Huawei Getui Oppo Meizu Android
 	 */
 	private String getPlatform(UserLogin destLogin) {
 		if (destLogin.getStatus() == UserLoginStatus.LOGGED_OFF) {
@@ -461,13 +461,26 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 			return null;
 		}
 
+		LOGGER.debug("【getPlatform】 destLogin={}",destLogin);
+
 		if (destLogin.getPusherIdentify() != null) {
 			if (destLogin.getPusherIdentify().startsWith("xiaomi:")) {
 				return "xiaomi";
 			} else if (destLogin.getPusherIdentify().startsWith("huawei:")) {
 				return "huawei";
+			} else if(destLogin.getPusherIdentify().startsWith("getui:")){
+				LOGGER.debug("getui:");
+				return "getui";
+			} else if(destLogin.getPusherIdentify().startsWith("oppo:")){
+				LOGGER.debug("oppo:");
+				return "oppo";
+			} else if(destLogin.getPusherIdentify().startsWith("meizu:")){
+				LOGGER.debug("meizu:");
+				return "meizu";
 			}
 		}
+
+		LOGGER.debug("========null getPusherIdentify!!!====");
 
 		Device d = this.deviceProvider.findDeviceByDeviceId(destLogin.getDeviceIdentifier());
 		String platform = null;
@@ -502,6 +515,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 	// ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html
 	// #//apple_ref/doc/uid/TP40008194-CH100-SW1
 	public void pushMessage(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg) {
+		LOGGER.debug("【pushMessage】 senderLogin={},destLogin={},msg={}",senderLogin,destLogin,msg);
+
 		if (null == destLogin.getDeviceIdentifier()) {
 			LOGGER.error("Pushing message, destLogin deviceId is null, msgId=" + msgId + ", senderLogin=" + senderLogin
 					+ ", destLogin=" + destLogin);
@@ -515,8 +530,11 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 		}
 		// assert(messageResolver != null)
 		DeviceMessage devMessage = messageResolver.resolvMessage(senderLogin, destLogin, msg);
+		LOGGER.debug("【getPlatform】 destLogin={}",destLogin);
 
 		String platform = getPlatform(destLogin);
+		LOGGER.debug("==== platform={}",platform);
+
 		if (platform == null) {
 			return;
 		}
@@ -539,8 +557,18 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 			pusherVendorService.pushMessageAsync(PusherVenderType.XIAOMI, senderLogin, destLogin, msg, devMessage);
 		} else if (platform.equals("huawei")) {
 			pusherVendorService.pushMessageAsync(PusherVenderType.HUAWEI, senderLogin, destLogin, msg, devMessage);
+		} else if(platform.equals("oppo")){
+			LOGGER.debug("==== TYPE={}",PusherVenderType.OPPO);
+			pusherVendorService.pushMessageAsync(PusherVenderType.OPPO, senderLogin, destLogin, msg, devMessage);
+		} else if(platform.equals("meizu")){
+			LOGGER.debug("==== TYPE={}",PusherVenderType.MEIZU);
+			pusherVendorService.pushMessageAsync(PusherVenderType.MEIZU, senderLogin, destLogin, msg, devMessage);
+		} else if(platform.equals("getui")){
+			LOGGER.debug("==== TYPE={}",PusherVenderType.GETUI);
+			pusherVendorService.pushMessageAsync(PusherVenderType.GETUI, senderLogin, destLogin, msg, devMessage);
 		} else {
 			// Android or other here
+			LOGGER.debug("Android or other here");
 			pushMessageAndroid(senderLogin, destLogin, msgId, msg, platform, devMessage);
 		}
 	}

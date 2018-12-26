@@ -151,4 +151,6 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleStationRent> searchCubicleStationRentByOrderId(Long spaceId, Long orderId, Byte rentType);
 
+	void deleteOfficeCubicleStationRent(Long orderId);
+
 }

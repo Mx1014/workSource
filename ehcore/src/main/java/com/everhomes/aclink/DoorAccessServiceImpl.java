@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.aclink.dingxin.DingxinService;
 import com.everhomes.aclink.faceplusplus.FacePlusPlusService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -345,6 +346,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     @Autowired
     private FacePlusPlusService facePlusPlusService;
+
+    @Autowired
+    DingxinService dingxinService;
     
     AlipayClient alipayClient;
     
@@ -4624,6 +4628,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,
 					AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
 		}
+		//鼎芯门禁对接
+        else if(doorAccess.getDoorType().equals(DoorAccessType.DINGXIN.getCode())){
+            dingxinService.openDoor(doorAccess.getUuid());
+            return;
+        }
 
 		// DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(doorId,
 		// user.getId(), null, null, (byte)1);

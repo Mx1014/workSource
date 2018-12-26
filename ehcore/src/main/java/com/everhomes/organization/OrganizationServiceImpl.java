@@ -6932,7 +6932,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationContactCommand  cmd_1 = new ListOrganizationContactCommand();
         cmd_1.setOrganizationId(cmd.getOrganizationId());
         cmd_1.setKeywords(cmd.getKeywords());
-        cmd_1.setFilterScopeTypes(Collections.singletonList("current"));
+        //issue-43452: 根据缺陷单,修改成查询包含子部门的人员
+        cmd_1.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode()));
         cmd_1.setVisibleFlag(VisibleFlag.ALL.getCode());
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
