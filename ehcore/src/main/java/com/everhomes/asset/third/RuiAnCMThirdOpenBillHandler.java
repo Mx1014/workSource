@@ -109,10 +109,11 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 //							}
 //						}
 
-						//获取左邻合同ID、合同编号
+						//获取左邻合同ID、合同编号、合同对应的客户名称
 						Long contractId = null;
 						String contractNum = null;
 						String rentalID = "";
+						String targetName = "";
 						if(cmSyncType != null && cmSyncType.equals(CMThirdPartContractHandler.DispContract)) {
 							if(cmDataObject.getContractHeader() != null) {
 								rentalID = cmDataObject.getContractHeader().getRentalID();//瑞安CM定义的合同ID
@@ -124,6 +125,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 										contractId = contract.getId();
 										contractNum = contract.getContractNumber();
 										communityId = contract.getCommunityId();
+										targetName = contract.getCustomerName();
 										addressId = contractProvider.findAddressByContractId(contractId);
 									}else {
 										LOGGER.info("syncRuiAnCMBillToZuolin findContractByNamespaceToken is null, namespaceId={}, NAMESPACE_CONTRACT_TYPE={},"
@@ -157,6 +159,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 										contractId = contract.getId();
 										contractNum = contract.getContractNumber();
 										communityId = contract.getCommunityId();
+										targetName = contract.getCustomerName();
 										addressId = contractProvider.findAddressByContractId(contractId);
 										EnterpriseCustomer customerForBill = enterpriseCustomerProvider.findById(contract.getCustomerId());
 										if(customerForBill != null) {
@@ -273,9 +276,10 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 									paymentBills.setBillGroupId(group.getId());
 									paymentBills.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
 									paymentBills.setTargetId(targetId);
-									if(cmDataObject.getContractHeader() != null) {
-										paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
-									}
+//									if(cmDataObject.getContractHeader() != null) {
+//										paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
+//									}
+									paymentBills.setTargetName(targetName);//客户名称
 									paymentBills.setContractId(contractId);
 									paymentBills.setContractNum(contractNum);
 									paymentBills.setDateStrBegin(cmBill.getStartDate());
@@ -334,9 +338,10 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 									items.setBillGroupId(group.getId());
 									items.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
 									items.setTargetId(targetId);
-									if(cmDataObject.getContractHeader() != null) {
-										items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
-									}
+//									if(cmDataObject.getContractHeader() != null) {
+//										items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
+//									}
+									paymentBills.setTargetName(targetName);//客户名称
 									items.setContractId(contractId);
 									items.setContractNum(contractNum);
 									items.setDateStrBegin(cmBill.getStartDate());
