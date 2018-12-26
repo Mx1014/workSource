@@ -3359,7 +3359,7 @@ public class CommunityServiceImpl implements CommunityService {
             resp.setCommunityUsers(allCount);
             resp.setAuthUsers(authUsers);
             resp.setAuthingUsers(authingUsers);
-            // 越来越多的用户来源域空间下全部用户统计时未认证人数统计不准确，认证和待认证是准确的，故改为总数减去已认证和待认证。
+            // 越来越多的用户来源导致域空间下全部用户统计时未认证人数统计不准确，认证和待认证是准确的，故改为总数减去已认证和待认证。
 //            resp.setNotAuthUsers(notAuthUsers);
 			resp.setNotAuthUsers(allCount - authUsers - authingUsers);
             resp.setWxUserCount(wxCount);
