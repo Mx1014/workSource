@@ -77,8 +77,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     
     private static final Integer NAMESPACE_ID = 999929;
 
-    private static final String DispContract = "/DispContract";
-    private static final String DispBill = "/DispBill";
+    public static final String DispContract = "/DispContract";
+    public static final String DispBill = "/DispBill";
 
 
     DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -179,16 +179,16 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                     pageOffset = String.valueOf(currentPage + 1);
                     cmSyncObjects.add(cmSyncObject);
                     syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    Date now = new Date(System.currentTimeMillis());
-                    String nowStr = sdf.format(now);
-                    if(date.compareTo(nowStr) < 0) {
-                        //同步到记录表
-                        syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
-
-                        date = getNextDay(date, sdf);
-                    }
-
+                    //无效代码 by ycx
+//                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//                    Date now = new Date(System.currentTimeMillis());
+//                    String nowStr = sdf.format(now);
+//                    if(date.compareTo(nowStr) < 0) {
+//                        //同步到记录表
+//                        syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
+//
+//                        date = getNextDay(date, sdf);
+//                    }
                 }else if(NO_DATA_CODE.equals(cmSyncObject.getErrorCode())){
                 	//{"errorcode":"100","errordescription":"请求参数无效！","errordetails":"无法找到有效合同数据！"}
                     LOGGER.error("sync from RuiAnCM error: {}", cmSyncObject.getErrorCode());
@@ -233,7 +233,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         try{
             //assetService.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
         	RuiAnCMThirdOpenBillHandler handler = PlatformContext.getComponent(ThirdOpenBillHandler.THIRDOPENBILL_PREFIX + NAMESPACE_ID);
-            handler.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
+            handler.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId, DispContract);
         }catch(Exception e){
             LOGGER.error("sync data from RuiAnCM is fail cause Bill " ,e);
             //将同步锁置为失效，此时可以再次创建任务
@@ -319,13 +319,14 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                     pageOffset = String.valueOf(currentPage + 1);
                     cmSyncObjects.add(cmSyncObject);
                     syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);//同步到记录表
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    Date now = new Date(System.currentTimeMillis());
-                    String nowStr = sdf.format(now);
-                    if(date.compareTo(nowStr) < 0) {
-                        syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);//同步到记录表
-                        date = getNextDay(date, sdf);
-                    }
+                    //无效代码 by ycx
+//                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//                    Date now = new Date(System.currentTimeMillis());
+//                    String nowStr = sdf.format(now);
+//                    if(date.compareTo(nowStr) < 0) {
+//                        syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);//同步到记录表
+//                        date = getNextDay(date, sdf);
+//                    }
                 }else if(NO_DATA_CODE.equals(cmSyncObject.getErrorCode())){
                 	//{"errorcode":"100","errordescription":"请求参数无效！","errordetails":"无法找到有效账单数据！"}
                     LOGGER.error("sync from RuiAnCM error: {}", cmSyncObject.getErrorCode());
@@ -346,7 +347,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         try{
             //assetService.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
         	RuiAnCMThirdOpenBillHandler handler = PlatformContext.getComponent(ThirdOpenBillHandler.THIRDOPENBILL_PREFIX + NAMESPACE_ID);
-            handler.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
+            handler.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId, DispBill);
         }catch(Exception e){
             LOGGER.error("sync data from RuiAnCM is fail cause Bill " ,e);
             //将同步锁置为失效，此时可以再次创建任务
