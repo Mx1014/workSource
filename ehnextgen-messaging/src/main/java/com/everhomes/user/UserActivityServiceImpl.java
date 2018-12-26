@@ -987,15 +987,20 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
 
         User user = UserContext.current().getUser();
-        JSONObject jsonObject = getUserVipLevel(user.getId(), user.getNamespaceId());
-        if (jsonObject != null) {
-            JSONObject responseJson = JSONObject.parseObject(jsonObject.get("response").toString());
-            if (responseJson != null) {
-                Integer level = responseJson.getInteger("membershipLevel");
-                String levelText = responseJson.getString("name");
-                userService.updateUserVipLevel(user.getId(), level, levelText);
-                rsp.setVipLevelText(levelText);
+        try {
+            JSONObject jsonObject = getUserVipLevel(user.getId(), user.getNamespaceId());
+            if (jsonObject != null) {
+                JSONObject responseJson = JSONObject.parseObject(jsonObject.get("response").toString());
+                if (responseJson != null) {
+                    Integer level = responseJson.getInteger("membershipLevel");
+                    String levelText = responseJson.getString("name");
+                    userService.updateUserVipLevel(user.getId(), level, levelText);
+                    rsp.setVipLevelText(levelText);
+                }
             }
+        }catch (Exception ex) {
+            LOGGER.error("get user vip level failed!");
+            ex.printStackTrace();
         }
         BizMyUserCenterCountResponse response = fetchBizMyUserCenterCount(user);
 
