@@ -135,4 +135,6 @@ public class ResourceOrderRuleDTO {
     public void setRefundTips(List<RentalRefundTipDTO> refundTips) {
         this.refundTips = refundTips;
     }
+
+
 }

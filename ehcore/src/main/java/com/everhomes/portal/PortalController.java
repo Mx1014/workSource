@@ -514,6 +514,44 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
+	 * <p>主页签查询</p>
+	 * <b>URL: /portal/listLaunchPadIndex</b>
+	 */
+	@RequestMapping("listLaunchPadIndex")
+	@RestReturn(ListLaunchPadIndexResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse listLaunchPadIndex(ListLaunchPadIndexCommand cmd){
+		return new RestResponse(portalService.listLaunchPadIndexs(cmd));
+	}
+
+    /**
+     * <p>更新启用主页签</p>
+     * <b>URL: /portal/updateIndexFlag</b>
+     */
+    @RequestMapping("updateIndexFlag")
+    @RestReturn(String.class)
+    public RestResponse updateIndexFlag(UpdateIndexFlagCommand cmd){
+        portalService.updateIndexFlag(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>查询是否启用主页签</p>
+     * <b>URL: /portal/updateIndexFlag</b>
+     */
+	@RequestMapping("getIndexFlag")
+	@RestReturn(GetIndexFlagResponse.class)
+	public RestResponse getIndexFlag(GetIndexFlagCommand cmd){
+		GetIndexFlagResponse res = portalService.getIndexFlag(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
 	 * <p>27.门户导航栏列表</p>
 	 * <b>URL: /portal/listPortalNavigationBars</b>
 	 */
@@ -566,6 +604,20 @@ public class PortalController extends ControllerBase {
 		return new RestResponse();
 	}
 
+	/**
+	 * <p>更新门户导航栏顺序</p>
+	 * <b>URL: /portal/updateNavigationBarOrder</b>
+	 */
+	@RequestMapping("updateNavigationBarOrder")
+	@RestReturn(String.class)
+	public RestResponse updateNavigationBarOrder(UpdatePortalNavigationBarOrderCommand cmd){
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		portalService.updatePortalNavigationBarOrder(cmd.getIds());
+		return new RestResponse();
+	}
 	/**
 	 * <p>31.发布</p>
 	 * <b>URL: /portal/publish</b>

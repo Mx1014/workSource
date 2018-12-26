@@ -8121,6 +8121,7 @@ public class PunchServiceImpl implements PunchService {
             if (null == pr)
                 continue;
             PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
+            dto.setGroupName(pr.getName());
             //打卡时间
             dto.setTimeRules(processPunchTimeRuleDTOs(r.getId(), pr.getStatus()));
             //打卡地点和WiFi
@@ -10992,7 +10993,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setUserId(statistic.getUserId());
         if(null != statistic.getUserId() && statistic.getUserId() > 0L){
             User u = this.userProvider.findUserById(statistic.getUserId());
-            dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(), EntityType.USER.getCode(),u.getId()));
+            if(u != null){
+            	dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(), EntityType.USER.getCode(),u.getId()));
+            }
         }
         dto.setDepartmentId(statistic.getDeptId());
         if(null != statistic.getDeptId()){

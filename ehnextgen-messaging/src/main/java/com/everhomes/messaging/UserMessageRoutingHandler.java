@@ -9,10 +9,7 @@ import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
-import com.everhomes.rest.messaging.ChannelType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.rest.rpc.client.RealtimeMessageIndicationPdu;
 import com.everhomes.rest.rpc.client.StoredMessageIndicationPdu;
@@ -237,6 +234,11 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                 message.setMeta(new HashMap<>());
             }
             message.getMeta().put("bodyType", message.getBodyType());    
+        }
+
+        if (senderLogin.getUserId() < User.MAX_SYSTEM_USER_ID) {
+            //标志位：SYS_MSG_ROUTER_FLAG
+            message.getMeta().put(MessageMetaConstant.SYS_MSG_ROUTER_FLAG,MessageMetaConstant.SYS_MSG_ROUTER_FLAG);
         }
 
         long msgId = this.messageBoxProvider.createMessage(msg);

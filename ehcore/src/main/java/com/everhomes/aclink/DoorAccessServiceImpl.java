@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.aclink.dingxin.DingxinService;
 import com.everhomes.aclink.faceplusplus.FacePlusPlusService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -341,7 +342,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     private AclinkMessageSequence aclinkMessageSequence;
 
     @Autowired
+    private AclinkPhotoSyncResultProvider aclinkPhotoSyncResultProvider;
+
+    @Autowired
     private FacePlusPlusService facePlusPlusService;
+
+    @Autowired
+    DingxinService dingxinService;
     
     AlipayClient alipayClient;
     
@@ -369,7 +376,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     private final static String URL_GETAPPINFOS = "http://sdk.api.jia-r.com/projectManage/getAppInfos";
     private final static String URL_GETKEYU = "http://sdk.api.jia-r.com/projectManage/getKeyU";
-
+    
+    private static Format baseDateFormatter = FastDateFormat.getInstance("yyyy年MM月dd日hh:mm");
+    
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
@@ -4619,6 +4628,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,
 					AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
 		}
+		//鼎芯门禁对接
+        else if(doorAccess.getDoorType().equals(DoorAccessType.DINGXIN.getCode())){
+            dingxinService.openDoor(doorAccess.getUuid());
+            return;
+        }
 
 		// DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(doorId,
 		// user.getId(), null, null, (byte)1);
@@ -7110,7 +7124,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		
 		rsp.setIsSupportRemote(DoorAuthStatus.INVALID.getCode());
 		rsp.setIsSupportTempAuth(DoorAuthStatus.INVALID.getCode());
-
+		rsp.setFaceSyncStatus(faceRecognitionPhotoProvider.getPhotoSyncStatusByUserId(user.getId()));
 		if(cmd.getDoorId() == null && cmd.getAuthId() != null){
 			DoorAuth auth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
 			//校验用户
@@ -7980,6 +7994,77 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         return resp;
     }
+	
+	private void sendPhotoSyncResult(Long uid, Byte resCode, String content){
+		Map<String, String> meta = new HashMap<String, String>();
+		String subject = resCode == 0 ? "人脸照片审核通过" : "人脸照片审核失败";
+		String routerName = resCode == 0 ? "zl://face-recognition/index" : "zl://face-recognition/home";
+		
+		RouterMetaObject routerMetaObject = new RouterMetaObject();
+		routerMetaObject.setRouter(routerName);
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.META_OBJECT, routerMetaObject.toString());
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, subject);
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_ACLINK);
+        if(null != meta && meta.size() > 0) {
+            messageDto.setMeta(meta);
+            }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+	}
+
+	//通知照片同步状态
+	@Override
+	public void notifyPhotoSyncResult(NotifyPhotoSyncResultCommand cmd) {
+		User user = userProvider.findUserById(cmd.getUserId());
+		assert(user != null);
+			//临时授权通知不了,暂时不管
+			//正式用户有效的照片暂时只拿最新的1张
+			List<FaceRecognitionPhoto> photoList = faceRecognitionPhotoProvider.listFacialRecognitionPhotoByUser(new CrossShardListingLocator(), user.getId(), 1);
+			if(photoList != null && photoList.size() > 0){
+				FaceRecognitionPhoto photo = photoList.get(0);
+				if(photo.getSyncTime().before(photo.getOperateTime())){
+					photo.setSyncTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					faceRecognitionPhotoProvider.updateFacialRecognitionPhoto(photo);
+				}
+				AclinkPhotoSyncResult syncRes = new AclinkPhotoSyncResult();
+				syncRes.setServerId(cmd.getServerId());
+				syncRes.setPhotoId(photo.getId());
+				syncRes.setResCode(cmd.getCode());
+				syncRes.setCreatorUid(UserContext.currentUserId());
+				syncRes.setNamespaceId(user.getNamespaceId());
+				aclinkPhotoSyncResultProvider.createSyncResult(syncRes);
+				List<AclinkPhotoSyncResult> syncResList = aclinkPhotoSyncResultProvider.queryByPhotoId(photo.getId());
+				if(cmd.getCode() == (byte) 0){
+					List<AclinkServer> serverList = aclinkServerProvider.listLocalServersByUserAuth(new CrossShardListingLocator(), user.getId(), null, 0);
+					List<AclinkPhotoSyncResult> syncResSuccessList = syncResList.stream().filter(r -> r.getResCode() == (byte) 0).collect(Collectors.toList());  
+					if(syncResSuccessList != null && syncResSuccessList.size() < serverList.size()){
+						LOGGER.info("serverId = {},server size = {},syncSuccessResList size = {}",cmd.getServerId(), serverList.size(),syncResList == null? 0:syncResList.size());
+						return;
+					}
+				}else{
+					List<AclinkPhotoSyncResult> syncResErrorList = syncResList.stream().filter(r -> r.getResCode() != (byte) 0).collect(Collectors.toList());
+					if(syncResErrorList.size() > 1){
+						LOGGER.info("serverId = {},syncSuccessResList size = {}",cmd.getServerId(),syncResList.size());
+						return;
+					}
+				}
+		        String locale = user.getLocale();
+		        String scope = AclinkNotificationTemplateCode.SCOPE;
+		        int code = cmd.getCode() == 0? AclinkNotificationTemplateCode.ACLINK_PHOTO_SYNC_SUCCESS:AclinkNotificationTemplateCode.ACLINK_PHOTO_SYNC_REJECT;
+		        Map<String, Object> map = new HashMap<String, Object>();
+		        map.put("dateTime", photo.getCreateTime());
+		        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		        sendPhotoSyncResult(user.getId(), cmd.getCode(), notifyTextForApplicant);
+			}
+	}
 }
 
 

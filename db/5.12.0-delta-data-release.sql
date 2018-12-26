@@ -35,7 +35,52 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4920049220, '0', '物品放行 统计信息权限', '物品放行 统计信息权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '49220', '0', 4920049220, '全部权限', '0', now());
 
+-- AUTHOR: 谢旭双
+-- REMARK: 同事圈默认选择器文本
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_moments', '1', 'zh_CN', '全部');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_moments', '2', 'zh_CN', '我发布的');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_moments', '3', 'zh_CN', '我点赞的');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_moments', '4', 'zh_CN', '我评论的');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_moments', '506', 'zh_CN', '接口参数异常');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_moments', '40002', 'zh_CN', '你不能删除其他人的评论');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('enterprise_moments', 'title', 'zh_CN', '同事圈');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('enterprise_default_moment', '1', 'zh_CN', '系统小助手');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('enterprise_default_moment', '2', 'zh_CN', '同事圈是公司员工交流、记录公司成长点滴的地方。在这里可以发表心情、分享经验、寻求帮助，培养融洽、和谐的办公氛围，提升团队凝聚力。');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('enterprise_default_moment', '3', 'zh_CN', '图片');
 
+-- AUTHOR: 谢旭双
+-- REMARK: 同事圈头部背景图
+SET @config_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `is_readonly`) VALUES (@config_id:=@config_id+1, 'enterprise.moment.banner', 'cs://1/image/aW1hZ2UvTVRwak1HWTRaalJsWkdRMk1XWXdOelkzWXpsak5tTTNaVEJtTVRNeE4yUmxOdw', '同事圈头部背景图', 1);
+
+-- AUTHOR: 吴寒
+-- REMARK: 同事圈菜单
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES('274000','同事圈','50000','/100/50000/274000','1','3','2','10','2018-09-26 16:51:46',NULL,NULL,'2018-09-26 16:51:46','0','0','0',NULL,'org_control','1','1','module','0','0',NULL,NULL,'moments',NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79887000','同事圈','70000010',NULL,'enterprise-payment-auth','1','2','/70000010/79887000','park','8','274000','3','system','module','2','1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79888000','同事圈','70000010',NULL,'enterprise-payment-auth','1','2','/70000010/79888000','zuolin','8','274000','3','system','module','2','1');
+
+-- AUTHOR: 谢旭双
+-- REMARK: 同事圈初始tag
+INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('enterprise_moments', '20001', 'zh_CN', '新人报道');
+INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('enterprise_moments', '20002', 'zh_CN', '快讯');
+INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('enterprise_moments', '20003', 'zh_CN', '求推荐');
+INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('enterprise_moments', '20004', 'zh_CN', '活动');
+INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('enterprise_moments', '20005', 'zh_CN', '讨论');
+INSERT INTO `ehcore`.`eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('enterprise_moments', '20006', 'zh_CN', '建议');
+
+-- AUTHOR:刘一麟
+-- REMARK:人脸识别v1.8
+INSERT INTO `ehcore`.`eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('aclink.notification', '3', 'zh_CN', '您于【日期】上传的人脸照片已通过审核，现可正常使用。', '您于${dateTime}上传的人脸照片已通过审核，现可正常使用。', '0');
+INSERT INTO `ehcore`.`eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('aclink.notification', '4', 'zh_CN', '您于【日期】上传的人脸照片因质量过低，未能通过审核，请重新拍摄上传。', '您于${dateTime}上传的人脸照片因质量过低，未能通过审核，请重新拍摄上传。', '0');
+
+-- AUTHOR:st.zheng
+-- REMARK:资源预约3.8.3
+update eh_configurations set `value` = '/resource-rental/build/index.html#/resource-detail?namespaceId=%s&rentalSiteId=%s&detailPageType=%s&canRental=1&isApp=1#sign_suffix' where name = 'rental.resource.detail.url';
+
+-- AUTHOR:梁燕龙
+-- REMARK: 域空间管理v3.0 主页签
+DELETE from eh_launch_pad_indexs;
+DELETE from eh_portal_navigation_bars;
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
@@ -63,6 +108,23 @@ update eh_var_field_item_scopes set status = 0 where status = 2 and module_name 
 update eh_var_field_item_scopes set module_name = 'enterprise_customer' where status = 2 and module_name = 'investment_promotion' and field_id = 5;
 
 update eh_var_field_item_scopes set module_name = 'enterprise_customer' where module_name = 'investment_promotion' and field_id = 12113 and status = 2 ;
+
+
+-- AUTHOR:2018年12月24日 黄明波
+-- REMARK:issue-44627 增加国贸服务快递的微信支持
+set @max_id = (select ifnull(max(id), 0) from eh_express_companies);
+set @namespace_id = 999923;
+INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `logistics_url`, `order_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'community', 240111044832061111, 2, 'EMS', '', '国贸服务，EMS快递公司', NULL, NULL, NULL, NULL, NULL, 2, 0, now(), null, 0);
+INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `logistics_url`, `order_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'community', 240111044832061111, 3, '中国邮政', '', '国贸服务，中国邮政快递公司', NULL, NULL, NULL, NULL, NULL, 2, 0, now(), null, 0);
+INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `logistics_url`, `order_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'community', 240111044832061111, 4, '国贸物业酒店管理有限公司', '', '国贸项目，国贸快递业务对应的公司', NULL, NULL, NULL, NULL, NULL, 1, 0, now(), null, 0);
+
+
+set @max_id = (select ifnull(max(id), 0) from eh_express_company_businesses);
+INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 3, 9, '邮政快递包裹', '[{"packageType": 3},{"packageType": 2},{"packageType": 1}]', '请确认寄件物品价值不超过2万元，贵重物品务必保价，保价费=保价金额*1%，最低2元', '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 1, 2, 0, now(), null, 0);
+INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 3, 2, '同城信筒快件', '[{"packageType": 4},{"packageType": 5}]', NULL, '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 1, 2, 0, now(), null, 0);
+INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 2, 3, 'EMS标准快递', '[]', '请确认寄件物品价值不超过5万元，贵重物品务必保价，保价费=保价金额*0.5%，最低1元', '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 2, 2, 0, now(), null, 0);
+INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 4, 10, '国贸快递', '[]', NULL, '[{"status": 6},{"status": 5},{"status": 4}]', 3, 2, 0, now(), null, 0);
+
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------

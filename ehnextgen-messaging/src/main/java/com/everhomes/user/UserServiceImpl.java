@@ -2573,6 +2573,23 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         //		}
         return info;
     }
+    @Override
+    public String getUserAvatarUrl(Long uid) {
+        User queryUser = userProvider.findUserById(uid);
+        if (queryUser != null) {
+            return getUserAvatarUrl(queryUser);
+        }
+        return null;
+    }
+
+    private String getUserAvatarUrl(User queryUser) {
+        String avatarUri = queryUser.getAvatar();
+        if (avatarUri == null || avatarUri.trim().length() == 0) {
+            avatarUri = getUserAvatarUriByGender(queryUser.getId(), queryUser.getNamespaceId(), queryUser.getGender());
+        }
+        String url = contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), queryUser.getId());
+        return url;
+    }
 
     private void populateUserAvatar(UserInfo user, String avatarUri) {
         if (avatarUri == null || avatarUri.trim().length() == 0) {
@@ -6341,8 +6358,22 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		Long userId = user == null ? null : user.getId();
 		List<IndexDTO> indexDtos = launchPadService.listIndexDtos(namespaceId, userId);
 
-		resp.setIndexDtos(indexDtos);
-		
+		//由于要兼容旧版本定制版app，需要使用不同的字段，否则客户端会崩掉  add by yanlong.liang 20181221
+		//如果是标准版，使用IndexDtos字段，如果是定制版，使用CustomIndexDtos
+		if (namespaceId == 2) {
+            resp.setIndexDtos(indexDtos);
+        }else {
+		    resp.setCustomIndexDtos(indexDtos);
+        }
+		//判断是否启用主页签
+        String indexFlag = configurationProvider.getValue(cmd.getNamespaceId(),ConfigConstants.INDEX_FLAG, "");
+        if (!org.springframework.util.StringUtils.isEmpty(indexFlag) && TrueOrFalseFlag.TRUE.getCode().equals(Byte.valueOf(indexFlag))) {
+            resp.setIndexFlag(TrueOrFalseFlag.TRUE.getCode());
+        }else {
+            resp.setIndexFlag(TrueOrFalseFlag.FALSE.getCode());
+        }
+
+
 		// 客户端地址模式配置, add by momoubin,18/11/09
 		resp.setClientAddressMode(this.configurationProvider.getIntValue(namespaceId, ConfigConstants.CLIENT_ADDRESS_MODE, 0));
 		resp.setAuthPopupConfig(Byte.valueOf(this.configurationProvider.getValue(namespaceId, "authPopupConfig", "1")));
@@ -7688,6 +7719,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @Override
     public GetUserListResponse getUserList(GetUserListCommand cmd) {
         GetUserListResponse response = new GetUserListResponse();
+        if (CollectionUtils.isEmpty(cmd.getIds())) {
+            return response;
+        }
         List<UserDTO> list = this.userProvider.getUserByIds(cmd.getIds());
         response.setUserDtos(list);
         return response;
@@ -7802,5 +7836,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         UserLogin newLogin = (UserLogin) StringHelper.fromJsonString(record.value(), UserLogin.class);
         kickoffLoginByDevice(newLogin);
+    }
+
+    @KafkaListener(topics = "user-logoff")
+    public void userLogoffMessage(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-logoff ] {}", record.value());
+
+        UserLogin login = (UserLogin) StringHelper.fromJsonString(record.value(), UserLogin.class);
+        logoff(login);
     }
 }

@@ -12,7 +12,7 @@ package com.everhomes.rest.community.admin;
  *     <li>keywords: 姓名或者昵称</li>
  *     <li>communityId: 小区id</li>
  *     <li>organizationId: organizationId</li>
- *     <li>userSourceType: 用户来源 1：来源app 2：来源微信</li>
+ *     <li>userSourceType: 用户来源 1：来源app 2：来源微信 3:支付宝来源</li>
  *     <li>organizationNames: 企业名称,分号隔开</li>
  *     <li>phone: 手机号码</li>
  *     <li>address: 家庭地址，小区的时候使用</li>

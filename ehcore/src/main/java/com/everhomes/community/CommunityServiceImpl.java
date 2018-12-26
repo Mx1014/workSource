@@ -2196,6 +2196,8 @@ public class CommunityServiceImpl implements CommunityService {
 				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
 			}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
 				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+			}else if(UserSourceType.ALIPAY == UserSourceType.fromCode(cmd.getUserSourceType())){
+				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.ALIPAY.getCode()));
 			}
 
 			if(!StringUtils.isEmpty(cmd.getKeywords())){
@@ -2244,6 +2246,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 				if(NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
 					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				} else if (NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.ALIPAY){
+					dto.setUserSourceType(UserSourceType.ALIPAY.getCode());
 				}
 
 				List<UserGroup> userGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
@@ -2421,6 +2425,11 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
 			dto.setIdentityNumber(user.getIdentityNumberTag());
+            if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
+                dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+            }else {
+                dto.setUserSourceType(UserSourceType.APP.getCode());
+            }
 			//dto.setAddressDtos(addressDtos);
             String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
             if ("true".equals(showVipFlag)) {
@@ -2487,6 +2496,11 @@ public class CommunityServiceImpl implements CommunityService {
                 dto.setShowVipLevelFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
             }
             dto.setVipLevel(user.getVipLevel());
+            if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
+                dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+            }else {
+                dto.setUserSourceType(UserSourceType.APP.getCode());
+            }
         }
 		List<OrganizationMemberLog> memberLogs = this.organizationProvider.listOrganizationMemberLogs(user.getId());
 		List<OrganizationMemberLogDTO> memberLog = new ArrayList<>();
@@ -2551,6 +2565,16 @@ public class CommunityServiceImpl implements CommunityService {
             if (user != null) {
                 communityUserAddressDTO = ConvertHelper.convert(user, CommunityUserAddressDTO.class);
                 communityUserAddressDTO.setIdentityNumber(user.getIdentityNumberTag());
+                if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
+                    communityUserAddressDTO.setUserSourceType(UserSourceType.WEIXIN.getCode());
+                }else {
+                    communityUserAddressDTO.setUserSourceType(UserSourceType.APP.getCode());
+                }
+                //最新活跃时间 add by sfyan 20170620
+                List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
+                if(userActivities.size() > 0){
+                    communityUserAddressDTO.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+                }
             }
 
             //是否展示会员等级
@@ -2925,6 +2949,8 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
 				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
 					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+				}else if(UserSourceType.ALIPAY == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.ALIPAY.getCode()));
 				}
 
 				if(null != cmd.getCommunityId()){
@@ -3048,6 +3074,8 @@ public class CommunityServiceImpl implements CommunityService {
 			User user = userProvider.findUserById(r.getUserId());
 			if(user != null && NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
 				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+			} else if (user != null && NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.ALIPAY) {
+				dto.setUserSourceType(UserSourceType.ALIPAY.getCode());
 			}
 
 //			if(null != dto.getPhone()){
@@ -3093,6 +3121,8 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
 					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				} else if (NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.ALIPAY){
+					dto.setUserSourceType(UserSourceType.ALIPAY.getCode());
 				}
 
 				//最新活跃时间 add by sfyan 20170620
@@ -3141,6 +3171,8 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
 					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				} else if (NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.ALIPAY){
+					dto.setUserSourceType(UserSourceType.ALIPAY.getCode());
 				}
 
 				//最新活跃时间 add by sfyan 20170620

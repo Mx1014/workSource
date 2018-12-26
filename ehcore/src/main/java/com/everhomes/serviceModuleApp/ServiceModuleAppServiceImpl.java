@@ -1312,8 +1312,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			List<AppCommunityConfigDTO> tempConfigDtos = new ArrayList<>();
 			if(serviceModuleEntries != null && serviceModuleEntries.size() > 0){
-				for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
-					for (ServiceModuleEntry entry: serviceModuleEntries){
+				for (ServiceModuleEntry entry: serviceModuleEntries){
+					for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
 						if(entry.getModuleId().equals(appCommunityConfigDto.getModuleId())){
                             List<ServiceModuleAppEntryProfile> serviceModuleAppEntryProfileList =
                                     this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(appCommunityConfigDto.getAppOriginId(),entry.getId(),null,null);

@@ -131,6 +131,8 @@ public interface ConfigConstants {
     public static final String PORTAL_ITEM_MORE_TITLE = "portal.item.more.title";
     public static final String PAY_V2_HOME_URL = "pay.v2.home.url";
     public static final String PAY_PLATFORM = "pay.platform";
+    public static final String INDEX_FLAG = "index.flag"; //是否启用主页签
+
 
     public static final String QUESTIONNAIRE_DETAIL_URL = "questionnaire.detail.url";
     public static final String QUESTIONNAIRE_SEND_MESSAGE_EXPRESS = "questionnaire.send.message.express";
@@ -251,4 +253,7 @@ public interface ConfigConstants {
 	public static final String SCHEDULE_QUALITY_INSPECTION_TASK_CORN = "quality.inspection.cronexpression";
 
 	public static final String USER_VIP_LEVEL_URL = "user.vip.level.url";
+
+	//同事圈头部背景图
+	public static final String ENTERPRISE_BANNER = "enterprise.moment.banner";
 }

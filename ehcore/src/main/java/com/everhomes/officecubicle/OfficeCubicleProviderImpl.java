@@ -302,6 +302,12 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	}
 	
 	@Override
+	public void deleteOfficeCubicleStationRent(Long orderId) {
+		dbProvider.getDslContext(AccessSpec.readOnly()).delete(Tables.EH_OFFICE_CUBICLE_STATION_RENT)
+		.where(Tables.EH_OFFICE_CUBICLE_STATION_RENT.ORDER_ID.equal(orderId)).execute();
+	}
+	
+	@Override
 	public void deleteRefundRule(Long spaceId) {
 		dbProvider.getDslContext(AccessSpec.readOnly()).delete(Tables.EH_OFFICE_CUBICLE_REFUND_RULE)
 		.where(Tables.EH_OFFICE_CUBICLE_REFUND_RULE.SPACE_ID.equal(spaceId)).execute();
@@ -482,10 +488,11 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_STATION_RENT);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.NAMESPACE_ID.eq(currentNamespaceId);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.SPACE_ID.eq(spaceId));
 		if (rentType!=null)
-			condition = Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType);
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.RENT_TYPE.eq(rentType));
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.BEGIN_TIME.lt(new Timestamp(System.currentTimeMillis())));
-		condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.gt(new Timestamp(System.currentTimeMillis())));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_STATION_RENT.END_TIME.gt(new Timestamp(System.currentTimeMillis())));
 		step.where(condition);
 		List<OfficeCubicleStationRent> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_STATION_RENT.OPERATE_TIME.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleStationRent.class);
@@ -864,6 +871,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		return ConvertHelper.convert(query.fetchAny(), OfficeCubicleRentOrder.class);
 	}
 
+	
 	@Override
 	public OfficeCubicleRentOrder findOfficeCubicleRentOrderById(Long orderId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -910,7 +918,6 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		stationRent.setId(id);
 		stationRent.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		stationRent.setCreatorUid(UserContext.currentUserId());
-		stationRent.setNamespaceId(UserContext.getCurrentNamespaceId());
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleStationRentRecord record = ConvertHelper.convert(stationRent,
 				EhOfficeCubicleStationRentRecord.class);

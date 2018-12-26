@@ -18,20 +18,20 @@ import java.util.List;
 
 public interface FacePlusPlusService {
 
-    String login ();
+    String login (String ip,String username, String password);
 
-    JSONObject createUser (String cookie, Integer subjectType, String name, Long start_time, Long end_time);
+    JSONObject createUser (String cookie, Integer subjectType, String name, Long start_time, Long end_time, String ip);
 
-//    JSONObject updateUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time);
-
-    String uploadPhoto (String cookie, String url, String subjectId);
-
-    void deleteUser (String cookie, String subjectId);
-
-    String filetest (String url);
+    void deleteUser (String cookie, String subjectId, String ip);
 
     DoorAuth createAuth (DoorAuth doorAuth, CreateDoorAuthCommand cmd, UserInfo custom);
 
     void addPhoto(String url,Long authId,Long userId);
+
+    String filetest (String url);
+
+    String uploadPhoto (String cookie, String url, String subjectId,String ip);
+
+    //    JSONObject updateUser (String cookie, Integer subjectType, String name, Integer start_time, Integer end_time);
 
 }

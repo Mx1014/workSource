@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>layoutId: layoutId</li>
  *     <li>layoutType: layoutType 参考 {@link LayoutType}</li>
+ *     <li>layoutName</li>
  * </ul>
  */
 public class Container {
@@ -14,6 +15,16 @@ public class Container {
     private Long layoutId;
 
     private Byte layoutType;
+
+    private String layoutName;
+
+    public String getLayoutName() {
+        return layoutName;
+    }
+
+    public void setLayoutName(String layoutName) {
+        this.layoutName = layoutName;
+    }
 
     public Long getLayoutId() {
         return layoutId;

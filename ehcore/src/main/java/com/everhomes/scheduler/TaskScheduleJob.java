@@ -75,6 +75,10 @@ public class TaskScheduleJob extends QuartzJobBean {
 
             //0、更新任务为开始执行
             Task task = taskService.findById(taskId);
+            if (task == null) {
+                LOGGER.info("Task is null, taskId={}", taskId);
+                return;
+            }
             task.setExecuteStartTime(new Timestamp(System.currentTimeMillis()));
             taskService.updateTask(task);
 
