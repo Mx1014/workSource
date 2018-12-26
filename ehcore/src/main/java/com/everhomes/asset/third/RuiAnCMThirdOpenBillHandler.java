@@ -20,6 +20,7 @@ import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.asset.PaymentBillItems;
 import com.everhomes.asset.PaymentBills;
 import com.everhomes.asset.bill.AssetBillProvider;
+import com.everhomes.contract.CMThirdPartContractHandler;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.locale.LocaleString;
@@ -83,19 +84,14 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 	/**
 	 * 同步瑞安CM的账单数据到左邻的数据库表中
 	 */
-	public void syncRuiAnCMBillToZuolin(List<CMSyncObject> cmSyncObjectList, Integer namespaceId, Long contractCategoryId){
+	public void syncRuiAnCMBillToZuolin(List<CMSyncObject> cmSyncObjectList, Integer namespaceId, Long contractCategoryId, String cmSyncType){
 		if(cmSyncObjectList != null) {
 			for(CMSyncObject cmSyncObject : cmSyncObjectList) {
 				List<CMDataObject> data = cmSyncObject.getData();
 				if(data != null) {
 					for(CMDataObject cmDataObject : data) {
-						//CMContractHeader contractHeader = cmDataObject.getContractHeader();
 						//1、根据propertyId获取左邻communityId
 						Long communityId = null;
-//						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());
-//						if(community != null) {
-//							communityId = community.getId();
-//						}
 						//2、获取左邻企业ID
 						Long targetId = null;
 						EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmDataObject.getCustomerId());
@@ -117,25 +113,27 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 						Long contractId = null;
 						String contractNum = null;
 						String rentalID = "";
-						if(cmDataObject.getContractHeader() != null) {
-							rentalID = cmDataObject.getContractHeader().getRentalID();//瑞安CM定义的合同ID
-							try {
-								Long namespaceContractToken = Long.parseLong(rentalID);
-								Contract contract = contractProvider.findContractByNamespaceToken(namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
-										namespaceContractToken, contractCategoryId);
-								if(contract != null) {
-									contractId = contract.getId();
-									contractNum = contract.getContractNumber();
-									communityId = contract.getCommunityId();
-									addressId = contractProvider.findAddressByContractId(contractId);
-								}else {
-									LOGGER.info("syncRuiAnCMBillToZuolin findContractByNamespaceToken is null, namespaceId={}, NAMESPACE_CONTRACT_TYPE={},"
-											+ "NAMESPACE_CONTRACT_TOKEN= {}, contractCategoryId={}", namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
+						if(cmSyncType != null && cmSyncType.equals(CMThirdPartContractHandler.DispContract)) {
+							if(cmDataObject.getContractHeader() != null) {
+								rentalID = cmDataObject.getContractHeader().getRentalID();//瑞安CM定义的合同ID
+								try {
+									Long namespaceContractToken = Long.parseLong(rentalID);
+									Contract contract = contractProvider.findContractByNamespaceToken(namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
 											namespaceContractToken, contractCategoryId);
-								}
-							}catch (Exception e){
-					            LOGGER.error("", e);
-					        }
+									if(contract != null) {
+										contractId = contract.getId();
+										contractNum = contract.getContractNumber();
+										communityId = contract.getCommunityId();
+										addressId = contractProvider.findAddressByContractId(contractId);
+									}else {
+										LOGGER.info("syncRuiAnCMBillToZuolin findContractByNamespaceToken is null, namespaceId={}, NAMESPACE_CONTRACT_TYPE={},"
+												+ "NAMESPACE_CONTRACT_TOKEN= {}, contractCategoryId={}", namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
+												namespaceContractToken, contractCategoryId);
+									}
+								}catch (Exception e){
+						            LOGGER.error("", e);
+						        }
+							}
 						}
 						//获取左邻缴费应用categoryId
 						Long categoryId = null;
@@ -149,6 +147,30 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 				        }
 						List<CMBill> cmBills = cmDataObject.getBill();
 						for(CMBill cmBill : cmBills) {
+							if(cmSyncType != null && cmSyncType.equals(CMThirdPartContractHandler.DispBill)) {
+								rentalID = cmBill.getRentalID();//瑞安CM定义的合同ID
+								try {
+									Long namespaceContractToken = Long.parseLong(rentalID);
+									Contract contract = contractProvider.findContractByNamespaceToken(namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
+											namespaceContractToken, contractCategoryId);
+									if(contract != null) {
+										contractId = contract.getId();
+										contractNum = contract.getContractNumber();
+										communityId = contract.getCommunityId();
+										addressId = contractProvider.findAddressByContractId(contractId);
+										EnterpriseCustomer customerForBill = enterpriseCustomerProvider.findById(contract.getCustomerId());
+										if(customerForBill != null) {
+											targetId = customerForBill.getOrganizationId();
+										}
+									}else {
+										LOGGER.info("syncRuiAnCMBillToZuolin findContractByNamespaceToken is null, namespaceId={}, NAMESPACE_CONTRACT_TYPE={},"
+												+ "NAMESPACE_CONTRACT_TOKEN= {}, contractCategoryId={}", namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
+												namespaceContractToken, contractCategoryId);
+									}
+								}catch (Exception e){
+						            LOGGER.error("", e);
+						        }
+							}
 							//所有数据以生产方为准
 							if(cmBill.getBillType() != null && cmBill.getBillType().equals("服务费账单")) {
 								//CM把我方的服务账单又同步回来
