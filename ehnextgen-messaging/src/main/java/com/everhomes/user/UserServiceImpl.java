@@ -6908,14 +6908,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 for (OrganizationMember member : orgMembers) {
 					AddressUserDTO dto = new AddressUserDTO();
 
-                    //add by momoubin 2018/12/27：因为members表数据可能会有多条groupPath的重复数据，所以这里要对这个进行过滤。
-                    if(!groupPaths.contains(member.getGroupPath())){
-                        groupPaths.add(member.getGroupPath());
-                    }else {
+                    if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(member.getGroupType())){
                         continue;
                     }
 
-                    if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(member.getGroupType())){
+                    //add by momoubin 2018/12/27：因为members表数据可能会有多条groupPath的重复数据，它们的groupType=ENTERPRISE，所以这里要对这个进行过滤。
+                    if(!groupPaths.contains(member.getGroupPath())){
+                        groupPaths.add(member.getGroupPath());
+                    }else {
                         continue;
                     }
 
