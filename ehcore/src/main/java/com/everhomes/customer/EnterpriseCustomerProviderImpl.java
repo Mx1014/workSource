@@ -2090,6 +2090,19 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 	}
 
     @Override
+    public void updateCustomerLastVisitingTime(EnterpriseCustomer customer) {
+        assert(customer.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
+                .set(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_VISITING_TIME, customer.getLastVisitingTime())
+                .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
+                .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+    }
+
+
+    @Override
     public String findLastEnterpriseCustomerVersionByCommunity(Integer namespaceId, Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);

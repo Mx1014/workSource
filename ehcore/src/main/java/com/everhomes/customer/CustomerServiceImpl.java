@@ -3622,10 +3622,24 @@ public class CustomerServiceImpl implements CustomerService {
 //        customer.setLastTrackingTime(tracking.getTrackingTime());
         //更细客户表的最后跟进时间
         Timestamp maxTrackingTime = enterpriseCustomerProvider.getCustomerMaxTrackingTime(cmd.getCustomerId(), cmd.getCustomerSource());
-        customer.setLastTrackingTime(maxTrackingTime);
-        enterpriseCustomerProvider.updateCustomerLastTrackingTime(customer);
-        enterpriseCustomerSearcher.feedDoc(customer);
+        updateLastTimeDiffByCustomerSource(customer, cmd.getCustomerSource(), maxTrackingTime);
         return ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
+    }
+
+    /**
+     * 新增了最近拜访时间字段，则需要判断新增的跟进信息是招商跟进信息还是租客拜访信息，然后更新不同的字段值，该方法应用在updateCustomerTracking，createCustomerTracking，deleteCustomerTracking
+     * Author 黄鹏宇
+     * Date 2018年12月27日
+     */
+    private void updateLastTimeDiffByCustomerSource(EnterpriseCustomer customer, Byte customerSource, Timestamp maxTrackingTime){
+        if(customerSource == InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode()){
+            customer.setLastVisitingTime(maxTrackingTime);
+            enterpriseCustomerProvider.updateCustomerLastVisitingTime(customer);
+        }else{
+            customer.setLastTrackingTime(maxTrackingTime);
+            enterpriseCustomerProvider.updateCustomerLastTrackingTime(customer);
+        }
+        enterpriseCustomerSearcher.feedDoc(customer);
     }
 
     @Override
@@ -3642,13 +3656,10 @@ public class CustomerServiceImpl implements CustomerService {
         if (customer != null) {
             List<CustomerTracking> customerTrackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId(),cmd.getCustomerSource());
             if (customerTrackings != null && customerTrackings.size() > 0) {
-                customer.setLastTrackingTime(customerTrackings.get(0).getTrackingTime());
-                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-                enterpriseCustomerSearcher.feedDoc(customer);
+
+                updateLastTimeDiffByCustomerSource(customer, cmd.getCustomerSource(), customerTrackings.get(0).getTrackingTime());
             }else {
-                customer.setLastTrackingTime(null);
-                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-                enterpriseCustomerSearcher.feedDoc(customer);
+                updateLastTimeDiffByCustomerSource(customer, cmd.getCustomerSource(), null);
             }
         }
     }
@@ -3669,9 +3680,7 @@ public class CustomerServiceImpl implements CustomerService {
 //        customer.setLastTrackingTime(tracking.getTrackingTime());
         //更细客户表的最后跟进时间
         Timestamp maxTrackingTime = enterpriseCustomerProvider.getCustomerMaxTrackingTime(cmd.getCustomerId(), cmd.getCustomerSource());
-        customer.setLastTrackingTime(maxTrackingTime);
-        enterpriseCustomerProvider.updateCustomerLastTrackingTime(customer);
-        enterpriseCustomerSearcher.feedDoc(customer);
+        updateLastTimeDiffByCustomerSource(customer, cmd.getCustomerSource(), maxTrackingTime);
     }
 
     private CustomerTracking checkCustomerTracking(Long id, Long customerId) {

@@ -176,6 +176,8 @@ public interface EnterpriseCustomerProvider {
 	
 	void updateCustomerLastTrackingTime(EnterpriseCustomer customer);
 
+    void updateCustomerLastVisitingTime(EnterpriseCustomer customer);
+
     String findLastEnterpriseCustomerVersionByCommunity(Integer namespaceId, Long communityId);
 
     List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId, Long appId, Long communityId);

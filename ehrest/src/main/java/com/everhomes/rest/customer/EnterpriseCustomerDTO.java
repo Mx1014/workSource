@@ -196,6 +196,7 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private Boolean thirdPartFlag = false;
 
     private Integer trackingPeriod;
+    private Integer visitingPeriod;
     private String deviceType;
     private String trackingPhone;
     private String hotline;
@@ -305,6 +306,24 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String stringTag21;
     private String corpLegalPersonDuty;
 
+    private Timestamp lastVisitingTime;
+
+
+    public Integer getVisitingPeriod() {
+        return visitingPeriod;
+    }
+
+    public void setVisitingPeriod(Integer visitingPeriod) {
+        this.visitingPeriod = visitingPeriod;
+    }
+
+    public Timestamp getLastVisitingTime() {
+        return lastVisitingTime;
+    }
+
+    public void setLastVisitingTime(Timestamp lastVisitingTime) {
+        this.lastVisitingTime = lastVisitingTime;
+    }
 
     public String getLegalAddress() {
         return legalAddress;

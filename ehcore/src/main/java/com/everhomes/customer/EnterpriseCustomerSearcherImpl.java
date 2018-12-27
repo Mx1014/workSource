@@ -185,6 +185,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("trackingUid",customer.getTrackingUid());
             builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
             builder.field("lastTrackingTime" , customer.getLastTrackingTime());
+            builder.field("lastVisitingTime" , customer.getLastVisitingTime());
             builder.field("updateTime" , customer.getUpdateTime());
             builder.field("createTime" , customer.getCreateTime());
             builder.field("propertyType" , customer.getPropertyType());
@@ -485,6 +486,13 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         	rf.gte(startTime);
         	fb = FilterBuilders.andFilter(fb, rf); 
         }*/
+
+        if(null != cmd.getLastVisitingTime() && cmd.getLastVisitingTime() > 0){
+            RangeFilterBuilder rf = new RangeFilterBuilder("lastVisitingTime");
+            Long startTime = getTomorrowLastTimestamp(cmd.getLastVisitingTime());
+            rf.gte(startTime);
+            fb = FilterBuilders.andFilter(fb, rf);
+        }
 
         if(cmd.getTrackerUids() != null && cmd.getTrackerUids().size()>0){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackerUid", cmd.getTrackingUids()));
@@ -1023,6 +1031,11 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
             dto.setTrackingPeriod(result);
         }
+
+        if (customer.getLastVisitingTime() != null) {
+            result = (int) ((System.currentTimeMillis() - customer.getLastVisitingTime().getTime()) / 86400000);
+            dto.setVisitingPeriod(result);
+        }
         ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
         command.setOrganizationId(customer.getOrganizationId());
         command.setCustomerId(customer.getId());
@@ -1120,6 +1133,11 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if (customer.getLastTrackingTime() != null) {
             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
             dto.setTrackingPeriod(result);
+        }
+
+        if (customer.getLastVisitingTime() != null) {
+            result = (int) ((System.currentTimeMillis() - customer.getLastVisitingTime().getTime()) / 86400000);
+            dto.setVisitingPeriod(result);
         }
         ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
         command.setOrganizationId(customer.getOrganizationId());

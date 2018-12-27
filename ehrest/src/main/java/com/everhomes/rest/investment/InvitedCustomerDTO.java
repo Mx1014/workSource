@@ -201,6 +201,16 @@ public class InvitedCustomerDTO {
     private String stringTag21;
     private String corpLegalPersonDuty;
 
+    private Timestamp lastVisitingTime;
+
+
+    public Timestamp getLastVisitingTime() {
+        return lastVisitingTime;
+    }
+
+    public void setLastVisitingTime(Timestamp lastVisitingTime) {
+        this.lastVisitingTime = lastVisitingTime;
+    }
 
     public String getStringTag17() {
         return stringTag17;

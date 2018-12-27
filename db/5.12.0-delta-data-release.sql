@@ -84,6 +84,10 @@ update eh_configurations set `value` = '/resource-rental/build/index.html#/resou
 -- REMARK: 域空间管理v3.0 主页签
 DELETE from eh_launch_pad_indexs;
 DELETE from eh_portal_navigation_bars;
+
+-- AUTHOR:黄鹏宇 2018年12月27日
+-- REMARK:初始化最近拜访时间
+update eh_enterprise_customers c, eh_customer_trackings t,(select id,max(tracking_time),customer_id from eh_customer_trackings group by customer_id) maxti set c.last_visiting_time = t.tracking_time where c.id = t.customer_id and t.id = maxti.id;
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base

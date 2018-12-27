@@ -62,6 +62,8 @@ public class SearchEnterpriseCustomerCommand {
     private Integer type;
     
     private Integer lastTrackingTime;
+
+    private Integer lastVisitingTime;
     
     private String propertyType;
     
@@ -125,6 +127,14 @@ public class SearchEnterpriseCustomerCommand {
     private String trackerName;
 
     private Byte mobileFlag;
+
+    public Integer getLastVisitingTime() {
+        return lastVisitingTime;
+    }
+
+    public void setLastVisitingTime(Integer lastVisitingTime) {
+        this.lastVisitingTime = lastVisitingTime;
+    }
 
     public Long getUpdateTime() {
         return updateTime;

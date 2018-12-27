@@ -48,6 +48,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
             "sourceType":{"type":"string","index":"not_analyzed"},
             "propertyArea":{"type":"double"},
 			"lastTrackingTime":{"type":"date"},
+			"lastVisitingTime":{"type":"date"},
 			"createTime":{"type":"date"},
 			"trackingTime":{"type":"date"},
 			"requirementMinArea":{"type":"double"},
