@@ -51,7 +51,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('ent
 -- AUTHOR: 谢旭双
 -- REMARK: 同事圈头部背景图
 SET @config_id = (SELECT MAX(id) FROM `eh_configurations`);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `is_readonly`) VALUES (@config_id:=@config_id+1, 'enterprise.moment.banner', 'cs://1/image/aW1hZ2UvTVRwak1HWTRaalJsWkdRMk1XWXdOelkzWXpsak5tTTNaVEJtTVRNeE4yUmxOdw', '同事圈头部背景图', 1);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `is_readonly`) VALUES (@config_id:=@config_id+1, 'enterprise.moment.banner', 'cs://1/image/aW1hZ2UvTVRwak5HSm1ZV05pWkdZeVpUa3dZamxsT1RVeFlqUXhPRGxqWVRJMk1ETmlZUQ', '同事圈头部背景图', 1);
 
 -- AUTHOR: 吴寒
 -- REMARK: 同事圈菜单
