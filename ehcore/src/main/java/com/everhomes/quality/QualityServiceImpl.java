@@ -5166,6 +5166,12 @@ public class QualityServiceImpl implements QualityService {
 //
 //				String msg = getLocalRecordMessage(operators, task.getTaskName(), taskDTO.getOperatorId(), taskDTO.getProcessExpireTime().getTime());
 //				record.setProcessMessage(msg);
+			} else {
+				//待整改
+				task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
+				task.setResult(QualityInspectionTaskResult.CORRECT.getCode());
+				record.setProcessResult(QualityInspectionTaskResult.NONE.getCode());
+				//record.setProcessType(ProcessType.RETIFY.getCode());
 			}
 		} else if (QualityInspectionTaskResult.CORRECT_COMPLETE.getCode() == taskDTO.getVerificationResult()) {
 			//整改完成

@@ -3,6 +3,15 @@
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
 -- AUTHOR:
 -- REMARK:
+
+-- -- 合同表，合同房源映射表增加contract_number，contract_id，contract_number，address_id索引 add by 丁建民 20181227
+-- --alter table eh_contracts add index contractNum_index(`contract_number`);
+
+-- --alter table eh_contract_building_mappings add index building_mappings_contract_id_index(`contract_id`);
+-- --alter table eh_contract_building_mappings add index building_mappings_contract_number_index(`contract_number`);
+-- --alter table eh_contract_building_mappings add index building_mappings_address_id_index(`address_id`);
+
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
