@@ -3320,7 +3320,7 @@ public class CommunityServiceImpl implements CommunityService {
 
             int authUsers = 0;
             int authingUsers = 0;
-            int notAuthUsers = 0;
+//            int notAuthUsers = 0;
             List<Community> communities = this.communityProvider.listNamespaceCommunities(namespaceId);
             if (!CollectionUtils.isEmpty(communities)) {
                 for (Community community : communities) {
@@ -3331,14 +3331,14 @@ public class CommunityServiceImpl implements CommunityService {
                         authUsers += countCommunityUserResponse.getAuthUsers();
                         authingUsers += countCommunityUserResponse.getAuthingUsers();
                         //未认证用户 userprofile表中的用户-已认证或者认证中的用户
-                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
+//                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
 
                         //未认证
-                        int notAuthCount = 0;
-                        if(users != null){
-                            notAuthCount = users.size();
-                        }
-                        notAuthUsers += notAuthCount;
+//                        int notAuthCount = 0;
+//                        if(users != null){
+//                            notAuthCount = users.size();
+//                        }
+//                        notAuthUsers += notAuthCount;
                     }else {
                         //园区用户统计
                         cmd.setCommunityId(community.getId());
@@ -3346,12 +3346,12 @@ public class CommunityServiceImpl implements CommunityService {
                         authUsers += countCommunityUserResponse.getAuthUsers();
                         authingUsers += countCommunityUserResponse.getAuthingUsers();
 
-                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
-                        if(users == null){
-                            users = new ArrayList<>();
-                        }
-                        int notAuthCount = users.size();
-                        notAuthUsers += notAuthCount;
+//                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
+//                        if(users == null){
+//                            users = new ArrayList<>();
+//                        }
+//                        int notAuthCount = users.size();
+//                        notAuthUsers += notAuthCount;
                     }
                 }
             }
@@ -3359,7 +3359,9 @@ public class CommunityServiceImpl implements CommunityService {
             resp.setCommunityUsers(allCount);
             resp.setAuthUsers(authUsers);
             resp.setAuthingUsers(authingUsers);
-            resp.setNotAuthUsers(notAuthUsers);
+            // 越来越多的用户来源导致域空间下全部用户统计时未认证人数统计不准确，认证和待认证是准确的，故改为总数减去已认证和待认证。
+//            resp.setNotAuthUsers(notAuthUsers);
+			resp.setNotAuthUsers(allCount - authUsers - authingUsers);
             resp.setWxUserCount(wxCount);
             resp.setAlipayUserCount(alipayCount);
             resp.setAppUserCount(allCount - wxCount - alipayCount);
@@ -3430,6 +3432,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         //绑定微信的、男性、女性
         Set<Long> wxMemberIds = new HashSet<>();
+        Set<Long> alipayMemberIds = new HashSet<>();
         Set<Long> maleMemberIds = new HashSet<>();
         Set<Long> femaleMemberIds = new HashSet<>();
 
@@ -3443,7 +3446,9 @@ public class CommunityServiceImpl implements CommunityService {
         for(User u: allUsers){
             if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
                 wxMemberIds.add(u.getId());
-            }
+            }else if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.ALIPAY){
+				alipayMemberIds.add(u.getId());
+			}
 
             if(UserGender.fromCode(u.getGender()) == UserGender.MALE){
                 maleMemberIds.add(u.getId());
@@ -3456,6 +3461,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 		//绑定微信
 		int wxCount = wxMemberIds.size();
+        //支付宝用户
+		int alipayCount = alipayMemberIds.size();
         //男性用户
         int maleCount = maleMemberIds.size();
         //女性用户
@@ -3467,7 +3474,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setAuthingUsers(authingCount);
         resp.setNotAuthUsers(notAuthCount);
         resp.setWxUserCount(wxCount);
-		resp.setAppUserCount(allCount - wxCount);
+        resp.setAlipayUserCount(alipayCount);
+		resp.setAppUserCount(allCount - wxCount - alipayCount);
 		resp.setMaleCount(maleCount);
 		resp.setFemaleCount(femaleCount);
 
@@ -3485,6 +3493,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		//已认证、认证中的微信微信用户
 		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode(), null);
+		int alipayCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.ALIPAY.getCode(), null);
 
         //未认证用户 userprofile表中的用户-已认证或者认证中的用户
         List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
@@ -3517,7 +3526,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setAuthingUsers(authingCount);
         resp.setNotAuthUsers(notAuthCount);
         resp.setWxUserCount(wxCount);
-		resp.setAppUserCount(allCount - wxCount);
+        resp.setAlipayUserCount(alipayCount);
+		resp.setAppUserCount(allCount - wxCount - alipayCount);
 		resp.setMaleCount(maleCount);
 		resp.setFemaleCount(femaleCount);
 

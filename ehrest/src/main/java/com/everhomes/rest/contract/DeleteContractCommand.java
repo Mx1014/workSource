@@ -40,7 +40,7 @@ public class DeleteContractCommand {
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
-    private Boolean checkAuth;
+    private Boolean checkAuth = true;
 
     public Boolean getCheckAuth() {
         return checkAuth;

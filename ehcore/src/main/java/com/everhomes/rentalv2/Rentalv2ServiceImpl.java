@@ -8997,6 +8997,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
         List<UsingInfoDTO> usingInfos = rentalOrders.stream().flatMap(r -> {
             List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(r.getId());
             String userName = r.getUserName();
+			User user = this.userProvider.findUserById(r.getRentalUid());
+			if (null != user) {
+				userName = user.getNickName();
+			} 
             if (userName.length() > 1)
                 userName = userName.substring(0, userName.length() - 2) + "*" + userName.substring(userName.length() - 1, userName.length());
             if (null != r.getUserEnterpriseId()) {
