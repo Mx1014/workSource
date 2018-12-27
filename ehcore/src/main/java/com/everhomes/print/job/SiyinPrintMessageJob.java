@@ -64,6 +64,7 @@ public class SiyinPrintMessageJob extends QuartzJobBean {
         if (null == userIdentifier) {
             LOGGER.error("userIdentifier is null...userId = " + creatorUid);
         } else {
+        	LOGGER.info("send message to unpaid order, user = {}, phone = {}.",creatorUid,userIdentifier.getIdentifierToken());
             smsProvider.sendSms(namespaceId, userIdentifier.getIdentifierToken(), templateScope,
                     templateId, templateLocale, variables);
         }
