@@ -130,4 +130,8 @@ public interface OfficeCubicleService {
 
 	BigDecimal getLongRentPrice(GetLongRentPriceCommand cmd);
 
+	void updateSpaceLongRentPrice(UpdateSpaceLongRentPriceCommand cmd);
+
+	void updateSpaceShortRentNum(UpdateSpaceShortRentNumCommand cmd);
+
 }
