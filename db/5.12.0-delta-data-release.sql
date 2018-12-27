@@ -81,6 +81,15 @@ update eh_configurations set `value` = '/resource-rental/build/index.html#/resou
 -- REMARK: 域空间管理v3.0 主页签
 DELETE from eh_launch_pad_indexs;
 DELETE from eh_portal_navigation_bars;
+
+-- AUTHOR:梁燕龙 20181227
+-- REMARK： 修改运营后台菜单数据
+SELECT * from eh_web_menus t WHERE t.name = '合同管理（科技园）' and t.type = 'zuolin';
+UPDATE eh_web_menus SET name = '科技园合同管理' WHERE name = '合同管理（科技园）' and type = 'zuolin';
+SELECT * from eh_web_menus t WHERE t.name = '租客管理' and t.type = 'zuolin';
+UPDATE eh_web_menus SET name = '企业客户管理' WHERE name = '租客管理' and type = 'zuolin';
+SELECT * from eh_web_menus t WHERE t.name = '企业支付授权' and t.type = 'zuolin' and t.parent_id =16300000;
+DELETE from eh_web_menus WHERE name = '企业支付授权' and type = 'zuolin' and parent_id = 16300000;
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
