@@ -4,14 +4,6 @@
 -- AUTHOR:
 -- REMARK:
 
--- -- 合同表，合同房源映射表增加contract_number，contract_id，contract_number，address_id索引 add by 丁建民 20181227
--- --alter table eh_contracts add index contractNum_index(`contract_number`);
-
--- --alter table eh_contract_building_mappings add index building_mappings_contract_id_index(`contract_id`);
--- --alter table eh_contract_building_mappings add index building_mappings_contract_number_index(`contract_number`);
--- --alter table eh_contract_building_mappings add index building_mappings_address_id_index(`address_id`);
-
-
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
@@ -142,6 +134,14 @@ INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`,
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 3, 2, '同城信筒快件', '[{"packageType": 4},{"packageType": 5}]', NULL, '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 1, 2, 0, now(), null, 0);
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 2, 3, 'EMS标准快递', '[]', '请确认寄件物品价值不超过5万元，贵重物品务必保价，保价费=保价金额*0.5%，最低1元', '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 2, 2, 0, now(), null, 0);
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 4, 10, '国贸快递', '[]', NULL, '[{"status": 6},{"status": 5},{"status": 4}]', 3, 2, 0, now(), null, 0);
+
+-- AUTHOR: 丁建民 20181227
+-- REMARK: 合同表，合同房源映射表增加索引
+
+alter table eh_contracts add index contractNum_index(`contract_number`);
+alter table eh_contract_building_mappings add index building_mappings_contract_id_index(`contract_id`);
+alter table eh_contract_building_mappings add index building_mappings_contract_number_index(`contract_number`);
+alter table eh_contract_building_mappings add index building_mappings_address_id_index(`address_id`);
 
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
