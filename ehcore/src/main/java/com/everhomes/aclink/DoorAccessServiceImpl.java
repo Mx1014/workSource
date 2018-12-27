@@ -5104,7 +5104,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	                cmd.setRightRemote(lv.getRightRemote());
 	                cmd.setRightVisitor(lv.getRightVisitor());
 	                cmd.setUserId(userId);
-	                createDoorAuth(cmd);
+	                QueryValidDoorAuthForeverCommand qryCmd = ConvertHelper.convert(cmd, QueryValidDoorAuthForeverCommand.class);
+	                DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(qryCmd);
+	                if(doorAuth == null){
+	                	createDoorAuth(cmd);
+	                }else{
+	                	LOGGER.info(String.format("user{%d} already has auth of door{%d}", cmd.getUserId(),cmd.getDoorId()));
+	                }
 	            }
 	        }
 	    }
