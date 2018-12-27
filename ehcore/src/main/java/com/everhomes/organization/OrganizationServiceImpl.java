@@ -6932,7 +6932,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationContactCommand  cmd_1 = new ListOrganizationContactCommand();
         cmd_1.setOrganizationId(cmd.getOrganizationId());
         cmd_1.setKeywords(cmd.getKeywords());
-        cmd_1.setFilterScopeTypes(Collections.singletonList("current"));
+        //issue-43452: 根据缺陷单,修改成查询包含子部门的人员
+        cmd_1.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode()));
         cmd_1.setVisibleFlag(VisibleFlag.ALL.getCode());
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
@@ -12511,8 +12512,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 else{
                 	//始终都要发消息
                     organizationMember.setOrganizationId(enterpriseId);
-                	//2018年10月17日 修改为新注册发消息,其它不发消息;18/12/12 注释去掉，
-                    sendMessageForContactApproved(organizationMember);
+                	//2018年10月17日 修改为新注册发消息,其它不发消息;
+                    //发消息在上面的joinOrganizationAfterOperation(organizationMember,false);方法内发
+//                    sendMessageForContactApproved(organizationMember);
                 }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428

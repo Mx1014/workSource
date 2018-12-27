@@ -9,6 +9,7 @@ import com.everhomes.rest.approval.ApprovalCategoryTimeSelectType;
 import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
 import com.everhomes.rest.openapi.GetOrgCheckInDataResponse;
 import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.techpark.punch.admin.AddPersonnelsToPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
@@ -360,5 +361,7 @@ public interface PunchService {
 	GoOutPunchLogDTO getGoOutPunchLog(GetGoOutPunchLogCommand cmd);
 
 	ListAllSimplePunchGroupsResponse listAllSimplePunchGroups(ListPunchGroupsCommand cmd);
+
+	void addPersonnelsToPunchGroup(AddPersonnelsToPunchGroupCommand cmd);
  
 }

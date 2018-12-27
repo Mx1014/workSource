@@ -167,7 +167,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.update(department);
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
-
+        //2018-12-26 By wh 增加内容:对于企业的名称修改的同时要更新直属部门的名称
+        if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(department.getGroupType())){
+            dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ORGANIZATIONS)
+                    .set(Tables.EH_ORGANIZATIONS.NAME,department.getName())
+                    .where(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(department.getId()))
+                    .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()))
+                    .execute();
+        }
     }
 
     /**

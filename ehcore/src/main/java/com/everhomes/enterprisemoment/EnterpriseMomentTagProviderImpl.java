@@ -63,8 +63,8 @@ public class EnterpriseMomentTagProviderImpl implements EnterpriseMomentTagProvi
 				enterpriseMomentTags.add(newEnterpriseMomentTag);
 			} else{
 				newEnterpriseMomentTag.setId(sameNameEnterpriseMomentTag.getId());
-				updateEnterpriseMomentTag(sameNameEnterpriseMomentTag);
-				enterpriseMomentTags.add(sameNameEnterpriseMomentTag);
+				updateEnterpriseMomentTag(newEnterpriseMomentTag);
+				enterpriseMomentTags.add(newEnterpriseMomentTag);
 			}
 		}
 		return enterpriseMomentTags;
@@ -78,6 +78,7 @@ public class EnterpriseMomentTagProviderImpl implements EnterpriseMomentTagProvi
 		enterpriseMomentTag.setName(name);
 		enterpriseMomentTag.setCreatorUid(creatorUid);
 		enterpriseMomentTag.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		enterpriseMomentTag.setDeleteFlag((byte)0);
 		return enterpriseMomentTag;
 	}
 
@@ -90,6 +91,9 @@ public class EnterpriseMomentTagProviderImpl implements EnterpriseMomentTagProvi
 			needToUpdateEnterpriseMomentTag.setId(sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseMomentTags.class)));
 			needToUpdateEnterpriseMomentTag.setOperatorUid(operatorUid);
 			needToUpdateEnterpriseMomentTag.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			needToUpdateEnterpriseMomentTag.setDeleteFlag((byte)0);
+			needToUpdateEnterpriseMomentTag.setDeleteUid(null);
+			needToUpdateEnterpriseMomentTag.setDeleteTime(null);
 			//为了满足根据标签名字筛选，但为了性能，又想用标签id做索引，做了如下的特殊操作
 			//修改名字时把当前tag标记为删除，如果不能找到同名的tag，把创建新名字的tag，否则把同名tagId所在的那行数据更新为needToUpdateEnterpriseMomentTag中的数据
 			EnterpriseMomentTag sameNameEnterpriseMomentTag = findEnterpriseMomentTagIncludeDeletedByName(namespaceId, organizationId, tag.getName());

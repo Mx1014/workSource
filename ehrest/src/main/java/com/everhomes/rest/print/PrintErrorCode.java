@@ -42,5 +42,6 @@ public class PrintErrorCode {
 	public static final String PRINT_LOGON_SCAN_TIMOUT= "print.logon.scan.timout";//二维码是否被扫描检测的延迟时间,单位毫秒 ：10000
 	public static final String PRINT_SIYIN_PATTERN= "print.siyin.pattern";//1:司印方配置成不解锁打印机，直接打印的模式，2:司印方配置成发送文档到打印机，需要解锁再打印的模式。
 	public static final String PRINT_SIYIN_JOB_COUNT_TIMEOUT= "print.siyin.job.count.timeout";//用户正在打印任务数量放到redis中的，设置一个默认超时时间 10 单位分钟
+	public static final String PRINT_SIYIN_ORDER_DIFF_TIME= "print.siyin.order.diff.time";//如果新的记录与订单更新时间在这个时间内，认为是同一订单
 
 }

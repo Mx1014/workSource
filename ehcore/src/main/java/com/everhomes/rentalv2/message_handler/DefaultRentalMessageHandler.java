@@ -82,7 +82,7 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         map.put("freeGoods", processFreeGoods(rentalBill));
         map.put("paidGoods",  processPaidGoods(rentalBill));
         rentalCommonService.sendMessageCode(rs.getChargeUid(), map,
-                    RentalNotificationTemplateCode.RENTAL_CANCEL_NOT_PAY);
+                    RentalNotificationTemplateCode.RENTAL_ADMIN_NOTIFY);
 
         //发短信
         String templateScope = SmsTemplateCode.SCOPE;

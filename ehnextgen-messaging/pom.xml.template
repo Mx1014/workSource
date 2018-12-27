@@ -151,7 +151,31 @@
             <artifactId>xmpush-server-api</artifactId>
             <version>0.0.9-20171017.103132-1</version>
         </dependency>
-        
+        <dependency>
+            <groupId>com.meizu.flyme</groupId>
+            <artifactId>ups-oppo-push-java-sdk</artifactId>
+            <version>1.0.0.20180605</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                     <groupId>log4j</groupId>
+                     <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.meizu.flyme</groupId>
+            <artifactId>push-server-sdk</artifactId>
+            <version>1.2.7.20181106_release</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gexin.platform</groupId>
+            <artifactId>gexin-rp-sdk-http</artifactId>
+            <version>4.1.0.0</version>
+        </dependency>
         <!-- 深圳湾物业缴费对接所需依赖：axis 1.4 jar start -->
         <dependency>
             <groupId>org.apache.axis</groupId>

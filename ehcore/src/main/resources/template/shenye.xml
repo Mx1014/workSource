@@ -586,7 +586,24 @@
                                         </w:rPr>
                                     </w:pPr>
                                 </w:p>
-                                <w:p w:rsidR="00F3574A" w:rsidRDefault="00F3574A" w:rsidP="00111E45">
+                                
+                                <w:p w:rsidR="003039B7" w:rsidRDefault="0080662B" w:rsidP="00111E45">
+                                    <w:pPr>
+                                        <w:jc w:val="center" />
+                                        <w:rPr>
+                                            <w:rFonts w:hint="eastAsia" />
+                                        </w:rPr>
+                                    </w:pPr>
+                                    <w:r>
+                                        <w:rPr>
+                                            <w:rFonts w:hint="eastAsia" />
+                                        </w:rPr>
+                                        <w:t>设备二维码：</w:t>
+                                    </w:r>
+                                </w:p>
+                                
+                                <!-- 设备二维码下载后，文档中左边显示不全 -->
+                                <!-- <w:p w:rsidR="00F3574A" w:rsidRDefault="00F3574A" w:rsidP="00111E45">
                                     <w:pPr>
                                         <w:ind w:firstLineChars="150" w:firstLine="315" />
                                         <w:rPr>
@@ -622,7 +639,7 @@
                                             </v:shape>
                                         </w:pict>
                                     </w:r>
-                                </w:p>
+                                </w:p> -->
                                 <w:p w:rsidR="00F3574A" w:rsidRPr="00F0155D" w:rsidRDefault="00F3574A" w:rsidP="00111E45">
                                     <w:pPr>
                                         <w:jc w:val="center" />

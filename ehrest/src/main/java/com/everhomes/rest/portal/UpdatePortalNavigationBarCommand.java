@@ -7,19 +7,20 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>id: 门户导航栏的id</li>
- *     <li>name: 主页签名称</li>
+ *     <li>label: 主页签名称</li>
  *     <li>description: 描述</li>
  *     <li>type: 主页签类型，参考{@link IndexType}</li>
  *     <li>configJson: 配置信息</li>
  *     <li>iconUri: icon 图片</li>
  *     <li>selectedIconUri: icon选中图片</li>
+ *     <li>topBarStyle: 顶栏样式，请参考{@link com.everhomes.rest.launchpadbase.indexconfigjson.TopBarStyle}</li>
  * </ul>
  */
 public class UpdatePortalNavigationBarCommand {
 
 	private Long id;
 
-	private String name;
+	private String label;
 
 	private String description;
 
@@ -31,6 +32,16 @@ public class UpdatePortalNavigationBarCommand {
 
 	private String selectedIconUri;
 
+	private Byte topBarStyle;
+
+	public Byte getTopBarStyle() {
+		return topBarStyle;
+	}
+
+	public void setTopBarStyle(Byte topBarStyle) {
+		this.topBarStyle = topBarStyle;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -39,12 +50,12 @@ public class UpdatePortalNavigationBarCommand {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getLabel() {
+		return label;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	public String getDescription() {

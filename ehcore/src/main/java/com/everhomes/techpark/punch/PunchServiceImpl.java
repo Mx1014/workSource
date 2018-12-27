@@ -82,6 +82,7 @@ import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.openapi.CheckInDataDTO;
 import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
 import com.everhomes.rest.openapi.GetOrgCheckInDataResponse;
+import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.EmployeeStatus;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
@@ -94,6 +95,7 @@ import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.techpark.punch.admin.AddPersonnelsToPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
@@ -8121,6 +8123,7 @@ public class PunchServiceImpl implements PunchService {
             if (null == pr)
                 continue;
             PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
+            dto.setGroupName(pr.getName());
             //打卡时间
             dto.setTimeRules(processPunchTimeRuleDTOs(r.getId(), pr.getStatus()));
             //打卡地点和WiFi
@@ -8465,7 +8468,40 @@ public class PunchServiceImpl implements PunchService {
 
         return dto;
     }
-
+    
+    @Override
+    public void addPersonnelsToPunchGroup(AddPersonnelsToPunchGroupCommand cmd){
+    	assert cmd.getTargets() != null;
+    	assert cmd.getPunchRuleId() != null;
+    	
+        PunchRule pr = punchProvider.getPunchRuleById(cmd.getPunchRuleId());
+        SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
+        command.setGroupId(pr.getPunchOrganizationId());
+        command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
+        command.setEnterpriseId(pr.getOwnerId());
+        command.setTargets(cmd.getTargets());
+        command.setVersionCode(CONFIG_VERSION_CODE);
+        List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(), CONFIG_VERSION_CODE);
+        List<Long> detailIds = new ArrayList<>();
+        if (null != employees) {
+            for (UniongroupMemberDetail detail : employees) {
+            	if(detail.getContactName() == null)
+            		continue;
+                UniongroupTarget target = new UniongroupTarget();
+                target.setName(detail.getContactName());
+                target.setId(detail.getDetailId());
+                target.setType(UniongroupTargetType.MEMBERDETAIL.getCode());
+                command.getTargets().add(target);
+                detailIds.add(detail.getDetailId());
+            }
+        }
+        try {
+            this.uniongroupService.saveUniongroupConfigures(command);
+        } catch (NoNodeAvailableException e) {
+            LOGGER.error("NoNodeAvailableException", e);
+        }
+    }
+    
     @Override
     public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
         if (cmd.getRuleType() == null)
@@ -10813,7 +10849,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setUserId(pdl.getUserId());
         if(null != pdl.getUserId() && pdl.getUserId() > 0L){
             User u = this.userProvider.findUserById(pdl.getUserId());
-            dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(), EntityType.USER.getCode(),u.getId()));
+            if(u != null) {
+                dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(), EntityType.USER.getCode(), u.getId()));
+            }
         }
         dto.setDepartmentId(pdl.getDeptId());
         if(null != pdl.getDeptId()){
@@ -10992,7 +11030,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setUserId(statistic.getUserId());
         if(null != statistic.getUserId() && statistic.getUserId() > 0L){
             User u = this.userProvider.findUserById(statistic.getUserId());
-            dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(), EntityType.USER.getCode(),u.getId()));
+            if(u != null){
+            	dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(), EntityType.USER.getCode(),u.getId()));
+            }
         }
         dto.setDepartmentId(statistic.getDeptId());
         if(null != statistic.getDeptId()){
@@ -11038,7 +11078,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setUserId(detail.getTargetId());
         if(null != detail.getTargetId() && detail.getTargetId() > 0L){
             User u = this.userProvider.findUserById(detail.getTargetId());
-            dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(),EntityType.USER.getCode(),u.getId()));
+            if (u != null) {
+                dto.setContactAvatar(contentServerService.parserUri(u.getAvatar(),EntityType.USER.getCode(),u.getId()));
+            }
         }
         Long userDeptId = organizationService.getDepartmentByDetailIdAndOrgId(detail.getId(), detail.getOrganizationId());
         dto.setDepartmentId(userDeptId);

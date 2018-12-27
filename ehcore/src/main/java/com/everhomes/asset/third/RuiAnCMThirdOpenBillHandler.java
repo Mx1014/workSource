@@ -20,6 +20,7 @@ import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.asset.PaymentBillItems;
 import com.everhomes.asset.PaymentBills;
 import com.everhomes.asset.bill.AssetBillProvider;
+import com.everhomes.contract.CMThirdPartContractHandler;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.locale.LocaleString;
@@ -83,19 +84,14 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 	/**
 	 * 同步瑞安CM的账单数据到左邻的数据库表中
 	 */
-	public void syncRuiAnCMBillToZuolin(List<CMSyncObject> cmSyncObjectList, Integer namespaceId, Long contractCategoryId){
+	public void syncRuiAnCMBillToZuolin(List<CMSyncObject> cmSyncObjectList, Integer namespaceId, Long contractCategoryId, String cmSyncType){
 		if(cmSyncObjectList != null) {
 			for(CMSyncObject cmSyncObject : cmSyncObjectList) {
 				List<CMDataObject> data = cmSyncObject.getData();
 				if(data != null) {
 					for(CMDataObject cmDataObject : data) {
-						//CMContractHeader contractHeader = cmDataObject.getContractHeader();
 						//1、根据propertyId获取左邻communityId
 						Long communityId = null;
-//						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());
-//						if(community != null) {
-//							communityId = community.getId();
-//						}
 						//2、获取左邻企业ID
 						Long targetId = null;
 						EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmDataObject.getCustomerId());
@@ -113,25 +109,33 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 //							}
 //						}
 
-						//获取左邻合同ID、合同编号
+						//获取左邻合同ID、合同编号、合同对应的客户名称
 						Long contractId = null;
 						String contractNum = null;
 						String rentalID = "";
-						if(cmDataObject.getContractHeader() != null) {
-							rentalID = cmDataObject.getContractHeader().getRentalID();//瑞安CM定义的合同ID
-							try {
-								Long namespaceContractToken = Long.parseLong(rentalID);
-								Contract contract = contractProvider.findContractByNamespaceToken(namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
-										namespaceContractToken, contractCategoryId);
-								if(contract != null) {
-									contractId = contract.getId();
-									contractNum = contract.getContractNumber();
-									communityId = contract.getCommunityId();
-									addressId = contractProvider.findAddressByContractId(contractId);
-								}
-							}catch (Exception e){
-					            LOGGER.error(e.toString());
-					        }
+						String targetName = "";
+						if(cmSyncType != null && cmSyncType.equals(CMThirdPartContractHandler.DispContract)) {
+							if(cmDataObject.getContractHeader() != null) {
+								rentalID = cmDataObject.getContractHeader().getRentalID();//瑞安CM定义的合同ID
+								try {
+									Long namespaceContractToken = Long.parseLong(rentalID);
+									Contract contract = contractProvider.findContractByNamespaceToken(namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
+											namespaceContractToken, contractCategoryId);
+									if(contract != null) {
+										contractId = contract.getId();
+										contractNum = contract.getContractNumber();
+										communityId = contract.getCommunityId();
+										targetName = contract.getCustomerName();
+										addressId = contractProvider.findAddressByContractId(contractId);
+									}else {
+										LOGGER.info("syncRuiAnCMBillToZuolin findContractByNamespaceToken is null, namespaceId={}, NAMESPACE_CONTRACT_TYPE={},"
+												+ "NAMESPACE_CONTRACT_TOKEN= {}, contractCategoryId={}", namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
+												namespaceContractToken, contractCategoryId);
+									}
+								}catch (Exception e){
+						            LOGGER.error("", e);
+						        }
+							}
 						}
 						//获取左邻缴费应用categoryId
 						Long categoryId = null;
@@ -141,10 +145,35 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 								categoryId = assetServiceModuleAppDTOs.get(0).getCategoryId();
 							}
 						}catch (Exception e){
-				            LOGGER.error(e.toString());
+							LOGGER.error("", e);
 				        }
 						List<CMBill> cmBills = cmDataObject.getBill();
 						for(CMBill cmBill : cmBills) {
+							if(cmSyncType != null && cmSyncType.equals(CMThirdPartContractHandler.DispBill)) {
+								rentalID = cmBill.getRentalID();//瑞安CM定义的合同ID
+								try {
+									Long namespaceContractToken = Long.parseLong(rentalID);
+									Contract contract = contractProvider.findContractByNamespaceToken(namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
+											namespaceContractToken, contractCategoryId);
+									if(contract != null) {
+										contractId = contract.getId();
+										contractNum = contract.getContractNumber();
+										communityId = contract.getCommunityId();
+										targetName = contract.getCustomerName();
+										addressId = contractProvider.findAddressByContractId(contractId);
+										EnterpriseCustomer customerForBill = enterpriseCustomerProvider.findById(contract.getCustomerId());
+										if(customerForBill != null) {
+											targetId = customerForBill.getOrganizationId();
+										}
+									}else {
+										LOGGER.info("syncRuiAnCMBillToZuolin findContractByNamespaceToken is null, namespaceId={}, NAMESPACE_CONTRACT_TYPE={},"
+												+ "NAMESPACE_CONTRACT_TOKEN= {}, contractCategoryId={}", namespaceId, NamespaceContractType.RUIAN_CM.getCode(),
+												namespaceContractToken, contractCategoryId);
+									}
+								}catch (Exception e){
+						            LOGGER.error("", e);
+						        }
+							}
 							//所有数据以生产方为准
 							if(cmBill.getBillType() != null && cmBill.getBillType().equals("服务费账单")) {
 								//CM把我方的服务账单又同步回来
@@ -172,7 +201,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 											try{
 												amountOwed = new BigDecimal(cmBill.getBalanceAmt());
 									        }catch (Exception e){
-									            LOGGER.error(e.toString());
+									        	LOGGER.error("", e);
 									        }
 											//已收=账单金额（应收）-账单欠款金额（待收）
 											amountReceived = zuolinServiceBill.getAmountReceivable().subtract(amountOwed);
@@ -188,7 +217,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 										LOGGER.error("The bill is not zuolinServiceBill, billId = {}", cmBill.getBillID());
 									}
 						        }catch (Exception e){
-						            LOGGER.error(e.toString());
+						        	LOGGER.error("", e);
 						        }
 							}else {
 								//来源于CM的租金账单场景
@@ -211,22 +240,22 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 									try{
 										amountOwed = new BigDecimal(cmBill.getBalanceAmt());
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 									try{
 										amountOwedWithoutTax = new BigDecimal(cmBill.getBalanceAmt());
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 									try{
 										amountReceivable = new BigDecimal(cmBill.getDocumentAmt());
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 									try{
 										amountReceivableWithoutTax = new BigDecimal(cmBill.getChargeAmt());
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 									//已收=账单金额（应收）-账单欠款金额（待收）
 									amountReceived = amountReceivable.subtract(amountOwed);
@@ -234,7 +263,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 									try{
 										taxAmount = new BigDecimal(cmBill.getTaxAmt());
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("", e);
 							        }
 
 									PaymentBills paymentBills = new PaymentBills();
@@ -247,9 +276,10 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 									paymentBills.setBillGroupId(group.getId());
 									paymentBills.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
 									paymentBills.setTargetId(targetId);
-									if(cmDataObject.getContractHeader() != null) {
-										paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
-									}
+//									if(cmDataObject.getContractHeader() != null) {
+//										paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
+//									}
+									paymentBills.setTargetName(targetName);//客户名称
 									paymentBills.setContractId(contractId);
 									paymentBills.setContractNum(contractNum);
 									paymentBills.setDateStrBegin(cmBill.getStartDate());
@@ -262,7 +292,7 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 							            	dateStr = yyyyMM.format(yyyyMM.parse(cmBill.getStartDate()));//账期取的是账单开始时间的yyyy-MM
 							            }
 							        }catch (Exception e){
-							            LOGGER.error(e.toString());
+							        	LOGGER.error("startDate cannot format yyyyMM, e={}, cmBill={}", e, cmBill);
 							        }
 									paymentBills.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
 									paymentBills.setSwitch((byte) 1);//默认为已出
@@ -308,9 +338,10 @@ public class RuiAnCMThirdOpenBillHandler implements ThirdOpenBillHandler{
 									items.setBillGroupId(group.getId());
 									items.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
 									items.setTargetId(targetId);
-									if(cmDataObject.getContractHeader() != null) {
-										items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
-									}
+//									if(cmDataObject.getContractHeader() != null) {
+//										items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
+//									}
+									paymentBills.setTargetName(targetName);//客户名称
 									items.setContractId(contractId);
 									items.setContractNum(contractNum);
 									items.setDateStrBegin(cmBill.getStartDate());

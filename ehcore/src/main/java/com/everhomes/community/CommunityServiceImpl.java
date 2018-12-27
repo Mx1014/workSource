@@ -2196,6 +2196,8 @@ public class CommunityServiceImpl implements CommunityService {
 				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
 			}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
 				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+			}else if(UserSourceType.ALIPAY == UserSourceType.fromCode(cmd.getUserSourceType())){
+				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.ALIPAY.getCode()));
 			}
 
 			if(!StringUtils.isEmpty(cmd.getKeywords())){
@@ -2244,6 +2246,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 				if(NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
 					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				} else if (NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.ALIPAY){
+					dto.setUserSourceType(UserSourceType.ALIPAY.getCode());
 				}
 
 				List<UserGroup> userGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
@@ -2421,6 +2425,11 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
 			dto.setIdentityNumber(user.getIdentityNumberTag());
+            if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
+                dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+            }else {
+                dto.setUserSourceType(UserSourceType.APP.getCode());
+            }
 			//dto.setAddressDtos(addressDtos);
             String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
             if ("true".equals(showVipFlag)) {
@@ -2487,6 +2496,11 @@ public class CommunityServiceImpl implements CommunityService {
                 dto.setShowVipLevelFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
             }
             dto.setVipLevel(user.getVipLevel());
+            if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
+                dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+            }else {
+                dto.setUserSourceType(UserSourceType.APP.getCode());
+            }
         }
 		List<OrganizationMemberLog> memberLogs = this.organizationProvider.listOrganizationMemberLogs(user.getId());
 		List<OrganizationMemberLogDTO> memberLog = new ArrayList<>();
@@ -2551,6 +2565,16 @@ public class CommunityServiceImpl implements CommunityService {
             if (user != null) {
                 communityUserAddressDTO = ConvertHelper.convert(user, CommunityUserAddressDTO.class);
                 communityUserAddressDTO.setIdentityNumber(user.getIdentityNumberTag());
+                if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
+                    communityUserAddressDTO.setUserSourceType(UserSourceType.WEIXIN.getCode());
+                }else {
+                    communityUserAddressDTO.setUserSourceType(UserSourceType.APP.getCode());
+                }
+                //最新活跃时间 add by sfyan 20170620
+                List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
+                if(userActivities.size() > 0){
+                    communityUserAddressDTO.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+                }
             }
 
             //是否展示会员等级
@@ -2925,6 +2949,8 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
 				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
 					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+				}else if(UserSourceType.ALIPAY == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.ALIPAY.getCode()));
 				}
 
 				if(null != cmd.getCommunityId()){
@@ -3048,6 +3074,8 @@ public class CommunityServiceImpl implements CommunityService {
 			User user = userProvider.findUserById(r.getUserId());
 			if(user != null && NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
 				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+			} else if (user != null && NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.ALIPAY) {
+				dto.setUserSourceType(UserSourceType.ALIPAY.getCode());
 			}
 
 //			if(null != dto.getPhone()){
@@ -3093,6 +3121,8 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
 					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				} else if (NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.ALIPAY){
+					dto.setUserSourceType(UserSourceType.ALIPAY.getCode());
 				}
 
 				//最新活跃时间 add by sfyan 20170620
@@ -3141,6 +3171,8 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
 					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				} else if (NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.ALIPAY){
+					dto.setUserSourceType(UserSourceType.ALIPAY.getCode());
 				}
 
 				//最新活跃时间 add by sfyan 20170620
@@ -3288,7 +3320,7 @@ public class CommunityServiceImpl implements CommunityService {
 
             int authUsers = 0;
             int authingUsers = 0;
-            int notAuthUsers = 0;
+//            int notAuthUsers = 0;
             List<Community> communities = this.communityProvider.listNamespaceCommunities(namespaceId);
             if (!CollectionUtils.isEmpty(communities)) {
                 for (Community community : communities) {
@@ -3299,14 +3331,14 @@ public class CommunityServiceImpl implements CommunityService {
                         authUsers += countCommunityUserResponse.getAuthUsers();
                         authingUsers += countCommunityUserResponse.getAuthingUsers();
                         //未认证用户 userprofile表中的用户-已认证或者认证中的用户
-                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
+//                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
 
                         //未认证
-                        int notAuthCount = 0;
-                        if(users != null){
-                            notAuthCount = users.size();
-                        }
-                        notAuthUsers += notAuthCount;
+//                        int notAuthCount = 0;
+//                        if(users != null){
+//                            notAuthCount = users.size();
+//                        }
+//                        notAuthUsers += notAuthCount;
                     }else {
                         //园区用户统计
                         cmd.setCommunityId(community.getId());
@@ -3314,12 +3346,12 @@ public class CommunityServiceImpl implements CommunityService {
                         authUsers += countCommunityUserResponse.getAuthUsers();
                         authingUsers += countCommunityUserResponse.getAuthingUsers();
 
-                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
-                        if(users == null){
-                            users = new ArrayList<>();
-                        }
-                        int notAuthCount = users.size();
-                        notAuthUsers += notAuthCount;
+//                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
+//                        if(users == null){
+//                            users = new ArrayList<>();
+//                        }
+//                        int notAuthCount = users.size();
+//                        notAuthUsers += notAuthCount;
                     }
                 }
             }
@@ -3327,7 +3359,9 @@ public class CommunityServiceImpl implements CommunityService {
             resp.setCommunityUsers(allCount);
             resp.setAuthUsers(authUsers);
             resp.setAuthingUsers(authingUsers);
-            resp.setNotAuthUsers(notAuthUsers);
+            // 越来越多的用户来源导致域空间下全部用户统计时未认证人数统计不准确，认证和待认证是准确的，故改为总数减去已认证和待认证。
+//            resp.setNotAuthUsers(notAuthUsers);
+			resp.setNotAuthUsers(allCount - authUsers - authingUsers);
             resp.setWxUserCount(wxCount);
             resp.setAlipayUserCount(alipayCount);
             resp.setAppUserCount(allCount - wxCount - alipayCount);
@@ -3398,6 +3432,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         //绑定微信的、男性、女性
         Set<Long> wxMemberIds = new HashSet<>();
+        Set<Long> alipayMemberIds = new HashSet<>();
         Set<Long> maleMemberIds = new HashSet<>();
         Set<Long> femaleMemberIds = new HashSet<>();
 
@@ -3411,7 +3446,9 @@ public class CommunityServiceImpl implements CommunityService {
         for(User u: allUsers){
             if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
                 wxMemberIds.add(u.getId());
-            }
+            }else if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.ALIPAY){
+				alipayMemberIds.add(u.getId());
+			}
 
             if(UserGender.fromCode(u.getGender()) == UserGender.MALE){
                 maleMemberIds.add(u.getId());
@@ -3424,6 +3461,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 		//绑定微信
 		int wxCount = wxMemberIds.size();
+        //支付宝用户
+		int alipayCount = alipayMemberIds.size();
         //男性用户
         int maleCount = maleMemberIds.size();
         //女性用户
@@ -3435,7 +3474,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setAuthingUsers(authingCount);
         resp.setNotAuthUsers(notAuthCount);
         resp.setWxUserCount(wxCount);
-		resp.setAppUserCount(allCount - wxCount);
+        resp.setAlipayUserCount(alipayCount);
+		resp.setAppUserCount(allCount - wxCount - alipayCount);
 		resp.setMaleCount(maleCount);
 		resp.setFemaleCount(femaleCount);
 
@@ -3453,6 +3493,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		//已认证、认证中的微信微信用户
 		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode(), null);
+		int alipayCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.ALIPAY.getCode(), null);
 
         //未认证用户 userprofile表中的用户-已认证或者认证中的用户
         List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
@@ -3485,7 +3526,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setAuthingUsers(authingCount);
         resp.setNotAuthUsers(notAuthCount);
         resp.setWxUserCount(wxCount);
-		resp.setAppUserCount(allCount - wxCount);
+        resp.setAlipayUserCount(alipayCount);
+		resp.setAppUserCount(allCount - wxCount - alipayCount);
 		resp.setMaleCount(maleCount);
 		resp.setFemaleCount(femaleCount);
 

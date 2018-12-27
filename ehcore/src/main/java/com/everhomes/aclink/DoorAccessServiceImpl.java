@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.security.Security;
 import java.sql.Timestamp;
+import java.text.Collator;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.aclink.dingxin.DingxinService;
 import com.everhomes.aclink.faceplusplus.FacePlusPlusService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -345,6 +347,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     @Autowired
     private FacePlusPlusService facePlusPlusService;
+
+    @Autowired
+    DingxinService dingxinService;
     
     AlipayClient alipayClient;
     
@@ -1296,7 +1301,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         doorAuth.setNickname(getRealName(ConvertHelper.convert(custom, User.class)));
                         }
 
-                    Long authId = doorAuthProvider.createDoorAuth(doorAuth);
+                    doorAuthProvider.createDoorAuth(doorAuth);
 
                     //face++门禁，若有开门权限且有照片，发送照片到face++服务器
                     if(doorAcc.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
@@ -1377,8 +1382,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAccessProvider.createAclinkFormValues(notice);
             }
 
-            doorAuthProvider.createDoorAuth(doorAuth);
-            
             //会议室预订,短信二维码打不开
             if(doorAcc.getOwnerType() != null && doorAcc.getDoorType() != null 
                     && ( doorAcc.getDoorType().equals(DoorAccessType.ZLACLINK_WIFI.getCode())
@@ -1395,7 +1398,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             	}else{
             		doorAuth.setQrKey(createZuolinQrV1(aesUserKey.getSecret()));
             	}
-            	doorAuthProvider.updateDoorAuth(doorAuth);
             }
             doorAuthProvider.updateDoorAuth(doorAuth);
 
@@ -2276,6 +2278,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         	resp.setNextPageAnchor(dtos.get(dtos.size() - 1).getCreateTimeMs());
         	dtos.remove(dtos.size() - 1);
         }
+        //当前页面钥匙按doorName排序
+        Comparator<AesUserKeyDTO> valueComparator = (o1, o2) -> Collator.getInstance(Locale.CHINA).compare(o1.getDoorName(), o2.getDoorName());
+        Collections.sort(dtos,valueComparator);
         resp.setNextPageAnchor(locator.getAnchor());
         resp.setAesUserKeys(dtos);
         
@@ -3079,12 +3084,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
     private void doDingxinQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys){
+        List<DoorAccessQRKeyDTO> result = qrKeys.stream().filter(qr -> qr.getQrDriver().equals(DoorAccessDriverType.DINGXIN.getCode())).collect(Collectors.toList());
+        if(!ListUtils.isEmpty(result)){
+            return;
+        }
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         qr.setCreateTimeMs(auth.getCreateTime().getTime());
         qr.setCreatorUid(auth.getApproveUserId());
         qr.setDoorGroupId(doorAccess.getId());
         qr.setDoorName(doorAccess.getName());
-        qr.setDoorDisplayName(doorAccess.getDisplayNameNotEmpty());
+        qr.setDoorDisplayName("门禁");
         String homeUrl = configurationProvider.getValue(AclinkConstant.HOME_URL, "");
         if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
             qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
@@ -3269,11 +3278,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			}
 
 		}
-        LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0)); 
+        LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0));
         if (resp.getKeys() == null || resp.getKeys().size() ==0 ){
         	LOGGER.info(String.format("user{%d} has no valid auth,phone:%d",user.getId(),user.getIdentityNumberTag()));
         }
-        return resp;              
+        return resp;
      }
     
     public ListDoorAccessQRKeyResponse listDoorAccessQRKey2() {
@@ -4624,8 +4633,17 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,
 					AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
 		}
+		//鼎芯门禁对接
+        else if(doorAccess.getDoorType().equals(DoorAccessType.DINGXIN.getCode())){
+            dingxinService.openDoor(doorAccess.getUuid());
+            return;
+        }
+        //face++门禁不支持远程开门
+        else if(doorAccess.getDoorType().equals(DoorAccessType.FACEPLUSPLUS.getCode())){
+            return;
+        }
 
-		// DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(doorId,
+        // DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(doorId,
 		// user.getId(), null, null, (byte)1);
 		AesUserKey aesUserKey = generateAesUserKey(user, doorAuth);
 		if (aesUserKey == null) {

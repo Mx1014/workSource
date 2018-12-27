@@ -6,6 +6,8 @@ public class PusherVendorData {
     private String appId;
     private String appSecret;
     private String appPkgName;
+    private String masterSecret;
+    private String appKey;
 
     public String getAppId() {
         return appId;
@@ -29,6 +31,22 @@ public class PusherVendorData {
 
     public void setAppPkgName(String appPkgName) {
         this.appPkgName = appPkgName;
+    }
+
+    public String getMasterSecret() {
+        return masterSecret;
+    }
+
+    public void setMasterSecret(String masterSecret) {
+        this.masterSecret = masterSecret;
+    }
+
+    public String getAppKey() {
+        return appKey;
+    }
+
+    public void setAppKey(String appKey) {
+        this.appKey = appKey;
     }
 
     @Override

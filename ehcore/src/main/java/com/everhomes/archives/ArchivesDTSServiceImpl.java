@@ -1080,7 +1080,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
     private <T> boolean checkArchivesWorkEmail(ImportFileResultLog<T> log, T data, String contactToken, String workEmail, Long organizationId) {
         if (!StringUtils.isEmpty(workEmail)) {
-            if (!Pattern.matches("^([a-zA-Z0-9]+[_|_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\\_|\\.]?)*[a-zA-Z0-9]+\\.[a-zA-Z]{2,3}$", workEmail)) {
+            if (!Pattern.matches("^([a-zA-Z0-9]+[-|_|_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[-|_|\\_|\\.]?)*[a-zA-Z0-9]+\\.[a-zA-Z]{2,3}$", workEmail)) {
                 LOGGER.warn("WorkEmail wrong format. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("WorkEmail wrong format");

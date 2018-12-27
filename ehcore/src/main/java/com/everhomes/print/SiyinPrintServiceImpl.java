@@ -1830,7 +1830,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		
 		if(list == null || list.size() == 0){
 			return PrintLogonStatusType.LOGON_SUCCESS;
-		}
+		} 
 		if(r != null){
 			r.setOrderId(list.get(0).getId());
 			r.setTotalFee(list.get(0).getOrderTotalFee());

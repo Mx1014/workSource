@@ -7,6 +7,7 @@ import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.util.StringHelper;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -192,6 +193,32 @@ public class UserLogin implements Serializable {
 
     public void setAppVersion(String appVersion) {
         this.appVersion = appVersion;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserLogin userLogin = (UserLogin) o;
+        return userId == userLogin.userId &&
+                loginId == userLogin.loginId &&
+                namespaceId == userLogin.namespaceId &&
+                loginInstanceNumber == userLogin.loginInstanceNumber &&
+                lastAccessTick == userLogin.lastAccessTick &&
+                Objects.equals(deviceIdentifier, userLogin.deviceIdentifier) &&
+                status == userLogin.status &&
+                Objects.equals(loginBorderId, userLogin.loginBorderId) &&
+                Objects.equals(portalRole, userLogin.portalRole) &&
+                Objects.equals(pusherIdentify, userLogin.pusherIdentify) &&
+                Objects.equals(borderSessionId, userLogin.borderSessionId) &&
+                Objects.equals(impersonationId, userLogin.impersonationId) &&
+                Objects.equals(appVersion, userLogin.appVersion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, loginId, deviceIdentifier, namespaceId, status, loginBorderId, loginInstanceNumber,
+                lastAccessTick, portalRole, pusherIdentify, borderSessionId, impersonationId, appVersion);
     }
 
     @Override

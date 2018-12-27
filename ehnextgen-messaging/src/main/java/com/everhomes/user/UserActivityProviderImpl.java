@@ -256,6 +256,8 @@ public class UserActivityProviderImpl implements UserActivityProvider {
             query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
         }else if(UserSourceType.APP == UserSourceType.fromCode(userSourceType)){
             query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+        }else if(UserSourceType.ALIPAY == UserSourceType.fromCode(userSourceType)){
+            query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.ALIPAY.getCode()));
         }
 
         excludeAuthUser(context, query, namespaceId, communityType);
