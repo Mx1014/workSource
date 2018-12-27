@@ -231,3 +231,8 @@ ALTER TABLE eh_launch_pad_indexs ADD COLUMN `preview_version_id` BIGINT COMMENT 
 ALTER TABLE `eh_policies` MODIFY COLUMN `title` varchar(200);
 ALTER TABLE `eh_policies` MODIFY COLUMN `outline` varchar(2000);
 ALTER TABLE `eh_policies` MODIFY COLUMN `content` mediumtext;
+
+
+-- AUTHOR: 黄鹏宇 20181227
+-- REMARK: 增加最近拜访时间将拜访时间和跟进时间分开
+ALTER TABLE eh_enterprise_customers ADD COLUMN `last_visiting_time` DATETIME COMMENT '最近拜访时间';
