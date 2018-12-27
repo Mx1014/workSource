@@ -10,6 +10,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.GetOwnerIdResponse;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
 import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
@@ -121,23 +122,22 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();
         if (cmd.getPageSize() != null) {
             List<OrganizationOwnerDTO> ownerDTOList = new ArrayList<>();
-            Long anchor = buildOrganizationOwnerDTOList(cmd, ownerDTOList);
-            response.setNextPageAnchor(anchor);
-            response.setOwners(ownerDTOList);
+            response = buildOrganizationOwnerDTOList(cmd, ownerDTOList);
         }
         return response;
     }
 
     private Long getAnchor(SearchOrganizationOwnersCommand cmd) {
-        Long anchor = 0L;
+        Long anchor = 1L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
         return anchor;
     }
 
-    private List<Long> getMatchOwnerIds(SearchOrganizationOwnersCommand cmd) {
+    private GetOwnerIdResponse getMatchOwnerIds(SearchOrganizationOwnersCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        GetOwnerIdResponse response = new GetOwnerIdResponse();
         QueryBuilder qb;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
@@ -170,25 +170,36 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
         Long anchor = getAnchor(cmd);
 
         qb = QueryBuilders.filteredQuery(qb, fb);
-        builder.setSearchType(SearchType.QUERY_THEN_FETCH)
-                .setFrom(anchor.intValue())
+
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH).setQuery(qb);
+               /* .setFrom(anchor.intValue())
                 .setSize(pageSize + 1)
-                .setQuery(qb);
+                */
+        builder.setFrom((anchor.intValue() - 1 ) * pageSize).setSize(pageSize + 1);
+
         builder.addSort("createTime", SortOrder.DESC);
 
         SearchResponse rsp = builder.execute().actionGet();
-        return getIds(rsp);
+        Long totalHits = rsp.getHits().getTotalHits();
+
+        response.setIds(getIds(rsp));
+        response.setTotalNum(totalHits);
+        response.setPageAnchor(anchor);
+
+        return response;
     }
 
-    private Long buildOrganizationOwnerDTOList(SearchOrganizationOwnersCommand cmd, List<OrganizationOwnerDTO> ownerDTOList) {
-        List<Long> ids = getMatchOwnerIds(cmd);
+    private ListOrganizationOwnersResponse buildOrganizationOwnerDTOList(SearchOrganizationOwnersCommand cmd, List<OrganizationOwnerDTO> ownerDTOList) {
+        GetOwnerIdResponse response2 = getMatchOwnerIds(cmd);
+	    List<Long> ids = response2.getIds();
         Long anchor = 0L;
         if (ids != null && ids.size() > cmd.getPageSize()) {
             ids.remove(ids.size() - 1);
-            anchor = anchor + ids.size();
+            anchor = response2.getPageAnchor() + 1;
         } else {
             anchor = null;
         }
@@ -232,8 +243,11 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 return dto;
             }).collect(Collectors.toList()));
         }
-
-        return anchor;
+        ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();
+        response.setNextPageAnchor(anchor);
+        response.setTotalNum(response2.getTotalNum());
+        response.setOwners(ownerDTOList);
+        return response;
     }
 
     private List<CommunityPmOwner> processCommunityPmOwners(List<CommunityPmOwner> pmOwners, List<Long> addressIds) {

@@ -300,7 +300,7 @@ public class WeChatServiceImpl implements WeChatService {
             }
         
         }
-
+        LOGGER.info("makeJsApiTicket body = {}",body);
         JsapiTicketResponse resp = (JsapiTicketResponse)StringHelper.fromJsonString(body, JsapiTicketResponse.class);
         Map<String, String> keys = new HashMap<String, String>();
             

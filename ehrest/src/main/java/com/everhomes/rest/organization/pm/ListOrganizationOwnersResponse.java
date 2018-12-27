@@ -16,6 +16,16 @@ public class ListOrganizationOwnersResponse {
     @ItemType(OrganizationOwnerDTO.class)
     private List<OrganizationOwnerDTO> owners;
 
+    private Long totalNum;
+
+    public Long getTotalNum() {
+        return totalNum;
+    }
+
+    public void setTotalNum(Long totalNum) {
+        this.totalNum = totalNum;
+    }
+
     public Long getNextPageAnchor() {
         return nextPageAnchor;
     }

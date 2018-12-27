@@ -18,6 +18,8 @@ public class SearchEnterpriseCustomerResponse {
 
     private Long nextPageAnchor;
 
+    private Long totalNum;
+
     public List<EnterpriseCustomerDTO> getDtos() {
         return dtos;
     }
@@ -32,6 +34,14 @@ public class SearchEnterpriseCustomerResponse {
 
     public void setNextPageAnchor(Long nextPageAnchor) {
         this.nextPageAnchor = nextPageAnchor;
+    }
+
+    public Long getTotalNum() {
+        return totalNum;
+    }
+
+    public void setTotalNum(Long totalNum) {
+        this.totalNum = totalNum;
     }
 
     @Override

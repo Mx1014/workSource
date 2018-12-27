@@ -52,6 +52,8 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
+import com.everhomes.rest.officecubicle.admin.UpdateSpaceLongRentPriceCommand;
+import com.everhomes.rest.officecubicle.admin.UpdateSpaceShortRentNumCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.util.RequireAuthentication;
@@ -280,6 +282,37 @@ public class OfficeCubicleController extends ControllerBase {
     @RequestMapping("updateCubicle")
     public RestResponse updateCubicle(AddCubicleAdminCommand cmd) {
     	 this.officeCubicleService.updateCubicle(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    
+    /**
+     * <b>URL: /officecubicle/updateSpaceShortRentNum</b> 
+     * <p>更新短租工位数量</p>
+     */
+    @RequestMapping("updateSpaceShortRentNum")
+    public RestResponse updateSpaceShortRentNum(UpdateSpaceShortRentNumCommand cmd) {
+    	 this.officeCubicleService.updateSpaceShortRentNum(cmd);
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
+     * <b>URL: /officecubicle/updateSpaceLongRentPrice</b> 
+     * <p>更新长租工位价格</p>
+     */
+    @RequestMapping("updateSpaceLongRentPrice")
+    public RestResponse updateSpaceLongRentPrice(UpdateSpaceLongRentPriceCommand cmd) {
+    	 this.officeCubicleService.updateSpaceLongRentPrice(cmd);
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

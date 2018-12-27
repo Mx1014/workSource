@@ -6,6 +6,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.techpark.punch.AddPunchLogShouldPunchTimeCommand;
 import com.everhomes.rest.techpark.punch.GetPunchQRCodeCommand;
@@ -17,6 +18,7 @@ import com.everhomes.rest.techpark.punch.ListPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListPunchLogsResponse;
 import com.everhomes.rest.techpark.punch.PunchDayLogInitializeCommand;
 import com.everhomes.rest.techpark.punch.PunchDayLogInitializeMonthlyCommand;
+import com.everhomes.rest.techpark.punch.admin.AddPersonnelsToPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.BatchUpdateVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
@@ -816,6 +818,22 @@ public class PunchAdminController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: punch/addPersonnelsToPunchGroup</b>
+     * <p>
+     * 更新打卡规则(考勤组)
+     * </p>
+     * @return 
+     */
+    @RequestMapping("addPersonnelsToPunchGroup")
+    @RestReturn(value = String.class)
+    public RestResponse addPersonnelsToPunchGroup (@Valid AddPersonnelsToPunchGroupCommand cmd) {
+        punchService.addPersonnelsToPunchGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: punch/deletePunchGroup</b>

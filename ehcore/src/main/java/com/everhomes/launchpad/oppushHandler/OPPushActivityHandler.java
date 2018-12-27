@@ -80,6 +80,8 @@ public class OPPushActivityHandler implements OPPushHandler {
                 ActivityContentRouterJson contentRouterJson = new ActivityContentRouterJson();
                 contentRouterJson.setForumId(dto.getForumId());
                 contentRouterJson.setTopicId(dto.getPostId());
+                contentRouterJson.setCategoryId(dto.getCategoryId());
+                contentRouterJson.setWechatSignup(dto.getWechatSignup());
                 RouterInfo routerInfo = routerService.getRouterInfo(10600L, "/detail", contentRouterJson.toString());
 
                 card.setRouterPath(routerInfo.getPath());

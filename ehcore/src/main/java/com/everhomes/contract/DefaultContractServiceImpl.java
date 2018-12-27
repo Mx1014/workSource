@@ -2126,6 +2126,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 							CustomerEntryInfo entryInfo = ConvertHelper.convert(contract, CustomerEntryInfo.class);
 							entryInfo.setAddressId(mapping.getAddressId());
 							entryInfo.setBuildingId(mapping.getBuildingId());
+							Address address = addressProvider.findAddressById(mapping.getAddressId());
+							Long buildingId = address.getBuildingId();
+							if (buildingId != null) {
+								entryInfo.setBuildingId(buildingId);
+							}
 							entryInfo.setAddress(mapping.getOrganizationAddress());
 							enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
 						}
@@ -2188,7 +2193,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 								if (contract.getCustomerType()==0) {
 									CustomerEntryInfo entryInfo = ConvertHelper.convert(contract, CustomerEntryInfo.class);
 									entryInfo.setAddressId(mapping.getAddressId());
-									entryInfo.setBuildingId(mapping.getBuildingId());
+									Address address = addressProvider.findAddressById(mapping.getAddressId());
+									Long buildingId = address.getBuildingId();
+									if (buildingId != null) {
+										entryInfo.setBuildingId(buildingId);
+									}
 									entryInfo.setAddress(mapping.getOrganizationAddress());
 									enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
 								}
@@ -4593,6 +4602,8 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			List<ContractAttachmentDTO> contractAttachments = new ArrayList<ContractAttachmentDTO>();
 			List<ContractChargingChangeDTO> contractChargingChanges = new ArrayList<ContractChargingChangeDTO>();
 			List<ContractChargingChangeDTO> frees = new ArrayList<ContractChargingChangeDTO>();
+			List<BuildingApartmentDTO> apartments = new ArrayList<BuildingApartmentDTO>();
+			
 			if (contractDetailDTO.getApartments() != null) {
 				for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
 					apartment.setId(null);
@@ -4602,6 +4613,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			if (contractDetailDTO.getChargingItems() != null) {
 				for (ContractChargingItemDTO contractChargingItem : contractDetailDTO.getChargingItems()) {
 					contractChargingItem.setId(null);
+					for (BuildingApartmentDTO apartment : contractChargingItem.getApartments()) {
+						apartment.setId(null);
+						apartments.add(apartment);
+					}
+					contractChargingItem.setApartments(apartments);
 					contractChargingItems.add(contractChargingItem);
 				}
 			}
@@ -4614,12 +4630,22 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			if (contractDetailDTO.getAdjusts() != null) {
 				for (ContractChargingChangeDTO contractChargingChange : contractDetailDTO.getAdjusts()) {
 					contractChargingChange.setId(null);
+					for (BuildingApartmentDTO apartment : contractChargingChange.getApartments()) {
+						apartment.setId(null);
+						apartments.add(apartment);
+					}
+					contractChargingChange.setApartments(apartments);
 					contractChargingChanges.add(contractChargingChange);
 				}
 			}
 			if (contractDetailDTO.getFrees() != null) {
 				for (ContractChargingChangeDTO free : contractDetailDTO.getFrees()) {
 					free.setId(null);
+					for (BuildingApartmentDTO apartment : free.getApartments()) {
+						apartment.setId(null);
+						apartments.add(apartment);
+					}
+					free.setApartments(apartments);
 					frees.add(free);
 				}
 			}

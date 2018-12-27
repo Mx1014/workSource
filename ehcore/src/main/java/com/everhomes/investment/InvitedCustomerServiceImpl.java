@@ -469,6 +469,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         SearchInvestmentResponse response = new SearchInvestmentResponse();
         response.setDtos(searchResponse.getDtos());
         response.setNextPageAnchor(searchResponse.getNextPageAnchor());
+        response.setTotalNum(searchResponse.getTotalNum());
         // only the first time we requested, populate stastics data
         if ( cmd.getPageAnchor() == null || cmd.getPageAnchor() == 0) {
             List<InvitedCustomerStatisticsDTO> statistics = null;
