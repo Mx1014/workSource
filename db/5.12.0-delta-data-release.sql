@@ -1,4 +1,4 @@
--- --------------------- SECTION BEGIN -------------------------------------------------------
+﻿-- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
 -- AUTHOR:
@@ -56,8 +56,8 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `is_reado
 -- AUTHOR: 吴寒
 -- REMARK: 同事圈菜单
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES('274000','同事圈','50000','/100/50000/274000','1','3','2','10','2018-09-26 16:51:46',NULL,NULL,'2018-09-26 16:51:46','0','0','0',NULL,'org_control','1','1','module','0','0',NULL,NULL,'moments',NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79887000','同事圈','70000010',NULL,'enterprise-payment-auth','1','2','/70000010/79887000','park','8','274000','3','system','module','2','1');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79888000','同事圈','70000010',NULL,'enterprise-payment-auth','1','2','/70000010/79888000','zuolin','8','274000','3','system','module','2','1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79887000','同事圈','70000010',NULL,'enterprise-moment','1','2','/70000010/79887000','park','8','274000','3','system','module','2','1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79888000','同事圈','70000010',NULL,'enterprise-moment','1','2','/70000010/79888000','zuolin','8','274000','3','system','module','2','1');
 
 -- AUTHOR: 谢旭双
 -- REMARK: 同事圈初始tag
