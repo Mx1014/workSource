@@ -142,9 +142,9 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*")
                     .field("contactToken", 5.0f)
-                    .field("contactName", 2.0f)
+                    .field("contactName", 5.0f)
                     .field("contactExtraTels", 2.0f);
 
             builder.setHighlighterFragmentSize(60);
