@@ -3386,37 +3386,37 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
             
             User currentUser = userProvider.findUserById(r.getUid());
             d.setId(r.getId());
-            //导入和手动添加的用户uid为0
-            if (currentUser != null && currentUser.getId() != 0) {
-                d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
-                d.setUserName(populateUserName(currentUser, activity.getPostId()));
-                
-                List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(currentUser.getId());
-                
-                List<String> phones = identifiers.stream().filter((a)-> { return IdentifierType.fromCode(a.getIdentifierType()) == IdentifierType.MOBILE; })
-                        .map((a) -> { return a.getIdentifierToken(); })
-                        .collect(Collectors.toList());
-                d.setPhone(phones);
-            }else {
-                GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
-                getGeneralFormValuesCommand.setSourceId(r.getId());
-                getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
-                getGeneralFormValuesCommand.setOriginFieldFlag(NormalFlag.NEED.getCode());
-                List<PostApprovalFormItem> values = this.generalFormService.getGeneralFormValues(getGeneralFormValuesCommand);
-                if (values != null) {
-                    for (PostApprovalFormItem postApprovalFormItem : values) {
-                        if (postApprovalFormItem.getFieldName().equals("USER_PHONE")) {
-                            d.setPhone(Arrays.asList(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue()));
-                        }
-                        if (postApprovalFormItem.getFieldName().equals("USER_NAME")) {
-                            d.setUserName(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
-                        }
+            GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
+            getGeneralFormValuesCommand.setSourceId(r.getId());
+            getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+            getGeneralFormValuesCommand.setOriginFieldFlag(NormalFlag.NEED.getCode());
+            List<PostApprovalFormItem> values = this.generalFormService.getGeneralFormValues(getGeneralFormValuesCommand);
+            if (!CollectionUtils.isEmpty(values)) {
+                for (PostApprovalFormItem postApprovalFormItem : values) {
+                    if (postApprovalFormItem.getFieldName().equals("USER_PHONE")) {
+                        d.setPhone(Arrays.asList(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue()));
                     }
+                    if (postApprovalFormItem.getFieldName().equals("USER_NAME")) {
+                        d.setUserName(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
+                    }
+                }
+            }else {
+                //导入和手动添加的用户uid为0
+                if (currentUser != null && currentUser.getId() != 0) {
+                    d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
+                    d.setUserName(populateUserName(currentUser, activity.getPostId()));
+
+                    List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(currentUser.getId());
+
+                    List<String> phones = identifiers.stream().filter((a)-> { return IdentifierType.fromCode(a.getIdentifierType()) == IdentifierType.MOBILE; })
+                            .map((a) -> { return a.getIdentifierToken(); })
+                            .collect(Collectors.toList());
+                    d.setPhone(phones);
                 }else {
                     d.setUserName(r.getRealName());
                     d.setPhone(Arrays.asList(r.getPhone()));
                 }
-			}
+            }
 
             return d;
         }).collect(Collectors.toList());
