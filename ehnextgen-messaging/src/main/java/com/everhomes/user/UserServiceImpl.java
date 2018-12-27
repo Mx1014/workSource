@@ -6903,7 +6903,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 			if(orgMembers != null && orgMembers.size() > 0){
 
 			    //add by momoubin 2018/12/27：因为members表数据可能会有多条groupPath的重复数据，所以这里要对这个进行过滤。
-                HashSet<String> groupPaths = new HashSet<>(orgMUserMessageRoutingHandler.javaembers.size());
+                HashSet<String> groupPaths = new HashSet<>();
 
                 for (OrganizationMember member : orgMembers) {
 					AddressUserDTO dto = new AddressUserDTO();
