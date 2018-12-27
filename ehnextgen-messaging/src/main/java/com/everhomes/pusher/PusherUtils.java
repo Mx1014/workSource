@@ -37,7 +37,8 @@ public class PusherUtils {
 
 			
 			RouterMetaObject metaObject = new RouterMetaObject();
-			metaObject.setRouter(router);
+//			metaObject.setRouter(router); //等ios和Android统一步伐后再说，暂时只设置url
+			metaObject.setUrl(router);
 			msg.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
 			msg.getMeta().put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
 			LOGGER.debug("final: msg={},router={}",msg,router);
@@ -53,8 +54,9 @@ public class PusherUtils {
 		router.append(prefix);
 		router.append(RouterParamsConstant.DST_CHANNEL).append(msg.getChannelType()).append("&");
 		router.append(RouterParamsConstant.DST_CHANNEL_ID).append(msg.getChannelToken()).append("&");
-		router.append(RouterParamsConstant.SENDER_UID).append(String.valueOf(senderLogin.getUserId())).append("&");
-		router.append(RouterParamsConstant.CLIENT_HANDLER_TYPE).append(String.valueOf(0));
+		router.append(RouterParamsConstant.SENDER_UID).append(String.valueOf(senderLogin.getUserId()));
+//		router.append(RouterParamsConstant.SENDER_UID).append(String.valueOf(senderLogin.getUserId())).append("&");
+//		router.append(RouterParamsConstant.CLIENT_HANDLER_TYPE).append(String.valueOf(0)); //普通路由不加该字段
 		return router.toString();
 	}
 	
