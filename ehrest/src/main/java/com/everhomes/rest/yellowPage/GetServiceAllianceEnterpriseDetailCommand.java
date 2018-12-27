@@ -15,10 +15,6 @@ public class GetServiceAllianceEnterpriseDetailCommand {
 	
 	private Long id;
 	
-	private Long parentId;
-	
-	private Long type;
-	
 	private String ownerType;
 	
 	private Long ownerId;
@@ -29,22 +25,6 @@ public class GetServiceAllianceEnterpriseDetailCommand {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public Long getParentId() {
-		return parentId;
-	}
-
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
-	}
-
-	public Long getType() {
-		return type;
-	}
-
-	public void setType(Long type) {
-		this.type = type;
 	}
 
 	public String getOwnerType() {

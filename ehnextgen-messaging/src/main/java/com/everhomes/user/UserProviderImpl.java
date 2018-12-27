@@ -2263,8 +2263,8 @@ public class UserProviderImpl implements UserProvider {
 		Record3<String, Long, String> ret =
 				context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user)
 				.leftOuterJoin(token).on(token.OWNER_UID.eq(user.ID).and(token.NAMESPACE_ID.eq(user.NAMESPACE_ID)))
-				.where(user.ID.eq(userId))
-				.fetchOne();
+				.where(user.ID.eq(userId).and(token.IDENTIFIER_TYPE.eq(IdentifierType.MOBILE.getCode())))
+				.fetchAny();
 
 		if (null == ret) {
 			return null;
