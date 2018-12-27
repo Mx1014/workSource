@@ -12508,6 +12508,22 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (null != joinEnterpriseMap.get(enterpriseId) && joinEnterpriseMap.get(enterpriseId)) {
                     organizationMember.setOrganizationId(enterpriseId);
                     joinOrganizationAfterOperation(organizationMember,false);
+                    //modify by wh : 2018年12月27日,只有在新加入公司才推送用户通过认证事件
+                    // 用户通过认证事件
+                    LocalEventBus.publish(event -> {
+                        LocalEventContext context = new LocalEventContext();
+                        context.setUid(organizationMember.getTargetId());
+                        context.setNamespaceId(namespaceId);
+                        event.setContext(context);
+
+                        event.setEntityType(EntityType.USER.getCode());
+                        event.setEntityId(organizationMember.getTargetId());
+                        event.setEventName(SystemEvent.ACCOUNT_AUTH_SUCCESS.dft());
+                        Map<String, Object> params = new HashMap<>();
+                        params.put("orgId", organizationMember.getGroupPath().split("/")[1]);
+                        event.setParams(params);
+                        LOGGER.info("publish event :[{}]",event);
+                    });
                 }
                 else{
                 	//始终都要发消息
@@ -12523,21 +12539,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
-        // 用户通过认证事件
-        LocalEventBus.publish(event -> {
-            LocalEventContext context = new LocalEventContext();
-            context.setUid(organizationMember.getTargetId());
-            context.setNamespaceId(namespaceId);
-            event.setContext(context);
-
-            event.setEntityType(EntityType.USER.getCode());
-            event.setEntityId(organizationMember.getTargetId());
-            event.setEventName(SystemEvent.ACCOUNT_AUTH_SUCCESS.dft());
-            Map<String, Object> params = new HashMap<>();
-            params.put("orgId", organizationMember.getGroupPath().split("/")[1]);
-            event.setParams(params);
-            LOGGER.info("publish event :[{}]",event);
-        });
 
         return dto;
     }
