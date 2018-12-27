@@ -45,6 +45,7 @@ public class SiyinPrintMessageJob extends QuartzJobBean {
             if (order.getOrderStatus()==PrintOrderStatusType.UNPAID.getCode()){
             	Integer namespaceId = order.getNamespaceId();
             	Long creatorUid = order.getCreatorUid();
+            	LOGGER.info("send message to unpaid order, orderNo = {}, phone = {}.",order.getOrderNo(),order.getCreatorPhone());
             	sendMessageToUser(namespaceId, creatorUid);
             }
         }catch (Exception e) {
@@ -64,7 +65,6 @@ public class SiyinPrintMessageJob extends QuartzJobBean {
         if (null == userIdentifier) {
             LOGGER.error("userIdentifier is null...userId = " + creatorUid);
         } else {
-        	LOGGER.info("send message to unpaid order, user = {}, phone = {}.",creatorUid,userIdentifier.getIdentifierToken());
             smsProvider.sendSms(namespaceId, userIdentifier.getIdentifierToken(), templateScope,
                     templateId, templateLocale, variables);
         }
