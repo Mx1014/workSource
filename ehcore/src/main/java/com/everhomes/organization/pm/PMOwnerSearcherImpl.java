@@ -142,6 +142,8 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
+            // 黄鹏宇 2018年12月27日：将全匹配改为模糊匹配
+            // qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
             qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*")
                     .field("contactToken", 5.0f)
                     .field("contactName", 5.0f)
