@@ -6,21 +6,21 @@ import com.everhomes.rest.uniongroup.UniongroupTarget;
 
 /**
  * <ul> 
- * <li>punchGroupId：考勤组的id</li>
+ * <li>punchRuleId：考勤组的id</li>
  * <li>targets：考勤组新增的关联对象</li> 
  * </ul>
  */
 
 public class AddPersonnelsToPunchGroupCommand {
-	private Long punchGroupId;
+	private Long punchRuleId;
 	private List<UniongroupTarget> targets;
 
-	public Long getPunchGroupId() {
-		return punchGroupId;
+	public Long getPunchRuleId() {
+		return punchRuleId;
 	}
 
-	public void setPunchGroupId(Long punchGroupId) {
-		this.punchGroupId = punchGroupId;
+	public void setPunchRuleId(Long punchRuleId) {
+		this.punchRuleId = punchRuleId;
 	}
 
 	public List<UniongroupTarget> getTargets() {
@@ -30,5 +30,4 @@ public class AddPersonnelsToPunchGroupCommand {
 	public void setTargets(List<UniongroupTarget> targets) {
 		this.targets = targets;
 	}
-
 }

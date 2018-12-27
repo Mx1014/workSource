@@ -8472,13 +8472,13 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public void addPersonnelsToPunchGroup(AddPersonnelsToPunchGroupCommand cmd){
     	assert cmd.getTargets() != null;
-    	assert cmd.getPunchGroupId() != null;
+    	assert cmd.getPunchRuleId() != null;
     	
-        PunchRule pr = punchProvider.getPunchRuleById(cmd.getPunchGroupId());
+        PunchRule pr = punchProvider.getPunchRuleById(cmd.getPunchRuleId());
         SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
         command.setGroupId(pr.getPunchOrganizationId());
         command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
-        command.setEnterpriseId(pr.getPunchOrganizationId());
+        command.setEnterpriseId(pr.getOwnerId());
         command.setTargets(cmd.getTargets());
         command.setVersionCode(CONFIG_VERSION_CODE);
         List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(), CONFIG_VERSION_CODE);
