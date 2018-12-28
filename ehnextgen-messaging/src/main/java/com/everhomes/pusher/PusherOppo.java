@@ -91,6 +91,7 @@ public class PusherOppo implements PusherVender{
 
         OppoMessage message = new OppoMessage()
         		.setTitle((StringUtils.isEmpty(devMessage.getTitle()))?"新消息":(devMessage.getTitle()))
+				.setSub_title("点击查看详情")
         		.setContent(msg.getContent())
         		.setClick_action_type(OppoClieckType.ACTION.getDesc())
                 .setClick_action_activity("com.everhomes.android.account.launcher")

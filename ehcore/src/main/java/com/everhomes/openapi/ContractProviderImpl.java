@@ -28,6 +28,10 @@ import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -836,12 +840,15 @@ public class ContractProviderImpl implements ContractProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractCategories.class, id);
 	}
 	
+	@Cacheable(value="ContractCategory", key="#categoryId" , unless="#result == null")
 	@Override
 	public ContractCategory findContractCategoryById(Long categoryId) { 
 		assert(categoryId != null);
 		EhContractCategoriesDao dao = new EhContractCategoriesDao(getReadOnlyContext().configuration());
 		return ConvertHelper.convert(dao.findById(categoryId), ContractCategory.class);
 	}
+	
+	@Caching(evict = { @CacheEvict(value="ContractCategory", key="#contractCategory.id")} )
 	@Override
 	public void updateContractCategory(ContractCategory contractCategory) {
 		new EhContractCategoriesDao(getContext(AccessSpec.readWrite()).configuration()).update(contractCategory);

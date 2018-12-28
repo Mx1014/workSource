@@ -11,6 +11,9 @@ import com.everhomes.server.schema.tables.records.EhVarFieldItemsRecord;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -46,7 +49,8 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 		getReadWriteDao().insert(contractBuildingMapping);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractBuildingMappings.class, null);
 	}
-
+	
+	@Caching(evict = { @CacheEvict(value="listByContract", key="#contractBuildingMapping.contractId")} )
 	@Override
 	public void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping) {
 		assert (contractBuildingMapping.getId() != null);
@@ -54,6 +58,7 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractBuildingMappings.class, contractBuildingMapping.getId());
 	}
 	
+	@Caching(evict = { @CacheEvict(value="listByContract", key="#contractBuildingMapping.contractId")} )
 	@Override
 	public void deleteContractBuildingMapping(ContractBuildingMapping contractBuildingMapping) {
 		assert (contractBuildingMapping.getId() != null);
@@ -167,6 +172,7 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 			.map(r->ConvertHelper.convert(r, ContractBuildingMapping.class));
 	}
 
+	@Cacheable(value = "listByContract", key="#contractId", unless="#result.size() == 0")
 	@Override
 	public List<ContractBuildingMapping> listByContract(Long contractId) {
 
