@@ -92,6 +92,12 @@ DELETE from eh_portal_navigation_bars;
 -- REMARK:初始化最近拜访时间
 update eh_enterprise_customers c, eh_customer_trackings t,(select id,max(tracking_time),customer_id from eh_customer_trackings group by customer_id) maxti set c.last_visiting_time = t.tracking_time where c.id = t.customer_id and t.id = maxti.id;
 
+-- AUTHOR:黄鹏宇 2018年12月27日
+-- REMARK:修复之前由于同步合同没有building_id导致的楼栋搜索查找失败
+UPDATE eh_customer_entry_infos i, eh_addresses a SET i.building_id = a.building_id WHERE i.address_id = a.id AND (i.building_id = 0 OR i.building_id IS NULL);
+
+
+
 -- AUTHOR:梁燕龙 20181227
 -- REMARK： 修改运营后台菜单数据
 SELECT * from eh_web_menus t WHERE t.name = '合同管理（科技园）' and t.type = 'zuolin';
@@ -148,7 +154,7 @@ INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`,
 
 -- AUTHOR:黄鹏宇 2018年12月26日
 -- REMARK:修复正中会同步数据没有出现在租客列表中的问题
-UPDATE eh_enterprise_customers SET level_item_id = 6 WHERE customer_source = 1 AND level_item_id IS NULL AND namespace_id = 999983;
+UPDATE eh_enterprise_customers SET level_item_id = 6 WHERE customer_source IS NULL AND level_item_id IS NULL AND status = 2 AND namespace_id = 999983;
 
 -- AUTHOR: 丁建民 20181227
 -- REMARK: 合同表，合同房源映射表增加索引
