@@ -2318,6 +2318,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         checkOrgNameUnique(cmd.getId(), cmd.getNamespaceId(), cmd.getName());
         EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
         dbProvider.execute((TransactionStatus status) -> {
+            List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
+            // fix 26997 不管有没有传门牌 都要处理
+            this.addAddresses(organization.getId(), addressDTOs, user.getId());
             //查到有关联的客户则同步修改过去
             if(customer != null) {
                 //产品功能 #20796 同步过来的客户名称不可改
@@ -2346,6 +2349,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                 customer.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
                 customer.setCorpEmail(cmd.getEmailDomain());
                 customer.setCorpEmployeeAmount(cmd.getMemberCount() == null ? null : cmd.getMemberCount().intValue());
+
+                //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+                this.updateCustomerEntryInfo(customer, addressDTOs);
+
 
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
                 enterpriseCustomerSearcher.feedDoc(customer);
@@ -2417,9 +2424,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             // 把企业所在的小区信息放到eh_organization_community_requests表，从eh_organizations表删除掉，以免重复 by lqs 20160512
             // organization.setCommunityId(cmd.getCommunityId());
             organization.setDescription(organizationDetail.getDescription());
-            List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-            // fix 26997 不管有没有传门牌 都要处理
-            this.addAddresses(organization.getId(), addressDTOs, user.getId());
             organizationSearcher.feedDoc(organization);
 
             //没有有关联的客户则新增一条
@@ -2438,11 +2442,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                 enterpriseCustomerProvider.createEnterpriseCustomer(enterpriseCustomer);
                 enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
 
-                //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
-                this.updateCustomerEntryInfo(enterpriseCustomer, addressDTOs);
-            }
 
+            }
             return null;
+
         });
 
         if (updateAttachmentAndAddress) {
