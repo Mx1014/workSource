@@ -1,15 +1,12 @@
 ﻿-- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
-<<<<<<< HEAD
+
 -- AUTHOR:黄鹏宇 2018年12月26日
 -- REMARK:请在执行sql前备份eh_var_field_items、eh_var_field_item_scopes、eh_enterprise_customers表
 
 -- REMARK:请在执行完sql后执行  customer/syncEnterpriseCustomerIndex  接口
-=======
--- AUTHOR:
--- REMARK:
->>>>>>> 5.12.0
+
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
