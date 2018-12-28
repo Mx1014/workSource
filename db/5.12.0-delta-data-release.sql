@@ -145,11 +145,11 @@ INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`,
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 2, 3, 'EMS标准快递', '[]', '请确认寄件物品价值不超过5万元，贵重物品务必保价，保价费=保价金额*0.5%，最低1元', '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 2, 2, 0, now(), null, 0);
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 4, 10, '国贸快递', '[]', NULL, '[{"status": 6},{"status": 5},{"status": 4}]', 3, 2, 0, now(), null, 0);
 
-<<<<<<< HEAD
+
 -- AUTHOR:黄鹏宇 2018年12月26日
 -- REMARK:修复正中会同步数据没有出现在租客列表中的问题
 UPDATE eh_enterprise_customers SET level_item_id = 6 WHERE customer_source = 1 AND level_item_id IS NULL AND namespace_id = 999983;
-=======
+
 -- AUTHOR: 丁建民 20181227
 -- REMARK: 合同表，合同房源映射表增加索引
 
@@ -158,7 +158,7 @@ alter table eh_contract_building_mappings add index building_mappings_contract_i
 alter table eh_contract_building_mappings add index building_mappings_contract_number_index(`contract_number`);
 alter table eh_contract_building_mappings add index building_mappings_address_id_index(`address_id`);
 
->>>>>>> 5.12.0
+
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
