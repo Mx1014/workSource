@@ -2443,7 +2443,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
 
                 //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
-                this.updateCustomerEntryInfo(customer, addressDTOs);
+                this.updateCustomerEntryInfo(enterpriseCustomer, addressDTOs);
 
             }
             return null;
