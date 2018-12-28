@@ -19,6 +19,9 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -52,6 +55,7 @@ public class ContractChargingChangeProviderImpl implements ContractChargingChang
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractChargingChanges.class, null);
     }
 
+    @Caching(evict = { @CacheEvict(value="listByContract", key="#change.contractId")} )
     @Override
     public void updateContractChargingChange(ContractChargingChange change) {
         assert(change.getId() != null);
@@ -64,6 +68,7 @@ public class ContractChargingChangeProviderImpl implements ContractChargingChang
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractChargingChanges.class, change.getId());
     }
 
+    @Caching(evict = { @CacheEvict(value="listByContract", key="#change.contractId")} )
     @Override
     public void deleteContractChargingChange(ContractChargingChange change) {
         assert(change.getId() != null);
@@ -74,6 +79,7 @@ public class ContractChargingChangeProviderImpl implements ContractChargingChang
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractChargingChanges.class, change.getId());
     }
 
+    @Cacheable(value = "listByContractId", key="#contractId", unless="#result.size() == 0")
     @Override
     public List<ContractChargingChange> listByContractId(Long contractId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

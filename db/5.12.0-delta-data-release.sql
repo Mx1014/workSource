@@ -1,8 +1,9 @@
--- --------------------- SECTION BEGIN -------------------------------------------------------
+﻿-- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
 -- AUTHOR:
 -- REMARK:
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
@@ -51,13 +52,13 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('ent
 -- AUTHOR: 谢旭双
 -- REMARK: 同事圈头部背景图
 SET @config_id = (SELECT MAX(id) FROM `eh_configurations`);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `is_readonly`) VALUES (@config_id:=@config_id+1, 'enterprise.moment.banner', 'cs://1/image/aW1hZ2UvTVRwak1HWTRaalJsWkdRMk1XWXdOelkzWXpsak5tTTNaVEJtTVRNeE4yUmxOdw', '同事圈头部背景图', 1);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `is_readonly`) VALUES (@config_id:=@config_id+1, 'enterprise.moment.banner', 'cs://1/image/aW1hZ2UvTVRwak5HSm1ZV05pWkdZeVpUa3dZamxsT1RVeFlqUXhPRGxqWVRJMk1ETmlZUQ', '同事圈头部背景图', 1);
 
 -- AUTHOR: 吴寒
 -- REMARK: 同事圈菜单
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES('274000','同事圈','50000','/100/50000/274000','1','3','2','10','2018-09-26 16:51:46',NULL,NULL,'2018-09-26 16:51:46','0','0','0',NULL,'org_control','1','1','module','0','0',NULL,NULL,'moments',NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79887000','同事圈','70000010',NULL,'enterprise-payment-auth','1','2','/70000010/79887000','park','8','274000','3','system','module','2','1');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79888000','同事圈','70000010',NULL,'enterprise-payment-auth','1','2','/70000010/79888000','zuolin','8','274000','3','system','module','2','1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79887000','同事圈','70000010',NULL,'enterprise-moment','1','2','/70000010/79887000','park','8','274000','3','system','module','2','1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES('79888000','同事圈','70000010',NULL,'enterprise-moment','1','2','/70000010/79888000','zuolin','8','274000','3','system','module','2','1');
 
 -- AUTHOR: 谢旭双
 -- REMARK: 同事圈初始tag
@@ -81,6 +82,15 @@ update eh_configurations set `value` = '/resource-rental/build/index.html#/resou
 -- REMARK: 域空间管理v3.0 主页签
 DELETE from eh_launch_pad_indexs;
 DELETE from eh_portal_navigation_bars;
+
+-- AUTHOR:梁燕龙 20181227
+-- REMARK： 修改运营后台菜单数据
+SELECT * from eh_web_menus t WHERE t.name = '合同管理（科技园）' and t.type = 'zuolin';
+UPDATE eh_web_menus SET name = '科技园合同管理' WHERE name = '合同管理（科技园）' and type = 'zuolin';
+SELECT * from eh_web_menus t WHERE t.name = '租客管理' and t.type = 'zuolin';
+UPDATE eh_web_menus SET name = '企业客户管理' WHERE name = '租客管理' and type = 'zuolin';
+SELECT * from eh_web_menus t WHERE t.name = '企业支付授权' and t.type = 'zuolin' and t.parent_id =16300000;
+DELETE from eh_web_menus WHERE name = '企业支付授权' and type = 'zuolin' and parent_id = 16300000;
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
@@ -124,6 +134,14 @@ INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`,
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 3, 2, '同城信筒快件', '[{"packageType": 4},{"packageType": 5}]', NULL, '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 1, 2, 0, now(), null, 0);
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 2, 3, 'EMS标准快递', '[]', '请确认寄件物品价值不超过5万元，贵重物品务必保价，保价费=保价金额*0.5%，最低1元', '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', 2, 2, 0, now(), null, 0);
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `pay_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (@max_id :=  @max_id + 1, @namespace_id, 'EhNamespaces', @namespace_id, 4, 10, '国贸快递', '[]', NULL, '[{"status": 6},{"status": 5},{"status": 4}]', 3, 2, 0, now(), null, 0);
+
+-- AUTHOR: 丁建民 20181227
+-- REMARK: 合同表，合同房源映射表增加索引
+
+alter table eh_contracts add index contractNum_index(`contract_number`);
+alter table eh_contract_building_mappings add index building_mappings_contract_id_index(`contract_id`);
+alter table eh_contract_building_mappings add index building_mappings_contract_number_index(`contract_number`);
+alter table eh_contract_building_mappings add index building_mappings_address_id_index(`address_id`);
 
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------

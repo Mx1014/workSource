@@ -807,7 +807,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		ServiceAlliances sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		ConfigCommand configCmd = allianceStandardService.reNewConfigCommand(cmd.getOwnerType(), cmd.getOwnerId(),
-				cmd.getParentId());
+				sa.getParentId());
 		populateServiceAlliance(sa, configCmd);
 
 		ServiceAllianceDTO dto = null;
