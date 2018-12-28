@@ -1053,6 +1053,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if (entryInfos != null && entryInfos.size() > 0) {
 //            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
             entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
+            List<Long> entryAddressId = entryInfos.stream().map(CustomerEntryInfoDTO::getAddressId).collect(Collectors.toList());
+            List<Address> acticveAddresses = addressProvider.findAddressByIdsAndActive(entryAddressId, command.getNamespaceId());
+            List<Long> acticveAddressesIds = acticveAddresses.stream().map(Address::getId).collect(Collectors.toList());
+            entryInfos = entryInfos.stream().filter(r -> acticveAddressesIds.contains(r.getAddressId())).collect(Collectors.toList());
             dto.setEntryInfos(entryInfos);
         }
 

@@ -556,7 +556,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Integer smsMinDuration = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.minDuration.seconds", "60"));
         Integer smsTimesDeviceForAnHour = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.device.timesForAnHour", "10"));
         Integer smsTimesDeviceForADay = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.device.timesForADay", "20"));
-        Integer smsTimesPhoneForAnHour = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForAnHour", "3"));
+        Integer smsTimesPhoneForAnHour = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForAnHour", "30"));
         Integer smsTimesPhoneForADay = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForADay", "5"));
 
         // 老版本的客户端没有deviceId

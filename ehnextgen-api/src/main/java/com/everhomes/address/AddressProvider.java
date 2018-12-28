@@ -125,7 +125,10 @@ public interface AddressProvider {
 	Address findNotInactiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName,
 			String apartmentName);
 	long createAddress3(Address address);
-	void createAddressArrangement(AddressArrangement arrangement);
+
+    List<Address> findAddressByIdsAndActive(List<Long> ids, Integer namespaceId);
+
+    void createAddressArrangement(AddressArrangement arrangement);
 	AddressArrangement findActiveAddressArrangementByAddressId(Long addressId);
 	void deleteAddressArrangement(Long id);
 	AddressArrangement findAddressArrangementById(Long id);

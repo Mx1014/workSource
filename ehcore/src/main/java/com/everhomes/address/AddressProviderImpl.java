@@ -935,6 +935,23 @@ public class AddressProviderImpl implements AddressProvider {
         return addressList;
     }
 
+    /**
+     * 根据Ids来查找列表而且是生效状态，并且限定域空间 黄鹏宇 2018年12月27日
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<Address> findAddressByIdsAndActive(List<Long> ids, Integer namespaceId){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Address> addressList = context.select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.in(ids))
+                .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchInto(Address.class);
+        return addressList;
+    }
+
 	@Override
 	public void createAddressArrangement(AddressArrangement arrangement) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(AddressArrangement.class));
